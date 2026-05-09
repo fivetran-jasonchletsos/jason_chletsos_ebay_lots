@@ -199,6 +199,7 @@
   <nav>
     <a href="index.html">Listings</a>
     <a href="quality.html">Quality Report</a>
+    <a href="price_review.html">Price Review</a>
     <a href="title_review.html">Title Review</a>
     <a href="craigslist.html">Craigslist Ads</a>
     <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
@@ -222,6 +223,10 @@
     </div>
 
     <div id="status-bar" style="display:none;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;"></div>
+    <div style="margin-bottom:16px;">
+      <button id="rebuild-btn" onclick="rebuildSite()" class="btn btn-secondary"
+        style="display:none;font-size:13px;">Rebuild Site</button>
+    </div>
 
     <div class="card">
       <table>
@@ -234,29 +239,6 @@
         </thead>
         <tbody id="review-body">
           
-      <tr class="review-row" data-id="306927028439">
-        <td style="width:36px;text-align:center;">
-          <input type="checkbox" class="row-check" value="306927028439" checked>
-        </td>
-        <td>
-          <a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank" style="font-size:11px;color:#888;">306927028439</a>
-          <div style="margin-top:6px;">
-            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
-            <div class="title-before">2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Black Tie</div>
-          </div>
-          <div style="margin-top:8px;">
-            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
-            <div class="title-after" contenteditable="true" data-id="306927028439">2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2</div>
-            <div style="font-size:11px;color:#856404;margin-top:3px;">
-              76 chars (0 chars) &mdash; eBay limit: 80
-            </div>
-          </div>
-        </td>
-        <td style="width:80px;text-align:center;">
-          <a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
-        </td>
-      </tr>
-
       <tr class="review-row" data-id="306927035291">
         <td style="width:36px;text-align:center;">
           <input type="checkbox" class="row-check" value="306927035291" checked>
@@ -1199,12 +1181,37 @@
           <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
+
+      <tr class="review-row" data-id="306927289794">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306927289794" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank" style="font-size:11px;color:#888;">306927289794</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306927289794">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC) Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              77 chars (+9 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
         </tbody>
       </table>
     </div>
 
     <script>
-      const LAMBDA_URL = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/revise';
+      const LAMBDA_URL  = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/revise';
+      // Add rebuild URL constant
+      const REBUILD_URL = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild';
 
       function updateCount() {
         const total   = document.querySelectorAll('.row-check').length;
@@ -1242,16 +1249,35 @@
           });
           const data = await resp.json();
           if (data.success) {
-            showStatus(
-              'Done. ' + data.updated + ' listing(s) updated on eBay.' +
-              (data.errors && data.errors.length ? ' ' + data.errors.length + ' failed.' : ''),
-              '#1e7e34', '#e6f4ea'
-            );
+            // Show success + rebuild button
+            const updated = data.updated;
+            const errs    = data.errors && data.errors.length ? ' ' + data.errors.length + ' failed.' : '';
+            showStatus('Done. ' + updated + ' listing(s) updated on eBay.' + errs, '#1e7e34', '#e6f4ea');
+            document.getElementById('rebuild-btn').style.display = 'inline-block';
           } else {
             showStatus('Error: ' + (data.error || 'Unknown error'), '#c62828', '#fdecea');
           }
         } catch(e) {
           showStatus('Request failed: ' + e.message, '#c62828', '#fdecea');
+        }
+      }
+
+      async function rebuildSite() {
+        const btn = document.getElementById('rebuild-btn');
+        btn.disabled    = true;
+        btn.textContent = 'Rebuilding...';
+        try {
+          const resp = await fetch(REBUILD_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+          const data = await resp.json();
+          if (data.success) {
+            showStatus('Site rebuild triggered. New prices will appear in ~2 minutes.', '#1e7e34', '#e6f4ea');
+          } else {
+            showStatus('Rebuild failed: ' + (data.error || 'Unknown'), '#c62828', '#fdecea');
+            btn.disabled = false; btn.textContent = 'Rebuild Site';
+          }
+        } catch(e) {
+          showStatus('Rebuild request failed: ' + e.message, '#c62828', '#fdecea');
+          btn.disabled = false; btn.textContent = 'Rebuild Site';
         }
       }
 
@@ -1266,7 +1292,7 @@
     </script>
   </main>
   <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
-    Updated 2026-05-09 01:58 UTC
+    Updated 2026-05-09 02:11 UTC
   </footer>
 </body>
 </html>
