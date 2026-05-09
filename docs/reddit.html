@@ -1306,7 +1306,13 @@ tr:hover td { background: rgba(212,175,55,.03); }
           <div class="rd-actions">
             <button type="button" class="btn btn-ghost" onclick="rdCopy()">Copy text</button>
             <a id="rd-eitr" target="_blank" rel="noopener" class="btn btn-ghost">View eBay</a>
-            <button type="submit" class="btn btn-gold" style="margin-left:auto;">Post to Reddit →</button>
+            <a id="rd-open-reddit" href="#" target="_blank" rel="noopener" class="btn btn-outline" onclick="rdOpenReddit(event)">
+              Open Reddit Submit Page →
+            </a>
+            <button type="submit" class="btn btn-gold" style="margin-left:auto;">Post via API →</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-dim);letter-spacing:.04em;">
+            Tip: <strong style="color:var(--text-muted);">Open Reddit Submit Page</strong> opens reddit.com with title + body pre-filled — no API needed. <strong style="color:var(--text-muted);">Post via API</strong> sends directly (requires deployed Lambda + Reddit credentials).
           </div>
 
           <div class="rd-preview" id="rd-preview"></div>
@@ -1356,6 +1362,9 @@ tr:hover td { background: rgba(212,175,55,.03); }
         document.getElementById('rd-preview').innerHTML =
           '<div class="pv-title">' + (t || '(untitled)') + '</div>' +
           (b || '(empty body)').replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;');
+        if (activeId) {
+          document.getElementById('rd-open-reddit').href = rdSubmitUrl();
+        }
       }
       document.getElementById('rd-title').addEventListener('input', rdUpdatePreview);
       document.getElementById('rd-body').addEventListener('input', rdUpdatePreview);
@@ -1373,8 +1382,29 @@ tr:hover td { background: rgba(212,175,55,.03); }
         const b = document.getElementById('rd-body').value;
         try {
           await navigator.clipboard.writeText(t + '\n\n' + b);
-          showToast('Title + body copied — paste at reddit.com/r/' + (activeSub || 'SportsCardSales') + '/submit');
+          showToast('Copied. Now click "Open Reddit Submit Page" to paste.');
         } catch(e) { showToast('Copy failed: ' + e.message); }
+      }
+
+      function rdSubmitUrl() {
+        const sub = activeSub || 'SportsCardSales';
+        const t   = document.getElementById('rd-title').value;
+        const b   = document.getElementById('rd-body').value;
+        // Reddit's submit URL accepts title + text query params and pre-fills the form
+        return 'https://www.reddit.com/r/' + encodeURIComponent(sub) + '/submit?'
+             + 'title=' + encodeURIComponent(t)
+             + '&text=' + encodeURIComponent(b)
+             + '&type=TEXT';
+      }
+
+      function rdOpenReddit(ev) {
+        if (!activeId) {
+          ev.preventDefault();
+          rdStatus('Select a listing first.', 'warning');
+          return;
+        }
+        // Update href just-in-time to capture latest title/body edits
+        document.getElementById('rd-open-reddit').href = rdSubmitUrl();
       }
 
       function rdStatus(msg, kind) {
@@ -1418,7 +1448,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 09, 2026 · 03:09 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 09, 2026 · 05:43 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
