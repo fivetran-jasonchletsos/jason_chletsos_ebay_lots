@@ -214,12 +214,23 @@
 
     <div style="margin-bottom:16px;">
       <p style="color:#555;font-size:14px;">
-        Market prices pulled from live eBay listings. Underpriced = more than 15% below market median.
-        Tap "Set $X.XX" to update the price on eBay instantly.
+        Review suggested prices below. Edit any price directly in the box.
+        Uncheck rows you want to skip. Click Apply to push selected prices to eBay.
+      </p>
+      <p style="color:#888;font-size:12px;margin-top:4px;">
+        Market data from live eBay listings. Underpriced = more than 15% below market median.
       </p>
     </div>
 
-    <div id="status-bar" style="display:none;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;"></div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+      <button onclick="selectAll(true)"  class="btn btn-secondary" style="font-size:13px;">Select All</button>
+      <button onclick="selectAll(false)" class="btn btn-secondary" style="font-size:13px;">Deselect All</button>
+      <span id="count-label" style="font-size:13px;color:#555;"></span>
+      <button onclick="applySelected()" class="btn btn-primary"
+        style="margin-left:auto;font-size:14px;padding:10px 24px;">Apply Selected to eBay</button>
+    </div>
+
+    <div id="status-bar" style="display:none;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:14px;"></div>
     <div style="margin-bottom:16px;">
       <button id="rebuild-btn" onclick="rebuildSite()" class="btn btn-secondary"
         style="display:none;font-size:13px;">Rebuild Site</button>
@@ -229,894 +240,1727 @@
       <table>
         <thead>
           <tr>
+            <th style="width:36px;"></th>
             <th>Listing</th>
-            <th style="text-align:right;">Price</th>
-            <th style="text-align:center;">Status</th>
+            <th style="width:130px;">Current</th>
+            <th style="width:130px;">New Price</th>
+            <th style="width:60px;"></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="review-body">
           
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="font-size:11px;color:#888;">306914169081</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a>
-          </div>
+      <tr class="review-row" data-id="306904203738">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904203738" checked>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.25</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$4.62</b> median <span style="color:#888;font-size:11px;">($2.00&ndash;$11.99, 10 listings)</span></div><div style="font-size:12px;color:#c62828;margin-top:2px;">-29.7% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#c62828;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span>
-          <button onclick="repriceItem('306914169081', 4.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $4.50</button>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="font-size:11px;color:#888;">306785270903</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="color:#1a1a1a;">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.49</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$2.70</b> median <span style="color:#888;font-size:11px;">($1.49&ndash;$4.99, 10 listings)</span></div><div style="font-size:12px;color:#c62828;margin-top:2px;">-44.8% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#c62828;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span>
-          <button onclick="repriceItem('306785270903', 2.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $2.50</button>
-        </td>
-      </tr>
-
-      <tr>
         <td>
           <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="font-size:11px;color:#888;">306904203738</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="color:#1a1a1a;">1994 Classic Pro Line Live - Autograph - Steve Emtman</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$9.99</b> median
+            &nbsp;&middot;&nbsp; $4.49&ndash;$18.04 &nbsp;&middot;&nbsp; 8 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.49</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$9.99</b> median <span style="color:#888;font-size:11px;">($4.49&ndash;$18.04, 8 listings)</span></div><div style="font-size:12px;color:#c62828;margin-top:2px;">-55.1% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.49</div>
+          <div style="font-size:11px;color:#c62828;margin-top:2px;">-55.1% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#c62828;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span>
-          <button onclick="repriceItem('306904203738', 10.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $10.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904203738"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">10.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#c62828;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306785270903">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306785270903" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="font-size:11px;color:#888;">306785270903</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="color:#1a1a1a;">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.70</b> median
+            &nbsp;&middot;&nbsp; $1.49&ndash;$4.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.49</div>
+          <div style="font-size:11px;color:#c62828;margin-top:2px;">-44.8% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306785270903"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#c62828;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914169081">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914169081" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="font-size:11px;color:#888;">306914169081</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$4.62</b> median
+            &nbsp;&middot;&nbsp; $2.00&ndash;$11.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.25</div>
+          <div style="font-size:11px;color:#c62828;margin-top:2px;">-29.7% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914169081"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">4.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#c62828;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913902750">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913902750" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" style="font-size:11px;color:#888;">306913902750</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" style="color:#1a1a1a;">7 Howie Long Cards Raiders</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.69</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$9.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.69</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.99, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+491.1% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$9.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+491.1% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913902750', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913902750"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913311444">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913311444" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" style="font-size:11px;color:#888;">306913311444</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" style="color:#1a1a1a;">9 Michael Irvin Cards Dallas Cowboys</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.04</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.58 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.04</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.58, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+379.8% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+379.8% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913311444', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913311444"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913939866">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913939866" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" style="font-size:11px;color:#888;">306913939866</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" style="color:#1a1a1a;">15 Dan Marino Cards Miami Dolphins</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.09</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.29 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.09</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.29, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+357.8% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+357.8% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913939866', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913939866"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306903941543">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903941543" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" style="font-size:11px;color:#888;">306903941543</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" style="color:#1a1a1a;">14 Cards Tim Brown Los Angeles Raiders</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.12</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.47 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.12</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.47, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+256.2% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+256.2% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306903941543', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306903941543"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306904078786">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904078786" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" style="font-size:11px;color:#888;">306904078786</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" style="color:#1a1a1a;">7 Cards Steve Atwater Rookie Cards Denver Broncos</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$0.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.69 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.49</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$0.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.69, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+250.8% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.49</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+250.8% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306904078786', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904078786"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306903937710">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903937710" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" style="font-size:11px;color:#888;">306903937710</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" style="color:#1a1a1a;">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.51</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.49 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.51</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.49, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+230.5% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+230.5% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306903937710', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306903937710"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913908225">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913908225" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" style="font-size:11px;color:#888;">306913908225</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" style="color:#1a1a1a;">9 Joe Montana Cards 49ers Chiefs</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.94</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$3.50 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$5.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.94</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$3.50, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+208.8% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$5.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+208.8% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913908225', 2.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $2.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913908225"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306904068997">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904068997" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" style="font-size:11px;color:#888;">306904068997</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" style="color:#1a1a1a;">11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$0.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$0.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.99, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+202.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+202.0% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306904068997', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904068997"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913787569">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913787569" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" style="font-size:11px;color:#888;">306913787569</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" style="color:#1a1a1a;">10 Jim Kelly Cards Buffalo Bills</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$0.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.25 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$0.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.25, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+200.5% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+200.5% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913787569', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913787569"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306904189481">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904189481" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" style="font-size:11px;color:#888;">306904189481</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" style="color:#1a1a1a;">4 Aaron Glenn Rookie Cards New York Jets</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.99, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+150.8% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+150.8% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306904189481', 2.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $2.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904189481"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306904174454">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904174454" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" style="font-size:11px;color:#888;">306904174454</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" style="color:#1a1a1a;">7 Cards Boomer Esiason Cincinnati Bengals New York Jets</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$0.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.29 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.49</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$0.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.29, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+150.3% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.49</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+150.3% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306904174454', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904174454"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306903933988">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903933988" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" style="font-size:11px;color:#888;">306903933988</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" style="color:#1a1a1a;">8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.39</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$299.99 &nbsp;&middot;&nbsp; 7 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.39</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$299.99, 7 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+115.1% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+115.1% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306903933988', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306903933988"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914280138">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914280138" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" style="font-size:11px;color:#888;">306914280138</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" style="color:#1a1a1a;">5 Sam Adams Rookie Cards Seattle Seahawks</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.34</b> median
+            &nbsp;&middot;&nbsp; $1.80&ndash;$5.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$2.34</b> median <span style="color:#888;font-size:11px;">($1.80&ndash;$5.99, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+113.2% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+113.2% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306914280138', 2.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $2.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914280138"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913307606">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913307606" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" style="font-size:11px;color:#888;">306913307606</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" style="color:#1a1a1a;">5 Bobby Humphrey Cards Denver Broncos</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$0.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$0.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.99, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+101.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+101.0% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913307606', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913307606"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306904215389">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904215389" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" style="font-size:11px;color:#888;">306904215389</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" style="color:#1a1a1a;">12 Jim Everett Cards Los Angeles Rams New Orleans Saints</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.49</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.99 &nbsp;&middot;&nbsp; 3 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.49</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.99, 3 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+100.7% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+100.7% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306904215389', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904215389"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306785163679">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306785163679" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" style="font-size:11px;color:#888;">306785163679</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" style="color:#1a1a1a;">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.04</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.69 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.04</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.69, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+90.4% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+90.4% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306785163679', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306785163679"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306903947932">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903947932" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" style="font-size:11px;color:#888;">306903947932</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" style="color:#1a1a1a;">8 Cards Carl Banks New York Giants</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.09</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.69 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.09</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.69, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+81.7% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+81.7% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306903947932', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306903947932"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913186982">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913186982" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" style="font-size:11px;color:#888;">306913186982</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" style="color:#1a1a1a;">11 Mel Gray Cards Detroit Lions</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.69</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.69</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.99, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+76.9% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+76.9% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913186982', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913186982"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913845449">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913845449" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" style="font-size:11px;color:#888;">306913845449</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" style="color:#1a1a1a;">3 Steve Largent Cards Seattle Seahawks</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.25</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.39 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.95</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.25</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.39, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+56.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.95</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+56.0% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913845449', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913845449"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306913934898">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913934898" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" style="font-size:11px;color:#888;">306913934898</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" style="color:#1a1a1a;">20 Warren Moon Cards Oilers Vikings</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$10.00</b> median
+            &nbsp;&middot;&nbsp; $4.99&ndash;$79.99 &nbsp;&middot;&nbsp; 5 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$14.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$10.00</b> median <span style="color:#888;font-size:11px;">($4.99&ndash;$79.99, 5 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+49.9% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$14.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+49.9% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306913934898', 10.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $10.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913934898"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">10.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914915295">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914915295" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" style="font-size:11px;color:#888;">306914915295</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.00</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.49 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$2.00</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.49, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+49.9% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+49.9% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306914915295', 2.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $2.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914915295"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914174921">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914174921" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" style="font-size:11px;color:#888;">306914174921</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" style="color:#1a1a1a;">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.48</b> median
+            &nbsp;&middot;&nbsp; $1.00&ndash;$1.70 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.48</b> median <span style="color:#888;font-size:11px;">($1.00&ndash;$1.70, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+34.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+34.0% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306914174921', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914174921"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306784122664">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306784122664" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" style="font-size:11px;color:#888;">306784122664</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" style="color:#1a1a1a;">6 Deion Sanders Cards Atlanta Falcons</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.49</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.69 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.49</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.69, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+33.6% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+33.6% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306784122664', 1.50)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.50</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306784122664"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914913674">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914913674" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" style="font-size:11px;color:#888;">306914913674</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.99</b> median
+            &nbsp;&middot;&nbsp; $2.49&ndash;$4.00 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$2.99</b> median <span style="color:#888;font-size:11px;">($2.49&ndash;$4.00, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+33.4% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+33.4% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306914913674', 3.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $3.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914913674"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914912556">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914912556" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" style="font-size:11px;color:#888;">306914912556</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Priz...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm ...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.00</b> median
+            &nbsp;&middot;&nbsp; $2.56&ndash;$4.50 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.00</b> median <span style="color:#888;font-size:11px;">($2.56&ndash;$4.50, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+33.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+33.0% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306914912556', 3.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $3.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914912556"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914500757">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914500757" checked>
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" style="font-size:11px;color:#888;">306914500757</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" style="color:#1a1a1a;">10 Eric Metcalf Cards Cleveland Browns</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.09</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$1.95 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.39</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.09</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$1.95, 10 listings)</span></div><div style="font-size:12px;color:#856404;margin-top:2px;">+26.9% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.39</div>
+          <div style="font-size:11px;color:#856404;margin-top:2px;">+26.9% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#856404;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span>
-          <button onclick="repriceItem('306914500757', 1.00)" class="btn btn-primary" style="font-size:12px;padding:6px 12px;margin-top:6px;">Set $1.00</button>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914500757"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#856404;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OVERPRICED</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306927289794">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306927289794" >
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank" style="font-size:11px;color:#888;">306927289794</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$15.00</b> median
+            &nbsp;&middot;&nbsp; $13.00&ndash;$17.00 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$18.00</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$15.00</b> median <span style="color:#888;font-size:11px;">($13.00&ndash;$17.00, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+20.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$18.00</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+20.0% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306927289794"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">15.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914244468">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914244468" >
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" style="font-size:11px;color:#888;">306914244468</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold ...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ic...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.67</b> median
+            &nbsp;&middot;&nbsp; $1.00&ndash;$2.49 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.67</b> median <span style="color:#888;font-size:11px;">($1.00&ndash;$2.49, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+19.2% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+19.2% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914244468"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914911040">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914911040" >
+        </td>
         <td>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" style="font-size:11px;color:#888;">306914911040</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm ...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (R...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.69</b> median
+            &nbsp;&middot;&nbsp; $2.49&ndash;$4.00 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.44</b> median <span style="color:#888;font-size:11px;">($2.49&ndash;$4.00, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+16.0% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+8.1% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914911040"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" style="font-size:11px;color:#888;">306914176585</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</a>
-          </div>
+      <tr class="review-row" data-id="306758076966">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306758076966" >
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.49</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.46</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$2.74, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+2.1% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" style="font-size:11px;color:#888;">306914248743</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.98</b> median <span style="color:#888;font-size:11px;">($1.25&ndash;$2.00, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.3% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" style="font-size:11px;color:#888;">306829826433</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" style="color:#1a1a1a;">Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cent...</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.50</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$4.50</b> median <span style="color:#888;font-size:11px;">($4.50&ndash;$4.50, 1 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" style="font-size:11px;color:#888;">306913168494</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" style="color:#1a1a1a;">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$4.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$200.00, 9 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" style="font-size:11px;color:#888;">306913790653</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" style="color:#1a1a1a;">11 Raghib And Quadry Ismail Cards Raiders Vikings</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$2.99</b> median <span style="color:#888;font-size:11px;">($2.99&ndash;$2.99, 1 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" style="font-size:11px;color:#888;">306913853080</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" style="color:#1a1a1a;">9 Ronnie Lott Cards 49ers Raiders Jets</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$4.99</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$4.99, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" style="font-size:11px;color:#888;">306913950248</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" style="color:#1a1a1a;">4 Rookie Cards Willie McGinest One Autographed</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.99</b> median <span style="color:#888;font-size:11px;">($3.99&ndash;$3.99, 1 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" style="font-size:11px;color:#888;">306914173441</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" style="color:#1a1a1a;">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silve...</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$2.99</b> median <span style="color:#888;font-size:11px;">($1.75&ndash;$3.25, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" style="font-size:11px;color:#888;">306914245253</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold ...</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.99</b> median <span style="color:#888;font-size:11px;">($1.99&ndash;$3.30, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" style="font-size:11px;color:#888;">306914547105</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" style="color:#1a1a1a;">12 Andre Rison Cards Colts Falcons RC</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.34</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.34</b> median <span style="color:#888;font-size:11px;">($3.34&ndash;$3.34, 1 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" style="font-size:11px;color:#888;">306914916776</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm ...</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.99</b> median <span style="color:#888;font-size:11px;">($2.99&ndash;$6.99, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" style="font-size:11px;color:#888;">306751048818</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" style="color:#1a1a1a;">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest e...</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$15.50</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$15.50</b> median <span style="color:#888;font-size:11px;">($12.00&ndash;$21.00, 3 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" style="font-size:11px;color:#888;">306926030086</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" style="color:#1a1a1a;">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Ye...</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$50.00</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$50.00</b> median <span style="color:#888;font-size:11px;">($50.00&ndash;$50.00, 1 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" style="font-size:11px;color:#888;">306926059250</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$205.00</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$205.00</b> median <span style="color:#888;font-size:11px;">($205.00&ndash;$205.00, 1 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">+0.0% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" style="font-size:11px;color:#888;">306914249326</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$1.50</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$1.50</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$3.49, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">-0.3% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" style="font-size:11px;color:#888;">306914908485</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</a>
-          </div>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$2.99</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.00</b> median <span style="color:#888;font-size:11px;">($2.99&ndash;$3.00, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">-0.3% vs market</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
-        </td>
-      </tr>
-
-      <tr>
         <td>
           <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" style="font-size:11px;color:#888;">306758076966</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
             <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" style="color:#1a1a1a;">Charcadet 022 Me: Mega Evolution Promo Holo</a>
           </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.69</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$3.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$3.39</div>
-          <div style="font-size:13px;margin-top:4px;">Market: <b>$3.69</b> median <span style="color:#888;font-size:11px;">($0.99&ndash;$3.99, 10 listings)</span></div><div style="font-size:12px;color:#1e7e34;margin-top:2px;">-8.1% vs market</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.39</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">-8.1% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#1e7e34;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">OK</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306758076966"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914176585">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914176585" >
+        </td>
         <td>
-          <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Justin-Jefferson-Stacked-Deck-Black-Tie-Aces-2-2-/306927028439" target="_blank" style="font-size:11px;color:#888;">306927028439</a>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" style="font-size:11px;color:#888;">306914176585</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Justin-Jefferson-Stacked-Deck-Black-Tie-Aces-2-2-/306927028439" target="_blank" style="color:#1a1a1a;">2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Ace...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.46</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$2.74 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$5.00</div>
-          <div style="font-size:12px;color:#888;margin-top:4px;">No market data found</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.49</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+2.1% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#888;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;">NO COMPS</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914176585"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914248743">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914248743" >
+        </td>
         <td>
-          <a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank" style="font-size:11px;color:#888;">306927035291</a>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" style="font-size:11px;color:#888;">306914248743</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank" style="color:#1a1a1a;">2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black ...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.98</b> median
+            &nbsp;&middot;&nbsp; $1.25&ndash;$2.00 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$5.00</div>
-          <div style="font-size:12px;color:#888;margin-top:4px;">No market data found</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.3% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#888;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;">NO COMPS</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914248743"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
 
-      <tr>
+      <tr class="review-row" data-id="306914249326">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914249326" >
+        </td>
         <td>
-          <a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank" style="font-size:11px;color:#888;">306927040476</a>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" style="font-size:11px;color:#888;">306914249326</a>
           <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank" style="color:#1a1a1a;">2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Dr...</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" style="color:#1a1a1a;">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.50</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$3.49 &nbsp;&middot;&nbsp; 10 listings
           </div>
         </td>
-        <td style="text-align:right;white-space:nowrap;">
-          <div style="font-size:16px;font-weight:700;">$4.00</div>
-          <div style="font-size:12px;color:#888;margin-top:4px;">No market data found</div>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.50</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">-0.3% vs market</div>
         </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <span style="background:#888;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;">NO COMPS</span>
-          
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914249326"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">1.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914908485">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914908485" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" style="font-size:11px;color:#888;">306914908485</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.00</b> median
+            &nbsp;&middot;&nbsp; $2.99&ndash;$3.00 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">-0.3% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914908485"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306829826433">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306829826433" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" style="font-size:11px;color:#888;">306829826433</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" style="color:#1a1a1a;">Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cents</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$4.50</b> median
+            &nbsp;&middot;&nbsp; $4.50&ndash;$4.50 &nbsp;&middot;&nbsp; 1 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.50</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306829826433"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">4.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913168494">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913168494" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" style="font-size:11px;color:#888;">306913168494</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" style="color:#1a1a1a;">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$4.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$200.00 &nbsp;&middot;&nbsp; 9 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913168494"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">5.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913790653">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913790653" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" style="font-size:11px;color:#888;">306913790653</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" style="color:#1a1a1a;">11 Raghib And Quadry Ismail Cards Raiders Vikings</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.99</b> median
+            &nbsp;&middot;&nbsp; $2.99&ndash;$2.99 &nbsp;&middot;&nbsp; 1 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913790653"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913853080">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913853080" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" style="font-size:11px;color:#888;">306913853080</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" style="color:#1a1a1a;">9 Ronnie Lott Cards 49ers Raiders Jets</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$4.99</b> median
+            &nbsp;&middot;&nbsp; $0.99&ndash;$4.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913853080"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">5.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913950248">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913950248" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" style="font-size:11px;color:#888;">306913950248</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" style="color:#1a1a1a;">4 Rookie Cards Willie McGinest One Autographed</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.99</b> median
+            &nbsp;&middot;&nbsp; $3.99&ndash;$3.99 &nbsp;&middot;&nbsp; 1 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306913950248"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">4.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914173441">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914173441" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" style="font-size:11px;color:#888;">306914173441</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" style="color:#1a1a1a;">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver ...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.99</b> median
+            &nbsp;&middot;&nbsp; $1.75&ndash;$3.25 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914173441"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914245253">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914245253" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" style="font-size:11px;color:#888;">306914245253</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ic...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$1.99</b> median
+            &nbsp;&middot;&nbsp; $1.99&ndash;$3.30 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914245253"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914547105">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914547105" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" style="font-size:11px;color:#888;">306914547105</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" style="color:#1a1a1a;">12 Andre Rison Cards Colts Falcons RC</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.34</b> median
+            &nbsp;&middot;&nbsp; $3.34&ndash;$3.34 &nbsp;&middot;&nbsp; 1 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.34</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914547105"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">3.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914916776">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914916776" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" style="font-size:11px;color:#888;">306914916776</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (R...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$3.99</b> median
+            &nbsp;&middot;&nbsp; $2.99&ndash;$6.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914916776"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">4.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306751048818">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306751048818" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" style="font-size:11px;color:#888;">306751048818</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" style="color:#1a1a1a;">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex ...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$15.50</b> median
+            &nbsp;&middot;&nbsp; $12.00&ndash;$21.00 &nbsp;&middot;&nbsp; 3 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$15.50</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306751048818"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">15.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306926030086">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306926030086" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" style="font-size:11px;color:#888;">306926030086</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" style="color:#1a1a1a;">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yell...</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$50.00</b> median
+            &nbsp;&middot;&nbsp; $50.00&ndash;$50.00 &nbsp;&middot;&nbsp; 1 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$50.00</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306926030086"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">50.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306926059250">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306926059250" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" style="font-size:11px;color:#888;">306926059250</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$205.00</b> median
+            &nbsp;&middot;&nbsp; $205.00&ndash;$205.00 &nbsp;&middot;&nbsp; 1 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div style="font-size:15px;font-weight:700;">$205.00</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306926059250"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">205.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
         </tbody>
@@ -1124,35 +1968,68 @@
     </div>
 
     <script>
-      const REPRICE_URL  = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/reprice';
-      const REBUILD_URL  = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild';
+      const REPRICE_URL = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/reprice';
+      const REBUILD_URL = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild';
 
-      async function repriceItem(itemId, newPrice) {
-        showStatus('Updating price to $' + newPrice.toFixed(2) + '...', '#1a1a1a', '#fff8e1');
-        try {
-          const resp = await fetch(REPRICE_URL, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ item_id: itemId, price: newPrice })
-          });
-          const data = await resp.json();
-          if (data.success) {
-            showStatus('Price updated to $' + newPrice.toFixed(2) + ' on eBay.', '#1e7e34', '#e6f4ea');
-            document.getElementById('rebuild-btn').style.display = 'inline-block';
-          } else {
-            showStatus('Error: ' + (data.error || 'Unknown error'), '#c62828', '#fdecea');
-          }
-        } catch(e) {
-          showStatus('Request failed: ' + e.message, '#c62828', '#fdecea');
+      function updateCount() {
+        const total   = document.querySelectorAll('.row-check').length;
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        document.getElementById('count-label').textContent = checked + ' of ' + total + ' selected';
+      }
+      document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateCount));
+      updateCount();
+
+      function selectAll(val) {
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        updateCount();
+      }
+
+      async function applySelected() {
+        const items = [];
+        document.querySelectorAll('.row-check:checked').forEach(cb => {
+          const id    = cb.value;
+          const field = document.querySelector('.price-after[data-id="' + id + '"]');
+          const price = parseFloat((field ? field.innerText.trim() : '0').replace(/[^0-9.]/g, ''));
+          if (id && !isNaN(price) && price > 0) items.push({ item_id: id, price });
+        });
+
+        if (items.length === 0) {
+          showStatus('No items selected.', '#856404', '#fff8e1');
+          return;
         }
+
+        showStatus('Applying ' + items.length + ' price(s) to eBay...', '#1a1a1a', '#fff8e1');
+
+        let updated = 0, errors = [];
+        for (const item of items) {
+          try {
+            const resp = await fetch(REPRICE_URL, {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify(item)
+            });
+            const data = await resp.json();
+            if (data.success) { updated++; }
+            else { errors.push(item.item_id + ': ' + (data.error || 'failed')); }
+          } catch(e) {
+            errors.push(item.item_id + ': ' + e.message);
+          }
+        }
+
+        const errMsg = errors.length ? ' ' + errors.length + ' failed.' : '';
+        showStatus('Done. ' + updated + ' price(s) updated on eBay.' + errMsg,
+          updated > 0 ? '#1e7e34' : '#c62828',
+          updated > 0 ? '#e6f4ea' : '#fdecea');
+        if (updated > 0) document.getElementById('rebuild-btn').style.display = 'inline-block';
       }
 
       async function rebuildSite() {
         const btn = document.getElementById('rebuild-btn');
-        btn.disabled    = true;
-        btn.textContent = 'Rebuilding...';
+        btn.disabled = true; btn.textContent = 'Rebuilding...';
         try {
-          const resp = await fetch(REBUILD_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+          const resp = await fetch(REBUILD_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+          });
           const data = await resp.json();
           if (data.success) {
             showStatus('Site rebuild triggered. Updated prices will appear in ~2 minutes.', '#1e7e34', '#e6f4ea');
@@ -1177,7 +2054,7 @@
     </script>
   </main>
   <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
-    Updated 2026-05-09 02:11 UTC
+    Updated 2026-05-09 02:18 UTC
   </footer>
 </body>
 </html>
