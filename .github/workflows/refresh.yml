@@ -1,0 +1,36 @@
+name: Refresh Site
+
+on:
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Write configuration.json
+        run: |
+          cat > configuration.json <<'EOF'
+          ${{ secrets.EBAY_CONFIGURATION_JSON }}
+          EOF
+
+      - name: Run promote.py (no deploy — commit handled below)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 promote.py --no-deploy
+
+      - name: Commit and push docs/
+        run: |
+          git config user.email "jchletsos@gmail.com"
+          git config user.name "Jason Chletsos"
+          git add docs/
+          git diff --cached --quiet && echo "No changes" || git commit -m "Site refresh $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
