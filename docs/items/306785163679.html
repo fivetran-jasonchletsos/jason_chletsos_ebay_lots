@@ -8,6 +8,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Harpua2001">
   <title>13 Junior Seau Cards Including Rookie Cards San Diego Chargers</title>
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,6 +139,20 @@ a:hover { color: var(--gold-bright); }
 }
 .btn-refresh:hover { transform: translateY(-1px); filter: brightness(1.08); }
 .btn-refresh:disabled { opacity: .55; cursor: not-allowed; }
+.btn-install {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--border-mid);
+  padding: 9px 14px;
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-family: inherit;
+}
+.btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
 .menu-toggle {
   display: none;
   width: 42px; height: 42px;
@@ -835,6 +854,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
 <a href="reddit.html">Reddit</a>
 <a href="../craigslist.html">Craigslist</a>
 <a href="../google_feed.xml" target="_blank" rel="noopener">Google Feed</a></nav>
+      <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install
+      </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
@@ -953,11 +976,22 @@ tr:hover td { background: rgba(212,175,55,.03); }
                 <div class="rel-price">$4.99</div>
               </div>
             </a></div>
-        </section>
+        </section><script>
+      (function() {
+        const id = '306785163679';
+        const title = "13 Junior Seau Cards Including Rookie Cards San Diego Chargers";
+        let recent = [];
+        try { recent = JSON.parse(localStorage.getItem('h2k_recent') || '[]'); } catch(e) {}
+        recent = recent.filter(r => r.id !== id);
+        recent.unshift({ id, title, ts: Date.now() });
+        recent = recent.slice(0, 12);
+        localStorage.setItem('h2k_recent', JSON.stringify(recent));
+      })();
+    </script>
   </main>
 
   <footer class="app-footer">
-    Updated May 09, 2026 · 08:10 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 09, 2026 · 08:22 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -1060,6 +1094,37 @@ tr:hover td { background: rgba(212,175,55,.03); }
     };
     // Apply on every page load
     window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+
+    // ---- PWA: register service worker + handle install prompt ----
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+
+    let __deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      __deferredInstall = e;
+      const btn = document.getElementById('install-app-btn');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+    window.addEventListener('appinstalled', () => {
+      __deferredInstall = null;
+      const btn = document.getElementById('install-app-btn');
+      if (btn) btn.style.display = 'none';
+      showToast('Installed. Find Harpua2001 on your home screen.');
+    });
+    window.installApp = async function() {
+      if (!__deferredInstall) return;
+      __deferredInstall.prompt();
+      const choice = await __deferredInstall.userChoice;
+      if (choice.outcome === 'accepted') {
+        __deferredInstall = null;
+        const btn = document.getElementById('install-app-btn');
+        if (btn) btn.style.display = 'none';
+      }
+    };
   </script>
 </body>
 </html>

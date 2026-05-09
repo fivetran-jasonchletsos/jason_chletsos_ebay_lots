@@ -102,6 +102,62 @@ def get_app_token(cfg: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Fetch seller profile (Trading API GetUser) — for trust panel
+# ---------------------------------------------------------------------------
+
+def fetch_seller_profile(token: str) -> dict:
+    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<GetUserRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <DetailLevel>ReturnAll</DetailLevel>
+</GetUserRequest>"""
+    headers = {
+        "X-EBAY-API-SITEID":              "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        "X-EBAY-API-CALL-NAME":           "GetUser",
+        "Content-Type":                   "text/xml",
+    }
+    try:
+        resp = requests.post("https://api.ebay.com/ws/api.dll", data=xml_body, headers=headers, timeout=15)
+        resp.raise_for_status()
+    except Exception as exc:
+        print(f"  Seller profile fetch failed: {exc}")
+        return {}
+
+    import xml.etree.ElementTree as _ET
+    root = _ET.fromstring(resp.text)
+    NS = "{urn:ebay:apis:eBLBaseComponents}"
+
+    def t(path):
+        n = root.find(f".//{NS}{path}".replace(NS + "/", NS))
+        return n.text if n is not None and n.text else ""
+
+    profile = {
+        "user_id":             root.findtext(f".//{NS}UserID", ""),
+        "feedback_score":      root.findtext(f".//{NS}FeedbackScore", "0"),
+        "positive_pct":        root.findtext(f".//{NS}PositiveFeedbackPercent", "0"),
+        "registration_date":   root.findtext(f".//{NS}RegistrationDate", ""),
+        "feedback_unique":     root.findtext(f".//{NS}UniqueNegativeFeedbackCount", "0"),
+        "site":                root.findtext(f".//{NS}Site", "US"),
+        "seller_business_type": root.findtext(f".//{NS}SellerBusinessType", ""),
+        "store_url":           root.findtext(f".//{NS}SellerInfo/{NS}StoreURL", ""),
+        "store_name":          root.findtext(f".//{NS}SellerInfo/{NS}StoreName", ""),
+    }
+
+    # Compute member_since like "Jan 2018"
+    try:
+        from datetime import datetime as _dt
+        reg = _dt.fromisoformat(profile["registration_date"].replace("Z", "+00:00"))
+        profile["member_since"] = reg.strftime("%b %Y")
+        profile["member_years"] = max(0, (datetime.now(timezone.utc) - reg).days // 365)
+    except Exception:
+        profile["member_since"] = ""
+        profile["member_years"] = 0
+
+    return profile
+
+
+# ---------------------------------------------------------------------------
 # Fetch listings via Trading API (works for legacy listings)
 # ---------------------------------------------------------------------------
 
@@ -401,6 +457,20 @@ a:hover { color: var(--gold-bright); }
 }
 .btn-refresh:hover { transform: translateY(-1px); filter: brightness(1.08); }
 .btn-refresh:disabled { opacity: .55; cursor: not-allowed; }
+.btn-install {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--border-mid);
+  padding: 9px 14px;
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-family: inherit;
+}
+.btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
 .menu-toggle {
   display: none;
   width: 42px; height: 42px;
@@ -1027,6 +1097,11 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Harpua2001">
   <title>{title}</title>
   {_CDN_HEAD}
   <style>{_BASE_CSS}</style>
@@ -1043,6 +1118,10 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         </div>
       </a>
       <nav class="nav-links">{nav_html_desktop}</nav>
+      <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install
+      </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
@@ -1177,6 +1256,37 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     }};
     // Apply on every page load
     window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+
+    // ---- PWA: register service worker + handle install prompt ----
+    if ('serviceWorker' in navigator) {{
+      window.addEventListener('load', () => {{
+        navigator.serviceWorker.register('sw.js').catch(() => {{}});
+      }});
+    }}
+
+    let __deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', (e) => {{
+      e.preventDefault();
+      __deferredInstall = e;
+      const btn = document.getElementById('install-app-btn');
+      if (btn) btn.style.display = 'inline-flex';
+    }});
+    window.addEventListener('appinstalled', () => {{
+      __deferredInstall = null;
+      const btn = document.getElementById('install-app-btn');
+      if (btn) btn.style.display = 'none';
+      showToast('Installed. Find Harpua2001 on your home screen.');
+    }});
+    window.installApp = async function() {{
+      if (!__deferredInstall) return;
+      __deferredInstall.prompt();
+      const choice = await __deferredInstall.userChoice;
+      if (choice.outcome === 'accepted') {{
+        __deferredInstall = null;
+        const btn = document.getElementById('install-app-btn');
+        if (btn) btn.style.display = 'none';
+      }}
+    }};
   </script>
 </body>
 </html>"""
@@ -1200,10 +1310,11 @@ def _categorize(listing: dict) -> str:
     return "Other"
 
 
-def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
+def build_dashboard(listings: list[dict], market: dict | None = None, seller: dict | None = None) -> Path:
     import re as _re
 
     locks = load_locks()
+    seller = seller or {}
 
     # Compute stats
     total_value = sum(float(l['price']) for l in listings if l['price'])
@@ -1228,11 +1339,11 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
         m = market.get(l["item_id"], {}) if market else {}
         enriched.append({**l, "price_f": price_f, "category": cat, "big_pic": big_pic, "market": m})
 
-    # Hero: pick highest-priced item with image as the centerpiece
+    # Hero: top-priced items (rotates auto)
     hero_pool = [e for e in enriched if e["pic"]]
     hero_pool.sort(key=lambda e: e["price_f"], reverse=True)
-    hero = hero_pool[0] if hero_pool else None
-    hero_runners = hero_pool[1:4]  # next 3
+    hero_slides = hero_pool[:5]
+    hero_runners = hero_pool[5:8] if len(hero_pool) > 5 else hero_pool[1:4]
 
     # Build category chip counts
     cat_counts = {}
@@ -1325,9 +1436,9 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
         </div>
       </article>''')
 
-    # Hero markup
+    # Hero markup — auto-rotating carousel
     hero_html = ""
-    if hero:
+    if hero_slides:
         runners_html = ""
         for r in hero_runners:
             runners_html += f'''
@@ -1338,28 +1449,39 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
                 <div class="hero-runner-price">${r['price_f']:.2f}</div>
               </div>
             </a>'''
+
+        slides_html = ""
+        for i, h in enumerate(hero_slides):
+            cls = " active" if i == 0 else ""
+            slides_html += f'''
+        <div class="hero-slide hero-feature{cls}" data-slide="{i}">
+          <div class="hero-image-wrap">
+            <a href="{h['big_pic']}" class="glightbox" data-gallery="store" data-title="{h['title']}">
+              <img src="{h['big_pic']}" alt="{h['title']}" loading="{"eager" if i == 0 else "lazy"}">
+            </a>
+            <div class="hero-tag">Featured #{i + 1}</div>
+          </div>
+          <div class="hero-body">
+            <div class="eyebrow">Top of the showcase</div>
+            <h1 class="hero-title">{h['title']}</h1>
+            <div class="hero-price">${h['price_f']:.2f}</div>
+            <div class="hero-meta">
+              <span class="tag tag-gold">{h['category']}</span>
+              {f'<span class="tag">{h["condition"]}</span>' if h["condition"] else ''}
+            </div>
+            <div class="hero-actions">
+              <a href="{h['url']}" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+              <a href="items/{h['item_id']}.html" class="btn btn-outline">Full Details</a>
+            </div>
+          </div>
+        </div>'''
+        dots_html = "".join(f'<button class="hero-dot{" active" if i == 0 else ""}" data-slide="{i}" onclick="goToSlide({i})" aria-label="Slide {i+1}"></button>' for i in range(len(hero_slides)))
+
         hero_html = f'''
     <section class="hero">
-      <div class="hero-feature">
-        <div class="hero-image-wrap">
-          <a href="{hero['big_pic']}" class="glightbox" data-gallery="store" data-title="{hero['title']}">
-            <img src="{hero['big_pic']}" alt="{hero['title']}" loading="eager">
-          </a>
-          <div class="hero-tag">Featured</div>
-        </div>
-        <div class="hero-body">
-          <div class="eyebrow">Top of the showcase</div>
-          <h1 class="hero-title">{hero['title']}</h1>
-          <div class="hero-price">${hero['price_f']:.2f}</div>
-          <div class="hero-meta">
-            <span class="tag tag-gold">{hero['category']}</span>
-            {f'<span class="tag">{hero["condition"]}</span>' if hero["condition"] else ''}
-          </div>
-          <div class="hero-actions">
-            <a href="{hero['url']}" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
-            <a href="items/{hero['item_id']}.html" class="btn btn-outline">Full Details</a>
-          </div>
-        </div>
+      <div class="hero-carousel" id="hero-carousel" onmouseenter="pauseHero()" onmouseleave="resumeHero()">
+        {slides_html}
+        <div class="hero-dots">{dots_html}</div>
       </div>
       {f'<div class="hero-runners">{runners_html}</div>' if runners_html else ''}
     </section>
@@ -1479,7 +1601,182 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
       .hero-body { padding: 22px; }
       .hero-feature { border-radius: var(--r-lg); }
     }
+
+    /* ============ TRUST PANEL ============ */
+    .trust-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      position: relative;
+    }
+    .trust-panel::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(600px 200px at 50% 0%, rgba(212,175,55,.08), transparent 60%);
+    }
+    .trust-block {
+      padding: 18px 16px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      text-decoration: none; color: inherit;
+      transition: background var(--t-fast);
+      position: relative; z-index: 1;
+    }
+    .trust-block:last-child { border-right: none; }
+    .trust-block:hover { background: rgba(212,175,55,.05); }
+    .trust-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px; line-height: 1;
+      color: var(--gold);
+      letter-spacing: .02em;
+    }
+    .trust-num-sub { font-size: 18px; color: var(--text-muted); margin-left: 2px; }
+    .trust-stars {
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: .05em;
+      line-height: 1;
+    }
+    .trust-lbl {
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+      margin-top: 6px;
+    }
+    .trust-cta .trust-num { font-size: 24px; }
+    .trust-cta:hover .trust-lbl { color: var(--gold); }
+    @media (max-width: 640px) {
+      .trust-panel { grid-template-columns: repeat(2, 1fr); }
+      .trust-block:nth-child(2) { border-right: none; }
+      .trust-block:nth-child(1), .trust-block:nth-child(2) { border-bottom: 1px solid var(--border); }
+      .trust-num { font-size: 28px; }
+    }
+
+    /* ============ HERO CAROUSEL ============ */
+    .hero-carousel { position: relative; }
+    .hero-slide { display: none; }
+    .hero-slide.active { display: grid; }
+    .hero-slide.fade-in { animation: heroFade 600ms cubic-bezier(.4,0,.2,1); }
+    @keyframes heroFade { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+    .hero-dots {
+      position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px; z-index: 5;
+    }
+    .hero-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      border: none;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      padding: 0;
+    }
+    .hero-dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
+
+    /* ============ RECENTLY VIEWED ============ */
+    .recent-strip {
+      display: none;
+      margin-bottom: 28px;
+    }
+    .recent-strip.show { display: block; }
+    .recent-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 12px;
+    }
+    .recent-head h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: .03em;
+      color: var(--text);
+    }
+    .recent-clear {
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      background: none; border: none; font-family: inherit; font-weight: 600;
+    }
+    .recent-clear:hover { color: var(--gold); }
+    .recent-scroll {
+      display: flex; gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    .recent-card {
+      flex: 0 0 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: all var(--t-fast);
+    }
+    .recent-card:hover { border-color: var(--border-mid); transform: translateY(-2px); }
+    .recent-card-img {
+      width: 100%; height: 140px;
+      object-fit: cover;
+      background: #111;
+      display: block;
+    }
+    .recent-card-body { padding: 10px 12px; }
+    .recent-card-title {
+      font-size: 12px; line-height: 1.3; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .recent-card-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; color: var(--gold); letter-spacing: .02em;
+    }
+
+    /* ============ SHARE BUTTON ============ */
+    .share-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: var(--r-sm);
+      font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .share-btn:hover { color: var(--gold); border-color: var(--border-mid); }
     """
+
+    # Trust panel
+    trust_html = ""
+    if seller and seller.get("feedback_score"):
+        try:
+            fb_score = int(seller["feedback_score"])
+            pos_pct  = float(seller.get("positive_pct", "0"))
+        except (ValueError, TypeError):
+            fb_score, pos_pct = 0, 0.0
+        years = seller.get("member_years", 0)
+        member_since = seller.get("member_since", "")
+        # Star rating: ★ ★ ★ ★ ★ scaled to positive_pct
+        stars_full = int(round(pos_pct / 20))
+        stars_html = "★" * stars_full + "☆" * (5 - stars_full)
+        trust_html = f'''
+    <section class="trust-panel">
+      <a href="{STORE_URL}" target="_blank" rel="noopener" class="trust-block">
+        <div class="trust-num">{fb_score:,}</div>
+        <div class="trust-lbl">Feedback Score</div>
+      </a>
+      <div class="trust-block">
+        <div class="trust-stars">{stars_html}</div>
+        <div class="trust-lbl">{pos_pct:g}% Positive</div>
+      </div>
+      <div class="trust-block">
+        <div class="trust-num">{years}<span class="trust-num-sub">+ yrs</span></div>
+        <div class="trust-lbl">Since {member_since}</div>
+      </div>
+      <a href="{STORE_URL}" target="_blank" rel="noopener" class="trust-block trust-cta">
+        <div class="trust-num">eBay</div>
+        <div class="trust-lbl">View Verified Profile →</div>
+      </a>
+    </section>'''
 
     body = f"""
     {hero_html}
@@ -1506,6 +1803,8 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
         </a>
       </div>
     </div>
+
+    {trust_html}
 
     <section class="section-head">
       <div>
@@ -1545,8 +1844,20 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
       </div>
     </div>
 
-    <div id="results-meta" style="font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;">
-      Showing <span id="visible-count">{len(enriched)}</span> of {len(enriched)} listings
+    <section class="recent-strip" id="recent-strip">
+      <div class="recent-head">
+        <h3>Recently Viewed</h3>
+        <button class="recent-clear" onclick="clearRecent()">Clear</button>
+      </div>
+      <div class="recent-scroll" id="recent-scroll"></div>
+    </section>
+
+    <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
+      <div>Showing <span id="visible-count">{len(enriched)}</span> of {len(enriched)} listings</div>
+      <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+        Share filters
+      </button>
     </div>
 
     <div id="no-results">
@@ -1654,6 +1965,127 @@ def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
       }}
 
       refreshFavUI();
+
+      // ============ HERO AUTO-ROTATION ============
+      const heroSlides = document.querySelectorAll('.hero-slide');
+      const heroDots   = document.querySelectorAll('.hero-dot');
+      let heroIdx = 0;
+      let heroTimer = null;
+      function goToSlide(i) {{
+        heroSlides.forEach((s, idx) => {{
+          s.classList.toggle('active', idx === i);
+          if (idx === i) {{
+            s.classList.remove('fade-in'); void s.offsetWidth; s.classList.add('fade-in');
+          }}
+        }});
+        heroDots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+        heroIdx = i;
+      }}
+      function nextSlide() {{ goToSlide((heroIdx + 1) % heroSlides.length); }}
+      function pauseHero() {{ if (heroTimer) {{ clearInterval(heroTimer); heroTimer = null; }} }}
+      function resumeHero() {{ if (heroSlides.length > 1 && !heroTimer) heroTimer = setInterval(nextSlide, 7000); }}
+      window.goToSlide = goToSlide;
+      window.pauseHero = pauseHero;
+      window.resumeHero = resumeHero;
+      resumeHero();
+
+      // ============ RECENTLY VIEWED ============
+      function getRecent() {{
+        try {{ return JSON.parse(localStorage.getItem('h2k_recent') || '[]'); }} catch(e) {{ return []; }}
+      }}
+      function clearRecent() {{
+        localStorage.removeItem('h2k_recent');
+        document.getElementById('recent-strip').classList.remove('show');
+      }}
+      window.clearRecent = clearRecent;
+      function renderRecent() {{
+        const recent = getRecent();
+        if (!recent.length) return;
+        const scroll = document.getElementById('recent-scroll');
+        const valid = [];
+        recent.forEach(r => {{
+          const card = document.querySelector('.listing-card[data-id="' + r.id + '"]');
+          if (card) {{
+            const img = card.querySelector('img')?.src || '';
+            const title = card.querySelector('h3 a')?.textContent || r.title || '';
+            const price = card.dataset.price || '0';
+            valid.push({{ id: r.id, img, title, price }});
+          }}
+        }});
+        if (!valid.length) return;
+        scroll.innerHTML = valid.slice(0, 8).map(v => `
+          <a href="items/${{v.id}}.html" class="recent-card">
+            <img class="recent-card-img" src="${{v.img}}" alt="${{v.title.replace(/"/g, '&quot;')}}" loading="lazy">
+            <div class="recent-card-body">
+              <div class="recent-card-title">${{v.title}}</div>
+              <div class="recent-card-price">$${{parseFloat(v.price).toFixed(2)}}</div>
+            </div>
+          </a>`).join('');
+        document.getElementById('recent-strip').classList.add('show');
+      }}
+      renderRecent();
+
+      // ============ URL HASH STATE ============
+      function readHash() {{
+        const params = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+        return {{
+          q:    params.get('q')    || '',
+          cat:  params.get('cat')  || 'All',
+          min:  parseFloat(params.get('min')) || PRICE_MIN_INIT,
+          max:  parseFloat(params.get('max')) || PRICE_MAX_INIT,
+          sort: params.get('sort') || 'default',
+          size: params.get('size') || (localStorage.getItem('h2k_size') || 'medium'),
+        }};
+      }}
+      function writeHash() {{
+        const p = new URLSearchParams();
+        const q = document.getElementById('search').value.trim();
+        if (q) p.set('q', q);
+        if (activeCat && activeCat !== 'All') p.set('cat', activeCat);
+        if (priceRange[0] !== PRICE_MIN_INIT) p.set('min', priceRange[0]);
+        if (priceRange[1] !== PRICE_MAX_INIT) p.set('max', priceRange[1]);
+        const sort = document.getElementById('sort-filter').value;
+        if (sort !== 'default') p.set('sort', sort);
+        const size = document.getElementById('listing-grid').dataset.size;
+        if (size && size !== 'medium') p.set('size', size);
+        const newHash = p.toString();
+        if (newHash !== (location.hash || '').replace(/^#/, '')) {{
+          history.replaceState(null, '', newHash ? '#' + newHash : location.pathname);
+        }}
+      }}
+      // Apply hash on load
+      (function applyHashOnLoad() {{
+        const s = readHash();
+        if (s.q) document.getElementById('search').value = s.q;
+        if (s.sort) document.getElementById('sort-filter').value = s.sort;
+        if (s.size) {{
+          document.getElementById('listing-grid').dataset.size = s.size;
+          document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s.size));
+        }}
+        if (s.cat && s.cat !== 'All') {{
+          const chip = document.querySelector('.chip[data-cat="' + s.cat + '"]');
+          if (chip) {{ document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); activeCat = s.cat; }}
+        }}
+        if (s.min !== PRICE_MIN_INIT || s.max !== PRICE_MAX_INIT) {{
+          slider.noUiSlider.set([s.min, s.max]);
+        }}
+        applyFilters();
+      }})();
+      // Hook into existing applyFilters to also write hash
+      const origApplyFilters = applyFilters;
+      applyFilters = function() {{ origApplyFilters(); writeHash(); }};
+      window.applyFilters = applyFilters;
+
+      // ============ SHARE FILTERS ============
+      window.shareFilters = async function() {{
+        writeHash();
+        try {{
+          await navigator.clipboard.writeText(location.href);
+          showToast('Link copied — paste anywhere to share this exact filtered view.');
+        }} catch(e) {{
+          showToast('Copy failed. URL: ' + location.href);
+        }}
+      }};
     </script>"""
 
     out = OUTPUT_DIR / "index.html"
@@ -2630,6 +3062,22 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
 
     {related_html}"""
 
+    # Track visit in localStorage so the storefront "Recently Viewed" works
+    safe_title = _json.dumps(l["title"][:120])  # JSON-encoded string is also valid JS
+    visit_script = f"""<script>
+      (function() {{
+        const id = '{l['item_id']}';
+        const title = {safe_title};
+        let recent = [];
+        try {{ recent = JSON.parse(localStorage.getItem('h2k_recent') || '[]'); }} catch(e) {{}}
+        recent = recent.filter(r => r.id !== id);
+        recent.unshift({{ id, title, ts: Date.now() }});
+        recent = recent.slice(0, 12);
+        localStorage.setItem('h2k_recent', JSON.stringify(recent));
+      }})();
+    </script>"""
+    body = body + visit_script
+
     # Item pages live in /items/ — adjust nav links to relative
     html_doc = html_shell(l['title'], body, extra_head=extra_head, active_page="../index.html")
     # Patch nav hrefs to point one directory up
@@ -2744,6 +3192,43 @@ JOIN jason_chletsos_ebay.orders_line_item li ON o.order_id = li.order_id
 GROUP BY o.buyer_username
 ORDER BY lifetime_value DESC;
 """
+
+def build_sitemap_and_robots(listings: list[dict]) -> None:
+    """Generate sitemap.xml + robots.txt for SEO."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    urls = [
+        ("",                    "1.0", "hourly"),
+        ("quality.html",        "0.6", "daily"),
+        ("price_review.html",   "0.6", "daily"),
+        ("title_review.html",   "0.5", "daily"),
+        ("reddit.html",         "0.4", "weekly"),
+        ("craigslist.html",     "0.4", "weekly"),
+        ("return-policy.html",  "0.3", "monthly"),
+    ]
+    entries = []
+    for path, prio, freq in urls:
+        loc = f"{SITE_URL}/{path}".rstrip("/")
+        entries.append(f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority></url>")
+    for l in listings:
+        if l.get("item_id"):
+            entries.append(f"  <url><loc>{SITE_URL}/items/{l['item_id']}.html</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+
+    sitemap = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+               "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
+               + "\n".join(entries) + "\n</urlset>\n")
+    (OUTPUT_DIR / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+
+    robots = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /price_review.html\n"
+        "Disallow: /title_review.html\n"
+        "Disallow: /quality.html\n"
+        f"Sitemap: {SITE_URL}/sitemap.xml\n"
+    )
+    (OUTPUT_DIR / "robots.txt").write_text(robots, encoding="utf-8")
+    print(f"  Sitemap + robots.txt: {OUTPUT_DIR}/sitemap.xml")
+
 
 def write_analysis_views():
     out = OUTPUT_DIR / "analysis_views.sql"
@@ -4077,9 +4562,14 @@ def main():
             return
 
     print("\nGenerating site files:")
+    print("  Fetching seller profile...")
+    seller = fetch_seller_profile(token)
+    if seller:
+        (OUTPUT_DIR / "_seller.json").write_text(json.dumps(seller, indent=2), encoding="utf-8")
+        print(f"  Seller: {seller.get('user_id')} · feedback {seller.get('feedback_score')} ({seller.get('positive_pct')}% positive) · since {seller.get('member_since')}")
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
-    build_dashboard(listings, market)
+    build_dashboard(listings, market, seller=seller)
     build_quality_report(listings)
     build_craigslist(listings)
     build_reddit(listings)
@@ -4088,6 +4578,7 @@ def main():
     build_return_policy()
     build_price_review(listings, market)
     build_title_review(listings)
+    build_sitemap_and_robots(listings)
 
     print("\nDeploying to GitHub Pages...")
     if no_deploy:

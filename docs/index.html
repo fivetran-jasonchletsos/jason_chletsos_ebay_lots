@@ -8,6 +8,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Harpua2001">
   <title>Harpua2001 · Cards, Coins & Collectibles</title>
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,6 +139,20 @@ a:hover { color: var(--gold-bright); }
 }
 .btn-refresh:hover { transform: translateY(-1px); filter: brightness(1.08); }
 .btn-refresh:disabled { opacity: .55; cursor: not-allowed; }
+.btn-install {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--border-mid);
+  padding: 9px 14px;
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-family: inherit;
+}
+.btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
 .menu-toggle {
   display: none;
   width: 42px; height: 42px;
@@ -822,6 +841,148 @@ tr:hover td { background: rgba(212,175,55,.03); }
       .hero-body { padding: 22px; }
       .hero-feature { border-radius: var(--r-lg); }
     }
+
+    /* ============ TRUST PANEL ============ */
+    .trust-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      position: relative;
+    }
+    .trust-panel::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(600px 200px at 50% 0%, rgba(212,175,55,.08), transparent 60%);
+    }
+    .trust-block {
+      padding: 18px 16px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      text-decoration: none; color: inherit;
+      transition: background var(--t-fast);
+      position: relative; z-index: 1;
+    }
+    .trust-block:last-child { border-right: none; }
+    .trust-block:hover { background: rgba(212,175,55,.05); }
+    .trust-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px; line-height: 1;
+      color: var(--gold);
+      letter-spacing: .02em;
+    }
+    .trust-num-sub { font-size: 18px; color: var(--text-muted); margin-left: 2px; }
+    .trust-stars {
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: .05em;
+      line-height: 1;
+    }
+    .trust-lbl {
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+      margin-top: 6px;
+    }
+    .trust-cta .trust-num { font-size: 24px; }
+    .trust-cta:hover .trust-lbl { color: var(--gold); }
+    @media (max-width: 640px) {
+      .trust-panel { grid-template-columns: repeat(2, 1fr); }
+      .trust-block:nth-child(2) { border-right: none; }
+      .trust-block:nth-child(1), .trust-block:nth-child(2) { border-bottom: 1px solid var(--border); }
+      .trust-num { font-size: 28px; }
+    }
+
+    /* ============ HERO CAROUSEL ============ */
+    .hero-carousel { position: relative; }
+    .hero-slide { display: none; }
+    .hero-slide.active { display: grid; }
+    .hero-slide.fade-in { animation: heroFade 600ms cubic-bezier(.4,0,.2,1); }
+    @keyframes heroFade { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+    .hero-dots {
+      position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px; z-index: 5;
+    }
+    .hero-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      border: none;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      padding: 0;
+    }
+    .hero-dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
+
+    /* ============ RECENTLY VIEWED ============ */
+    .recent-strip {
+      display: none;
+      margin-bottom: 28px;
+    }
+    .recent-strip.show { display: block; }
+    .recent-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 12px;
+    }
+    .recent-head h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: .03em;
+      color: var(--text);
+    }
+    .recent-clear {
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      background: none; border: none; font-family: inherit; font-weight: 600;
+    }
+    .recent-clear:hover { color: var(--gold); }
+    .recent-scroll {
+      display: flex; gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    .recent-card {
+      flex: 0 0 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: all var(--t-fast);
+    }
+    .recent-card:hover { border-color: var(--border-mid); transform: translateY(-2px); }
+    .recent-card-img {
+      width: 100%; height: 140px;
+      object-fit: cover;
+      background: #111;
+      display: block;
+    }
+    .recent-card-body { padding: 10px 12px; }
+    .recent-card-title {
+      font-size: 12px; line-height: 1.3; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .recent-card-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; color: var(--gold); letter-spacing: .02em;
+    }
+
+    /* ============ SHARE BUTTON ============ */
+    .share-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: var(--r-sm);
+      font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .share-btn:hover { color: var(--gold); border-color: var(--border-mid); }
     </style>
 </head>
 <body>
@@ -841,6 +1002,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
 <a href="reddit.html">Reddit</a>
 <a href="craigslist.html">Craigslist</a>
 <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a></nav>
+      <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install
+      </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
@@ -877,47 +1042,135 @@ tr:hover td { background: rgba(212,175,55,.03); }
     
     
     <section class="hero">
-      <div class="hero-feature">
-        <div class="hero-image-wrap">
-          <a href="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14">
-            <img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l1600.jpg" alt="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14" loading="eager">
-          </a>
-          <div class="hero-tag">Featured</div>
-        </div>
-        <div class="hero-body">
-          <div class="eyebrow">Top of the showcase</div>
-          <h1 class="hero-title">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</h1>
-          <div class="hero-price">$205.00</div>
-          <div class="hero-meta">
-            <span class="tag tag-gold">Football Singles</span>
-            
+      <div class="hero-carousel" id="hero-carousel" onmouseenter="pauseHero()" onmouseleave="resumeHero()">
+        
+        <div class="hero-slide hero-feature active" data-slide="0">
+          <div class="hero-image-wrap">
+            <a href="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14">
+              <img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l1600.jpg" alt="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14" loading="eager">
+            </a>
+            <div class="hero-tag">Featured #1</div>
           </div>
-          <div class="hero-actions">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
-            <a href="items/306926059250.html" class="btn btn-outline">Full Details</a>
+          <div class="hero-body">
+            <div class="eyebrow">Top of the showcase</div>
+            <h1 class="hero-title">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</h1>
+            <div class="hero-price">$205.00</div>
+            <div class="hero-meta">
+              <span class="tag tag-gold">Football Singles</span>
+              
+            </div>
+            <div class="hero-actions">
+              <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+              <a href="items/306926059250.html" class="btn btn-outline">Full Details</a>
+            </div>
           </div>
         </div>
+        <div class="hero-slide hero-feature" data-slide="1">
+          <div class="hero-image-wrap">
+            <a href="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm">
+              <img src="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l1600.jpg" alt="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm" loading="lazy">
+            </a>
+            <div class="hero-tag">Featured #2</div>
+          </div>
+          <div class="hero-body">
+            <div class="eyebrow">Top of the showcase</div>
+            <h1 class="hero-title">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm</h1>
+            <div class="hero-price">$50.00</div>
+            <div class="hero-meta">
+              <span class="tag tag-gold">Football Singles</span>
+              
+            </div>
+            <div class="hero-actions">
+              <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+              <a href="items/306926030086.html" class="btn btn-outline">Full Details</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-slide hero-feature" data-slide="2">
+          <div class="hero-image-wrap">
+            <a href="https://i.ebayimg.com/images/g/v7UAAeSwQW9p~pTV/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)">
+              <img src="https://i.ebayimg.com/images/g/v7UAAeSwQW9p~pTV/s-l1600.jpg" alt="2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)" loading="lazy">
+            </a>
+            <div class="hero-tag">Featured #3</div>
+          </div>
+          <div class="hero-body">
+            <div class="eyebrow">Top of the showcase</div>
+            <h1 class="hero-title">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)</h1>
+            <div class="hero-price">$18.00</div>
+            <div class="hero-meta">
+              <span class="tag tag-gold">Football Singles</span>
+              
+            </div>
+            <div class="hero-actions">
+              <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+              <a href="items/306927289794.html" class="btn btn-outline">Full Details</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-slide hero-feature" data-slide="3">
+          <div class="hero-image-wrap">
+            <a href="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125">
+              <img src="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l1600.jpg" alt="EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125" loading="lazy">
+            </a>
+            <div class="hero-tag">Featured #4</div>
+          </div>
+          <div class="hero-body">
+            <div class="eyebrow">Top of the showcase</div>
+            <h1 class="hero-title">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125</h1>
+            <div class="hero-price">$15.50</div>
+            <div class="hero-meta">
+              <span class="tag tag-gold">Pokemon</span>
+              
+            </div>
+            <div class="hero-actions">
+              <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+              <a href="items/306751048818.html" class="btn btn-outline">Full Details</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-slide hero-feature" data-slide="4">
+          <div class="hero-image-wrap">
+            <a href="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="20 Warren Moon Cards Oilers Vikings">
+              <img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l1600.jpg" alt="20 Warren Moon Cards Oilers Vikings" loading="lazy">
+            </a>
+            <div class="hero-tag">Featured #5</div>
+          </div>
+          <div class="hero-body">
+            <div class="eyebrow">Top of the showcase</div>
+            <h1 class="hero-title">20 Warren Moon Cards Oilers Vikings</h1>
+            <div class="hero-price">$14.99</div>
+            <div class="hero-meta">
+              <span class="tag tag-gold">Football Lots</span>
+              
+            </div>
+            <div class="hero-actions">
+              <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+              <a href="items/306913934898.html" class="btn btn-outline">Full Details</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-dots"><button class="hero-dot active" data-slide="0" onclick="goToSlide(0)" aria-label="Slide 1"></button><button class="hero-dot" data-slide="1" onclick="goToSlide(1)" aria-label="Slide 2"></button><button class="hero-dot" data-slide="2" onclick="goToSlide(2)" aria-label="Slide 3"></button><button class="hero-dot" data-slide="3" onclick="goToSlide(3)" aria-label="Slide 4"></button><button class="hero-dot" data-slide="4" onclick="goToSlide(4)" aria-label="Slide 5"></button></div>
       </div>
       <div class="hero-runners">
-            <a href="items/306926030086.html" class="hero-runner">
-              <img src="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l500.jpg" alt="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm" loading="lazy">
+            <a href="items/306904203738.html" class="hero-runner">
+              <img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="1994 Classic Pro Line Live - Autograph - Steve Emtman" loading="lazy">
               <div class="hero-runner-meta">
-                <div class="hero-runner-title">2025 Panini Mosaic - Showtime Signatures Aaron Donald …</div>
-                <div class="hero-runner-price">$50.00</div>
+                <div class="hero-runner-title">1994 Classic Pro Line Live - Autograph - Steve Emtman</div>
+                <div class="hero-runner-price">$10.00</div>
               </div>
             </a>
-            <a href="items/306927289794.html" class="hero-runner">
-              <img src="https://i.ebayimg.com/images/g/v7UAAeSwQW9p~pTV/s-l500.jpg" alt="2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)" loading="lazy">
+            <a href="items/306913902750.html" class="hero-runner">
+              <img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="7 Howie Long Cards Raiders" loading="lazy">
               <div class="hero-runner-meta">
-                <div class="hero-runner-title">2025 Panini Prizm - Rookies Tyler Shough #327 White Di…</div>
-                <div class="hero-runner-price">$18.00</div>
+                <div class="hero-runner-title">7 Howie Long Cards Raiders</div>
+                <div class="hero-runner-price">$9.99</div>
               </div>
             </a>
-            <a href="items/306751048818.html" class="hero-runner">
-              <img src="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l500.jpg" alt="EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125" loading="lazy">
+            <a href="items/306913908225.html" class="hero-runner">
+              <img src="https://i.ebayimg.com/images/g/GuUAAeSw0F5p9e1k/s-l500.jpg" alt="9 Joe Montana Cards 49ers Chiefs" loading="lazy">
               <div class="hero-runner-meta">
-                <div class="hero-runner-title">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese…</div>
-                <div class="hero-runner-price">$15.50</div>
+                <div class="hero-runner-title">9 Joe Montana Cards 49ers Chiefs</div>
+                <div class="hero-runner-price">$5.99</div>
               </div>
             </a></div>
     </section>
@@ -945,6 +1198,26 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </a>
       </div>
     </div>
+
+    
+    <section class="trust-panel">
+      <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener" class="trust-block">
+        <div class="trust-num">161</div>
+        <div class="trust-lbl">Feedback Score</div>
+      </a>
+      <div class="trust-block">
+        <div class="trust-stars">★★★★★</div>
+        <div class="trust-lbl">100% Positive</div>
+      </div>
+      <div class="trust-block">
+        <div class="trust-num">27<span class="trust-num-sub">+ yrs</span></div>
+        <div class="trust-lbl">Since Dec 1998</div>
+      </div>
+      <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener" class="trust-block trust-cta">
+        <div class="trust-num">eBay</div>
+        <div class="trust-lbl">View Verified Profile →</div>
+      </a>
+    </section>
 
     <section class="section-head">
       <div>
@@ -984,8 +1257,20 @@ tr:hover td { background: rgba(212,175,55,.03); }
       </div>
     </div>
 
-    <div id="results-meta" style="font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;">
-      Showing <span id="visible-count">52</span> of 52 listings
+    <section class="recent-strip" id="recent-strip">
+      <div class="recent-head">
+        <h3>Recently Viewed</h3>
+        <button class="recent-clear" onclick="clearRecent()">Clear</button>
+      </div>
+      <div class="recent-scroll" id="recent-scroll"></div>
+    </section>
+
+    <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
+      <div>Showing <span id="visible-count">52</span> of 52 listings</div>
+      <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+        Share filters
+      </button>
     </div>
 
     <div id="no-results">
@@ -2497,11 +2782,132 @@ tr:hover td { background: rgba(212,175,55,.03); }
       }
 
       refreshFavUI();
+
+      // ============ HERO AUTO-ROTATION ============
+      const heroSlides = document.querySelectorAll('.hero-slide');
+      const heroDots   = document.querySelectorAll('.hero-dot');
+      let heroIdx = 0;
+      let heroTimer = null;
+      function goToSlide(i) {
+        heroSlides.forEach((s, idx) => {
+          s.classList.toggle('active', idx === i);
+          if (idx === i) {
+            s.classList.remove('fade-in'); void s.offsetWidth; s.classList.add('fade-in');
+          }
+        });
+        heroDots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+        heroIdx = i;
+      }
+      function nextSlide() { goToSlide((heroIdx + 1) % heroSlides.length); }
+      function pauseHero() { if (heroTimer) { clearInterval(heroTimer); heroTimer = null; } }
+      function resumeHero() { if (heroSlides.length > 1 && !heroTimer) heroTimer = setInterval(nextSlide, 7000); }
+      window.goToSlide = goToSlide;
+      window.pauseHero = pauseHero;
+      window.resumeHero = resumeHero;
+      resumeHero();
+
+      // ============ RECENTLY VIEWED ============
+      function getRecent() {
+        try { return JSON.parse(localStorage.getItem('h2k_recent') || '[]'); } catch(e) { return []; }
+      }
+      function clearRecent() {
+        localStorage.removeItem('h2k_recent');
+        document.getElementById('recent-strip').classList.remove('show');
+      }
+      window.clearRecent = clearRecent;
+      function renderRecent() {
+        const recent = getRecent();
+        if (!recent.length) return;
+        const scroll = document.getElementById('recent-scroll');
+        const valid = [];
+        recent.forEach(r => {
+          const card = document.querySelector('.listing-card[data-id="' + r.id + '"]');
+          if (card) {
+            const img = card.querySelector('img')?.src || '';
+            const title = card.querySelector('h3 a')?.textContent || r.title || '';
+            const price = card.dataset.price || '0';
+            valid.push({ id: r.id, img, title, price });
+          }
+        });
+        if (!valid.length) return;
+        scroll.innerHTML = valid.slice(0, 8).map(v => `
+          <a href="items/${v.id}.html" class="recent-card">
+            <img class="recent-card-img" src="${v.img}" alt="${v.title.replace(/"/g, '&quot;')}" loading="lazy">
+            <div class="recent-card-body">
+              <div class="recent-card-title">${v.title}</div>
+              <div class="recent-card-price">$${parseFloat(v.price).toFixed(2)}</div>
+            </div>
+          </a>`).join('');
+        document.getElementById('recent-strip').classList.add('show');
+      }
+      renderRecent();
+
+      // ============ URL HASH STATE ============
+      function readHash() {
+        const params = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+        return {
+          q:    params.get('q')    || '',
+          cat:  params.get('cat')  || 'All',
+          min:  parseFloat(params.get('min')) || PRICE_MIN_INIT,
+          max:  parseFloat(params.get('max')) || PRICE_MAX_INIT,
+          sort: params.get('sort') || 'default',
+          size: params.get('size') || (localStorage.getItem('h2k_size') || 'medium'),
+        };
+      }
+      function writeHash() {
+        const p = new URLSearchParams();
+        const q = document.getElementById('search').value.trim();
+        if (q) p.set('q', q);
+        if (activeCat && activeCat !== 'All') p.set('cat', activeCat);
+        if (priceRange[0] !== PRICE_MIN_INIT) p.set('min', priceRange[0]);
+        if (priceRange[1] !== PRICE_MAX_INIT) p.set('max', priceRange[1]);
+        const sort = document.getElementById('sort-filter').value;
+        if (sort !== 'default') p.set('sort', sort);
+        const size = document.getElementById('listing-grid').dataset.size;
+        if (size && size !== 'medium') p.set('size', size);
+        const newHash = p.toString();
+        if (newHash !== (location.hash || '').replace(/^#/, '')) {
+          history.replaceState(null, '', newHash ? '#' + newHash : location.pathname);
+        }
+      }
+      // Apply hash on load
+      (function applyHashOnLoad() {
+        const s = readHash();
+        if (s.q) document.getElementById('search').value = s.q;
+        if (s.sort) document.getElementById('sort-filter').value = s.sort;
+        if (s.size) {
+          document.getElementById('listing-grid').dataset.size = s.size;
+          document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s.size));
+        }
+        if (s.cat && s.cat !== 'All') {
+          const chip = document.querySelector('.chip[data-cat="' + s.cat + '"]');
+          if (chip) { document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); activeCat = s.cat; }
+        }
+        if (s.min !== PRICE_MIN_INIT || s.max !== PRICE_MAX_INIT) {
+          slider.noUiSlider.set([s.min, s.max]);
+        }
+        applyFilters();
+      })();
+      // Hook into existing applyFilters to also write hash
+      const origApplyFilters = applyFilters;
+      applyFilters = function() { origApplyFilters(); writeHash(); };
+      window.applyFilters = applyFilters;
+
+      // ============ SHARE FILTERS ============
+      window.shareFilters = async function() {
+        writeHash();
+        try {
+          await navigator.clipboard.writeText(location.href);
+          showToast('Link copied — paste anywhere to share this exact filtered view.');
+        } catch(e) {
+          showToast('Copy failed. URL: ' + location.href);
+        }
+      };
     </script>
   </main>
 
   <footer class="app-footer">
-    Updated May 09, 2026 · 08:10 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 09, 2026 · 08:22 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -2604,6 +3010,37 @@ tr:hover td { background: rgba(212,175,55,.03); }
     };
     // Apply on every page load
     window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+
+    // ---- PWA: register service worker + handle install prompt ----
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+
+    let __deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      __deferredInstall = e;
+      const btn = document.getElementById('install-app-btn');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+    window.addEventListener('appinstalled', () => {
+      __deferredInstall = null;
+      const btn = document.getElementById('install-app-btn');
+      if (btn) btn.style.display = 'none';
+      showToast('Installed. Find Harpua2001 on your home screen.');
+    });
+    window.installApp = async function() {
+      if (!__deferredInstall) return;
+      __deferredInstall.prompt();
+      const choice = await __deferredInstall.userChoice;
+      if (choice.outcome === 'accepted') {
+        __deferredInstall = null;
+        const btn = document.getElementById('install-app-btn');
+        if (btn) btn.style.display = 'none';
+      }
+    };
   </script>
 </body>
 </html>
