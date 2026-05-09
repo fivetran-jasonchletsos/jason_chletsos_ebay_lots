@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <title>Harpua2001 - eBay Listings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      line-height: 0;
+    }
+    nav {
+      background: #004fa3;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    nav a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    nav a:hover, nav a.active {
+      color: white;
+      border-bottom-color: #fff;
+    }
+    main { padding: 16px; max-width: 960px; margin: 0 auto; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .card-body { padding: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #0064d2;
+      color: white;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7f9ff; }
+    a { color: #0064d2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      background: white;
+    }
+    /* grid sizing — controlled by data-size on the grid wrapper */
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+    .grid[data-size="large"]  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .grid[data-size="medium"] { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .grid[data-size="small"]  { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .grid[data-size="list"]   { grid-template-columns: 1fr; }
+
+    .listing-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* list layout — card goes horizontal */
+    .grid[data-size="list"] .listing-card {
+      flex-direction: row;
+      align-items: center;
+    }
+    .grid[data-size="list"] .listing-card .thumb-wrap {
+      flex: 0 0 80px;
+      height: 80px;
+    }
+    .grid[data-size="list"] .listing-card .info { padding: 10px 12px; }
+    .grid[data-size="list"] .listing-card .actions { border-top: none; border-left: 1px solid #eee; padding: 10px; flex-direction: column; min-width: 110px; }
+
+    .thumb-wrap { width: 100%; overflow: hidden; background: #eee; }
+    .grid[data-size="large"]  .thumb-wrap { height: 180px; }
+    .grid[data-size="medium"] .thumb-wrap { height: 120px; }
+    .grid[data-size="small"]  .thumb-wrap { height: 80px;  }
+
+    .listing-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .listing-card .info { padding: 12px; flex: 1; }
+    .listing-card .info h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+    /* hide title in small mode to save space */
+    .grid[data-size="small"] .listing-card .info h3 { font-size: 11px; }
+    .listing-card .price { font-size: 18px; font-weight: 700; color: #0064d2; }
+    .grid[data-size="small"] .listing-card .price { font-size: 14px; }
+    .listing-card .meta  { font-size: 11px; color: #888; margin-top: 4px; }
+    .grid[data-size="small"] .listing-card .meta { display: none; }
+    .listing-card .actions { padding: 10px 12px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+    .grid[data-size="small"] .listing-card .actions { padding: 6px 8px; }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+    .btn-primary { background: #0064d2; color: white; flex: 1; }
+    .btn-secondary { background: #f0f2f5; color: #333; flex: 1; }
+    .btn:hover { opacity: .9; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green  { background: #e6f4ea; color: #1e7e34; }
+    .badge-yellow { background: #fff8e1; color: #856404; }
+    .badge-red    { background: #fdecea; color: #c62828; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+    }
+    .stat .num { font-size: 26px; font-weight: 700; color: #0064d2; }
+    .stat .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+    .search-bar { margin-bottom: 14px; }
+    /* size toggle buttons */
+    .size-toggle { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+    .size-toggle span { font-size: 12px; color: #888; margin-right: 4px; }
+    .size-btn {
+      padding: 5px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #555;
+    }
+    .size-btn.active {
+      background: #0064d2;
+      color: white;
+      border-color: #0064d2;
+    }
+    #no-results { display: none; padding: 24px; text-align: center; color: #888; }
+    @media (max-width: 480px) {
+      .grid[data-size="large"]  { grid-template-columns: 1fr 1fr; }
+      .grid[data-size="medium"] { grid-template-columns: repeat(3, 1fr); }
+      .grid[data-size="small"]  { grid-template-columns: repeat(4, 1fr); }
+      .grid[data-size="large"]  .thumb-wrap { height: 130px; }
+      .stat .num { font-size: 20px; }
+    }
+  </style>
+  
+</head>
+<body>
+  <header>
+    <img src="banner.jpg" alt="Harpua2001" style="width:100%;max-height:200px;object-fit:cover;display:block;">
+  </header>
+  <nav>
+    <a href="index.html">Listings</a>
+    <a href="quality.html">Quality Report</a>
+    <a href="title_review.html">Title Review</a>
+    <a href="craigslist.html">Craigslist Ads</a>
+    <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+  </nav>
+  <main>
+    
+    <div class="stat-row">
+      <div class="stat"><div class="num">51</div><div class="lbl">Active Listings</div></div>
+      <div class="stat"><div class="num">$450</div><div class="lbl">Total Value</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl">Categories</div></div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="search" placeholder="Search listings..." oninput="filterListings()">
+      <select id="cat-filter" onchange="filterListings()"><option value="">All categories</option>
+</select>
+      <select id="sort-filter" onchange="filterListings()">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="title">Title A-Z</option>
+      </select>
+    </div>
+
+    <div class="size-toggle">
+      <span>View:</span>
+      <button class="size-btn" onclick="setSize('small')">Small</button>
+      <button class="size-btn active" onclick="setSize('medium')">Medium</button>
+      <button class="size-btn" onclick="setSize('large')">Large</button>
+      <button class="size-btn" onclick="setSize('list')">List</button>
+    </div>
+
+    <div id="no-results">No listings match your search.</div>
+    <div class="grid" id="listing-grid" data-size="medium">
+      
+    <div class="listing-card" data-title="2026 aces justin jefferson 2/2  wild card 5 card draw stacked deck black tie" data-cat="" data-price="5.0">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank"><img src="https://i.ebayimg.com/images/g/h6MAAeSw6YZp~mQC/s-l500.jpg" alt="2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Black Tie" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank">2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Black Tie</a></h3>
+        <div class="price">$5.00</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2026 baker mayfield 1/1 king wild card 5 card draw stacked deck black tie" data-cat="" data-price="5.0">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank"><img src="https://i.ebayimg.com/images/g/jbwAAeSwu-dp~mT2/s-l500.jpg" alt="2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black Tie" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank">2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black Tie</a></h3>
+        <div class="price">$5.00</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2026 germie bernard  4/4 kings wild card black tie edition steelers draft pick" data-cat="" data-price="4.0">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank"><img src="https://i.ebayimg.com/images/g/OvAAAeSw0rNp~mXb/s-l500.jpg" alt="2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Draft Pick" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank">2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Draft Pick</a></h3>
+        <div class="price">$4.00</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="australia coins - 1942 silver sixpence (king george vi) & 1968 20 cents" data-cat="" data-price="4.5">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank"><img src="https://i.ebayimg.com/images/g/WngAAeSw1upputrS/s-l500.jpg" alt="Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cents" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank">Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cents</a></h3>
+        <div class="price">$4.50</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="6 deion sanders cards atlanta falcons" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank"><img src="https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l500.jpg" alt="6 Deion Sanders Cards Atlanta Falcons" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank">6 Deion Sanders Cards Atlanta Falcons</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="13 junior seau cards including rookie cards san diego chargers" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank"><img src="https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l500.jpg" alt="13 Junior Seau Cards Including Rookie Cards San Diego Chargers" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="3 marshall faulk cards san diego state indianapolis colts" data-cat="" data-price="1.49">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank"><img src="https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg" alt="3 Marshall Faulk Cards San Diego State Indianapolis Colts" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a></h3>
+        <div class="price">$1.49</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="8 cards roger craig san francisco 49ers minnesota vikings" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank"><img src="https://i.ebayimg.com/images/g/7fsAAeSwwtlp7reN/s-l500.jpg" alt="8 Cards Roger Craig San Francisco 49ers Minnesota Vikings" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank">8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="jerome bettis notre dame los angeles rams 10 cards" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank"><img src="https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg" alt="Jerome Bettis Notre Dame Los Angeles Rams 10 Cards" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="14 cards tim brown los angeles raiders" data-cat="" data-price="3.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank"><img src="https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg" alt="14 Cards Tim Brown Los Angeles Raiders" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank">14 Cards Tim Brown Los Angeles Raiders</a></h3>
+        <div class="price">$3.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="8 cards carl banks new york giants" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank"><img src="https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l500.jpg" alt="8 Cards Carl Banks New York Giants" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank">8 Cards Carl Banks New York Giants</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="11 cards marcus allen los angeles raiders kansas city chiefs" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank"><img src="https://i.ebayimg.com/images/g/sc0AAeSwVNVp7uZe/s-l500.jpg" alt="11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank">11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="7 cards steve atwater rookie cards denver broncos" data-cat="" data-price="3.49">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="7 Cards Steve Atwater Rookie Cards Denver Broncos" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank">7 Cards Steve Atwater Rookie Cards Denver Broncos</a></h3>
+        <div class="price">$3.49</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="7 cards boomer esiason cincinnati bengals new york jets" data-cat="" data-price="2.49">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank"><img src="https://i.ebayimg.com/images/g/JnAAAeSwLQ1p7wMT/s-l500.jpg" alt="7 Cards Boomer Esiason Cincinnati Bengals New York Jets" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank">7 Cards Boomer Esiason Cincinnati Bengals New York Jets</a></h3>
+        <div class="price">$2.49</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="4 aaron glenn rookie cards new york jets" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank"><img src="https://i.ebayimg.com/images/g/pjoAAeSwN8dp7wmI/s-l500.jpg" alt="4 Aaron Glenn Rookie Cards New York Jets" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank">4 Aaron Glenn Rookie Cards New York Jets</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="1994 classic pro line live - autograph - steve emtman" data-cat="" data-price="4.49">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank"><img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="1994 Classic Pro Line Live - Autograph - Steve Emtman" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank">1994 Classic Pro Line Live - Autograph - Steve Emtman</a></h3>
+        <div class="price">$4.49</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="12 jim everett cards los angeles rams new orleans saints" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank"><img src="https://i.ebayimg.com/images/g/hOMAAeSwWi9p7w-H/s-l500.jpg" alt="12 Jim Everett Cards Los Angeles Rams New Orleans Saints" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank">12 Jim Everett Cards Los Angeles Rams New Orleans Saints</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="15 charles haley cards san francisco 49ers dallas cowboys" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank"><img src="https://i.ebayimg.com/images/g/1VIAAeSwrHRp9Vkl/s-l500.jpg" alt="15 Charles Haley Cards San Francisco 49ers Dallas Cowboys" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="11 mel gray cards detroit lions" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank"><img src="https://i.ebayimg.com/images/g/4iQAAeSwGjRp9VwZ/s-l500.jpg" alt="11 Mel Gray Cards Detroit Lions" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank">11 Mel Gray Cards Detroit Lions</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="5 bobby humphrey cards denver broncos" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank"><img src="https://i.ebayimg.com/images/g/nJwAAeSwFO1p9XlJ/s-l500.jpg" alt="5 Bobby Humphrey Cards Denver Broncos" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank">5 Bobby Humphrey Cards Denver Broncos</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="9 michael irvin cards dallas cowboys" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank"><img src="https://i.ebayimg.com/images/g/DikAAeSw77xp9Xow/s-l500.jpg" alt="9 Michael Irvin Cards Dallas Cowboys" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank">9 Michael Irvin Cards Dallas Cowboys</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="10 jim kelly cards buffalo bills" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank"><img src="https://i.ebayimg.com/images/g/iuEAAeSw0F5p9d4k/s-l500.jpg" alt="10 Jim Kelly Cards Buffalo Bills" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank">10 Jim Kelly Cards Buffalo Bills</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="11 raghib and quadry ismail cards raiders vikings" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="11 Raghib And Quadry Ismail Cards Raiders Vikings" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank">11 Raghib And Quadry Ismail Cards Raiders Vikings</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="3 steve largent cards seattle seahawks" data-cat="" data-price="1.95">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank"><img src="https://i.ebayimg.com/images/g/VIUAAeSwm5Bp9eiq/s-l500.jpg" alt="3 Steve Largent Cards Seattle Seahawks" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank">3 Steve Largent Cards Seattle Seahawks</a></h3>
+        <div class="price">$1.95</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="9 ronnie lott cards 49ers raiders jets" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank"><img src="https://i.ebayimg.com/images/g/RFMAAeSwa5xp9eoC/s-l500.jpg" alt="9 Ronnie Lott Cards 49ers Raiders Jets" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank">9 Ronnie Lott Cards 49ers Raiders Jets</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="7 howie long cards raiders" data-cat="" data-price="9.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank"><img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="7 Howie Long Cards Raiders" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank">7 Howie Long Cards Raiders</a></h3>
+        <div class="price">$9.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="9 joe montana cards 49ers chiefs" data-cat="" data-price="5.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank"><img src="https://i.ebayimg.com/images/g/GuUAAeSw0F5p9e1k/s-l500.jpg" alt="9 Joe Montana Cards 49ers Chiefs" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank">9 Joe Montana Cards 49ers Chiefs</a></h3>
+        <div class="price">$5.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="20 warren moon cards oilers vikings" data-cat="" data-price="14.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank"><img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="20 Warren Moon Cards Oilers Vikings" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank">20 Warren Moon Cards Oilers Vikings</a></h3>
+        <div class="price">$14.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="15 dan marino cards miami dolphins" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank"><img src="https://i.ebayimg.com/images/g/wMMAAeSwx-Bp9fCx/s-l500.jpg" alt="15 Dan Marino Cards Miami Dolphins" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank">15 Dan Marino Cards Miami Dolphins</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="4 rookie cards willie mcginest one autographed" data-cat="" data-price="3.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank"><img src="https://i.ebayimg.com/images/g/cDgAAeSwPaJp9fK~/s-l500.jpg" alt="4 Rookie Cards Willie McGinest One Autographed" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank">4 Rookie Cards Willie McGinest One Autographed</a></h3>
+        <div class="price">$3.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm - prizmatic colston loveland #20 silver prizm (rc)" data-cat="" data-price="3.25">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank"><img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a></h3>
+        <div class="price">$3.25</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini rookies & stars - stellar rookies shedeur sanders #1 silver (rc)" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank"><img src="https://i.ebayimg.com/images/g/absAAeSwHPhp9hiM/s-l500.jpg" alt="2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini rookies & stars - artistry in motion lamar jackson #2" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank"><img src="https://i.ebayimg.com/images/g/nj4AAeSwM4Zp9hjO/s-l500.jpg" alt="2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks - andrew marsh #157 silver prizm (rc)" data-cat="" data-price="1.49">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank"><img src="https://i.ebayimg.com/images/g/lTUAAeSwSx9p9hlJ/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</a></h3>
+        <div class="price">$1.49</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks - instant impact dylan raiola #ii- gold ice prizm" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank"><img src="https://i.ebayimg.com/images/g/ntwAAeSwPN5p9iXs/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks new recruits tetairoa mcmillan #11 gold ice prizm" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank"><img src="https://i.ebayimg.com/images/g/v30AAeSwpzNp9iZC/s-l500.jpg" alt="2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks - barry sanders #188 purple wave prizm" data-cat="" data-price="1.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a></h3>
+        <div class="price">$1.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini select - select numbers jordan love #7 silver prizm" data-cat="" data-price="1.5">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank"><img src="https://i.ebayimg.com/images/g/vrwAAeSwI-5p9ie0/s-l500.jpg" alt="2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</a></h3>
+        <div class="price">$1.50</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="5 sam adams rookie cards seattle seahawks" data-cat="" data-price="4.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank"><img src="https://i.ebayimg.com/images/g/xWoAAeSwzANp9is3/s-l500.jpg" alt="5 Sam Adams Rookie Cards Seattle Seahawks" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank">5 Sam Adams Rookie Cards Seattle Seahawks</a></h3>
+        <div class="price">$4.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="10 eric metcalf cards cleveland browns" data-cat="" data-price="1.39">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank"><img src="https://i.ebayimg.com/images/g/SocAAeSwqZVp9k4F/s-l500.jpg" alt="10 Eric Metcalf Cards Cleveland Browns" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank">10 Eric Metcalf Cards Cleveland Browns</a></h3>
+        <div class="price">$1.39</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="12 andre rison cards colts falcons rc" data-cat="" data-price="3.34">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank"><img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="12 Andre Rison Cards Colts Falcons RC" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank">12 Andre Rison Cards Colts Falcons RC</a></h3>
+        <div class="price">$3.34</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks - ashton jeanty #13 gold ice prizm (rc)" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank"><img src="https://i.ebayimg.com/images/g/TYkAAeSw~9Bp9qSL/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini select - concourse tetairoa mcmillan #44 pink shock prizm (rc)" data-cat="" data-price="3.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank"><img src="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l500.jpg" alt="2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</a></h3>
+        <div class="price">$3.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini select - concourse ashton jeanty #4 black & red shock prizm (rc)" data-cat="" data-price="3.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank"><img src="https://i.ebayimg.com/images/g/27IAAeSwi69p9qVk/s-l500.jpg" alt="2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)</a></h3>
+        <div class="price">$3.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini select - premier level travis hunter #128 pink shock prizm (rc)" data-cat="" data-price="3.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank"><img src="https://i.ebayimg.com/images/g/GGAAAeSwYOtp9qXI/s-l500.jpg" alt="2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank">2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)</a></h3>
+        <div class="price">$3.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks - travis hunter #20 silver prizm (rc)" data-cat="" data-price="2.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank"><img src="https://i.ebayimg.com/images/g/qdEAAeSwJk1p9qaI/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</a></h3>
+        <div class="price">$2.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm - rookies jalen milroe #317 neon green pulsar prizm (rc)" data-cat="" data-price="3.99">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank"><img src="https://i.ebayimg.com/images/g/A50AAeSw4ABp9qbm/s-l500.jpg" alt="2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)</a></h3>
+        <div class="price">$3.99</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="eevee - poke ball reverse holo - psa 9 - 2024 japanese terastal fest ex - #125" data-cat="" data-price="15.5">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank"><img src="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l500.jpg" alt="EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125</a></h3>
+        <div class="price">$15.50</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini mosaic - showtime signatures aaron donald sos-aad red & yellow prizm" data-cat="" data-price="50.0">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank"><img src="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l500.jpg" alt="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm</a></h3>
+        <div class="price">$50.00</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="2025 panini prizm draft picks - on campus joe burrow #oc-14" data-cat="" data-price="205.0">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank"><img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a></h3>
+        <div class="price">$205.00</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    <div class="listing-card" data-title="charcadet 022 me: mega evolution promo holo" data-cat="" data-price="3.39">
+      <div class="thumb-wrap"><a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank"><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l500.jpg" alt="Charcadet 022 Me: Mega Evolution Promo Holo" loading="lazy"></a></div>
+      <div class="info">
+        <h3><a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank">Charcadet 022 Me: Mega Evolution Promo Holo</a></h3>
+        <div class="price">$3.39</div>
+        <div class="meta"> &middot; </div>
+      </div>
+      <div class="actions">
+        <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" class="btn btn-primary">View on eBay</a>
+      </div>
+    </div>
+    </div>
+
+    <script>
+      function setSize(size) {
+        document.getElementById('listing-grid').dataset.size = size;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        localStorage.setItem('listingSize', size);
+      }
+
+      // Restore saved size preference
+      const saved = localStorage.getItem('listingSize');
+      if (saved) {
+        document.getElementById('listing-grid').dataset.size = saved;
+        document.querySelectorAll('.size-btn').forEach(b => {
+          b.classList.toggle('active', b.textContent.toLowerCase() === saved);
+        });
+      }
+
+      function filterListings() {
+        const q    = document.getElementById('search').value.toLowerCase();
+        const cat  = document.getElementById('cat-filter').value;
+        const sort = document.getElementById('sort-filter').value;
+        const grid = document.getElementById('listing-grid');
+        let cards  = Array.from(grid.querySelectorAll('.listing-card'));
+
+        cards.forEach(c => {
+          const titleMatch = c.dataset.title.includes(q);
+          const catMatch   = !cat || c.dataset.cat === cat;
+          c.style.display  = (titleMatch && catMatch) ? '' : 'none';
+        });
+
+        const visible = cards.filter(c => c.style.display !== 'none');
+        document.getElementById('no-results').style.display = visible.length === 0 ? 'block' : 'none';
+
+        if (sort === 'price-asc')  visible.sort((a,b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
+        if (sort === 'price-desc') visible.sort((a,b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
+        if (sort === 'title')      visible.sort((a,b) => a.dataset.title.localeCompare(b.dataset.title));
+        visible.forEach(c => grid.appendChild(c));
+      }
+    </script>
+  </main>
+  <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
+    Updated 2026-05-09 01:58 UTC
+  </footer>
+</body>
+</html>

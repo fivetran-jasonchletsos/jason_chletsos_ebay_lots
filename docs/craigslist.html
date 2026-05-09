@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <title>Harpua2001 - Craigslist Ads</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      line-height: 0;
+    }
+    nav {
+      background: #004fa3;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    nav a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    nav a:hover, nav a.active {
+      color: white;
+      border-bottom-color: #fff;
+    }
+    main { padding: 16px; max-width: 960px; margin: 0 auto; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .card-body { padding: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #0064d2;
+      color: white;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7f9ff; }
+    a { color: #0064d2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      background: white;
+    }
+    /* grid sizing — controlled by data-size on the grid wrapper */
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+    .grid[data-size="large"]  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .grid[data-size="medium"] { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .grid[data-size="small"]  { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .grid[data-size="list"]   { grid-template-columns: 1fr; }
+
+    .listing-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* list layout — card goes horizontal */
+    .grid[data-size="list"] .listing-card {
+      flex-direction: row;
+      align-items: center;
+    }
+    .grid[data-size="list"] .listing-card .thumb-wrap {
+      flex: 0 0 80px;
+      height: 80px;
+    }
+    .grid[data-size="list"] .listing-card .info { padding: 10px 12px; }
+    .grid[data-size="list"] .listing-card .actions { border-top: none; border-left: 1px solid #eee; padding: 10px; flex-direction: column; min-width: 110px; }
+
+    .thumb-wrap { width: 100%; overflow: hidden; background: #eee; }
+    .grid[data-size="large"]  .thumb-wrap { height: 180px; }
+    .grid[data-size="medium"] .thumb-wrap { height: 120px; }
+    .grid[data-size="small"]  .thumb-wrap { height: 80px;  }
+
+    .listing-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .listing-card .info { padding: 12px; flex: 1; }
+    .listing-card .info h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+    /* hide title in small mode to save space */
+    .grid[data-size="small"] .listing-card .info h3 { font-size: 11px; }
+    .listing-card .price { font-size: 18px; font-weight: 700; color: #0064d2; }
+    .grid[data-size="small"] .listing-card .price { font-size: 14px; }
+    .listing-card .meta  { font-size: 11px; color: #888; margin-top: 4px; }
+    .grid[data-size="small"] .listing-card .meta { display: none; }
+    .listing-card .actions { padding: 10px 12px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+    .grid[data-size="small"] .listing-card .actions { padding: 6px 8px; }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+    .btn-primary { background: #0064d2; color: white; flex: 1; }
+    .btn-secondary { background: #f0f2f5; color: #333; flex: 1; }
+    .btn:hover { opacity: .9; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green  { background: #e6f4ea; color: #1e7e34; }
+    .badge-yellow { background: #fff8e1; color: #856404; }
+    .badge-red    { background: #fdecea; color: #c62828; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+    }
+    .stat .num { font-size: 26px; font-weight: 700; color: #0064d2; }
+    .stat .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+    .search-bar { margin-bottom: 14px; }
+    /* size toggle buttons */
+    .size-toggle { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+    .size-toggle span { font-size: 12px; color: #888; margin-right: 4px; }
+    .size-btn {
+      padding: 5px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #555;
+    }
+    .size-btn.active {
+      background: #0064d2;
+      color: white;
+      border-color: #0064d2;
+    }
+    #no-results { display: none; padding: 24px; text-align: center; color: #888; }
+    @media (max-width: 480px) {
+      .grid[data-size="large"]  { grid-template-columns: 1fr 1fr; }
+      .grid[data-size="medium"] { grid-template-columns: repeat(3, 1fr); }
+      .grid[data-size="small"]  { grid-template-columns: repeat(4, 1fr); }
+      .grid[data-size="large"]  .thumb-wrap { height: 130px; }
+      .stat .num { font-size: 20px; }
+    }
+  </style>
+  
+</head>
+<body>
+  <header>
+    <img src="banner.jpg" alt="Harpua2001" style="width:100%;max-height:200px;object-fit:cover;display:block;">
+  </header>
+  <nav>
+    <a href="index.html">Listings</a>
+    <a href="quality.html">Quality Report</a>
+    <a href="title_review.html">Title Review</a>
+    <a href="craigslist.html">Craigslist Ads</a>
+    <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+  </nav>
+  <main>
+    
+    <div style="background:white;border-radius:10px;padding:14px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);font-size:13px;color:#555">
+      <strong style="color:#1a1a1a">How to use:</strong>
+      Tap any ad text box to select all, copy it, then go to craigslist.org,
+      select your city, click "Post" - "For Sale" - "Collectibles", and paste.
+      Craigslist is free and has active buyers for sports cards and coins.
+      Post the highest-value items first.
+    </div>
+    
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Black Tie</h3>
+            <div style="font-size:13px;color:#888"> &middot; $5.00</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Black Tie
+
+Price: $5.00
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black Tie</h3>
+            <div style="font-size:13px;color:#888"> &middot; $5.00</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black Tie
+
+Price: $5.00
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Draft Pick</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.00</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Draft Pick
+
+Price: $4.00
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cents</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.50</div>
+          </div>
+          <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >Australia Coins - 1942 Silver Sixpence (King George VI) &amp; 1968 20 Cents
+
+Price: $4.50
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">6 Deion Sanders Cards Atlanta Falcons</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >6 Deion Sanders Cards Atlanta Falcons
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >13 Junior Seau Cards Including Rookie Cards San Diego Chargers
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">3 Marshall Faulk Cards San Diego State Indianapolis Colts</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.49</div>
+          </div>
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >3 Marshall Faulk Cards San Diego State Indianapolis Colts
+
+Price: $1.49
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >8 Cards Roger Craig San Francisco 49ers Minnesota Vikings
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >Jerome Bettis Notre Dame Los Angeles Rams 10 Cards
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">14 Cards Tim Brown Los Angeles Raiders</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >14 Cards Tim Brown Los Angeles Raiders
+
+Price: $3.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">8 Cards Carl Banks New York Giants</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >8 Cards Carl Banks New York Giants
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">7 Cards Steve Atwater Rookie Cards Denver Broncos</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.49</div>
+          </div>
+          <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >7 Cards Steve Atwater Rookie Cards Denver Broncos
+
+Price: $3.49
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">7 Cards Boomer Esiason Cincinnati Bengals New York Jets</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.49</div>
+          </div>
+          <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >7 Cards Boomer Esiason Cincinnati Bengals New York Jets
+
+Price: $2.49
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">4 Aaron Glenn Rookie Cards New York Jets</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >4 Aaron Glenn Rookie Cards New York Jets
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">1994 Classic Pro Line Live - Autograph - Steve Emtman</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.49</div>
+          </div>
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >1994 Classic Pro Line Live - Autograph - Steve Emtman
+
+Price: $4.49
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">12 Jim Everett Cards Los Angeles Rams New Orleans Saints</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >12 Jim Everett Cards Los Angeles Rams New Orleans Saints
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >15 Charles Haley Cards San Francisco 49ers Dallas Cowboys
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">11 Mel Gray Cards Detroit Lions</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >11 Mel Gray Cards Detroit Lions
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">5 Bobby Humphrey Cards Denver Broncos</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >5 Bobby Humphrey Cards Denver Broncos
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">9 Michael Irvin Cards Dallas Cowboys</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >9 Michael Irvin Cards Dallas Cowboys
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">10 Jim Kelly Cards Buffalo Bills</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >10 Jim Kelly Cards Buffalo Bills
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">11 Raghib And Quadry Ismail Cards Raiders Vikings</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >11 Raghib And Quadry Ismail Cards Raiders Vikings
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">3 Steve Largent Cards Seattle Seahawks</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.95</div>
+          </div>
+          <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >3 Steve Largent Cards Seattle Seahawks
+
+Price: $1.95
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">9 Ronnie Lott Cards 49ers Raiders Jets</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >9 Ronnie Lott Cards 49ers Raiders Jets
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">7 Howie Long Cards Raiders</h3>
+            <div style="font-size:13px;color:#888"> &middot; $9.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >7 Howie Long Cards Raiders
+
+Price: $9.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">9 Joe Montana Cards 49ers Chiefs</h3>
+            <div style="font-size:13px;color:#888"> &middot; $5.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >9 Joe Montana Cards 49ers Chiefs
+
+Price: $5.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">20 Warren Moon Cards Oilers Vikings</h3>
+            <div style="font-size:13px;color:#888"> &middot; $14.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >20 Warren Moon Cards Oilers Vikings
+
+Price: $14.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">15 Dan Marino Cards Miami Dolphins</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >15 Dan Marino Cards Miami Dolphins
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">4 Rookie Cards Willie McGinest One Autographed</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >4 Rookie Cards Willie McGinest One Autographed
+
+Price: $3.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.25</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)
+
+Price: $3.25
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Rookies &amp; Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Rookies &amp; Stars - Artistry in Motion Lamar Jackson #2
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.49</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)
+
+Price: $1.49
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm
+
+Price: $1.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.50</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm
+
+Price: $1.50
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">5 Sam Adams Rookie Cards Seattle Seahawks</h3>
+            <div style="font-size:13px;color:#888"> &middot; $4.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >5 Sam Adams Rookie Cards Seattle Seahawks
+
+Price: $4.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">10 Eric Metcalf Cards Cleveland Browns</h3>
+            <div style="font-size:13px;color:#888"> &middot; $1.39</div>
+          </div>
+          <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >10 Eric Metcalf Cards Cleveland Browns
+
+Price: $1.39
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">12 Andre Rison Cards Colts Falcons RC</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.34</div>
+          </div>
+          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >12 Andre Rison Cards Colts Falcons RC
+
+Price: $3.34
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)
+
+Price: $3.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Select - Concourse Ashton Jeanty #4 Black &amp; Red Shock Prizm (RC)
+
+Price: $3.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)
+
+Price: $3.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $2.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)
+
+Price: $2.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.99</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)
+
+Price: $3.99
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125</h3>
+            <div style="font-size:13px;color:#888"> &middot; $15.50</div>
+          </div>
+          <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125
+
+Price: $15.50
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm</h3>
+            <div style="font-size:13px;color:#888"> &middot; $50.00</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red &amp; Yellow Prizm
+
+Price: $50.00
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</h3>
+            <div style="font-size:13px;color:#888"> &middot; $205.00</div>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14
+
+Price: $205.00
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">Charcadet 022 Me: Mega Evolution Promo Holo</h3>
+            <div style="font-size:13px;color:#888"> &middot; $3.39</div>
+          </div>
+          <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" class="btn btn-secondary" style="font-size:12px;padding:6px 12px;white-space:nowrap">View on eBay</a>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Craigslist Ad Text - tap to select all</div>
+          <textarea onclick="this.select()" readonly
+            style="width:100%;height:160px;font-size:12px;font-family:monospace;border:1px solid #ddd;border-radius:6px;padding:10px;resize:vertical;background:#fafafa;color:#333"
+          >Charcadet 022 Me: Mega Evolution Promo Holo
+
+Price: $3.39
+
+
+See eBay listing for full details.
+
+View on eBay: https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966
+
+Payment: PayPal, Venmo, or cash on local pickup.
+Shipping available.</textarea>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#888">
+          Post at: craigslist.org - For Sale - Collectibles
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
+    Updated 2026-05-09 01:58 UTC
+  </footer>
+</body>
+</html>

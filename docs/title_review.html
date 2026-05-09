@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <title>Title Review - Harpua2001</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      line-height: 0;
+    }
+    nav {
+      background: #004fa3;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    nav a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    nav a:hover, nav a.active {
+      color: white;
+      border-bottom-color: #fff;
+    }
+    main { padding: 16px; max-width: 960px; margin: 0 auto; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .card-body { padding: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #0064d2;
+      color: white;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7f9ff; }
+    a { color: #0064d2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      background: white;
+    }
+    /* grid sizing — controlled by data-size on the grid wrapper */
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+    .grid[data-size="large"]  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .grid[data-size="medium"] { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .grid[data-size="small"]  { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .grid[data-size="list"]   { grid-template-columns: 1fr; }
+
+    .listing-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* list layout — card goes horizontal */
+    .grid[data-size="list"] .listing-card {
+      flex-direction: row;
+      align-items: center;
+    }
+    .grid[data-size="list"] .listing-card .thumb-wrap {
+      flex: 0 0 80px;
+      height: 80px;
+    }
+    .grid[data-size="list"] .listing-card .info { padding: 10px 12px; }
+    .grid[data-size="list"] .listing-card .actions { border-top: none; border-left: 1px solid #eee; padding: 10px; flex-direction: column; min-width: 110px; }
+
+    .thumb-wrap { width: 100%; overflow: hidden; background: #eee; }
+    .grid[data-size="large"]  .thumb-wrap { height: 180px; }
+    .grid[data-size="medium"] .thumb-wrap { height: 120px; }
+    .grid[data-size="small"]  .thumb-wrap { height: 80px;  }
+
+    .listing-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .listing-card .info { padding: 12px; flex: 1; }
+    .listing-card .info h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+    /* hide title in small mode to save space */
+    .grid[data-size="small"] .listing-card .info h3 { font-size: 11px; }
+    .listing-card .price { font-size: 18px; font-weight: 700; color: #0064d2; }
+    .grid[data-size="small"] .listing-card .price { font-size: 14px; }
+    .listing-card .meta  { font-size: 11px; color: #888; margin-top: 4px; }
+    .grid[data-size="small"] .listing-card .meta { display: none; }
+    .listing-card .actions { padding: 10px 12px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+    .grid[data-size="small"] .listing-card .actions { padding: 6px 8px; }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+    .btn-primary { background: #0064d2; color: white; flex: 1; }
+    .btn-secondary { background: #f0f2f5; color: #333; flex: 1; }
+    .btn:hover { opacity: .9; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green  { background: #e6f4ea; color: #1e7e34; }
+    .badge-yellow { background: #fff8e1; color: #856404; }
+    .badge-red    { background: #fdecea; color: #c62828; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+    }
+    .stat .num { font-size: 26px; font-weight: 700; color: #0064d2; }
+    .stat .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+    .search-bar { margin-bottom: 14px; }
+    /* size toggle buttons */
+    .size-toggle { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+    .size-toggle span { font-size: 12px; color: #888; margin-right: 4px; }
+    .size-btn {
+      padding: 5px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #555;
+    }
+    .size-btn.active {
+      background: #0064d2;
+      color: white;
+      border-color: #0064d2;
+    }
+    #no-results { display: none; padding: 24px; text-align: center; color: #888; }
+    @media (max-width: 480px) {
+      .grid[data-size="large"]  { grid-template-columns: 1fr 1fr; }
+      .grid[data-size="medium"] { grid-template-columns: repeat(3, 1fr); }
+      .grid[data-size="small"]  { grid-template-columns: repeat(4, 1fr); }
+      .grid[data-size="large"]  .thumb-wrap { height: 130px; }
+      .stat .num { font-size: 20px; }
+    }
+  </style>
+  
+</head>
+<body>
+  <header>
+    <img src="banner.jpg" alt="Harpua2001" style="width:100%;max-height:200px;object-fit:cover;display:block;">
+  </header>
+  <nav>
+    <a href="index.html">Listings</a>
+    <a href="quality.html">Quality Report</a>
+    <a href="title_review.html">Title Review</a>
+    <a href="craigslist.html">Craigslist Ads</a>
+    <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+  </nav>
+  <main>
+    
+    <div style="margin-bottom:16px;">
+      <p style="color:#555;font-size:14px;">
+        Review the optimized titles below. Edit any title directly in the box.
+        Uncheck rows you want to skip. Click Apply to push selected titles to eBay.
+      </p>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+      <button onclick="selectAll(true)"  class="btn btn-secondary" style="font-size:13px;">Select All</button>
+      <button onclick="selectAll(false)" class="btn btn-secondary" style="font-size:13px;">Deselect All</button>
+      <span id="count-label" style="font-size:13px;color:#555;"></span>
+      <button onclick="applySelected()" class="btn btn-primary" style="margin-left:auto;font-size:14px;padding:10px 24px;">
+        Apply Selected to eBay
+      </button>
+    </div>
+
+    <div id="status-bar" style="display:none;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;"></div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px;"></th>
+            <th>Title (tap to edit)</th>
+            <th style="width:80px;"></th>
+          </tr>
+        </thead>
+        <tbody id="review-body">
+          
+      <tr class="review-row" data-id="306927028439">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306927028439" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank" style="font-size:11px;color:#888;">306927028439</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Black Tie</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306927028439">2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2</div>
+            <div style="font-size:11px;color:#856404;margin-top:3px;">
+              76 chars (0 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306927035291">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306927035291" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank" style="font-size:11px;color:#888;">306927035291</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black Tie</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306927035291">2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              74 chars (+1 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306927040476">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306927040476" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank" style="font-size:11px;color:#888;">306927040476</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Draft Pick</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306927040476">2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC</div>
+            <div style="font-size:11px;color:#856404;margin-top:3px;">
+              74 chars (-4 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306829826433">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306829826433" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" style="font-size:11px;color:#888;">306829826433</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cents</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306829826433">Australia 1942 Silver Sixpence King George VI + 1968 20 Cents Coin Lot</div>
+            <div style="font-size:11px;color:#856404;margin-top:3px;">
+              70 chars (-1 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306784122664">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306784122664" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" style="font-size:11px;color:#888;">306784122664</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">6 Deion Sanders Cards Atlanta Falcons</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306784122664">Deion Sanders Atlanta Falcons Football Card Lot (6) NFL HOF Prime Time</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              70 chars (+33 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306785163679">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306785163679" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" style="font-size:11px;color:#888;">306785163679</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306785163679">Junior Seau San Diego Chargers Football Card Lot (13) Includes Rookie Cards RC</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              78 chars (+16 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306785270903">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306785270903" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="font-size:11px;color:#888;">306785270903</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">3 Marshall Faulk Cards San Diego State Indianapolis Colts</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306785270903">Marshall Faulk San Diego Chargers Indianapolis Colts Football Card Lot (3) HOF</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              78 chars (+21 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306903933988">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903933988" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" style="font-size:11px;color:#888;">306903933988</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306903933988">Roger Craig San Francisco 49ers Minnesota Vikings Football Card Lot (8) HOF</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              75 chars (+18 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306903937710">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903937710" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" style="font-size:11px;color:#888;">306903937710</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306903937710">Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              76 chars (+26 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306903941543">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903941543" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" style="font-size:11px;color:#888;">306903941543</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">14 Cards Tim Brown Los Angeles Raiders</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306903941543">Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              70 chars (+32 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306903947932">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306903947932" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" style="font-size:11px;color:#888;">306903947932</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">8 Cards Carl Banks New York Giants</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306903947932">Carl Banks New York Giants Football Card Lot (8) Super Bowl LB</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              62 chars (+28 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904068997">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904068997" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" style="font-size:11px;color:#888;">306904068997</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306904068997">Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              78 chars (+18 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904078786">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904078786" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" style="font-size:11px;color:#888;">306904078786</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">7 Cards Steve Atwater Rookie Cards Denver Broncos</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306904078786">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              79 chars (+30 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904174454">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904174454" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" style="font-size:11px;color:#888;">306904174454</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">7 Cards Boomer Esiason Cincinnati Bengals New York Jets</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306904174454">Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              69 chars (+14 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904189481">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904189481" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" style="font-size:11px;color:#888;">306904189481</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">4 Aaron Glenn Rookie Cards New York Jets</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306904189481">4 Aaron Glenn Rookie Cards New York Jets Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              62 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904203738">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904203738" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="font-size:11px;color:#888;">306904203738</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">1994 Classic Pro Line Live - Autograph - Steve Emtman</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306904203738">1994 Classic Pro Line Live - Autograph - Steve Emtman NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              57 chars (+4 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904215389">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904215389" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" style="font-size:11px;color:#888;">306904215389</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">12 Jim Everett Cards Los Angeles Rams New Orleans Saints</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306904215389">12 Jim Everett Cards Los Angeles Rams New Orleans Saints Football Card Lot</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              74 chars (+18 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913168494">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913168494" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" style="font-size:11px;color:#888;">306913168494</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913168494">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys Football Card Lot</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              75 chars (+18 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913186982">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913186982" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" style="font-size:11px;color:#888;">306913186982</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">11 Mel Gray Cards Detroit Lions</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913186982">11 Mel Gray Cards Detroit Lions Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              53 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913307606">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913307606" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" style="font-size:11px;color:#888;">306913307606</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">5 Bobby Humphrey Cards Denver Broncos</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913307606">5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              59 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913311444">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913311444" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" style="font-size:11px;color:#888;">306913311444</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">9 Michael Irvin Cards Dallas Cowboys</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913311444">9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              58 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913787569">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913787569" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" style="font-size:11px;color:#888;">306913787569</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">10 Jim Kelly Cards Buffalo Bills</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913787569">10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              54 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913790653">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913790653" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" style="font-size:11px;color:#888;">306913790653</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">11 Raghib And Quadry Ismail Cards Raiders Vikings</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913790653">11 Raghib And Quadry Ismail Cards Raiders Vikings Football Card Lot</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              67 chars (+18 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913845449">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913845449" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" style="font-size:11px;color:#888;">306913845449</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">3 Steve Largent Cards Seattle Seahawks</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913845449">3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              60 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913853080">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913853080" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" style="font-size:11px;color:#888;">306913853080</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">9 Ronnie Lott Cards 49ers Raiders Jets</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913853080">9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              60 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913902750">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913902750" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" style="font-size:11px;color:#888;">306913902750</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">7 Howie Long Cards Raiders</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913902750">7 Howie Long Cards Raiders Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              48 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913908225">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913908225" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" style="font-size:11px;color:#888;">306913908225</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">9 Joe Montana Cards 49ers Chiefs</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913908225">9 Joe Montana Cards 49ers Chiefs Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              54 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913934898">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913934898" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" style="font-size:11px;color:#888;">306913934898</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">20 Warren Moon Cards Oilers Vikings</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913934898">20 Warren Moon Cards Oilers Vikings Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              57 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913939866">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913939866" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" style="font-size:11px;color:#888;">306913939866</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">15 Dan Marino Cards Miami Dolphins</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913939866">15 Dan Marino Cards Miami Dolphins Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              56 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306913950248">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306913950248" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" style="font-size:11px;color:#888;">306913950248</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">4 Rookie Cards Willie McGinest One Autographed</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306913950248">4 Rookie Cards Willie McGinest One Autographed Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              68 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914169081">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914169081" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="font-size:11px;color:#888;">306914169081</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914169081">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              77 chars (+9 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914174921">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914174921" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" style="font-size:11px;color:#888;">306914174921</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914174921">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2 Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              74 chars (+9 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914176585">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914176585" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" style="font-size:11px;color:#888;">306914176585</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914176585">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC) Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              76 chars (+9 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914248743">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914248743" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" style="font-size:11px;color:#888;">306914248743</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914248743">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              77 chars (+9 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914249326">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914249326" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" style="font-size:11px;color:#888;">306914249326</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914249326">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm NFL Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              76 chars (+13 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914280138">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914280138" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" style="font-size:11px;color:#888;">306914280138</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">5 Sam Adams Rookie Cards Seattle Seahawks</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914280138">5 Sam Adams Rookie Cards Seattle Seahawks Football Card Lot NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              63 chars (+22 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914500757">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914500757" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" style="font-size:11px;color:#888;">306914500757</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">10 Eric Metcalf Cards Cleveland Browns</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914500757">Eric Metcalf Cleveland Browns Football Card Lot (10) NFL Wide Receiver</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              70 chars (+32 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914547105">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914547105" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" style="font-size:11px;color:#888;">306914547105</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">12 Andre Rison Cards Colts Falcons RC</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914547105">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              76 chars (+39 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914908485">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914908485" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" style="font-size:11px;color:#888;">306914908485</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914908485">2025 Panini Prizm Draft Picks Ashton Jeanty RC #13 Gold Ice Prizm Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              74 chars (+5 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914915295">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914915295" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" style="font-size:11px;color:#888;">306914915295</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306914915295">2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Prizm Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              72 chars (+5 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306926059250">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306926059250" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" style="font-size:11px;color:#888;">306926059250</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306926059250">2025 Panini Prizm Draft Picks Joe Burrow On Campus #OC-14 NFL Football</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              70 chars (+11 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306758076966">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306758076966" checked>
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" style="font-size:11px;color:#888;">306758076966</a>
+          <div style="margin-top:6px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Current:</div>
+            <div class="title-before">Charcadet 022 Me: Mega Evolution Promo Holo</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;color:#888;margin-bottom:2px;">Optimized:</div>
+            <div class="title-after" contenteditable="true" data-id="306758076966">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</div>
+            <div style="font-size:11px;color:#1e7e34;margin-top:3px;">
+              55 chars (+12 chars) &mdash; eBay limit: 80
+            </div>
+          </div>
+        </td>
+        <td style="width:80px;text-align:center;">
+          <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      const LAMBDA_URL = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/revise';
+
+      function updateCount() {
+        const total   = document.querySelectorAll('.row-check').length;
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        document.getElementById('count-label').textContent = checked + ' of ' + total + ' selected';
+      }
+      document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateCount));
+      updateCount();
+
+      function selectAll(val) {
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        updateCount();
+      }
+
+      async function applySelected() {
+        const items = [];
+        document.querySelectorAll('.row-check:checked').forEach(cb => {
+          const id    = cb.value;
+          const after = document.querySelector('.title-after[data-id="' + id + '"]');
+          items.push({ item_id: id, title: after ? after.innerText.trim() : '' });
+        });
+
+        if (items.length === 0) {
+          showStatus('No items selected.', '#856404', '#fff8e1');
+          return;
+        }
+
+        showStatus('Applying ' + items.length + ' title(s) to eBay...', '#1a1a1a', '#fff8e1');
+
+        try {
+          const resp = await fetch(LAMBDA_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ items })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            showStatus(
+              'Done. ' + data.updated + ' listing(s) updated on eBay.' +
+              (data.errors && data.errors.length ? ' ' + data.errors.length + ' failed.' : ''),
+              '#1e7e34', '#e6f4ea'
+            );
+          } else {
+            showStatus('Error: ' + (data.error || 'Unknown error'), '#c62828', '#fdecea');
+          }
+        } catch(e) {
+          showStatus('Request failed: ' + e.message, '#c62828', '#fdecea');
+        }
+      }
+
+      function showStatus(msg, color, bg) {
+        const bar = document.getElementById('status-bar');
+        bar.style.display    = 'block';
+        bar.style.color      = color;
+        bar.style.background = bg;
+        bar.textContent      = msg;
+        bar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    </script>
+  </main>
+  <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
+    Updated 2026-05-09 01:58 UTC
+  </footer>
+</body>
+</html>

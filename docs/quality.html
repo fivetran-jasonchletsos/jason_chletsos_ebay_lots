@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <title>Harpua2001 - Quality Report</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      line-height: 0;
+    }
+    nav {
+      background: #004fa3;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    nav a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    nav a:hover, nav a.active {
+      color: white;
+      border-bottom-color: #fff;
+    }
+    main { padding: 16px; max-width: 960px; margin: 0 auto; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .card-body { padding: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #0064d2;
+      color: white;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7f9ff; }
+    a { color: #0064d2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      background: white;
+    }
+    /* grid sizing — controlled by data-size on the grid wrapper */
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+    .grid[data-size="large"]  { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .grid[data-size="medium"] { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .grid[data-size="small"]  { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .grid[data-size="list"]   { grid-template-columns: 1fr; }
+
+    .listing-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* list layout — card goes horizontal */
+    .grid[data-size="list"] .listing-card {
+      flex-direction: row;
+      align-items: center;
+    }
+    .grid[data-size="list"] .listing-card .thumb-wrap {
+      flex: 0 0 80px;
+      height: 80px;
+    }
+    .grid[data-size="list"] .listing-card .info { padding: 10px 12px; }
+    .grid[data-size="list"] .listing-card .actions { border-top: none; border-left: 1px solid #eee; padding: 10px; flex-direction: column; min-width: 110px; }
+
+    .thumb-wrap { width: 100%; overflow: hidden; background: #eee; }
+    .grid[data-size="large"]  .thumb-wrap { height: 180px; }
+    .grid[data-size="medium"] .thumb-wrap { height: 120px; }
+    .grid[data-size="small"]  .thumb-wrap { height: 80px;  }
+
+    .listing-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .listing-card .info { padding: 12px; flex: 1; }
+    .listing-card .info h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+    /* hide title in small mode to save space */
+    .grid[data-size="small"] .listing-card .info h3 { font-size: 11px; }
+    .listing-card .price { font-size: 18px; font-weight: 700; color: #0064d2; }
+    .grid[data-size="small"] .listing-card .price { font-size: 14px; }
+    .listing-card .meta  { font-size: 11px; color: #888; margin-top: 4px; }
+    .grid[data-size="small"] .listing-card .meta { display: none; }
+    .listing-card .actions { padding: 10px 12px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+    .grid[data-size="small"] .listing-card .actions { padding: 6px 8px; }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+    .btn-primary { background: #0064d2; color: white; flex: 1; }
+    .btn-secondary { background: #f0f2f5; color: #333; flex: 1; }
+    .btn:hover { opacity: .9; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green  { background: #e6f4ea; color: #1e7e34; }
+    .badge-yellow { background: #fff8e1; color: #856404; }
+    .badge-red    { background: #fdecea; color: #c62828; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+    }
+    .stat .num { font-size: 26px; font-weight: 700; color: #0064d2; }
+    .stat .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+    .search-bar { margin-bottom: 14px; }
+    /* size toggle buttons */
+    .size-toggle { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+    .size-toggle span { font-size: 12px; color: #888; margin-right: 4px; }
+    .size-btn {
+      padding: 5px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      color: #555;
+    }
+    .size-btn.active {
+      background: #0064d2;
+      color: white;
+      border-color: #0064d2;
+    }
+    #no-results { display: none; padding: 24px; text-align: center; color: #888; }
+    @media (max-width: 480px) {
+      .grid[data-size="large"]  { grid-template-columns: 1fr 1fr; }
+      .grid[data-size="medium"] { grid-template-columns: repeat(3, 1fr); }
+      .grid[data-size="small"]  { grid-template-columns: repeat(4, 1fr); }
+      .grid[data-size="large"]  .thumb-wrap { height: 130px; }
+      .stat .num { font-size: 20px; }
+    }
+  </style>
+  
+</head>
+<body>
+  <header>
+    <img src="banner.jpg" alt="Harpua2001" style="width:100%;max-height:200px;object-fit:cover;display:block;">
+  </header>
+  <nav>
+    <a href="index.html">Listings</a>
+    <a href="quality.html">Quality Report</a>
+    <a href="title_review.html">Title Review</a>
+    <a href="craigslist.html">Craigslist Ads</a>
+    <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+  </nav>
+  <main>
+    
+    <div class="stat-row">
+      <div class="stat"><div class="num">51</div><div class="lbl">Listings</div></div>
+      <div class="stat"><div class="num">75</div><div class="lbl">Avg Score</div></div>
+      <div class="stat"><div class="num">22</div><div class="lbl">Good</div></div>
+      <div class="stat"><div class="num">29</div><div class="lbl">Fair</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl">Needs Work</div></div>
+    </div>
+    <p style="margin-bottom:14px;font-size:13px;color:#555">
+      Listings sorted worst-first. Fix red items first - they have the biggest impact on eBay search rank.
+    </p>
+    <div class="card">
+      <table>
+        <thead><tr><th>Title</th><th>Price</th><th>Score</th><th>Status</th><th>Issues to Fix</th></tr></thead>
+        <tbody>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/6-Deion-Sanders-Cards-Atlanta-Falcons-/306784122664" target="_blank">6 Deion Sanders Cards Atlanta Falcons</a></td>
+          <td>$1.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (37/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/14-Cards-Tim-Brown-Los-Angeles-Raiders-/306903941543" target="_blank">14 Cards Tim Brown Los Angeles Raiders</a></td>
+          <td>$3.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (38/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/8-Cards-Carl-Banks-New-York-Giants-/306903947932" target="_blank">8 Cards Carl Banks New York Giants</a></td>
+          <td>$1.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (34/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-/306913186982" target="_blank">11 Mel Gray Cards Detroit Lions</a></td>
+          <td>$2.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (31/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-/306913307606" target="_blank">5 Bobby Humphrey Cards Denver Broncos</a></td>
+          <td>$1.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (37/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-/306913311444" target="_blank">9 Michael Irvin Cards Dallas Cowboys</a></td>
+          <td>$4.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (36/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-/306913787569" target="_blank">10 Jim Kelly Cards Buffalo Bills</a></td>
+          <td>$2.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (32/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-/306913845449" target="_blank">3 Steve Largent Cards Seattle Seahawks</a></td>
+          <td>$1.95</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (38/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-/306913853080" target="_blank">9 Ronnie Lott Cards 49ers Raiders Jets</a></td>
+          <td>$4.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (38/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank">7 Howie Long Cards Raiders</a></td>
+          <td>$9.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (26/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank">9 Joe Montana Cards 49ers Chiefs</a></td>
+          <td>$5.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (32/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank">20 Warren Moon Cards Oilers Vikings</a></td>
+          <td>$14.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (35/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank">15 Dan Marino Cards Miami Dolphins</a></td>
+          <td>$4.99</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (34/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank">10 Eric Metcalf Cards Cleveland Browns</a></td>
+          <td>$1.39</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (38/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank">12 Andre Rison Cards Colts Falcons RC</a></td>
+          <td>$3.34</td>
+          <td><strong>60</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title too short (37/80 chars) - add more keywords<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a></td>
+          <td>$1.49</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (57/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank">8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</a></td>
+          <td>$2.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (57/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</a></td>
+          <td>$4.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (50/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank">7 Cards Steve Atwater Rookie Cards Denver Broncos</a></td>
+          <td>$3.49</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (49/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank">7 Cards Boomer Esiason Cincinnati Bengals New York Jets</a></td>
+          <td>$2.49</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (55/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank">4 Aaron Glenn Rookie Cards New York Jets</a></td>
+          <td>$4.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (40/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank">1994 Classic Pro Line Live - Autograph - Steve Emtman</a></td>
+          <td>$4.49</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (53/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank">12 Jim Everett Cards Los Angeles Rams New Orleans Saints</a></td>
+          <td>$2.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (56/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</a></td>
+          <td>$4.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (57/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank">11 Raghib And Quadry Ismail Cards Raiders Vikings</a></td>
+          <td>$2.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (49/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank">4 Rookie Cards Willie McGinest One Autographed</a></td>
+          <td>$3.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (46/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank">5 Sam Adams Rookie Cards Seattle Seahawks</a></td>
+          <td>$4.99</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (41/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a></td>
+          <td>$205.00</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (59/80 chars)<br>Description missing or very short<br>Price $205.00 is 3x above your average ($8.82) - verify</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank">Charcadet 022 Me: Mega Evolution Promo Holo</a></td>
+          <td>$3.39</td>
+          <td><strong>75</strong>/100</td>
+          <td><span class="badge badge-yellow">Fair</span></td>
+          <td style="font-size:12px;color:#555">Title could be longer (43/80 chars)<br>Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2026-Aces-Justin-Jefferson-2-2-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927028439" target="_blank">2026 Aces Justin Jefferson 2/2  Wild Card 5 Card Draw Stacked Deck Bla</a></td>
+          <td>$5.00</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2026-Baker-Mayfield-1-1-King-Wild-Card-5-Card-Draw-Stacked-Deck-Black-Tie--/306927035291" target="_blank">2026 Baker Mayfield 1/1 King Wild Card 5 Card Draw Stacked Deck Black </a></td>
+          <td>$5.00</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2026-Germie-Bernard-4-4-Kings-Wild-Card-Black-Tie-Edition-Steelers-Draft-Pick-/306927040476" target="_blank">2026 Germie Bernard  4/4 Kings Wild Card Black Tie Edition Steelers Dr</a></td>
+          <td>$4.00</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/Australia-Coins-1942-Silver-Sixpence-King-George-VI-1968-20-Cents-/306829826433" target="_blank">Australia Coins - 1942 Silver Sixpence (King George VI) & 1968 20 Cent</a></td>
+          <td>$4.50</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</a></td>
+          <td>$1.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank">11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs</a></td>
+          <td>$2.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a></td>
+          <td>$3.25</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silve</a></td>
+          <td>$2.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</a></td>
+          <td>$1.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</a></td>
+          <td>$1.49</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold </a></td>
+          <td>$1.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold </a></td>
+          <td>$1.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a></td>
+          <td>$1.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</a></td>
+          <td>$1.50</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</a></td>
+          <td>$2.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm </a></td>
+          <td>$3.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Priz</a></td>
+          <td>$3.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank">2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm</a></td>
+          <td>$3.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</a></td>
+          <td>$2.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Jalen-Milroe-317-Neon-Green-Pulsar-Prizm-RC--/306914916776" target="_blank">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm </a></td>
+          <td>$3.99</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest e</a></td>
+          <td>$15.50</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Ye</a></td>
+          <td>$50.00</td>
+          <td><strong>85</strong>/100</td>
+          <td><span class="badge badge-green">Good</span></td>
+          <td style="font-size:12px;color:#555">Description missing or very short<br>Price $50.00 is 3x above your average ($8.82) - verify</td>
+        </tr></tbody>
+      </table>
+    </div>
+  </main>
+  <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
+    Updated 2026-05-09 01:58 UTC
+  </footer>
+</body>
+</html>
