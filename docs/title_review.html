@@ -203,7 +203,49 @@
     <a href="title_review.html">Title Review</a>
     <a href="craigslist.html">Craigslist Ads</a>
     <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+    <button id="nav-refresh-btn" onclick="navRebuild()"
+      style="margin-left:auto;background:#1e7e34;color:#fff;border:none;
+             padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;
+             white-space:nowrap;flex-shrink:0;">
+      Refresh Site
+    </button>
   </nav>
+  <div id="nav-toast" style="display:none;position:fixed;bottom:20px;left:50%;
+       transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 20px;
+       border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);">
+  </div>
+  <script>
+    async function navRebuild() {
+      const btn   = document.getElementById('nav-refresh-btn');
+      const toast = document.getElementById('nav-toast');
+      btn.textContent = 'Refreshing...';
+      btn.disabled    = true;
+      try {
+        const resp = await fetch(
+          'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild',
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }
+        );
+        const data = await resp.json();
+        if (data.success) {
+          showToast('Site rebuild triggered. Ready in ~2 minutes.');
+          btn.textContent = 'Refresh Site';
+        } else {
+          showToast('Rebuild failed: ' + (data.error || 'Unknown'));
+          btn.textContent = 'Refresh Site';
+        }
+      } catch(e) {
+        showToast('Request failed: ' + e.message);
+        btn.textContent = 'Refresh Site';
+      }
+      btn.disabled = false;
+    }
+    function showToast(msg) {
+      const toast = document.getElementById('nav-toast');
+      toast.textContent  = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+  </script>
   <main>
     
     <div style="margin-bottom:16px;">
@@ -1180,9 +1222,20 @@
           });
           const data = await resp.json();
           if (data.success) {
-            // Show success + rebuild button
+            // Update current title cells and dim applied rows
             const updated = data.updated;
-            const errs    = data.errors && data.errors.length ? ' ' + data.errors.length + ' failed.' : '';
+            items.forEach(it => {
+              const row = document.querySelector('.row-check[value="' + it.item_id + '"]')
+                            ?.closest('tr');
+              if (row) {
+                const curEl = row.querySelector('.title-before');
+                const newEl = row.querySelector('.title-after[data-id="' + it.item_id + '"]');
+                if (curEl && newEl) curEl.textContent = newEl.innerText.trim();
+                row.querySelector('.row-check').checked = false;
+                row.style.opacity = '0.5';
+              }
+            });
+            const errs = data.errors && data.errors.length ? ' ' + data.errors.length + ' failed.' : '';
             showStatus('Done. ' + updated + ' listing(s) updated on eBay.' + errs, '#1e7e34', '#e6f4ea');
             document.getElementById('rebuild-btn').style.display = 'inline-block';
           } else {
@@ -1223,7 +1276,7 @@
     </script>
   </main>
   <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
-    Updated 2026-05-09 02:20 UTC
+    Updated 2026-05-09 02:24 UTC
   </footer>
 </body>
 </html>

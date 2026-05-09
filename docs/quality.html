@@ -203,7 +203,49 @@
     <a href="title_review.html">Title Review</a>
     <a href="craigslist.html">Craigslist Ads</a>
     <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+    <button id="nav-refresh-btn" onclick="navRebuild()"
+      style="margin-left:auto;background:#1e7e34;color:#fff;border:none;
+             padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;
+             white-space:nowrap;flex-shrink:0;">
+      Refresh Site
+    </button>
   </nav>
+  <div id="nav-toast" style="display:none;position:fixed;bottom:20px;left:50%;
+       transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 20px;
+       border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);">
+  </div>
+  <script>
+    async function navRebuild() {
+      const btn   = document.getElementById('nav-refresh-btn');
+      const toast = document.getElementById('nav-toast');
+      btn.textContent = 'Refreshing...';
+      btn.disabled    = true;
+      try {
+        const resp = await fetch(
+          'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild',
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }
+        );
+        const data = await resp.json();
+        if (data.success) {
+          showToast('Site rebuild triggered. Ready in ~2 minutes.');
+          btn.textContent = 'Refresh Site';
+        } else {
+          showToast('Rebuild failed: ' + (data.error || 'Unknown'));
+          btn.textContent = 'Refresh Site';
+        }
+      } catch(e) {
+        showToast('Request failed: ' + e.message);
+        btn.textContent = 'Refresh Site';
+      }
+      btn.disabled = false;
+    }
+    function showToast(msg) {
+      const toast = document.getElementById('nav-toast');
+      toast.textContent  = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+  </script>
   <main>
     
     <div class="stat-row">
@@ -327,7 +369,7 @@
         </tr>
         <tr>
           <td><a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a></td>
-          <td>$1.49</td>
+          <td>$2.50</td>
           <td><strong>75</strong>/100</td>
           <td><span class="badge badge-yellow">Fair</span></td>
           <td style="font-size:12px;color:#555">Title could be longer (57/80 chars)<br>Description missing or very short</td>
@@ -369,7 +411,7 @@
         </tr>
         <tr>
           <td><a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank">1994 Classic Pro Line Live - Autograph - Steve Emtman</a></td>
-          <td>$4.49</td>
+          <td>$10.00</td>
           <td><strong>75</strong>/100</td>
           <td><span class="badge badge-yellow">Fair</span></td>
           <td style="font-size:12px;color:#555">Title could be longer (53/80 chars)<br>Description missing or very short</td>
@@ -414,7 +456,7 @@
           <td>$205.00</td>
           <td><strong>75</strong>/100</td>
           <td><span class="badge badge-yellow">Fair</span></td>
-          <td style="font-size:12px;color:#555">Title could be longer (59/80 chars)<br>Description missing or very short<br>Price $205.00 is 3x above your average ($9.00) - verify</td>
+          <td style="font-size:12px;color:#555">Title could be longer (59/80 chars)<br>Description missing or very short<br>Price $205.00 is 3x above your average ($9.15) - verify</td>
         </tr>
         <tr>
           <td><a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank">Charcadet 022 Me: Mega Evolution Promo Holo</a></td>
@@ -467,7 +509,7 @@
         </tr>
         <tr>
           <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a></td>
-          <td>$3.25</td>
+          <td>$4.50</td>
           <td><strong>85</strong>/100</td>
           <td><span class="badge badge-green">Good</span></td>
           <td style="font-size:12px;color:#555">Description missing or very short</td>
@@ -575,7 +617,7 @@
           <td>$50.00</td>
           <td><strong>85</strong>/100</td>
           <td><span class="badge badge-green">Good</span></td>
-          <td style="font-size:12px;color:#555">Description missing or very short<br>Price $50.00 is 3x above your average ($9.00) - verify</td>
+          <td style="font-size:12px;color:#555">Description missing or very short<br>Price $50.00 is 3x above your average ($9.15) - verify</td>
         </tr>
         <tr>
           <td><a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Tyler-Shough-327-White-Disco-Prizm-RC--/306927289794" target="_blank">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)</a></td>
@@ -588,7 +630,7 @@
     </div>
   </main>
   <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
-    Updated 2026-05-09 02:20 UTC
+    Updated 2026-05-09 02:24 UTC
   </footer>
 </body>
 </html>

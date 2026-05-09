@@ -203,13 +203,55 @@
     <a href="title_review.html">Title Review</a>
     <a href="craigslist.html">Craigslist Ads</a>
     <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+    <button id="nav-refresh-btn" onclick="navRebuild()"
+      style="margin-left:auto;background:#1e7e34;color:#fff;border:none;
+             padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;
+             white-space:nowrap;flex-shrink:0;">
+      Refresh Site
+    </button>
   </nav>
+  <div id="nav-toast" style="display:none;position:fixed;bottom:20px;left:50%;
+       transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 20px;
+       border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);">
+  </div>
+  <script>
+    async function navRebuild() {
+      const btn   = document.getElementById('nav-refresh-btn');
+      const toast = document.getElementById('nav-toast');
+      btn.textContent = 'Refreshing...';
+      btn.disabled    = true;
+      try {
+        const resp = await fetch(
+          'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild',
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }
+        );
+        const data = await resp.json();
+        if (data.success) {
+          showToast('Site rebuild triggered. Ready in ~2 minutes.');
+          btn.textContent = 'Refresh Site';
+        } else {
+          showToast('Rebuild failed: ' + (data.error || 'Unknown'));
+          btn.textContent = 'Refresh Site';
+        }
+      } catch(e) {
+        showToast('Request failed: ' + e.message);
+        btn.textContent = 'Refresh Site';
+      }
+      btn.disabled = false;
+    }
+    function showToast(msg) {
+      const toast = document.getElementById('nav-toast');
+      toast.textContent  = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+  </script>
   <main>
     
     <div class="stat-row">
-      <div class="stat"><div class="num" style="color:#c62828">3</div><div class="lbl">Underpriced</div></div>
+      <div class="stat"><div class="num" style="color:#c62828">0</div><div class="lbl">Underpriced</div></div>
       <div class="stat"><div class="num" style="color:#856404">26</div><div class="lbl">Overpriced</div></div>
-      <div class="stat"><div class="num" style="color:#c62828">$8</div><div class="lbl">Revenue Gap</div></div>
+      <div class="stat"><div class="num" style="color:#c62828">$0</div><div class="lbl">Revenue Gap</div></div>
     </div>
 
     <div style="margin-bottom:16px;">
@@ -249,111 +291,6 @@
         </thead>
         <tbody id="review-body">
           
-      <tr class="review-row" data-id="306904203738">
-        <td style="width:36px;text-align:center;">
-          <input type="checkbox" class="row-check" value="306904203738" checked>
-        </td>
-        <td>
-          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="font-size:11px;color:#888;">306904203738</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="color:#1a1a1a;">1994 Classic Pro Line Live - Autograph - Steve Emtman</a>
-          </div>
-          <div style="margin-top:6px;font-size:12px;color:#888;">
-            Market: <b style="color:#1a1a1a;">$9.99</b> median
-            &nbsp;&middot;&nbsp; $4.49&ndash;$18.04 &nbsp;&middot;&nbsp; 8 listings
-          </div>
-        </td>
-        <td style="width:130px;vertical-align:top;padding-top:10px;">
-          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.49</div>
-          <div style="font-size:11px;color:#c62828;margin-top:2px;">-55.1% vs market</div>
-        </td>
-        <td style="width:130px;vertical-align:top;padding-top:10px;">
-          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <span style="font-size:14px;font-weight:600;">$</span>
-            <div class="price-after" contenteditable="true" data-id="306904203738"
-              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
-                     min-width:60px;outline:none;padding:1px 2px;">10.00</div>
-          </div>
-          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#c62828;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span></div>
-        </td>
-        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
-          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" class="btn btn-secondary"
-             style="font-size:11px;padding:5px 8px;">View</a>
-        </td>
-      </tr>
-
-      <tr class="review-row" data-id="306785270903">
-        <td style="width:36px;text-align:center;">
-          <input type="checkbox" class="row-check" value="306785270903" checked>
-        </td>
-        <td>
-          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="font-size:11px;color:#888;">306785270903</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="color:#1a1a1a;">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a>
-          </div>
-          <div style="margin-top:6px;font-size:12px;color:#888;">
-            Market: <b style="color:#1a1a1a;">$2.70</b> median
-            &nbsp;&middot;&nbsp; $1.49&ndash;$4.99 &nbsp;&middot;&nbsp; 10 listings
-          </div>
-        </td>
-        <td style="width:130px;vertical-align:top;padding-top:10px;">
-          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.49</div>
-          <div style="font-size:11px;color:#c62828;margin-top:2px;">-44.8% vs market</div>
-        </td>
-        <td style="width:130px;vertical-align:top;padding-top:10px;">
-          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <span style="font-size:14px;font-weight:600;">$</span>
-            <div class="price-after" contenteditable="true" data-id="306785270903"
-              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
-                     min-width:60px;outline:none;padding:1px 2px;">2.50</div>
-          </div>
-          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#c62828;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span></div>
-        </td>
-        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
-          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" class="btn btn-secondary"
-             style="font-size:11px;padding:5px 8px;">View</a>
-        </td>
-      </tr>
-
-      <tr class="review-row" data-id="306914169081">
-        <td style="width:36px;text-align:center;">
-          <input type="checkbox" class="row-check" value="306914169081" checked>
-        </td>
-        <td>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="font-size:11px;color:#888;">306914169081</a>
-          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a>
-          </div>
-          <div style="margin-top:6px;font-size:12px;color:#888;">
-            Market: <b style="color:#1a1a1a;">$4.62</b> median
-            &nbsp;&middot;&nbsp; $2.00&ndash;$11.99 &nbsp;&middot;&nbsp; 10 listings
-          </div>
-        </td>
-        <td style="width:130px;vertical-align:top;padding-top:10px;">
-          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.25</div>
-          <div style="font-size:11px;color:#c62828;margin-top:2px;">-29.7% vs market</div>
-        </td>
-        <td style="width:130px;vertical-align:top;padding-top:10px;">
-          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <span style="font-size:14px;font-weight:600;">$</span>
-            <div class="price-after" contenteditable="true" data-id="306914169081"
-              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
-                     min-width:60px;outline:none;padding:1px 2px;">4.50</div>
-          </div>
-          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#c62828;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">UNDERPRICED</span></div>
-        </td>
-        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" class="btn btn-secondary"
-             style="font-size:11px;padding:5px 8px;">View</a>
-        </td>
-      </tr>
-
       <tr class="review-row" data-id="306913902750">
         <td style="width:36px;text-align:center;">
           <input type="checkbox" class="row-check" value="306913902750" checked>
@@ -370,7 +307,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$9.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$9.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+491.1% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -405,7 +342,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+379.8% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -440,7 +377,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+357.8% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -475,7 +412,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+256.2% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -510,7 +447,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.49</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.49</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+250.8% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -545,7 +482,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+230.5% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -580,7 +517,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$5.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$5.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+208.8% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -615,7 +552,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+202.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -650,7 +587,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+200.5% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -685,7 +622,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+150.8% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -720,7 +657,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.49</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.49</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+150.3% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -755,7 +692,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+115.1% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -790,7 +727,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+113.2% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -825,7 +762,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+101.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -860,7 +797,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+100.7% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -895,7 +832,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+90.4% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -930,7 +867,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+81.7% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -965,7 +902,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+76.9% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1000,7 +937,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.95</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.95</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+56.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1035,7 +972,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$14.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$14.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+49.9% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1070,7 +1007,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+49.9% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1105,7 +1042,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+34.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1140,7 +1077,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+33.6% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1175,7 +1112,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+33.4% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1210,7 +1147,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.99</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+33.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1245,7 +1182,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.39</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.39</div>
           <div style="font-size:11px;color:#856404;margin-top:2px;">+26.9% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1280,7 +1217,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$18.00</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$18.00</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+20.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1315,7 +1252,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+19.2% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1350,7 +1287,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+8.1% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1385,7 +1322,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.39</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.39</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">-8.1% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1400,6 +1337,76 @@
         </td>
         <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
           <a href="https://www.ebay.com/itm/Charcadet-022-Me-Mega-Evolution-Promo-Holo-/306758076966" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306785270903">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306785270903" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="font-size:11px;color:#888;">306785270903</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" style="color:#1a1a1a;">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$2.70</b> median
+            &nbsp;&middot;&nbsp; $1.99&ndash;$4.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.50</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">-7.4% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306785270903"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">2.50</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306914169081">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306914169081" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="font-size:11px;color:#888;">306914169081</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" style="color:#1a1a1a;">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$4.75</b> median
+            &nbsp;&middot;&nbsp; $2.00&ndash;$11.99 &nbsp;&middot;&nbsp; 10 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.50</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">-5.3% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306914169081"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">5.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" class="btn btn-secondary"
              style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
@@ -1420,7 +1427,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.49</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.49</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+2.1% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1455,7 +1462,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.3% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1490,7 +1497,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.50</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.50</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">-0.3% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1525,7 +1532,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">-0.3% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1540,6 +1547,41 @@
         </td>
         <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
           <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Ashton-Jeanty-13-Gold-Ice-Prizm-RC--/306914908485" target="_blank" class="btn btn-secondary"
+             style="font-size:11px;padding:5px 8px;">View</a>
+        </td>
+      </tr>
+
+      <tr class="review-row" data-id="306904203738">
+        <td style="width:36px;text-align:center;">
+          <input type="checkbox" class="row-check" value="306904203738" >
+        </td>
+        <td>
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="font-size:11px;color:#888;">306904203738</a>
+          <div style="margin-top:4px;font-size:13px;font-weight:600;line-height:1.3;">
+            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" style="color:#1a1a1a;">1994 Classic Pro Line Live - Autograph - Steve Emtman</a>
+          </div>
+          <div style="margin-top:6px;font-size:12px;color:#888;">
+            Market: <b style="color:#1a1a1a;">$10.00</b> median
+            &nbsp;&middot;&nbsp; $4.99&ndash;$18.04 &nbsp;&middot;&nbsp; 8 listings
+          </div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$10.00</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">+0.1% vs market</div>
+        </td>
+        <td style="width:130px;vertical-align:top;padding-top:10px;">
+          <div style="font-size:11px;color:#888;margin-bottom:2px;">New price:</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:600;">$</span>
+            <div class="price-after" contenteditable="true" data-id="306904203738"
+              style="font-size:15px;font-weight:700;border-bottom:2px solid #0064d2;
+                     min-width:60px;outline:none;padding:1px 2px;">10.00</div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:2px;"><span style="background:#1e7e34;color:#fff;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:700;">OK</span></div>
+        </td>
+        <td style="width:60px;text-align:center;vertical-align:top;padding-top:10px;">
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" class="btn btn-secondary"
              style="font-size:11px;padding:5px 8px;">View</a>
         </td>
       </tr>
@@ -1560,7 +1602,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.50</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.50</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1595,7 +1637,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1630,7 +1672,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1665,7 +1707,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$4.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$4.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1700,7 +1742,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1735,7 +1777,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$2.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$2.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1770,7 +1812,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$1.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$1.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1805,7 +1847,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.34</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.34</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1840,7 +1882,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$3.99</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$3.99</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1875,7 +1917,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$15.50</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$15.50</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1910,7 +1952,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$50.00</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$50.00</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -1945,7 +1987,7 @@
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
           <div style="font-size:11px;color:#888;margin-bottom:2px;">Current:</div>
-          <div style="font-size:15px;font-weight:700;">$205.00</div>
+          <div class="current-price" style="font-size:15px;font-weight:700;">$205.00</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">+0.0% vs market</div>
         </td>
         <td style="width:130px;vertical-align:top;padding-top:10px;">
@@ -2009,8 +2051,19 @@
               body:    JSON.stringify(item)
             });
             const data = await resp.json();
-            if (data.success) { updated++; }
-            else { errors.push(item.item_id + ': ' + (data.error || 'failed')); }
+            if (data.success) {
+              updated++;
+              // Update the current price cell in the DOM immediately
+              const row = document.querySelector('.row-check[value="' + item.item_id + '"]')
+                            ?.closest('tr');
+              if (row) {
+                const curCell = row.querySelector('.current-price');
+                if (curCell) curCell.textContent = '$' + item.price.toFixed(2);
+                // Uncheck and dim the row — it's been applied
+                row.querySelector('.row-check').checked = false;
+                row.style.opacity = '0.5';
+              }
+            } else { errors.push(item.item_id + ': ' + (data.error || 'failed')); }
           } catch(e) {
             errors.push(item.item_id + ': ' + e.message);
           }
@@ -2054,7 +2107,7 @@
     </script>
   </main>
   <footer style="text-align:center;padding:24px;color:#aaa;font-size:12px;">
-    Updated 2026-05-09 02:20 UTC
+    Updated 2026-05-09 02:24 UTC
   </footer>
 </body>
 </html>
