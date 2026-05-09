@@ -924,7 +924,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 09, 2026 · 05:54 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 09, 2026 · 08:10 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -970,6 +970,63 @@ tr:hover td { background: rgba(212,175,55,.03); }
     if (typeof GLightbox !== 'undefined') {
       window.__lightbox = GLightbox({ selector: '.glightbox', touchNavigation: true, loop: false });
     }
+
+    // ---- eBay revise/reprice lock learning (cross-page) ----
+    // When Apply returns errors with codes 240 (content-policy lock) or 291
+    // (ended listing), remember them so subsequent visits flag those listings
+    // before the user wastes another click.
+    window.LockTracker = {
+      KEY: 'h2k_locked_items',
+      get() {
+        try { return JSON.parse(localStorage.getItem(this.KEY) || '{}'); } catch(e) { return {}; }
+      },
+      set(map) { localStorage.setItem(this.KEY, JSON.stringify(map)); },
+      record(itemId, code, reason) {
+        const m = this.get();
+        m[itemId] = { code: String(code), reason: String(reason || ''), ts: Date.now() };
+        this.set(m);
+      },
+      // Parse Lambda error string like "[240] short :: long"
+      parseError(errStr) {
+        const m = String(errStr || '').match(/^\[(\d+)\]/);
+        return m ? m[1] : null;
+      },
+      // Apply lock badges + uncheck to any cards on the current page
+      applyToCards() {
+        const m = this.get();
+        document.querySelectorAll('[data-id]').forEach(card => {
+          const id = card.dataset.id;
+          if (m[id] && !card.dataset.locked) {
+            card.dataset.locked = m[id].code;
+            const cb = card.querySelector('.row-check');
+            if (cb) { cb.checked = false; cb.disabled = true; cb.title = 'eBay refuses to revise this listing'; }
+            // Add a visual hint if the card has space (no-op if absent)
+            if (!card.querySelector('.lock-learned-hint')) {
+              const hint = document.createElement('div');
+              hint.className = 'lock-learned-hint';
+              hint.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(224,123,111,0.08);border:1px dashed rgba(224,123,111,0.35);border-radius:6px;font-size:11px;color:var(--danger);font-weight:600;letter-spacing:.04em;';
+              hint.textContent = '🔒 eBay refused a previous revise (code ' + m[id].code + '). Skipped automatically.';
+              const target = card.querySelector('.q-body, .pr-info, .info, .tr-bodies') || card;
+              target.appendChild(hint);
+            }
+          }
+        });
+      },
+      // Hook for Apply functions to call after fetch returns
+      consumeErrors(errors) {
+        if (!Array.isArray(errors)) return;
+        errors.forEach(e => {
+          const code = this.parseError(e.error || e.msg || e);
+          if (code === '240' || code === '291') {
+            const id = e.item_id || e.id;
+            if (id) this.record(id, code, e.error || '');
+          }
+        });
+        this.applyToCards();
+      }
+    };
+    // Apply on every page load
+    window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
   </script>
 </body>
 </html>
