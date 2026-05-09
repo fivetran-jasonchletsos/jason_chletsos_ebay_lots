@@ -1,0 +1,4131 @@
+"""
+promote.py - Free listing promotion tools for Harpua2001 / jason_chletsos_ebay
+
+Generates a GitHub Pages site with:
+  - Mobile-first listing dashboard (searchable, filterable)
+  - Listing quality report (fixable issues ranked by impact)
+  - Google Merchant Center RSS feed (free Google Shopping placement)
+  - Craigslist post generator (ready-to-paste ads per listing)
+  - Analysis SQL views for Fivetran/Databricks schema
+
+Run:
+  python3 promote.py
+
+Output goes to ./docs/ (GitHub Pages root).
+Push to GitHub and enable Pages at:
+  github.com/fivetran-jasonchletsos/jason_chletsos_ebay_lots
+  Settings -> Pages -> Branch: main, Folder: /docs
+"""
+
+import base64
+import json
+import os
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
+from pathlib import Path
+from urllib.parse import quote
+from xml.dom import minidom
+
+import requests
+
+# ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
+
+CONFIG_FILE  = Path(__file__).parent / "configuration.json"
+LOCKS_FILE   = Path(__file__).parent / "locks.json"
+OUTPUT_DIR   = Path(__file__).parent / "docs"
+OUTPUT_DIR.mkdir(exist_ok=True)
+
+
+def load_locks() -> dict:
+    """Load known-locked items: {item_id: {code, reason, since}}."""
+    if not LOCKS_FILE.exists():
+        return {}
+    try:
+        data = json.loads(LOCKS_FILE.read_text())
+        return data.get("items", {}) if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+SELLER_NAME  = "Harpua2001"
+STORE_URL    = "https://www.ebay.com/usr/harpua2001"
+SITE_URL     = "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots"
+CURRENCY     = "USD"
+
+# ---------------------------------------------------------------------------
+# eBay auth
+# ---------------------------------------------------------------------------
+
+def get_access_token(cfg: dict) -> str:
+    credentials = base64.b64encode(
+        f"{cfg['client_id']}:{cfg['client_secret']}".encode()
+    ).decode()
+    resp = requests.post(
+        "https://api.ebay.com/identity/v1/oauth2/token",
+        headers={
+            "Authorization": f"Basic {credentials}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data={
+            "grant_type":   "refresh_token",
+            "refresh_token": cfg["refresh_token"],
+            "scope": " ".join([
+                "https://api.ebay.com/oauth/api_scope",
+                "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
+                "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
+            ]),
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()["access_token"]
+
+
+def get_app_token(cfg: dict) -> str:
+    """Client-credentials token for Browse API (no user context needed)."""
+    credentials = base64.b64encode(
+        f"{cfg['client_id']}:{cfg['client_secret']}".encode()
+    ).decode()
+    resp = requests.post(
+        "https://api.ebay.com/identity/v1/oauth2/token",
+        headers={
+            "Authorization": f"Basic {credentials}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data={
+            "grant_type": "client_credentials",
+            "scope":      "https://api.ebay.com/oauth/api_scope",
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()["access_token"]
+
+
+# ---------------------------------------------------------------------------
+# Fetch listings via Trading API (works for legacy listings)
+# ---------------------------------------------------------------------------
+
+def fetch_listings(token: str, cfg: dict) -> list[dict]:
+    xml_body = """<?xml version="1.0" encoding="utf-8"?>
+<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <ActiveList>
+    <Include>true</Include>
+    <Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>1</PageNumber></Pagination>
+  </ActiveList>
+  <ErrorLanguage>en_US</ErrorLanguage>
+  <WarningLevel>High</WarningLevel>
+</GetMyeBaySellingRequest>""".format(token=token)
+
+    headers = {
+        "X-EBAY-API-SITEID":               "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL":  "967",
+        "X-EBAY-API-CALL-NAME":            "GetMyeBaySelling",
+        "X-EBAY-API-APP-NAME":             cfg["client_id"],
+        "X-EBAY-API-DEV-NAME":             cfg["dev_id"],
+        "X-EBAY-API-CERT-NAME":            cfg["client_secret"],
+        "Content-Type":                    "text/xml",
+    }
+    r = requests.post("https://api.ebay.com/ws/api.dll", headers=headers, data=xml_body.encode())
+    if r.status_code != 200:
+        print(f"  Trading API error: {r.status_code}")
+        return []
+
+    ns = {"e": "urn:ebay:apis:eBLBaseComponents"}
+    root = ET.fromstring(r.text)
+    items = []
+    for item in root.findall(".//e:ActiveList/e:ItemArray/e:Item", ns):
+        def t(tag):
+            el = item.find(f"e:{tag}", ns)
+            return (el.text or "").strip() if el is not None else ""
+
+        pic = item.find("e:PictureDetails/e:GalleryURL", ns)
+        price_el = item.find("e:SellingStatus/e:CurrentPrice", ns)
+        view_url = item.find("e:ListingDetails/e:ViewItemURL", ns)
+
+        item_id = t("ItemID")
+        # Upgrade eBay thumbnail URL from s-l140 to s-l500 for sharp images
+        raw_pic = pic.text.strip() if pic is not None else ""
+        import re as _re
+        sharp_pic = _re.sub(r's-l\d+\.jpg', 's-l500.jpg', raw_pic) if raw_pic else ""
+        items.append({
+            "item_id":   item_id,
+            "title":     t("Title"),
+            "price":     price_el.text.strip() if price_el is not None else "0",
+            "pic":       sharp_pic,
+            "url":       view_url.text.strip() if view_url is not None else f"https://www.ebay.com/itm/{item_id}",
+            "category":  t("PrimaryCategory/CategoryName"),
+            "condition": t("ConditionDisplayName"),
+            "quantity":  t("QuantityAvailable") or t("Quantity") or "1",
+            "desc":      t("Description"),
+        })
+
+    print(f"  Fetched {len(items)} listings")
+    return items
+
+
+# ---------------------------------------------------------------------------
+# Market price research via eBay Browse API
+# ---------------------------------------------------------------------------
+
+import statistics as _stats
+import time as _time
+
+def fetch_market_prices(listings: list[dict], cfg: dict) -> dict:
+    """
+    For each listing, search eBay Browse API for active comps and return a
+    dict keyed by item_id with:
+      { "market_median": float, "market_min": float, "market_max": float,
+        "comp_count": int, "gap_pct": float, "flag": "OK"|"UNDERPRICED"|"OVERPRICED"|"NO_COMPS" }
+
+    Uses the listing title (trimmed to key terms) as the search query.
+    Rate-limited to ~1 req/sec to stay within eBay's limits.
+    """
+    app_token = get_app_token(cfg)
+    results   = {}
+
+    print(f"  Fetching market comps for {len(listings)} listings...")
+    for i, l in enumerate(listings):
+        item_id   = l["item_id"]
+        our_price = float(l["price"]) if l["price"] else 0.0
+        query     = _market_query(l["title"])
+
+        try:
+            r = requests.get(
+                "https://api.ebay.com/buy/browse/v1/item_summary/search",
+                headers={
+                    "Authorization":          f"Bearer {app_token}",
+                    "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
+                },
+                params={
+                    "q":      query,
+                    "limit":  10,
+                    "sort":   "price",
+                    "filter": "buyingOptions:{FIXED_PRICE}",
+                },
+                timeout=10,
+            )
+            if r.status_code == 401:
+                # Token expired mid-run — refresh once
+                app_token = get_app_token(cfg)
+                r = requests.get(
+                    "https://api.ebay.com/buy/browse/v1/item_summary/search",
+                    headers={"Authorization": f"Bearer {app_token}",
+                             "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"},
+                    params={"q": query, "limit": 10, "sort": "price",
+                            "filter": "buyingOptions:{FIXED_PRICE}"},
+                    timeout=10,
+                )
+
+            prices = []
+            for it in r.json().get("itemSummaries", []):
+                try:
+                    p = float(it["price"]["value"])
+                    if p > 0:
+                        prices.append(p)
+                except (KeyError, ValueError):
+                    pass
+
+            if not prices:
+                results[item_id] = {"flag": "NO_COMPS", "comp_count": 0,
+                                    "market_median": None, "market_min": None,
+                                    "market_max": None, "gap_pct": None}
+            else:
+                med = _stats.median(prices)
+                gap = ((our_price - med) / med * 100) if med else 0
+                if gap < -15:
+                    flag = "UNDERPRICED"
+                elif gap > 20:
+                    flag = "OVERPRICED"
+                else:
+                    flag = "OK"
+                results[item_id] = {
+                    "flag":          flag,
+                    "comp_count":    len(prices),
+                    "market_median": round(med, 2),
+                    "market_min":    round(min(prices), 2),
+                    "market_max":    round(max(prices), 2),
+                    "gap_pct":       round(gap, 1),
+                }
+
+        except Exception as exc:
+            results[item_id] = {"flag": "NO_COMPS", "comp_count": 0,
+                                "market_median": None, "market_min": None,
+                                "market_max": None, "gap_pct": None,
+                                "error": str(exc)}
+
+        # Polite rate limit — Browse API allows ~5k calls/day, no hard per-second limit
+        # but a short sleep avoids bursting
+        if i % 10 == 9:
+            _time.sleep(1)
+
+    underpriced = sum(1 for v in results.values() if v["flag"] == "UNDERPRICED")
+    overpriced  = sum(1 for v in results.values() if v["flag"] == "OVERPRICED")
+    print(f"  Market comps done — {underpriced} underpriced, {overpriced} overpriced")
+    return results
+
+
+def _market_query(title: str) -> str:
+    """
+    Trim a listing title down to the most distinctive search terms.
+    Removes filler words that hurt precision (lot, cards, including, etc.)
+    """
+    import re as _re
+    # Drop common filler that hurts search precision
+    stop = r"\b(lot|cards?|including|rookie|card|x different|no duplicates|"  \
+           r"graded|raw|nm|mint|psa|bgs|sgc|authenticated|certified|"         \
+           r"free shipping|combined shipping)\b"
+    q = _re.sub(stop, " ", title, flags=_re.IGNORECASE)
+    q = _re.sub(r"\s{2,}", " ", q).strip()
+    # Cap at 100 chars for the API
+    return q[:100]
+
+
+# ---------------------------------------------------------------------------
+# Shared HTML shell — Dark sports-card luxe design system
+# ---------------------------------------------------------------------------
+
+LAMBDA_BASE = "https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay"
+
+_BASE_CSS = """
+:root {
+  --bg:          #0a0a0a;
+  --surface:     #141414;
+  --surface-2:   #1a1a1a;
+  --surface-3:   #232323;
+  --border:      rgba(212,175,55,0.10);
+  --border-mid:  rgba(212,175,55,0.22);
+  --border-hi:   rgba(212,175,55,0.45);
+  --gold:        #d4af37;
+  --gold-bright: #f4ce5d;
+  --gold-dim:    #8a7521;
+  --text:        #f1efe9;
+  --text-muted:  #9a9388;
+  --text-dim:    #5d574c;
+  --success:     #7fc77a;
+  --warning:     #e0b54a;
+  --danger:      #e07b6f;
+  --link:        #6cb0ff;
+  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
+  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --t-fast: 160ms cubic-bezier(.4,0,.2,1);
+  --t-base: 280ms cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+  font-feature-settings: 'cv11','ss01','cv02';
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(212,175,55,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(212,175,55,.05), transparent 60%);
+  background-attachment: fixed;
+}
+::selection { background: var(--gold); color: #000; }
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+a:hover { color: var(--gold-bright); }
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ============ HEADER + NAV ============ */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(180deg, rgba(10,10,10,.96), rgba(10,10,10,.86));
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid var(--border);
+}
+.app-header-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 18px;
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none;
+  flex: 1; min-width: 0;
+}
+.brand-mark {
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  display: grid; place-items: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; color: #0a0a0a; font-weight: 700;
+  box-shadow: var(--glow-gold);
+  flex-shrink: 0;
+}
+.brand-text { display: flex; flex-direction: column; min-width: 0; }
+.brand-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; line-height: 1; letter-spacing: .04em;
+  color: var(--text);
+}
+.brand-tag {
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); margin-top: 4px; font-weight: 600;
+}
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 13px; font-weight: 500;
+  padding: 10px 14px; border-radius: var(--r-sm);
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); background: var(--surface-2); }
+.nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
+.btn-refresh {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #0a0a0a;
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  box-shadow: var(--glow-gold);
+}
+.btn-refresh:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.btn-refresh:disabled { opacity: .55; cursor: not-allowed; }
+.menu-toggle {
+  display: none;
+  width: 42px; height: 42px;
+  border: 1px solid var(--border-mid);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  align-items: center; justify-content: center;
+}
+.menu-toggle svg { width: 22px; height: 22px; }
+
+/* Mobile drawer */
+.drawer-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--t-base);
+}
+.drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(86vw, 340px);
+  background: var(--surface);
+  border-left: 1px solid var(--border-mid);
+  z-index: 201;
+  transform: translateX(100%);
+  transition: transform var(--t-base);
+  display: flex; flex-direction: column;
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+.drawer-close {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.drawer a {
+  display: flex; align-items: center; justify-content: space-between;
+  color: var(--text);
+  padding: 16px 14px;
+  border-radius: var(--r-md);
+  font-size: 15px; font-weight: 500;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+.drawer a:hover, .drawer a.active {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--gold);
+}
+.drawer a::after {
+  content: '\\2192'; color: var(--text-dim); font-size: 18px;
+}
+.drawer-foot { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+.drawer .btn-refresh { width: 100%; padding: 14px; font-size: 13px; }
+
+/* ============ LAYOUT ============ */
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+.section-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: .03em; line-height: 1;
+  color: var(--text);
+}
+.section-title .accent { color: var(--gold); }
+.section-sub { color: var(--text-muted); font-size: 14px; }
+.eyebrow {
+  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+}
+
+/* ============ STATS ============ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px 20px;
+  overflow: hidden;
+  transition: all var(--t-base);
+}
+.stat-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  pointer-events: none;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
+.stat-card .num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px; line-height: 1;
+  color: var(--gold);
+  letter-spacing: .02em;
+  text-shadow: 0 0 28px rgba(212,175,55,.25);
+}
+.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
+.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
+.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .lbl {
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+  margin-top: 8px;
+}
+.stat-card.linked { cursor: pointer; }
+.stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
+.stat-card.linked a { color: inherit; }
+
+/* ============ CARDS / SURFACES ============ */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  margin-bottom: 16px;
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: .03em;
+  color: var(--text);
+}
+.panel-sub { color: var(--text-muted); font-size: 13px; }
+
+/* ============ BUTTONS / CHIPS ============ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all var(--t-fast);
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #0a0a0a;
+  letter-spacing: .04em;
+}
+.btn-gold:hover { color: #000; transform: translateY(-1px); filter: brightness(1.08); }
+.btn-ghost {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+.btn-ghost:hover { background: var(--surface-3); border-color: var(--border-mid); color: var(--gold); }
+.btn-outline {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--border-mid);
+}
+.btn-outline:hover { border-color: var(--gold); background: rgba(212,175,55,.06); color: var(--gold-bright); }
+.btn-block { width: 100%; padding: 14px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  letter-spacing: .02em;
+  user-select: none;
+}
+.chip:hover { color: var(--text); border-color: var(--border-mid); }
+.chip.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #0a0a0a;
+  border-color: var(--gold);
+}
+.chip .count { color: inherit; opacity: .7; }
+
+/* ============ FORM CONTROLS ============ */
+input, select, textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all var(--t-fast);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: var(--surface-3);
+  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+}
+input::placeholder, textarea::placeholder { color: var(--text-dim); }
+.search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%239a9388' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+  padding-left: 44px;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--border-mid);
+  border-radius: 4px;
+  background: var(--surface-2);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--t-fast);
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+input[type="checkbox"]:checked {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+input[type="checkbox"]:checked::after {
+  content: ''; position: absolute;
+  left: 5px; top: 2px;
+  width: 6px; height: 11px;
+  border: solid #0a0a0a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ============ LISTING GRID ============ */
+.filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin-bottom: 22px;
+}
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.filter-row:last-child { margin-bottom: 0; }
+.filter-chips { display: flex; gap: 8px; flex-wrap: wrap; flex: 1 1 100%; }
+.slider-wrap { flex: 1 1 100%; padding: 4px 8px 0; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; letter-spacing: .12em; text-transform: uppercase; }
+.slider-values { color: var(--gold); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+.grid[data-size="large"]  { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.grid[data-size="medium"] { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.grid[data-size="small"]  { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.grid[data-size="list"]   { grid-template-columns: 1fr; }
+
+.listing-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--t-base);
+  isolation: isolate;
+}
+.listing-card::after {
+  content: ''; position: absolute; inset: 0;
+  border-radius: var(--r-lg); pointer-events: none;
+  box-shadow: 0 0 0 1px transparent inset;
+  transition: box-shadow var(--t-base);
+}
+.listing-card:hover { transform: translateY(-3px); border-color: var(--border-mid); }
+.listing-card:hover::after { box-shadow: 0 0 0 1px var(--border-hi) inset, 0 24px 50px -10px rgba(0,0,0,.7); }
+
+.thumb-wrap {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(135deg, #0e0e0e, #1a1a1a);
+  overflow: hidden;
+}
+.thumb-wrap::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, transparent 60%, rgba(0,0,0,.7)),
+    radial-gradient(circle at 30% 30%, rgba(212,175,55,.06), transparent 50%);
+  pointer-events: none; z-index: 1;
+}
+.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 4/3; }
+.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 1/1; }
+.grid[data-size="small"]  .thumb-wrap { aspect-ratio: 1/1; }
+.listing-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--t-base);
+}
+.listing-card:hover img { transform: scale(1.04); }
+
+.fav-btn {
+  position: absolute; top: 10px; right: 10px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--text);
+  cursor: pointer;
+  display: grid; place-items: center;
+  z-index: 5;
+  transition: all var(--t-fast);
+}
+.fav-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.fav-btn:hover { color: var(--gold); transform: scale(1.08); }
+.fav-btn.on { color: var(--gold); }
+.fav-btn.on svg { fill: var(--gold); stroke: var(--gold); }
+
+.zoom-btn {
+  position: absolute; top: 10px; left: 10px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--text);
+  cursor: pointer;
+  display: grid; place-items: center;
+  z-index: 5;
+  transition: all var(--t-fast);
+  opacity: 0;
+}
+.listing-card:hover .zoom-btn { opacity: 1; }
+.zoom-btn:hover { color: var(--gold); }
+
+.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info h3 {
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a:hover { color: var(--gold); }
+.listing-card .price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; line-height: 1;
+  color: var(--gold);
+  letter-spacing: .02em;
+}
+.grid[data-size="small"] .listing-card .price { font-size: 20px; }
+.listing-card .meta {
+  font-size: 11px; color: var(--text-muted);
+  margin-top: 6px;
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--surface-3);
+  border-radius: 999px;
+  font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.tag-gold { background: rgba(212,175,55,.12); color: var(--gold); }
+.tag-danger { background: rgba(224,123,111,.12); color: var(--danger); }
+.tag-warn { background: rgba(224,181,74,.14); color: var(--warning); }
+.tag-success { background: rgba(127,199,122,.14); color: var(--success); }
+
+.listing-card .actions {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.grid[data-size="small"] .listing-card .info h3 { font-size: 11px; -webkit-line-clamp: 1; }
+.grid[data-size="small"] .listing-card .meta { display: none; }
+.grid[data-size="small"] .listing-card .actions { padding: 8px; }
+.grid[data-size="list"] .listing-card { flex-direction: row; align-items: stretch; }
+.grid[data-size="list"] .listing-card .thumb-wrap { width: 120px; flex: 0 0 120px; aspect-ratio: 1/1; }
+.grid[data-size="list"] .listing-card .info { padding: 14px 18px; }
+.grid[data-size="list"] .listing-card .actions { border-top: none; border-left: 1px solid var(--border); flex-direction: column; min-width: 130px; }
+
+.size-toggle { display: flex; gap: 6px; align-items: center; }
+.size-toggle .lbl-txt { font-size: 11px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; margin-right: 6px; font-weight: 600; }
+.size-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--t-fast);
+  letter-spacing: .04em;
+}
+.size-btn:hover { color: var(--text); border-color: var(--border-mid); }
+.size-btn.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #0a0a0a;
+  border-color: var(--gold);
+}
+
+/* ============ TABLES ============ */
+.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap table { min-width: 600px; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  padding: 14px 18px;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 700;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+  vertical-align: top;
+  color: var(--text);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(212,175,55,.03); }
+
+/* ============ BADGES ============ */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.badge-success { background: rgba(127,199,122,.12); color: var(--success); border-color: rgba(127,199,122,.25); }
+.badge-warning { background: rgba(224,181,74,.12); color: var(--warning); border-color: rgba(224,181,74,.25); }
+.badge-danger  { background: rgba(224,123,111,.12); color: var(--danger);  border-color: rgba(224,123,111,.25); }
+.badge-gold    { background: rgba(212,175,55,.12);  color: var(--gold);    border-color: rgba(212,175,55,.30); }
+
+/* ============ STATUS BAR / TOAST ============ */
+#status-bar {
+  display: none;
+  padding: 14px 18px; border-radius: var(--r-md);
+  margin-bottom: 16px; font-size: 14px;
+  border: 1px solid;
+}
+.status-info    { background: rgba(108,176,255,.08); color: var(--link);    border-color: rgba(108,176,255,.3); }
+.status-success { background: rgba(127,199,122,.08); color: var(--success); border-color: rgba(127,199,122,.3); }
+.status-warning { background: rgba(224,181,74,.08);  color: var(--warning); border-color: rgba(224,181,74,.3); }
+.status-danger  { background: rgba(224,123,111,.08); color: var(--danger);  border-color: rgba(224,123,111,.3); }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 14px 22px;
+  border-radius: var(--r-md);
+  font-size: 13px; font-weight: 500;
+  z-index: 9999;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-mid);
+  opacity: 0;
+  transition: all var(--t-base);
+  max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============ FOOTER ============ */
+.app-footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+.app-footer .seller-link { color: var(--gold); }
+
+/* ============ NO RESULTS ============ */
+#no-results {
+  display: none;
+  padding: 60px 20px; text-align: center;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--r-lg);
+}
+#no-results .big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px; color: var(--gold); margin-bottom: 6px;
+}
+
+/* ============ NOUISLIDER OVERRIDES ============ */
+.noUi-target {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  height: 6px;
+}
+.noUi-connect { background: linear-gradient(90deg, var(--gold-dim), var(--gold)); }
+.noUi-handle {
+  background: var(--gold);
+  border: 2px solid #0a0a0a;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--gold), 0 8px 16px rgba(0,0,0,.6);
+  width: 22px !important; height: 22px !important;
+  right: -11px !important; top: -9px !important;
+  cursor: grab;
+}
+.noUi-handle::before, .noUi-handle::after { display: none; }
+
+/* ============ GLIGHTBOX OVERRIDES ============ */
+.glightbox-clean .gslide-description { background: var(--surface) !important; }
+.glightbox-clean .gdesc-inner { color: var(--text); }
+.glightbox-clean .gslide-title { color: var(--gold) !important; font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.gbtn { background: var(--surface-2) !important; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 880px) {
+  .nav-links { display: none; }
+  .menu-toggle { display: inline-flex; }
+}
+@media (max-width: 640px) {
+  main { padding: 22px 14px 70px; }
+  .panel { padding: 16px; }
+  .stat-card { padding: 18px 16px; }
+  .stat-card .num { font-size: 36px; }
+  .filter-row { gap: 8px; }
+  .grid[data-size="large"]  { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid[data-size="medium"] { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid[data-size="small"]  { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .listing-card .info { padding: 12px; }
+  .listing-card .price { font-size: 22px; }
+  .table-wrap { margin: 0 -16px; }
+  th, td { padding: 12px 14px; font-size: 12.5px; }
+}
+@media (max-width: 420px) {
+  .grid[data-size="medium"] { grid-template-columns: 1fr; }
+  .grid[data-size="list"] .listing-card .thumb-wrap { width: 96px; flex: 0 0 96px; }
+}
+"""
+
+_CDN_HEAD = """
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+"""
+
+_CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts can use them
+
+# nav items: (href, label)
+_NAV_ITEMS = [
+    ("index.html",        "Listings"),
+    ("quality.html",      "Quality"),
+    ("price_review.html", "Pricing"),
+    ("title_review.html", "Titles"),
+    ("reddit.html",       "Reddit"),
+    ("craigslist.html",   "Craigslist"),
+    ("google_feed.xml",   "Google Feed"),
+]
+
+
+def _nav_link_html(active_page: str, mobile: bool = False) -> str:
+    out = []
+    for href, label in _NAV_ITEMS:
+        is_external = href.endswith(".xml")
+        is_active = (href == active_page)
+        cls = " class=\"active\"" if is_active else ""
+        ext = ' target="_blank" rel="noopener"' if is_external else ""
+        out.append(f'<a href="{href}"{cls}{ext}>{label}</a>')
+    return "\n".join(out)
+
+
+def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "index.html") -> str:
+    nav_html_desktop = _nav_link_html(active_page, mobile=False)
+    nav_html_mobile  = _nav_link_html(active_page, mobile=True)
+    updated = datetime.now(timezone.utc).strftime('%b %d, %Y · %H:%M UTC')
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <title>{title}</title>
+  {_CDN_HEAD}
+  <style>{_BASE_CSS}</style>
+  {extra_head}
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-mark">H</div>
+        <div class="brand-text">
+          <div class="brand-name">{SELLER_NAME}</div>
+          <div class="brand-tag">Cards · Coins · Collectibles</div>
+        </div>
+      </a>
+      <nav class="nav-links">{nav_html_desktop}</nav>
+      <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+  <aside class="drawer" id="drawer" aria-label="Mobile navigation">
+    <div class="drawer-head">
+      <div>
+        <div class="brand-name" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;">{SELLER_NAME}</div>
+        <div class="brand-tag" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:4px;">eBay Storefront</div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+      </button>
+    </div>
+    {nav_html_mobile}
+    <div class="drawer-foot">
+      <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
+    </div>
+  </aside>
+
+  <div id="nav-toast" class="toast"></div>
+
+  <main>
+    {body}
+  </main>
+
+  <footer class="app-footer">
+    Updated {updated} · <a href="{STORE_URL}" class="seller-link" target="_blank" rel="noopener">{SELLER_NAME} on eBay</a>
+  </footer>
+
+  {_CDN_FOOT}
+  <script>
+    function openDrawer() {{
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer-backdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }}
+    function closeDrawer() {{
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer-backdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }}
+    document.querySelectorAll('.drawer a').forEach(a => a.addEventListener('click', closeDrawer));
+    document.addEventListener('keydown', e => {{ if (e.key === 'Escape') closeDrawer(); }});
+
+    function showToast(msg) {{
+      const t = document.getElementById('nav-toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+    }}
+
+    async function navRebuild() {{
+      const btn = document.getElementById('nav-refresh-btn');
+      const original = btn.textContent;
+      btn.textContent = 'Refreshing…'; btn.disabled = true;
+      try {{
+        const resp = await fetch('{LAMBDA_BASE}/rebuild', {{
+          method: 'POST', headers: {{ 'Content-Type': 'application/json' }}, body: '{{}}'
+        }});
+        const data = await resp.json();
+        showToast(data.success ? 'Site rebuild triggered. Live in ~2 minutes.' : 'Rebuild failed: ' + (data.error || 'Unknown'));
+      }} catch (e) {{
+        showToast('Request failed: ' + e.message);
+      }}
+      btn.textContent = original; btn.disabled = false;
+    }}
+
+    // Init GLightbox if present anywhere on page
+    if (typeof GLightbox !== 'undefined') {{
+      window.__lightbox = GLightbox({{ selector: '.glightbox', touchNavigation: true, loop: false }});
+    }}
+
+    // ---- eBay revise/reprice lock learning (cross-page) ----
+    // When Apply returns errors with codes 240 (content-policy lock) or 291
+    // (ended listing), remember them so subsequent visits flag those listings
+    // before the user wastes another click.
+    window.LockTracker = {{
+      KEY: 'h2k_locked_items',
+      get() {{
+        try {{ return JSON.parse(localStorage.getItem(this.KEY) || '{{}}'); }} catch(e) {{ return {{}}; }}
+      }},
+      set(map) {{ localStorage.setItem(this.KEY, JSON.stringify(map)); }},
+      record(itemId, code, reason) {{
+        const m = this.get();
+        m[itemId] = {{ code: String(code), reason: String(reason || ''), ts: Date.now() }};
+        this.set(m);
+      }},
+      // Parse Lambda error string like "[240] short :: long"
+      parseError(errStr) {{
+        const m = String(errStr || '').match(/^\\[(\\d+)\\]/);
+        return m ? m[1] : null;
+      }},
+      // Apply lock badges + uncheck to any cards on the current page
+      applyToCards() {{
+        const m = this.get();
+        document.querySelectorAll('[data-id]').forEach(card => {{
+          const id = card.dataset.id;
+          if (m[id] && !card.dataset.locked) {{
+            card.dataset.locked = m[id].code;
+            const cb = card.querySelector('.row-check');
+            if (cb) {{ cb.checked = false; cb.disabled = true; cb.title = 'eBay refuses to revise this listing'; }}
+            // Add a visual hint if the card has space (no-op if absent)
+            if (!card.querySelector('.lock-learned-hint')) {{
+              const hint = document.createElement('div');
+              hint.className = 'lock-learned-hint';
+              hint.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(224,123,111,0.08);border:1px dashed rgba(224,123,111,0.35);border-radius:6px;font-size:11px;color:var(--danger);font-weight:600;letter-spacing:.04em;';
+              hint.textContent = '🔒 eBay refused a previous revise (code ' + m[id].code + '). Skipped automatically.';
+              const target = card.querySelector('.q-body, .pr-info, .info, .tr-bodies') || card;
+              target.appendChild(hint);
+            }}
+          }}
+        }});
+      }},
+      // Hook for Apply functions to call after fetch returns
+      consumeErrors(errors) {{
+        if (!Array.isArray(errors)) return;
+        errors.forEach(e => {{
+          const code = this.parseError(e.error || e.msg || e);
+          if (code === '240' || code === '291') {{
+            const id = e.item_id || e.id;
+            if (id) this.record(id, code, e.error || '');
+          }}
+        }});
+        this.applyToCards();
+      }}
+    }};
+    // Apply on every page load
+    window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+  </script>
+</body>
+</html>"""
+
+
+# ---------------------------------------------------------------------------
+# 1. Listing dashboard (index.html)
+# ---------------------------------------------------------------------------
+
+def _categorize(listing: dict) -> str:
+    """Lightweight category derivation from the listing title for filter chips."""
+    t = listing["title"].lower()
+    if any(w in t for w in ["pokemon", "pikachu", "charizard", "charcadet", "eevee", "holo promo", "mega evolution"]):
+        return "Pokemon"
+    if any(w in t for w in ["sixpence", "shilling", "australia", " coin", "coins"]) or t.startswith("coin"):
+        return "Coins"
+    if any(w in t for w in [" lot", "lot ", "cards "]) and any(w in t for w in ["football", "nfl", "raiders", "broncos", "cowboys", "49ers", "bears", "packers", "bengals", "chargers", "steelers", "vikings", "rams", "browns", "falcons", "giants", "jets", "patriots", "saints", "seahawks", "buccaneers", "titans", "chiefs", "colts"]):
+        return "Football Lots"
+    if any(w in t for w in ["prizm", "optic", "donruss", "panini", "rookie", "rc "]):
+        return "Football Singles"
+    return "Other"
+
+
+def build_dashboard(listings: list[dict], market: dict | None = None) -> Path:
+    import re as _re
+
+    locks = load_locks()
+
+    # Compute stats
+    total_value = sum(float(l['price']) for l in listings if l['price'])
+    underpriced_count = sum(
+        1 for l in listings
+        if market and market.get(l["item_id"], {}).get("flag") == "UNDERPRICED"
+    )
+    overpriced_count = sum(
+        1 for l in listings
+        if market and market.get(l["item_id"], {}).get("flag") == "OVERPRICED"
+    )
+
+    # Annotate + sort by price desc for hero feature
+    enriched = []
+    for l in listings:
+        try:
+            price_f = float(l["price"])
+        except (ValueError, TypeError):
+            price_f = 0.0
+        cat = _categorize(l)
+        big_pic = _re.sub(r's-l\d+\.jpg', 's-l1600.jpg', l["pic"]) if l["pic"] else ""
+        m = market.get(l["item_id"], {}) if market else {}
+        enriched.append({**l, "price_f": price_f, "category": cat, "big_pic": big_pic, "market": m})
+
+    # Hero: pick highest-priced item with image as the centerpiece
+    hero_pool = [e for e in enriched if e["pic"]]
+    hero_pool.sort(key=lambda e: e["price_f"], reverse=True)
+    hero = hero_pool[0] if hero_pool else None
+    hero_runners = hero_pool[1:4]  # next 3
+
+    # Build category chip counts
+    cat_counts = {}
+    for e in enriched:
+        cat_counts[e["category"]] = cat_counts.get(e["category"], 0) + 1
+    # Order chips: All first, then by count desc
+    chip_order = ["All"] + sorted(cat_counts.keys(), key=lambda k: -cat_counts[k])
+    chips_html_parts = []
+    for cat in chip_order:
+        cnt = len(enriched) if cat == "All" else cat_counts.get(cat, 0)
+        if cnt == 0 and cat != "All":
+            continue
+        active = " active" if cat == "All" else ""
+        chips_html_parts.append(
+            f'<button type="button" class="chip{active}" data-cat="{cat}" onclick="setCategory(this)">{cat} <span class="count">{cnt}</span></button>'
+        )
+    # Watchlist chip
+    chips_html_parts.append(
+        '<button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)">'
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>'
+        'Watchlist <span class="count" id="watch-count">0</span></button>'
+    )
+
+    # Price range
+    prices = [e["price_f"] for e in enriched if e["price_f"] > 0]
+    p_min = int((min(prices) if prices else 0) // 1)
+    p_max = int(((max(prices) if prices else 100)) + 1)
+
+    # Build cards
+    card_html = []
+    for e in enriched:
+        flag = e["market"].get("flag") if e["market"] else None
+        flag_tag = ""
+        if flag == "UNDERPRICED":
+            flag_tag = '<span class="tag tag-danger">Underpriced</span>'
+        elif flag == "OVERPRICED":
+            flag_tag = '<span class="tag tag-warn">Overpriced</span>'
+        cond_tag = f'<span class="tag">{e["condition"]}</span>' if e["condition"] else ""
+        cat_tag = f'<span class="tag tag-gold">{e["category"]}</span>'
+
+        # eBay restriction tag
+        lock_info = locks.get(e["item_id"])
+        lock_tag = ""
+        if lock_info:
+            code = lock_info.get("code", "")
+            label = "Title locked" if code == "240" else ("Ended" if code == "291" else "Locked")
+            reason = lock_info.get("reason", "")
+            lock_tag = f'<span class="tag tag-danger" title="{reason}">🔒 {label}</span>'
+
+        # eBay listing URL drives item-page link instead — we want lightbox to open the image, not the page
+        item_page = f"items/{e['item_id']}.html"
+        ebay_url  = e["url"]
+        title_esc = e["title"].replace('"', "&quot;")
+
+        if e["pic"]:
+            thumb = (
+                f'<a href="{e["big_pic"]}" class="glightbox" data-gallery="store" '
+                f'data-title="{title_esc}" data-description="${e["price_f"]:.2f} · {e["condition"] or e["category"]}">'
+                f'<img src="{e["pic"]}" alt="{title_esc}" loading="lazy"></a>'
+            )
+        else:
+            thumb = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:11px;">No image</div>'
+
+        card_html.append(f'''
+      <article class="listing-card"
+        data-id="{e['item_id']}"
+        data-title="{e['title'].lower()}"
+        data-price="{e['price_f']:.2f}"
+        data-cat="{e['category']}"
+        {f'data-locked="{lock_info["code"]}"' if lock_info else ''}>
+        <div class="thumb-wrap">
+          {thumb}
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;{e['item_id']}&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="{e['item_id']}" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="{item_page}">{e['title']}</a></h3>
+          <div class="price">${e['price_f']:.2f}</div>
+          <div class="meta">{cat_tag}{cond_tag}{flag_tag}{lock_tag}</div>
+        </div>
+        <div class="actions">
+          <a href="{ebay_url}" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="{item_page}" class="btn btn-ghost">Details</a>
+        </div>
+      </article>''')
+
+    # Hero markup
+    hero_html = ""
+    if hero:
+        runners_html = ""
+        for r in hero_runners:
+            runners_html += f'''
+            <a href="items/{r['item_id']}.html" class="hero-runner">
+              <img src="{r['pic']}" alt="{r['title']}" loading="lazy">
+              <div class="hero-runner-meta">
+                <div class="hero-runner-title">{r['title'][:54]}{'…' if len(r['title']) > 54 else ''}</div>
+                <div class="hero-runner-price">${r['price_f']:.2f}</div>
+              </div>
+            </a>'''
+        hero_html = f'''
+    <section class="hero">
+      <div class="hero-feature">
+        <div class="hero-image-wrap">
+          <a href="{hero['big_pic']}" class="glightbox" data-gallery="store" data-title="{hero['title']}">
+            <img src="{hero['big_pic']}" alt="{hero['title']}" loading="eager">
+          </a>
+          <div class="hero-tag">Featured</div>
+        </div>
+        <div class="hero-body">
+          <div class="eyebrow">Top of the showcase</div>
+          <h1 class="hero-title">{hero['title']}</h1>
+          <div class="hero-price">${hero['price_f']:.2f}</div>
+          <div class="hero-meta">
+            <span class="tag tag-gold">{hero['category']}</span>
+            {f'<span class="tag">{hero["condition"]}</span>' if hero["condition"] else ''}
+          </div>
+          <div class="hero-actions">
+            <a href="{hero['url']}" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+            <a href="items/{hero['item_id']}.html" class="btn btn-outline">Full Details</a>
+          </div>
+        </div>
+      </div>
+      {f'<div class="hero-runners">{runners_html}</div>' if runners_html else ''}
+    </section>
+    '''
+
+    extra_css = """
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .hero-feature {
+      position: relative;
+      background: linear-gradient(135deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 380px;
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-hi) inset;
+    }
+    .hero-feature::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(600px 400px at 100% 0%, rgba(212,175,55,.16), transparent 60%);
+      pointer-events: none;
+    }
+    .hero-image-wrap {
+      position: relative;
+      background: #000;
+      overflow: hidden;
+      min-height: 360px;
+    }
+    .hero-image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 600ms cubic-bezier(.4,0,.2,1);
+    }
+    .hero-feature:hover .hero-image-wrap img { transform: scale(1.05); }
+    .hero-tag {
+      position: absolute; top: 16px; left: 16px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: #0a0a0a;
+      font-size: 11px; font-weight: 800; letter-spacing: .2em;
+      text-transform: uppercase;
+      border-radius: var(--r-sm);
+      z-index: 2;
+    }
+    .hero-body {
+      padding: 32px 36px;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(28px, 3.5vw, 44px);
+      line-height: 1.05; letter-spacing: .015em;
+      color: var(--text);
+      margin: 8px 0 14px;
+    }
+    .hero-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 5vw, 56px);
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 14px;
+      text-shadow: 0 0 32px rgba(212,175,55,.3);
+    }
+    .hero-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero-actions .btn { padding: 12px 24px; font-size: 13px; }
+
+    .hero-runners {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .hero-runner {
+      display: flex; gap: 14px; align-items: stretch;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 12px;
+      transition: all var(--t-fast);
+    }
+    .hero-runner:hover {
+      border-color: var(--border-mid);
+      transform: translateX(-2px);
+    }
+    .hero-runner img {
+      width: 76px; height: 76px;
+      object-fit: cover;
+      border-radius: var(--r-sm);
+      flex-shrink: 0;
+    }
+    .hero-runner-meta { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .hero-runner-title {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .hero-runner-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; color: var(--gold);
+      margin-top: 4px;
+      letter-spacing: .02em;
+    }
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-feature { grid-template-columns: 1fr; min-height: auto; }
+      .hero-image-wrap { aspect-ratio: 16/10; min-height: 0; }
+      .hero-runners { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+      .hero-runner { flex: 0 0 260px; }
+    }
+    @media (max-width: 540px) {
+      .hero-body { padding: 22px; }
+      .hero-feature { border-radius: var(--r-lg); }
+    }
+    """
+
+    body = f"""
+    {hero_html}
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="num">{len(listings)}</div>
+        <div class="lbl">Active Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${total_value:,.0f}</div>
+        <div class="lbl">Inventory Value</div>
+      </div>
+      <div class="stat-card linked">
+        <a href="price_review.html" style="text-decoration:none;">
+          <div class="num {'danger' if underpriced_count else ''}">{underpriced_count}</div>
+          <div class="lbl">Underpriced</div>
+        </a>
+      </div>
+      <div class="stat-card linked">
+        <a href="price_review.html" style="text-decoration:none;">
+          <div class="num {'warning' if overpriced_count else ''}">{overpriced_count}</div>
+          <div class="lbl">Overpriced</div>
+        </a>
+      </div>
+    </div>
+
+    <section class="section-head">
+      <div>
+        <div class="eyebrow">Browse the inventory</div>
+        <h2 class="section-title">The <span class="accent">Showcase</span></h2>
+      </div>
+      <div class="size-toggle">
+        <span class="lbl-txt">View</span>
+        <button class="size-btn" data-size="small" onclick="setSize('small', this)">S</button>
+        <button class="size-btn active" data-size="medium" onclick="setSize('medium', this)">M</button>
+        <button class="size-btn" data-size="large" onclick="setSize('large', this)">L</button>
+        <button class="size-btn" data-size="list" onclick="setSize('list', this)">List</button>
+      </div>
+    </section>
+
+    <div class="filter-bar">
+      <div class="filter-row">
+        <input type="text" id="search" class="search-input" placeholder="Search players, sets, years…" oninput="applyFilters()" autocomplete="off">
+        <select id="sort-filter" onchange="applyFilters()" style="max-width:220px;">
+          <option value="default">Sort: Featured</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="title">Title A → Z</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <div class="filter-chips">{''.join(chips_html_parts)}</div>
+      </div>
+      <div class="filter-row">
+        <div class="slider-wrap">
+          <div class="slider-labels">
+            <span>Price Range</span>
+            <span><span class="slider-values" id="price-min-lbl">${p_min}</span> – <span class="slider-values" id="price-max-lbl">${p_max}</span></span>
+          </div>
+          <div id="price-slider"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="results-meta" style="font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;">
+      Showing <span id="visible-count">{len(enriched)}</span> of {len(enriched)} listings
+    </div>
+
+    <div id="no-results">
+      <div class="big">No matches</div>
+      <div>Try widening the price range or clearing filters.</div>
+    </div>
+
+    <div class="grid" id="listing-grid" data-size="medium">
+      {''.join(card_html)}
+    </div>
+
+    <script>
+      const PRICE_MIN_INIT = {p_min};
+      const PRICE_MAX_INIT = {p_max};
+      let activeCat = 'All';
+      let priceRange = [PRICE_MIN_INIT, PRICE_MAX_INIT];
+
+      // Watchlist (localStorage)
+      function getFavs() {{
+        try {{ return JSON.parse(localStorage.getItem('h2k_favs') || '[]'); }} catch(e) {{ return []; }}
+      }}
+      function setFavs(list) {{ localStorage.setItem('h2k_favs', JSON.stringify(list)); }}
+      function refreshFavUI() {{
+        const favs = getFavs();
+        document.querySelectorAll('.fav-btn').forEach(b => {{
+          b.classList.toggle('on', favs.includes(b.dataset.id));
+        }});
+        const wc = document.getElementById('watch-count');
+        if (wc) wc.textContent = favs.length;
+      }}
+      function toggleFav(btn, ev) {{
+        ev.preventDefault(); ev.stopPropagation();
+        const id = btn.dataset.id;
+        let favs = getFavs();
+        if (favs.includes(id)) favs = favs.filter(x => x !== id);
+        else favs.push(id);
+        setFavs(favs);
+        refreshFavUI();
+        if (activeCat === '__watch') applyFilters();
+      }}
+
+      // Size toggle
+      function setSize(size, btn) {{
+        document.getElementById('listing-grid').dataset.size = size;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
+        localStorage.setItem('h2k_size', size);
+      }}
+      const savedSize = localStorage.getItem('h2k_size');
+      if (savedSize) {{
+        document.getElementById('listing-grid').dataset.size = savedSize;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === savedSize));
+      }}
+
+      // Category chips
+      function setCategory(btn) {{
+        activeCat = btn.dataset.cat;
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+        applyFilters();
+      }}
+
+      // Price slider
+      const slider = document.getElementById('price-slider');
+      noUiSlider.create(slider, {{
+        start: [PRICE_MIN_INIT, PRICE_MAX_INIT],
+        connect: true,
+        range: {{ min: PRICE_MIN_INIT, max: PRICE_MAX_INIT }},
+        step: 1,
+      }});
+      slider.noUiSlider.on('update', (values) => {{
+        const [lo, hi] = values.map(v => Math.round(parseFloat(v)));
+        priceRange = [lo, hi];
+        document.getElementById('price-min-lbl').textContent = '$' + lo;
+        document.getElementById('price-max-lbl').textContent = '$' + hi;
+        applyFilters();
+      }});
+
+      // Combined filter logic
+      function applyFilters() {{
+        const q = document.getElementById('search').value.toLowerCase().trim();
+        const sort = document.getElementById('sort-filter').value;
+        const grid = document.getElementById('listing-grid');
+        const cards = Array.from(grid.querySelectorAll('.listing-card'));
+        const favs = getFavs();
+        const [lo, hi] = priceRange;
+
+        let visible = 0;
+        cards.forEach(c => {{
+          const price = parseFloat(c.dataset.price);
+          let ok = c.dataset.title.includes(q);
+          if (ok && activeCat === '__watch') ok = favs.includes(c.dataset.id);
+          else if (ok && activeCat !== 'All')  ok = c.dataset.cat === activeCat;
+          if (ok) ok = price >= lo && price <= hi;
+          c.style.display = ok ? '' : 'none';
+          if (ok) visible++;
+        }});
+
+        document.getElementById('visible-count').textContent = visible;
+        document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+
+        const visCards = cards.filter(c => c.style.display !== 'none');
+        if (sort === 'price-desc') visCards.sort((a,b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
+        else if (sort === 'price-asc')  visCards.sort((a,b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
+        else if (sort === 'title')      visCards.sort((a,b) => a.dataset.title.localeCompare(b.dataset.title));
+        visCards.forEach(c => grid.appendChild(c));
+      }}
+
+      refreshFavUI();
+    </script>"""
+
+    out = OUTPUT_DIR / "index.html"
+    out.write_text(html_shell(f"{SELLER_NAME} · Cards, Coins & Collectibles", body, extra_head=f"<style>{extra_css}</style>", active_page="index.html"), encoding="utf-8")
+    print(f"  Dashboard: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 2. Quality report (quality.html)
+# ---------------------------------------------------------------------------
+
+def build_quality_report(listings: list[dict]) -> Path:
+    locks = load_locks()
+    prices = []
+    for l in listings:
+        try:
+            prices.append(float(l["price"]))
+        except ValueError:
+            pass
+    avg_price = sum(prices) / len(prices) if prices else 0
+
+    issue_counts = {"Short title": 0, "No image": 0, "Weak description": 0, "Pricing outlier": 0}
+    items = []  # (score, listing, issues)
+    for l in listings:
+        issues = []
+        score  = 100
+
+        tlen = len(l["title"])
+        if tlen < 40:
+            issues.append(f"Title too short ({tlen}/80 chars)")
+            issue_counts["Short title"] += 1
+            score -= 25
+        elif tlen < 60:
+            issues.append(f"Title could be longer ({tlen}/80 chars)")
+            issue_counts["Short title"] += 1
+            score -= 10
+
+        if not l["pic"]:
+            issues.append("No image — critical for search rank")
+            issue_counts["No image"] += 1
+            score -= 40
+
+        if not l["desc"] or len(l["desc"]) < 50:
+            issues.append("Description missing or very short")
+            issue_counts["Weak description"] += 1
+            score -= 15
+
+        try:
+            p = float(l["price"])
+            if avg_price > 0 and p > avg_price * 3:
+                issues.append(f"${p:.2f} is 3× your average (${avg_price:.2f})")
+                issue_counts["Pricing outlier"] += 1
+            elif avg_price > 0 and p < avg_price * 0.1:
+                issues.append(f"${p:.2f} is very low vs avg (${avg_price:.2f})")
+                issue_counts["Pricing outlier"] += 1
+        except ValueError:
+            pass
+
+        score = max(0, score)
+        items.append((score, l, issues))
+
+    items.sort(key=lambda x: x[0])
+    avg_score = sum(s for s, _, _ in items) / len(items) if items else 0
+    good = sum(1 for s, _, _ in items if s >= 80)
+    fair = sum(1 for s, _, _ in items if 50 <= s < 80)
+    bad  = sum(1 for s, _, _ in items if s < 50)
+
+    cards = []
+    for score, l, issues in items:
+        if score >= 80:
+            badge = '<span class="badge badge-success">Good</span>'
+            stripe = "var(--success)"
+        elif score >= 50:
+            badge = '<span class="badge badge-warning">Fair</span>'
+            stripe = "var(--warning)"
+        else:
+            badge = '<span class="badge badge-danger">Needs work</span>'
+            stripe = "var(--danger)"
+
+        issue_html = "".join(f'<li>{i}</li>' for i in issues) if issues else '<li style="color:var(--success);">No issues — looks great</li>'
+        try:
+            price_f = float(l['price'])
+        except ValueError:
+            price_f = 0.0
+
+        thumb_html = f'<img src="{l["pic"]}" alt="" loading="lazy">' if l["pic"] else '<div style="background:var(--surface-3);width:100%;height:100%;"></div>'
+
+        # Compute suggested title — only fixable if it differs from current
+        suggested = _suggest_title(l)
+        original  = l["title"].strip()
+        title_fixable = suggested.lower() != _re.sub(r' {2,}', ' ', original).lower()
+
+        # Lock check — listings eBay refuses to revise are read-only
+        lock_info = locks.get(l["item_id"])
+        is_locked = bool(lock_info)
+
+        # Default-check listings with a fixable title AND score < 80 AND not locked
+        default_checked = "checked" if (title_fixable and score < 80 and not is_locked) else ""
+
+        lock_badge = ""
+        if is_locked:
+            code = lock_info.get("code", "")
+            label = "Title locked by eBay" if code == "240" else ("Listing ended" if code == "291" else "Locked by eBay")
+            tip = lock_info.get("reason", "eBay rejects revisions on this listing")
+            lock_badge = f'<span class="badge badge-danger" title="{tip}" style="margin-left:8px;">🔒 {label}</span>'
+
+        action_block = ""
+        if is_locked:
+            action_block = f'''<div class="q-fix-none" style="border-color:rgba(224,123,111,0.35);background:rgba(224,123,111,0.05);">
+              🔒 <b>{lock_info.get("code", "")} — {lock_info.get("reason", "Locked by eBay")}.</b>
+              {"Title cannot be changed — to fix, end this listing on eBay and create a new one with a clean title." if lock_info.get("code") == "240" else "Refresh the site to remove ended listings."}
+            </div>'''
+        elif title_fixable:
+            action_block = f'''
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="{l['item_id']}" data-suggested="{suggested.replace('"', '&quot;')}" {default_checked} aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">{suggested}</div>
+                </div>
+              </div>'''
+        else:
+            action_block = '<div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>'
+
+        cards.append(f'''
+      <article class="q-card" data-id="{l['item_id']}" style="--stripe:{stripe}" {'data-locked="' + lock_info.get("code", "") + '"' if is_locked else ''}>
+        <div class="q-thumb">{thumb_html}</div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">{score}</span><span class="q-score-of">/100</span>
+                {badge}
+                {lock_badge}
+              </div>
+              <a href="{l['url']}" target="_blank" rel="noopener" class="q-title">{l['title']}</a>
+            </div>
+            <div class="q-price">${price_f:.2f}</div>
+          </div>
+          <ul class="q-issues">{issue_html}</ul>
+          {action_block}
+        </div>
+      </article>''')
+
+    extra_css = """
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .chart-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      min-height: 280px;
+    }
+    .chart-panel h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; letter-spacing: .03em;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .chart-wrap { position: relative; height: 230px; }
+    .q-grid { display: grid; gap: 12px; }
+    .q-card {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--stripe);
+      border-radius: var(--r-lg);
+      padding: 14px;
+      transition: all var(--t-fast);
+    }
+    .q-card:hover { border-color: var(--border-mid); border-left-color: var(--stripe); transform: translateX(2px); }
+    .q-thumb { width: 88px; height: 88px; border-radius: var(--r-sm); overflow: hidden; background: var(--surface-3); }
+    .q-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .q-body { min-width: 0; }
+    .q-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .q-title-wrap { min-width: 0; flex: 1; }
+    .q-score-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .q-score { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--stripe); line-height: 1; letter-spacing: .02em; }
+    .q-score-of { font-size: 11px; color: var(--text-dim); margin-right: 4px; }
+    .q-title { display: block; font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.35; text-decoration: none; }
+    .q-title:hover { color: var(--gold); }
+    .q-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); line-height: 1; letter-spacing: .02em; flex-shrink: 0; }
+    .q-issues { list-style: none; padding: 0; margin: 6px 0 0; font-size: 12.5px; color: var(--text-muted); }
+    .q-issues li { padding: 3px 0; padding-left: 14px; position: relative; }
+    .q-issues li::before { content: '⚑'; position: absolute; left: 0; color: var(--stripe); font-size: 10px; }
+    .q-fix {
+      display: grid; grid-template-columns: auto 1fr; gap: 12px;
+      align-items: start;
+      margin-top: 12px; padding: 12px;
+      background: var(--surface-2);
+      border: 1px dashed var(--border-mid);
+      border-radius: var(--r-sm);
+    }
+    .q-fix-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .q-fix-suggest { font-size: 13px; color: var(--gold); font-weight: 600; line-height: 1.4; }
+    .q-fix-none { margin-top: 12px; font-size: 12px; color: var(--text-dim); padding: 8px 0; border-top: 1px dashed var(--border); }
+    .action-bar {
+      position: sticky; top: 76px; z-index: 50;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 16px;
+      background: rgba(20,20,20,.92); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-md);
+    }
+    #count-label { font-size: 12px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; }
+    @media (max-width: 540px) {
+      .q-card { grid-template-columns: 64px 1fr; padding: 12px; }
+      .q-thumb { width: 64px; height: 64px; }
+      .q-head { flex-direction: column; gap: 4px; }
+      .action-bar { top: 70px; }
+    }
+    """
+
+    chart_data_quality = [good, fair, bad]
+    chart_data_issues = list(issue_counts.values())
+    chart_labels_issues = list(issue_counts.keys())
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Health audit</div>
+        <h1 class="section-title">Quality <span class="accent">Report</span></h1>
+        <div class="section-sub">Listings ranked worst-first — fix the red ones to climb in eBay's search rankings.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">{len(items)}</div><div class="lbl">Total Listings</div></div>
+      <div class="stat-card"><div class="num">{avg_score:.0f}</div><div class="lbl">Avg Score</div></div>
+      <div class="stat-card"><div class="num success">{good}</div><div class="lbl">Good (80+)</div></div>
+      <div class="stat-card"><div class="num warning">{fair}</div><div class="lbl">Fair (50-79)</div></div>
+      <div class="stat-card"><div class="num danger">{bad}</div><div class="lbl">Needs Work</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-panel">
+        <h3>Score Distribution</h3>
+        <div class="chart-wrap"><canvas id="chart-quality"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <h3>Issues Found</h3>
+        <div class="chart-wrap"><canvas id="chart-issues"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2 class="section-title" style="font-size:24px;">Listings to <span class="accent">improve</span></h2>
+    </div>
+
+    <div class="action-bar">
+      <button onclick="qSelectAll(true)"  class="btn btn-ghost">Select All Fixable</button>
+      <button onclick="qSelectAll(false)" class="btn btn-ghost">Deselect</button>
+      <span id="count-label"></span>
+      <button onclick="qApplyFixes()" class="btn btn-gold" style="margin-left:auto;">Apply Title Fixes to eBay →</button>
+    </div>
+
+    <div id="status-bar"></div>
+    <div style="margin-bottom:16px;">
+      <button id="rebuild-btn" onclick="qRebuild()" class="btn btn-outline" style="display:none;">Trigger Rebuild</button>
+    </div>
+
+    <div class="q-grid">{''.join(cards)}</div>
+
+    <script>
+      const REVISE_URL  = '{LAMBDA_BASE}/revise';
+      const REBUILD_URL = '{LAMBDA_BASE}/rebuild';
+
+      function qUpdateCount() {{
+        const total   = document.querySelectorAll('.row-check').length;
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        const lbl = document.getElementById('count-label');
+        if (lbl) lbl.textContent = checked + ' of ' + total + ' selected';
+      }}
+      document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', qUpdateCount));
+      qUpdateCount();
+
+      function qSelectAll(val) {{
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        qUpdateCount();
+      }}
+
+      function qStatus(msg, kind) {{
+        const bar = document.getElementById('status-bar');
+        bar.className = 'status-' + kind;
+        bar.style.display = 'block';
+        bar.textContent = msg;
+        bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+      }}
+
+      async function qApplyFixes() {{
+        const items = [];
+        document.querySelectorAll('.row-check:checked').forEach(cb => {{
+          items.push({{ item_id: cb.value, title: cb.dataset.suggested }});
+        }});
+        if (!items.length) {{ qStatus('No items selected.', 'warning'); return; }}
+        qStatus('Applying ' + items.length + ' title fix(es) to eBay…', 'info');
+
+        try {{
+          const resp = await fetch(REVISE_URL, {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ items }})
+          }});
+          const data = await resp.json();
+          if (data.success) {{
+            // Mark successful items as applied
+            const failedIds = new Set((data.errors || []).map(e => e.item_id));
+            items.forEach(it => {{
+              const card = document.querySelector('.q-card[data-id="' + it.item_id + '"]');
+              if (card && !failedIds.has(it.item_id)) {{
+                card.querySelector('.row-check').checked = false;
+                card.style.opacity = '0.45';
+              }}
+            }});
+            // Learn locks for next time
+            LockTracker.consumeErrors(data.errors || []);
+            const errs = data.errors && data.errors.length ? ' · ' + data.errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
+            qStatus('Done. ' + (data.updated || 0) + ' listing(s) updated on eBay' + errs, 'success');
+            document.getElementById('rebuild-btn').style.display = 'inline-flex';
+          }} else {{
+            qStatus('Error: ' + (data.error || 'Unknown'), 'danger');
+          }}
+        }} catch(e) {{ qStatus('Request failed: ' + e.message, 'danger'); }}
+      }}
+
+      async function qRebuild() {{
+        const btn = document.getElementById('rebuild-btn');
+        btn.disabled = true; btn.textContent = 'Rebuilding…';
+        try {{
+          const resp = await fetch(REBUILD_URL, {{ method:'POST', headers:{{ 'Content-Type':'application/json' }}, body:'{{}}' }});
+          const data = await resp.json();
+          if (data.success) qStatus('Site rebuild triggered. Live in ~2 minutes.', 'success');
+          else {{ qStatus('Rebuild failed: ' + (data.error || 'Unknown'), 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }}
+        }} catch(e) {{ qStatus('Rebuild request failed: ' + e.message, 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }}
+      }}
+
+      Chart.defaults.color = '#9a9388';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.borderColor = 'rgba(212,175,55,0.10)';
+
+      new Chart(document.getElementById('chart-quality'), {{
+        type: 'doughnut',
+        data: {{
+          labels: ['Good (80+)','Fair (50-79)','Needs work'],
+          datasets: [{{
+            data: {chart_data_quality},
+            backgroundColor: ['#7fc77a', '#e0b54a', '#e07b6f'],
+            borderColor: '#0a0a0a',
+            borderWidth: 3,
+            hoverOffset: 8,
+          }}],
+        }},
+        options: {{
+          cutout: '68%',
+          plugins: {{ legend: {{ position: 'bottom', labels: {{ padding: 14, usePointStyle: true, pointStyle: 'rectRounded' }} }} }},
+        }}
+      }});
+
+      new Chart(document.getElementById('chart-issues'), {{
+        type: 'bar',
+        data: {{
+          labels: {chart_labels_issues!r},
+          datasets: [{{
+            data: {chart_data_issues},
+            backgroundColor: ['rgba(224,123,111,.6)','rgba(224,181,74,.6)','rgba(108,176,255,.6)','rgba(212,175,55,.6)'],
+            borderColor: ['#e07b6f','#e0b54a','#6cb0ff','#d4af37'],
+            borderWidth: 1.5,
+            borderRadius: 6,
+          }}],
+        }},
+        options: {{
+          indexAxis: 'y',
+          plugins: {{ legend: {{ display: false }} }},
+          scales: {{
+            x: {{ grid: {{ color: 'rgba(212,175,55,0.05)' }}, ticks: {{ color: '#9a9388', precision: 0 }} }},
+            y: {{ grid: {{ display: false }}, ticks: {{ color: '#f1efe9' }} }},
+          }}
+        }}
+      }});
+    </script>"""
+
+    out = OUTPUT_DIR / "quality.html"
+    out.write_text(html_shell(f"Quality Report · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="quality.html"), encoding="utf-8")
+    print(f"  Quality report: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 3. Craigslist post generator (craigslist.html)
+# ---------------------------------------------------------------------------
+
+_CRAIGSLIST_CITIES = [
+    ("newyork",      "New York"),
+    ("losangeles",   "Los Angeles"),
+    ("chicago",      "Chicago"),
+    ("sfbay",        "SF Bay Area"),
+    ("boston",       "Boston"),
+    ("houston",      "Houston"),
+    ("atlanta",      "Atlanta"),
+    ("philadelphia", "Philadelphia"),
+    ("phoenix",      "Phoenix"),
+    ("dallas",       "Dallas / Fort Worth"),
+    ("seattle",      "Seattle"),
+    ("miami",        "Miami / South Florida"),
+    ("denver",       "Denver"),
+    ("portland",     "Portland"),
+    ("sandiego",     "San Diego"),
+    ("washingtondc", "Washington DC"),
+    ("austin",       "Austin"),
+    ("minneapolis",  "Minneapolis"),
+    ("detroit",      "Detroit"),
+    ("orangecounty", "Orange County"),
+    ("vegas",        "Las Vegas"),
+    ("nashville",    "Nashville"),
+]
+
+
+def build_craigslist(listings: list[dict]) -> Path:
+    """
+    Premium Craigslist post generator.
+    Highest-priced items featured first, with one-click copy-to-clipboard.
+    """
+    sorted_l = sorted(listings, key=lambda x: float(x["price"]) if x["price"] else 0, reverse=True)
+    cards = []
+    for l in sorted_l:
+        try:
+            price_f = float(l["price"])
+        except ValueError:
+            price_f = 0.0
+
+        ad_lines = [
+            l["title"],
+            "",
+            f"Price: ${price_f:.2f}",
+            f"Condition: {l['condition']}" if l["condition"] else "",
+            "",
+            l["desc"][:800].strip() if l["desc"] else "See eBay listing for full details.",
+            "",
+            f"View on eBay: {l['url']}",
+            "",
+            "Payment: PayPal, Venmo, or cash on local pickup.",
+            "Shipping available.",
+        ]
+        ad_text = "\n".join(line for line in ad_lines if line is not None)
+        ad_escaped = ad_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+        # Premium tier indicator
+        if price_f >= 50:
+            tier = '<span class="badge badge-gold">Top Tier</span>'
+        elif price_f >= 10:
+            tier = '<span class="badge badge-success">Mid</span>'
+        else:
+            tier = '<span class="badge badge-warning">Quick Sale</span>'
+
+        thumb_html = f'<img src="{l["pic"]}" alt="" loading="lazy">' if l["pic"] else ''
+
+        cards.append(f'''
+      <article class="cl-card">
+        <div class="cl-head">
+          <div class="cl-thumb">{thumb_html}</div>
+          <div class="cl-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              {tier}
+              <span style="font-size:11px;color:var(--text-muted);">{l['category'] or 'Collectibles'}</span>
+            </div>
+            <h3 class="cl-title">{l['title'][:90]}</h3>
+            <div class="cl-price">${price_f:.2f}</div>
+          </div>
+          <a href="{l['url']}" target="_blank" rel="noopener" class="btn btn-ghost cl-view">View on eBay</a>
+        </div>
+        <div class="cl-ad-wrap">
+          <div class="cl-ad-head">
+            <span class="cl-ad-label">Craigslist Ad</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-ghost cl-copy" type="button" onclick="copyAd(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                Copy
+              </button>
+              <a class="btn btn-gold cl-post" target="_blank" rel="noopener" data-cl-post>
+                Post on Craigslist →
+              </a>
+            </div>
+          </div>
+          <textarea onclick="this.select()" readonly class="cl-ad">{ad_escaped}</textarea>
+        </div>
+      </article>''')
+
+    extra_css = """
+    .cl-grid { display: grid; gap: 14px; }
+    .cl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: all var(--t-fast);
+    }
+    .cl-card:hover { border-color: var(--border-mid); }
+    .cl-head {
+      display: grid;
+      grid-template-columns: 76px 1fr auto;
+      gap: 14px; align-items: center;
+      padding: 14px 18px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .cl-thumb { width: 76px; height: 76px; border-radius: var(--r-sm); overflow: hidden; background: var(--surface-3); }
+    .cl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .cl-info { min-width: 0; }
+    .cl-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); margin-bottom: 6px; }
+    .cl-price { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--gold); line-height: 1; letter-spacing: .02em; }
+    .cl-view { padding: 8px 14px; font-size: 12px; }
+    .cl-ad-wrap { padding: 14px 18px; }
+    .cl-ad-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .cl-ad-label { font-size: 10px; color: var(--text-muted); letter-spacing: .18em; text-transform: uppercase; font-weight: 700; }
+    .cl-copy { padding: 6px 14px; font-size: 11px; }
+    .cl-ad {
+      width: 100%; height: 180px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.55;
+      background: #0c0c0c; color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      resize: vertical;
+    }
+    .cl-ad:focus { background: #050505; border-color: var(--border-hi); color: var(--text); }
+    @media (max-width: 540px) {
+      .cl-head { grid-template-columns: 56px 1fr; gap: 12px; padding: 14px; }
+      .cl-thumb { width: 56px; height: 56px; }
+      .cl-view { grid-column: 1 / -1; }
+    }
+    """
+
+    city_options = "".join(
+        f'<option value="{slug}">{name}</option>'
+        for slug, name in _CRAIGSLIST_CITIES
+    )
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Free traffic, real buyers</div>
+        <h1 class="section-title">Craigslist <span class="accent">Ads</span></h1>
+        <div class="section-sub">Pick your city below. Then for any listing: Copy the ad text, click Post on Craigslist → opens that city's submit page → choose <b>For Sale → Collectibles</b> → paste.</div>
+      </div>
+    </div>
+
+    <div class="panel" style="display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:22px;">
+      <div style="flex:1;min-width:240px;">
+        <label style="display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);font-weight:700;margin-bottom:6px;">Your Craigslist city</label>
+        <select id="cl-city" onchange="clCityChange()">
+          <option value="">— Pick a city —</option>
+          {city_options}
+          <option value="__other">Other / find my city ↗</option>
+        </select>
+      </div>
+      <a id="cl-browse-link" target="_blank" rel="noopener" class="btn btn-ghost" style="display:none;">Browse local collectibles ↗</a>
+      <a id="cl-post-link" target="_blank" rel="noopener" class="btn btn-outline" style="display:none;">Post New Ad ↗</a>
+    </div>
+
+    <div class="cl-grid">
+      {''.join(cards)}
+    </div>
+
+    <script>
+      function clBuildPostUrl(city) {{
+        // Craigslist post path: https://[city].craigslist.org/post — opens picker for category
+        return 'https://' + city + '.craigslist.org/post';
+      }}
+      function clBuildBrowseUrl(city) {{
+        // For Sale > Collectibles - by owner
+        return 'https://' + city + '.craigslist.org/d/collectibles/search/cba';
+      }}
+      function clRefreshLinks() {{
+        const city = localStorage.getItem('cl_city') || '';
+        const postLink   = document.getElementById('cl-post-link');
+        const browseLink = document.getElementById('cl-browse-link');
+        const cards = document.querySelectorAll('[data-cl-post]');
+
+        if (city && city !== '__other') {{
+          postLink.href   = clBuildPostUrl(city);
+          browseLink.href = clBuildBrowseUrl(city);
+          postLink.style.display   = 'inline-flex';
+          browseLink.style.display = 'inline-flex';
+          cards.forEach(a => {{
+            a.href = clBuildPostUrl(city);
+            a.style.pointerEvents = '';
+            a.style.opacity = '';
+            a.title = 'Opens ' + city + '.craigslist.org/post — choose For Sale → Collectibles - by owner';
+          }});
+        }} else {{
+          postLink.style.display   = 'none';
+          browseLink.style.display = 'none';
+          cards.forEach(a => {{
+            a.href = '#';
+            a.style.opacity = '0.55';
+            a.title = 'Pick your city above first';
+          }});
+        }}
+      }}
+
+      function clCityChange() {{
+        const sel = document.getElementById('cl-city');
+        const v = sel.value;
+        if (v === '__other') {{
+          window.open('https://www.craigslist.org/about/sites', '_blank', 'noopener');
+          sel.value = localStorage.getItem('cl_city') || '';
+          return;
+        }}
+        if (v) localStorage.setItem('cl_city', v);
+        else   localStorage.removeItem('cl_city');
+        clRefreshLinks();
+      }}
+
+      // Restore selection
+      const savedCity = localStorage.getItem('cl_city');
+      if (savedCity) {{
+        document.getElementById('cl-city').value = savedCity;
+      }}
+      clRefreshLinks();
+
+      async function copyAd(btn) {{
+        const card = btn.closest('.cl-card');
+        const text = card.querySelector('.cl-ad').value;
+        try {{
+          await navigator.clipboard.writeText(text);
+          const original = btn.innerHTML;
+          btn.innerHTML = '✓ Copied';
+          btn.style.borderColor = 'var(--success)';
+          btn.style.color = 'var(--success)';
+          setTimeout(() => {{ btn.innerHTML = original; btn.style.borderColor = ''; btn.style.color = ''; }}, 1500);
+        }} catch (e) {{
+          card.querySelector('.cl-ad').select();
+          showToast('Press Cmd/Ctrl+C to copy');
+        }}
+      }}
+    </script>"""
+
+    out = OUTPUT_DIR / "craigslist.html"
+    out.write_text(html_shell(f"Craigslist Ads · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="craigslist.html"), encoding="utf-8")
+    print(f"  Craigslist generator: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 4. Google Merchant Center feed (google_feed.xml)
+# ---------------------------------------------------------------------------
+
+# Google product category IDs for our inventory types
+# https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
+_GOOGLE_CATEGORY_MAP = {
+    "pokemon":   "Toys & Games > Collectible Card Games > Collectible Card Game Cards",
+    "coin":      "Collectibles > Coins & Currency > Coins > US Coins",
+    "australia": "Collectibles > Coins & Currency > Coins > Foreign Coins",
+    "football":  "Sporting Goods > Sport Collectibles > Football Collectibles > Football Trading Cards",
+    "default":   "Sporting Goods > Sport Collectibles > Football Collectibles > Football Trading Cards",
+}
+
+def _google_category(listing: dict) -> str:
+    t = listing["title"].lower()
+    if any(w in t for w in ["pokemon", "pikachu", "charizard", "charcadet", "eevee", "holo", "promo"]):
+        return _GOOGLE_CATEGORY_MAP["pokemon"]
+    if any(w in t for w in ["australia", "sixpence", "shilling"]):
+        return _GOOGLE_CATEGORY_MAP["australia"]
+    if any(w in t for w in ["coin", "cent", "penny"]):
+        return _GOOGLE_CATEGORY_MAP["coin"]
+    return _GOOGLE_CATEGORY_MAP["default"]
+
+def _shipping_weight(listing: dict) -> str:
+    """Nominal shipping weight. Coins heavier than cards."""
+    t = listing["title"].lower()
+    if any(w in t for w in ["coin", "cent", "penny", "sixpence", "shilling", "australia"]):
+        return "1 oz"
+    # Card lots scale with quantity hint in title
+    if "lot" in t or any(c.isdigit() and t[t.index(c)-1:t.index(c)] == " " for c in t[:20]):
+        return "0.5 oz"
+    return "0.1 oz"
+
+def build_google_feed(listings: list[dict]) -> Path:
+    # Also generate individual item pages so g:link points to our verified domain
+    items_dir = OUTPUT_DIR / "items"
+    items_dir.mkdir(exist_ok=True)
+
+    rss     = ET.Element("rss", {"version": "2.0", "xmlns:g": "http://base.google.com/ns/1.0"})
+    channel = ET.SubElement(rss, "channel")
+    ET.SubElement(channel, "title").text       = f"{SELLER_NAME} eBay Store"
+    ET.SubElement(channel, "link").text        = SITE_URL
+    ET.SubElement(channel, "description").text = f"Active listings from {SELLER_NAME}"
+
+    skipped = 0
+    for l in listings:
+        if not l["title"] or not l["pic"]:
+            skipped += 1
+            continue
+        try:
+            price_f = float(l["price"])
+        except ValueError:
+            skipped += 1
+            continue
+
+        # --- Individual item page (fixes domain mismatch) ---
+        item_page_url = f"{SITE_URL}/items/{l['item_id']}.html"
+        _build_item_page(l, items_dir, all_listings=listings)
+
+        # --- Image: upgrade to s-l1600 (800px+ satisfies Google minimum) ---
+        import re as _re
+        big_pic = _re.sub(r's-l\d+\.jpg', 's-l1600.jpg', l["pic"])
+
+        # --- Condition ---
+        cond_lower  = l["condition"].lower()
+        if "new" in cond_lower:
+            g_condition = "new"
+        elif "refurb" in cond_lower:
+            g_condition = "refurbished"
+        else:
+            g_condition = "used"
+
+        # --- Google product category ---
+        g_cat = _google_category(l)
+
+        entry = ET.SubElement(channel, "item")
+        ET.SubElement(entry, "g:id").text                      = l["item_id"]
+        ET.SubElement(entry, "g:title").text                   = l["title"][:150]
+        ET.SubElement(entry, "g:description").text             = (l["desc"] or l["title"])[:5000]
+        ET.SubElement(entry, "g:link").text                    = item_page_url        # verified domain
+        ET.SubElement(entry, "g:image_link").text              = big_pic              # s-l1600
+        ET.SubElement(entry, "g:price").text                   = f"{price_f:.2f} {CURRENCY}"
+        ET.SubElement(entry, "g:availability").text            = "in_stock"
+        ET.SubElement(entry, "g:condition").text               = g_condition
+        ET.SubElement(entry, "g:brand").text                   = SELLER_NAME
+        ET.SubElement(entry, "g:identifier_exists").text       = "no"
+        ET.SubElement(entry, "g:google_product_category").text = g_cat
+        ET.SubElement(entry, "g:shipping_weight").text         = _shipping_weight(l)
+
+    out = OUTPUT_DIR / "google_feed.xml"
+    xmlstr = minidom.parseString(ET.tostring(rss, encoding="unicode")).toprettyxml(indent="  ")
+    out.write_text(xmlstr, encoding="utf-8")
+    print(f"  Google feed: {out}  ({len(listings) - skipped} items, {skipped} skipped)")
+    return out
+
+
+def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None = None) -> None:
+    """
+    Premium product page at docs/items/{item_id}.html.
+    Verified GitHub Pages domain (satisfies Google Merchant Center).
+    Includes OG tags, Schema.org Product JSON-LD, gallery zoom, related items.
+    """
+    import re as _re
+    import json as _json
+    price_f = float(l["price"]) if l["price"] else 0.0
+    big_pic = _re.sub(r's-l\d+\.jpg', 's-l1600.jpg', l["pic"]) if l["pic"] else ""
+    desc_raw = (l["desc"] or l["title"])
+    desc_short = desc_raw[:160].replace('"', "'")
+    desc_html = desc_raw.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")[:2000]
+    title_esc = l['title'].replace('"', "&quot;")
+    category = _categorize(l)
+
+    # Schema.org Product JSON-LD
+    product_ld = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": l["title"],
+        "image": big_pic or None,
+        "description": desc_raw[:500],
+        "sku": l["item_id"],
+        "brand": {"@type": "Brand", "name": SELLER_NAME},
+        "offers": {
+            "@type": "Offer",
+            "url": l["url"],
+            "priceCurrency": CURRENCY,
+            "price": f"{price_f:.2f}",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/UsedCondition" if "new" not in (l["condition"] or "").lower() else "https://schema.org/NewCondition",
+            "seller": {"@type": "Organization", "name": SELLER_NAME, "url": STORE_URL},
+        },
+    }
+
+    # Related items: same category, exclude self, top by price
+    related_html = ""
+    if all_listings:
+        same_cat = [x for x in all_listings if x["item_id"] != l["item_id"] and _categorize(x) == category and x["pic"]]
+        same_cat.sort(key=lambda x: float(x["price"]) if x["price"] else 0, reverse=True)
+        rel = same_cat[:4]
+        if rel:
+            cards = []
+            for r in rel:
+                rp = float(r["price"]) if r["price"] else 0.0
+                cards.append(f'''
+            <a href="{r['item_id']}.html" class="rel-card">
+              <div class="rel-img"><img src="{r['pic']}" alt="{r['title']}" loading="lazy"></div>
+              <div class="rel-meta">
+                <div class="rel-title">{r['title'][:60]}{'…' if len(r['title']) > 60 else ''}</div>
+                <div class="rel-price">${rp:.2f}</div>
+              </div>
+            </a>''')
+            related_html = f'''
+        <section class="related">
+          <div class="eyebrow">More from {category}</div>
+          <h2 class="section-title" style="margin-bottom:16px;">You might also like</h2>
+          <div class="rel-grid">{''.join(cards)}</div>
+        </section>'''
+
+    img_block = ""
+    if big_pic:
+        img_block = f'''
+          <a href="{big_pic}" class="glightbox" data-gallery="item" data-title="{title_esc}">
+            <img src="{big_pic}" alt="{title_esc}" loading="eager" width="800" height="800">
+            <div class="zoom-hint">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+              Tap to zoom
+            </div>
+          </a>'''
+
+    extra_head = f"""<meta name="description" content="{title_esc} — ${price_f:.2f}. {desc_short}">
+  <meta property="og:title" content="{title_esc}">
+  <meta property="og:description" content="{desc_short}">
+  <meta property="og:image" content="{big_pic}">
+  <meta property="og:url" content="{SITE_URL}/items/{l['item_id']}.html">
+  <meta property="og:price:amount" content="{price_f:.2f}">
+  <meta property="og:price:currency" content="USD">
+  <meta property="og:availability" content="instock">
+  <meta property="og:type" content="product">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="{SITE_URL}/items/{l['item_id']}.html">
+  <script type="application/ld+json">{_json.dumps(product_ld)}</script>
+  <style>
+    .product {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 32px;
+      margin-bottom: 40px;
+    }}
+    .product-gallery {{
+      position: relative;
+      background: linear-gradient(135deg, #0e0e0e, #1a1a1a);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      aspect-ratio: 1/1;
+      box-shadow: var(--shadow-lg);
+    }}
+    .product-gallery::before {{
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(700px 400px at 50% -10%, rgba(212,175,55,.10), transparent 60%);
+      z-index: 1;
+    }}
+    .product-gallery a {{ display: block; width: 100%; height: 100%; }}
+    .product-gallery img {{ width: 100%; height: 100%; object-fit: contain; padding: 24px; }}
+    .zoom-hint {{
+      position: absolute; bottom: 14px; right: 14px; z-index: 2;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text-muted);
+      font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+    }}
+    .product-detail {{ display: flex; flex-direction: column; }}
+    .product-detail .eyebrow {{ margin-bottom: 12px; }}
+    .product-title {{
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(28px, 3vw, 40px);
+      line-height: 1.1; letter-spacing: .015em;
+      color: var(--text);
+      margin-bottom: 14px;
+    }}
+    .product-price {{
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(46px, 5.5vw, 68px);
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 18px;
+      text-shadow: 0 0 32px rgba(212,175,55,.3);
+    }}
+    .product-tags {{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }}
+    .product-actions {{ display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }}
+    .product-actions .btn {{ flex: 1; min-width: 160px; padding: 14px 22px; font-size: 13px; }}
+    .product-meta-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 18px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      margin-bottom: 22px;
+    }}
+    .meta-cell .meta-lbl {{ font-size: 10px; color: var(--text-muted); letter-spacing: .18em; text-transform: uppercase; font-weight: 600; }}
+    .meta-cell .meta-val {{ font-size: 14px; color: var(--text); margin-top: 4px; font-weight: 500; }}
+    .product-desc {{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 22px;
+    }}
+    .product-desc h3 {{ font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); margin-bottom: 12px; letter-spacing: .03em; }}
+    .product-desc p {{ color: var(--text-muted); line-height: 1.7; font-size: 14px; }}
+    .related .rel-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }}
+    .rel-card {{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      display: block;
+      transition: all var(--t-fast);
+    }}
+    .rel-card:hover {{ border-color: var(--border-mid); transform: translateY(-2px); }}
+    .rel-img {{ aspect-ratio: 1/1; background: #111; }}
+    .rel-img img {{ width: 100%; height: 100%; object-fit: cover; }}
+    .rel-meta {{ padding: 12px; }}
+    .rel-title {{ font-size: 12px; line-height: 1.35; color: var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }}
+    .rel-price {{ font-family: 'Bebas Neue', sans-serif; color: var(--gold); font-size: 20px; margin-top: 6px; }}
+    @media (max-width: 880px) {{
+      .product {{ grid-template-columns: 1fr; gap: 22px; }}
+    }}
+  </style>"""
+
+    body = f"""
+    <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:13px;margin-bottom:18px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to listings
+    </a>
+
+    <article class="product">
+      <div class="product-gallery">{img_block}</div>
+      <div class="product-detail">
+        <div class="eyebrow">{category} · #{l['item_id']}</div>
+        <h1 class="product-title">{l['title']}</h1>
+        <div class="product-price">${price_f:.2f}</div>
+        <div class="product-tags">
+          <span class="tag tag-gold">{category}</span>
+          {f'<span class="tag">{l["condition"]}</span>' if l["condition"] else ''}
+        </div>
+        <div class="product-actions">
+          <a href="{l['url']}" target="_blank" rel="noopener" class="btn btn-gold">Buy on eBay →</a>
+          <a href="{STORE_URL}" target="_blank" rel="noopener" class="btn btn-outline">More from {SELLER_NAME}</a>
+        </div>
+        <div class="product-meta-grid">
+          <div class="meta-cell">
+            <div class="meta-lbl">Condition</div>
+            <div class="meta-val">{l["condition"] or '—'}</div>
+          </div>
+          <div class="meta-cell">
+            <div class="meta-lbl">Category</div>
+            <div class="meta-val">{category}</div>
+          </div>
+          <div class="meta-cell">
+            <div class="meta-lbl">Item ID</div>
+            <div class="meta-val font-mono">{l['item_id']}</div>
+          </div>
+          <div class="meta-cell">
+            <div class="meta-lbl">Seller</div>
+            <div class="meta-val">{SELLER_NAME}</div>
+          </div>
+        </div>
+        <div class="product-desc">
+          <h3>Item Details</h3>
+          <p>{desc_html}</p>
+        </div>
+      </div>
+    </article>
+
+    {related_html}"""
+
+    # Item pages live in /items/ — adjust nav links to relative
+    html_doc = html_shell(l['title'], body, extra_head=extra_head, active_page="../index.html")
+    # Patch nav hrefs to point one directory up
+    html_doc = html_doc.replace('href="index.html"', 'href="../index.html"')
+    html_doc = html_doc.replace('href="quality.html"', 'href="../quality.html"')
+    html_doc = html_doc.replace('href="price_review.html"', 'href="../price_review.html"')
+    html_doc = html_doc.replace('href="title_review.html"', 'href="../title_review.html"')
+    html_doc = html_doc.replace('href="craigslist.html"', 'href="../craigslist.html"')
+    html_doc = html_doc.replace('href="google_feed.xml"', 'href="../google_feed.xml"')
+
+    (items_dir / f"{l['item_id']}.html").write_text(html_doc, encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# 5. Analysis views SQL for Fivetran/Databricks schema
+# ---------------------------------------------------------------------------
+
+ANALYSIS_SQL = """-- Analysis views for Fivetran managed eBay connector
+-- Destination: jason_chletsos_databricks / jason_chletsos_ebay
+-- Run these after the first sync completes
+
+-- 1. Order revenue summary
+CREATE OR REPLACE VIEW jason_chletsos_ebay.v_order_summary AS
+SELECT
+    o.order_id,
+    o.creation_date,
+    o.order_fulfillment_status,
+    o.order_payment_status,
+    o.buyer_username,
+    COUNT(DISTINCT li.line_item_id)                              AS line_item_count,
+    SUM(li.quantity)                                             AS total_units,
+    SUM(li.line_item_cost_value)                                 AS gross_revenue,
+    SUM(li.delivery_cost_value)                                  AS shipping_charged,
+    SUM(li.line_item_cost_value) + SUM(li.delivery_cost_value)   AS total_order_value,
+    SUM(COALESCE(r.amount_value, 0))                             AS total_refunded,
+    SUM(li.line_item_cost_value) - SUM(COALESCE(r.amount_value, 0)) AS net_revenue
+FROM jason_chletsos_ebay.order_history o
+LEFT JOIN jason_chletsos_ebay.orders_line_item li ON o.order_id = li.order_id
+LEFT JOIN jason_chletsos_ebay.orders_line_item_refund r ON li.line_item_id = r.line_item_id
+GROUP BY o.order_id, o.creation_date, o.order_fulfillment_status,
+         o.order_payment_status, o.buyer_username;
+
+-- 2. Sales by item
+CREATE OR REPLACE VIEW jason_chletsos_ebay.v_sales_by_item AS
+SELECT
+    li.legacy_item_id                                            AS listing_id,
+    li.title,
+    COUNT(DISTINCT li.order_id)                                  AS orders_count,
+    SUM(li.quantity)                                             AS units_sold,
+    AVG(li.line_item_cost_value)                                 AS avg_sale_price,
+    SUM(li.line_item_cost_value)                                 AS gross_revenue,
+    SUM(COALESCE(r.amount_value, 0))                             AS total_refunded,
+    SUM(li.line_item_cost_value) - SUM(COALESCE(r.amount_value, 0)) AS net_revenue,
+    MIN(o.creation_date)                                         AS first_sale_date,
+    MAX(o.creation_date)                                         AS last_sale_date
+FROM jason_chletsos_ebay.orders_line_item li
+JOIN jason_chletsos_ebay.order_history o ON li.order_id = o.order_id
+LEFT JOIN jason_chletsos_ebay.orders_line_item_refund r ON li.line_item_id = r.line_item_id
+GROUP BY li.legacy_item_id, li.title
+ORDER BY gross_revenue DESC;
+
+-- 3. Monthly revenue trend
+CREATE OR REPLACE VIEW jason_chletsos_ebay.v_monthly_revenue AS
+SELECT
+    DATE_TRUNC('month', o.creation_date)                         AS month,
+    COUNT(DISTINCT o.order_id)                                   AS orders,
+    SUM(li.quantity)                                             AS units_sold,
+    SUM(li.line_item_cost_value)                                 AS gross_revenue,
+    SUM(COALESCE(r.amount_value, 0))                             AS refunds,
+    SUM(li.line_item_cost_value) - SUM(COALESCE(r.amount_value, 0)) AS net_revenue,
+    COUNT(DISTINCT o.buyer_username)                             AS unique_buyers
+FROM jason_chletsos_ebay.order_history o
+LEFT JOIN jason_chletsos_ebay.orders_line_item li ON o.order_id = li.order_id
+LEFT JOIN jason_chletsos_ebay.orders_line_item_refund r ON li.line_item_id = r.line_item_id
+GROUP BY DATE_TRUNC('month', o.creation_date)
+ORDER BY month DESC;
+
+-- 4. Fulfillment performance
+CREATE OR REPLACE VIEW jason_chletsos_ebay.v_fulfillment_performance AS
+SELECT
+    o.order_id,
+    o.creation_date                                              AS order_date,
+    o.order_fulfillment_status,
+    sf.shipping_carrier_code,
+    sf.shipped_date,
+    DATEDIFF('day', o.creation_date, sf.shipped_date)            AS days_to_ship,
+    CASE
+        WHEN DATEDIFF('day', o.creation_date, sf.shipped_date) <= 1 THEN 'Same or next day'
+        WHEN DATEDIFF('day', o.creation_date, sf.shipped_date) <= 3 THEN 'Fast 2 to 3 days'
+        WHEN DATEDIFF('day', o.creation_date, sf.shipped_date) <= 7 THEN 'Standard 4 to 7 days'
+        ELSE 'Slow 7 plus days'
+    END                                                          AS shipping_speed_tier
+FROM jason_chletsos_ebay.order_history o
+LEFT JOIN jason_chletsos_ebay.shipping_fulfillment sf ON o.order_id = sf.order_id;
+
+-- 5. Buyer analysis
+CREATE OR REPLACE VIEW jason_chletsos_ebay.v_buyer_analysis AS
+SELECT
+    o.buyer_username,
+    COUNT(DISTINCT o.order_id)                                   AS total_orders,
+    SUM(li.line_item_cost_value)                                 AS lifetime_value,
+    AVG(li.line_item_cost_value)                                 AS avg_order_value,
+    MIN(o.creation_date)                                         AS first_order_date,
+    MAX(o.creation_date)                                         AS last_order_date,
+    CASE
+        WHEN COUNT(DISTINCT o.order_id) = 1  THEN 'One-time'
+        WHEN COUNT(DISTINCT o.order_id) <= 3 THEN 'Repeat'
+        ELSE 'Loyal'
+    END                                                          AS buyer_segment
+FROM jason_chletsos_ebay.order_history o
+JOIN jason_chletsos_ebay.orders_line_item li ON o.order_id = li.order_id
+GROUP BY o.buyer_username
+ORDER BY lifetime_value DESC;
+"""
+
+def write_analysis_views():
+    out = OUTPUT_DIR / "analysis_views.sql"
+    out.write_text(ANALYSIS_SQL, encoding="utf-8")
+    print(f"  Analysis views SQL: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Price review page — market comps vs our prices
+# ---------------------------------------------------------------------------
+
+def build_price_review(listings: list[dict], market: dict) -> Path:
+    """
+    Premium price review: cards with current vs suggested side-by-side,
+    market gap visualization, gap distribution chart.
+    """
+    locks = load_locks()
+    lambda_url  = f"{LAMBDA_BASE}/reprice"
+    rebuild_url = f"{LAMBDA_BASE}/rebuild"
+
+    FLAG_ORDER = {"UNDERPRICED": 0, "OVERPRICED": 1, "OK": 2, "NO_COMPS": 3}
+    sorted_listings = sorted(
+        listings,
+        key=lambda l: (
+            FLAG_ORDER.get(market.get(l["item_id"], {}).get("flag", "NO_COMPS"), 3),
+            abs(market.get(l["item_id"], {}).get("gap_pct") or 0) * -1,
+        )
+    )
+
+    cards = []
+    gap_buckets = {"<-25%": 0, "-25 to -10%": 0, "-10 to +10%": 0, "+10 to +25%": 0, ">+25%": 0}
+    for l in sorted_listings:
+        item_id   = l["item_id"]
+        our_price = float(l["price"]) if l["price"] else 0.0
+        m         = market.get(item_id, {})
+        flag      = m.get("flag", "NO_COMPS")
+        med       = m.get("market_median")
+        mn        = m.get("market_min")
+        mx        = m.get("market_max")
+        gap       = m.get("gap_pct")
+        comps     = m.get("comp_count", 0)
+
+        if flag == "NO_COMPS" or med is None:
+            continue
+
+        # Bucket the gap for the chart
+        if gap is not None:
+            if gap < -25: gap_buckets["<-25%"] += 1
+            elif gap < -10: gap_buckets["-25 to -10%"] += 1
+            elif gap < 10: gap_buckets["-10 to +10%"] += 1
+            elif gap < 25: gap_buckets["+10 to +25%"] += 1
+            else: gap_buckets[">+25%"] += 1
+
+        suggested = max(0.99, round(med * 2) / 2)
+
+        if flag == "UNDERPRICED":
+            badge = '<span class="badge badge-danger">Underpriced</span>'
+            stripe = "var(--danger)"
+            checked = "checked"
+        elif flag == "OVERPRICED":
+            badge = '<span class="badge badge-warning">Overpriced</span>'
+            stripe = "var(--warning)"
+            checked = "checked"
+        else:
+            badge = '<span class="badge badge-success">On Market</span>'
+            stripe = "var(--success)"
+            checked = ""
+
+        # Lock — eBay refuses to revise this listing (price OR title)
+        lock_info = locks.get(item_id)
+        lock_attr = ""
+        if lock_info:
+            checked = ""  # never default-check a locked item
+            lock_label = "Title locked" if lock_info.get("code") == "240" else ("Ended" if lock_info.get("code") == "291" else "Locked")
+            lock_reason = lock_info.get("reason", "")
+            badge += f' <span class="badge badge-danger" title="{lock_reason}">🔒 {lock_label}</span>'
+            stripe = "var(--danger)"
+            lock_attr = f'data-locked="{lock_info["code"]}"'
+
+        gap_label = f"{gap:+.1f}% vs market" if gap is not None else ""
+        thumb_html = f'<img src="{l["pic"]}" alt="" loading="lazy">' if l["pic"] else ''
+        title_short = l['title'][:80] + ('…' if len(l['title']) > 80 else '')
+
+        check_disabled = "disabled" if lock_info else ""
+        cards.append(f'''
+      <article class="pr-card review-row" data-id="{item_id}" {lock_attr} style="--stripe:{stripe}">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="{item_id}" {checked} {check_disabled} aria-label="Select for repricing"{' title="eBay refuses to revise this listing"' if lock_info else ''}>
+        </div>
+        <div class="pr-thumb">{thumb_html}</div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            {badge}
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#{item_id}</span>
+          </div>
+          <a href="{l['url']}" target="_blank" rel="noopener" class="pr-title">{title_short}</a>
+          <div class="pr-market">
+            Market median <b>${med:.2f}</b> · Range ${mn:.2f}–${mx:.2f} · {comps} comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">${our_price:.2f}</div>
+            <div class="pr-gap">{gap_label}</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="{item_id}" inputmode="decimal">{suggested:.2f}</span>
+            </div>
+            <a href="{l['url']}" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>''')
+
+    if not cards:
+        cards_html = '<div class="panel" style="text-align:center;padding:40px;color:var(--text-muted);">No actionable price data found.</div>'
+    else:
+        cards_html = "\n".join(cards)
+
+    underpriced = sum(1 for v in market.values() if v.get("flag") == "UNDERPRICED")
+    overpriced  = sum(1 for v in market.values() if v.get("flag") == "OVERPRICED")
+    money_left  = sum(
+        (market[l["item_id"]]["market_median"] - float(l["price"]))
+        for l in listings
+        if market.get(l["item_id"], {}).get("flag") == "UNDERPRICED"
+        and market[l["item_id"]].get("market_median") is not None
+    )
+
+    extra_css = """
+    .pr-grid { display: grid; gap: 12px; }
+    .pr-card {
+      display: grid;
+      grid-template-columns: 36px 88px 1fr auto;
+      gap: 14px; align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--stripe);
+      border-radius: var(--r-lg);
+      padding: 14px 18px;
+      transition: all var(--t-fast);
+    }
+    .pr-card:hover { border-color: var(--border-mid); border-left-color: var(--stripe); }
+    .pr-check { display: flex; justify-content: center; align-items: center; }
+    .pr-thumb {
+      width: 88px; height: 88px;
+      border-radius: var(--r-sm); overflow: hidden;
+      background: var(--surface-3);
+      flex-shrink: 0;
+    }
+    .pr-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .pr-info { min-width: 0; }
+    .pr-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .pr-title {
+      display: block; font-size: 14px; font-weight: 600; color: var(--text);
+      line-height: 1.35; margin-bottom: 6px; text-decoration: none;
+    }
+    .pr-title:hover { color: var(--gold); }
+    .pr-market { font-size: 12px; color: var(--text-muted); }
+    .pr-market b { color: var(--text); font-weight: 700; }
+    .pr-prices {
+      display: flex; align-items: center; gap: 14px;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      flex-shrink: 0;
+    }
+    .pr-cell-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+    .pr-current {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px; line-height: 1; color: var(--text);
+      letter-spacing: .02em;
+    }
+    .pr-gap { font-size: 11px; color: var(--stripe); margin-top: 2px; font-weight: 600; }
+    .pr-arrow { color: var(--gold); font-size: 24px; line-height: 1; }
+    .pr-new {
+      display: flex; align-items: baseline; gap: 2px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px; line-height: 1; color: var(--gold);
+      letter-spacing: .02em;
+    }
+    .pr-dollar { font-size: 18px; }
+    .pr-new .price-after {
+      min-width: 70px;
+      border-bottom: 2px dashed var(--gold-dim);
+      outline: none;
+      cursor: text;
+      caret-color: var(--gold);
+    }
+    .pr-new .price-after:focus { border-bottom-style: solid; border-bottom-color: var(--gold); }
+    .pr-view-link { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
+    .pr-view-link:hover { color: var(--gold); }
+    .action-bar {
+      position: sticky; top: 76px; z-index: 50;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 16px;
+      background: rgba(20,20,20,.92); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-md);
+    }
+    #count-label { font-size: 12px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; }
+    .charts-row {
+      display: grid; grid-template-columns: 1fr; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
+    .chart-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
+    .chart-wrap { position: relative; height: 220px; }
+    @media (max-width: 880px) {
+      .pr-card { grid-template-columns: 32px 64px 1fr; gap: 12px; padding: 14px; }
+      .pr-thumb { width: 64px; height: 64px; }
+      .pr-prices { grid-column: 1 / -1; padding: 12px; justify-content: space-between; }
+      .action-bar { top: 70px; }
+    }
+    @media (max-width: 480px) {
+      .pr-card { grid-template-columns: 32px 1fr; }
+      .pr-thumb { display: none; }
+    }
+    """
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Market intelligence</div>
+        <h1 class="section-title">Price <span class="accent">Review</span></h1>
+        <div class="section-sub">Live eBay comps vs your prices. Underpriced = leaving money on the table.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num danger">{underpriced}</div><div class="lbl">Underpriced</div></div>
+      <div class="stat-card"><div class="num warning">{overpriced}</div><div class="lbl">Overpriced</div></div>
+      <div class="stat-card"><div class="num danger">${money_left:,.0f}</div><div class="lbl">Revenue Gap</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-panel">
+        <h3>Market Gap Distribution</h3>
+        <div class="chart-wrap"><canvas id="chart-gap"></canvas></div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button onclick="selectAll(true)"  class="btn btn-ghost">Select All</button>
+      <button onclick="selectAll(false)" class="btn btn-ghost">Deselect</button>
+      <span id="count-label"></span>
+      <button onclick="applySelected()" class="btn btn-gold" style="margin-left:auto;">Apply to eBay →</button>
+    </div>
+
+    <div id="status-bar"></div>
+    <div style="margin-bottom:16px;">
+      <button id="rebuild-btn" onclick="rebuildSite()" class="btn btn-outline" style="display:none;">Trigger Rebuild</button>
+    </div>
+
+    <div class="pr-grid" id="review-body">
+      {cards_html}
+    </div>
+
+    <script>
+      const REPRICE_URL = '{lambda_url}';
+      const REBUILD_URL = '{rebuild_url}';
+
+      Chart.defaults.color = '#9a9388';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      new Chart(document.getElementById('chart-gap'), {{
+        type: 'bar',
+        data: {{
+          labels: {list(gap_buckets.keys())!r},
+          datasets: [{{
+            label: 'Listings',
+            data: {list(gap_buckets.values())},
+            backgroundColor: ['rgba(224,123,111,.7)','rgba(224,181,74,.6)','rgba(127,199,122,.6)','rgba(224,181,74,.5)','rgba(212,175,55,.6)'],
+            borderColor:    ['#e07b6f','#e0b54a','#7fc77a','#e0b54a','#d4af37'],
+            borderWidth: 1.5,
+            borderRadius: 6,
+          }}]
+        }},
+        options: {{
+          plugins: {{ legend: {{ display: false }} }},
+          scales: {{
+            y: {{ grid: {{ color: 'rgba(212,175,55,0.05)' }}, ticks: {{ color: '#9a9388', precision: 0 }} }},
+            x: {{ grid: {{ display: false }}, ticks: {{ color: '#f1efe9' }} }}
+          }}
+        }}
+      }});
+
+      function updateCount() {{
+        const total   = document.querySelectorAll('.row-check').length;
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        document.getElementById('count-label').textContent = checked + ' of ' + total + ' selected';
+      }}
+      document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateCount));
+      updateCount();
+
+      function selectAll(val) {{
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        updateCount();
+      }}
+
+      function showStatus(msg, kind) {{
+        const bar = document.getElementById('status-bar');
+        bar.className = 'status-' + kind;
+        bar.style.display = 'block';
+        bar.textContent = msg;
+        bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+      }}
+
+      async function applySelected() {{
+        const items = [];
+        document.querySelectorAll('.row-check:checked').forEach(cb => {{
+          const id    = cb.value;
+          const field = document.querySelector('.price-after[data-id="' + id + '"]');
+          const price = parseFloat((field ? field.innerText.trim() : '0').replace(/[^0-9.]/g, ''));
+          if (id && !isNaN(price) && price > 0) items.push({{ item_id: id, price }});
+        }});
+
+        if (!items.length) {{ showStatus('No items selected.', 'warning'); return; }}
+        showStatus('Applying ' + items.length + ' price(s) to eBay…', 'info');
+
+        let updated = 0;
+        const errors = [];  // {{item_id, error}} — shape compatible with LockTracker
+        for (const item of items) {{
+          try {{
+            const resp = await fetch(REPRICE_URL, {{
+              method: 'POST',
+              headers: {{ 'Content-Type': 'application/json' }},
+              body: JSON.stringify(item)
+            }});
+            const data = await resp.json();
+            if (data.success) {{
+              updated++;
+              const card = document.querySelector('.row-check[value="' + item.item_id + '"]')?.closest('.pr-card');
+              if (card) {{
+                const cur = card.querySelector('.current-price');
+                if (cur) cur.textContent = '$' + item.price.toFixed(2);
+                card.querySelector('.row-check').checked = false;
+                card.style.opacity = '0.45';
+              }}
+            }} else {{
+              errors.push({{ item_id: item.item_id, error: data.error || 'failed' }});
+            }}
+          }} catch(e) {{
+            errors.push({{ item_id: item.item_id, error: e.message }});
+          }}
+        }}
+
+        LockTracker.consumeErrors(errors);
+        const errMsg = errors.length ? ' · ' + errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
+        showStatus('Done. ' + updated + ' price(s) updated on eBay' + errMsg,
+          updated > 0 ? 'success' : 'danger');
+        if (updated > 0) document.getElementById('rebuild-btn').style.display = 'inline-flex';
+      }}
+
+      async function rebuildSite() {{
+        const btn = document.getElementById('rebuild-btn');
+        btn.disabled = true; btn.textContent = 'Rebuilding…';
+        try {{
+          const resp = await fetch(REBUILD_URL, {{ method: 'POST', headers: {{ 'Content-Type': 'application/json' }}, body: '{{}}' }});
+          const data = await resp.json();
+          if (data.success) showStatus('Site rebuild triggered. Live in ~2 minutes.', 'success');
+          else {{ showStatus('Rebuild failed: ' + (data.error || 'Unknown'), 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }}
+        }} catch(e) {{ showStatus('Rebuild request failed: ' + e.message, 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }}
+      }}
+    </script>"""
+
+    out = OUTPUT_DIR / "price_review.html"
+    out.write_text(html_shell(f"Price Review · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="price_review.html"), encoding="utf-8")
+    print(f"  Price review: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Reddit cross-post page (reddit.html)
+# ---------------------------------------------------------------------------
+
+# Curated subreddit list — researched from active selling subs.
+# r/SportsCardSales is the dedicated marketplace sub (strict format, high traffic).
+# Others are collector subs that allow some selling activity.
+_REDDIT_SUBS = [
+    {"id": "SportsCardSales", "name": "r/SportsCardSales",   "tag": "[WTS]", "kind": "self",
+     "note": "Dedicated marketplace · strict format · highest traffic for all sports cards"},
+    {"id": "footballcards",   "name": "r/footballcards",     "tag": "[WTS]", "kind": "self",
+     "note": "Football-specific community · selling allowed in flair-tagged posts"},
+    {"id": "Pokemoncardsales","name": "r/Pokemoncardsales",  "tag": "[WTS]", "kind": "self",
+     "note": "Pokemon-specific marketplace"},
+    {"id": "sportscards",     "name": "r/sportscards",       "tag": "[FS]",  "kind": "self",
+     "note": "General community · selling in dedicated threads"},
+    {"id": "CoinSales",       "name": "r/CoinSales",         "tag": "[WTS]", "kind": "self",
+     "note": "For numismatic / coin listings"},
+    {"id": "baseballcards",   "name": "r/baseballcards",     "tag": "[WTS]", "kind": "self",
+     "note": "Baseball-specific community"},
+]
+
+
+def _suggest_subreddit(category: str) -> str:
+    return {
+        "Pokemon":          "Pokemoncardsales",
+        "Coins":            "CoinSales",
+        "Football Lots":    "SportsCardSales",
+        "Football Singles": "SportsCardSales",
+    }.get(category, "SportsCardSales")
+
+
+def _reddit_default_post(l: dict) -> tuple[str, str]:
+    """Generate (title, body) defaults that conform to r/SportsCardSales rules."""
+    try:
+        price_f = float(l["price"])
+    except (ValueError, TypeError):
+        price_f = 0.0
+    cat = _categorize(l)
+    title = f"[WTS] {l['title'][:200]} — ${price_f:.2f}"
+    body_lines = [
+        f"**{l['title']}**",
+        "",
+        f"**Price: ${price_f:.2f}** — coined, firm.",
+        f"**Condition:** {l['condition'] or 'See photos in album'}",
+        f"**Category:** {cat}",
+        "",
+        "*(Replace the line below with an Imgur album URL showing photos + a paper with your Reddit username + today's date — required by most sales subs.)*",
+        "**Photos:** [imgur.com/a/REPLACE_ME]",
+        "",
+        "**Shipping:** PWE for singles · BMWT for lots and higher-value items · Insurance available on request.",
+        "",
+        "**Payment:** eBay-managed checkout only — PayPal, Visa, Mastercard, AmEx, Discover, Apple Pay, Google Pay. All transactions covered by eBay's Money Back Guarantee. **No DM sales, no Venmo / Zelle / Cash App / crypto.**",
+        "",
+        f"**Buy It Now (one eBay link per post — sub rule):** {l['url']}",
+    ]
+    body = "\n".join(body_lines)
+    return title, body
+
+
+def build_reddit(listings: list[dict]) -> Path:
+    """
+    Reddit cross-post page. Pick a listing → composer pre-fills title + body
+    in the proper r/SportsCardSales format → click Post to send via Lambda.
+    """
+    sorted_l = sorted(listings, key=lambda x: float(x["price"]) if x["price"] else 0, reverse=True)
+
+    # Build per-listing JSON payload to drive the composer client-side
+    import json as _json
+    payloads = {}
+    for l in sorted_l:
+        cat = _categorize(l)
+        title, body = _reddit_default_post(l)
+        payloads[l["item_id"]] = {
+            "id":       l["item_id"],
+            "title":    title,
+            "body":     body,
+            "subreddit": _suggest_subreddit(cat),
+            "ebay_url": l["url"],
+            "img":      l["pic"],
+            "category": cat,
+            "price":    float(l["price"]) if l["price"] else 0,
+        }
+    payload_json = _json.dumps(payloads)
+    subs_json = _json.dumps(_REDDIT_SUBS)
+
+    # Build picker tiles
+    tiles = []
+    for l in sorted_l:
+        try: price_f = float(l["price"])
+        except: price_f = 0.0
+        cat = _categorize(l)
+        thumb = f'<img src="{l["pic"]}" alt="" loading="lazy">' if l["pic"] else ''
+        tiles.append(f'''
+        <button type="button" class="rd-tile" data-id="{l['item_id']}" onclick="rdSelect('{l['item_id']}')">
+          <div class="rd-tile-img">{thumb}</div>
+          <div class="rd-tile-info">
+            <div class="rd-tile-cat">{cat}</div>
+            <div class="rd-tile-title">{l['title'][:64]}</div>
+            <div class="rd-tile-price">${price_f:.2f}</div>
+          </div>
+        </button>''')
+
+    extra_css = """
+    .rd-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+    .rd-picker {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      position: sticky; top: 90px;
+    }
+    .rd-picker h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 12px; }
+    .rd-search { margin-bottom: 12px; }
+    .rd-tiles { display: grid; gap: 8px; }
+    .rd-tile {
+      display: grid; grid-template-columns: 56px 1fr; gap: 10px;
+      padding: 8px; border: 1px solid var(--border); border-radius: var(--r-sm);
+      background: var(--surface-2); cursor: pointer;
+      text-align: left; align-items: center;
+      transition: all var(--t-fast); width: 100%;
+      font-family: inherit; color: inherit;
+    }
+    .rd-tile:hover { border-color: var(--border-mid); background: var(--surface-3); }
+    .rd-tile.active { border-color: var(--gold); background: rgba(212,175,55,.06); }
+    .rd-tile-img { width: 56px; height: 56px; border-radius: var(--r-sm); overflow: hidden; background: #111; }
+    .rd-tile-img img { width: 100%; height: 100%; object-fit: cover; }
+    .rd-tile-info { min-width: 0; }
+    .rd-tile-cat { font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 2px; }
+    .rd-tile-title {
+      font-size: 12px; color: var(--text); line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 2px;
+    }
+    .rd-tile-price { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); }
+
+    .rd-composer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 22px;
+    }
+    .rd-empty {
+      padding: 60px 20px; text-align: center;
+      color: var(--text-muted);
+      border: 1px dashed var(--border-mid);
+      border-radius: var(--r-md);
+    }
+    .rd-empty .big { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold); margin-bottom: 6px; }
+    .rd-form { display: none; }
+    .rd-form.show { display: block; }
+    .rd-form-row { margin-bottom: 14px; }
+    .rd-form-row label { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; }
+    .rd-sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+    .rd-sub {
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+    .rd-sub:hover { border-color: var(--border-mid); }
+    .rd-sub.active { border-color: var(--gold); background: rgba(212,175,55,.08); }
+    .rd-sub-name { font-weight: 700; color: var(--gold); font-size: 13px; margin-bottom: 2px; }
+    .rd-sub-note { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
+    .rd-form textarea { font-family: 'JetBrains Mono', monospace; font-size: 13px; min-height: 220px; resize: vertical; }
+    .rd-form .rd-title-input { font-weight: 600; }
+    .rd-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    .rd-preview {
+      margin-top: 18px;
+      padding: 16px;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .rd-preview .pv-title { color: var(--gold); font-weight: 700; font-family: inherit; font-size: 13px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed var(--border); }
+    @media (max-width: 880px) {
+      .rd-layout { grid-template-columns: 1fr; }
+      .rd-picker { max-height: 320px; position: relative; top: 0; }
+    }
+    """
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Cross-post to Reddit</div>
+        <h1 class="section-title">Reddit <span class="accent">Cross-Post</span></h1>
+        <div class="section-sub">Pick a listing on the left, refine the post, choose a subreddit, send. r/SportsCardSales pre-selected — biggest dedicated sales sub.</div>
+      </div>
+    </div>
+
+    <div class="rd-layout">
+      <aside class="rd-picker">
+        <h3>Pick a listing</h3>
+        <input type="search" class="rd-search search-input" id="rd-search" placeholder="Filter…" oninput="rdFilter()">
+        <div class="rd-tiles">{''.join(tiles)}</div>
+      </aside>
+
+      <section class="rd-composer">
+        <div id="rd-empty" class="rd-empty">
+          <div class="big">No listing selected</div>
+          <div>Pick a listing from the panel to begin composing.</div>
+        </div>
+
+        <form id="rd-form" class="rd-form" onsubmit="event.preventDefault(); rdSubmit();">
+          <div class="rd-form-row">
+            <label>Subreddit</label>
+            <div class="rd-sub-grid" id="rd-sub-grid"></div>
+          </div>
+          <div class="rd-form-row">
+            <label>Post title (300 char max — keep [WTS] tag)</label>
+            <input type="text" id="rd-title" class="rd-title-input" maxlength="300">
+          </div>
+          <div class="rd-form-row">
+            <label>Post body (Markdown supported)</label>
+            <textarea id="rd-body"></textarea>
+          </div>
+
+          <div id="status-bar"></div>
+          <div class="rd-actions">
+            <button type="button" class="btn btn-ghost" onclick="rdCopy()">Copy text</button>
+            <a id="rd-eitr" target="_blank" rel="noopener" class="btn btn-ghost">View eBay</a>
+            <a id="rd-open-reddit" href="#" target="_blank" rel="noopener" class="btn btn-outline" onclick="rdOpenReddit(event)">
+              Open Reddit Submit Page →
+            </a>
+            <button type="submit" class="btn btn-gold" style="margin-left:auto;">Post via API →</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-dim);letter-spacing:.04em;">
+            Tip: <strong style="color:var(--text-muted);">Open Reddit Submit Page</strong> opens reddit.com with title + body pre-filled — no API needed. <strong style="color:var(--text-muted);">Post via API</strong> sends directly (requires deployed Lambda + Reddit credentials).
+          </div>
+
+          <div class="rd-preview" id="rd-preview"></div>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      const REDDIT_URL = '{LAMBDA_BASE}/reddit-post';
+      const PAYLOADS = {payload_json};
+      const SUBS = {subs_json};
+      let activeId = null;
+      let activeSub = null;
+
+      // Render subreddit chips
+      function rdRenderSubs(selected) {{
+        const grid = document.getElementById('rd-sub-grid');
+        grid.innerHTML = SUBS.map(s => `
+          <button type="button" class="rd-sub${{s.id === selected ? ' active' : ''}}" data-sub="${{s.id}}" onclick="rdPickSub('${{s.id}}')">
+            <div class="rd-sub-name">${{s.name}}</div>
+            <div class="rd-sub-note">${{s.note}}</div>
+          </button>`).join('');
+        activeSub = selected;
+      }}
+      function rdPickSub(id) {{
+        activeSub = id;
+        document.querySelectorAll('.rd-sub').forEach(b => b.classList.toggle('active', b.dataset.sub === id));
+        rdUpdatePreview();
+      }}
+
+      function rdSelect(id) {{
+        activeId = id;
+        const p = PAYLOADS[id];
+        document.querySelectorAll('.rd-tile').forEach(t => t.classList.toggle('active', t.dataset.id === id));
+        document.getElementById('rd-empty').style.display = 'none';
+        document.getElementById('rd-form').classList.add('show');
+        document.getElementById('rd-title').value = p.title;
+        document.getElementById('rd-body').value  = p.body;
+        document.getElementById('rd-eitr').href   = p.ebay_url;
+        rdRenderSubs(p.subreddit);
+        rdUpdatePreview();
+      }}
+
+      function rdUpdatePreview() {{
+        const t = document.getElementById('rd-title').value;
+        const b = document.getElementById('rd-body').value;
+        document.getElementById('rd-preview').innerHTML =
+          '<div class="pv-title">' + (t || '(untitled)') + '</div>' +
+          (b || '(empty body)').replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;');
+        if (activeId) {{
+          document.getElementById('rd-open-reddit').href = rdSubmitUrl();
+        }}
+      }}
+      document.getElementById('rd-title').addEventListener('input', rdUpdatePreview);
+      document.getElementById('rd-body').addEventListener('input', rdUpdatePreview);
+
+      function rdFilter() {{
+        const q = document.getElementById('rd-search').value.toLowerCase();
+        document.querySelectorAll('.rd-tile').forEach(t => {{
+          const hit = t.textContent.toLowerCase().includes(q);
+          t.style.display = hit ? '' : 'none';
+        }});
+      }}
+
+      async function rdCopy() {{
+        const t = document.getElementById('rd-title').value;
+        const b = document.getElementById('rd-body').value;
+        try {{
+          await navigator.clipboard.writeText(t + '\\n\\n' + b);
+          showToast('Copied. Now click "Open Reddit Submit Page" to paste.');
+        }} catch(e) {{ showToast('Copy failed: ' + e.message); }}
+      }}
+
+      function rdSubmitUrl() {{
+        const sub = activeSub || 'SportsCardSales';
+        const t   = document.getElementById('rd-title').value;
+        const b   = document.getElementById('rd-body').value;
+        // Reddit's submit URL accepts title + text query params and pre-fills the form
+        return 'https://www.reddit.com/r/' + encodeURIComponent(sub) + '/submit?'
+             + 'title=' + encodeURIComponent(t)
+             + '&text=' + encodeURIComponent(b)
+             + '&type=TEXT';
+      }}
+
+      function rdOpenReddit(ev) {{
+        if (!activeId) {{
+          ev.preventDefault();
+          rdStatus('Select a listing first.', 'warning');
+          return;
+        }}
+        // Update href just-in-time to capture latest title/body edits
+        document.getElementById('rd-open-reddit').href = rdSubmitUrl();
+      }}
+
+      function rdStatus(msg, kind) {{
+        const bar = document.getElementById('status-bar');
+        bar.className = 'status-' + kind;
+        bar.style.display = 'block';
+        bar.textContent = msg;
+        bar.scrollIntoView({{ behavior:'smooth', block:'nearest' }});
+      }}
+
+      async function rdSubmit() {{
+        if (!activeId || !activeSub) {{ rdStatus('Select a listing and subreddit first.', 'warning'); return; }}
+        const payload = {{
+          item_id:   activeId,
+          subreddit: activeSub,
+          title:     document.getElementById('rd-title').value,
+          body:      document.getElementById('rd-body').value,
+        }};
+        rdStatus('Posting to r/' + activeSub + '…', 'info');
+        try {{
+          const resp = await fetch(REDDIT_URL, {{
+            method:  'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body:    JSON.stringify(payload),
+          }});
+          const data = await resp.json();
+          if (data.success) {{
+            rdStatus('Posted! ' + (data.url ? 'View: ' + data.url : ''), 'success');
+            if (data.url) window.open(data.url, '_blank');
+          }} else if (data.error && data.error.includes('not deployed')) {{
+            rdStatus('Reddit Lambda not deployed yet. Use Copy → paste at reddit.com/r/' + activeSub + '/submit (see README setup steps).', 'warning');
+          }} else {{
+            rdStatus('Failed: ' + (data.error || 'Unknown'), 'danger');
+          }}
+        }} catch(e) {{
+          rdStatus('Reddit endpoint unreachable. Use Copy → paste manually. (' + e.message + ')', 'warning');
+        }}
+      }}
+    </script>
+    """
+
+    out = OUTPUT_DIR / "reddit.html"
+    out.write_text(html_shell(f"Reddit Cross-Post · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="reddit.html"), encoding="utf-8")
+    print(f"  Reddit cross-post: {out}")
+    return out
+
+
+def build_return_policy() -> Path:
+    extra_css = """
+    .policy { max-width: 760px; margin: 0 auto; }
+    .policy-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px 28px;
+      margin-bottom: 14px;
+    }
+    .policy-section h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: .03em;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .policy-section p { color: var(--text); line-height: 1.7; font-size: 14.5px; margin-bottom: 10px; }
+    .policy-section p:last-child { margin-bottom: 0; }
+    """
+    body = f"""
+    <div class="policy">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Buyer Protection</div>
+          <h1 class="section-title">Return <span class="accent">Policy</span></h1>
+          <div class="section-sub">Seller: {SELLER_NAME} · eBay store: <a href="{STORE_URL}" target="_blank" rel="noopener" class="seller-link">{STORE_URL}</a></div>
+        </div>
+      </div>
+
+      <div class="policy-section">
+        <h2>Returns</h2>
+        <p>This seller does not accept returns. All sales are final. Please review all photos, descriptions, and ask any questions before purchasing.</p>
+        <p>If an item arrives damaged or is significantly not as described, contact us through eBay messages and we will work to resolve the issue.</p>
+      </div>
+
+      <div class="policy-section">
+        <h2>Non-defective Returns</h2>
+        <p>Returns are not accepted for buyer remorse, changed mind, or items ordered by mistake.</p>
+      </div>
+
+      <div class="policy-section">
+        <h2>Refunds</h2>
+        <p>Refunds are only issued in cases where an item arrives damaged or is significantly not as described. Contact us through eBay messages before opening a case.</p>
+      </div>
+
+      <div class="policy-section">
+        <h2>Exchanges</h2>
+        <p>We do not offer exchanges.</p>
+      </div>
+
+      <div class="policy-section">
+        <h2>How to Report a Problem</h2>
+        <p>If there is a problem with your order, send a message through eBay: <a href="{STORE_URL}" target="_blank" rel="noopener">{STORE_URL}</a></p>
+      </div>
+
+      <div style="text-align:center;color:var(--text-dim);font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-top:24px;">
+        Last updated: {datetime.now(timezone.utc).strftime('%B %d, %Y')}
+      </div>
+    </div>
+    """
+    out = OUTPUT_DIR / "return-policy.html"
+    out.write_text(html_shell(f"Return Policy · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="return-policy.html"), encoding="utf-8")
+    print(f"  Return policy: {out}")
+    return out
+
+
+
+# ---------------------------------------------------------------------------
+# 6. Title review page (title_review.html) + local apply server
+# ---------------------------------------------------------------------------
+
+def build_title_review(listings: list[dict]) -> Path:
+    """
+    Premium title review: side-by-side diff cards with character counter.
+    Apply pushes to Lambda /ebay/revise.
+    """
+    locks = load_locks()
+    lambda_url  = f"{LAMBDA_BASE}/revise"
+    rebuild_url = f"{LAMBDA_BASE}/rebuild"
+
+    cards = []
+    total_gain = 0
+    for l in listings:
+        suggested = _suggest_title(l)
+        original  = l["title"].strip()
+        if suggested.lower() == _re.sub(r' {2,}', ' ', original).lower():
+            continue
+
+        char_gain = len(suggested) - len(original.strip())
+        total_gain += char_gain
+        gain_color = "var(--success)" if char_gain > 0 else "var(--warning)"
+        gain_label = f"+{char_gain}" if char_gain > 0 else f"{char_gain}"
+        pct = round(min(100, len(suggested) / 80 * 100))
+        bar_color = "var(--success)" if len(suggested) <= 80 else "var(--danger)"
+
+        thumb_html = f'<img src="{l["pic"]}" alt="" loading="lazy">' if l["pic"] else ''
+
+        lock_info = locks.get(l["item_id"])
+        is_locked = bool(lock_info)
+        lock_attr = f'data-locked="{lock_info["code"]}"' if is_locked else ""
+        check_attrs = "disabled" if is_locked else "checked"
+        lock_inline = ""
+        if is_locked:
+            label = "Title locked by eBay" if lock_info.get("code") == "240" else ("Listing ended" if lock_info.get("code") == "291" else "Locked")
+            lock_reason = lock_info.get("reason", "")
+            lock_inline = f'<span class="badge badge-danger" style="margin-left:8px;" title="{lock_reason}">🔒 {label}</span>'
+
+        cards.append(f'''
+      <article class="tr-card review-row" data-id="{l['item_id']}" {lock_attr}>
+        <header class="tr-head">
+          <input type="checkbox" class="row-check" value="{l['item_id']}" {check_attrs} aria-label="Select for revision"{' title="eBay refuses to revise this title"' if is_locked else ''}>
+          <div class="tr-thumb">{thumb_html}</div>
+          <div class="tr-id">
+            <a href="{l['url']}" target="_blank" rel="noopener" class="font-mono" style="font-size:11px;color:var(--text-muted);">#{l['item_id']}</a>
+            {lock_inline}
+            <a href="{l['url']}" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:6px 12px;font-size:11px;">View on eBay</a>
+          </div>
+        </header>
+        <div class="tr-bodies">
+          <div class="tr-version tr-before">
+            <div class="tr-lbl">Current</div>
+            <div class="title-before">{original}</div>
+            <div class="tr-charcount">{len(original)} chars</div>
+          </div>
+          <div class="tr-arrow"><span>→</span></div>
+          <div class="tr-version tr-after">
+            <div class="tr-lbl">Optimized · tap to edit</div>
+            <div class="title-after" contenteditable="true" data-id="{l['item_id']}" spellcheck="false">{suggested}</div>
+            <div class="tr-charcount">
+              <span style="color:{bar_color};">{len(suggested)} chars</span>
+              <span style="color:{gain_color};font-weight:700;">({gain_label})</span>
+              <span class="tr-progress"><span class="tr-progress-fill" style="width:{pct}%;background:{bar_color};"></span></span>
+            </div>
+          </div>
+        </div>
+      </article>''')
+
+    if not cards:
+        cards_html = '<div class="panel" style="text-align:center;padding:40px;color:var(--text-muted);">All titles are already optimized.</div>'
+    else:
+        cards_html = "\n".join(cards)
+
+    extra_css = """
+    .tr-grid { display: grid; gap: 14px; }
+    .tr-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: all var(--t-fast);
+    }
+    .tr-card:hover { border-color: var(--border-mid); }
+    .tr-head {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 18px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .tr-thumb { width: 44px; height: 44px; border-radius: var(--r-sm); overflow: hidden; background: var(--surface-3); flex-shrink: 0; }
+    .tr-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .tr-id { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .tr-bodies {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr;
+      gap: 0;
+    }
+    .tr-version { padding: 18px 22px; min-width: 0; }
+    .tr-after { background: rgba(212,175,55,0.04); border-left: 1px solid var(--border); }
+    .tr-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .18em; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+    .title-before {
+      color: var(--text-muted); font-size: 13.5px; line-height: 1.45;
+      padding: 8px 0; border-bottom: 1px dashed var(--border);
+      margin-bottom: 8px;
+      text-decoration: line-through; text-decoration-color: rgba(224,123,111,0.4);
+      text-decoration-thickness: 1px;
+    }
+    .title-after {
+      color: var(--text); font-size: 14px; font-weight: 600; line-height: 1.45;
+      padding: 8px 12px; margin-bottom: 8px;
+      background: var(--surface-3);
+      border: 1px dashed var(--gold-dim);
+      border-radius: var(--r-sm);
+      outline: none;
+      cursor: text;
+      caret-color: var(--gold);
+      transition: all var(--t-fast);
+      word-break: break-word;
+    }
+    .title-after:focus { border-style: solid; border-color: var(--gold); background: rgba(212,175,55,.06); }
+    .tr-charcount { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .tr-progress { flex: 1; height: 4px; background: var(--surface-3); border-radius: 999px; overflow: hidden; max-width: 120px; margin-left: auto; }
+    .tr-progress-fill { display: block; height: 100%; transition: width var(--t-base); }
+    .tr-arrow {
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold);
+      font-size: 22px;
+      background: linear-gradient(180deg, transparent, rgba(212,175,55,.04), transparent);
+    }
+    .action-bar {
+      position: sticky; top: 76px; z-index: 50;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 16px;
+      background: rgba(20,20,20,.92); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-md);
+    }
+    #count-label { font-size: 12px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; }
+    @media (max-width: 720px) {
+      .tr-bodies { grid-template-columns: 1fr; }
+      .tr-after { border-left: none; border-top: 1px solid var(--border); }
+      .tr-arrow { display: none; }
+      .action-bar { top: 70px; }
+    }
+    """
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">SEO optimization</div>
+        <h1 class="section-title">Title <span class="accent">Review</span></h1>
+        <div class="section-sub">{len(cards)} listings have suggested SEO improvements. Total +{total_gain} chars of search keywords.</div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button onclick="selectAll(true)"  class="btn btn-ghost">Select All</button>
+      <button onclick="selectAll(false)" class="btn btn-ghost">Deselect</button>
+      <span id="count-label"></span>
+      <button onclick="applySelected()" class="btn btn-gold" style="margin-left:auto;">Apply to eBay →</button>
+    </div>
+
+    <div id="status-bar"></div>
+    <div style="margin-bottom:16px;">
+      <button id="rebuild-btn" onclick="rebuildSite()" class="btn btn-outline" style="display:none;">Trigger Rebuild</button>
+    </div>
+
+    <div class="tr-grid" id="review-body">
+      {cards_html}
+    </div>
+
+    <script>
+      const LAMBDA_URL  = '{lambda_url}';
+      const REBUILD_URL = '{rebuild_url}';
+
+      function updateCount() {{
+        const total   = document.querySelectorAll('.row-check').length;
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        document.getElementById('count-label').textContent = checked + ' of ' + total + ' selected';
+      }}
+      document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateCount));
+      updateCount();
+
+      function selectAll(val) {{
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        updateCount();
+      }}
+
+      function showStatus(msg, kind) {{
+        const bar = document.getElementById('status-bar');
+        bar.className = 'status-' + kind;
+        bar.style.display = 'block';
+        bar.textContent = msg;
+        bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+      }}
+
+      async function applySelected() {{
+        const items = [];
+        document.querySelectorAll('.row-check:checked').forEach(cb => {{
+          const id = cb.value;
+          const after = document.querySelector('.title-after[data-id="' + id + '"]');
+          items.push({{ item_id: id, title: after ? after.innerText.trim() : '' }});
+        }});
+
+        if (!items.length) {{ showStatus('No items selected.', 'warning'); return; }}
+        showStatus('Applying ' + items.length + ' title(s) to eBay…', 'info');
+
+        try {{
+          const resp = await fetch(LAMBDA_URL, {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ items }})
+          }});
+          const data = await resp.json();
+          if (data.success) {{
+            const updated = data.updated;
+            const failedIds = new Set((data.errors || []).map(e => e.item_id));
+            items.forEach(it => {{
+              if (failedIds.has(it.item_id)) return; // don't dim eBay-rejected rows
+              const card = document.querySelector('.row-check[value="' + it.item_id + '"]')?.closest('.tr-card');
+              if (card) {{
+                const before = card.querySelector('.title-before');
+                const after  = card.querySelector('.title-after[data-id="' + it.item_id + '"]');
+                if (before && after) before.textContent = after.innerText.trim();
+                card.querySelector('.row-check').checked = false;
+                card.style.opacity = '0.45';
+              }}
+            }});
+            LockTracker.consumeErrors(data.errors || []);
+            const errs = data.errors && data.errors.length ? ' · ' + data.errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
+            showStatus('Done. ' + updated + ' listing(s) updated on eBay' + errs, 'success');
+            document.getElementById('rebuild-btn').style.display = 'inline-flex';
+          }} else {{
+            showStatus('Error: ' + (data.error || 'Unknown error'), 'danger');
+          }}
+        }} catch(e) {{ showStatus('Request failed: ' + e.message, 'danger'); }}
+      }}
+
+      async function rebuildSite() {{
+        const btn = document.getElementById('rebuild-btn');
+        btn.disabled = true; btn.textContent = 'Rebuilding…';
+        try {{
+          const resp = await fetch(REBUILD_URL, {{ method: 'POST', headers: {{ 'Content-Type': 'application/json' }}, body: '{{}}' }});
+          const data = await resp.json();
+          if (data.success) showStatus('Site rebuild triggered. Live in ~2 minutes.', 'success');
+          else {{ showStatus('Rebuild failed: ' + (data.error || 'Unknown'), 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }}
+        }} catch(e) {{ showStatus('Rebuild request failed: ' + e.message, 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }}
+      }}
+    </script>"""
+
+    out = OUTPUT_DIR / "title_review.html"
+    out.write_text(html_shell(f"Title Review · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="title_review.html"), encoding="utf-8")
+    print(f"  Title review: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Auto-fix: push quality improvements back to eBay via ReviseItem
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+# ---------------------------------------------------------------------------
+# Per-listing hand-crafted SEO titles
+# Keys are eBay item IDs. Values are the optimized title strings.
+# Rules:
+#   - Max 80 characters (eBay hard limit)
+#   - Front-load the most searched keywords (player name, year, set, parallel)
+#   - Include: player name, year, brand/set, card number, parallel/color, RC if rookie
+#   - For lots: player name, HOF if applicable, number of cards, key brands, era
+#   - For coins: country, year, denomination, metal, grade/condition
+#   - Never keyword stuff — every word must be a real search term buyers use
+#   - No ALL CAPS, no punctuation spam, no filler words
+# ---------------------------------------------------------------------------
+
+_SEO_TITLES = {
+    # --- Wild Card 5 Card Draw (2026) ---
+    "306927028439": "2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2",
+    "306927035291": "2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1",
+    "306927040476": "2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC",
+
+    # --- Coins ---
+    "306829826433": "Australia 1942 Silver Sixpence King George VI + 1968 20 Cents Coin Lot",
+
+    # --- HOF Lot listings (90s cards) ---
+    "306784122664": "Deion Sanders Atlanta Falcons Football Card Lot (6) NFL HOF Prime Time",
+    "306785163679": "Junior Seau San Diego Chargers Football Card Lot (13) Includes Rookie Cards RC",
+    "306785270903": "Marshall Faulk San Diego Chargers Indianapolis Colts Football Card Lot (3) HOF",
+    "306903933988": "Roger Craig San Francisco 49ers Minnesota Vikings Football Card Lot (8) HOF",
+    "306903937710": "Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus",
+    "306903941543": "Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver",
+    "306903947932": "Carl Banks New York Giants Football Card Lot (8) Super Bowl LB",
+    "306904068997": "Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF",
+    "306904078786": "Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF",
+    "306904174454": "Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)",
+    "306904178257": "John Elway Denver Broncos Football Card Lot (10) HOF Super Bowl QB",
+    "306783987628": "Emmitt Smith Dallas Cowboys Football Card Lot (15) HOF No Duplicates",
+    "306844574522": "Jerry Rice San Francisco 49ers Football Card Lot (15) HOF Topps Fleer Score 90s",
+    "306844558345": "Steve Young San Francisco 49ers Football Card Lot (18) HOF Topps Fleer Score 90s",
+    "306844611599": "Sterling Sharpe Green Bay Packers Football Card Lot (21) 1989-1994 Topps Fleer",
+
+    # --- 2025 Panini Prizm Draft Picks singles ---
+    "306903423536": "2025 Panini Prizm Draft Picks Joe Burrow On Campus #OC-14 NFL SP",
+    "306926059250": "2025 Panini Prizm Draft Picks Joe Burrow On Campus #OC-14 NFL Football",
+    "306914214448": "2025 Panini Donruss Optic Shedeur Sanders Rated Rookie RC #203 Stars Prizm",
+    "306914172219": "2025 Panini Prizm Draft Picks Caleb Downs RC #159 Green Prizm Football",
+    "306914195022": "2025 Panini Prizm Draft Picks Drew Allar RC Fearless #F-DAR Gold Ice Prizm",
+    "306914175824": "2025 Panini Prizm Draft Picks Cam Ward Instant Impact #II-CWD Gold Ice Prizm",
+    "306914248275": "2025 Panini Prizm Draft Picks Carnell Tate RC #68 Gold Ice Prizm Football",
+    "306914908485": "2025 Panini Prizm Draft Picks Ashton Jeanty RC #13 Gold Ice Prizm Football",
+    "306914915295": "2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Prizm Football",
+
+    # --- Rule-based fallback lot listings that need hand-crafted titles ---
+    "306914500757": "Eric Metcalf Cleveland Browns Football Card Lot (10) NFL Wide Receiver",
+    "306914547105": "Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL",
+
+    # --- Pokemon ---
+    "306758076966": "Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM",
+}
+
+# For listings not in the hand-crafted dict, apply rule-based improvements
+def _rule_based_title(listing: dict) -> str:
+    title = listing["title"].strip()
+    title = _re.sub(r' {2,}', ' ', title)  # collapse double spaces
+
+    t_lower = title.lower()
+
+    # Detect listing type
+    is_lot     = any(w in t_lower for w in ["lot", "cards", "x different", "no duplicates"])
+    is_prizm   = any(w in t_lower for w in ["prizm", "optic", "donruss", "panini"])
+    is_coin    = any(w in t_lower for w in ["coin", "cent", "penny", "sixpence", "shilling", "australia"])
+    is_pokemon = any(w in t_lower for w in ["pokemon", "pikachu", "charizard", "charcadet",
+                                             "promo", "mega evolution", "holo", "trainer"])
+
+    # Do not touch non-football listings
+    if is_coin or is_pokemon:
+        return title[:80].strip()
+
+    # Add "Football Card Lot" to lot listings missing it
+    if is_lot and "football" not in t_lower:
+        suffix = " Football Card Lot"
+        if len(title) + len(suffix) <= 80:
+            title += suffix
+            t_lower = title.lower()
+
+    # Add "NFL" to short football titles missing it
+    if "nfl" not in t_lower and len(title) < 65:
+        if len(title) + len(" NFL") <= 80:
+            title += " NFL"
+            t_lower = title.lower()
+
+    # Add "Football" to Prizm/Panini titles missing it
+    if is_prizm and "football" not in t_lower:
+        if len(title) + len(" Football") <= 80:
+            title += " Football"
+
+    return title[:80].strip()
+
+
+def _suggest_title(listing: dict) -> str:
+    """
+    Return the best SEO title for a listing.
+    Hand-crafted titles take priority. Falls back to rule-based improvements.
+    """
+    item_id = listing.get("item_id", "")
+
+    # Use hand-crafted title if available
+    if item_id in _SEO_TITLES:
+        t = _SEO_TITLES[item_id].strip()
+        assert len(t) <= 80, f"SEO title for {item_id} exceeds 80 chars: {len(t)}"
+        return t
+
+    # Fall back to rule-based
+    return _rule_based_title(listing)
+
+
+def revise_listings(cfg: dict, listings: list[dict], dry_run: bool = True):
+    """
+    Push title and description improvements back to eBay for every listing
+    where the suggested title differs from the current title.
+
+    Pass dry_run=True (default) to preview changes without sending to eBay.
+    Pass dry_run=False to actually update.
+    """
+    token = get_access_token(cfg)
+    ns_uri = "urn:ebay:apis:eBLBaseComponents"
+
+    improved = []
+    for l in listings:
+        suggested = _suggest_title(l)
+        if suggested.strip().lower() != l["title"].strip().lower():
+            improved.append((l, suggested))
+
+    if not improved:
+        print("  All titles are already optimized. Nothing to update.")
+        return
+
+    print(f"  {'DRY RUN - ' if dry_run else ''}{len(improved)} listings with improvable titles:")
+    for l, new_title in improved:
+        print(f"    [{l['item_id']}]")
+        print(f"      Before: {l['title']}")
+        print(f"      After:  {new_title}")
+
+    if dry_run:
+        print("\n  Run with --fix to apply these changes to eBay.")
+        return
+
+    print("\n  Applying changes to eBay...")
+    success = 0
+    for l, new_title in improved:
+        xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<ReviseItemRequest xmlns="{ns_uri}">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <Item>
+    <ItemID>{l['item_id']}</ItemID>
+    <Title>{new_title}</Title>
+  </Item>
+</ReviseItemRequest>"""
+        headers = {
+            "X-EBAY-API-SITEID":              "0",
+            "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+            "X-EBAY-API-CALL-NAME":           "ReviseItem",
+            "X-EBAY-API-APP-NAME":            cfg["client_id"],
+            "X-EBAY-API-DEV-NAME":            cfg["dev_id"],
+            "X-EBAY-API-CERT-NAME":           cfg["client_secret"],
+            "Content-Type":                   "text/xml",
+        }
+        r = requests.post("https://api.ebay.com/ws/api.dll",
+                          headers=headers, data=xml_body.encode())
+        root = ET.fromstring(r.text)
+        ack = root.findtext(f"{{{ns_uri}}}Ack", "")
+        if ack in ("Success", "Warning"):
+            print(f"    Updated {l['item_id']}: {new_title}")
+            success += 1
+        else:
+            errs = root.findall(f".//{{{ns_uri}}}ShortMessage""")
+            msg = errs[0].text if errs else r.text[:100]
+            print(f"    FAILED {l['item_id']}: {msg}")
+
+    print(f"\n  Done. {success}/{len(improved)} listings updated on eBay.")
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def _git_deploy():
+    """Commit docs/ changes and push to GitHub Pages (main branch)."""
+    import subprocess
+    repo  = Path(__file__).parent
+    token = os.environ.get("GITHUB_TOKEN", "")
+
+    if token:
+        result = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            cwd=repo, capture_output=True, text=True
+        )
+        remote_url = result.stdout.strip()
+        if "github.com" in remote_url and "@" not in remote_url:
+            authed_url = remote_url.replace("https://", f"https://{token}@")
+            subprocess.run(["git", "remote", "set-url", "origin", authed_url],
+                           cwd=repo, check=True)
+
+    subprocess.run(["git", "config", "user.email", "jchletsos@gmail.com"],
+                   cwd=repo, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "Jason Chletsos"],
+                   cwd=repo, capture_output=True)
+
+    subprocess.run(["git", "add", "docs/"], cwd=repo, check=True)
+    diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=repo)
+    if diff.returncode == 0:
+        print("  No changes to deploy.")
+        return
+
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    subprocess.run(["git", "commit", "-m", f"Site refresh {ts}"],
+                   cwd=repo, check=True)
+    subprocess.run(["git", "push", "--force", "origin", "main"], cwd=repo, check=True)
+    print("  Pushed to GitHub. Pages will rebuild in ~60s.")
+
+
+def main():
+    import sys
+    fix_mode    = "--fix"       in sys.argv
+    dry_fix     = "--dry-fix"   in sys.argv
+    no_deploy   = "--no-deploy" in sys.argv
+    print("Loading config...")
+    cfg = json.loads(CONFIG_FILE.read_text())
+
+    print("Getting eBay access token...")
+    token = get_access_token(cfg)
+
+    print("Fetching active listings...")
+    listings = fetch_listings(token, cfg)
+
+    if not listings:
+        print("No listings found.")
+        return
+
+    if fix_mode or dry_fix:
+        print(f"\n{'Previewing' if dry_fix else 'Applying'} title improvements...")
+        revise_listings(cfg, listings, dry_run=not fix_mode)
+        if not fix_mode:
+            return
+
+    print("\nGenerating site files:")
+    print("  Fetching market price comps (this takes ~1 min)...")
+    market = fetch_market_prices(listings, cfg)
+    build_dashboard(listings, market)
+    build_quality_report(listings)
+    build_craigslist(listings)
+    build_reddit(listings)
+    build_google_feed(listings)
+    write_analysis_views()
+    build_return_policy()
+    build_price_review(listings, market)
+    build_title_review(listings)
+
+    print("\nDeploying to GitHub Pages...")
+    if no_deploy:
+        print("  Skipping deploy (--no-deploy flag set).")
+    else:
+        _git_deploy()
+
+    print(f"""
+Done.
+---------------------------------------------------------
+Site URL (after ~60s build):
+  https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/
+
+Pages:
+  /             - Searchable listing dashboard (mobile-friendly)
+  /quality.html - Quality report, worst listings first
+  /craigslist.html - Ready-to-paste Craigslist ads
+  /google_feed.xml - Submit to merchants.google.com for free Google Shopping
+
+Next steps:
+  1. Submit google_feed.xml URL to merchants.google.com (free Google Shopping)
+  2. Open quality.html and fix red listings to improve eBay search rank
+  3. Use craigslist.html to post high-value items on Craigslist (free, collector buyers)
+  4. Run this script again anytime to refresh the site with current listings
+
+To preview title improvements without changing eBay:
+  python3 promote.py --dry-fix
+
+To apply title improvements directly to eBay:
+  python3 promote.py --fix
+
+To add a banner image to the site header:
+  1. Create a 1200x200 JPG in Canva (free at canva.com)
+  2. Save it as docs/banner.jpg
+  3. Run python3 promote.py to redeploy
+---------------------------------------------------------
+""")
+
+
+if __name__ == "__main__":
+    main()
