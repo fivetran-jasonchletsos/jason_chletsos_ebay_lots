@@ -2,6 +2,10 @@ name: Refresh Site
 
 on:
   workflow_dispatch:
+  schedule:
+    # Auto-refresh every 4 hours so the site stays in sync with eBay even
+    # if no one clicks the Refresh button. Cron is in UTC.
+    - cron: "0 */4 * * *"
 
 jobs:
   refresh:
