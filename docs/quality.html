@@ -12,9 +12,13 @@
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 
   <style>
 :root {
@@ -751,10 +755,31 @@ tr:hover td { background: rgba(212,175,55,.03); }
     .q-issues { list-style: none; padding: 0; margin: 6px 0 0; font-size: 12.5px; color: var(--text-muted); }
     .q-issues li { padding: 3px 0; padding-left: 14px; position: relative; }
     .q-issues li::before { content: '⚑'; position: absolute; left: 0; color: var(--stripe); font-size: 10px; }
+    .q-fix {
+      display: grid; grid-template-columns: auto 1fr; gap: 12px;
+      align-items: start;
+      margin-top: 12px; padding: 12px;
+      background: var(--surface-2);
+      border: 1px dashed var(--border-mid);
+      border-radius: var(--r-sm);
+    }
+    .q-fix-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .q-fix-suggest { font-size: 13px; color: var(--gold); font-weight: 600; line-height: 1.4; }
+    .q-fix-none { margin-top: 12px; font-size: 12px; color: var(--text-dim); padding: 8px 0; border-top: 1px dashed var(--border); }
+    .action-bar {
+      position: sticky; top: 76px; z-index: 50;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 16px;
+      background: rgba(20,20,20,.92); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-md);
+    }
+    #count-label { font-size: 12px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; }
     @media (max-width: 540px) {
       .q-card { grid-template-columns: 64px 1fr; padding: 12px; }
       .q-thumb { width: 64px; height: 64px; }
       .q-head { flex-direction: column; gap: 4px; }
+      .action-bar { top: 70px; }
     }
     </style>
 </head>
@@ -772,6 +797,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
 <a href="quality.html" class="active">Quality</a>
 <a href="price_review.html">Pricing</a>
 <a href="title_review.html">Titles</a>
+<a href="reddit.html">Reddit</a>
 <a href="craigslist.html">Craigslist</a>
 <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a></nav>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
@@ -796,6 +822,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
 <a href="quality.html" class="active">Quality</a>
 <a href="price_review.html">Pricing</a>
 <a href="title_review.html">Titles</a>
+<a href="reddit.html">Reddit</a>
 <a href="craigslist.html">Craigslist</a>
 <a href="google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
     <div class="drawer-foot">
@@ -838,8 +865,20 @@ tr:hover td { background: rgba(212,175,55,.03); }
       <h2 class="section-title" style="font-size:24px;">Listings to <span class="accent">improve</span></h2>
     </div>
 
+    <div class="action-bar">
+      <button onclick="qSelectAll(true)"  class="btn btn-ghost">Select All Fixable</button>
+      <button onclick="qSelectAll(false)" class="btn btn-ghost">Deselect</button>
+      <span id="count-label"></span>
+      <button onclick="qApplyFixes()" class="btn btn-gold" style="margin-left:auto;">Apply Title Fixes to eBay →</button>
+    </div>
+
+    <div id="status-bar"></div>
+    <div style="margin-bottom:16px;">
+      <button id="rebuild-btn" onclick="qRebuild()" class="btn btn-outline" style="display:none;">Trigger Rebuild</button>
+    </div>
+
     <div class="q-grid">
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306784122664" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -853,9 +892,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (37/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306784122664" data-suggested="Deion Sanders Atlanta Falcons Football Card Lot (6) NFL HOF Prime Time" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Deion Sanders Atlanta Falcons Football Card Lot (6) NFL HOF Prime Time</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306903941543" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -869,9 +916,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (38/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306903941543" data-suggested="Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306903947932" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -885,9 +940,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (34/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306903947932" data-suggested="Carl Banks New York Giants Football Card Lot (8) Super Bowl LB" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Carl Banks New York Giants Football Card Lot (8) Super Bowl LB</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913186982" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/4iQAAeSwGjRp9VwZ/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -901,9 +964,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (31/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913186982" data-suggested="11 Mel Gray Cards Detroit Lions Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">11 Mel Gray Cards Detroit Lions Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913307606" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/nJwAAeSwFO1p9XlJ/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -917,9 +988,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (37/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913307606" data-suggested="5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913311444" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/DikAAeSw77xp9Xow/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -933,9 +1012,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (36/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913311444" data-suggested="9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913787569" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/iuEAAeSw0F5p9d4k/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -949,9 +1036,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (32/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913787569" data-suggested="10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913845449" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/VIUAAeSwm5Bp9eiq/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -965,9 +1060,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.95</div>
           </div>
           <ul class="q-issues"><li>Title too short (38/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913845449" data-suggested="3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913853080" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/RFMAAeSwa5xp9eoC/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -981,9 +1084,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (38/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913853080" data-suggested="9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913902750" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -997,9 +1108,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$9.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (26/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913902750" data-suggested="7 Howie Long Cards Raiders Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">7 Howie Long Cards Raiders Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913908225" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/GuUAAeSw0F5p9e1k/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1013,9 +1132,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$5.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (32/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913908225" data-suggested="9 Joe Montana Cards 49ers Chiefs Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">9 Joe Montana Cards 49ers Chiefs Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913934898" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1029,9 +1156,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$14.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (35/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913934898" data-suggested="20 Warren Moon Cards Oilers Vikings Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">20 Warren Moon Cards Oilers Vikings Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913939866" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/wMMAAeSwx-Bp9fCx/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1045,9 +1180,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title too short (34/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913939866" data-suggested="15 Dan Marino Cards Miami Dolphins Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">15 Dan Marino Cards Miami Dolphins Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306914500757" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/SocAAeSwqZVp9k4F/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1061,9 +1204,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.39</div>
           </div>
           <ul class="q-issues"><li>Title too short (38/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914500757" data-suggested="Eric Metcalf Cleveland Browns Football Card Lot (10) NFL Wide Receiver" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Eric Metcalf Cleveland Browns Football Card Lot (10) NFL Wide Receiver</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306914547105" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1077,9 +1228,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.34</div>
           </div>
           <ul class="q-issues"><li>Title too short (37/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914547105" data-suggested="Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306785270903" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1093,9 +1252,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.50</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (57/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306785270903" data-suggested="Marshall Faulk San Diego Chargers Indianapolis Colts Football Card Lot (3) HOF" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Marshall Faulk San Diego Chargers Indianapolis Colts Football Card Lot (3) HOF</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306903933988" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/7fsAAeSwwtlp7reN/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1109,9 +1276,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (57/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306903933988" data-suggested="Roger Craig San Francisco 49ers Minnesota Vikings Football Card Lot (8) HOF" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Roger Craig San Francisco 49ers Minnesota Vikings Football Card Lot (8) HOF</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306903937710" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1125,9 +1300,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (50/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306903937710" data-suggested="Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306904078786" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1141,9 +1324,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.49</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (49/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306904078786" data-suggested="Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306904174454" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/JnAAAeSwLQ1p7wMT/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1157,9 +1348,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.49</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (55/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306904174454" data-suggested="Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306904189481" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/pjoAAeSwN8dp7wmI/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1173,9 +1372,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (40/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306904189481" data-suggested="4 Aaron Glenn Rookie Cards New York Jets Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">4 Aaron Glenn Rookie Cards New York Jets Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306904203738" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1189,9 +1396,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$10.00</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (53/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306904203738" data-suggested="1994 Classic Pro Line Live - Autograph - Steve Emtman NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">1994 Classic Pro Line Live - Autograph - Steve Emtman NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306904215389" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/hOMAAeSwWi9p7w-H/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1205,9 +1420,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (56/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306904215389" data-suggested="12 Jim Everett Cards Los Angeles Rams New Orleans Saints Football Card Lot" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">12 Jim Everett Cards Los Angeles Rams New Orleans Saints Football Card Lot</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913168494" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/1VIAAeSwrHRp9Vkl/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1221,9 +1444,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (57/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913168494" data-suggested="15 Charles Haley Cards San Francisco 49ers Dallas Cowboys Football Card Lot" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys Football Card Lot</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913790653" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1237,9 +1468,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (49/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913790653" data-suggested="11 Raghib And Quadry Ismail Cards Raiders Vikings Football Card Lot" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">11 Raghib And Quadry Ismail Cards Raiders Vikings Football Card Lot</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306913950248" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/cDgAAeSwPaJp9fK~/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1253,9 +1492,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (46/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306913950248" data-suggested="4 Rookie Cards Willie McGinest One Autographed Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">4 Rookie Cards Willie McGinest One Autographed Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306914280138" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/xWoAAeSwzANp9is3/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1269,9 +1516,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.99</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (41/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914280138" data-suggested="5 Sam Adams Rookie Cards Seattle Seahawks Football Card Lot NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">5 Sam Adams Rookie Cards Seattle Seahawks Football Card Lot NFL</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306926059250" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1285,9 +1540,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$205.00</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (59/80 chars)</li><li>Description missing or very short</li><li>$205.00 is 3× your average ($9.15)</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306926059250" data-suggested="2025 Panini Prizm Draft Picks Joe Burrow On Campus #OC-14 NFL Football" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm Draft Picks Joe Burrow On Campus #OC-14 NFL Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--warning)">
+      <article class="q-card" data-id="306758076966" style="--stripe:var(--warning)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1301,9 +1564,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.39</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (43/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306758076966" data-suggested="Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306927028439" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/h6MAAeSw6YZp~mQC/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1317,9 +1588,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$5.00</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306927035291" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/jbwAAeSwu-dp~mT2/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1333,9 +1605,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$5.00</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306927040476" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/OvAAAeSw0rNp~mXb/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1349,9 +1622,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.00</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306829826433" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/WngAAeSw1upputrS/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1365,9 +1639,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.50</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306785163679" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1381,9 +1656,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306785163679" data-suggested="Junior Seau San Diego Chargers Football Card Lot (13) Includes Rookie Cards RC"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Junior Seau San Diego Chargers Football Card Lot (13) Includes Rookie Cards RC</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306904068997" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/sc0AAeSwVNVp7uZe/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1397,9 +1680,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306904068997" data-suggested="Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914169081" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1413,9 +1704,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$4.50</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914169081" data-suggested="2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914173441" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/absAAeSwHPhp9hiM/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1429,9 +1728,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914174921" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/nj4AAeSwM4Zp9hjO/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1445,9 +1745,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914174921" data-suggested="2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2 Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2 Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914176585" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/lTUAAeSwSx9p9hlJ/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1461,9 +1769,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.49</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914176585" data-suggested="2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC) Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC) Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914244468" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/ntwAAeSwPN5p9iXs/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1477,9 +1793,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914245253" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/v30AAeSwpzNp9iZC/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1493,9 +1810,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914248743" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1509,9 +1827,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914248743" data-suggested="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914249326" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/vrwAAeSwI-5p9ie0/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1525,9 +1851,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$1.50</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914249326" data-suggested="2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm NFL Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm NFL Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914908485" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/TYkAAeSw~9Bp9qSL/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1541,9 +1875,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914908485" data-suggested="2025 Panini Prizm Draft Picks Ashton Jeanty RC #13 Gold Ice Prizm Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm Draft Picks Ashton Jeanty RC #13 Gold Ice Prizm Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914911040" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1557,9 +1899,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914912556" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/27IAAeSwi69p9qVk/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1573,9 +1916,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914913674" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/GGAAAeSwYOtp9qXI/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1589,9 +1933,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914915295" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/qdEAAeSwJk1p9qaI/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1605,9 +1950,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$2.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306914915295" data-suggested="2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Prizm Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Prizm Football</div>
+                </div>
+              </div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306914916776" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/A50AAeSw4ABp9qbm/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1621,9 +1974,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$3.99</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306751048818" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1637,9 +1991,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$15.50</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306926030086" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1653,9 +2008,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$50.00</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li><li>$50.00 is 3× your average ($9.15)</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
-      <article class="q-card" style="--stripe:var(--success)">
+      <article class="q-card" data-id="306927289794" style="--stripe:var(--success)">
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/v7UAAeSwQW9p~pTV/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
           <div class="q-head">
@@ -1669,10 +2025,86 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="q-price">$18.00</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306927289794" data-suggested="2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC) Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC) Football</div>
+                </div>
+              </div>
         </div>
       </article></div>
 
     <script>
+      const REVISE_URL  = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/revise';
+      const REBUILD_URL = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild';
+
+      function qUpdateCount() {
+        const total   = document.querySelectorAll('.row-check').length;
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        const lbl = document.getElementById('count-label');
+        if (lbl) lbl.textContent = checked + ' of ' + total + ' selected';
+      }
+      document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', qUpdateCount));
+      qUpdateCount();
+
+      function qSelectAll(val) {
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        qUpdateCount();
+      }
+
+      function qStatus(msg, kind) {
+        const bar = document.getElementById('status-bar');
+        bar.className = 'status-' + kind;
+        bar.style.display = 'block';
+        bar.textContent = msg;
+        bar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      async function qApplyFixes() {
+        const items = [];
+        document.querySelectorAll('.row-check:checked').forEach(cb => {
+          items.push({ item_id: cb.value, title: cb.dataset.suggested });
+        });
+        if (!items.length) { qStatus('No items selected.', 'warning'); return; }
+        qStatus('Applying ' + items.length + ' title fix(es) to eBay…', 'info');
+
+        try {
+          const resp = await fetch(REVISE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            items.forEach(it => {
+              const card = document.querySelector('.q-card[data-id="' + it.item_id + '"]');
+              if (card) {
+                card.querySelector('.row-check').checked = false;
+                card.style.opacity = '0.45';
+              }
+            });
+            const errs = data.errors && data.errors.length ? ' · ' + data.errors.length + ' failed' : '';
+            qStatus('Done. ' + (data.updated || 0) + ' listing(s) updated on eBay' + errs, 'success');
+            document.getElementById('rebuild-btn').style.display = 'inline-flex';
+          } else {
+            qStatus('Error: ' + (data.error || 'Unknown'), 'danger');
+          }
+        } catch(e) { qStatus('Request failed: ' + e.message, 'danger'); }
+      }
+
+      async function qRebuild() {
+        const btn = document.getElementById('rebuild-btn');
+        btn.disabled = true; btn.textContent = 'Rebuilding…';
+        try {
+          const resp = await fetch(REBUILD_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body:'{}' });
+          const data = await resp.json();
+          if (data.success) qStatus('Site rebuild triggered. Live in ~2 minutes.', 'success');
+          else { qStatus('Rebuild failed: ' + (data.error || 'Unknown'), 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }
+        } catch(e) { qStatus('Rebuild request failed: ' + e.message, 'danger'); btn.disabled = false; btn.textContent = 'Trigger Rebuild'; }
+      }
+
       Chart.defaults.color = '#9a9388';
       Chart.defaults.font.family = "'Inter', sans-serif";
       Chart.defaults.borderColor = 'rgba(212,175,55,0.10)';
@@ -1720,14 +2152,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 09, 2026 · 02:59 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 09, 2026 · 03:09 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
-<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
   <script>
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');
