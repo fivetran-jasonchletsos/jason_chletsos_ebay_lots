@@ -13,6 +13,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
+  <script>
+    // Apply saved theme synchronously to avoid flash-of-wrong-theme.
+    (function() {
+      try {
+        var t = localStorage.getItem('h2k_theme');
+        if (t === 'cream' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+  </script>
   <title>2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</title>
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,6 +36,7 @@
 
   <style>
 :root {
+  /* Default: Dark Luxe (gold on black) */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
@@ -47,6 +57,10 @@
   --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
   --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
   --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
+  --bg-radial-1: rgba(212,175,55,.08);
+  --bg-radial-2: rgba(212,175,55,.05);
+  --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
+  --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
@@ -54,6 +68,140 @@
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
 }
+
+/* ============ ALT THEME: CREAM & NAVY ============ */
+[data-theme="cream"] {
+  --bg:          #f5f0e8;       /* warm cream */
+  --surface:     #e8e0d0;       /* light tan card */
+  --surface-2:   #ede5d6;       /* slightly lighter raised */
+  --surface-3:   #d8ccba;       /* darker for inputs / chips */
+  --border:      rgba(13,31,60,0.10);
+  --border-mid:  rgba(13,31,60,0.22);
+  --border-hi:   rgba(13,31,60,0.45);
+  --gold:        #c05a1a;       /* burnt orange (price/accent) */
+  --gold-bright: #e57228;
+  --gold-dim:    #8a3e10;
+  --text:        #0d1f3c;       /* deep navy */
+  --text-muted:  #5a6a7a;       /* steel gray */
+  --text-dim:    #8a98a8;
+  --success:     #2f7d4a;
+  --warning:     #b8860b;
+  --danger:      #b54a3e;
+  --link:        #0d1f3c;
+  --shadow-lg:   0 18px 48px -12px rgba(13,31,60,.18);
+  --shadow-card: 0 2px 10px rgba(13,31,60,.08), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(192,90,26,.22);
+  --bg-radial-1: rgba(192,90,26,.10);
+  --bg-radial-2: rgba(13,31,60,.06);
+  --hero-tag-fg: #f5f0e8;       /* cream text on orange tag */
+  --brand-fg:    #f5f0e8;       /* cream "H" on orange brand mark */
+}
+
+/* Cream-theme button overrides — primary becomes navy/cream, ghost+outline use navy */
+[data-theme="cream"] .btn-gold,
+[data-theme="cream"] .btn-refresh {
+  background: var(--text);
+  color: var(--bg);
+}
+[data-theme="cream"] .btn-gold:hover,
+[data-theme="cream"] .btn-refresh:hover {
+  filter: brightness(1.15);
+  color: var(--bg);
+}
+[data-theme="cream"] .btn-ghost,
+[data-theme="cream"] .btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--text);
+}
+[data-theme="cream"] .btn-ghost:hover,
+[data-theme="cream"] .btn-outline:hover {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+[data-theme="cream"] .btn-install {
+  border-color: var(--text);
+  color: var(--text);
+}
+[data-theme="cream"] .btn-install:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* Cream-theme tag/badge — matches user spec exactly */
+[data-theme="cream"] .tag {
+  background: #e8d8c0;
+  color: #8a3e10;
+  border: 1px solid #c05a1a;
+}
+[data-theme="cream"] .tag-gold {
+  background: #c05a1a;
+  color: #f5f0e8;
+  border-color: #8a3e10;
+}
+[data-theme="cream"] .tag-danger,
+[data-theme="cream"] .badge-danger {
+  background: rgba(181,74,62,.14); color: #8a2c20; border-color: rgba(181,74,62,.4);
+}
+[data-theme="cream"] .tag-warn,
+[data-theme="cream"] .badge-warning {
+  background: rgba(184,134,11,.14); color: #7a5a07; border-color: rgba(184,134,11,.4);
+}
+[data-theme="cream"] .tag-success,
+[data-theme="cream"] .badge-success {
+  background: rgba(47,125,74,.14); color: #1f5230; border-color: rgba(47,125,74,.4);
+}
+[data-theme="cream"] .badge-gold {
+  background: rgba(192,90,26,.14); color: #8a3e10; border-color: rgba(192,90,26,.45);
+}
+
+/* Header glass effect needs different alpha on light */
+[data-theme="cream"] .app-header {
+  background: linear-gradient(180deg, rgba(245,240,232,.95), rgba(245,240,232,.85));
+}
+[data-theme="cream"] .nav-links a.active {
+  background: rgba(192,90,26,.10);
+  color: var(--gold);
+}
+
+/* Brand mark uses orange gradient w/ cream H letter */
+[data-theme="cream"] .brand-mark { color: var(--brand-fg); }
+
+/* Stat / hero glow tints — orange instead of gold halo */
+[data-theme="cream"] .stat-card .num,
+[data-theme="cream"] .hero-price,
+[data-theme="cream"] .product-price {
+  text-shadow: 0 0 22px rgba(192,90,26,.18);
+}
+
+/* Drawer + selection in cream */
+[data-theme="cream"] ::selection { background: var(--gold); color: var(--bg); }
+[data-theme="cream"] .drawer { background: var(--surface); }
+[data-theme="cream"] .drawer a { color: var(--text); }
+[data-theme="cream"] .drawer a:hover, [data-theme="cream"] .drawer a.active {
+  background: var(--surface-2); color: var(--gold); border-color: var(--border-mid);
+}
+
+/* Filter chip "active" state */
+[data-theme="cream"] .chip.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* Hero tag (Featured #1) keeps orange-gradient look but with cream text */
+[data-theme="cream"] .hero-tag { color: var(--hero-tag-fg); }
+
+/* Search-input magnifier icon needs darker stroke for cream bg */
+[data-theme="cream"] .search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%235a6a7a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+}
+
+/* Charts: Chart.js uses a hardcoded gray for grids/labels — re-tint via CSS for cream */
+[data-theme="cream"] .chart-panel { color: var(--text); }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -67,8 +215,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh;
   background-image:
-    radial-gradient(1200px 600px at 80% -10%, rgba(212,175,55,.08), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(212,175,55,.05), transparent 60%);
+    radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
 }
 ::selection { background: var(--gold); color: #000; }
@@ -101,7 +249,7 @@ a:hover { color: var(--gold-bright); }
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   display: grid; place-items: center;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; color: #0a0a0a; font-weight: 700;
+  font-size: 22px; color: var(--brand-fg); font-weight: 700;
   box-shadow: var(--glow-gold);
   flex-shrink: 0;
 }
@@ -127,7 +275,7 @@ a:hover { color: var(--gold-bright); }
 .nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
 .btn-refresh {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   border: none;
   padding: 10px 18px;
   border-radius: var(--r-sm);
@@ -153,6 +301,29 @@ a:hover { color: var(--gold-bright); }
   font-family: inherit;
 }
 .btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
+.btn-theme {
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+.btn-theme:hover { color: var(--gold); border-color: var(--gold); }
+.btn-theme .ic-moon { display: none; }
+.btn-theme .ic-sun  { display: block; }
+[data-theme="cream"] .btn-theme .ic-sun  { display: none; }
+[data-theme="cream"] .btn-theme .ic-moon { display: block; }
+[data-theme="cream"] .btn-theme {
+  color: var(--text);
+  border-color: var(--text);
+}
+[data-theme="cream"] .btn-theme:hover {
+  background: var(--text);
+  color: var(--bg);
+}
 .menu-toggle {
   display: none;
   width: 42px; height: 42px;
@@ -319,7 +490,7 @@ main {
 }
 .btn-gold {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   letter-spacing: .04em;
 }
 .btn-gold:hover { color: #000; transform: translateY(-1px); filter: brightness(1.08); }
@@ -354,7 +525,7 @@ main {
 .chip:hover { color: var(--text); border-color: var(--border-mid); }
 .chip.active {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   border-color: var(--gold);
 }
 .chip .count { color: inherit; opacity: .7; }
@@ -584,7 +755,7 @@ input[type="checkbox"]:checked::after {
 .size-btn:hover { color: var(--text); border-color: var(--border-mid); }
 .size-btn.active {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   border-color: var(--gold);
 }
 
@@ -854,6 +1025,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
 <a href="reddit.html">Reddit</a>
 <a href="../craigslist.html">Craigslist</a>
 <a href="../google_feed.xml" target="_blank" rel="noopener">Google Feed</a></nav>
+      <button class="btn-theme" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch theme" aria-label="Switch theme">
+        <svg class="ic-sun"  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ic-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
       <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
         Install
@@ -991,7 +1166,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 09, 2026 · 08:22 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 09, 2026 · 16:02 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -1125,6 +1300,32 @@ tr:hover td { background: rgba(212,175,55,.03); }
         if (btn) btn.style.display = 'none';
       }
     };
+
+    // ---- Theme switching: dark luxe ↔ cream & navy ----
+    window.toggleTheme = function() {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = cur === 'cream' ? 'dark' : 'cream';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('h2k_theme', next); } catch(e) {}
+      // Update theme-color meta for browser chrome (status bar)
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', next === 'cream' ? '#f5f0e8' : '#0a0a0a');
+      // Update Chart.js defaults if present, then re-render any active charts
+      if (typeof Chart !== 'undefined') {
+        const styles = getComputedStyle(document.documentElement);
+        Chart.defaults.color = styles.getPropertyValue('--text-muted').trim() || '#9a9388';
+        Chart.defaults.borderColor = styles.getPropertyValue('--border').trim();
+        // Trigger redraw on existing charts
+        Object.values(Chart.instances || {}).forEach(c => { try { c.update(); } catch(e) {} });
+      }
+      showToast('Theme: ' + (next === 'cream' ? 'Cream & Navy' : 'Dark Luxe'));
+    };
+    // Initial chart-color sync once Chart.js loads
+    if (typeof Chart !== 'undefined') {
+      const s = getComputedStyle(document.documentElement);
+      Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';
+      Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+    }
   </script>
 </body>
 </html>
