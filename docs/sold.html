@@ -22,8 +22,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["5264c98ed90a293472cde211a9dfe4f658c0346678c1901b7f87e6ab369ce06e"];
-    window.__ADMIN_SALT   = '281fc7abc7cd248e39d056979dbf4567';
+    window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -532,16 +532,63 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
-.nav-links { display: flex; align-items: center; gap: 4px; }
-.nav-links a {
+.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links a,
+.nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
   font-size: 13px; font-weight: 500;
   padding: 10px 14px; border-radius: var(--r-sm);
   transition: all var(--t-fast);
   white-space: nowrap;
+  background: transparent; border: none; font-family: inherit;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.nav-links a:hover { color: var(--text); background: var(--surface-2); }
-.nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
+.nav-links a:hover,
+.nav-links .nav-dropdown-trigger:hover { color: var(--text); background: var(--surface-2); }
+.nav-links a.active,
+.nav-links .nav-dropdown-trigger.active { color: var(--gold); background: rgba(212,175,55,.08); }
+
+.nav-dropdown { position: relative; }
+.nav-dropdown-trigger svg { transition: transform var(--t-fast); opacity: .65; }
+.nav-dropdown[aria-expanded="true"] .nav-dropdown-trigger svg,
+.nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); opacity: 1; }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: none;
+  z-index: 150;
+}
+.nav-dropdown.open .nav-dropdown-menu,
+.nav-dropdown:hover .nav-dropdown-menu { display: block; }
+.nav-dropdown-menu a {
+  display: block;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-dropdown-menu a:hover { background: var(--surface-2); color: var(--gold); }
+.nav-dropdown-menu a.active { background: rgba(212,175,55,.12); color: var(--gold); }
+
+/* Drawer grouping headers (mobile) */
+.drawer-group {
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700;
+  padding: 16px 14px 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.drawer-group:first-of-type { margin-top: 0; border-top: none; padding-top: 8px; }
 .btn-refresh {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   color: var(--brand-fg);
@@ -1352,16 +1399,24 @@ tr:hover td { background: rgba(212,175,55,.03); }
           <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
         </div>
       </a>
-      <nav class="nav-links"><a href="index.html">Listings</a>
-<a href="sold.html" class="active">Sold</a>
-<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
-<a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a></nav>
+      <nav class="nav-links"><a href="index.html" class="nav-link">Listings</a>
+<a href="sold.html" class="nav-link active">Sold</a>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Insights
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="analytics.html" data-admin="1">Analytics</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="price_review.html" data-admin="1">Pricing</a><a href="title_review.html" data-admin="1">Titles</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Cross-post
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
+        </div></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1400,11 +1455,13 @@ tr:hover td { background: rgba(212,175,55,.03); }
     </div>
     <a href="index.html">Listings</a>
 <a href="sold.html" class="active">Sold</a>
+<div class="drawer-group" data-admin="1">Insights</div>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
 <a href="quality.html" class="admin-only" data-admin="1">Quality</a>
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
 <a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<div class="drawer-group" data-admin="1">Cross-post</div>
 <a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
 <a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
@@ -2447,7 +2504,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 23:31 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 10, 2026 · 23:40 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -2527,6 +2584,27 @@ tr:hover td { background: rgba(212,175,55,.03); }
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
       else showToast('Signed out.');
     };
+
+    // Nav dropdown toggle (touch-friendly; desktop hover also works via CSS)
+    window.toggleNavDropdown = function(btn, ev) {
+      ev.stopPropagation();
+      const dd = btn.closest('.nav-dropdown');
+      const opening = !dd.classList.contains('open');
+      // Close any other open dropdowns
+      document.querySelectorAll('.nav-dropdown.open').forEach(d => {
+        if (d !== dd) d.classList.remove('open');
+      });
+      dd.classList.toggle('open', opening);
+      btn.setAttribute('aria-expanded', opening);
+    };
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown.open').forEach(d => {
+          d.classList.remove('open');
+          d.querySelector('.nav-dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
 
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');

@@ -38,10 +38,33 @@ ADMIN_FILE   = Path(__file__).parent / "admin.json"
 OUTPUT_DIR   = Path(__file__).parent / "docs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# Random per-build salt to prevent rainbow-table cracking of admin password hashes.
-# Regenerated each build — old localStorage tokens auto-expire on next deploy.
+# Stable per-installation salt for admin password hashes. Stored alongside
+# the passwords in admin.json (gitignored) so it survives across rebuilds
+# without invalidating the user's stored login token on every deploy.
+# Old tokens still auto-expire when the password itself rotates because the
+# hash changes; the salt no longer needs to rotate just to achieve that.
 import hashlib as _hashlib, secrets as _secrets
-_ADMIN_SALT = _secrets.token_hex(16)
+
+
+def _ensure_admin_salt() -> str:
+    """Read or generate a stable salt persisted in admin.json."""
+    if not ADMIN_FILE.exists():
+        return _secrets.token_hex(16)
+    try:
+        data = json.loads(ADMIN_FILE.read_text())
+        if isinstance(data, dict) and isinstance(data.get("salt"), str) and len(data["salt"]) >= 16:
+            return data["salt"]
+        # No salt yet — generate one and persist it
+        if isinstance(data, dict):
+            data["salt"] = _secrets.token_hex(16)
+            ADMIN_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            return data["salt"]
+    except Exception:
+        pass
+    return _secrets.token_hex(16)
+
+
+_ADMIN_SALT = _ensure_admin_salt()
 
 
 def load_admin_hashes() -> list[str]:
@@ -1515,16 +1538,63 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
-.nav-links { display: flex; align-items: center; gap: 4px; }
-.nav-links a {
+.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links a,
+.nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
   font-size: 13px; font-weight: 500;
   padding: 10px 14px; border-radius: var(--r-sm);
   transition: all var(--t-fast);
   white-space: nowrap;
+  background: transparent; border: none; font-family: inherit;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.nav-links a:hover { color: var(--text); background: var(--surface-2); }
-.nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
+.nav-links a:hover,
+.nav-links .nav-dropdown-trigger:hover { color: var(--text); background: var(--surface-2); }
+.nav-links a.active,
+.nav-links .nav-dropdown-trigger.active { color: var(--gold); background: rgba(212,175,55,.08); }
+
+.nav-dropdown { position: relative; }
+.nav-dropdown-trigger svg { transition: transform var(--t-fast); opacity: .65; }
+.nav-dropdown[aria-expanded="true"] .nav-dropdown-trigger svg,
+.nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); opacity: 1; }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: none;
+  z-index: 150;
+}
+.nav-dropdown.open .nav-dropdown-menu,
+.nav-dropdown:hover .nav-dropdown-menu { display: block; }
+.nav-dropdown-menu a {
+  display: block;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-dropdown-menu a:hover { background: var(--surface-2); color: var(--gold); }
+.nav-dropdown-menu a.active { background: rgba(212,175,55,.12); color: var(--gold); }
+
+/* Drawer grouping headers (mobile) */
+.drawer-group {
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700;
+  padding: 16px 14px 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.drawer-group:first-of-type { margin-top: 0; border-top: none; padding-top: 8px; }
 .btn-refresh {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   color: var(--brand-fg);
@@ -2295,36 +2365,87 @@ _CDN_HEAD = """
 
 _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts can use them
 
-# nav items: (href, label, public?)
-# public=True: visible to anonymous visitors. public=False: only after admin login.
+# nav items: (href, label, public?, group?)
+# - group=None  → top-level direct link
+# - group="X"   → tucked under the "X ▾" dropdown
+# Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
-    ("index.html",        "Listings",    True),
-    ("sold.html",         "Sold",        True),
-    ("analytics.html",    "Analytics",   False),
-    ("deals.html",        "Deals",       False),
-    ("quality.html",      "Quality",     False),
-    ("price_review.html", "Pricing",     False),
-    ("title_review.html", "Titles",      False),
-    ("reddit.html",       "Reddit",      False),
-    ("craigslist.html",   "Craigslist",  False),
-    ("google_feed.xml",   "Google Feed", False),
+    ("index.html",        "Listings",    True,  None),
+    ("sold.html",         "Sold",        True,  None),
+    ("analytics.html",    "Analytics",   False, "Insights"),
+    ("deals.html",        "Deals",       False, "Insights"),
+    ("quality.html",      "Quality",     False, "Insights"),
+    ("price_review.html", "Pricing",     False, "Insights"),
+    ("title_review.html", "Titles",      False, "Insights"),
+    ("reddit.html",       "Reddit",      False, "Cross-post"),
+    ("craigslist.html",   "Craigslist",  False, "Cross-post"),
+    ("google_feed.xml",   "Google Feed", False, "Cross-post"),
 ]
-# Admin-only pages — body content is hidden until the visitor unlocks
-_ADMIN_PAGES = {p for p, _, public in _NAV_ITEMS if not public}
+_ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
 
 def _nav_link_html(active_page: str, mobile: bool = False) -> str:
+    """Render the nav.
+    Desktop: flat links for top-level + dropdown menus for grouped items.
+    Mobile (drawer): everything as a flat list (drawer scrolls).
+    """
+    if mobile:
+        # Drawer: flat list, group items get a small section header
+        out = []
+        last_group = None
+        for href, label, public, group in _NAV_ITEMS:
+            is_external = href.endswith(".xml")
+            is_active   = (href == active_page)
+            cls_parts   = []
+            if is_active: cls_parts.append("active")
+            if not public: cls_parts.append("admin-only")
+            cls = f' class="{" ".join(cls_parts)}"' if cls_parts else ""
+            attrs = ' target="_blank" rel="noopener"' if is_external else ""
+            if not public: attrs += ' data-admin="1"'
+            if group and group != last_group:
+                out.append(f'<div class="drawer-group" data-admin="1">{group}</div>')
+                last_group = group
+            out.append(f'<a href="{href}"{cls}{attrs}>{label}</a>')
+        return "\n".join(out)
+
+    # Desktop: build top-level links + grouped dropdowns, preserving order of first appearance
+    rendered_groups: set[str] = set()
     out = []
-    for href, label, public in _NAV_ITEMS:
+    for href, label, public, group in _NAV_ITEMS:
         is_external = href.endswith(".xml")
-        is_active = (href == active_page)
-        cls_parts = []
-        if is_active: cls_parts.append("active")
-        if not public: cls_parts.append("admin-only")
-        cls = f' class="{" ".join(cls_parts)}"' if cls_parts else ""
-        attrs = ' target="_blank" rel="noopener"' if is_external else ""
-        if not public: attrs += ' data-admin="1"'
-        out.append(f'<a href="{href}"{cls}{attrs}>{label}</a>')
+        is_active   = (href == active_page)
+        if group is None:
+            cls_parts = ["nav-link"]
+            if is_active: cls_parts.append("active")
+            if not public: cls_parts.append("admin-only")
+            cls = ' class="' + " ".join(cls_parts) + '"'
+            attrs = ' target="_blank" rel="noopener"' if is_external else ""
+            if not public: attrs += ' data-admin="1"'
+            out.append(f'<a href="{href}"{cls}{attrs}>{label}</a>')
+            continue
+        if group in rendered_groups:
+            continue
+        rendered_groups.add(group)
+        # Build the dropdown for this group
+        items = [it for it in _NAV_ITEMS if it[3] == group]
+        group_is_admin = all(not it[2] for it in items)
+        any_active     = any(it[0] == active_page for it in items)
+        btn_cls = "nav-dropdown-trigger" + (" active" if any_active else "")
+        admin_attr = ' data-admin="1"' if group_is_admin else ''
+        items_html = []
+        for h2, lbl2, public2, _ in items:
+            ext  = ' target="_blank" rel="noopener"' if h2.endswith(".xml") else ""
+            adm  = ' data-admin="1"' if not public2 else ''
+            a_active = ' class="active"' if h2 == active_page else ''
+            items_html.append(f'<a href="{h2}"{a_active}{adm}{ext}>{lbl2}</a>')
+        out.append(f'''
+        <div class="nav-dropdown"{admin_attr}>
+          <button class="{btn_cls}" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            {group}
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu">{''.join(items_html)}</div>
+        </div>''')
     return "\n".join(out)
 
 
@@ -2539,6 +2660,27 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
       else showToast('Signed out.');
     }};
+
+    // Nav dropdown toggle (touch-friendly; desktop hover also works via CSS)
+    window.toggleNavDropdown = function(btn, ev) {{
+      ev.stopPropagation();
+      const dd = btn.closest('.nav-dropdown');
+      const opening = !dd.classList.contains('open');
+      // Close any other open dropdowns
+      document.querySelectorAll('.nav-dropdown.open').forEach(d => {{
+        if (d !== dd) d.classList.remove('open');
+      }});
+      dd.classList.toggle('open', opening);
+      btn.setAttribute('aria-expanded', opening);
+    }};
+    document.addEventListener('click', (e) => {{
+      if (!e.target.closest('.nav-dropdown')) {{
+        document.querySelectorAll('.nav-dropdown.open').forEach(d => {{
+          d.classList.remove('open');
+          d.querySelector('.nav-dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+        }});
+      }}
+    }});
 
     function openDrawer() {{
       document.getElementById('drawer').classList.add('open');
