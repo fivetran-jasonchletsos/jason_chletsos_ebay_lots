@@ -18,18 +18,58 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install --upgrade pip requests
 
       - name: Write configuration.json
+        env:
+          CONFIG_BLOB: ${{ secrets.EBAY_CONFIGURATION_JSON }}
+        run: printf '%s' "$CONFIG_BLOB" > configuration.json
+
+      - name: Validate configuration.json
         run: |
-          cat > configuration.json <<'EOF'
-          ${{ secrets.EBAY_CONFIGURATION_JSON }}
-          EOF
+          python3 - <<'PY'
+          import json, sys, os
+          if not os.path.exists("configuration.json") or os.path.getsize("configuration.json") == 0:
+              sys.exit("ERROR: configuration.json is empty — secret EBAY_CONFIGURATION_JSON is unset.")
+          try:
+              cfg = json.load(open("configuration.json"))
+          except Exception as e:
+              sys.exit(f"ERROR: configuration.json is not valid JSON: {e}")
+          required = ("client_id", "client_secret", "refresh_token", "dev_id")
+          missing = [k for k in required if not cfg.get(k)]
+          if missing:
+              sys.exit(f"ERROR: configuration.json missing keys: {missing}. Update the GitHub secret.")
+          # Sanity: try a real eBay token fetch so we fail fast with a clear message
+          import base64, urllib.request, urllib.parse
+          creds = base64.b64encode(f"{cfg['client_id']}:{cfg['client_secret']}".encode()).decode()
+          data = urllib.parse.urlencode({
+              "grant_type": "refresh_token",
+              "refresh_token": cfg["refresh_token"],
+              "scope": "https://api.ebay.com/oauth/api_scope/sell.inventory",
+          }).encode()
+          req = urllib.request.Request(
+              "https://api.ebay.com/identity/v1/oauth2/token",
+              data=data,
+              headers={"Authorization": f"Basic {creds}",
+                       "Content-Type":  "application/x-www-form-urlencoded"},
+              method="POST")
+          try:
+              import json as _j
+              resp = urllib.request.urlopen(req, timeout=15)
+              body = _j.loads(resp.read().decode())
+              if not body.get("access_token"):
+                  sys.exit(f"ERROR: eBay rejected refresh_token (no access_token in response). Update the GitHub secret with current credentials.")
+              print("OK: configuration.json valid + eBay refresh_token works")
+          except urllib.error.HTTPError as e:
+              sys.exit(f"ERROR: eBay returned HTTP {e.code} when exchanging refresh_token. Token is likely expired/rotated — update GitHub secret EBAY_CONFIGURATION_JSON. Body: {e.read().decode()[:300]}")
+          except Exception as e:
+              sys.exit(f"ERROR: token exchange failed: {e}")
+          PY
 
       - name: Run promote.py (no deploy — commit handled below)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 promote.py --no-deploy
+        run: python3 -u promote.py --no-deploy
 
       - name: Commit and push docs/
         run: |
