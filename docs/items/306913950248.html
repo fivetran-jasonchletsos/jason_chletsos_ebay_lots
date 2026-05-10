@@ -18,10 +18,27 @@
     (function() {
       try {
         var t = localStorage.getItem('h2k_theme');
-        if (t === 'cream' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    // Admin gate constants (populated at build time)
+    window.__ADMIN_HASHES = ["560a37aeaf25f4662cc3613b23feaf4b0247b0b3cd1e1a3a9d8b65404ab70837", "1805c19bf34ef567551ce09689354b22e5d99b1b54ed9303ba5ff7a5207e898a"];
+    window.__ADMIN_SALT   = 'f87be83729a52edbf03b96031322b952';
+    window.__IS_ADMIN_PAGE = false;
+    // Early body class: if a stored token matches any embedded hash, mark body admin
+    (function() {
+      try {
+        var stored = localStorage.getItem('h2k_admin_token');
+        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        document.documentElement.classList.toggle('pre-is-admin', !!ok);
       } catch(e) {}
     })();
   </script>
+  <style>
+    /* Use html.pre-is-admin → body.is-admin (we mirror in the body-load script).
+       Until then, on admin pages, show the gate over content immediately. */
+    html:not(.pre-is-admin) body.admin-page main { filter: blur(14px); pointer-events: none; user-select: none; }
+  </style>
   <title>4 Rookie Cards Willie McGinest One Autographed</title>
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -553,6 +570,76 @@ a:hover { color: var(--gold-bright); }
   font-family: inherit;
 }
 .btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
+
+/* ============ ADMIN GATE ============ */
+/* Admin nav links + Refresh button hidden unless html.pre-is-admin (set in head before body renders) */
+html:not(.pre-is-admin) [data-admin="1"],
+html:not(.pre-is-admin) .nav-links a.admin-only,
+html:not(.pre-is-admin) .drawer a.admin-only,
+html:not(.pre-is-admin) #install-app-btn,
+html:not(.pre-is-admin) #nav-refresh-btn,
+html:not(.pre-is-admin) .btn-logout { display: none !important; }
+html.pre-is-admin .btn-login,
+html.pre-is-admin .gate-overlay { display: none !important; }
+.btn-login, .btn-logout {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--t-fast);
+}
+.btn-login:hover, .btn-logout:hover { color: var(--gold); border-color: var(--gold); }
+.gate-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.85);
+  backdrop-filter: blur(10px);
+  display: none; align-items: center; justify-content: center;
+}
+.gate-overlay.open { display: flex; }
+.gate-card {
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-lg);
+  padding: 32px 32px 26px;
+  max-width: 380px;
+  width: calc(100vw - 32px);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+.gate-card h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: .04em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.gate-card .gate-sub {
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.gate-card input[type="password"] {
+  width: 100%;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: .2em;
+  font-size: 16px;
+}
+.gate-card .gate-actions { display: flex; gap: 10px; }
+.gate-card .gate-actions button { flex: 1; }
+.gate-error {
+  font-size: 12px; color: var(--danger);
+  min-height: 18px; margin-bottom: 8px;
+}
+.gate-storefront-msg {
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+  margin-top: 14px;
+}
 .btn-theme {
   width: 38px; height: 38px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1260,7 +1347,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
     }
   </style>
 </head>
-<body>
+<body class="">
   <header class="app-header">
     <div class="app-header-inner">
       <a href="../index.html" class="brand">
@@ -1272,12 +1359,12 @@ tr:hover td { background: rgba(212,175,55,.03); }
       </a>
       <nav class="nav-links"><a href="../index.html">Listings</a>
 <a href="sold.html">Sold</a>
-<a href="../quality.html">Quality</a>
-<a href="../price_review.html">Pricing</a>
-<a href="../title_review.html">Titles</a>
-<a href="reddit.html">Reddit</a>
-<a href="../craigslist.html">Craigslist</a>
-<a href="../google_feed.xml" target="_blank" rel="noopener">Google Feed</a></nav>
+<a href="../quality.html" class="admin-only" data-admin="1">Quality</a>
+<a href="../price_review.html" class="admin-only" data-admin="1">Pricing</a>
+<a href="../title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
+<a href="../craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
+<a href="../google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1287,6 +1374,14 @@ tr:hover td { background: rgba(212,175,55,.03); }
       <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
         Install
+      </button>
+      <button class="btn-login"  onclick="openGate()" title="Sign in to manage listings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sign in
+      </button>
+      <button class="btn-logout" onclick="adminLogout()" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
@@ -1308,18 +1403,34 @@ tr:hover td { background: rgba(212,175,55,.03); }
     </div>
     <a href="../index.html">Listings</a>
 <a href="sold.html">Sold</a>
-<a href="../quality.html">Quality</a>
-<a href="../price_review.html">Pricing</a>
-<a href="../title_review.html">Titles</a>
-<a href="reddit.html">Reddit</a>
-<a href="../craigslist.html">Craigslist</a>
-<a href="../google_feed.xml" target="_blank" rel="noopener">Google Feed</a>
+<a href="../quality.html" class="admin-only" data-admin="1">Quality</a>
+<a href="../price_review.html" class="admin-only" data-admin="1">Pricing</a>
+<a href="../title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
+<a href="../craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
+<a href="../google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
       <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
     </div>
   </aside>
 
   <div id="nav-toast" class="toast"></div>
+
+  <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-card">
+      <h2 id="gate-title">Owner Access</h2>
+      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
+      <form onsubmit="event.preventDefault(); adminAttempt();">
+        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
+        <div class="gate-error" id="gate-error">&nbsp;</div>
+        <div class="gate-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Unlock</button>
+        </div>
+      </form>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+    </div>
+  </div>
 
   <main>
     
@@ -1393,17 +1504,17 @@ tr:hover td { background: rgba(212,175,55,.03); }
                 <div class="rel-price">$44.99</div>
               </div>
             </a>
+            <a href="306930462076.html" class="rel-card">
+              <div class="rel-img"><img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="2025 Panini Prizm - Bo Nix #142 White Disco Prizm" loading="lazy"></div>
+              <div class="rel-meta">
+                <div class="rel-title">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</div>
+                <div class="rel-price">$7.50</div>
+              </div>
+            </a>
             <a href="306914911040.html" class="rel-card">
               <div class="rel-img"><img src="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l500.jpg" alt="2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)" loading="lazy"></div>
               <div class="rel-meta">
                 <div class="rel-title">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Sh…</div>
-                <div class="rel-price">$3.99</div>
-              </div>
-            </a>
-            <a href="306914916776.html" class="rel-card">
-              <div class="rel-img"><img src="https://i.ebayimg.com/images/g/A50AAeSw4ABp9qbm/s-l500.jpg" alt="2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)" loading="lazy"></div>
-              <div class="rel-meta">
-                <div class="rel-title">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pul…</div>
                 <div class="rel-price">$3.99</div>
               </div>
             </a></div>
@@ -1422,11 +1533,72 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 15:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 10, 2026 · 16:45 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
   <script>
+    // ---- ADMIN GATE ----
+    (function bootstrapAdmin() {
+      // Mirror html class onto body so CSS selectors targeting body.is-admin work
+      if (document.documentElement.classList.contains('pre-is-admin')) {
+        document.body.classList.add('is-admin');
+      }
+      if (window.__IS_ADMIN_PAGE) {
+        document.body.classList.add('admin-page');
+        if (!document.body.classList.contains('is-admin')) {
+          // No valid token → force the gate open and block content
+          openGate();
+        }
+      }
+    })();
+
+    async function _sha256Hex(s) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    window.openGate = function() {
+      const o = document.getElementById('gate-overlay');
+      if (o) o.classList.add('open');
+      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
+    };
+    window.closeGate = function() {
+      // On admin pages, can't close without authing — bounce to home instead
+      if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
+        const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
+        location.href = home;
+        return;
+      }
+      document.getElementById('gate-overlay')?.classList.remove('open');
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
+      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
+    };
+    window.adminAttempt = async function() {
+      const inp = document.getElementById('gate-input');
+      const err = document.getElementById('gate-error');
+      const v = (inp.value || '').trim();
+      if (!v) return;
+      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
+      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {
+        try { localStorage.setItem('h2k_admin_token', hash); } catch(e) {}
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+        document.getElementById('gate-overlay').classList.remove('open');
+        showToast('Welcome back. Management tools unlocked.');
+      } else {
+        err.textContent = 'Wrong passcode. Try again.';
+        inp.value = '';
+        inp.focus();
+      }
+    };
+    window.adminLogout = function() {
+      try { localStorage.removeItem('h2k_admin_token'); } catch(e) {}
+      document.body.classList.remove('is-admin');
+      document.documentElement.classList.remove('pre-is-admin');
+      if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
+      else showToast('Signed out.');
+    };
+
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');
       document.getElementById('drawer-backdrop').classList.add('open');
