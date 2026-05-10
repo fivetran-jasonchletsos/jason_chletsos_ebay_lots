@@ -2301,6 +2301,134 @@ tr:hover td { background: rgba(212,175,55,.03); }
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
 }
 
+/* ============ POLISH LAYER ============ */
+
+/* Reading-flow scroll progress indicator at top of page */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; z-index: 999;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  transition: transform 80ms linear;
+  pointer-events: none;
+}
+
+/* View Transitions — smooth cross-page navigation */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(.4,0,.2,1);
+}
+
+/* Card entrance stagger — fade up from below */
+@keyframes h2k-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.listing-card, .deal-card, .sold-card, .q-card, .pr-card, .tr-card, .cl-card, .topick-tile, .recent-card, .a-panel {
+  animation: h2k-fade-up 480ms cubic-bezier(.4,0,.2,1) both;
+  animation-delay: calc(var(--enter-idx, 0) * 28ms);
+}
+
+/* Keyboard focus rings — gold glow, never harsh blue */
+*:focus { outline: none; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+  box-shadow: 0 0 0 4px rgba(212,175,55,.18);
+}
+
+/* Empty-state illustrations */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center; gap: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--r-lg);
+}
+.empty-state-icon {
+  width: 64px; height: 64px;
+  color: var(--gold);
+  opacity: .7;
+  animation: h2k-fade-up 600ms both;
+}
+.empty-state-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: .03em;
+  color: var(--text);
+}
+.empty-state-sub { color: var(--text-muted); font-size: 14px; max-width: 380px; }
+
+/* Confetti container — DOM-injected on success */
+.h2k-confetti-host {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9998;
+  overflow: hidden;
+}
+.h2k-confetti {
+  position: absolute; top: -10px;
+  width: 10px; height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: h2k-confetti-fall 1600ms ease-out forwards;
+}
+@keyframes h2k-confetti-fall {
+  0% { opacity: 1; transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(var(--cx, 0), 110vh, 0) rotate(var(--cr, 540deg)); }
+}
+
+/* Ripple on .btn-gold click */
+.btn-gold { position: relative; overflow: hidden; }
+.btn-gold::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), rgba(255,255,255,.45), transparent 50%);
+  opacity: 0;
+  transition: opacity 400ms;
+  pointer-events: none;
+}
+.btn-gold:active::after { opacity: 1; transition: opacity 60ms; }
+
+/* Subtle tab indicator slide — handled via .active background */
+.tab-bar { position: relative; }
+
+/* Gentle pulse on price element while popover is open */
+.price-pop.open + .price,
+.listing-card .price-wrap:hover .price { animation: h2k-price-pulse 1.6s ease-in-out infinite; }
+@keyframes h2k-price-pulse {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%      { text-shadow: 0 0 18px rgba(212,175,55,.4); }
+}
+
+/* Skeleton state for charts that haven't drawn yet */
+@keyframes h2k-shimmer {
+  0% { background-position: -300px 0; }
+  100% { background-position: calc(300px + 100%) 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+  background-size: 300px 100%;
+  animation: h2k-shimmer 1.6s linear infinite;
+  border-radius: var(--r-sm);
+}
+
+/* Reduced motion respect — disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .listing-card, .deal-card, .sold-card, .q-card, .pr-card, .tr-card, .cl-card, .topick-tile, .recent-card, .a-panel {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* ============ NOUISLIDER OVERRIDES ============ */
 .noUi-target {
   background: var(--surface-3);
@@ -2787,6 +2915,99 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     }};
     // Apply on every page load
     window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+
+    // ============ POLISH LAYER ============
+    // Skip motion for users who request it
+    const __reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Scroll progress bar
+    (function () {{
+      const bar = document.createElement('div');
+      bar.className = 'scroll-progress';
+      document.body.appendChild(bar);
+      function update() {{
+        const h = document.documentElement;
+        const top = h.scrollTop || document.body.scrollTop;
+        const max = h.scrollHeight - h.clientHeight;
+        const pct = max > 0 ? top / max : 0;
+        bar.style.transform = 'scaleX(' + pct + ')';
+      }}
+      window.addEventListener('scroll', update, {{ passive: true }});
+      update();
+    }})();
+
+    // Staggered card entrance — set --enter-idx so CSS calc() spaces the delays
+    (function () {{
+      if (__reducedMotion) return;
+      const selectors = ['.listing-card','.deal-card','.sold-card','.q-card','.pr-card','.tr-card','.cl-card','.topick-tile','.recent-card','.a-panel'];
+      selectors.forEach(sel => {{
+        const cards = document.querySelectorAll(sel);
+        cards.forEach((c, i) => {{
+          if (i < 24) c.style.setProperty('--enter-idx', i);
+        }});
+      }});
+    }})();
+
+    // Count-up animation on stat-card numbers — runs once when each card scrolls into view
+    (function () {{
+      if (__reducedMotion) return;
+      const nums = document.querySelectorAll('.stat-card .num');
+      const io = new IntersectionObserver((entries) => {{
+        entries.forEach(e => {{
+          if (!e.isIntersecting) return;
+          const el = e.target;
+          const raw = el.textContent || '';
+          // Skip anything containing letters (e.g. "5+ yrs", "100%", "★★★★★")
+          if (/[a-z%★]/i.test(raw)) {{ io.unobserve(el); return; }}
+          const hasDollar = raw.includes('$');
+          const target = parseFloat(raw.replace(/[^0-9.\\-]/g, '')) || 0;
+          if (target === 0) {{ io.unobserve(el); return; }}
+          const isInt = !raw.includes('.');
+          const start = performance.now();
+          const dur = 900;
+          function step(now) {{
+            const t = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            const cur = target * eased;
+            const fmt = isInt ? Math.round(cur).toLocaleString() : cur.toFixed(2);
+            el.textContent = (hasDollar ? '$' : '') + fmt;
+            if (t < 1) requestAnimationFrame(step);
+          }}
+          requestAnimationFrame(step);
+          io.unobserve(el);
+        }});
+      }}, {{ threshold: 0.4 }});
+      nums.forEach(n => io.observe(n));
+    }})();
+
+    // Button ripple — track click coordinates as CSS custom properties
+    document.addEventListener('click', (e) => {{
+      const btn = e.target.closest('.btn-gold');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      btn.style.setProperty('--rx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+      btn.style.setProperty('--ry', ((e.clientY - rect.top)  / rect.height * 100) + '%');
+    }}, {{ passive: true }});
+
+    // Confetti — celebratory micro-interaction on successful Apply
+    window.h2kConfetti = function (count = 36) {{
+      if (__reducedMotion) return;
+      const host = document.createElement('div');
+      host.className = 'h2k-confetti-host';
+      const colors = ['#d4af37','#f4ce5d','#7fc77a','#6cb0ff','#e07b6f','#b388e0'];
+      for (let i = 0; i < count; i++) {{
+        const p = document.createElement('div');
+        p.className = 'h2k-confetti';
+        p.style.left = (Math.random() * 100) + 'vw';
+        p.style.background = colors[i % colors.length];
+        p.style.setProperty('--cx', (Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--cr', (Math.random() * 720 - 360) + 'deg');
+        p.style.animationDelay = (Math.random() * 200) + 'ms';
+        host.appendChild(p);
+      }}
+      document.body.appendChild(host);
+      setTimeout(() => host.remove(), 2200);
+    }};
 
     // ---- PWA: register service worker + handle install prompt ----
     if ('serviceWorker' in navigator) {{
@@ -3583,9 +3804,16 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       </button>
     </div>
 
-    <div id="no-results">
-      <div class="big">No matches</div>
-      <div>Try widening the price range or clearing filters.</div>
+    <div id="no-results" class="empty-state">
+      <svg class="empty-state-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="10" y="14" width="44" height="36" rx="4"/>
+        <circle cx="20" cy="24" r="3" fill="currentColor"/>
+        <path d="M10 42l12-12 8 8 8-8 16 16"/>
+        <line x1="48" y1="56" x2="58" y2="58" stroke-width="3" stroke-linecap="round" opacity=".4"/>
+        <line x1="6" y1="58" x2="20" y2="56"  stroke-width="3" stroke-linecap="round" opacity=".4"/>
+      </svg>
+      <div class="empty-state-title">No matches</div>
+      <div class="empty-state-sub">Try widening the price range, switching tabs, or clearing the search box. The card catalog updates every 4 hours automatically.</div>
     </div>
 
     <div class="grid" id="listing-grid" data-size="medium">
@@ -4763,6 +4991,7 @@ def build_quality_report(listings: list[dict]) -> Path:
             // Learn locks for next time
             LockTracker.consumeErrors(data.errors || []);
             const errs = data.errors && data.errors.length ? ' · ' + data.errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
+            if ((data.updated || 0) > 0 && window.h2kConfetti) window.h2kConfetti();
             qStatus('Done. ' + (data.updated || 0) + ' listing(s) updated on eBay' + errs, 'success');
             document.getElementById('rebuild-btn').style.display = 'inline-flex';
           }} else {{
@@ -6010,6 +6239,7 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
         }}
 
         LockTracker.consumeErrors(errors);
+        if (updated > 0 && window.h2kConfetti) window.h2kConfetti();
         const errMsg = errors.length ? ' · ' + errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
         showStatus('Done. ' + updated + ' price(s) updated on eBay' + errMsg,
           updated > 0 ? 'success' : 'danger');
@@ -6717,6 +6947,7 @@ def build_title_review(listings: list[dict]) -> Path:
               }}
             }});
             LockTracker.consumeErrors(data.errors || []);
+            if (updated > 0 && window.h2kConfetti) window.h2kConfetti();
             const errs = data.errors && data.errors.length ? ' · ' + data.errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
             showStatus('Done. ' + updated + ' listing(s) updated on eBay' + errs, 'success');
             document.getElementById('rebuild-btn').style.display = 'inline-flex';
