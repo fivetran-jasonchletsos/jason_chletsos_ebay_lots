@@ -22,8 +22,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["2c0b899a716fb2881a39e2087feed197f65ff66b18c1d876cebba7fe1959e7d2"];
-    window.__ADMIN_SALT   = '5e55780183192914bc362a78401bdab3';
+    window.__ADMIN_HASHES = ["11d96b71a8c64c13deb3f254092d846081919d38a4ac77fd9f7359d3efb63ba4"];
+    window.__ADMIN_SALT   = '6770d890343fe4ff3216acdb160e37ff';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -792,6 +792,15 @@ main {
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
 .stat-card.linked a { color: inherit; }
+button.stat-card {
+  font-family: inherit; color: inherit; text-align: center; width: 100%;
+  appearance: none; -webkit-appearance: none;
+}
+button.stat-card.active {
+  border-color: var(--gold);
+  box-shadow: var(--glow-gold);
+}
+button.stat-card.active .num { filter: brightness(1.15); }
 
 /* ============ CARDS / SURFACES ============ */
 .panel {
@@ -1502,7 +1511,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         <div class="brand-mark">H</div>
         <div class="brand-text">
           <div class="brand-name">Harpua2001</div>
-          <div class="brand-tag">Sports &amp; Pokemon Cards</div>
+          <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
         </div>
       </a>
       <nav class="nav-links"><a href="index.html" class="active">Listings</a>
@@ -1721,26 +1730,22 @@ tr:hover td { background: rgba(212,175,55,.03); }
     
 
     <div class="stat-grid">
-      <div class="stat-card">
-        <div class="num">67</div>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('all', this)">
+        <div class="num">80</div>
         <div class="lbl">Active Listings</div>
-      </div>
-      <div class="stat-card">
-        <div class="num">$442</div>
+      </button>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('value', this)">
+        <div class="num">$475</div>
         <div class="lbl">Inventory Value</div>
-      </div>
-      <div class="stat-card linked">
-        <a href="price_review.html" style="text-decoration:none;">
-          <div class="num danger">7</div>
-          <div class="lbl">Underpriced</div>
-        </a>
-      </div>
-      <div class="stat-card linked">
-        <a href="price_review.html" style="text-decoration:none;">
-          <div class="num warning">18</div>
-          <div class="lbl">Overpriced</div>
-        </a>
-      </div>
+      </button>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('underpriced', this)">
+        <div class="num danger">9</div>
+        <div class="lbl">Underpriced</div>
+      </button>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('overpriced', this)">
+        <div class="num warning">22</div>
+        <div class="lbl">Overpriced</div>
+      </button>
     </div>
 
     
@@ -1780,7 +1785,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
     <div class="filter-bar">
       <div class="filter-row">
         <input type="text" id="search" class="search-input" placeholder="Search players, sets, years…" oninput="applyFilters()" autocomplete="off">
-        <select id="sort-filter" onchange="applyFilters()" style="max-width:220px;">
+        <select id="category-select" onchange="setCategoryFromSelect()" style="max-width:200px;">
+          <option value="All">All</option><option value="Football Singles">Football Singles</option><option value="Football Lots">Football Lots</option><option value="Other">Other</option><option value="Basketball Lots">Basketball Lots</option><option value="Basketball Singles">Basketball Singles</option><option value="Pokemon">Pokemon</option><option value="Baseball Lots">Baseball Lots</option><option value="Baseball Singles">Baseball Singles</option>
+        </select>
+        <select id="sort-filter" onchange="applyFilters()" style="max-width:200px;">
           <option value="default">Sort: Featured</option>
           <option value="price-desc">Price: High → Low</option>
           <option value="price-asc">Price: Low → High</option>
@@ -1788,7 +1796,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </select>
       </div>
       <div class="filter-row">
-        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">67</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">33</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">19</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">5</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">4</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">2</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
+        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">80</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">43</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">19</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">6</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">5</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">3</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
       </div>
       <div class="filter-row">
         <div class="slider-wrap">
@@ -1810,7 +1818,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
     </section>
 
     <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
-      <div>Showing <span id="visible-count">67</span> of 67 listings</div>
+      <div>Showing <span id="visible-count">80</span> of 80 listings</div>
       <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
         Share filters
@@ -1829,6 +1837,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2026 wild card 5 card draw justin jefferson stacked deck black tie aces #2/2"
         data-price="5.00"
         data-cat="Other"
+        data-flag="NO_COMPS"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/h6MAAeSw6YZp~mQC/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2" data-description="$5.00 · Other"><img src="https://i.ebayimg.com/images/g/h6MAAeSw6YZp~mQC/s-l500.jpg" alt="2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2" loading="lazy"></a>
@@ -1856,6 +1865,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2026 wild card 5 card draw baker mayfield stacked deck black tie king #1/1"
         data-price="10.00"
         data-cat="Other"
+        data-flag="NO_COMPS"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/jbwAAeSwu-dp~mT2/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1" data-description="$10.00 · Other"><img src="https://i.ebayimg.com/images/g/jbwAAeSwu-dp~mT2/s-l500.jpg" alt="2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1" loading="lazy"></a>
@@ -1883,6 +1893,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2026 wild card 5 card draw germie bernard black tie kings #4/4 steelers rc"
         data-price="4.00"
         data-cat="Basketball Singles"
+        data-flag="NO_COMPS"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/OvAAAeSw0rNp~mXb/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC" data-description="$4.00 · Basketball Singles"><img src="https://i.ebayimg.com/images/g/OvAAAeSw0rNp~mXb/s-l500.jpg" alt="2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC" loading="lazy"></a>
@@ -1910,6 +1921,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="deion sanders cards"
         data-price="1.99"
         data-cat="Other"
+        data-flag="OVERPRICED"
         data-locked="240">
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="Deion Sanders Cards" data-description="$1.99 · Other"><img src="https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l500.jpg" alt="Deion Sanders Cards" loading="lazy"></a>
@@ -1937,6 +1949,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="13 junior seau cards including rookie cards san diego chargers"
         data-price="1.00"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="13 Junior Seau Cards Including Rookie Cards San Diego Chargers" data-description="$1.00 · Football Lots"><img src="https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l500.jpg" alt="13 Junior Seau Cards Including Rookie Cards San Diego Chargers" loading="lazy"></a>
@@ -1964,6 +1977,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="3 marshall faulk cards san diego state indianapolis colts"
         data-price="2.50"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="3 Marshall Faulk Cards San Diego State Indianapolis Colts" data-description="$2.50 · Football Lots"><img src="https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg" alt="3 Marshall Faulk Cards San Diego State Indianapolis Colts" loading="lazy"></a>
@@ -1991,6 +2005,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="8 cards roger craig san francisco 49ers minnesota vikings"
         data-price="1.50"
         data-cat="Basketball Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/7fsAAeSwwtlp7reN/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="8 Cards Roger Craig San Francisco 49ers Minnesota Vikings" data-description="$1.50 · Basketball Lots"><img src="https://i.ebayimg.com/images/g/7fsAAeSwwtlp7reN/s-l500.jpg" alt="8 Cards Roger Craig San Francisco 49ers Minnesota Vikings" loading="lazy"></a>
@@ -2018,6 +2033,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="jerome bettis notre dame los angeles rams 10 cards"
         data-price="4.99"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="Jerome Bettis Notre Dame Los Angeles Rams 10 Cards" data-description="$4.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg" alt="Jerome Bettis Notre Dame Los Angeles Rams 10 Cards" loading="lazy"></a>
@@ -2045,6 +2061,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="tim brown los angeles raiders football card lot (14) hof wide receiver"
         data-price="3.99"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver" data-description="$3.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg" alt="Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver" loading="lazy"></a>
@@ -2072,6 +2089,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="carl banks new york giants football card lot (8) super bowl lb"
         data-price="1.99"
         data-cat="Baseball Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="Carl Banks New York Giants Football Card Lot (8) Super Bowl LB" data-description="$1.99 · Baseball Lots"><img src="https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l500.jpg" alt="Carl Banks New York Giants Football Card Lot (8) Super Bowl LB" loading="lazy"></a>
@@ -2099,6 +2117,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="11 cards marcus allen los angeles raiders kansas city chiefs"
         data-price="2.99"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/sc0AAeSwVNVp7uZe/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs" data-description="$2.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/sc0AAeSwVNVp7uZe/s-l500.jpg" alt="11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs" loading="lazy"></a>
@@ -2126,6 +2145,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="7 cards steve atwater rookie cards denver broncos"
         data-price="3.49"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="7 Cards Steve Atwater Rookie Cards Denver Broncos" data-description="$3.49 · Football Lots"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="7 Cards Steve Atwater Rookie Cards Denver Broncos" loading="lazy"></a>
@@ -2153,6 +2173,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="7 cards boomer esiason cincinnati bengals new york jets"
         data-price="2.49"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/JnAAAeSwLQ1p7wMT/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="7 Cards Boomer Esiason Cincinnati Bengals New York Jets" data-description="$2.49 · Football Lots"><img src="https://i.ebayimg.com/images/g/JnAAAeSwLQ1p7wMT/s-l500.jpg" alt="7 Cards Boomer Esiason Cincinnati Bengals New York Jets" loading="lazy"></a>
@@ -2180,6 +2201,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="4 aaron glenn rookie cards new york jets"
         data-price="4.99"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/pjoAAeSwN8dp7wmI/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="4 Aaron Glenn Rookie Cards New York Jets" data-description="$4.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/pjoAAeSwN8dp7wmI/s-l500.jpg" alt="4 Aaron Glenn Rookie Cards New York Jets" loading="lazy"></a>
@@ -2207,6 +2229,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="1994 classic pro line live - autograph - steve emtman"
         data-price="10.00"
         data-cat="Other"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1994 Classic Pro Line Live - Autograph - Steve Emtman" data-description="$10.00 · Other"><img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="1994 Classic Pro Line Live - Autograph - Steve Emtman" loading="lazy"></a>
@@ -2234,6 +2257,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="12 jim everett cards los angeles rams new orleans saints"
         data-price="1.50"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/hOMAAeSwWi9p7w-H/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="12 Jim Everett Cards Los Angeles Rams New Orleans Saints" data-description="$1.50 · Football Lots"><img src="https://i.ebayimg.com/images/g/hOMAAeSwWi9p7w-H/s-l500.jpg" alt="12 Jim Everett Cards Los Angeles Rams New Orleans Saints" loading="lazy"></a>
@@ -2261,6 +2285,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="15 charles haley cards san francisco 49ers dallas cowboys"
         data-price="4.99"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/1VIAAeSwrHRp9Vkl/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="15 Charles Haley Cards San Francisco 49ers Dallas Cowboys" data-description="$4.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/1VIAAeSwrHRp9Vkl/s-l500.jpg" alt="15 Charles Haley Cards San Francisco 49ers Dallas Cowboys" loading="lazy"></a>
@@ -2288,6 +2313,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="11 mel gray cards detroit lions football card lot nfl"
         data-price="2.99"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/4iQAAeSwGjRp9VwZ/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="11 Mel Gray Cards Detroit Lions Football Card Lot NFL" data-description="$2.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/4iQAAeSwGjRp9VwZ/s-l500.jpg" alt="11 Mel Gray Cards Detroit Lions Football Card Lot NFL" loading="lazy"></a>
@@ -2315,6 +2341,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="5 bobby humphrey cards denver broncos football card lot nfl"
         data-price="1.99"
         data-cat="Football Lots"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/nJwAAeSwFO1p9XlJ/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL" data-description="$1.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/nJwAAeSwFO1p9XlJ/s-l500.jpg" alt="5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL" loading="lazy"></a>
@@ -2342,6 +2369,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="9 michael irvin cards dallas cowboys football card lot nfl"
         data-price="4.99"
         data-cat="Football Lots"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/DikAAeSw77xp9Xow/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL" data-description="$4.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/DikAAeSw77xp9Xow/s-l500.jpg" alt="9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL" loading="lazy"></a>
@@ -2369,6 +2397,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="10 jim kelly cards buffalo bills football card lot nfl"
         data-price="2.00"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/iuEAAeSw0F5p9d4k/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL" data-description="$2.00 · Football Lots"><img src="https://i.ebayimg.com/images/g/iuEAAeSw0F5p9d4k/s-l500.jpg" alt="10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL" loading="lazy"></a>
@@ -2396,6 +2425,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="11 raghib and quadry ismail cards raiders vikings"
         data-price="2.99"
         data-cat="Basketball Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="11 Raghib And Quadry Ismail Cards Raiders Vikings" data-description="$2.99 · Basketball Lots"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="11 Raghib And Quadry Ismail Cards Raiders Vikings" loading="lazy"></a>
@@ -2423,6 +2453,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="3 steve largent cards seattle seahawks football card lot nfl"
         data-price="1.95"
         data-cat="Basketball Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/VIUAAeSwm5Bp9eiq/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL" data-description="$1.95 · Basketball Lots"><img src="https://i.ebayimg.com/images/g/VIUAAeSwm5Bp9eiq/s-l500.jpg" alt="3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL" loading="lazy"></a>
@@ -2450,6 +2481,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="9 ronnie lott cards 49ers raiders jets football card lot nfl"
         data-price="4.99"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/RFMAAeSwa5xp9eoC/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL" data-description="$4.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/RFMAAeSwa5xp9eoC/s-l500.jpg" alt="9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL" loading="lazy"></a>
@@ -2477,6 +2509,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="7 howie long cards raiders"
         data-price="4.99"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="7 Howie Long Cards Raiders" data-description="$4.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="7 Howie Long Cards Raiders" loading="lazy"></a>
@@ -2504,6 +2537,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="9 joe montana cards 49ers chiefs"
         data-price="5.99"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/GuUAAeSw0F5p9e1k/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="9 Joe Montana Cards 49ers Chiefs" data-description="$5.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/GuUAAeSw0F5p9e1k/s-l500.jpg" alt="9 Joe Montana Cards 49ers Chiefs" loading="lazy"></a>
@@ -2531,6 +2565,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="20 warren moon cards oilers vikings"
         data-price="10.00"
         data-cat="Basketball Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="20 Warren Moon Cards Oilers Vikings" data-description="$10.00 · Basketball Lots"><img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="20 Warren Moon Cards Oilers Vikings" loading="lazy"></a>
@@ -2558,6 +2593,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="15 dan marino cards miami dolphins"
         data-price="4.99"
         data-cat="Football Lots"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/wMMAAeSwx-Bp9fCx/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="15 Dan Marino Cards Miami Dolphins" data-description="$4.99 · Football Lots"><img src="https://i.ebayimg.com/images/g/wMMAAeSwx-Bp9fCx/s-l500.jpg" alt="15 Dan Marino Cards Miami Dolphins" loading="lazy"></a>
@@ -2585,6 +2621,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="4 rookie cards willie mcginest one autographed"
         data-price="3.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/cDgAAeSwPaJp9fK~/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="4 Rookie Cards Willie McGinest One Autographed" data-description="$3.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/cDgAAeSwPaJp9fK~/s-l500.jpg" alt="4 Rookie Cards Willie McGinest One Autographed" loading="lazy"></a>
@@ -2612,6 +2649,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - prizmatic colston loveland #20 silver prizm (rc)"
         data-price="3.00"
         data-cat="Football Singles"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)" data-description="$3.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)" loading="lazy"></a>
@@ -2639,6 +2677,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini rookies & stars - stellar rookies shedeur sanders #1 silver (rc)"
         data-price="2.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/absAAeSwHPhp9hiM/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)" data-description="$2.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/absAAeSwHPhp9hiM/s-l500.jpg" alt="2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)" loading="lazy"></a>
@@ -2666,6 +2705,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini rookies & stars - artistry in motion lamar jackson #2"
         data-price="1.50"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/nj4AAeSwM4Zp9hjO/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2" data-description="$1.50 · Football Singles"><img src="https://i.ebayimg.com/images/g/nj4AAeSwM4Zp9hjO/s-l500.jpg" alt="2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2" loading="lazy"></a>
@@ -2693,6 +2733,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm draft picks - andrew marsh #157 silver prizm (rc)"
         data-price="1.49"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/lTUAAeSwSx9p9hlJ/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)" data-description="$1.49 · Football Singles"><img src="https://i.ebayimg.com/images/g/lTUAAeSwSx9p9hlJ/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)" loading="lazy"></a>
@@ -2720,6 +2761,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm draft picks - instant impact dylan raiola #ii- gold ice prizm"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/ntwAAeSwPN5p9iXs/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/ntwAAeSwPN5p9iXs/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm" loading="lazy"></a>
@@ -2747,6 +2789,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm draft picks new recruits tetairoa mcmillan #11 gold ice prizm"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/v30AAeSwpzNp9iZC/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/v30AAeSwpzNp9iZC/s-l500.jpg" alt="2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm" loading="lazy"></a>
@@ -2774,6 +2817,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm draft picks - barry sanders #188 purple wave prizm"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" loading="lazy"></a>
@@ -2801,6 +2845,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - select numbers jordan love #7 silver prizm"
         data-price="1.50"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/vrwAAeSwI-5p9ie0/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm" data-description="$1.50 · Football Singles"><img src="https://i.ebayimg.com/images/g/vrwAAeSwI-5p9ie0/s-l500.jpg" alt="2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm" loading="lazy"></a>
@@ -2828,6 +2873,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="5 sam adams rookie cards seattle seahawks"
         data-price="2.50"
         data-cat="Basketball Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/xWoAAeSwzANp9is3/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="5 Sam Adams Rookie Cards Seattle Seahawks" data-description="$2.50 · Basketball Lots"><img src="https://i.ebayimg.com/images/g/xWoAAeSwzANp9is3/s-l500.jpg" alt="5 Sam Adams Rookie Cards Seattle Seahawks" loading="lazy"></a>
@@ -2855,6 +2901,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="10 eric metcalf cards cleveland browns"
         data-price="1.00"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/SocAAeSwqZVp9k4F/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="10 Eric Metcalf Cards Cleveland Browns" data-description="$1.00 · Football Lots"><img src="https://i.ebayimg.com/images/g/SocAAeSwqZVp9k4F/s-l500.jpg" alt="10 Eric Metcalf Cards Cleveland Browns" loading="lazy"></a>
@@ -2882,6 +2929,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="12 andre rison cards colts falcons rc"
         data-price="3.34"
         data-cat="Football Lots"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="12 Andre Rison Cards Colts Falcons RC" data-description="$3.34 · Football Lots"><img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="12 Andre Rison Cards Colts Falcons RC" loading="lazy"></a>
@@ -2909,6 +2957,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - concourse tetairoa mcmillan #44 pink shock prizm (rc)"
         data-price="3.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)" data-description="$3.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l500.jpg" alt="2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)" loading="lazy"></a>
@@ -2924,7 +2973,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         <div class="info">
           <h3><a href="items/306914911040.html">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</a></h3>
           <div class="price">$3.99</div>
-          <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
@@ -2936,6 +2985,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - concourse ashton jeanty #4 black & red shock prizm (rc)"
         data-price="3.00"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/27IAAeSwi69p9qVk/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)" data-description="$3.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/27IAAeSwi69p9qVk/s-l500.jpg" alt="2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)" loading="lazy"></a>
@@ -2963,6 +3013,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - premier level travis hunter #128 pink shock prizm (rc)"
         data-price="3.00"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/GGAAAeSwYOtp9qXI/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)" data-description="$3.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/GGAAAeSwYOtp9qXI/s-l500.jpg" alt="2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)" loading="lazy"></a>
@@ -2990,6 +3041,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm draft picks - travis hunter #20 silver prizm (rc)"
         data-price="2.00"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/qdEAAeSwJk1p9qaI/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)" data-description="$2.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/qdEAAeSwJk1p9qaI/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)" loading="lazy"></a>
@@ -3017,6 +3069,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="eevee - poke ball reverse holo - psa 9 - 2024 japanese terastal fest ex - #125"
         data-price="15.50"
         data-cat="Pokemon"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125" data-description="$15.50 · Pokemon"><img src="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l500.jpg" alt="EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125" loading="lazy"></a>
@@ -3044,6 +3097,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini mosaic - showtime signatures aaron donald sos-aad red & yellow prizm"
         data-price="44.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm" data-description="$44.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l500.jpg" alt="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm" loading="lazy"></a>
@@ -3071,6 +3125,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm draft picks - on campus joe burrow #oc-14"
         data-price="180.00"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14" data-description="$180.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14" loading="lazy"></a>
@@ -3098,6 +3153,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="charcadet 022 mega evolution promo holo pokemon card nm"
         data-price="3.50"
         data-cat="Pokemon"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM" data-description="$3.50 · Pokemon"><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l500.jpg" alt="Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM" loading="lazy"></a>
@@ -3125,6 +3181,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - rookies will johnson #370 white disco prizm (rc)"
         data-price="1.21"
         data-cat="Football Singles"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/MmQAAeSwDPJqAKWW/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Rookies Will Johnson #370 White Disco Prizm (RC)" data-description="$1.21 · Football Singles"><img src="https://i.ebayimg.com/images/g/MmQAAeSwDPJqAKWW/s-l500.jpg" alt="2025 Panini Prizm - Rookies Will Johnson #370 White Disco Prizm (RC)" loading="lazy"></a>
@@ -3152,6 +3209,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - bo nix #142 white disco prizm"
         data-price="7.50"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Bo Nix #142 White Disco Prizm" data-description="$7.50 · Football Singles"><img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="2025 Panini Prizm - Bo Nix #142 White Disco Prizm" loading="lazy"></a>
@@ -3179,6 +3237,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - dwayne bowe #46 white disco prizm"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/5r8AAeSwur5qAKab/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/5r8AAeSwur5qAKab/s-l500.jpg" alt="2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm" loading="lazy"></a>
@@ -3206,6 +3265,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - prizmatic abdul carter #10 (rc)"
         data-price="1.19"
         data-cat="Football Singles"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/oAMAAeSw16pqAKb0/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC)" data-description="$1.19 · Football Singles"><img src="https://i.ebayimg.com/images/g/oAMAAeSw16pqAKb0/s-l500.jpg" alt="2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC)" loading="lazy"></a>
@@ -3233,6 +3293,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - concourse brian thomas jr. #30 green & yellow shock prizm"
         data-price="1.49"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/tWMAAeSwnSNqAKc-/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & Yellow Shock Prizm" data-description="$1.49 · Football Singles"><img src="https://i.ebayimg.com/images/g/tWMAAeSwnSNqAKc-/s-l500.jpg" alt="2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & Yellow Shock Prizm" loading="lazy"></a>
@@ -3260,6 +3321,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - rookies trey amos #400 red shimmer prizm /49 (rc)"
         data-price="3.25"
         data-cat="Football Singles"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/GzIAAeSwo1lqAKeK/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm /49 (RC)" data-description="$3.25 · Football Singles"><img src="https://i.ebayimg.com/images/g/GzIAAeSwo1lqAKeK/s-l500.jpg" alt="2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm /49 (RC)" loading="lazy"></a>
@@ -3287,6 +3349,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - club level najee harris #203 black & green shock prizm"
         data-price="1.20"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/bSwAAeSwDgxqAKgR/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Club Level Najee Harris #203 Black & Green Shock Prizm" data-description="$1.20 · Football Singles"><img src="https://i.ebayimg.com/images/g/bSwAAeSwDgxqAKgR/s-l500.jpg" alt="2025 Panini Select - Club Level Najee Harris #203 Black & Green Shock Prizm" loading="lazy"></a>
@@ -3314,6 +3377,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - club level kyle monangai #274 (rc)"
         data-price="1.75"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/898AAeSwYRNqAKoe/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Club Level Kyle Monangai #274 (RC)" data-description="$1.75 · Football Singles"><img src="https://i.ebayimg.com/images/g/898AAeSwYRNqAKoe/s-l500.jpg" alt="2025 Panini Select - Club Level Kyle Monangai #274 (RC)" loading="lazy"></a>
@@ -3341,6 +3405,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 topps chrome football deommodore lenoir refractor #269 49'ers"
         data-price="1.49"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/~boAAeSwKDVqAKqf/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Topps Chrome Football Deommodore Lenoir Refractor #269 49'ers" data-description="$1.49 · Football Singles"><img src="https://i.ebayimg.com/images/g/~boAAeSwKDVqAKqf/s-l500.jpg" alt="2025 Topps Chrome Football Deommodore Lenoir Refractor #269 49'ers" loading="lazy"></a>
@@ -3368,6 +3433,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 topps chrome garrett williams #6 arizona cardinals"
         data-price="1.49"
         data-cat="Baseball Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/vj8AAeSw--9qALYV/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Topps Chrome Garrett Williams #6 Arizona Cardinals" data-description="$1.49 · Baseball Singles"><img src="https://i.ebayimg.com/images/g/vj8AAeSw--9qALYV/s-l500.jpg" alt="2025 Topps Chrome Garrett Williams #6 Arizona Cardinals" loading="lazy"></a>
@@ -3395,6 +3461,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini select - premier level tank bigsby #129 silver prizm"
         data-price="1.00"
         data-cat="Football Singles"
+        data-flag="UNDERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/WLMAAeSwLFVqALa5/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Select - Premier Level Tank Bigsby #129 Silver Prizm" data-description="$1.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/WLMAAeSwLFVqALa5/s-l500.jpg" alt="2025 Panini Select - Premier Level Tank Bigsby #129 Silver Prizm" loading="lazy"></a>
@@ -3422,6 +3489,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - willis mcgahee #45 silver prizm"
         data-price="2.28"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/lEkAAeSwvnlqALdT/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Willis McGahee #45 Silver Prizm" data-description="$2.28 · Football Singles"><img src="https://i.ebayimg.com/images/g/lEkAAeSwvnlqALdT/s-l500.jpg" alt="2025 Panini Prizm - Willis McGahee #45 Silver Prizm" loading="lazy"></a>
@@ -3449,6 +3517,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - rookies isaac teslaa #316 (rc)"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/Jg8AAeSw~RxqALgM/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC)" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/Jg8AAeSw~RxqALgM/s-l500.jpg" alt="2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC)" loading="lazy"></a>
@@ -3476,6 +3545,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - rookies andrew mukuba #330 (rc)"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/9HsAAeSwLuFqALiW/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Rookies Andrew Mukuba #330 (RC)" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/9HsAAeSwLuFqALiW/s-l500.jpg" alt="2025 Panini Prizm - Rookies Andrew Mukuba #330 (RC)" loading="lazy"></a>
@@ -3503,6 +3573,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - jared verse #30 silver prizm"
         data-price="4.25"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/yBcAAeSwZZBqANUu/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Jared Verse #30 Silver Prizm" data-description="$4.25 · Football Singles"><img src="https://i.ebayimg.com/images/g/yBcAAeSwZZBqANUu/s-l500.jpg" alt="2025 Panini Prizm - Jared Verse #30 Silver Prizm" loading="lazy"></a>
@@ -3530,6 +3601,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - rookies grey zabel #387 silver prizm (rc)"
         data-price="1.99"
         data-cat="Football Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/WUYAAeSwd-5qANWf/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/WUYAAeSwd-5qANWf/s-l500.jpg" alt="2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)" loading="lazy"></a>
@@ -3557,6 +3629,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - chris boswell #174"
         data-price="1.49"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/IkQAAeSwWi9qANYX/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Chris Boswell #174" data-description="$1.49 · Football Singles"><img src="https://i.ebayimg.com/images/g/IkQAAeSwWi9qANYX/s-l500.jpg" alt="2025 Panini Prizm - Chris Boswell #174" loading="lazy"></a>
@@ -3584,6 +3657,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="2025 panini prizm - jared verse #30 silver prizm"
         data-price="4.25"
         data-cat="Football Singles"
+        data-flag="OVERPRICED"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/zTsAAeSwfLxqANl4/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm - Jared Verse #30 Silver Prizm" data-description="$4.25 · Football Singles"><img src="https://i.ebayimg.com/images/g/zTsAAeSwfLxqANl4/s-l500.jpg" alt="2025 Panini Prizm - Jared Verse #30 Silver Prizm" loading="lazy"></a>
@@ -3611,6 +3685,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         data-title="1991-92 fleer - pro vision magic johnson #6"
         data-price="1.40"
         data-cat="Basketball Singles"
+        data-flag="OK"
         >
         <div class="thumb-wrap">
           <a href="https://i.ebayimg.com/images/g/6dYAAeSw4vpqAOEd/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1991-92 Fleer - Pro Vision Magic Johnson #6" data-description="$1.40 · Basketball Singles"><img src="https://i.ebayimg.com/images/g/6dYAAeSw4vpqAOEd/s-l500.jpg" alt="1991-92 Fleer - Pro Vision Magic Johnson #6" loading="lazy"></a>
@@ -3633,12 +3708,377 @@ tr:hover td { background: rgba(212,175,55,.03); }
           <a href="items/306930807722.html" class="btn btn-ghost">Details</a>
         </div>
       </article>
+      <article class="listing-card"
+        data-id="306930901658"
+        data-title="2025 panini prizm draft picks - devin neal #43 red ice prizm (rc)"
+        data-price="2.99"
+        data-cat="Football Singles"
+        data-flag="OVERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/Yg4AAeSwl5xqAO81/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm (RC)" data-description="$2.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/Yg4AAeSwl5xqAO81/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930901658&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930901658" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930901658.html">2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm (RC)</a></h3>
+          <div class="price">$2.99</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Devin-Neal-43-Red-Ice-Prizm-RC--/306930901658" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930901658.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930903609"
+        data-title="2025 panini prizm draft picks #6 quinn ewers student orientation red ice"
+        data-price="1.49"
+        data-cat="Football Singles"
+        data-flag="OK"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/5aUAAeSwPN5qAPA7/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orientation Red Ice" data-description="$1.49 · Football Singles"><img src="https://i.ebayimg.com/images/g/5aUAAeSwPN5qAPA7/s-l500.jpg" alt="2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orientation Red Ice" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930903609&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930903609" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930903609.html">2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orientation Red Ice</a></h3>
+          <div class="price">$1.49</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-6-Quinn-Ewers-Student-Orientation-Red-Ice-/306930903609" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930903609.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930904430"
+        data-title="2025 panini prizm draft picks - chris paul jr. #2 silver prizm (rc)"
+        data-price="1.69"
+        data-cat="Football Singles"
+        data-flag="OK"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/e6EAAeSwbvhqAPB~/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Prizm (RC)" data-description="$1.69 · Football Singles"><img src="https://i.ebayimg.com/images/g/e6EAAeSwbvhqAPB~/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Prizm (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930904430&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930904430" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930904430.html">2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Prizm (RC)</a></h3>
+          <div class="price">$1.69</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Chris-Paul-Jr-2-Silver-Prizm-RC--/306930904430" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930904430.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930909038"
+        data-title="2025 panini prizm draft picks - bryce underwood #28 red ice prizm (rc)"
+        data-price="2.00"
+        data-cat="Football Singles"
+        data-flag="UNDERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/O6QAAeSwBe1qAPIi/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC)" data-description="$2.00 · Football Singles"><img src="https://i.ebayimg.com/images/g/O6QAAeSwBe1qAPIi/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930909038&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930909038" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930909038.html">2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC)</a></h3>
+          <div class="price">$2.00</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Bryce-Underwood-28-Red-Ice-Prizm-RC--/306930909038" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930909038.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930911781"
+        data-title="2025 panini prizm draft picks - instant impact will howard #ii-whd red ice prizm"
+        data-price="1.85"
+        data-cat="Football Singles"
+        data-flag="OK"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/n8EAAeSwsj1qAPKf/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Instant Impact Will Howard #II-WHD Red Ice Prizm" data-description="$1.85 · Football Singles"><img src="https://i.ebayimg.com/images/g/n8EAAeSwsj1qAPKf/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Instant Impact Will Howard #II-WHD Red Ice Prizm" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930911781&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930911781" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930911781.html">2025 Panini Prizm Draft Picks - Instant Impact Will Howard #II-WHD Red Ice Prizm</a></h3>
+          <div class="price">$1.85</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Will-Howard-II-WHD-Red-Ice-Prizm-/306930911781" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930911781.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930914782"
+        data-title="1990-91 skybox - michael jordan #41"
+        data-price="4.99"
+        data-cat="Other"
+        data-flag="OVERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1990-91 Skybox - Michael Jordan #41" data-description="$4.99 · Other"><img src="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l500.jpg" alt="1990-91 Skybox - Michael Jordan #41" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930914782&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930914782" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930914782.html">1990-91 Skybox - Michael Jordan #41</a></h3>
+          <div class="price">$4.99</div>
+          <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1990-91-Skybox-Michael-Jordan-41-/306930914782" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930914782.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930919438"
+        data-title="1993-94 fleer ultra - rebound kings dennis rodman #10"
+        data-price="2.49"
+        data-cat="Basketball Singles"
+        data-flag="OVERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/LoAAAeSwCm1qAPP9/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10" data-description="$2.49 · Basketball Singles"><img src="https://i.ebayimg.com/images/g/LoAAAeSwCm1qAPP9/s-l500.jpg" alt="1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930919438&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930919438" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930919438.html">1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10</a></h3>
+          <div class="price">$2.49</div>
+          <div class="meta"><span class="tag tag-gold">Basketball Singles</span><span class="tag tag-warn">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Rebound-Kings-Dennis-Rodman-10-/306930919438" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930919438.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930920326"
+        data-title="1993-94 fleer ultra - bobby hurley #161 (rc)"
+        data-price="1.99"
+        data-cat="Other"
+        data-flag="OK"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/5TkAAeSwM4hqAPRX/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1993-94 Fleer Ultra - Bobby Hurley #161 (RC)" data-description="$1.99 · Other"><img src="https://i.ebayimg.com/images/g/5TkAAeSwM4hqAPRX/s-l500.jpg" alt="1993-94 Fleer Ultra - Bobby Hurley #161 (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930920326&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930920326" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930920326.html">1993-94 Fleer Ultra - Bobby Hurley #161 (RC)</a></h3>
+          <div class="price">$1.99</div>
+          <div class="meta"><span class="tag tag-gold">Other</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Bobby-Hurley-161-RC--/306930920326" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930920326.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930929280"
+        data-title="2025 panini prizm draft picks - carnell tate #68 red ice prizm (rc)"
+        data-price="3.99"
+        data-cat="Football Singles"
+        data-flag="UNDERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/ulEAAeSwM4ZqAPT8/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)" data-description="$3.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/ulEAAeSwM4ZqAPT8/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930929280&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930929280" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930929280.html">2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)</a></h3>
+          <div class="price">$3.99</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Carnell-Tate-68-Red-Ice-Prizm-RC--/306930929280" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930929280.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930930898"
+        data-title="2025 panini prizm draft picks - new recruits ashton jeanty #9 red ice prizm (rc)"
+        data-price="2.99"
+        data-cat="Football Singles"
+        data-flag="OK"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/U54AAeSwGgVqAPWA/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #9 Red Ice Prizm (RC)" data-description="$2.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/U54AAeSwGgVqAPWA/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #9 Red Ice Prizm (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930930898&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930930898" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930930898.html">2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #9 Red Ice Prizm (RC)</a></h3>
+          <div class="price">$2.99</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Ashton-Jeanty-9-Red-Ice-Prizm-RC--/306930930898" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930930898.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930938563"
+        data-title="2025 panini prizm draft picks - dan marino #192 red ice prizm"
+        data-price="2.99"
+        data-cat="Football Singles"
+        data-flag="OVERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/iAkAAeSwhANqAPdG/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm" data-description="$2.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/iAkAAeSwhANqAPdG/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930938563&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930938563" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930938563.html">2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm</a></h3>
+          <div class="price">$2.99</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-/306930938563" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930938563.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930939967"
+        data-title="2025 panini prizm draft picks - keelon russell #150 red ice prizm (rc)"
+        data-price="2.99"
+        data-cat="Football Singles"
+        data-flag="OVERPRICED"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/uKMAAeSwsj1qAPeq/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice Prizm (RC)" data-description="$2.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/uKMAAeSwsj1qAPeq/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice Prizm (RC)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930939967&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930939967" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930939967.html">2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice Prizm (RC)</a></h3>
+          <div class="price">$2.99</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Keelon-Russell-150-Red-Ice-Prizm-RC--/306930939967" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930939967.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306930942401"
+        data-title="2025 panini prizm draft picks - jayden daniels #178 silver prizm"
+        data-price="1.25"
+        data-cat="Football Singles"
+        data-flag="OK"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/64EAAeSwZLVqAPgo/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm" data-description="$1.25 · Football Singles"><img src="https://i.ebayimg.com/images/g/64EAAeSwZLVqAPgo/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306930942401&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306930942401" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306930942401.html">2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm</a></h3>
+          <div class="price">$1.25</div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Jayden-Daniels-178-Silver-Prizm-/306930942401" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306930942401.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
     </div>
 
     <script>
       const PRICE_MIN_INIT = 1;
       const PRICE_MAX_INIT = 181;
       let activeCat = 'All';
+      let activeFlag = null;   // null | 'UNDERPRICED' | 'OVERPRICED'
       let priceRange = [PRICE_MIN_INIT, PRICE_MAX_INIT];
 
       // Watchlist (localStorage)
@@ -3681,8 +4121,46 @@ tr:hover td { background: rgba(212,175,55,.03); }
       function setCategory(btn) {
         activeCat = btn.dataset.cat;
         document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+        // Sync the dropdown
+        const sel = document.getElementById('category-select');
+        if (sel) sel.value = activeCat;
         applyFilters();
       }
+      // Category dropdown
+      window.setCategoryFromSelect = function() {
+        const sel = document.getElementById('category-select');
+        activeCat = sel.value;
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
+        applyFilters();
+      };
+      // KPI stat-card click → filter the grid
+      window.filterByKPI = function(kind, btn) {
+        document.querySelectorAll('.stat-card.linked').forEach(c => c.classList.toggle('active', c === btn));
+        // Reset other filters when clicking a KPI
+        activeCat = 'All';
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === 'All'));
+        const sel = document.getElementById('category-select');
+        if (sel) sel.value = 'All';
+        document.getElementById('search').value = '';
+        slider.noUiSlider.set([PRICE_MIN_INIT, PRICE_MAX_INIT]);
+        const sortSel = document.getElementById('sort-filter');
+        if (kind === 'value') {
+          sortSel.value = 'price-desc';
+          activeFlag = null;
+        } else if (kind === 'underpriced') {
+          sortSel.value = 'default';
+          activeFlag = 'UNDERPRICED';
+        } else if (kind === 'overpriced') {
+          sortSel.value = 'default';
+          activeFlag = 'OVERPRICED';
+        } else {
+          sortSel.value = 'default';
+          activeFlag = null;
+        }
+        applyFilters();
+        // Scroll the grid into view after the filter applies
+        document.getElementById('listing-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
 
       // Price slider
       const slider = document.getElementById('price-slider');
@@ -3715,6 +4193,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
           let ok = c.dataset.title.includes(q);
           if (ok && activeCat === '__watch') ok = favs.includes(c.dataset.id);
           else if (ok && activeCat !== 'All')  ok = c.dataset.cat === activeCat;
+          if (ok && activeFlag) ok = c.dataset.flag === activeFlag;
           if (ok) ok = price >= lo && price <= hi;
           c.style.display = ok ? '' : 'none';
           if (ok) visible++;
@@ -3856,7 +4335,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 20:08 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 10, 2026 · 21:42 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
