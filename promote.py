@@ -2492,6 +2492,21 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         document.documentElement.classList.add('pre-is-admin');
         document.getElementById('gate-overlay').classList.remove('open');
         showToast('Welcome back. Management tools unlocked.');
+
+        // Fire-and-forget alert ping (server decides if email is sent)
+        try {{
+          let did = localStorage.getItem('h2k_device_id');
+          if (!did) {{
+            did = (crypto.randomUUID && crypto.randomUUID()) ||
+                  (Date.now() + '-' + Math.random().toString(36).slice(2));
+            localStorage.setItem('h2k_device_id', did);
+          }}
+          fetch('{LAMBDA_BASE}/admin-login', {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ device_id: did, user_agent: navigator.userAgent }})
+          }}).catch(() => {{}});
+        }} catch(e) {{}}
       }} else {{
         err.textContent = 'Wrong passcode. Try again.';
         inp.value = '';

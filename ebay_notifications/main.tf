@@ -146,6 +146,51 @@ variable "fivetran_connector_id" {
 }
 
 # ---------------------------------------------------------------------------
+# Admin-login alerting — email-sent SNS topic
+# ---------------------------------------------------------------------------
+variable "admin_alert_email" {
+  description = "Email to receive admin-login alerts"
+  type        = string
+  default     = "jchletsos@gmail.com"
+}
+
+variable "admin_known_devices" {
+  description = "Comma-separated UUIDs of devices that should NOT trigger an alert"
+  type        = string
+  default     = ""
+}
+
+variable "admin_known_ip_prefixes" {
+  description = "Comma-separated IP prefixes (e.g. '73.146.,10.0.') that should NOT trigger an alert"
+  type        = string
+  default     = ""
+}
+
+resource "aws_sns_topic" "admin_alerts" {
+  name = "harpua2001-admin-alerts"
+}
+
+resource "aws_sns_topic_subscription" "admin_alerts_email" {
+  topic_arn = aws_sns_topic.admin_alerts.arn
+  protocol  = "email"
+  endpoint  = var.admin_alert_email
+}
+
+# Grant Lambda permission to publish to the SNS topic
+resource "aws_iam_role_policy" "lambda_sns_publish" {
+  name = "lambda-sns-publish"
+  role = aws_iam_role.lambda_exec.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["sns:Publish"]
+      Resource = aws_sns_topic.admin_alerts.arn
+    }]
+  })
+}
+
+# ---------------------------------------------------------------------------
 # Package Lambda
 # ---------------------------------------------------------------------------
 data "archive_file" "lambda_zip" {
@@ -205,6 +250,9 @@ resource "aws_lambda_function" "ebay_notifications" {
       FIVETRAN_API_KEY        = var.fivetran_api_key
       FIVETRAN_API_SECRET     = var.fivetran_api_secret
       FIVETRAN_CONNECTOR_ID   = var.fivetran_connector_id
+      ADMIN_ALERT_SNS_TOPIC   = aws_sns_topic.admin_alerts.arn
+      ADMIN_KNOWN_DEVICES     = var.admin_known_devices
+      ADMIN_KNOWN_IP_PREFIXES = var.admin_known_ip_prefixes
     }
   }
 }
@@ -276,6 +324,18 @@ resource "aws_apigatewayv2_route" "reddit_post_post" {
 resource "aws_apigatewayv2_route" "reddit_post_options" {
   api_id    = aws_apigatewayv2_api.ebay_notifications.id
   route_key = "OPTIONS /ebay/reddit-post"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "admin_login_post" {
+  api_id    = aws_apigatewayv2_api.ebay_notifications.id
+  route_key = "POST /ebay/admin-login"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "admin_login_options" {
+  api_id    = aws_apigatewayv2_api.ebay_notifications.id
+  route_key = "OPTIONS /ebay/admin-login"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 

@@ -58,6 +58,11 @@ FIVETRAN_API_KEY      = os.environ.get("FIVETRAN_API_KEY", "")
 FIVETRAN_API_SECRET   = os.environ.get("FIVETRAN_API_SECRET", "")
 FIVETRAN_CONNECTOR_ID = os.environ.get("FIVETRAN_CONNECTOR_ID", "")
 
+# Admin-login alerting — publishes to SNS when a NEW device/IP unlocks the gate
+ADMIN_ALERT_SNS_TOPIC  = os.environ.get("ADMIN_ALERT_SNS_TOPIC", "")
+ADMIN_KNOWN_DEVICES    = [d.strip() for d in os.environ.get("ADMIN_KNOWN_DEVICES", "").split(",") if d.strip()]
+ADMIN_KNOWN_IP_PREFIXES = [p.strip() for p in os.environ.get("ADMIN_KNOWN_IP_PREFIXES", "").split(",") if p.strip()]
+
 
 def lambda_handler(event, context):
     method = event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method", "GET")
@@ -211,6 +216,66 @@ def lambda_handler(event, context):
         if results["github"] and results["github"].get("ok"):
             msgs.append("Site rebuild triggered (live in ~2 min)")
         return _cors_response(200, {"success": True, "message": " · ".join(msgs), "results": results})
+
+    # ------------------------------------------------------------------
+    # POST /ebay/admin-login — log + alert when someone unlocks the admin gate
+    # Body: {device_id, user_agent}
+    # Lambda compares the source IP + device fingerprint against the trusted
+    # allowlists (ADMIN_KNOWN_DEVICES, ADMIN_KNOWN_IP_PREFIXES). If neither
+    # matches, publishes an alert to the SNS topic so the owner gets an email.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/admin-login"):
+        try:
+            body  = json.loads(event.get("body", "{}") or "{}")
+            device_id  = (body.get("device_id")  or "")[:64]
+            user_agent = (body.get("user_agent") or "")[:200]
+            # Source IP from API Gateway HTTP API event context
+            req_ctx    = event.get("requestContext", {})
+            http_ctx   = req_ctx.get("http", {})
+            source_ip  = http_ctx.get("sourceIp") or req_ctx.get("identity", {}).get("sourceIp", "")
+            now_iso    = __import__("datetime").datetime.utcnow().isoformat() + "Z"
+
+            # Decide if this is a known device/IP
+            is_known_device = bool(device_id) and device_id in ADMIN_KNOWN_DEVICES
+            is_known_ip     = any(source_ip.startswith(p) for p in ADMIN_KNOWN_IP_PREFIXES) if source_ip else False
+            trusted = is_known_device or is_known_ip
+            logger.info(f"Admin login: ip={source_ip} device={device_id[:8]}... ua={user_agent[:60]}... trusted={trusted}")
+
+            if trusted:
+                return _cors_response(200, {"success": True, "trusted": True})
+
+            # Publish SNS alert (best effort — failures don't break the login)
+            published = False
+            if ADMIN_ALERT_SNS_TOPIC:
+                try:
+                    # Tiny inline boto3 — Lambda has boto3 pre-installed
+                    import boto3
+                    sns = boto3.client("sns")
+                    msg = (
+                        f"⚠ NEW ADMIN LOGIN to Harpua2001 site\n\n"
+                        f"Time:       {now_iso} UTC\n"
+                        f"Source IP:  {source_ip or 'unknown'}\n"
+                        f"Device ID:  {device_id or '(none)'}\n"
+                        f"User-Agent: {user_agent or '(none)'}\n\n"
+                        f"If this was you, add to ADMIN_KNOWN_DEVICES or ADMIN_KNOWN_IP_PREFIXES on the Lambda to silence future alerts.\n\n"
+                        f"If NOT you, rotate the password in admin.json + run promote.py to invalidate the salt."
+                    )
+                    sns.publish(
+                        TopicArn=ADMIN_ALERT_SNS_TOPIC,
+                        Subject="Harpua2001 site — new admin login",
+                        Message=msg,
+                    )
+                    published = True
+                except Exception as exc:
+                    logger.error(f"SNS publish failed: {exc}")
+            return _cors_response(200, {"success": True, "trusted": False, "alerted": published})
+
+        except Exception as exc:
+            logger.error(f"Admin-login alert error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/admin-login"):
+        return _cors_preflight()
 
     # ------------------------------------------------------------------
     # POST /ebay/reddit-post — submit a self-post to a chosen subreddit
