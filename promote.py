@@ -34,8 +34,30 @@ import requests
 
 CONFIG_FILE  = Path(__file__).parent / "configuration.json"
 LOCKS_FILE   = Path(__file__).parent / "locks.json"
+ADMIN_FILE   = Path(__file__).parent / "admin.json"
 OUTPUT_DIR   = Path(__file__).parent / "docs"
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+# Random per-build salt to prevent rainbow-table cracking of admin password hashes.
+# Regenerated each build — old localStorage tokens auto-expire on next deploy.
+import hashlib as _hashlib, secrets as _secrets
+_ADMIN_SALT = _secrets.token_hex(16)
+
+
+def load_admin_hashes() -> list[str]:
+    """Read admin.json (gitignored), return SHA-256(salt+pw) hashes."""
+    if not ADMIN_FILE.exists():
+        return []
+    try:
+        data = json.loads(ADMIN_FILE.read_text())
+        pwds = data.get("passwords", []) if isinstance(data, dict) else []
+        return [
+            _hashlib.sha256((_ADMIN_SALT + str(p)).encode()).hexdigest()
+            for p in pwds
+            if p and not str(p).startswith("set-your-")
+        ]
+    except Exception:
+        return []
 
 
 def load_locks() -> dict:
@@ -102,87 +124,190 @@ def get_app_token(cfg: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Fetch sold listings (Trading API GetMyeBaySelling/SoldList)
+# Fetch sold listings (Trading API GetOrders) + persistent history accumulator
 # ---------------------------------------------------------------------------
+SOLD_HISTORY_FILE = Path(__file__).parent / "sold_history.json"
 
-def fetch_sold_listings(token: str, cfg: dict, days_back: int = 60) -> list[dict]:
-    """Fetch completed sales from eBay. SoldList max window is 60 days."""
-    days_back = min(max(int(days_back), 1), 60)
-    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
-  <SoldList>
-    <Include>true</Include>
-    <DurationInDays>{days_back}</DurationInDays>
-    <Pagination>
-      <EntriesPerPage>200</EntriesPerPage>
-      <PageNumber>1</PageNumber>
-    </Pagination>
-  </SoldList>
-  <DetailLevel>ReturnAll</DetailLevel>
-</GetMyeBaySellingRequest>"""
+
+def _load_sold_history() -> list[dict]:
+    if not SOLD_HISTORY_FILE.exists():
+        return []
+    try:
+        return json.load(open(SOLD_HISTORY_FILE))
+    except Exception:
+        return []
+
+
+def _save_sold_history(items: list[dict]) -> None:
+    SOLD_HISTORY_FILE.write_text(json.dumps(items, indent=2, default=str), encoding="utf-8")
+
+
+def _redact_buyer(uid: str) -> str:
+    """Redact buyer username for the public site — keep first 1 char + length hint."""
+    if not uid:
+        return ""
+    if len(uid) <= 2:
+        return uid[0] + "*"
+    return uid[0] + "*" * (len(uid) - 1)
+
+
+def fetch_sold_listings(token: str, cfg: dict, days_back: int = 90) -> list[dict]:
+    """
+    Fetch completed orders via Trading API GetOrders (90-day max window).
+    Merges with persisted history at sold_history.json so the page shows
+    all-time sales regardless of eBay's 90-day API limit.
+    """
+    from datetime import datetime as _dt, timedelta as _td
+
+    days_back = min(max(int(days_back), 1), 90)
+    now = _dt.now(timezone.utc)
+    start = now - _td(days=days_back)
+
+    NS = "{urn:ebay:apis:eBLBaseComponents}"
     headers = {
         "X-EBAY-API-SITEID":              "0",
         "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
-        "X-EBAY-API-CALL-NAME":           "GetMyeBaySelling",
+        "X-EBAY-API-CALL-NAME":           "GetOrders",
         "X-EBAY-API-APP-NAME":            cfg.get("client_id", ""),
         "X-EBAY-API-DEV-NAME":            cfg.get("dev_id", ""),
         "X-EBAY-API-CERT-NAME":           cfg.get("client_secret", ""),
         "Content-Type":                   "text/xml",
     }
-    try:
-        resp = requests.post("https://api.ebay.com/ws/api.dll", data=xml_body, headers=headers, timeout=30)
-        resp.raise_for_status()
-    except Exception as exc:
-        print(f"  Sold listings fetch failed: {exc}")
-        return []
 
-    NS = "{urn:ebay:apis:eBLBaseComponents}"
-    root = ET.fromstring(resp.text)
-
-    sold = []
-    # SoldList → OrderTransactionArray → OrderTransaction → Order > TransactionArray > Transaction
-    # Or: SoldList → OrderTransactionArray → OrderTransaction → Transaction (single)
-    for trans in root.findall(f".//{NS}Transaction"):
-        item       = trans.find(f"{NS}Item")
-        if item is None:
-            continue
-        item_id    = item.findtext(f"{NS}ItemID", "")
-        title      = item.findtext(f"{NS}Title", "")
-        pic        = item.findtext(f"{NS}PictureDetails/{NS}GalleryURL", "") or item.findtext(f"{NS}GalleryURL", "")
-        category   = item.findtext(f"{NS}PrimaryCategory/{NS}CategoryName", "")
-        condition  = item.findtext(f"{NS}ConditionDisplayName", "")
-        listing_url = item.findtext(f"{NS}ListingDetails/{NS}ViewItemURL", "") or f"https://www.ebay.com/itm/{item_id}"
-
-        qty        = trans.findtext(f"{NS}QuantityPurchased", "1")
-        sale_price = trans.findtext(f"{NS}TransactionPrice", "0")
-        sold_date  = trans.findtext(f"{NS}CreatedDate", "") or trans.findtext(f"{NS}PaidTime", "")
-        buyer      = trans.findtext(f"{NS}Buyer/{NS}UserID", "")
-        ship_cost  = trans.findtext(f"{NS}ActualShippingCost/{NS}value", "") or trans.findtext(f"{NS}ShippingServiceSelected/{NS}ShippingServiceCost", "")
-        feedback_left = trans.findtext(f"{NS}FeedbackLeft/{NS}CommentType", "")
-
+    # Paginate through all pages
+    fresh: list[dict] = []
+    page = 1
+    while True:
+        xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<GetOrdersRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <CreateTimeFrom>{start.strftime('%Y-%m-%dT%H:%M:%S.000Z')}</CreateTimeFrom>
+  <CreateTimeTo>{now.strftime('%Y-%m-%dT%H:%M:%S.000Z')}</CreateTimeTo>
+  <OrderRole>Seller</OrderRole>
+  <OrderStatus>All</OrderStatus>
+  <Pagination><EntriesPerPage>100</EntriesPerPage><PageNumber>{page}</PageNumber></Pagination>
+  <DetailLevel>ReturnAll</DetailLevel>
+</GetOrdersRequest>"""
         try:
-            price_f = float(sale_price)
-        except (TypeError, ValueError):
-            price_f = 0.0
+            resp = requests.post("https://api.ebay.com/ws/api.dll", data=xml_body, headers=headers, timeout=30)
+            resp.raise_for_status()
+        except Exception as exc:
+            print(f"  GetOrders fetch failed (page {page}): {exc}")
+            break
+        root = ET.fromstring(resp.text)
+        if root.findtext(f"{NS}Ack") not in ("Success", "Warning"):
+            err = root.find(f".//{NS}Errors")
+            if err is not None:
+                print(f"  GetOrders error: [{err.findtext(f'{NS}ErrorCode')}] {err.findtext(f'{NS}LongMessage', '')[:120]}")
+            break
 
-        sold.append({
-            "item_id":     item_id,
-            "title":       title,
-            "pic":         pic,
-            "url":         listing_url,
-            "category":    category,
-            "condition":   condition,
-            "quantity":    qty,
-            "sale_price":  price_f,
-            "sold_date":   sold_date,
-            "buyer":       buyer,
-            "ship_cost":   ship_cost,
-            "feedback":    feedback_left,
-        })
+        for order in root.findall(f".//{NS}Order"):
+            order_id   = order.findtext(f"{NS}OrderID", "")
+            created    = order.findtext(f"{NS}CreatedTime", "") or order.findtext(f"{NS}PaidTime", "")
+            paid       = order.findtext(f"{NS}PaidTime", "")
+            status     = order.findtext(f"{NS}OrderStatus", "")
+            buyer      = order.findtext(f"{NS}BuyerUserID", "")
+            ship_cost  = order.findtext(f"{NS}ShippingServiceSelected/{NS}ShippingServiceCost", "") \
+                       or order.findtext(f"{NS}ShippingDetails/{NS}ShippingServiceOptions/{NS}ShippingServiceCost", "")
+            order_total = order.findtext(f"{NS}Total", "0")
 
-    print(f"  Fetched {len(sold)} sold listings (last {days_back} days)")
-    return sold
+            # An Order can have multiple Transactions (line items) — flatten each as a row
+            for trans in order.findall(f".//{NS}Transaction"):
+                item       = trans.find(f"{NS}Item")
+                if item is None:
+                    continue
+                item_id    = item.findtext(f"{NS}ItemID", "")
+                title      = item.findtext(f"{NS}Title", "")
+                category   = item.findtext(f"{NS}PrimaryCategory/{NS}CategoryName", "")
+                condition  = item.findtext(f"{NS}ConditionDisplayName", "")
+                listing_url = item.findtext(f"{NS}ListingDetails/{NS}ViewItemURL", "") or f"https://www.ebay.com/itm/{item_id}"
+                qty        = trans.findtext(f"{NS}QuantityPurchased", "1")
+                sale_price = trans.findtext(f"{NS}TransactionPrice", "0") or trans.findtext(f"{NS}TransactionPrice/{NS}value", "0")
+                sold_date  = trans.findtext(f"{NS}CreatedDate", "") or paid or created
+                feedback_left = trans.findtext(f"{NS}FeedbackLeft/{NS}CommentType", "")
+                trans_id   = trans.findtext(f"{NS}TransactionID", "")
+                try:
+                    price_f = float(sale_price)
+                except (TypeError, ValueError):
+                    price_f = 0.0
+
+                # Composite unique key — order can have multiple line items
+                uniq = f"{order_id}:{trans_id}" if trans_id else f"{order_id}:{item_id}"
+                fresh.append({
+                    "uniq":        uniq,
+                    "order_id":    order_id,
+                    "item_id":     item_id,
+                    "title":       title,
+                    "pic":         "",
+                    "url":         listing_url,
+                    "category":    category,
+                    "condition":   condition,
+                    "quantity":    qty,
+                    "sale_price":  price_f,
+                    "sold_date":   sold_date,
+                    "buyer":       _redact_buyer(buyer),
+                    "ship_cost":   ship_cost,
+                    "order_total": order_total,
+                    "status":      status,
+                    "feedback":    feedback_left,
+                })
+
+        pr = root.find(f".//{NS}PaginationResult")
+        total_pages = int(pr.findtext(f"{NS}TotalNumberOfPages", "1")) if pr is not None else 1
+        if page >= total_pages:
+            break
+        page += 1
+
+    print(f"  Fetched {len(fresh)} sales from eBay (last {days_back} days)")
+
+    # Merge with persistent history (dedupe by uniq key)
+    history = _load_sold_history()
+    by_uniq = {h.get("uniq", ""): h for h in history if h.get("uniq")}
+    new_count = 0
+    for s in fresh:
+        if s["uniq"] not in by_uniq:
+            new_count += 1
+        by_uniq[s["uniq"]] = s  # always overwrite with latest data
+    merged = sorted(by_uniq.values(), key=lambda x: x.get("sold_date") or "", reverse=True)
+
+    # Image enrichment for items missing pics (Browse API per-item)
+    missing_pics = [m for m in merged if not m.get("pic") and m.get("item_id")]
+    if missing_pics:
+        try:
+            _enrich_sold_with_images(missing_pics, cfg)
+        except Exception as exc:
+            print(f"  Image enrichment skipped: {exc}")
+
+    _save_sold_history(merged)
+    print(f"  Sold history: {len(merged)} total ({new_count} new this run, persisted to {SOLD_HISTORY_FILE.name})")
+    return merged
+
+
+def _enrich_sold_with_images(sold: list[dict], cfg: dict) -> None:
+    """Attach a pic URL per sold item via the Browse API (uses user OAuth)."""
+    token = get_access_token(cfg)
+    base = "https://api.ebay.com/buy/browse/v1/item/get_item_by_legacy_id"
+    headers = {"Authorization": f"Bearer {token}", "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"}
+    fetched = 0
+    for s in sold:
+        if s.get("pic") or not s.get("item_id"):
+            continue
+        try:
+            r = requests.get(base, params={"legacy_item_id": s["item_id"]}, headers=headers, timeout=10)
+            if r.status_code == 200:
+                d = r.json()
+                pic = (d.get("image") or {}).get("imageUrl") or ""
+                if not pic:
+                    addl = d.get("additionalImages") or []
+                    if addl:
+                        pic = addl[0].get("imageUrl", "")
+                if pic:
+                    s["pic"] = pic
+                    fetched += 1
+        except Exception:
+            continue
+    if fetched:
+        print(f"  Image enrichment: pulled {fetched} thumbnails from Browse API")
 
 
 # ---------------------------------------------------------------------------
@@ -946,6 +1071,76 @@ a:hover { color: var(--gold-bright); }
   font-family: inherit;
 }
 .btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
+
+/* ============ ADMIN GATE ============ */
+/* Admin nav links + Refresh button hidden unless html.pre-is-admin (set in head before body renders) */
+html:not(.pre-is-admin) [data-admin="1"],
+html:not(.pre-is-admin) .nav-links a.admin-only,
+html:not(.pre-is-admin) .drawer a.admin-only,
+html:not(.pre-is-admin) #install-app-btn,
+html:not(.pre-is-admin) #nav-refresh-btn,
+html:not(.pre-is-admin) .btn-logout { display: none !important; }
+html.pre-is-admin .btn-login,
+html.pre-is-admin .gate-overlay { display: none !important; }
+.btn-login, .btn-logout {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--t-fast);
+}
+.btn-login:hover, .btn-logout:hover { color: var(--gold); border-color: var(--gold); }
+.gate-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.85);
+  backdrop-filter: blur(10px);
+  display: none; align-items: center; justify-content: center;
+}
+.gate-overlay.open { display: flex; }
+.gate-card {
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-lg);
+  padding: 32px 32px 26px;
+  max-width: 380px;
+  width: calc(100vw - 32px);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+.gate-card h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: .04em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.gate-card .gate-sub {
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.gate-card input[type="password"] {
+  width: 100%;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: .2em;
+  font-size: 16px;
+}
+.gate-card .gate-actions { display: flex; gap: 10px; }
+.gate-card .gate-actions button { flex: 1; }
+.gate-error {
+  font-size: 12px; color: var(--danger);
+  min-height: 18px; margin-bottom: 8px;
+}
+.gate-storefront-msg {
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+  margin-top: 14px;
+}
 .btn-theme {
   width: 38px; height: 38px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -1558,27 +1753,34 @@ _CDN_HEAD = """
 
 _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts can use them
 
-# nav items: (href, label)
+# nav items: (href, label, public?)
+# public=True: visible to anonymous visitors. public=False: only after admin login.
 _NAV_ITEMS = [
-    ("index.html",        "Listings"),
-    ("sold.html",         "Sold"),
-    ("quality.html",      "Quality"),
-    ("price_review.html", "Pricing"),
-    ("title_review.html", "Titles"),
-    ("reddit.html",       "Reddit"),
-    ("craigslist.html",   "Craigslist"),
-    ("google_feed.xml",   "Google Feed"),
+    ("index.html",        "Listings",    True),
+    ("sold.html",         "Sold",        True),
+    ("quality.html",      "Quality",     False),
+    ("price_review.html", "Pricing",     False),
+    ("title_review.html", "Titles",      False),
+    ("reddit.html",       "Reddit",      False),
+    ("craigslist.html",   "Craigslist",  False),
+    ("google_feed.xml",   "Google Feed", False),
 ]
+# Admin-only pages — body content is hidden until the visitor unlocks
+_ADMIN_PAGES = {p for p, _, public in _NAV_ITEMS if not public}
 
 
 def _nav_link_html(active_page: str, mobile: bool = False) -> str:
     out = []
-    for href, label in _NAV_ITEMS:
+    for href, label, public in _NAV_ITEMS:
         is_external = href.endswith(".xml")
         is_active = (href == active_page)
-        cls = " class=\"active\"" if is_active else ""
-        ext = ' target="_blank" rel="noopener"' if is_external else ""
-        out.append(f'<a href="{href}"{cls}{ext}>{label}</a>')
+        cls_parts = []
+        if is_active: cls_parts.append("active")
+        if not public: cls_parts.append("admin-only")
+        cls = f' class="{" ".join(cls_parts)}"' if cls_parts else ""
+        attrs = ' target="_blank" rel="noopener"' if is_external else ""
+        if not public: attrs += ' data-admin="1"'
+        out.append(f'<a href="{href}"{cls}{attrs}>{label}</a>')
     return "\n".join(out)
 
 
@@ -1586,6 +1788,11 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     nav_html_desktop = _nav_link_html(active_page, mobile=False)
     nav_html_mobile  = _nav_link_html(active_page, mobile=True)
     updated = datetime.now(timezone.utc).strftime('%b %d, %Y · %H:%M UTC')
+
+    # Admin gate values
+    admin_hashes_json = json.dumps(load_admin_hashes())
+    admin_salt = _ADMIN_SALT
+    is_admin_page = "true" if active_page in _ADMIN_PAGES else "false"
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1606,23 +1813,40 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     (function() {{
       try {{
         var t = localStorage.getItem('h2k_theme');
-        if (t === 'cream' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
+      }} catch(e) {{}}
+    }})();
+    // Admin gate constants (populated at build time)
+    window.__ADMIN_HASHES = {admin_hashes_json};
+    window.__ADMIN_SALT   = '{admin_salt}';
+    window.__IS_ADMIN_PAGE = {is_admin_page};
+    // Early body class: if a stored token matches any embedded hash, mark body admin
+    (function() {{
+      try {{
+        var stored = localStorage.getItem('h2k_admin_token');
+        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        document.documentElement.classList.toggle('pre-is-admin', !!ok);
       }} catch(e) {{}}
     }})();
   </script>
+  <style>
+    /* Use html.pre-is-admin → body.is-admin (we mirror in the body-load script).
+       Until then, on admin pages, show the gate over content immediately. */
+    html:not(.pre-is-admin) body.admin-page main {{ filter: blur(14px); pointer-events: none; user-select: none; }}
+  </style>
   <title>{title}</title>
   {_CDN_HEAD}
   <style>{_BASE_CSS}</style>
   {extra_head}
 </head>
-<body>
+<body class="{'admin-page' if active_page in _ADMIN_PAGES else ''}">
   <header class="app-header">
     <div class="app-header-inner">
       <a href="index.html" class="brand">
         <div class="brand-mark">H</div>
         <div class="brand-text">
           <div class="brand-name">{SELLER_NAME}</div>
-          <div class="brand-tag">Cards · Coins · Collectibles</div>
+          <div class="brand-tag">Sports &amp; Pokemon Cards</div>
         </div>
       </a>
       <nav class="nav-links">{nav_html_desktop}</nav>
@@ -1635,6 +1859,14 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
         Install
+      </button>
+      <button class="btn-login"  onclick="openGate()" title="Sign in to manage listings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sign in
+      </button>
+      <button class="btn-logout" onclick="adminLogout()" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
@@ -1662,6 +1894,22 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 
   <div id="nav-toast" class="toast"></div>
 
+  <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-card">
+      <h2 id="gate-title">Owner Access</h2>
+      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
+      <form onsubmit="event.preventDefault(); adminAttempt();">
+        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
+        <div class="gate-error" id="gate-error">&nbsp;</div>
+        <div class="gate-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Unlock</button>
+        </div>
+      </form>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+    </div>
+  </div>
+
   <main>
     {body}
   </main>
@@ -1672,6 +1920,67 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 
   {_CDN_FOOT}
   <script>
+    // ---- ADMIN GATE ----
+    (function bootstrapAdmin() {{
+      // Mirror html class onto body so CSS selectors targeting body.is-admin work
+      if (document.documentElement.classList.contains('pre-is-admin')) {{
+        document.body.classList.add('is-admin');
+      }}
+      if (window.__IS_ADMIN_PAGE) {{
+        document.body.classList.add('admin-page');
+        if (!document.body.classList.contains('is-admin')) {{
+          // No valid token → force the gate open and block content
+          openGate();
+        }}
+      }}
+    }})();
+
+    async function _sha256Hex(s) {{
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }}
+    window.openGate = function() {{
+      const o = document.getElementById('gate-overlay');
+      if (o) o.classList.add('open');
+      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
+    }};
+    window.closeGate = function() {{
+      // On admin pages, can't close without authing — bounce to home instead
+      if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {{
+        const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
+        location.href = home;
+        return;
+      }}
+      document.getElementById('gate-overlay')?.classList.remove('open');
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
+      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
+    }};
+    window.adminAttempt = async function() {{
+      const inp = document.getElementById('gate-input');
+      const err = document.getElementById('gate-error');
+      const v = (inp.value || '').trim();
+      if (!v) return;
+      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
+      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {{
+        try {{ localStorage.setItem('h2k_admin_token', hash); }} catch(e) {{}}
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+        document.getElementById('gate-overlay').classList.remove('open');
+        showToast('Welcome back. Management tools unlocked.');
+      }} else {{
+        err.textContent = 'Wrong passcode. Try again.';
+        inp.value = '';
+        inp.focus();
+      }}
+    }};
+    window.adminLogout = function() {{
+      try {{ localStorage.removeItem('h2k_admin_token'); }} catch(e) {{}}
+      document.body.classList.remove('is-admin');
+      document.documentElement.classList.remove('pre-is-admin');
+      if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
+      else showToast('Signed out.');
+    }};
+
     function openDrawer() {{
       document.getElementById('drawer').classList.add('open');
       document.getElementById('drawer-backdrop').classList.add('open');
@@ -1872,15 +2181,23 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 # 1. Listing dashboard (index.html)
 # ---------------------------------------------------------------------------
 
+_BASKETBALL_TEAMS = ["lakers", "celtics", "warriors", "bulls", "heat", "knicks", "nets", "76ers", "raptors", "bucks", "cavaliers", "pistons", "pacers", "hawks", "magic", "wizards", "spurs", "rockets", "mavericks", "grizzlies", "pelicans", "thunder", "nuggets", "jazz", "timberwolves", "trail blazers", "kings", "suns", "clippers"]
+_BASEBALL_TEAMS   = ["yankees", "red sox", "dodgers", "giants", "cubs", "white sox", "mets", "phillies", "braves", "marlins", "nationals", "orioles", "blue jays", "rays", "guardians", "indians", "twins", "tigers", "royals", "astros", "rangers", "athletics", "angels", "mariners", "cardinals", "brewers", "reds", "pirates", "padres", "rockies", "diamondbacks"]
+_FOOTBALL_TEAMS   = ["raiders", "broncos", "cowboys", "49ers", "bears", "packers", "bengals", "chargers", "steelers", "vikings", "rams", "browns", "falcons", "giants", "jets", "patriots", "saints", "seahawks", "buccaneers", "titans", "chiefs", "colts", "eagles", "lions", "ravens", "bills", "dolphins", "texans", "cardinals", "panthers", "redskins", "commanders"]
+
+
 def _categorize(listing: dict) -> str:
     """Lightweight category derivation from the listing title for filter chips."""
     t = listing["title"].lower()
     if any(w in t for w in ["pokemon", "pikachu", "charizard", "charcadet", "eevee", "holo promo", "mega evolution"]):
         return "Pokemon"
-    if any(w in t for w in ["sixpence", "shilling", "australia", " coin", "coins"]) or t.startswith("coin"):
-        return "Coins"
-    if any(w in t for w in [" lot", "lot ", "cards "]) and any(w in t for w in ["football", "nfl", "raiders", "broncos", "cowboys", "49ers", "bears", "packers", "bengals", "chargers", "steelers", "vikings", "rams", "browns", "falcons", "giants", "jets", "patriots", "saints", "seahawks", "buccaneers", "titans", "chiefs", "colts"]):
-        return "Football Lots"
+    is_lot = any(w in t for w in [" lot", "lot ", "cards "])
+    if any(w in t for w in _BASKETBALL_TEAMS) or "nba" in t or "basketball" in t:
+        return "Basketball Lots" if is_lot else "Basketball Singles"
+    if any(w in t for w in _BASEBALL_TEAMS) or "mlb" in t or "baseball" in t:
+        return "Baseball Lots" if is_lot else "Baseball Singles"
+    if any(w in t for w in _FOOTBALL_TEAMS) or "nfl" in t or "football" in t:
+        return "Football Lots" if is_lot else "Football Singles"
     if any(w in t for w in ["prizm", "optic", "donruss", "panini", "rookie", "rc "]):
         return "Football Singles"
     return "Other"
@@ -2665,7 +2982,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     </script>"""
 
     out = OUTPUT_DIR / "index.html"
-    out.write_text(html_shell(f"{SELLER_NAME} · Cards, Coins & Collectibles", body, extra_head=f"<style>{extra_css}</style>", active_page="index.html"), encoding="utf-8")
+    out.write_text(html_shell(f"{SELLER_NAME} · Sports & Pokemon Cards", body, extra_head=f"<style>{extra_css}</style>", active_page="index.html"), encoding="utf-8")
     print(f"  Dashboard: {out}")
     return out
 
@@ -2797,12 +3114,22 @@ def build_sold_page(sold: list[dict]) -> Path:
     }
     """
 
+    # Earliest + latest date range for the eyebrow
+    dates = [s.get("sold_date") for s in sold if s.get("sold_date")]
+    range_label = "All-time history"
+    if dates:
+        try:
+            d_min = _dt.fromisoformat(min(dates).replace("Z","+00:00")).strftime("%b %Y")
+            d_max = _dt.fromisoformat(max(dates).replace("Z","+00:00")).strftime("%b %Y")
+            range_label = f"{d_min} → {d_max}" if d_min != d_max else f"Sales from {d_max}"
+        except Exception:
+            pass
     body = f"""
     <div class="section-head">
       <div>
-        <div class="eyebrow">Last 60 days</div>
+        <div class="eyebrow">{range_label}</div>
         <h1 class="section-title">Sold <span class="accent">Items</span></h1>
-        <div class="section-sub">Completed sales pulled live from eBay. Newest first. (eBay's API limits the window to 60 days.)</div>
+        <div class="section-sub">Completed sales accumulated from eBay (Trading API caps live queries at 90 days; full history persists to <code>sold_history.json</code> on every build, so the catalog grows over time).</div>
       </div>
     </div>
 
@@ -3500,29 +3827,26 @@ def build_craigslist(listings: list[dict]) -> Path:
 # Google product category IDs for our inventory types
 # https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
 _GOOGLE_CATEGORY_MAP = {
-    "pokemon":   "Toys & Games > Collectible Card Games > Collectible Card Game Cards",
-    "coin":      "Collectibles > Coins & Currency > Coins > US Coins",
-    "australia": "Collectibles > Coins & Currency > Coins > Foreign Coins",
-    "football":  "Sporting Goods > Sport Collectibles > Football Collectibles > Football Trading Cards",
-    "default":   "Sporting Goods > Sport Collectibles > Football Collectibles > Football Trading Cards",
+    "pokemon":    "Toys & Games > Collectible Card Games > Collectible Card Game Cards",
+    "football":   "Sporting Goods > Sport Collectibles > Football Collectibles > Football Trading Cards",
+    "basketball": "Sporting Goods > Sport Collectibles > Basketball Collectibles > Basketball Trading Cards",
+    "baseball":   "Sporting Goods > Sport Collectibles > Baseball Collectibles > Baseball Trading Cards",
+    "default":    "Sporting Goods > Sport Collectibles > Football Collectibles > Football Trading Cards",
 }
 
 def _google_category(listing: dict) -> str:
     t = listing["title"].lower()
     if any(w in t for w in ["pokemon", "pikachu", "charizard", "charcadet", "eevee", "holo", "promo"]):
         return _GOOGLE_CATEGORY_MAP["pokemon"]
-    if any(w in t for w in ["australia", "sixpence", "shilling"]):
-        return _GOOGLE_CATEGORY_MAP["australia"]
-    if any(w in t for w in ["coin", "cent", "penny"]):
-        return _GOOGLE_CATEGORY_MAP["coin"]
+    if any(w in t for w in _BASKETBALL_TEAMS) or "nba" in t or "basketball" in t:
+        return _GOOGLE_CATEGORY_MAP["basketball"]
+    if any(w in t for w in _BASEBALL_TEAMS) or "mlb" in t or "baseball" in t:
+        return _GOOGLE_CATEGORY_MAP["baseball"]
     return _GOOGLE_CATEGORY_MAP["default"]
 
 def _shipping_weight(listing: dict) -> str:
-    """Nominal shipping weight. Coins heavier than cards."""
+    """Nominal shipping weight for trading-card lots vs singles."""
     t = listing["title"].lower()
-    if any(w in t for w in ["coin", "cent", "penny", "sixpence", "shilling", "australia"]):
-        return "1 oz"
-    # Card lots scale with quantity hint in title
     if "lot" in t or any(c.isdigit() and t[t.index(c)-1:t.index(c)] == " " for c in t[:20]):
         return "0.5 oz"
     return "0.1 oz"
@@ -4374,23 +4698,26 @@ _REDDIT_SUBS = [
      "note": "Dedicated marketplace · strict format · highest traffic for all sports cards"},
     {"id": "footballcards",   "name": "r/footballcards",     "tag": "[WTS]", "kind": "self",
      "note": "Football-specific community · selling allowed in flair-tagged posts"},
+    {"id": "basketballcards", "name": "r/basketballcards",   "tag": "[WTS]", "kind": "self",
+     "note": "Basketball-specific community"},
+    {"id": "baseballcards",   "name": "r/baseballcards",     "tag": "[WTS]", "kind": "self",
+     "note": "Baseball-specific community"},
     {"id": "Pokemoncardsales","name": "r/Pokemoncardsales",  "tag": "[WTS]", "kind": "self",
      "note": "Pokemon-specific marketplace"},
     {"id": "sportscards",     "name": "r/sportscards",       "tag": "[FS]",  "kind": "self",
      "note": "General community · selling in dedicated threads"},
-    {"id": "CoinSales",       "name": "r/CoinSales",         "tag": "[WTS]", "kind": "self",
-     "note": "For numismatic / coin listings"},
-    {"id": "baseballcards",   "name": "r/baseballcards",     "tag": "[WTS]", "kind": "self",
-     "note": "Baseball-specific community"},
 ]
 
 
 def _suggest_subreddit(category: str) -> str:
     return {
-        "Pokemon":          "Pokemoncardsales",
-        "Coins":            "CoinSales",
-        "Football Lots":    "SportsCardSales",
-        "Football Singles": "SportsCardSales",
+        "Pokemon":            "Pokemoncardsales",
+        "Football Lots":      "SportsCardSales",
+        "Football Singles":   "SportsCardSales",
+        "Basketball Lots":    "basketballcards",
+        "Basketball Singles": "basketballcards",
+        "Baseball Lots":      "baseballcards",
+        "Baseball Singles":   "baseballcards",
     }.get(category, "SportsCardSales")
 
 
@@ -5083,7 +5410,6 @@ import re as _re
 #   - Front-load the most searched keywords (player name, year, set, parallel)
 #   - Include: player name, year, brand/set, card number, parallel/color, RC if rookie
 #   - For lots: player name, HOF if applicable, number of cards, key brands, era
-#   - For coins: country, year, denomination, metal, grade/condition
 #   - Never keyword stuff — every word must be a real search term buyers use
 #   - No ALL CAPS, no punctuation spam, no filler words
 # ---------------------------------------------------------------------------
@@ -5093,9 +5419,6 @@ _SEO_TITLES = {
     "306927028439": "2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2",
     "306927035291": "2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1",
     "306927040476": "2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC",
-
-    # --- Coins ---
-    "306829826433": "Australia 1942 Silver Sixpence King George VI + 1968 20 Cents Coin Lot",
 
     # --- HOF Lot listings (90s cards) ---
     "306784122664": "Deion Sanders Atlanta Falcons Football Card Lot (6) NFL HOF Prime Time",
@@ -5143,12 +5466,13 @@ def _rule_based_title(listing: dict) -> str:
     # Detect listing type
     is_lot     = any(w in t_lower for w in ["lot", "cards", "x different", "no duplicates"])
     is_prizm   = any(w in t_lower for w in ["prizm", "optic", "donruss", "panini"])
-    is_coin    = any(w in t_lower for w in ["coin", "cent", "penny", "sixpence", "shilling", "australia"])
     is_pokemon = any(w in t_lower for w in ["pokemon", "pikachu", "charizard", "charcadet",
                                              "promo", "mega evolution", "holo", "trainer"])
+    is_basketball = any(w in t_lower for w in _BASKETBALL_TEAMS) or "nba" in t_lower or "basketball" in t_lower
+    is_baseball   = any(w in t_lower for w in _BASEBALL_TEAMS)   or "mlb" in t_lower or "baseball" in t_lower
 
-    # Do not touch non-football listings
-    if is_coin or is_pokemon:
+    # Pokemon, basketball, baseball: keep their own keywords; don't bolt on football/NFL terms
+    if is_pokemon or is_basketball or is_baseball:
         return title[:80].strip()
 
     # Add "Football Card Lot" to lot listings missing it
@@ -5281,7 +5605,7 @@ def _git_deploy():
     subprocess.run(["git", "config", "user.name", "Jason Chletsos"],
                    cwd=repo, capture_output=True)
 
-    subprocess.run(["git", "add", "docs/"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "docs/", "sold_history.json"], cwd=repo, check=False)
     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=repo)
     if diff.returncode == 0:
         print("  No changes to deploy.")
@@ -5324,8 +5648,8 @@ def main():
     if seller:
         (OUTPUT_DIR / "_seller.json").write_text(json.dumps(seller, indent=2), encoding="utf-8")
         print(f"  Seller: {seller.get('user_id')} · feedback {seller.get('feedback_score')} ({seller.get('positive_pct')}% positive) · since {seller.get('member_since')}")
-    print("  Fetching sold listings (last 60 days)...")
-    sold = fetch_sold_listings(token, cfg, days_back=60)
+    print("  Fetching sold listings (last 90 days; merged into all-time history)...")
+    sold = fetch_sold_listings(token, cfg, days_back=90)
     build_sold_page(sold)
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
