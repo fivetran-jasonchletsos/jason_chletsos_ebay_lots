@@ -22,8 +22,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["11d96b71a8c64c13deb3f254092d846081919d38a4ac77fd9f7359d3efb63ba4"];
-    window.__ADMIN_SALT   = '6770d890343fe4ff3216acdb160e37ff';
+    window.__ADMIN_HASHES = ["2438c2e8d8371a8aadff99865f4875dcfc12b9a9fc086e5f0e29d36200e301a4"];
+    window.__ADMIN_SALT   = 'baa4f37e3d76640acd8509fe0d8e3ee1';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -1052,6 +1052,57 @@ input[type="checkbox"]:checked::after {
   font-size: 26px; line-height: 1;
   color: var(--gold);
   letter-spacing: .02em;
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  outline: none;
+}
+.listing-card .price-info-ic {
+  font-size: 12px; color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  transition: color var(--t-fast);
+}
+.listing-card .price:hover .price-info-ic,
+.listing-card .price:focus .price-info-ic { color: var(--gold); }
+.listing-card .price-wrap { position: relative; display: inline-block; }
+.listing-card .price-pop {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 260px;
+  max-width: 300px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 14px;
+  z-index: 80;
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+}
+.listing-card .price-wrap:hover .price-pop,
+.listing-card .price-pop.open { display: block; }
+.listing-card .price-pop .pp-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 2px 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.listing-card .price-pop .pp-row:last-child { border-bottom: none; }
+.listing-card .price-pop .pp-lbl {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 700;
+  grid-column: 1;
+}
+.listing-card .price-pop .pp-val {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  text-align: right; grid-column: 2; grid-row: 1;
+}
+.listing-card .price-pop .pp-note {
+  font-size: 11px; color: var(--text-dim);
+  grid-column: 1 / -1; grid-row: 2;
 }
 .grid[data-size="small"] .listing-card .price { font-size: 20px; }
 .listing-card .meta {
@@ -1852,7 +1903,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306927028439.html">2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2</a></h3>
-          <div class="price">$5.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$5.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$5.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val"><span style='color:var(--text-dim)'>no comps</span></div><div class="pp-note">no matching listings found</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Other</span></div>
         </div>
         <div class="actions">
@@ -1880,7 +1934,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306927035291.html">2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1</a></h3>
-          <div class="price">$10.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$10.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$10.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val"><span style='color:var(--text-dim)'>no comps</span></div><div class="pp-note">no matching listings found</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Other</span></div>
         </div>
         <div class="actions">
@@ -1908,7 +1965,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306927040476.html">2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC</a></h3>
-          <div class="price">$4.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val"><span style='color:var(--text-dim)'>no comps</span></div><div class="pp-note">no matching listings found</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Singles</span></div>
         </div>
         <div class="actions">
@@ -1936,7 +1996,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306784122664.html">Deion Sanders Cards</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$0.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.72 – $0.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+101.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn">Overpriced</span><span class="tag tag-danger" title="title content-policy locked (eBay rejects new titles, no-op succeeds)">🔒 Title locked</span></div>
         </div>
         <div class="actions">
@@ -1964,7 +2027,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306785163679.html">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</a></h3>
-          <div class="price">$1.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.04</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.69</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-4.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -1992,7 +2058,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306785270903.html">3 Marshall Faulk Cards San Diego State Indianapolis Colts</a></h3>
-          <div class="price">$2.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.70</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.99 – $4.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-7.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2020,7 +2089,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306903933988.html">8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</a></h3>
-          <div class="price">$1.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.39</div><div class="pp-note">7 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $299.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+7.9%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span></div>
         </div>
         <div class="actions">
@@ -2048,7 +2120,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306903937710.html">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.51</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.49</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+230.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2076,7 +2151,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306903941543.html">Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver</a></h3>
-          <div class="price">$3.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.99 – $3.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$4.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2104,7 +2182,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306903947932.html">Carl Banks New York Giants Football Card Lot (8) Super Bowl LB</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Baseball Lots</span></div>
         </div>
         <div class="actions">
@@ -2132,7 +2213,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306904068997.html">11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$0.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+202.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2160,7 +2244,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306904078786.html">7 Cards Steve Atwater Rookie Cards Denver Broncos</a></h3>
-          <div class="price">$3.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.34</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.79</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+159.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$1.99</div><div class="pp-note">1 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2188,7 +2275,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306904174454.html">7 Cards Boomer Esiason Cincinnati Bengals New York Jets</a></h3>
-          <div class="price">$2.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$0.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.29</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+150.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2216,7 +2306,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306904189481.html">4 Aaron Glenn Rookie Cards New York Jets</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+150.8%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2244,7 +2337,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306904203738.html">1994 Classic Pro Line Live - Autograph - Steve Emtman</a></h3>
-          <div class="price">$10.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$10.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$10.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$10.00</div><div class="pp-note">8 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$4.99 – $18.04</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$10.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Other</span></div>
         </div>
         <div class="actions">
@@ -2272,7 +2368,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306904215389.html">12 Jim Everett Cards Los Angeles Rams New Orleans Saints</a></h3>
-          <div class="price">$1.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.49</div><div class="pp-note">3 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.50</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2300,7 +2399,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913168494.html">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$4.99</div><div class="pp-note">9 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $200.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.69</div><div class="pp-note">2 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2328,7 +2430,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913186982.html">11 Mel Gray Cards Detroit Lions Football Card Lot NFL</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.99 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.50</div><div class="pp-note">1 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2356,7 +2461,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913307606.html">5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$10.99</div><div class="pp-note">2 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.99 – $19.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-81.9%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$1.99</div><div class="pp-note">1 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$11.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -2384,7 +2492,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913311444.html">9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$9.49</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $299.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-47.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.69</div><div class="pp-note">2 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$9.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -2412,7 +2523,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913787569.html">10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL</a></h3>
-          <div class="price">$2.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.04</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-2.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2440,7 +2554,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913790653.html">11 Raghib And Quadry Ismail Cards Raiders Vikings</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.99 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span></div>
         </div>
         <div class="actions">
@@ -2468,7 +2585,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913845449.html">3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL</a></h3>
-          <div class="price">$1.95</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.95<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.95</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.98</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.25 – $4.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-1.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span></div>
         </div>
         <div class="actions">
@@ -2496,7 +2616,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913853080.html">9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$4.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$4.99 – $4.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2524,7 +2647,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913902750.html">7 Howie Long Cards Raiders</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.69</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+195.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2552,7 +2678,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913908225.html">9 Joe Montana Cards 49ers Chiefs</a></h3>
-          <div class="price">$5.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$5.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$5.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.94</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $3.50</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+208.8%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2580,7 +2709,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913934898.html">20 Warren Moon Cards Oilers Vikings</a></h3>
-          <div class="price">$10.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$10.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$10.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$10.00</div><div class="pp-note">5 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$4.99 – $79.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$10.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span></div>
         </div>
         <div class="actions">
@@ -2608,7 +2740,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913939866.html">15 Dan Marino Cards Miami Dolphins</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.09</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.29</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+357.8%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -2636,7 +2771,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306913950248.html">4 Rookie Cards Willie McGinest One Autographed</a></h3>
-          <div class="price">$3.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.99 – $3.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$4.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2664,7 +2802,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914169081.html">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</a></h3>
-          <div class="price">$3.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$4.25</div><div class="pp-note">9 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.00 – $7.10</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-29.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$4.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -2692,7 +2833,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914173441.html">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.75 – $3.25</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2720,7 +2864,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914174921.html">2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</a></h3>
-          <div class="price">$1.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.48</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $1.70</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+1.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2748,7 +2895,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914176585.html">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</a></h3>
-          <div class="price">$1.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $3.23</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2776,7 +2926,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914244468.html">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.67</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $2.49</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+19.2%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2804,7 +2957,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914245253.html">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.99 – $3.30</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2832,7 +2988,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914248743.html">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.98</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.25 – $2.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.50</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2860,7 +3019,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914249326.html">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</a></h3>
-          <div class="price">$1.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $3.49</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -2888,7 +3050,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914280138.html">5 Sam Adams Rookie Cards Seattle Seahawks</a></h3>
-          <div class="price">$2.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.28</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.80 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+9.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span></div>
         </div>
         <div class="actions">
@@ -2916,7 +3081,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914500757.html">10 Eric Metcalf Cards Cleveland Browns</a></h3>
-          <div class="price">$1.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.09</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.95</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-8.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2944,7 +3112,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914547105.html">12 Andre Rison Cards Colts Falcons RC</a></h3>
-          <div class="price">$3.34</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.34<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.34</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.34</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.34 – $3.34</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
@@ -2972,7 +3143,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914911040.html">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</a></h3>
-          <div class="price">$3.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.44</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.49 – $4.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+16.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3000,7 +3174,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914912556.html">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)</a></h3>
-          <div class="price">$3.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.00</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.56 – $4.50</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3028,7 +3205,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914913674.html">2025 Panini Select - Premier Level Travis Hunter #128 Pink Shock Prizm (RC)</a></h3>
-          <div class="price">$3.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.87</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.75 – $3.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+4.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3056,7 +3236,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306914915295.html">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</a></h3>
-          <div class="price">$2.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.00</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.20</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3084,7 +3267,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306751048818.html">EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125</a></h3>
-          <div class="price">$15.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$15.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$15.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$15.50</div><div class="pp-note">3 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$12.00 – $21.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$15.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Pokemon</span></div>
         </div>
         <div class="actions">
@@ -3112,7 +3298,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306926030086.html">2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm</a></h3>
-          <div class="price">$44.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$44.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$44.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$44.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$44.99 – $44.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$45.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3140,7 +3329,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306926059250.html">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a></h3>
-          <div class="price">$180.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$180.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$180.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$180.00</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$180.00 – $180.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$180.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3168,7 +3360,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306758076966.html">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</a></h3>
-          <div class="price">$3.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.15</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $4.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+11.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$54.00</div><div class="pp-note">4 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Pokemon</span></div>
         </div>
         <div class="actions">
@@ -3196,7 +3391,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930460600.html">2025 Panini Prizm - Rookies Will Johnson #370 White Disco Prizm (RC)</a></h3>
-          <div class="price">$1.21</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.21<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.21</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $2.15</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-19.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -3224,7 +3422,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930462076.html">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</a></h3>
-          <div class="price">$7.50</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$7.50<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$7.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$6.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$5.00 – $8.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+15.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$6.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3252,7 +3453,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930463268.html">2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.12</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+76.9%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3280,7 +3484,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930464091.html">2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC)</a></h3>
-          <div class="price">$1.19</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.19<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.19</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.76</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-32.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -3308,7 +3515,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930465261.html">2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & Yellow Shock Prizm</a></h3>
-          <div class="price">$1.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3336,7 +3546,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930466950.html">2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm /49 (RC)</a></h3>
-          <div class="price">$3.25</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.25<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.25</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$16.62</div><div class="pp-note">2 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.25 – $30.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-80.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$16.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -3364,7 +3577,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930471991.html">2025 Panini Select - Club Level Najee Harris #203 Black & Green Shock Prizm</a></h3>
-          <div class="price">$1.20</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.20<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.20</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.25</div><div class="pp-note">7 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $3.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-4.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3392,7 +3608,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930486853.html">2025 Panini Select - Club Level Kyle Monangai #274 (RC)</a></h3>
-          <div class="price">$1.75</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.75<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.75</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.90</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.75 – $3.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-7.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3420,7 +3639,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930492125.html">2025 Topps Chrome Football Deommodore Lenoir Refractor #269 49'ers</a></h3>
-          <div class="price">$1.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.12</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+33.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3448,7 +3670,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930553146.html">2025 Topps Chrome Garrett Williams #6 Arizona Cardinals</a></h3>
-          <div class="price">$1.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.38 – $1.69</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Baseball Singles</span></div>
         </div>
         <div class="actions">
@@ -3476,7 +3701,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930555649.html">2025 Panini Select - Premier Level Tank Bigsby #129 Silver Prizm</a></h3>
-          <div class="price">$1.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.75</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-42.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -3504,7 +3732,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930559170.html">2025 Panini Prizm - Willis McGahee #45 Silver Prizm</a></h3>
-          <div class="price">$2.28</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.28<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.28</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.44</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.65</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+58.9%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3532,7 +3763,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930560592.html">2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC)</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.45</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.85</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+37.2%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3560,7 +3794,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930562031.html">2025 Panini Prizm - Rookies Andrew Mukuba #330 (RC)</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.49</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.68</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+33.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3588,7 +3825,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930742908.html">2025 Panini Prizm - Jared Verse #30 Silver Prizm</a></h3>
-          <div class="price">$4.25</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.25<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.25</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.42</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+199.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3616,7 +3856,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930745036.html">2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.25</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.59 – $3.49</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-11.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3644,7 +3887,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930746886.html">2025 Panini Prizm - Chris Boswell #174</a></h3>
-          <div class="price">$1.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.10</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.29</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+36.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3672,7 +3918,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930773940.html">2025 Panini Prizm - Jared Verse #30 Silver Prizm</a></h3>
-          <div class="price">$4.25</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.25<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.25</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.42</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+199.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3700,7 +3949,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930807722.html">1991-92 Fleer - Pro Vision Magic Johnson #6</a></h3>
-          <div class="price">$1.40</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.40<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.40</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.59</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-11.9%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Singles</span></div>
         </div>
         <div class="actions">
@@ -3728,7 +3980,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930901658.html">2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm (RC)</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.30</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.65</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+130.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3756,7 +4011,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930903609.html">2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orientation Red Ice</a></h3>
-          <div class="price">$1.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.69</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.41</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-12.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3784,7 +4042,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930904430.html">2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Prizm (RC)</a></h3>
-          <div class="price">$1.69</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.69<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.69</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.45</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.09 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+16.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3812,7 +4073,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930909038.html">2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC)</a></h3>
-          <div class="price">$2.00</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.00<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.00</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.50</div><div class="pp-note">9 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.99 – $9.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-20.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -3840,7 +4104,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930911781.html">2025 Panini Prizm Draft Picks - Instant Impact Will Howard #II-WHD Red Ice Prizm</a></h3>
-          <div class="price">$1.85</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.85<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.85</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.82</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.25</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+1.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -3868,7 +4135,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930914782.html">1990-91 Skybox - Michael Jordan #41</a></h3>
-          <div class="price">$4.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.00</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+399.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3896,7 +4166,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930919438.html">1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10</a></h3>
-          <div class="price">$2.49</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.49<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.75</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.95</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+42.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Basketball Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -3924,7 +4197,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930920326.html">1993-94 Fleer Ultra - Bobby Hurley #161 (RC)</a></h3>
-          <div class="price">$1.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.68</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.79</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+18.8%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Other</span></div>
         </div>
         <div class="actions">
@@ -3952,7 +4228,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930929280.html">2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)</a></h3>
-          <div class="price">$3.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$5.00</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.99 – $8.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-20.2%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger">Underpriced</span></div>
         </div>
         <div class="actions">
@@ -3980,7 +4259,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930930898.html">2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #9 Red Ice Prizm (RC)</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.97</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.50 – $4.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -4008,7 +4290,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930938563.html">2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.90</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.12 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+57.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -4036,7 +4321,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930939967.html">2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice Prizm (RC)</a></h3>
-          <div class="price">$2.99</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.30</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.99 – $3.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+30.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn">Overpriced</span></div>
         </div>
         <div class="actions">
@@ -4064,7 +4352,10 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
         <div class="info">
           <h3><a href="items/306930942401.html">2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm</a></h3>
-          <div class="price">$1.25</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.25<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            <div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.25</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.29</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.24 – $2.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-2.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99</div><div class="pp-note">9 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div>
+          </div>
           <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
@@ -4211,6 +4502,21 @@ tr:hover td { background: rgba(212,175,55,.03); }
 
       refreshFavUI();
 
+      // ============ PRICE POPOVER ============
+      window.togglePricePop = function(priceEl, ev) {
+        ev.stopPropagation();
+        const pop = priceEl.parentElement.querySelector('.price-pop');
+        const wasOpen = pop.classList.contains('open');
+        // Close all popovers first
+        document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+        if (!wasOpen) pop.classList.add('open');
+      };
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.price-wrap')) {
+          document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+        }
+      });
+
       // ============ HERO AUTO-ROTATION ============
       const heroSlides = document.querySelectorAll('.hero-slide');
       const heroDots   = document.querySelectorAll('.hero-dot');
@@ -4335,7 +4641,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 21:42 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 10, 2026 · 21:46 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
