@@ -102,6 +102,90 @@ def get_app_token(cfg: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Fetch sold listings (Trading API GetMyeBaySelling/SoldList)
+# ---------------------------------------------------------------------------
+
+def fetch_sold_listings(token: str, cfg: dict, days_back: int = 60) -> list[dict]:
+    """Fetch completed sales from eBay. SoldList max window is 60 days."""
+    days_back = min(max(int(days_back), 1), 60)
+    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <SoldList>
+    <Include>true</Include>
+    <DurationInDays>{days_back}</DurationInDays>
+    <Pagination>
+      <EntriesPerPage>200</EntriesPerPage>
+      <PageNumber>1</PageNumber>
+    </Pagination>
+  </SoldList>
+  <DetailLevel>ReturnAll</DetailLevel>
+</GetMyeBaySellingRequest>"""
+    headers = {
+        "X-EBAY-API-SITEID":              "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        "X-EBAY-API-CALL-NAME":           "GetMyeBaySelling",
+        "X-EBAY-API-APP-NAME":            cfg.get("client_id", ""),
+        "X-EBAY-API-DEV-NAME":            cfg.get("dev_id", ""),
+        "X-EBAY-API-CERT-NAME":           cfg.get("client_secret", ""),
+        "Content-Type":                   "text/xml",
+    }
+    try:
+        resp = requests.post("https://api.ebay.com/ws/api.dll", data=xml_body, headers=headers, timeout=30)
+        resp.raise_for_status()
+    except Exception as exc:
+        print(f"  Sold listings fetch failed: {exc}")
+        return []
+
+    NS = "{urn:ebay:apis:eBLBaseComponents}"
+    root = ET.fromstring(resp.text)
+
+    sold = []
+    # SoldList → OrderTransactionArray → OrderTransaction → Order > TransactionArray > Transaction
+    # Or: SoldList → OrderTransactionArray → OrderTransaction → Transaction (single)
+    for trans in root.findall(f".//{NS}Transaction"):
+        item       = trans.find(f"{NS}Item")
+        if item is None:
+            continue
+        item_id    = item.findtext(f"{NS}ItemID", "")
+        title      = item.findtext(f"{NS}Title", "")
+        pic        = item.findtext(f"{NS}PictureDetails/{NS}GalleryURL", "") or item.findtext(f"{NS}GalleryURL", "")
+        category   = item.findtext(f"{NS}PrimaryCategory/{NS}CategoryName", "")
+        condition  = item.findtext(f"{NS}ConditionDisplayName", "")
+        listing_url = item.findtext(f"{NS}ListingDetails/{NS}ViewItemURL", "") or f"https://www.ebay.com/itm/{item_id}"
+
+        qty        = trans.findtext(f"{NS}QuantityPurchased", "1")
+        sale_price = trans.findtext(f"{NS}TransactionPrice", "0")
+        sold_date  = trans.findtext(f"{NS}CreatedDate", "") or trans.findtext(f"{NS}PaidTime", "")
+        buyer      = trans.findtext(f"{NS}Buyer/{NS}UserID", "")
+        ship_cost  = trans.findtext(f"{NS}ActualShippingCost/{NS}value", "") or trans.findtext(f"{NS}ShippingServiceSelected/{NS}ShippingServiceCost", "")
+        feedback_left = trans.findtext(f"{NS}FeedbackLeft/{NS}CommentType", "")
+
+        try:
+            price_f = float(sale_price)
+        except (TypeError, ValueError):
+            price_f = 0.0
+
+        sold.append({
+            "item_id":     item_id,
+            "title":       title,
+            "pic":         pic,
+            "url":         listing_url,
+            "category":    category,
+            "condition":   condition,
+            "quantity":    qty,
+            "sale_price":  price_f,
+            "sold_date":   sold_date,
+            "buyer":       buyer,
+            "ship_cost":   ship_cost,
+            "feedback":    feedback_left,
+        })
+
+    print(f"  Fetched {len(sold)} sold listings (last {days_back} days)")
+    return sold
+
+
+# ---------------------------------------------------------------------------
 # Fetch seller profile (Trading API GetUser) — for trust panel
 # ---------------------------------------------------------------------------
 
@@ -345,6 +429,7 @@ LAMBDA_BASE = "https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay"
 
 _BASE_CSS = """
 :root {
+  /* Default: Dark Luxe (gold on black) */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
@@ -365,6 +450,10 @@ _BASE_CSS = """
   --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
   --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
   --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
+  --bg-radial-1: rgba(212,175,55,.08);
+  --bg-radial-2: rgba(212,175,55,.05);
+  --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
+  --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
@@ -372,6 +461,392 @@ _BASE_CSS = """
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
 }
+
+/* ============ ALT THEME: CREAM & NAVY ============ */
+[data-theme="cream"] {
+  --bg:          #f5f0e8;       /* warm cream */
+  --surface:     #e8e0d0;       /* light tan card */
+  --surface-2:   #ede5d6;       /* slightly lighter raised */
+  --surface-3:   #d8ccba;       /* darker for inputs / chips */
+  --border:      rgba(13,31,60,0.10);
+  --border-mid:  rgba(13,31,60,0.22);
+  --border-hi:   rgba(13,31,60,0.45);
+  --gold:        #c05a1a;       /* burnt orange (price/accent) */
+  --gold-bright: #e57228;
+  --gold-dim:    #8a3e10;
+  --text:        #0d1f3c;       /* deep navy */
+  --text-muted:  #5a6a7a;       /* steel gray */
+  --text-dim:    #8a98a8;
+  --success:     #2f7d4a;
+  --warning:     #b8860b;
+  --danger:      #b54a3e;
+  --link:        #0d1f3c;
+  --shadow-lg:   0 18px 48px -12px rgba(13,31,60,.18);
+  --shadow-card: 0 2px 10px rgba(13,31,60,.08), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(192,90,26,.22);
+  --bg-radial-1: rgba(192,90,26,.10);
+  --bg-radial-2: rgba(13,31,60,.06);
+  --hero-tag-fg: #f5f0e8;       /* cream text on orange tag */
+  --brand-fg:    #f5f0e8;       /* cream "H" on orange brand mark */
+}
+
+/* Cream-theme button overrides — primary becomes navy/cream, ghost+outline use navy */
+[data-theme="cream"] .btn-gold,
+[data-theme="cream"] .btn-refresh {
+  background: var(--text);
+  color: var(--bg);
+}
+[data-theme="cream"] .btn-gold:hover,
+[data-theme="cream"] .btn-refresh:hover {
+  filter: brightness(1.15);
+  color: var(--bg);
+}
+[data-theme="cream"] .btn-ghost,
+[data-theme="cream"] .btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--text);
+}
+[data-theme="cream"] .btn-ghost:hover,
+[data-theme="cream"] .btn-outline:hover {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+[data-theme="cream"] .btn-install {
+  border-color: var(--text);
+  color: var(--text);
+}
+[data-theme="cream"] .btn-install:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* Cream-theme tag/badge — matches user spec exactly */
+[data-theme="cream"] .tag {
+  background: #e8d8c0;
+  color: #8a3e10;
+  border: 1px solid #c05a1a;
+}
+[data-theme="cream"] .tag-gold {
+  background: #c05a1a;
+  color: #f5f0e8;
+  border-color: #8a3e10;
+}
+[data-theme="cream"] .tag-danger,
+[data-theme="cream"] .badge-danger {
+  background: rgba(181,74,62,.14); color: #8a2c20; border-color: rgba(181,74,62,.4);
+}
+[data-theme="cream"] .tag-warn,
+[data-theme="cream"] .badge-warning {
+  background: rgba(184,134,11,.14); color: #7a5a07; border-color: rgba(184,134,11,.4);
+}
+[data-theme="cream"] .tag-success,
+[data-theme="cream"] .badge-success {
+  background: rgba(47,125,74,.14); color: #1f5230; border-color: rgba(47,125,74,.4);
+}
+[data-theme="cream"] .badge-gold {
+  background: rgba(192,90,26,.14); color: #8a3e10; border-color: rgba(192,90,26,.45);
+}
+
+/* Header glass effect needs different alpha on light */
+[data-theme="cream"] .app-header {
+  background: linear-gradient(180deg, rgba(245,240,232,.95), rgba(245,240,232,.85));
+}
+[data-theme="cream"] .nav-links a.active {
+  background: rgba(192,90,26,.10);
+  color: var(--gold);
+}
+
+/* Brand mark uses orange gradient w/ cream H letter */
+[data-theme="cream"] .brand-mark { color: var(--brand-fg); }
+
+/* Stat / hero glow tints — orange instead of gold halo */
+[data-theme="cream"] .stat-card .num,
+[data-theme="cream"] .hero-price,
+[data-theme="cream"] .product-price {
+  text-shadow: 0 0 22px rgba(192,90,26,.18);
+}
+
+/* Drawer + selection in cream */
+[data-theme="cream"] ::selection { background: var(--gold); color: var(--bg); }
+[data-theme="cream"] .drawer { background: var(--surface); }
+[data-theme="cream"] .drawer a { color: var(--text); }
+[data-theme="cream"] .drawer a:hover, [data-theme="cream"] .drawer a.active {
+  background: var(--surface-2); color: var(--gold); border-color: var(--border-mid);
+}
+
+/* Filter chip "active" state */
+[data-theme="cream"] .chip.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* Hero tag (Featured #1) keeps orange-gradient look but with cream text */
+[data-theme="cream"] .hero-tag { color: var(--hero-tag-fg); }
+
+/* Search-input magnifier icon needs darker stroke for cream bg */
+[data-theme="cream"] .search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%235a6a7a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+}
+
+/* Charts: Chart.js uses a hardcoded gray for grids/labels — re-tint via CSS for cream */
+[data-theme="cream"] .chart-panel { color: var(--text); }
+
+/* ============ MIDNIGHT LUXURY (Dark Black & Gold, refined) ============ */
+[data-theme="midnight"] {
+  --bg:          #0f0f0f;
+  --surface:     #1c1c1c;
+  --surface-2:   #232323;
+  --surface-3:   #2a2a2a;
+  --border:      rgba(212,168,50,0.10);
+  --border-mid:  rgba(212,168,50,0.22);
+  --border-hi:   rgba(212,168,50,0.45);
+  --gold:        #d4a832;
+  --gold-bright: #e5c050;
+  --gold-dim:    #b8922a;
+  --text:        #f0ead8;
+  --text-muted:  #6a5e3a;
+  --text-dim:    #4a4028;
+  --link:        #d4a832;
+  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
+  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,168,50,.25);
+  --bg-radial-1: rgba(212,168,50,.08);
+  --bg-radial-2: rgba(212,168,50,.05);
+  --hero-tag-fg: #0f0f0f;
+  --brand-fg:    #0f0f0f;
+}
+[data-theme="midnight"] .tag { background: #1e1a0e; color: #b8922a; border: 1px solid #b8922a; }
+
+/* ============ CLEAN WHITE & COBALT ============ */
+[data-theme="cobalt"] {
+  --bg:          #ffffff;
+  --surface:     #f2f5fc;
+  --surface-2:   #f7f9fd;
+  --surface-3:   #e3eafa;
+  --border:      rgba(13,26,46,0.08);
+  --border-mid:  rgba(13,26,46,0.18);
+  --border-hi:   rgba(26,79,214,0.45);
+  --gold:        #1a4fd6;
+  --gold-bright: #3a6fef;
+  --gold-dim:    #1238a0;
+  --text:        #0d1a2e;
+  --text-muted:  #7a8fab;
+  --text-dim:    #a8b6cb;
+  --link:        #1a4fd6;
+  --shadow-lg:   0 18px 48px -12px rgba(13,26,46,.15);
+  --shadow-card: 0 2px 10px rgba(13,26,46,.06), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(26,79,214,.22);
+  --bg-radial-1: rgba(26,79,214,.06);
+  --bg-radial-2: rgba(26,79,214,.04);
+  --hero-tag-fg: #ffffff;
+  --brand-fg:    #ffffff;
+}
+[data-theme="cobalt"] .tag { background: #eaf0fd; color: #1238a0; border: 1px solid #1a4fd6; }
+[data-theme="cobalt"] ::selection { background: var(--gold); color: var(--bg); }
+[data-theme="cobalt"] .app-header { background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.85)); }
+[data-theme="cobalt"] .search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%237a8fab' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+}
+
+/* ============ FOREST & PARCHMENT ============ */
+[data-theme="forest"] {
+  --bg:          #f4f0e6;
+  --surface:     #e8e2d0;
+  --surface-2:   #ede8d8;
+  --surface-3:   #d8cfb8;
+  --border:      rgba(26,46,26,0.10);
+  --border-mid:  rgba(26,46,26,0.22);
+  --border-hi:   rgba(26,46,26,0.45);
+  --gold:        #3a6b2a;
+  --gold-bright: #4f8a3a;
+  --gold-dim:    #234018;
+  --text:        #1a2e1a;
+  --text-muted:  #6a7a5a;
+  --text-dim:    #8a9778;
+  --link:        #3a6b2a;
+  --shadow-lg:   0 18px 48px -12px rgba(26,46,26,.18);
+  --shadow-card: 0 2px 10px rgba(26,46,26,.08), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(58,107,42,.22);
+  --bg-radial-1: rgba(58,107,42,.08);
+  --bg-radial-2: rgba(26,46,26,.05);
+  --hero-tag-fg: #f4f0e6;
+  --brand-fg:    #f4f0e6;
+}
+[data-theme="forest"] .tag { background: #dde8d5; color: #234018; border: 1px solid #3a6b2a; }
+[data-theme="forest"] .btn-gold,
+[data-theme="forest"] .btn-refresh { background: var(--text); color: var(--bg); }
+[data-theme="forest"] .btn-gold:hover,
+[data-theme="forest"] .btn-refresh:hover { filter: brightness(1.15); color: var(--bg); }
+[data-theme="forest"] .btn-ghost,
+[data-theme="forest"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+[data-theme="forest"] .btn-ghost:hover,
+[data-theme="forest"] .btn-outline:hover { background: var(--gold); color: var(--bg); }
+[data-theme="forest"] ::selection { background: var(--gold); color: var(--bg); }
+[data-theme="forest"] .app-header { background: linear-gradient(180deg, rgba(244,240,230,.95), rgba(244,240,230,.85)); }
+[data-theme="forest"] .search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%236a7a5a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+}
+
+/* ============ CRIMSON & CHARCOAL ============ */
+[data-theme="crimson"] {
+  --bg:          #1c1c1e;
+  --surface:     #2a2a2c;
+  --surface-2:   #313134;
+  --surface-3:   #383838;
+  --border:      rgba(192,40,42,0.10);
+  --border-mid:  rgba(192,40,42,0.25);
+  --border-hi:   rgba(192,40,42,0.55);
+  --gold:        #c0282a;
+  --gold-bright: #e05050;
+  --gold-dim:    #8a1a1c;
+  --text:        #f5f5f5;
+  --text-muted:  #8a8a8a;
+  --text-dim:    #5a5a5a;
+  --link:        #e05050;
+  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
+  --shadow-card: 0 2px 8px rgba(0,0,0,.5), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(192,40,42,.30);
+  --bg-radial-1: rgba(192,40,42,.10);
+  --bg-radial-2: rgba(192,40,42,.05);
+  --hero-tag-fg: #ffffff;
+  --brand-fg:    #ffffff;
+}
+[data-theme="crimson"] .tag { background: #2e1515; color: #e05050; border: 1px solid #c0282a; }
+
+/* ============ SOFT LAVENDER & PLUM ============ */
+[data-theme="lavender"] {
+  --bg:          #f5f3fb;
+  --surface:     #ede9f7;
+  --surface-2:   #f0ecf8;
+  --surface-3:   #ddd5ee;
+  --border:      rgba(42,26,74,0.10);
+  --border-mid:  rgba(42,26,74,0.22);
+  --border-hi:   rgba(107,63,160,0.45);
+  --gold:        #6b3fa0;
+  --gold-bright: #8a5cc0;
+  --gold-dim:    #4a1f80;
+  --text:        #2a1a4a;
+  --text-muted:  #7a6a9a;
+  --text-dim:    #a59ab8;
+  --link:        #6b3fa0;
+  --shadow-lg:   0 18px 48px -12px rgba(42,26,74,.18);
+  --shadow-card: 0 2px 10px rgba(42,26,74,.08), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(107,63,160,.22);
+  --bg-radial-1: rgba(107,63,160,.08);
+  --bg-radial-2: rgba(42,26,74,.05);
+  --hero-tag-fg: #f5f3fb;
+  --brand-fg:    #f5f3fb;
+}
+[data-theme="lavender"] .tag { background: #e2d8f5; color: #4a1f80; border: 1px solid #6b3fa0; }
+[data-theme="lavender"] .btn-gold,
+[data-theme="lavender"] .btn-refresh { background: var(--text); color: var(--bg); }
+[data-theme="lavender"] .btn-gold:hover,
+[data-theme="lavender"] .btn-refresh:hover { filter: brightness(1.15); color: var(--bg); }
+[data-theme="lavender"] .btn-ghost,
+[data-theme="lavender"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+[data-theme="lavender"] .btn-ghost:hover,
+[data-theme="lavender"] .btn-outline:hover { background: var(--gold); color: var(--bg); }
+[data-theme="lavender"] ::selection { background: var(--gold); color: var(--bg); }
+[data-theme="lavender"] .app-header { background: linear-gradient(180deg, rgba(245,243,251,.95), rgba(245,243,251,.85)); }
+[data-theme="lavender"] .search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%237a6a9a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+}
+
+/* ============ WARM SAND & TERRACOTTA ============ */
+[data-theme="terracotta"] {
+  --bg:          #faf6ef;
+  --surface:     #f0e8d8;
+  --surface-2:   #f4ede0;
+  --surface-3:   #e3d6bc;
+  --border:      rgba(46,30,14,0.10);
+  --border-mid:  rgba(46,30,14,0.22);
+  --border-hi:   rgba(184,76,26,0.45);
+  --gold:        #b84c1a;
+  --gold-bright: #d76a3a;
+  --gold-dim:    #7a2e0a;
+  --text:        #2e1e0e;
+  --text-muted:  #8a6a4a;
+  --text-dim:    #b8a085;
+  --link:        #b84c1a;
+  --shadow-lg:   0 18px 48px -12px rgba(46,30,14,.18);
+  --shadow-card: 0 2px 10px rgba(46,30,14,.08), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(184,76,26,.22);
+  --bg-radial-1: rgba(184,76,26,.08);
+  --bg-radial-2: rgba(46,30,14,.05);
+  --hero-tag-fg: #faf6ef;
+  --brand-fg:    #faf6ef;
+}
+[data-theme="terracotta"] .tag { background: #f0d8c8; color: #7a2e0a; border: 1px solid #b84c1a; }
+[data-theme="terracotta"] .btn-gold,
+[data-theme="terracotta"] .btn-refresh { background: var(--text); color: var(--bg); }
+[data-theme="terracotta"] .btn-gold:hover,
+[data-theme="terracotta"] .btn-refresh:hover { filter: brightness(1.15); color: var(--bg); }
+[data-theme="terracotta"] .btn-ghost,
+[data-theme="terracotta"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+[data-theme="terracotta"] .btn-ghost:hover,
+[data-theme="terracotta"] .btn-outline:hover { background: var(--gold); color: var(--bg); }
+[data-theme="terracotta"] ::selection { background: var(--gold); color: var(--bg); }
+[data-theme="terracotta"] .app-header { background: linear-gradient(180deg, rgba(250,246,239,.95), rgba(250,246,239,.85)); }
+[data-theme="terracotta"] .search-input {
+  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%238a6a4a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
+  background-size: 18px;
+}
+
+/* ============ THEME PICKER POPOVER ============ */
+.theme-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: none;
+  z-index: 200;
+  width: 230px;
+}
+.theme-popover.open { display: block; }
+.theme-option {
+  display: grid;
+  grid-template-columns: 28px 1fr 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  transition: background var(--t-fast);
+}
+.theme-option:hover { background: var(--surface-2); }
+.theme-option.active { background: var(--surface-3); }
+.theme-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid var(--border-mid);
+  position: relative;
+}
+.theme-swatch span:first-child { background: var(--sw-bg); }
+.theme-swatch span:last-child  { background: var(--sw-acc); }
+.theme-name { font-size: 13px; font-weight: 600; }
+.theme-check { color: var(--gold); font-size: 14px; opacity: 0; }
+.theme-option.active .theme-check { opacity: 1; }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -385,8 +860,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh;
   background-image:
-    radial-gradient(1200px 600px at 80% -10%, rgba(212,175,55,.08), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(212,175,55,.05), transparent 60%);
+    radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
 }
 ::selection { background: var(--gold); color: #000; }
@@ -419,7 +894,7 @@ a:hover { color: var(--gold-bright); }
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   display: grid; place-items: center;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; color: #0a0a0a; font-weight: 700;
+  font-size: 22px; color: var(--brand-fg); font-weight: 700;
   box-shadow: var(--glow-gold);
   flex-shrink: 0;
 }
@@ -445,7 +920,7 @@ a:hover { color: var(--gold-bright); }
 .nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
 .btn-refresh {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   border: none;
   padding: 10px 18px;
   border-radius: var(--r-sm);
@@ -471,6 +946,29 @@ a:hover { color: var(--gold-bright); }
   font-family: inherit;
 }
 .btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
+.btn-theme {
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+.btn-theme:hover { color: var(--gold); border-color: var(--gold); }
+.btn-theme .ic-moon { display: none; }
+.btn-theme .ic-sun  { display: block; }
+[data-theme="cream"] .btn-theme .ic-sun  { display: none; }
+[data-theme="cream"] .btn-theme .ic-moon { display: block; }
+[data-theme="cream"] .btn-theme {
+  color: var(--text);
+  border-color: var(--text);
+}
+[data-theme="cream"] .btn-theme:hover {
+  background: var(--text);
+  color: var(--bg);
+}
 .menu-toggle {
   display: none;
   width: 42px; height: 42px;
@@ -637,7 +1135,7 @@ main {
 }
 .btn-gold {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   letter-spacing: .04em;
 }
 .btn-gold:hover { color: #000; transform: translateY(-1px); filter: brightness(1.08); }
@@ -672,7 +1170,7 @@ main {
 .chip:hover { color: var(--text); border-color: var(--border-mid); }
 .chip.active {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   border-color: var(--gold);
 }
 .chip .count { color: inherit; opacity: .7; }
@@ -902,7 +1400,7 @@ input[type="checkbox"]:checked::after {
 .size-btn:hover { color: var(--text); border-color: var(--border-mid); }
 .size-btn.active {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: #0a0a0a;
+  color: var(--brand-fg);
   border-color: var(--gold);
 }
 
@@ -1063,6 +1561,7 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # nav items: (href, label)
 _NAV_ITEMS = [
     ("index.html",        "Listings"),
+    ("sold.html",         "Sold"),
     ("quality.html",      "Quality"),
     ("price_review.html", "Pricing"),
     ("title_review.html", "Titles"),
@@ -1102,6 +1601,15 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
+  <script>
+    // Apply saved theme synchronously to avoid flash-of-wrong-theme.
+    (function() {{
+      try {{
+        var t = localStorage.getItem('h2k_theme');
+        if (t === 'cream' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      }} catch(e) {{}}
+    }})();
+  </script>
   <title>{title}</title>
   {_CDN_HEAD}
   <style>{_BASE_CSS}</style>
@@ -1118,6 +1626,12 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         </div>
       </a>
       <nav class="nav-links">{nav_html_desktop}</nav>
+      <div style="position:relative;">
+        <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
+        </button>
+        <div class="theme-popover" id="theme-popover" role="menu"></div>
+      </div>
       <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
         Install
@@ -1287,6 +1801,68 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         if (btn) btn.style.display = 'none';
       }}
     }};
+
+    // ---- Theme picker (8 themes) ----
+    const THEMES = [
+      {{ id: 'dark',       name: 'Dark Luxe',         bg: '#0a0a0a', acc: '#d4af37', meta: '#0a0a0a' }},
+      {{ id: 'midnight',   name: 'Midnight Luxury',   bg: '#0f0f0f', acc: '#d4a832', meta: '#0f0f0f' }},
+      {{ id: 'crimson',    name: 'Crimson & Charcoal',bg: '#1c1c1e', acc: '#c0282a', meta: '#1c1c1e' }},
+      {{ id: 'cream',      name: 'Cream & Navy',      bg: '#f5f0e8', acc: '#c05a1a', meta: '#f5f0e8' }},
+      {{ id: 'cobalt',     name: 'White & Cobalt',    bg: '#ffffff', acc: '#1a4fd6', meta: '#ffffff' }},
+      {{ id: 'forest',     name: 'Forest & Parchment',bg: '#f4f0e6', acc: '#3a6b2a', meta: '#f4f0e6' }},
+      {{ id: 'lavender',   name: 'Lavender & Plum',   bg: '#f5f3fb', acc: '#6b3fa0', meta: '#f5f3fb' }},
+      {{ id: 'terracotta', name: 'Sand & Terracotta', bg: '#faf6ef', acc: '#b84c1a', meta: '#faf6ef' }},
+    ];
+    function applyTheme(id, persist) {{
+      const t = THEMES.find(x => x.id === id) || THEMES[0];
+      if (t.id === 'dark') document.documentElement.removeAttribute('data-theme');
+      else                 document.documentElement.setAttribute('data-theme', t.id);
+      if (persist) {{ try {{ localStorage.setItem('h2k_theme', t.id); }} catch(e) {{}} }}
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', t.meta);
+      // Refresh charts to pick up new CSS-var-driven colors
+      if (typeof Chart !== 'undefined') {{
+        const styles = getComputedStyle(document.documentElement);
+        Chart.defaults.color = styles.getPropertyValue('--text-muted').trim() || '#9a9388';
+        Chart.defaults.borderColor = styles.getPropertyValue('--border').trim();
+        Object.values(Chart.instances || {{}}).forEach(c => {{ try {{ c.update(); }} catch(e) {{}} }});
+      }}
+      // Update active state in popover
+      document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === t.id));
+    }}
+    function buildThemePicker() {{
+      const pop = document.getElementById('theme-popover');
+      if (!pop) return;
+      const cur = (localStorage.getItem('h2k_theme') || 'dark');
+      pop.innerHTML = THEMES.map(t => `
+        <button class="theme-option${{t.id === cur ? ' active' : ''}}" data-theme="${{t.id}}" onclick="applyTheme('${{t.id}}', true)">
+          <span class="theme-swatch" style="--sw-bg:${{t.bg}}; --sw-acc:${{t.acc}};"><span></span><span></span></span>
+          <span class="theme-name">${{t.name}}</span>
+          <span class="theme-check">✓</span>
+        </button>`).join('');
+    }}
+    window.toggleThemePicker = function(ev) {{
+      ev?.stopPropagation?.();
+      const pop = document.getElementById('theme-popover');
+      const btn = document.getElementById('theme-picker-btn');
+      const open = pop.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+    }};
+    window.applyTheme = applyTheme;
+    document.addEventListener('click', (e) => {{
+      const pop = document.getElementById('theme-popover');
+      if (pop && pop.classList.contains('open') && !pop.contains(e.target) && !e.target.closest('#theme-picker-btn')) {{
+        pop.classList.remove('open');
+        document.getElementById('theme-picker-btn')?.setAttribute('aria-expanded', false);
+      }}
+    }});
+    buildThemePicker();
+    // Sync chart defaults with whatever theme is active right now
+    if (typeof Chart !== 'undefined') {{
+      const s = getComputedStyle(document.documentElement);
+      Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';
+      Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+    }}
   </script>
 </body>
 </html>"""
@@ -1526,7 +2102,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       position: absolute; top: 16px; left: 16px;
       padding: 6px 12px;
       background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      color: #0a0a0a;
+      color: var(--hero-tag-fg);
       font-size: 11px; font-weight: 800; letter-spacing: .2em;
       text-transform: uppercase;
       border-radius: var(--r-sm);
@@ -2091,6 +2667,187 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     out = OUTPUT_DIR / "index.html"
     out.write_text(html_shell(f"{SELLER_NAME} · Cards, Coins & Collectibles", body, extra_head=f"<style>{extra_css}</style>", active_page="index.html"), encoding="utf-8")
     print(f"  Dashboard: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Sold items page (sold.html)
+# ---------------------------------------------------------------------------
+
+def build_sold_page(sold: list[dict]) -> Path:
+    """Renders all completed sales (last 90 days) in a dark-luxe card grid."""
+    import re as _re
+    from datetime import datetime as _dt
+
+    # Sort newest-first
+    sold_sorted = sorted(sold, key=lambda s: s.get("sold_date") or "", reverse=True)
+
+    # Aggregate stats
+    total_revenue = sum(s["sale_price"] for s in sold)
+    avg_price     = (total_revenue / len(sold)) if sold else 0.0
+    unique_buyers = len({s["buyer"] for s in sold if s["buyer"]})
+
+    # Bucket by month for the chart
+    monthly = {}
+    for s in sold:
+        if s.get("sold_date"):
+            try:
+                d = _dt.fromisoformat(s["sold_date"].replace("Z", "+00:00"))
+                k = d.strftime("%Y-%m")
+                monthly.setdefault(k, {"count": 0, "revenue": 0.0})
+                monthly[k]["count"] += 1
+                monthly[k]["revenue"] += s["sale_price"]
+            except Exception:
+                pass
+    months_sorted = sorted(monthly.keys())
+    chart_labels  = months_sorted
+    chart_revenue = [round(monthly[m]["revenue"], 2) for m in months_sorted]
+    chart_count   = [monthly[m]["count"] for m in months_sorted]
+
+    # Build cards
+    cards = []
+    for s in sold_sorted:
+        big_pic = _re.sub(r's-l\d+\.jpg', 's-l500.jpg', s["pic"]) if s["pic"] else ""
+        thumb = (
+            f'<img src="{big_pic}" alt="" loading="lazy">' if big_pic
+            else '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:11px;">No image</div>'
+        )
+        date_short = ""
+        if s.get("sold_date"):
+            try:
+                d = _dt.fromisoformat(s["sold_date"].replace("Z", "+00:00"))
+                date_short = d.strftime("%b %-d, %Y")
+            except Exception:
+                date_short = s["sold_date"][:10]
+        buyer_html = f'<span class="tag">{s["buyer"]}</span>' if s["buyer"] else ""
+        feedback_badge = ""
+        if s.get("feedback"):
+            cls = "badge-success" if "positive" in (s["feedback"] or "").lower() else ("badge-warning" if "neutral" in (s["feedback"] or "").lower() else "badge-danger")
+            feedback_badge = f'<span class="badge {cls}">FB: {s["feedback"]}</span>'
+
+        cards.append(f'''
+      <article class="sold-card" data-id="{s['item_id']}">
+        <div class="sold-thumb">{thumb}</div>
+        <div class="sold-body">
+          <div class="sold-meta-row">
+            <span class="tag tag-success">SOLD</span>
+            <span class="sold-date">{date_short}</span>
+            {f'<span class="sold-qty">×{s["quantity"]}</span>' if s["quantity"] not in ("", "1") else ""}
+          </div>
+          <a href="{s['url']}" target="_blank" rel="noopener" class="sold-title">{s['title']}</a>
+          <div class="sold-meta-row" style="margin-top:6px;">
+            {buyer_html}
+            {feedback_badge}
+            {f'<span class="tag">{s["condition"]}</span>' if s["condition"] else ""}
+          </div>
+        </div>
+        <div class="sold-price-block">
+          <div class="sold-price">${s["sale_price"]:,.2f}</div>
+          {f'<div class="sold-ship">+ ${float(s["ship_cost"]):,.2f} ship</div>' if s["ship_cost"] else ""}
+        </div>
+      </article>''')
+
+    if not cards:
+        cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No sales found in the last 90 days. Check back after your next sale.</div>'
+    else:
+        cards_html = "\n".join(cards)
+
+    extra_css = """
+    .sold-grid { display: grid; gap: 12px; }
+    .sold-card {
+      display: grid;
+      grid-template-columns: 88px 1fr auto;
+      gap: 16px; align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--success);
+      border-radius: var(--r-lg);
+      padding: 14px 18px;
+      transition: all var(--t-fast);
+    }
+    .sold-card:hover { border-color: var(--border-mid); border-left-color: var(--success); transform: translateX(2px); }
+    .sold-thumb {
+      width: 88px; height: 88px;
+      border-radius: var(--r-sm); overflow: hidden;
+      background: var(--surface-3);
+    }
+    .sold-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .sold-body { min-width: 0; }
+    .sold-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sold-date { font-size: 11px; color: var(--text-muted); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+    .sold-qty { font-size: 11px; color: var(--text-dim); font-weight: 600; }
+    .sold-title { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--text); margin-top: 6px; text-decoration: none; }
+    .sold-title:hover { color: var(--gold); }
+    .sold-price-block { text-align: right; flex-shrink: 0; }
+    .sold-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px; line-height: 1;
+      color: var(--gold);
+      letter-spacing: .02em;
+    }
+    .sold-ship { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .charts-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+    .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
+    .chart-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
+    .chart-wrap { position: relative; height: 240px; }
+    @media (max-width: 540px) {
+      .sold-card { grid-template-columns: 56px 1fr; padding: 14px; }
+      .sold-thumb { width: 56px; height: 56px; }
+      .sold-price-block { grid-column: 1 / -1; text-align: left; }
+    }
+    """
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Last 60 days</div>
+        <h1 class="section-title">Sold <span class="accent">Items</span></h1>
+        <div class="section-sub">Completed sales pulled live from eBay. Newest first. (eBay's API limits the window to 60 days.)</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">{len(sold)}</div><div class="lbl">Items Sold</div></div>
+      <div class="stat-card"><div class="num">${total_revenue:,.0f}</div><div class="lbl">Gross Revenue</div></div>
+      <div class="stat-card"><div class="num">${avg_price:,.2f}</div><div class="lbl">Avg Sale Price</div></div>
+      <div class="stat-card"><div class="num">{unique_buyers}</div><div class="lbl">Unique Buyers</div></div>
+    </div>
+
+    {'<div class="charts-row"><div class="chart-panel"><h3>Monthly Sales</h3><div class="chart-wrap"><canvas id="chart-sold"></canvas></div></div></div>' if chart_labels else ''}
+
+    <div class="sold-grid">
+      {cards_html}
+    </div>
+
+    <script>
+      Chart.defaults.color = '#9a9388';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      const lbls = {chart_labels!r};
+      if (lbls.length && document.getElementById('chart-sold')) {{
+        new Chart(document.getElementById('chart-sold'), {{
+          type: 'bar',
+          data: {{
+            labels: lbls,
+            datasets: [
+              {{ label: 'Revenue ($)', data: {chart_revenue}, backgroundColor: 'rgba(212,175,55,.55)', borderColor: '#d4af37', borderWidth: 1.5, borderRadius: 6, yAxisID: 'y' }},
+              {{ label: 'Items',        data: {chart_count},   type: 'line',  backgroundColor: 'rgba(127,199,122,.2)', borderColor: '#7fc77a', borderWidth: 2, tension: 0.35, yAxisID: 'y1' }}
+            ]
+          }},
+          options: {{
+            plugins: {{ legend: {{ position: 'bottom', labels: {{ padding: 12, usePointStyle: true }} }} }},
+            scales: {{
+              y:  {{ beginAtZero: true, position: 'left',  grid: {{ color: 'rgba(212,175,55,0.05)' }}, ticks: {{ callback: v => '$' + v }} }},
+              y1: {{ beginAtZero: true, position: 'right', grid: {{ display: false }}, ticks: {{ precision: 0 }} }},
+              x:  {{ grid: {{ display: false }} }}
+            }}
+          }}
+        }});
+      }}
+    </script>"""
+
+    out = OUTPUT_DIR / "sold.html"
+    out.write_text(html_shell(f"Sold Items · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="sold.html"), encoding="utf-8")
+    print(f"  Sold items page: {out}")
     return out
 
 
@@ -4567,6 +5324,9 @@ def main():
     if seller:
         (OUTPUT_DIR / "_seller.json").write_text(json.dumps(seller, indent=2), encoding="utf-8")
         print(f"  Seller: {seller.get('user_id')} · feedback {seller.get('feedback_score')} ({seller.get('positive_pct')}% positive) · since {seller.get('member_since')}")
+    print("  Fetching sold listings (last 60 days)...")
+    sold = fetch_sold_listings(token, cfg, days_back=60)
+    build_sold_page(sold)
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
     build_dashboard(listings, market, seller=seller)

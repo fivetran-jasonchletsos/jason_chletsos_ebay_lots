@@ -53,6 +53,11 @@ REDDIT_USER_AGENT    = os.environ.get("REDDIT_USER_AGENT", "harpua2001-crosspost
 REDDIT_TOKEN_URL     = "https://www.reddit.com/api/v1/access_token"
 REDDIT_SUBMIT_URL    = "https://oauth.reddit.com/api/submit"
 
+# Fivetran (eBay → warehouse sync) — triggered from Refresh button
+FIVETRAN_API_KEY      = os.environ.get("FIVETRAN_API_KEY", "")
+FIVETRAN_API_SECRET   = os.environ.get("FIVETRAN_API_SECRET", "")
+FIVETRAN_CONNECTOR_ID = os.environ.get("FIVETRAN_CONNECTOR_ID", "")
+
 
 def lambda_handler(event, context):
     method = event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method", "GET")
@@ -138,8 +143,44 @@ def lambda_handler(event, context):
     # Rebuilds the GitHub Pages site with fresh eBay listings
     # ------------------------------------------------------------------
     if method == "POST" and path.endswith("/ebay/rebuild"):
+        results = {"fivetran": None, "github": None}
+
+        # 1) Trigger the Fivetran eBay sync first — this populates the warehouse
+        if FIVETRAN_API_KEY and FIVETRAN_API_SECRET and FIVETRAN_CONNECTOR_ID:
+            try:
+                creds = base64.b64encode(f"{FIVETRAN_API_KEY}:{FIVETRAN_API_SECRET}".encode()).decode()
+                fv_url = f"https://api.fivetran.com/v1/connectors/{FIVETRAN_CONNECTOR_ID}/force"
+                fv_req = urllib.request.Request(
+                    fv_url,
+                    data=b"",
+                    headers={
+                        "Authorization": f"Basic {creds}",
+                        "Content-Type":  "application/json",
+                    },
+                    method="POST",
+                )
+                fv_resp = urllib.request.urlopen(fv_req, timeout=10)
+                fv_body = json.loads(fv_resp.read().decode() or "{}")
+                results["fivetran"] = {
+                    "ok":      fv_body.get("code") == "Success",
+                    "message": fv_body.get("message"),
+                    "code":    fv_body.get("code"),
+                }
+                logger.info(f"Fivetran sync triggered: {fv_body.get('code')} — {fv_body.get('message')}")
+            except urllib.error.HTTPError as exc:
+                err_body = exc.read().decode()[:300]
+                results["fivetran"] = {"ok": False, "error": f"HTTP {exc.code}: {err_body}"}
+                logger.error(f"Fivetran trigger HTTP error: {exc.code} — {err_body}")
+            except Exception as exc:
+                results["fivetran"] = {"ok": False, "error": str(exc)}
+                logger.error(f"Fivetran trigger error: {exc}")
+        else:
+            results["fivetran"] = {"ok": False, "error": "Fivetran credentials not configured (FIVETRAN_API_KEY / SECRET / CONNECTOR_ID)"}
+
+        # 2) Then trigger the GitHub Actions workflow to rebuild the site
         if not GITHUB_TOKEN:
-            return _cors_response(500, {"success": False, "error": "GITHUB_TOKEN not configured"})
+            results["github"] = {"ok": False, "error": "GITHUB_TOKEN not configured"}
+            return _cors_response(500, {"success": False, "error": "GITHUB_TOKEN not configured", "results": results})
         try:
             payload = json.dumps({"ref": "main"}).encode()
             req = urllib.request.Request(
@@ -154,12 +195,22 @@ def lambda_handler(event, context):
                 method="POST",
             )
             resp = urllib.request.urlopen(req, timeout=10)
-            # 204 No Content = success
+            results["github"] = {"ok": True, "status": resp.status}
             logger.info(f"GitHub Actions dispatch triggered, status={resp.status}")
-            return _cors_response(200, {"success": True, "message": "Site rebuild triggered. Ready in ~2 minutes."})
         except Exception as exc:
+            results["github"] = {"ok": False, "error": str(exc)}
             logger.error(f"Rebuild trigger error: {exc}")
-            return _cors_response(500, {"success": False, "error": str(exc)})
+            return _cors_response(500, {"success": False, "error": str(exc), "results": results})
+
+        # Compose a friendly user-facing summary
+        msgs = []
+        if results["fivetran"] and results["fivetran"].get("ok"):
+            msgs.append("Fivetran sync started (warehouse refresh: ~1-3 min)")
+        elif results["fivetran"]:
+            msgs.append(f"Fivetran skipped: {results['fivetran'].get('error') or results['fivetran'].get('message')}")
+        if results["github"] and results["github"].get("ok"):
+            msgs.append("Site rebuild triggered (live in ~2 min)")
+        return _cors_response(200, {"success": True, "message": " · ".join(msgs), "results": results})
 
     # ------------------------------------------------------------------
     # POST /ebay/reddit-post — submit a self-post to a chosen subreddit
