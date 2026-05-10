@@ -22,8 +22,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["1f84097ce0ae7c7f40d72002c7ff48945f5617c8dfae5676d802622d2050f39b"];
-    window.__ADMIN_SALT   = '2cd750405e870666ff5c797e93798283';
+    window.__ADMIN_HASHES = ["26151899cab3c6e9c3bd63f326624aedf8117f914c4dea54b2cb6ba34526f981"];
+    window.__ADMIN_SALT   = '0e61cb58686263abecca8afc2d215b8b';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -2424,7 +2424,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 21:48 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 10, 2026 · 21:54 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -2515,14 +2515,21 @@ tr:hover td { background: rgba(212,175,55,.03); }
       const btn = document.getElementById('nav-refresh-btn');
       const original = btn.textContent;
       btn.textContent = 'Refreshing…'; btn.disabled = true;
+      showToast('Refreshing inventory, prices, sold history, and deals from eBay…');
       try {
         const resp = await fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
         });
         const data = await resp.json();
-        showToast(data.success ? 'Site rebuild triggered. Live in ~2 minutes.' : 'Rebuild failed: ' + (data.error || 'Unknown'));
+        if (data.success) {
+          // Use Lambda's detailed message if present
+          const detail = data.message || 'Refresh started';
+          showToast(detail + ' · pull-to-refresh in ~2-3 min to see new prices');
+        } else {
+          showToast('Refresh failed: ' + (data.error || 'Unknown'));
+        }
       } catch (e) {
-        showToast('Request failed: ' + e.message);
+        showToast('Refresh request failed: ' + e.message);
       }
       btn.textContent = original; btn.disabled = false;
     }

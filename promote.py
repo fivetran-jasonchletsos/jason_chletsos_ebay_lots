@@ -367,6 +367,470 @@ def fetch_seller_profile(token: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Deal hunter — find listings priced well below the median for a given query
+# ---------------------------------------------------------------------------
+DEAL_QUERIES_FILE = Path(__file__).parent / "deal_queries.json"
+
+
+def fetch_deals(cfg: dict) -> dict:
+    """Scan watchlist queries on eBay Browse API. Flag items priced significantly
+    below median asking price. Returns {threshold, queries: [{q, comps, median, ...,
+    deals: [{title, price, discount_pct, url, ...}]}]}."""
+    if not DEAL_QUERIES_FILE.exists():
+        return {"queries": [], "threshold": 30, "total_deals": 0}
+    try:
+        cfg_deals = json.load(open(DEAL_QUERIES_FILE))
+    except Exception as exc:
+        print(f"  deal_queries.json invalid: {exc}")
+        return {"queries": [], "threshold": 30, "total_deals": 0}
+
+    queries = cfg_deals.get("queries", [])
+    threshold_pct = float(cfg_deals.get("discount_threshold_pct", 30))
+    min_comps = int(cfg_deals.get("min_comps", 5))
+
+    # Use app token (client_credentials) — no user OAuth scopes needed for Browse search
+    app_token = get_app_token(cfg)
+    own_seller = cfg.get("seller_username", "") or "harpua2001"
+
+    out_queries = []
+    total_deals = 0
+    for q_cfg in queries:
+        q = q_cfg.get("q", "").strip()
+        if not q:
+            continue
+        max_price = q_cfg.get("max_price")
+        category  = q_cfg.get("category", "")
+        url = "https://api.ebay.com/buy/browse/v1/item_summary/search"
+        min_price = q_cfg.get("min_price")
+        # Default min: $5 for queries that didn't set one (avoids the $0.99 penny-flip floor)
+        if min_price is None:
+            min_price = 5
+        # Build price filter
+        if max_price:
+            price_range = f"{min_price}..{max_price}"
+        else:
+            price_range = f"{min_price}.."
+        params = {
+            "q":      q,
+            "limit":  "100",
+            # Include both auctions and Buy It Now — we'll badge each in the UI.
+            "filter": f"buyingOptions:{{FIXED_PRICE|AUCTION}},itemLocationCountry:US,price:[{price_range}],priceCurrency:USD",
+            # No sort — default best-match returns a representative price spread.
+        }
+        headers = {
+            "Authorization": f"Bearer {app_token}",
+            "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
+        }
+        try:
+            r = requests.get(url, params=params, headers=headers, timeout=15)
+            r.raise_for_status()
+            data = r.json()
+        except Exception as exc:
+            print(f"  Browse API failed for '{q}': {exc}")
+            continue
+
+        items = data.get("itemSummaries", []) or []
+        # Filter: drop our own listings, items without an image, and obvious noise
+        clean = []
+        for it in items:
+            seller_name = (it.get("seller") or {}).get("username", "").lower()
+            if seller_name == own_seller.lower():
+                continue
+            price = ((it.get("price") or {}).get("value") or "0")
+            try:
+                price_f = float(price)
+            except (TypeError, ValueError):
+                continue
+            if price_f <= 0:
+                continue
+            img = (it.get("image") or {}).get("imageUrl", "")
+            options = it.get("buyingOptions") or []
+            if "AUCTION" in options and "FIXED_PRICE" not in options:
+                listing_type = "Auction"
+            elif "FIXED_PRICE" in options and "AUCTION" in options:
+                listing_type = "BIN + Auction"
+            elif "BEST_OFFER" in options or any("OFFER" in o for o in options):
+                listing_type = "BIN + Offer"
+            elif "FIXED_PRICE" in options:
+                listing_type = "BIN"
+            else:
+                listing_type = "BIN"
+            # For auctions, end time is informative
+            end_time = it.get("itemEndDate", "")
+            clean.append({
+                "item_id":      it.get("itemId", "") or it.get("legacyItemId", ""),
+                "legacy_id":    it.get("legacyItemId", "") or "",
+                "title":        it.get("title", ""),
+                "price":        price_f,
+                "image":        img,
+                "condition":    it.get("condition", "") or "Used",
+                "seller":       seller_name,
+                "feedback":     ((it.get("seller") or {}).get("feedbackPercentage") or "") + "%",
+                "url":          it.get("itemWebUrl", ""),
+                "listing_type": listing_type,
+                "end_time":     end_time,
+            })
+
+        if len(clean) < min_comps:
+            out_queries.append({"q": q, "category": category, "comps": len(clean), "median": 0, "min": 0, "max": 0, "deals": [], "skipped_reason": f"insufficient comps ({len(clean)}<{min_comps})"})
+            continue
+
+        prices = sorted([c["price"] for c in clean])
+        median = prices[len(prices) // 2]
+        threshold_price = median * (1 - threshold_pct / 100.0)
+        deals = []
+        for c in clean:
+            if c["price"] <= threshold_price:
+                discount_pct = round((1 - c["price"] / median) * 100, 1)
+                deals.append({**c, "median": median, "discount_pct": discount_pct})
+        # Sort deals by discount_pct desc (best deals first)
+        deals.sort(key=lambda d: -d["discount_pct"])
+        out_queries.append({
+            "q":       q,
+            "category": category,
+            "comps":   len(clean),
+            "median":  round(median, 2),
+            "min":     round(prices[0], 2),
+            "max":     round(prices[-1], 2),
+            "deals":   deals,
+        })
+        total_deals += len(deals)
+
+    print(f"  Found {total_deals} deals across {len(out_queries)} queries")
+    return {
+        "queries":      out_queries,
+        "threshold":    threshold_pct,
+        "min_comps":    min_comps,
+        "total_deals":  total_deals,
+    }
+
+
+def build_deals_page(deals_data: dict) -> Path:
+    """Render the deal hunter page from fetch_deals output."""
+    queries     = deals_data.get("queries", [])
+    threshold   = deals_data.get("threshold", 30)
+    total_deals = deals_data.get("total_deals", 0)
+
+    # Flatten all deals across queries, sort by discount %
+    all_deals = []
+    for q in queries:
+        for d in q.get("deals", []):
+            all_deals.append({**d, "from_query": q["q"], "from_category": q.get("category", "")})
+    all_deals.sort(key=lambda d: -d["discount_pct"])
+
+    best_deal_pct = all_deals[0]["discount_pct"] if all_deals else 0
+    cheapest = min((d["price"] for d in all_deals), default=0)
+    total_savings = sum(d["median"] - d["price"] for d in all_deals)
+
+    # Compute filter ranges from full deal set (before slicing)
+    if all_deals:
+        prices_all   = [d["price"] for d in all_deals]
+        discounts    = [d["discount_pct"] for d in all_deals]
+        savings_all  = [d["median"] - d["price"] for d in all_deals]
+        f_price_min  = int(min(prices_all) // 1)
+        f_price_max  = int(max(prices_all) + 1)
+        f_disc_min   = int(min(discounts) // 1)
+        f_disc_max   = int(max(discounts) + 1)
+    else:
+        f_price_min = f_price_max = f_disc_min = f_disc_max = 0
+
+    # Derive categories present in deals for the dropdown
+    deal_cats = sorted({d.get("from_category", "") for d in all_deals if d.get("from_category")})
+    cat_options = '<option value="All">All categories</option>' + "".join(f'<option value="{c}">{c}</option>' for c in deal_cats)
+
+    # Cards
+    cards = []
+    for d in all_deals[:200]:  # cap at 200 so the page stays fast
+        img = (
+            f'<img src="{d["image"]}" alt="" loading="lazy">' if d["image"]
+            else '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:11px;">No image</div>'
+        )
+        # Bigger discount → hotter color
+        if d["discount_pct"] >= 50:
+            tier = '<span class="badge badge-danger">🔥 HOT</span>'
+        elif d["discount_pct"] >= 40:
+            tier = '<span class="badge badge-warning">DEAL</span>'
+        else:
+            tier = '<span class="badge badge-success">VALUE</span>'
+
+        cat_tag = f'<span class="tag tag-gold">{d["from_category"]}</span>' if d.get("from_category") else ""
+        # Listing-type badge — colored differently for Auction (time-sensitive)
+        ltype = d.get("listing_type", "BIN")
+        if "Auction" in ltype:
+            type_badge = f'<span class="tag tag-warn">⏱ {ltype}</span>'
+        elif "Offer" in ltype:
+            type_badge = f'<span class="tag tag-gold">{ltype}</span>'
+        else:
+            type_badge = f'<span class="tag">{ltype}</span>'
+        # Auction end time hint
+        end_hint = ""
+        if d.get("end_time") and "Auction" in ltype:
+            try:
+                from datetime import datetime as _dt
+                end_dt = _dt.fromisoformat(d["end_time"].replace("Z", "+00:00"))
+                end_hint = f' <span class="deal-end">ends {end_dt.strftime("%b %-d %-I:%M%p UTC")}</span>'
+            except Exception:
+                pass
+        # Sale price label: "current bid" for auctions, "asking" for BIN
+        price_label = "current bid" if "Auction" in ltype and "BIN" not in ltype else "asking"
+        # Simplified listing-type token for filter dropdown
+        if "Auction" in ltype and "BIN" not in ltype:
+            type_token = "Auction"
+        elif "Offer" in ltype:
+            type_token = "Best Offer"
+        else:
+            type_token = "BIN"
+        savings = d["median"] - d["price"]
+        cards.append(f'''
+      <article class="deal-card"
+        data-price="{d['price']:.2f}"
+        data-discount="{d['discount_pct']:.1f}"
+        data-savings="{savings:.2f}"
+        data-cat="{d.get('from_category','')}"
+        data-type="{type_token}"
+        data-title="{(d.get('title','') or '').lower().replace(chr(34),'')}">
+        <div class="deal-thumb">{img}<div class="deal-discount">-{d['discount_pct']:.0f}%</div></div>
+        <div class="deal-body">
+          <div class="deal-meta-row">
+            {tier}
+            {type_badge}
+            {cat_tag}
+            <span class="tag">{d['condition']}</span>
+          </div>
+          <a href="{d['url']}" target="_blank" rel="noopener" class="deal-title">{d['title'][:120]}</a>
+          <div class="deal-meta-row" style="margin-top:6px;">
+            <span class="deal-from">Seen via <em>“{d['from_query']}”</em>{end_hint}</span>
+            <span class="deal-feedback" title="Seller">{d['seller']} {d['feedback']}</span>
+          </div>
+        </div>
+        <div class="deal-price-block">
+          <div class="deal-price">${d['price']:.2f}</div>
+          <div class="deal-median">{price_label} · median ${d['median']:.2f}</div>
+          <a href="{d['url']}" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+        </div>
+      </article>''')
+
+    if not cards:
+        cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No deals matched the threshold today. Lower the bar in <code>deal_queries.json</code> (increase <code>discount_threshold_pct</code>) or add new queries.</div>'
+    else:
+        cards_html = "\n".join(cards)
+
+    # Query summary table
+    summary_rows = []
+    for q in queries:
+        d_count = len(q.get("deals", []))
+        if q.get("skipped_reason"):
+            summary_rows.append(f'<tr><td>{q["q"]}</td><td colspan="4" style="color:var(--text-muted);font-style:italic;">{q["skipped_reason"]}</td></tr>')
+        else:
+            d_marker = f'<b style="color:var(--gold);">{d_count}</b>' if d_count else '0'
+            summary_rows.append(f'<tr><td>{q["q"]}</td><td>{q["comps"]}</td><td>${q["min"]:.2f}</td><td>${q["median"]:.2f}</td><td>${q["max"]:.2f}</td><td>{d_marker}</td></tr>')
+    summary_html = "\n".join(summary_rows) or '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Add queries to <code>deal_queries.json</code>.</td></tr>'
+
+    extra_css = """
+    .deal-grid { display: grid; gap: 12px; margin-bottom: 28px; }
+    .deal-card {
+      display: grid;
+      grid-template-columns: 108px 1fr auto;
+      gap: 16px; align-items: stretch;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--r-lg);
+      padding: 14px 18px;
+      transition: all var(--t-fast);
+    }
+    .deal-card:hover { transform: translateY(-1px); border-color: var(--border-mid); }
+    .deal-thumb {
+      position: relative;
+      width: 108px; height: 108px;
+      border-radius: var(--r-sm); overflow: hidden; background: var(--surface-3);
+    }
+    .deal-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .deal-discount {
+      position: absolute; top: 6px; right: 6px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--brand-fg);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px; letter-spacing: .02em;
+      padding: 3px 8px;
+      border-radius: var(--r-sm);
+      line-height: 1;
+    }
+    .deal-body { min-width: 0; }
+    .deal-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .deal-title { display: block; font-size: 14.5px; font-weight: 600; color: var(--text); line-height: 1.35; text-decoration: none; margin-top: 8px; }
+    .deal-title:hover { color: var(--gold); }
+    .deal-from { font-size: 11px; color: var(--text-muted); }
+    .deal-from em { color: var(--gold); font-style: normal; font-weight: 600; }
+    .deal-feedback { font-size: 11px; color: var(--text-dim); margin-left: auto; }
+    .deal-price-block { text-align: right; flex-shrink: 0; align-self: center; }
+    .deal-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px; line-height: 1;
+      color: var(--gold);
+      letter-spacing: .02em;
+    }
+    .deal-median { font-size: 11px; color: var(--text-muted); text-decoration: line-through; margin-top: 4px; }
+    .summary-table { width: 100%; }
+    .summary-table th, .summary-table td { font-size: 12px; padding: 8px 10px; text-align: left; }
+    .summary-table th:not(:first-child), .summary-table td:not(:first-child) { text-align: right; }
+    @media (max-width: 580px) {
+      .deal-card { grid-template-columns: 80px 1fr; padding: 12px; gap: 12px; }
+      .deal-thumb { width: 80px; height: 80px; }
+      .deal-price-block { grid-column: 1 / -1; text-align: left; }
+      .deal-feedback { margin-left: 0; }
+    }
+    """
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Underpriced listings · &gt;{threshold:g}% below median</div>
+        <h1 class="section-title">Deal <span class="accent">Hunter</span></h1>
+        <div class="section-sub">Live scans of eBay watchlist queries from <code>deal_queries.json</code>. Flagged when current asking price is at least {threshold:g}% below the median price for the same query.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">{total_deals}</div><div class="lbl">Deals Right Now</div></div>
+      <div class="stat-card"><div class="num">{best_deal_pct:.0f}<span style="font-size:24px;">%</span></div><div class="lbl">Best Discount</div></div>
+      <div class="stat-card"><div class="num">${cheapest:,.0f}</div><div class="lbl">Cheapest Find</div></div>
+      <div class="stat-card"><div class="num">${total_savings:,.0f}</div><div class="lbl">Potential Savings</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-row">
+        <input type="search" id="deal-search" class="search-input" placeholder="Filter by keyword (player, set, brand)…" oninput="dealApply()" autocomplete="off">
+        <select id="deal-cat" onchange="dealApply()" style="max-width:220px;">
+          {cat_options}
+        </select>
+        <select id="deal-type" onchange="dealApply()" style="max-width:180px;">
+          <option value="All">All listing types</option>
+          <option value="BIN">Buy It Now</option>
+          <option value="Auction">Auction</option>
+          <option value="Best Offer">Best Offer</option>
+        </select>
+        <select id="deal-sort" onchange="dealApply()" style="max-width:200px;">
+          <option value="discount-desc">Sort: Biggest % off</option>
+          <option value="savings-desc">Sort: Biggest $ saved</option>
+          <option value="price-asc">Sort: Price low→high</option>
+          <option value="price-desc">Sort: Price high→low</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <div class="slider-wrap">
+          <div class="slider-labels">
+            <span>Price</span>
+            <span><span class="slider-values" id="dp-lo">${f_price_min}</span> – <span class="slider-values" id="dp-hi">${f_price_max}</span></span>
+          </div>
+          <div id="deal-price-slider"></div>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="slider-wrap">
+          <div class="slider-labels">
+            <span>Minimum discount</span>
+            <span class="slider-values" id="dd-lo">{f_disc_min}%</span>
+          </div>
+          <div id="deal-disc-slider"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="deal-results-meta" style="font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;">
+      Showing <span id="deal-visible-count">{len(cards)}</span> of {len(cards)} deals
+    </div>
+
+    <div class="deal-grid" id="deal-grid">
+      {cards_html}
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Query coverage</div>
+        <div class="panel-sub">{len(queries)} watch queries · min {deals_data.get("min_comps", 5)} comps required</div>
+      </div>
+      <table class="summary-table">
+        <thead><tr><th>Query</th><th>Comps</th><th>Min</th><th>Median</th><th>Max</th><th>Deals</th></tr></thead>
+        <tbody>{summary_html}</tbody>
+      </table>
+    </div>
+    """
+    # Filter JS — uses noUiSlider (already loaded in head)
+    body += f"""
+    <script>
+      const DP_MIN = {f_price_min}, DP_MAX = {f_price_max};
+      const DD_MIN = {f_disc_min}, DD_MAX = {f_disc_max};
+      let dealPriceRange = [DP_MIN, DP_MAX];
+      let dealDiscMin    = DD_MIN;
+      if (typeof noUiSlider !== 'undefined' && DP_MAX > DP_MIN) {{
+        const ps = document.getElementById('deal-price-slider');
+        noUiSlider.create(ps, {{
+          start: [DP_MIN, DP_MAX], connect: true, step: 1,
+          range: {{ min: DP_MIN, max: DP_MAX }}
+        }});
+        ps.noUiSlider.on('update', (vals) => {{
+          const [lo, hi] = vals.map(v => Math.round(parseFloat(v)));
+          dealPriceRange = [lo, hi];
+          document.getElementById('dp-lo').textContent = '$' + lo;
+          document.getElementById('dp-hi').textContent = '$' + hi;
+          dealApply();
+        }});
+      }}
+      if (typeof noUiSlider !== 'undefined' && DD_MAX > DD_MIN) {{
+        const ds = document.getElementById('deal-disc-slider');
+        noUiSlider.create(ds, {{
+          start: DD_MIN, step: 1,
+          range: {{ min: DD_MIN, max: DD_MAX }}
+        }});
+        ds.noUiSlider.on('update', (v) => {{
+          dealDiscMin = Math.round(parseFloat(Array.isArray(v) ? v[0] : v));
+          document.getElementById('dd-lo').textContent = dealDiscMin + '%';
+          dealApply();
+        }});
+      }}
+      window.dealApply = function() {{
+        const q    = (document.getElementById('deal-search').value || '').toLowerCase().trim();
+        const cat  = document.getElementById('deal-cat').value;
+        const type = document.getElementById('deal-type').value;
+        const sort = document.getElementById('deal-sort').value;
+        const grid = document.getElementById('deal-grid');
+        const cards = Array.from(grid.querySelectorAll('.deal-card'));
+        const [plo, phi] = dealPriceRange;
+        let vis = 0;
+        cards.forEach(c => {{
+          const price = parseFloat(c.dataset.price);
+          const disc  = parseFloat(c.dataset.discount);
+          let ok = true;
+          if (q && !(c.dataset.title || '').includes(q)) ok = false;
+          if (ok && cat !== 'All' && c.dataset.cat !== cat) ok = false;
+          if (ok && type !== 'All' && c.dataset.type !== type) ok = false;
+          if (ok && (price < plo || price > phi)) ok = false;
+          if (ok && disc < dealDiscMin) ok = false;
+          c.style.display = ok ? '' : 'none';
+          if (ok) vis++;
+        }});
+        document.getElementById('deal-visible-count').textContent = vis;
+        // Sort visible
+        const visCards = cards.filter(c => c.style.display !== 'none');
+        const keyMap = {{
+          'discount-desc': c => -parseFloat(c.dataset.discount),
+          'savings-desc':  c => -parseFloat(c.dataset.savings),
+          'price-asc':     c =>  parseFloat(c.dataset.price),
+          'price-desc':    c => -parseFloat(c.dataset.price),
+        }};
+        const keyFn = keyMap[sort] || keyMap['discount-desc'];
+        visCards.sort((a, b) => keyFn(a) - keyFn(b));
+        visCards.forEach(c => grid.appendChild(c));
+      }};
+    </script>"""
+    out = OUTPUT_DIR / "deals.html"
+    out.write_text(html_shell(f"Deal Hunter · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="deals.html"), encoding="utf-8")
+    print(f"  Deals page: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Fetch listings via Trading API (works for legacy listings)
 # ---------------------------------------------------------------------------
 
@@ -1293,6 +1757,15 @@ main {
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
 .stat-card.linked a { color: inherit; }
+button.stat-card {
+  font-family: inherit; color: inherit; text-align: center; width: 100%;
+  appearance: none; -webkit-appearance: none;
+}
+button.stat-card.active {
+  border-color: var(--gold);
+  box-shadow: var(--glow-gold);
+}
+button.stat-card.active .num { filter: brightness(1.15); }
 
 /* ============ CARDS / SURFACES ============ */
 .panel {
@@ -1544,6 +2017,57 @@ input[type="checkbox"]:checked::after {
   font-size: 26px; line-height: 1;
   color: var(--gold);
   letter-spacing: .02em;
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  outline: none;
+}
+.listing-card .price-info-ic {
+  font-size: 12px; color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  transition: color var(--t-fast);
+}
+.listing-card .price:hover .price-info-ic,
+.listing-card .price:focus .price-info-ic { color: var(--gold); }
+.listing-card .price-wrap { position: relative; display: inline-block; }
+.listing-card .price-pop {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 260px;
+  max-width: 300px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 14px;
+  z-index: 80;
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+}
+.listing-card .price-wrap:hover .price-pop,
+.listing-card .price-pop.open { display: block; }
+.listing-card .price-pop .pp-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 2px 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.listing-card .price-pop .pp-row:last-child { border-bottom: none; }
+.listing-card .price-pop .pp-lbl {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 700;
+  grid-column: 1;
+}
+.listing-card .price-pop .pp-val {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  text-align: right; grid-column: 2; grid-row: 1;
+}
+.listing-card .price-pop .pp-note {
+  font-size: 11px; color: var(--text-dim);
+  grid-column: 1 / -1; grid-row: 2;
 }
 .grid[data-size="small"] .listing-card .price { font-size: 20px; }
 .listing-card .meta {
@@ -1758,6 +2282,7 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 _NAV_ITEMS = [
     ("index.html",        "Listings",    True),
     ("sold.html",         "Sold",        True),
+    ("deals.html",        "Deals",       False),
     ("quality.html",      "Quality",     False),
     ("price_review.html", "Pricing",     False),
     ("title_review.html", "Titles",      False),
@@ -1846,7 +2371,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         <div class="brand-mark">H</div>
         <div class="brand-text">
           <div class="brand-name">{SELLER_NAME}</div>
-          <div class="brand-tag">Sports &amp; Pokemon Cards</div>
+          <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
         </div>
       </a>
       <nav class="nav-links">{nav_html_desktop}</nav>
@@ -2006,14 +2531,21 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       const btn = document.getElementById('nav-refresh-btn');
       const original = btn.textContent;
       btn.textContent = 'Refreshing…'; btn.disabled = true;
+      showToast('Refreshing inventory, prices, sold history, and deals from eBay…');
       try {{
         const resp = await fetch('{LAMBDA_BASE}/rebuild', {{
           method: 'POST', headers: {{ 'Content-Type': 'application/json' }}, body: '{{}}'
         }});
         const data = await resp.json();
-        showToast(data.success ? 'Site rebuild triggered. Live in ~2 minutes.' : 'Rebuild failed: ' + (data.error || 'Unknown'));
+        if (data.success) {{
+          // Use Lambda's detailed message if present
+          const detail = data.message || 'Refresh started';
+          showToast(detail + ' · pull-to-refresh in ~2-3 min to see new prices');
+        }} else {{
+          showToast('Refresh failed: ' + (data.error || 'Unknown'));
+        }}
       }} catch (e) {{
-        showToast('Request failed: ' + e.message);
+        showToast('Refresh request failed: ' + e.message);
       }}
       btn.textContent = original; btn.disabled = false;
     }}
@@ -2203,11 +2735,46 @@ def _categorize(listing: dict) -> str:
     return "Other"
 
 
+def _sold_history_match(listing_title: str, sold_history: list[dict]) -> dict:
+    """Find similar items in sold_history.json by token overlap."""
+    if not sold_history:
+        return {"count": 0}
+    # Tokenize, keep meaningful words (len >=4), skip common stopwords
+    stop = {"card", "cards", "lot", "pack", "set", "near", "mint", "psa",
+            "from", "with", "rookie", "rookies", "card", "draft", "picks"}
+    tokens = {w for w in listing_title.lower().split()
+              if len(w) >= 4 and w not in stop}
+    if not tokens:
+        return {"count": 0}
+    prices = []
+    for s in sold_history:
+        s_tokens = {w for w in (s.get("title") or "").lower().split() if len(w) >= 4}
+        if len(tokens & s_tokens) >= 2:
+            try:
+                p = float(s.get("sale_price") or 0)
+                if p > 0:
+                    prices.append(p)
+            except (TypeError, ValueError):
+                continue
+    if not prices:
+        return {"count": 0}
+    prices.sort()
+    return {
+        "count":  len(prices),
+        "median": round(prices[len(prices) // 2], 2),
+        "min":    round(prices[0], 2),
+        "max":    round(prices[-1], 2),
+        "avg":    round(sum(prices) / len(prices), 2),
+    }
+
+
 def build_dashboard(listings: list[dict], market: dict | None = None, seller: dict | None = None) -> Path:
     import re as _re
 
     locks = load_locks()
     seller = seller or {}
+    # Load full sold history for cross-listing price intelligence
+    sold_history = _load_sold_history()
 
     # Compute stats
     total_value = sum(float(l['price']) for l in listings if l['price'])
@@ -2277,6 +2844,36 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         cond_tag = f'<span class="tag">{e["condition"]}</span>' if e["condition"] else ""
         cat_tag = f'<span class="tag tag-gold">{e["category"]}</span>'
 
+        # Build multi-source pricing popover data
+        m = e["market"] or {}
+        sold_match = _sold_history_match(e["title"], sold_history)
+        sources = []
+        sources.append(("Your price", f"${e['price_f']:.2f}", "what's set on eBay"))
+        if m.get("market_median") is not None:
+            sources.append(("eBay active median", f"${m['market_median']:.2f}", f"{m.get('comp_count', 0)} active asking prices"))
+            sources.append(("eBay range", f"${m.get('market_min', 0):.2f} – ${m.get('market_max', 0):.2f}", "low → high asking"))
+            if m.get("gap_pct") is not None:
+                gap = m["gap_pct"]
+                tone = "var(--success)" if -15 <= gap <= 20 else ("var(--danger)" if gap < -15 else "var(--warning)")
+                sources.append(("Gap vs market", f"<span style=\"color:{tone};font-weight:700;\">{gap:+.1f}%</span>", "your price vs. median"))
+        else:
+            sources.append(("eBay active median", "<span style='color:var(--text-dim)'>no comps</span>", "no matching listings found"))
+        if sold_match.get("count", 0) > 0:
+            sources.append(("Your past sales", f"${sold_match['median']:.2f}", f"{sold_match['count']} similar items sold (median)"))
+        else:
+            sources.append(("Your past sales", "<span style='color:var(--text-dim)'>none yet</span>", "no similar items in sold history"))
+        # Suggested re-price = market median rounded to nearest $0.50, min $0.99
+        suggested = None
+        if m.get("market_median"):
+            suggested = max(0.99, round(m["market_median"] * 2) / 2)
+            sources.append(("Suggested list", f"<b style=\"color:var(--gold);\">${suggested:.2f}</b>", "median rounded to $0.50"))
+
+        rows_html = "".join(
+            f'<div class="pp-row"><div class="pp-lbl">{lbl}</div><div class="pp-val">{val}</div><div class="pp-note">{note}</div></div>'
+            for lbl, val, note in sources
+        )
+        price_pop_html = f'<div class="price-pop" role="dialog" aria-label="Pricing details">{rows_html}</div>'
+
         # eBay restriction tag
         lock_info = locks.get(e["item_id"])
         lock_tag = ""
@@ -2306,6 +2903,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         data-title="{e['title'].lower()}"
         data-price="{e['price_f']:.2f}"
         data-cat="{e['category']}"
+        data-flag="{flag or 'NONE'}"
         {f'data-locked="{lock_info["code"]}"' if lock_info else ''}>
         <div class="thumb-wrap">
           {thumb}
@@ -2320,7 +2918,10 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         </div>
         <div class="info">
           <h3><a href="{item_page}">{e['title']}</a></h3>
-          <div class="price">${e['price_f']:.2f}</div>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">${e['price_f']:.2f}<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
+            {price_pop_html}
+          </div>
           <div class="meta">{cat_tag}{cond_tag}{flag_tag}{lock_tag}</div>
         </div>
         <div class="actions">
@@ -2675,26 +3276,22 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     {hero_html}
 
     <div class="stat-grid">
-      <div class="stat-card">
+      <button class="stat-card linked" type="button" onclick="filterByKPI('all', this)">
         <div class="num">{len(listings)}</div>
         <div class="lbl">Active Listings</div>
-      </div>
-      <div class="stat-card">
+      </button>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('value', this)">
         <div class="num">${total_value:,.0f}</div>
         <div class="lbl">Inventory Value</div>
-      </div>
-      <div class="stat-card linked">
-        <a href="price_review.html" style="text-decoration:none;">
-          <div class="num {'danger' if underpriced_count else ''}">{underpriced_count}</div>
-          <div class="lbl">Underpriced</div>
-        </a>
-      </div>
-      <div class="stat-card linked">
-        <a href="price_review.html" style="text-decoration:none;">
-          <div class="num {'warning' if overpriced_count else ''}">{overpriced_count}</div>
-          <div class="lbl">Overpriced</div>
-        </a>
-      </div>
+      </button>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('underpriced', this)">
+        <div class="num {'danger' if underpriced_count else ''}">{underpriced_count}</div>
+        <div class="lbl">Underpriced</div>
+      </button>
+      <button class="stat-card linked" type="button" onclick="filterByKPI('overpriced', this)">
+        <div class="num {'warning' if overpriced_count else ''}">{overpriced_count}</div>
+        <div class="lbl">Overpriced</div>
+      </button>
     </div>
 
     {trust_html}
@@ -2716,7 +3313,10 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     <div class="filter-bar">
       <div class="filter-row">
         <input type="text" id="search" class="search-input" placeholder="Search players, sets, years…" oninput="applyFilters()" autocomplete="off">
-        <select id="sort-filter" onchange="applyFilters()" style="max-width:220px;">
+        <select id="category-select" onchange="setCategoryFromSelect()" style="max-width:200px;">
+          {''.join(f'<option value="{c}">{c}</option>' for c in chip_order)}
+        </select>
+        <select id="sort-filter" onchange="applyFilters()" style="max-width:200px;">
           <option value="default">Sort: Featured</option>
           <option value="price-desc">Price: High → Low</option>
           <option value="price-asc">Price: Low → High</option>
@@ -2766,6 +3366,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       const PRICE_MIN_INIT = {p_min};
       const PRICE_MAX_INIT = {p_max};
       let activeCat = 'All';
+      let activeFlag = null;   // null | 'UNDERPRICED' | 'OVERPRICED'
       let priceRange = [PRICE_MIN_INIT, PRICE_MAX_INIT];
 
       // Watchlist (localStorage)
@@ -2808,8 +3409,46 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       function setCategory(btn) {{
         activeCat = btn.dataset.cat;
         document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+        // Sync the dropdown
+        const sel = document.getElementById('category-select');
+        if (sel) sel.value = activeCat;
         applyFilters();
       }}
+      // Category dropdown
+      window.setCategoryFromSelect = function() {{
+        const sel = document.getElementById('category-select');
+        activeCat = sel.value;
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
+        applyFilters();
+      }};
+      // KPI stat-card click → filter the grid
+      window.filterByKPI = function(kind, btn) {{
+        document.querySelectorAll('.stat-card.linked').forEach(c => c.classList.toggle('active', c === btn));
+        // Reset other filters when clicking a KPI
+        activeCat = 'All';
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === 'All'));
+        const sel = document.getElementById('category-select');
+        if (sel) sel.value = 'All';
+        document.getElementById('search').value = '';
+        slider.noUiSlider.set([PRICE_MIN_INIT, PRICE_MAX_INIT]);
+        const sortSel = document.getElementById('sort-filter');
+        if (kind === 'value') {{
+          sortSel.value = 'price-desc';
+          activeFlag = null;
+        }} else if (kind === 'underpriced') {{
+          sortSel.value = 'default';
+          activeFlag = 'UNDERPRICED';
+        }} else if (kind === 'overpriced') {{
+          sortSel.value = 'default';
+          activeFlag = 'OVERPRICED';
+        }} else {{
+          sortSel.value = 'default';
+          activeFlag = null;
+        }}
+        applyFilters();
+        // Scroll the grid into view after the filter applies
+        document.getElementById('listing-grid').scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+      }};
 
       // Price slider
       const slider = document.getElementById('price-slider');
@@ -2842,6 +3481,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
           let ok = c.dataset.title.includes(q);
           if (ok && activeCat === '__watch') ok = favs.includes(c.dataset.id);
           else if (ok && activeCat !== 'All')  ok = c.dataset.cat === activeCat;
+          if (ok && activeFlag) ok = c.dataset.flag === activeFlag;
           if (ok) ok = price >= lo && price <= hi;
           c.style.display = ok ? '' : 'none';
           if (ok) visible++;
@@ -2858,6 +3498,21 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       }}
 
       refreshFavUI();
+
+      // ============ PRICE POPOVER ============
+      window.togglePricePop = function(priceEl, ev) {{
+        ev.stopPropagation();
+        const pop = priceEl.parentElement.querySelector('.price-pop');
+        const wasOpen = pop.classList.contains('open');
+        // Close all popovers first
+        document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+        if (!wasOpen) pop.classList.add('open');
+      }};
+      document.addEventListener('click', (e) => {{
+        if (!e.target.closest('.price-wrap')) {{
+          document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+        }}
+      }});
 
       // ============ HERO AUTO-ROTATION ============
       const heroSlides = document.querySelectorAll('.hero-slide');
@@ -3192,13 +3847,31 @@ def build_quality_report(listings: list[dict]) -> Path:
             pass
     avg_price = sum(prices) / len(prices) if prices else 0
 
-    issue_counts = {"Short title": 0, "No image": 0, "Weak description": 0, "Pricing outlier": 0}
+    issue_counts = {
+        "Short title": 0, "No image": 0, "Weak description": 0, "Pricing outlier": 0,
+        "Hype/fluff words": 0, "ALL CAPS section": 0, "Contact info in desc": 0,
+        "Placeholder values": 0,
+    }
     items = []  # (score, listing, issues)
+    # Compile detection patterns once
+    fluff_re = _re.compile(
+        r"\b(L@@K|LOOK|Wow|Amazing|Must Have|Must-Have|Rare Find|Sweet|Stunning|"
+        r"Beautiful|Gorgeous|Awesome|Buy Now|Don't Miss|Steal|GORGEOUS|AMAZING)\b",
+        _re.IGNORECASE,
+    )
+    allcaps_re   = _re.compile(r"\b[A-Z]{4,}\b")
+    email_re     = _re.compile(r"\b[\w\.-]+@[\w\.-]+\.\w+\b")
+    phone_re     = _re.compile(r"\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b|\b\(\d{3}\)\s*\d{3}[\s.-]?\d{4}\b")
+    placeholder_re = _re.compile(r"\b(does not apply|n/a|unbranded|unknown)\b", _re.IGNORECASE)
+
     for l in listings:
         issues = []
         score  = 100
 
-        tlen = len(l["title"])
+        title = l["title"] or ""
+        desc  = l["desc"]  or ""
+        tlen  = len(title)
+
         if tlen < 40:
             issues.append(f"Title too short ({tlen}/80 chars)")
             issue_counts["Short title"] += 1
@@ -3208,15 +3881,49 @@ def build_quality_report(listings: list[dict]) -> Path:
             issue_counts["Short title"] += 1
             score -= 10
 
+        # Fluff/hype words in title (search-killer + violates eBay seller guidance)
+        fluff_hits = [m.group(0) for m in fluff_re.finditer(title)]
+        if fluff_hits:
+            issues.append(f"Title has fluff word(s): {', '.join(set(fluff_hits))}")
+            issue_counts["Hype/fluff words"] += 1
+            score -= 10
+
+        # ALL CAPS sections in title (also flagged in description)
+        caps_in_title = [m.group(0) for m in allcaps_re.finditer(title) if m.group(0) not in _KEEP_CAPS]
+        if caps_in_title:
+            issues.append(f"Title has ALL-CAPS section: {', '.join(set(caps_in_title)[:3])}")
+            issue_counts["ALL CAPS section"] += 1
+            score -= 8
+
+        if "!" in title or "***" in title:
+            issues.append("Title has spammy punctuation (! or ***)")
+            score -= 5
+
         if not l["pic"]:
             issues.append("No image — critical for search rank")
             issue_counts["No image"] += 1
             score -= 40
 
-        if not l["desc"] or len(l["desc"]) < 50:
+        if not desc or len(desc) < 50:
             issues.append("Description missing or very short")
             issue_counts["Weak description"] += 1
             score -= 15
+        else:
+            # Hype/fluff in description
+            if fluff_re.search(desc):
+                issues.append("Description has hype/fluff words")
+                issue_counts["Hype/fluff words"] += 1
+                score -= 8
+            # Contact info — violates eBay policy
+            if email_re.search(desc) or phone_re.search(desc):
+                issues.append("Description has email/phone — eBay will suppress")
+                issue_counts["Contact info in desc"] += 1
+                score -= 20
+            # Placeholder values
+            if placeholder_re.search(desc):
+                issues.append("Description has placeholder values (Does not apply / N/A)")
+                issue_counts["Placeholder values"] += 1
+                score -= 8
 
         try:
             p = float(l["price"])
@@ -4322,12 +5029,79 @@ def write_analysis_views():
 # Price review page — market comps vs our prices
 # ---------------------------------------------------------------------------
 
+# eBay fee assumptions (used in price suggestion math)
+EBAY_FINAL_VALUE_FEE_PCT = 0.1325  # ~13.25% on collectibles category
+EBAY_PER_ORDER_FIXED_FEE = 0.40    # $0.40 per order fixed
+DEFAULT_SHIP_COST_LOW    = 1.30    # PWE for singles
+DEFAULT_SHIP_COST_HIGH   = 5.00    # BMWT for lots
+
+
+def _ebay_net(sale_price: float, ship_cost: float = DEFAULT_SHIP_COST_LOW) -> dict:
+    """Estimate net proceeds after eBay fees + shipping. Returns dict with breakdown."""
+    fvf = round(sale_price * EBAY_FINAL_VALUE_FEE_PCT, 2)
+    fee = fvf + EBAY_PER_ORDER_FIXED_FEE
+    net = round(sale_price - fee - ship_cost, 2)
+    return {
+        "sale":  round(sale_price, 2),
+        "fvf":   fvf,
+        "fixed": EBAY_PER_ORDER_FIXED_FEE,
+        "ship":  ship_cost,
+        "net":   net,
+    }
+
+
+def _suggest_list_price(market_median: float, sold_match: dict | None = None) -> dict:
+    """
+    Recommend a list price following eBay best practices:
+      - Prefer sold-history median (real sale data) when available + N>=3
+      - Else use active median × 0.95 (slight below market to move faster)
+      - Round to .99 ending (psychological pricing)
+      - Pick a strategy label
+
+    Returns: {price, basis, strategy, basis_count, math}
+    """
+    if sold_match and sold_match.get("count", 0) >= 3:
+        basis      = "sold_history"
+        basis_p    = sold_match["median"]
+        basis_n    = sold_match["count"]
+        strategy   = "Match market (your sold median)"
+        ref_price  = basis_p
+    elif market_median and market_median > 0:
+        basis      = "active_median"
+        basis_p    = market_median
+        basis_n    = 0
+        strategy   = "Price to move (5% below active median)"
+        ref_price  = market_median * 0.95
+    else:
+        return {"price": None, "basis": "none", "strategy": "no comps", "basis_count": 0}
+
+    # Round to .99 ending
+    floor_dollar = int(ref_price)
+    if ref_price - floor_dollar >= 0.50:
+        price = floor_dollar + 0.99
+    elif floor_dollar >= 1:
+        price = floor_dollar - 0.01
+    else:
+        price = 0.99
+    price = max(0.99, round(price, 2))
+
+    return {
+        "price":       price,
+        "basis":       basis,
+        "basis_value": round(basis_p, 2),
+        "basis_count": basis_n,
+        "strategy":    strategy,
+        "math":        _ebay_net(price),
+    }
+
+
 def build_price_review(listings: list[dict], market: dict) -> Path:
     """
     Premium price review: cards with current vs suggested side-by-side,
     market gap visualization, gap distribution chart.
     """
     locks = load_locks()
+    sold_history = _load_sold_history()
     lambda_url  = f"{LAMBDA_BASE}/reprice"
     rebuild_url = f"{LAMBDA_BASE}/rebuild"
 
@@ -4364,7 +5138,13 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
             elif gap < 25: gap_buckets["+10 to +25%"] += 1
             else: gap_buckets[">+25%"] += 1
 
-        suggested = max(0.99, round(med * 2) / 2)
+        # Apply best-practice pricing: .99 endings, prefer sold history, sub-market by 5% for fast moves
+        sm = _sold_history_match(l["title"], sold_history)
+        suggestion = _suggest_list_price(med, sm)
+        suggested = suggestion["price"] if suggestion.get("price") else max(0.99, round(med) - 0.01)
+        # Net math (uses suggested price)
+        ship_est = DEFAULT_SHIP_COST_HIGH if "lot" in l["title"].lower() else DEFAULT_SHIP_COST_LOW
+        net_math = _ebay_net(suggested, ship_est)
 
         if flag == "UNDERPRICED":
             badge = '<span class="badge badge-danger">Underpriced</span>'
@@ -4423,6 +5203,10 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
             <div class="pr-new">
               <span class="pr-dollar">$</span>
               <span class="price-after" contenteditable="true" data-id="{item_id}" inputmode="decimal">{suggested:.2f}</span>
+            </div>
+            <div class="pr-strategy" title="Basis: {suggestion.get('basis','')}{', ' + str(suggestion.get('basis_count',0)) + ' sold' if suggestion.get('basis_count',0) else ''}">{suggestion.get('strategy', '')}</div>
+            <div class="pr-math">
+              -${net_math['fvf']:.2f} fee · -${net_math['ship']:.2f} ship · <b style="color:var(--success);">${net_math['net']:.2f} net</b>
             </div>
             <a href="{l['url']}" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -4505,6 +5289,8 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
       caret-color: var(--gold);
     }
     .pr-new .price-after:focus { border-bottom-style: solid; border-bottom-color: var(--gold); }
+    .pr-strategy { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-top: 6px; font-weight: 700; }
+    .pr-math { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1.4; }
     .pr-view-link { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
     .pr-view-link:hover { color: var(--gold); }
     .action-bar {
@@ -5496,21 +6282,70 @@ def _rule_based_title(listing: dict) -> str:
     return title[:80].strip()
 
 
+# ---------------------------------------------------------------------------
+# Best-practice text helpers — applied to AI-generated titles
+# ---------------------------------------------------------------------------
+# Fluff/hype words that hurt eBay search rank + buyer trust. Stripped from
+# suggested titles. Source: official eBay seller guidelines + best-practice
+# prompt published by Claude (see commit message "Align AI to eBay best...").
+_FLUFF_WORDS = [
+    r"\bL@@K\b", r"\bLOOK\b", r"\bWow\b", r"\bWOW\b", r"\bAmazing\b", r"\bAMAZING\b",
+    r"\bMust Have\b", r"\bMust-Have\b", r"\bRare Find\b", r"\bSweet\b",
+    r"\bStunning\b", r"\bBeautiful\b", r"\bGorgeous\b", r"\bAwesome\b",
+    r"\bBuy Now\b", r"\bDon't Miss\b", r"\bSteal\b", r"\bDeal\b",
+    r"\bHOT\b(?! Wheels)",  # "HOT Wheels" is a real brand, "HOT" alone is hype
+]
+# Acronyms / brand words that should stay all-caps despite the Title-Case rule
+_KEEP_CAPS = {
+    "NFL", "NBA", "MLB", "NHL", "MLS", "RC", "PSA", "BGS", "SGC", "MVP", "HOF",
+    "USA", "DC", "TCG", "OBO", "BIN", "PWE", "BMWT", "WTS", "FS", "BIN+BO",
+    "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII",
+    "NM", "MT", "EX", "VG", "GOAT", "VS", "AKA", "FT", "OZ", "LB",
+}
+
+
+def _clean_title_per_best_practices(title: str) -> str:
+    """Apply eBay best practices to a title:
+    - Strip exclamation marks + filler punctuation
+    - Remove fluff/hype words
+    - Convert ALL-CAPS words (4+ chars) to Title Case unless in _KEEP_CAPS
+    - Collapse runs of whitespace
+    - Trim to 80 chars
+    """
+    t = title or ""
+    # Drop trailing/exclamation marks, dollar signs as filler, asterisks
+    t = t.replace("!", "").replace("***", "").replace("**", "")
+    # Strip hype words
+    for pat in _FLUFF_WORDS:
+        t = _re.sub(pat, "", t, flags=_re.IGNORECASE)
+    # Title-case fully uppercase words ≥4 chars unless in keep-caps allowlist
+    def _fix_caps(m):
+        w = m.group(0)
+        if w in _KEEP_CAPS or len(w) < 4:
+            return w
+        return w[0].upper() + w[1:].lower()
+    t = _re.sub(r"\b[A-Z]{4,}\b", _fix_caps, t)
+    # Collapse whitespace, strip
+    t = _re.sub(r"\s+", " ", t).strip()
+    # 80-char cap
+    return t[:80].strip()
+
+
 def _suggest_title(listing: dict) -> str:
     """
     Return the best SEO title for a listing.
     Hand-crafted titles take priority. Falls back to rule-based improvements.
+    Always runs the cleaner so even hand-crafted titles inherit best practices.
     """
     item_id = listing.get("item_id", "")
 
     # Use hand-crafted title if available
     if item_id in _SEO_TITLES:
         t = _SEO_TITLES[item_id].strip()
-        assert len(t) <= 80, f"SEO title for {item_id} exceeds 80 chars: {len(t)}"
-        return t
-
-    # Fall back to rule-based
-    return _rule_based_title(listing)
+    else:
+        # Fall back to rule-based
+        t = _rule_based_title(listing)
+    return _clean_title_per_best_practices(t)
 
 
 def revise_listings(cfg: dict, listings: list[dict], dry_run: bool = True):
@@ -5651,6 +6486,9 @@ def main():
     print("  Fetching sold listings (last 90 days; merged into all-time history)...")
     sold = fetch_sold_listings(token, cfg, days_back=90)
     build_sold_page(sold)
+    print("  Scanning Deals watchlist...")
+    deals = fetch_deals(cfg)
+    build_deals_page(deals)
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
     build_dashboard(listings, market, seller=seller)
