@@ -24,7 +24,7 @@
     // Admin gate constants (populated at build time)
     window.__ADMIN_HASHES = ["5264c98ed90a293472cde211a9dfe4f658c0346678c1901b7f87e6ab369ce06e"];
     window.__ADMIN_SALT   = '281fc7abc7cd248e39d056979dbf4567';
-    window.__IS_ADMIN_PAGE = false;
+    window.__IS_ADMIN_PAGE = true;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
       try {
@@ -39,7 +39,7 @@
        Until then, on admin pages, show the gate over content immediately. */
     html:not(.pre-is-admin) body.admin-page main { filter: blur(14px); pointer-events: none; user-select: none; }
   </style>
-  <title>Sold Items · Harpua2001</title>
+  <title>Analytics · Harpua2001</title>
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1298,51 +1298,22 @@ tr:hover td { background: rgba(212,175,55,.03); }
 }
 </style>
   <style>
-    .sold-grid { display: grid; gap: 12px; }
-    .sold-card {
-      display: grid;
-      grid-template-columns: 88px 1fr auto;
-      gap: 16px; align-items: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--success);
-      border-radius: var(--r-lg);
-      padding: 14px 18px;
-      transition: all var(--t-fast);
-    }
-    .sold-card:hover { border-color: var(--border-mid); border-left-color: var(--success); transform: translateX(2px); }
-    .sold-thumb {
-      width: 88px; height: 88px;
-      border-radius: var(--r-sm); overflow: hidden;
-      background: var(--surface-3);
-    }
-    .sold-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .sold-body { min-width: 0; }
-    .sold-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .sold-date { font-size: 11px; color: var(--text-muted); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
-    .sold-qty { font-size: 11px; color: var(--text-dim); font-weight: 600; }
-    .sold-title { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--text); margin-top: 6px; text-decoration: none; }
-    .sold-title:hover { color: var(--gold); }
-    .sold-price-block { text-align: right; flex-shrink: 0; }
-    .sold-price {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px; line-height: 1;
-      color: var(--gold);
-      letter-spacing: .02em;
-    }
-    .sold-ship { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-    .charts-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
-    .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .chart-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
-    .chart-wrap { position: relative; height: 240px; }
-    @media (max-width: 540px) {
-      .sold-card { grid-template-columns: 56px 1fr; padding: 14px; }
-      .sold-thumb { width: 56px; height: 56px; }
-      .sold-price-block { grid-column: 1 / -1; text-align: left; }
-    }
+    .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+    .a-grid.cols-1 { grid-template-columns: 1fr; }
+    .a-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
+    .a-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .a-panel .a-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; letter-spacing: .02em; }
+    .a-chart-wrap { position: relative; height: 280px; }
+    .a-chart-wrap.tall { height: 340px; }
+    .a-table { width: 100%; }
+    .a-table th, .a-table td { font-size: 12.5px; padding: 8px 10px; text-align: left; }
+    .a-table th:not(:first-child), .a-table td:not(:first-child) { text-align: right; }
+    .a-table tr:hover td { background: rgba(212,175,55,0.04); }
+    .a-pct { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    @media (max-width: 760px) { .a-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
-<body class="">
+<body class="admin-page">
   <header class="app-header">
     <div class="app-header-inner">
       <a href="index.html" class="brand">
@@ -1353,8 +1324,8 @@ tr:hover td { background: rgba(212,175,55,.03); }
         </div>
       </a>
       <nav class="nav-links"><a href="index.html">Listings</a>
-<a href="sold.html" class="active">Sold</a>
-<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
+<a href="sold.html">Sold</a>
+<a href="analytics.html" class="active admin-only" data-admin="1">Analytics</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
 <a href="quality.html" class="admin-only" data-admin="1">Quality</a>
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
@@ -1399,8 +1370,8 @@ tr:hover td { background: rgba(212,175,55,.03); }
       </button>
     </div>
     <a href="index.html">Listings</a>
-<a href="sold.html" class="active">Sold</a>
-<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
+<a href="sold.html">Sold</a>
+<a href="analytics.html" class="active admin-only" data-admin="1">Analytics</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
 <a href="quality.html" class="admin-only" data-admin="1">Quality</a>
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
@@ -1435,1019 +1406,190 @@ tr:hover td { background: rgba(212,175,55,.03); }
     
     <div class="section-head">
       <div>
-        <div class="eyebrow">Feb 2026 → May 2026</div>
-        <h1 class="section-title">Sold <span class="accent">Items</span></h1>
-        <div class="section-sub">Completed sales accumulated from eBay (Trading API caps live queries at 90 days; full history persists to <code>sold_history.json</code> on every build, so the catalog grows over time).</div>
+        <div class="eyebrow">Cross-cut intelligence</div>
+        <h1 class="section-title">Analytics</h1>
+        <div class="section-sub">What you're selling, what you've sold, where the market is. Built from active listings, sold history, and live eBay comps.</div>
       </div>
     </div>
 
     <div class="stat-grid">
+      <div class="stat-card"><div class="num">84</div><div class="lbl">Active Listings</div></div>
+      <div class="stat-card"><div class="num">$311</div><div class="lbl">Inventory Value</div></div>
       <div class="stat-card"><div class="num">46</div><div class="lbl">Items Sold</div></div>
-      <div class="stat-card"><div class="num">$962</div><div class="lbl">Gross Revenue</div></div>
-      <div class="stat-card"><div class="num">$20.90</div><div class="lbl">Avg Sale Price</div></div>
-      <div class="stat-card"><div class="num">36</div><div class="lbl">Unique Buyers</div></div>
+      <div class="stat-card"><div class="num">$962</div><div class="lbl">Sold Revenue</div></div>
+      <div class="stat-card"><div class="num">3.09<span style="font-size:18px;color:var(--text-muted)">×</span></div><div class="lbl">Turnover Ratio</div></div>
+      <div class="stat-card"><div class="num danger">$40</div><div class="lbl">$ Left on Table (Underpriced)</div></div>
     </div>
 
-    <div class="charts-row"><div class="chart-panel"><h3>Monthly Sales</h3><div class="chart-wrap"><canvas id="chart-sold"></canvas></div></div></div>
+    <div class="a-grid">
+      <div class="a-panel">
+        <h3>Inventory by category</h3>
+        <div class="a-sub">Active listings — what's on the shelf right now</div>
+        <div class="a-chart-wrap"><canvas id="ch-inv-cat"></canvas></div>
+      </div>
+      <div class="a-panel">
+        <h3>Sold revenue by category</h3>
+        <div class="a-sub">All-time accumulated from eBay sales history</div>
+        <div class="a-chart-wrap"><canvas id="ch-sold-cat"></canvas></div>
+      </div>
+    </div>
 
-    <div class="sold-grid">
-      
-      <article class="sold-card" data-id="306926059250">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 10, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306926059250" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">m********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$180.00</div>
-          <div class="sold-ship">+ $5.28 ship</div>
-        </div>
-      </article>
+    <div class="a-grid cols-1">
+      <div class="a-panel">
+        <h3>Sales velocity over time</h3>
+        <div class="a-sub">Monthly units (line) + revenue (bars)</div>
+        <div class="a-chart-wrap tall"><canvas id="ch-sales-time"></canvas></div>
+      </div>
+    </div>
 
-      <article class="sold-card" data-id="306914916776">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/A50AAeSw4ABp9qbm/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 10, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914916776" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">s*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$3.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
+    <div class="a-grid">
+      <div class="a-panel">
+        <h3>Market position</h3>
+        <div class="a-sub">Each dot is one of your active listings: market median (x) vs your asking price (y). On-line = match, above = overpriced, below = underpriced.</div>
+        <div class="a-chart-wrap tall"><canvas id="ch-market-pos"></canvas></div>
+      </div>
+      <div class="a-panel">
+        <h3>Pricing position breakdown</h3>
+        <div class="a-sub">How many of your active listings are above/at/below the market median</div>
+        <div class="a-chart-wrap"><canvas id="ch-pos-bars"></canvas></div>
+      </div>
+    </div>
 
-      <article class="sold-card" data-id="306914908485">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/TYkAAeSw~9Bp9qSL/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 10, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914908485" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">i*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306927289794">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/v7UAAeSwQW9p~pTV/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 9, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306927289794" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">r********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$13.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306913178483">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/1cIAAeSwg6Bp9Vpx/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 5, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306913178483" target="_blank" rel="noopener" class="sold-title">6 Cards Darrell Green Washington Redskins</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">p***************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.25</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306914170613">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/SAEAAeSwpHBp9hf3/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 4, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914170613" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - New Recruits Jeremiah Smith #25 Green Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">d*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$4.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306914248275">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/rUwAAeSwe1Np9ibX/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 4, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914248275" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - Carnell Tate #68 Gold Ice Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">b********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.50</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306914175824">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/WvUAAeSwa5xp9hkN/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 3, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914175824" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - Instant Impact Cam Ward #II-CWD Gold Ice Prizm</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">m*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.00</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306914195022">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/i9oAAeSwEeNp9h68/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 3, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914195022" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - Fearless Drew Allar #F-DAR Gold Ice Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">h********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306914172219">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/X~EAAeSwn8tp9hhT/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 3, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914172219" target="_blank" rel="noopener" class="sold-title">2025 Panini Prizm Draft Picks - Caleb Downs #159 Green Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">4**********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.50</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306914214448">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/ws4AAeSwzrlp9iDv/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 2, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306914214448" target="_blank" rel="noopener" class="sold-title">2025 Panini Donruss Optic - Rated Rookie Shedeur Sanders #203 Stars Prizm (RC)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">m************************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$9.50</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306783987628">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/C44AAeSwdpxpmmR-/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">May 1, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306783987628" target="_blank" rel="noopener" class="sold-title">Emmitt Smith - 15 x Different Cards, No Duplicates - Dallas Cowboys</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">s***********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.69</div>
-          <div class="sold-ship">+ $5.83 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306904178257">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/JjwAAeSwAnFp7wT7/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Apr 30, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306904178257" target="_blank" rel="noopener" class="sold-title">10 Cards John Elway Denver Broncos</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">c*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306844574522">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/xA0AAeSwXBJpxTqJ/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Apr 26, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306844574522" target="_blank" rel="noopener" class="sold-title">Jerry Rice SF 49ers HOF Lot 15 Cards Topps Fleer Score Upper Deck Inserts 90s</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">f*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$4.49</div>
-          <div class="sold-ship">+ $5.72 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306844558345">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/zc4AAeSw0vBpxTb0/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Apr 24, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306844558345" target="_blank" rel="noopener" class="sold-title">Steve Young SF 49ers HOF Lot 18 Cards Topps Fleer Score Upper Deck Inserts 90s</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">s*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.99</div>
-          <div class="sold-ship">+ $5.62 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306844611599">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/EBwAAeSw9A1pxT1t/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Apr 22, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306844611599" target="_blank" rel="noopener" class="sold-title">Sterling Sharpe Green Bay Packers Football Card Lot (21 Cards) 1989–1994</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">c*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.99</div>
-          <div class="sold-ship">+ $5.39 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306763479221">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/00AAAeSwF9FpjAwV/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Apr 1, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306763479221" target="_blank" rel="noopener" class="sold-title">1974 BAHAMAS $1 DOLLAR BANKNOTE CURRENCY QUEEN ELIZABETH II</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">h*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$3.49</div>
-          <div class="sold-ship">+ $4.88 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306785215326">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/dKIAAeSwB7tpm2DA/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 25, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306785215326" target="_blank" rel="noopener" class="sold-title">7 Brett Favre Cards 2 Rookie Cards Atlanta Falcons Green Bay Packers.</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">r********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.50</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306785158779">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/fyAAAeSwLQFpm1Qo/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 17, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306785158779" target="_blank" rel="noopener" class="sold-title">4 Troy Aikman Cards Including Rookie Card Dallas Cowboys</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">u*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.59</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766359010">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/GisAAeSw1-lpjfkL/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 16, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766359010" target="_blank" rel="noopener" class="sold-title">Pokemon TCG Korean Mega Lucario EX (MUR) Gold 092/063 — Sleeve/Toploader</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">r*********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$205.00</div>
-          <div class="sold-ship">+ $5.20 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306724134422">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/gw4AAeSwTiZpcU94/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 10, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306724134422" target="_blank" rel="noopener" class="sold-title">2003 Two Dollar Bill Uncirculated with Original Protective Cover</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">b**************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$5.99</div>
-          <div class="sold-ship">+ $5.56 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306763721952">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/4GAAAeSwJCdpjDd7/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 7, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306763721952" target="_blank" rel="noopener" class="sold-title">Two 1976 Bicentennial $2 Dollar Bills</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">j************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$6.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766416334">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/GGwAAeSwPudpjgPz/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 6, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766416334" target="_blank" rel="noopener" class="sold-title">M Mewtwo EX 63/162 Breakthrough Holo</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">c*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$20.00</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306779489578">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/KmwAAeSwSdFpjf0E/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 5, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306779489578" target="_blank" rel="noopener" class="sold-title">Pokémon Galarian Slowking V Full Art Ultra Rare Chilling Reign Holo 179/198</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">b*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$65.00</div>
-          <div class="sold-ship">+ $5.00 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306758094326">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/jw8AAeSw779piKmI/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 2, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306758094326" target="_blank" rel="noopener" class="sold-title">Pokemon TCG Garchomp & Giratina GX 228/236 Tag Team Full Art Holo NM</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">c***************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$54.00</div>
-          <div class="sold-ship">+ $5.52 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306751073160">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/EkwAAeSwRUJphAQc/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Mar 1, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306751073160" target="_blank" rel="noopener" class="sold-title">Pikachu Yellow Cheeks “NORMAL” 58/102 Base Set Pokemon TCG</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">j**********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306769222985">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/XlwAAeSw5iFpj9r~/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 25, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306769222985" target="_blank" rel="noopener" class="sold-title">French Colonial Un Sou Copper Coin - 1800s Lower Canada/Quebec Token</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">f**********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306725000964">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/XXkAAeSwrE5pcfQm/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 25, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306725000964" target="_blank" rel="noopener" class="sold-title">1976 Bicentennial 3-Coin Commemorative Set - Dollar, Quarter & Medal</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">h*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$7.99</div>
-          <div class="sold-ship">+ $5.45 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306763490128">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/Z-wAAeSw3oFpjA2T/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 24, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306763490128" target="_blank" rel="noopener" class="sold-title">1981 & 1982 US Mint Proof Set Lot - OGP (Original Government Packaging)</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">m********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$12.99</div>
-          <div class="sold-ship">+ $6.07 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306756807872">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/adYAAeSw0Rhph9mY/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 24, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306756807872" target="_blank" rel="noopener" class="sold-title">Charizard V SWSH050 Sword & Shield Promo Pokemon TCG</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">d************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$10.00</div>
-          <div class="sold-ship">+ $2.64 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306786990609">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/nUUAAeSwl8VpnMDT/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 24, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306786990609" target="_blank" rel="noopener" class="sold-title">Pikachu EX XY174 XY Holo</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">d************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$7.00</div>
-          <div class="sold-ship">+ $2.64 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306755271636">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/xOEAAeSwVWFphsTi/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 22, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306755271636" target="_blank" rel="noopener" class="sold-title">1850-A Switzerland 2 Rappen - First Year of Issue - Rare Early Swiss Coin</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">s***********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$4.50</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306783893955">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/5x0AAeSwbkBpmlgV/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 22, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306783893955" target="_blank" rel="noopener" class="sold-title">11 Barry Sanders Football Cards Detroit Lions NFL Hall Of Famer</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">k**********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$3.50</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306770798715">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/wtwAAeSwem9pkN7Q/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 21, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306770798715" target="_blank" rel="noopener" class="sold-title">Tony Gwynn San Diego Padres Baseball Card Lot 21 Cards</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">r*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$4.49</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306769216548">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/tGsAAeSwQJxpj9o7/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 20, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306769216548" target="_blank" rel="noopener" class="sold-title">1917 Canada 10 Cents Silver Coin George V</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">a********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$5.00</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306755274027">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/DGQAAeSwo9hphsXq/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 19, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306755274027" target="_blank" rel="noopener" class="sold-title">1878 Netherlands 1 Cent - King William III - Historic Dutch Bronze Coin</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">j********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$3.52</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766376547">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/KmwAAeSwSdFpjf0E/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 19, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766376547" target="_blank" rel="noopener" class="sold-title">Pokémon Galarian Slowking V Full Art Ultra Rare Chilling Reign Holo 179/198</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">b*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$65.00</div>
-          <div class="sold-ship">+ $4.88 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306731149582">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/WIcAAeSwsvFpdrbV/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 16, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306731149582" target="_blank" rel="noopener" class="sold-title">Jim Abbott Baseball 10 Card Lot - Topps, Donruss, Classic - Angels 1989-1991</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">g*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306761236910">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/KVAAAeSwhDRpZX~o/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 16, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306761236910" target="_blank" rel="noopener" class="sold-title">Rare 1994 FIFA World Cup Collector's Lot - New York/New Jersey Host Committee</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">p************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$22.99</div>
-          <div class="sold-ship">+ $5.45 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766408702">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/S-4AAeSwJ05pjgJh/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 15, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766408702" target="_blank" rel="noopener" class="sold-title">Mew VMAX (Secret) 268/264 Swsh08: Fusion Strike Holo</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">n***************</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$45.00</div>
-          <div class="sold-ship">+ $5.20 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306769095421">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/FXEAAeSwThVpj8JF/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 14, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306769095421" target="_blank" rel="noopener" class="sold-title">1964 Canada Canadian Caribou Quarter 25 Cents Elizabeth 80% Silver Coin</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">c********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$9.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766374591">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/q1YAAeSw8nxpjfsA/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 13, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766374591" target="_blank" rel="noopener" class="sold-title">Darkrai VSTAR GG50/GG70 Crown Zenith: Galarian Gallery Holo</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">u*****</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$50.00</div>
-          <div class="sold-ship">+ $5.00 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306722348038">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/MrwAAeSwG~hpcBLK/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 13, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306722348038" target="_blank" rel="noopener" class="sold-title">1868 Great Britain One Penny</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">v*******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$1.25</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766420949">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/W1QAAeSwl4xpjgS7/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 12, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766420949" target="_blank" rel="noopener" class="sold-title">Mega Charizard X EX MEP 023 UPC Black Star Promo MINT Pokemon Card Pokémon TCG</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">j******</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$35.00</div>
-          <div class="sold-ship">+ $5.00 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306766339043">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/8DgAAeSwVptpjfZ5/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 12, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306766339043" target="_blank" rel="noopener" class="sold-title">Team Rocket's Crobat ex 234/182 Sv10: Destined Rivals Holo</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">r**********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$58.99</div>
-          <div class="sold-ship">+ $5.52 ship</div>
-        </div>
-      </article>
-
-      <article class="sold-card" data-id="306755276878">
-        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/UE0AAeSwdEpphscV/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="sold-body">
-          <div class="sold-meta-row">
-            <span class="tag tag-success">SOLD</span>
-            <span class="sold-date">Feb 11, 2026</span>
-            
-          </div>
-          <a href="https://www.ebay.com/itm/306755276878" target="_blank" rel="noopener" class="sold-title">1918-S Lincoln Wheat Cent - Early Date San Francisco Mint - Penny</a>
-          <div class="sold-meta-row" style="margin-top:6px;">
-            <span class="tag">b********</span>
-            
-            
-          </div>
-        </div>
-        <div class="sold-price-block">
-          <div class="sold-price">$2.99</div>
-          <div class="sold-ship">+ $1.32 ship</div>
-        </div>
-      </article>
+    <div class="a-grid cols-1">
+      <div class="a-panel">
+        <h3>Category comparison</h3>
+        <div class="a-sub">Selling vs sold, side by side</div>
+        <table class="a-table">
+          <thead><tr><th>Category</th><th>Active</th><th>Listed $</th><th>Sold</th><th>Sold $</th><th>Avg Sale</th></tr></thead>
+          <tbody><tr><td><b>Baseball Lots</b></td><td>1</td><td>$2</td><td>3</td><td>$9</td><td>$2.91</td></tr><tr><td><b>Baseball Singles</b></td><td>1</td><td>$1</td><td>0</td><td>$0</td><td>$0.00</td></tr><tr><td><b>Basketball Lots</b></td><td>7</td><td>$28</td><td>0</td><td>$0</td><td>$0.00</td></tr><tr><td><b>Basketball Singles</b></td><td>3</td><td>$8</td><td>1</td><td>$3</td><td>$2.99</td></tr><tr><td><b>Football Lots</b></td><td>19</td><td>$65</td><td>7</td><td>$18</td><td>$2.58</td></tr><tr><td><b>Football Singles</b></td><td>45</td><td>$154</td><td>12</td><td>$233</td><td>$19.43</td></tr><tr><td><b>Other</b></td><td>6</td><td>$34</td><td>17</td><td>$385</td><td>$22.63</td></tr><tr><td><b>Pokemon</b></td><td>2</td><td>$19</td><td>6</td><td>$314</td><td>$52.33</td></tr></tbody>
+        </table>
+      </div>
+      <div class="a-panel">
+        <h3>Top 10 sales</h3>
+        <div class="a-sub">Biggest sold items in accumulated history</div>
+        <table class="a-table">
+          <thead><tr><th>Item</th><th>Price</th><th>Date</th></tr></thead>
+          <tbody><tr><td>Pokemon TCG Korean Mega Lucario EX (MUR) Gold 092/063 — Sleeve/Toploader</td><td>$205.00</td><td>2026-03-16</td></tr>
+<tr><td>2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</td><td>$180.00</td><td>2026-05-10</td></tr>
+<tr><td>Pokémon Galarian Slowking V Full Art Ultra Rare Chilling Reign Holo 179/198</td><td>$65.00</td><td>2026-03-05</td></tr>
+<tr><td>Pokémon Galarian Slowking V Full Art Ultra Rare Chilling Reign Holo 179/198</td><td>$65.00</td><td>2026-02-19</td></tr>
+<tr><td>Team Rocket's Crobat ex 234/182 Sv10: Destined Rivals Holo</td><td>$58.99</td><td>2026-02-12</td></tr>
+<tr><td>Pokemon TCG Garchomp & Giratina GX 228/236 Tag Team Full Art Holo NM</td><td>$54.00</td><td>2026-03-02</td></tr>
+<tr><td>Darkrai VSTAR GG50/GG70 Crown Zenith: Galarian Gallery Holo</td><td>$50.00</td><td>2026-02-13</td></tr>
+<tr><td>Mew VMAX (Secret) 268/264 Swsh08: Fusion Strike Holo</td><td>$45.00</td><td>2026-02-15</td></tr>
+<tr><td>Mega Charizard X EX MEP 023 UPC Black Star Promo MINT Pokemon Card Pokémon </td><td>$35.00</td><td>2026-02-12</td></tr>
+<tr><td>Rare 1994 FIFA World Cup Collector's Lot - New York/New Jersey Host Committ</td><td>$22.99</td><td>2026-02-16</td></tr></tbody>
+        </table>
+      </div>
     </div>
 
     <script>
-      Chart.defaults.color = '#9a9388';
+      Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.font.family = "'Inter', sans-serif";
-      const lbls = ['2026-02', '2026-03', '2026-04', '2026-05'];
-      if (lbls.length && document.getElementById('chart-sold')) {
-        new Chart(document.getElementById('chart-sold'), {
-          type: 'bar',
-          data: {
-            labels: lbls,
-            datasets: [
-              { label: 'Revenue ($)', data: [356.18, 363.06, 14.95, 227.39], backgroundColor: 'rgba(212,175,55,.55)', borderColor: '#d4af37', borderWidth: 1.5, borderRadius: 6, yAxisID: 'y' },
-              { label: 'Items',        data: [20, 9, 5, 12],   type: 'line',  backgroundColor: 'rgba(127,199,122,.2)', borderColor: '#7fc77a', borderWidth: 2, tension: 0.35, yAxisID: 'y1' }
-            ]
-          },
-          options: {
-            plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true } } },
-            scales: {
-              y:  { beginAtZero: true, position: 'left',  grid: { color: 'rgba(212,175,55,0.05)' }, ticks: { callback: v => '$' + v } },
-              y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { precision: 0 } },
-              x:  { grid: { display: false } }
-            }
+      const GOLD = '#d4af37';
+      const PALETTE = ['#d4af37','#7fc77a','#6cb0ff','#e0b54a','#e07b6f','#b388e0','#5fc7c7','#f4ce5d','#8a7521'];
+
+      // Inventory by category (donut)
+      new Chart(document.getElementById('ch-inv-cat'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Other', 'Basketball Singles', 'Football Lots', 'Basketball Lots', 'Football Singles', 'Baseball Lots', 'Pokemon', 'Baseball Singles'],
+          datasets: [{
+            data: [6, 3, 19, 7, 45, 1, 2, 1],
+            backgroundColor: PALETTE,
+            borderColor: '#0a0a0a', borderWidth: 3, hoverOffset: 8,
+          }]
+        },
+        options: { cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12 } } } }
+      });
+
+      // Sold revenue by category (donut)
+      new Chart(document.getElementById('ch-sold-cat'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Football Singles', 'Baseball Lots', 'Football Lots', 'Other', 'Pokemon', 'Basketball Singles'],
+          datasets: [{
+            data: [233.13, 8.73, 18.05, 384.69, 313.99, 2.99],
+            backgroundColor: PALETTE,
+            borderColor: '#0a0a0a', borderWidth: 3, hoverOffset: 8,
+          }]
+        },
+        options: {
+          cutout: '60%',
+          plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12 } },
+            tooltip: { callbacks: { label: (ctx) => ctx.label + ': $' + ctx.parsed.toFixed(2) } }
           }
-        });
-      }
+        }
+      });
+
+      // Sales velocity over time (line + bar dual axis)
+      new Chart(document.getElementById('ch-sales-time'), {
+        type: 'bar',
+        data: {
+          labels: ['2026-02', '2026-03', '2026-04', '2026-05'],
+          datasets: [
+            { label: 'Revenue ($)', data: [356.18, 363.06, 14.95, 227.39], backgroundColor: 'rgba(212,175,55,.55)', borderColor: GOLD, borderWidth: 1.5, borderRadius: 6, yAxisID: 'y' },
+            { label: 'Items sold', data: [20, 9, 5, 12], type: 'line', backgroundColor: 'rgba(127,199,122,.2)', borderColor: '#7fc77a', borderWidth: 2, tension: 0.35, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            y:  { beginAtZero: true, position: 'left',  grid: { color: 'rgba(212,175,55,0.06)' }, ticks: { callback: v => '$' + v } },
+            y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { precision: 0 } },
+          }
+        }
+      });
+
+      // Market position scatter
+      const scatterPts = [{'x': 0.99, 'y': 1.99, 'id': '306784122664', 'title': 'Deion Sanders Cards', 'flag': 'OVERPRICED'}, {'x': 1.04, 'y': 1.0, 'id': '306785163679', 'title': '13 Junior Seau Cards Including Rookie Cards San Diego Charge', 'flag': 'OK'}, {'x': 2.7, 'y': 2.5, 'id': '306785270903', 'title': '3 Marshall Faulk Cards San Diego State Indianapolis Colts', 'flag': 'OK'}, {'x': 1.39, 'y': 1.5, 'id': '306903933988', 'title': '8 Cards Roger Craig San Francisco 49ers Minnesota Vikings', 'flag': 'OK'}, {'x': 1.51, 'y': 4.99, 'id': '306903937710', 'title': 'Jerome Bettis Notre Dame Los Angeles Rams 10 Cards', 'flag': 'OVERPRICED'}, {'x': 3.99, 'y': 3.99, 'id': '306903941543', 'title': 'Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wid', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306903947932', 'title': 'Carl Banks New York Giants Football Card Lot (8) Super Bowl ', 'flag': 'OK'}, {'x': 0.99, 'y': 2.99, 'id': '306904068997', 'title': '11 Cards Marcus Allen Los Angeles Raiders Kansas City Chiefs', 'flag': 'OVERPRICED'}, {'x': 1.34, 'y': 3.49, 'id': '306904078786', 'title': '7 Cards Steve Atwater Rookie Cards Denver Broncos', 'flag': 'OVERPRICED'}, {'x': 0.99, 'y': 2.49, 'id': '306904174454', 'title': '7 Cards Boomer Esiason Cincinnati Bengals New York Jets', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 4.99, 'id': '306904189481', 'title': '4 Aaron Glenn Rookie Cards New York Jets', 'flag': 'OVERPRICED'}, {'x': 10.0, 'y': 10.0, 'id': '306904203738', 'title': '1994 Classic Pro Line Live - Autograph - Steve Emtman', 'flag': 'OK'}, {'x': 1.49, 'y': 1.5, 'id': '306904215389', 'title': '12 Jim Everett Cards Los Angeles Rams New Orleans Saints', 'flag': 'OK'}, {'x': 4.99, 'y': 4.99, 'id': '306913168494', 'title': '15 Charles Haley Cards San Francisco 49ers Dallas Cowboys', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306913186982', 'title': '11 Mel Gray Cards Detroit Lions Football Card Lot NFL', 'flag': 'OK'}, {'x': 10.99, 'y': 1.99, 'id': '306913307606', 'title': '5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL', 'flag': 'UNDERPRICED'}, {'x': 9.49, 'y': 4.99, 'id': '306913311444', 'title': '9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL', 'flag': 'UNDERPRICED'}, {'x': 2.04, 'y': 2.0, 'id': '306913787569', 'title': '10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306913790653', 'title': '11 Raghib And Quadry Ismail Cards Raiders Vikings', 'flag': 'OK'}, {'x': 1.98, 'y': 1.95, 'id': '306913845449', 'title': '3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL', 'flag': 'OK'}, {'x': 4.99, 'y': 4.99, 'id': '306913853080', 'title': '9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL', 'flag': 'OK'}, {'x': 1.69, 'y': 4.99, 'id': '306913902750', 'title': '7 Howie Long Cards Raiders', 'flag': 'OVERPRICED'}, {'x': 1.94, 'y': 5.99, 'id': '306913908225', 'title': '9 Joe Montana Cards 49ers Chiefs', 'flag': 'OVERPRICED'}, {'x': 10.0, 'y': 10.0, 'id': '306913934898', 'title': '20 Warren Moon Cards Oilers Vikings', 'flag': 'OK'}, {'x': 1.09, 'y': 4.99, 'id': '306913939866', 'title': '15 Dan Marino Cards Miami Dolphins', 'flag': 'OVERPRICED'}, {'x': 3.99, 'y': 3.99, 'id': '306913950248', 'title': '4 Rookie Cards Willie McGinest One Autographed', 'flag': 'OK'}, {'x': 4.25, 'y': 3.0, 'id': '306914169081', 'title': '2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Pr', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306914173441', 'title': '2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sander', 'flag': 'OK'}, {'x': 1.48, 'y': 1.5, 'id': '306914174921', 'title': '2025 Panini Rookies & Stars - Artistry in Motion Lamar Jacks', 'flag': 'OK'}, {'x': 1.5, 'y': 1.49, 'id': '306914176585', 'title': '2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Pri', 'flag': 'OK'}, {'x': 1.67, 'y': 1.99, 'id': '306914244468', 'title': '2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola ', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306914245253', 'title': '2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan', 'flag': 'OK'}, {'x': 1.98, 'y': 1.99, 'id': '306914248743', 'title': '2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wa', 'flag': 'OK'}, {'x': 1.5, 'y': 1.5, 'id': '306914249326', 'title': '2025 Panini Select - Select Numbers Jordan Love #7 Silver Pr', 'flag': 'OK'}, {'x': 2.28, 'y': 2.5, 'id': '306914280138', 'title': '5 Sam Adams Rookie Cards Seattle Seahawks', 'flag': 'OK'}, {'x': 1.09, 'y': 1.0, 'id': '306914500757', 'title': '10 Eric Metcalf Cards Cleveland Browns', 'flag': 'OK'}, {'x': 3.34, 'y': 3.34, 'id': '306914547105', 'title': '12 Andre Rison Cards Colts Falcons RC', 'flag': 'OK'}, {'x': 3.69, 'y': 3.99, 'id': '306914911040', 'title': '2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Sh', 'flag': 'OK'}, {'x': 3.0, 'y': 3.0, 'id': '306914912556', 'title': '2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red ', 'flag': 'OK'}, {'x': 2.87, 'y': 3.0, 'id': '306914913674', 'title': '2025 Panini Select - Premier Level Travis Hunter #128 Pink S', 'flag': 'OK'}, {'x': 2.0, 'y': 2.0, 'id': '306914915295', 'title': '2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Pri', 'flag': 'OK'}, {'x': 15.5, 'y': 15.5, 'id': '306751048818', 'title': 'EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Teras', 'flag': 'OK'}, {'x': 44.99, 'y': 44.99, 'id': '306926030086', 'title': '2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AA', 'flag': 'OK'}, {'x': 3.15, 'y': 3.5, 'id': '306758076966', 'title': 'Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM', 'flag': 'OK'}, {'x': 1.5, 'y': 1.21, 'id': '306930460600', 'title': '2025 Panini Prizm - Rookies Will Johnson #370 White Disco Pr', 'flag': 'UNDERPRICED'}, {'x': 6.5, 'y': 7.5, 'id': '306930462076', 'title': '2025 Panini Prizm - Bo Nix #142 White Disco Prizm', 'flag': 'OK'}, {'x': 1.12, 'y': 1.99, 'id': '306930463268', 'title': '2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm', 'flag': 'OVERPRICED'}, {'x': 1.76, 'y': 1.19, 'id': '306930464091', 'title': '2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC)', 'flag': 'UNDERPRICED'}, {'x': 1.5, 'y': 1.49, 'id': '306930465261', 'title': '2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & ', 'flag': 'OK'}, {'x': 16.62, 'y': 3.25, 'id': '306930466950', 'title': '2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm', 'flag': 'UNDERPRICED'}, {'x': 1.25, 'y': 1.2, 'id': '306930471991', 'title': '2025 Panini Select - Club Level Najee Harris #203 Black & Gr', 'flag': 'OK'}, {'x': 1.9, 'y': 1.75, 'id': '306930486853', 'title': '2025 Panini Select - Club Level Kyle Monangai #274 (RC)', 'flag': 'OK'}, {'x': 1.12, 'y': 1.49, 'id': '306930492125', 'title': '2025 Topps Chrome Football Deommodore Lenoir Refractor #269 ', 'flag': 'OVERPRICED'}, {'x': 1.5, 'y': 1.49, 'id': '306930553146', 'title': '2025 Topps Chrome Garrett Williams #6 Arizona Cardinals', 'flag': 'OK'}, {'x': 1.75, 'y': 1.0, 'id': '306930555649', 'title': '2025 Panini Select - Premier Level Tank Bigsby #129 Silver P', 'flag': 'UNDERPRICED'}, {'x': 1.44, 'y': 2.28, 'id': '306930559170', 'title': '2025 Panini Prizm - Willis McGahee #45 Silver Prizm', 'flag': 'OVERPRICED'}, {'x': 1.45, 'y': 1.99, 'id': '306930560592', 'title': '2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC)', 'flag': 'OVERPRICED'}, {'x': 1.49, 'y': 1.99, 'id': '306930562031', 'title': '2025 Panini Prizm - Rookies Andrew Mukuba #330 (RC)', 'flag': 'OVERPRICED'}, {'x': 1.42, 'y': 4.25, 'id': '306930742908', 'title': '2025 Panini Prizm - Jared Verse #30 Silver Prizm', 'flag': 'OVERPRICED'}, {'x': 2.0, 'y': 1.99, 'id': '306930745036', 'title': '2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC', 'flag': 'OK'}, {'x': 1.1, 'y': 1.49, 'id': '306930746886', 'title': '2025 Panini Prizm - Chris Boswell #174', 'flag': 'OVERPRICED'}, {'x': 1.42, 'y': 4.25, 'id': '306930773940', 'title': '2025 Panini Prizm - Jared Verse #30 Silver Prizm', 'flag': 'OVERPRICED'}, {'x': 1.59, 'y': 1.4, 'id': '306930807722', 'title': '1991-92 Fleer - Pro Vision Magic Johnson #6', 'flag': 'OK'}, {'x': 1.3, 'y': 2.99, 'id': '306930901658', 'title': '2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm', 'flag': 'OVERPRICED'}, {'x': 1.69, 'y': 1.49, 'id': '306930903609', 'title': '2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orienta', 'flag': 'OK'}, {'x': 1.45, 'y': 1.69, 'id': '306930904430', 'title': '2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Pri', 'flag': 'OK'}, {'x': 2.5, 'y': 2.0, 'id': '306930909038', 'title': '2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice ', 'flag': 'UNDERPRICED'}, {'x': 1.82, 'y': 1.85, 'id': '306930911781', 'title': '2025 Panini Prizm Draft Picks - Instant Impact Will Howard #', 'flag': 'OK'}, {'x': 1.0, 'y': 4.99, 'id': '306930914782', 'title': '1990-91 Skybox - Michael Jordan #41', 'flag': 'OVERPRICED'}, {'x': 1.75, 'y': 2.49, 'id': '306930919438', 'title': '1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10', 'flag': 'OVERPRICED'}, {'x': 1.68, 'y': 1.99, 'id': '306930920326', 'title': '1993-94 Fleer Ultra - Bobby Hurley #161 (RC)', 'flag': 'OK'}, {'x': 5.0, 'y': 3.99, 'id': '306930929280', 'title': '2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Pri', 'flag': 'UNDERPRICED'}, {'x': 2.97, 'y': 2.99, 'id': '306930930898', 'title': '2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #', 'flag': 'OK'}, {'x': 1.9, 'y': 2.99, 'id': '306930938563', 'title': '2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Priz', 'flag': 'OVERPRICED'}, {'x': 2.3, 'y': 2.99, 'id': '306930939967', 'title': '2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice ', 'flag': 'OVERPRICED'}, {'x': 1.29, 'y': 1.25, 'id': '306930942401', 'title': '2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver P', 'flag': 'OK'}, {'x': 1.3, 'y': 2.22, 'id': '306931048688', 'title': '2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 2.22, 'id': '306931052623', 'title': '2025 Panini Prizm Draft Picks - Luther Burden #71 Red Ice Pr', 'flag': 'OK'}, {'x': 2.0, 'y': 2.22, 'id': '306931055732', 'title': '2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver P', 'flag': 'OK'}, {'x': 5.62, 'y': 4.56, 'id': '306931070594', 'title': '6 Basketball Cards From 90s', 'flag': 'UNDERPRICED'}, {'x': 11.99, 'y': 4.56, 'id': '306931077943', 'title': '6 Basketball Cards From The 90s', 'flag': 'UNDERPRICED'}];
+      new Chart(document.getElementById('ch-market-pos'), {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'Listings',
+            data: scatterPts.map(p => ({ x: p.x, y: p.y, _info: p })),
+            backgroundColor: scatterPts.map(p => p.flag === 'UNDERPRICED' ? '#e07b6f' : p.flag === 'OVERPRICED' ? '#e0b54a' : '#7fc77a'),
+            pointRadius: 5, pointHoverRadius: 8,
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => { const p = ctx.raw._info; return [p.title, 'Yours: $' + p.y, 'Market: $' + p.x]; } } }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Market median ($)' }, grid: { color: 'rgba(212,175,55,0.06)' } },
+            y: { title: { display: true, text: 'Your price ($)' }, grid: { color: 'rgba(212,175,55,0.06)' } }
+          }
+        }
+      });
+
+      // Pricing position breakdown
+      new Chart(document.getElementById('ch-pos-bars'), {
+        type: 'bar',
+        data: {
+          labels: ['Below market (UNDERPRICED)', 'On market (OK)', 'Above market (OVERPRICED)', 'No comps'],
+          datasets: [{
+            data: [11, 47, 23, 3],
+            backgroundColor: ['rgba(224,123,111,.7)','rgba(127,199,122,.7)','rgba(224,181,74,.7)','rgba(150,150,150,.4)'],
+            borderColor: ['#e07b6f','#7fc77a','#e0b54a','#888'],
+            borderWidth: 1.5, borderRadius: 6,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(212,175,55,0.06)' } }, y: { grid: { display: false } } }
+        }
+      });
     </script>
+    
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 23:31 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 10, 2026 · 23:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   

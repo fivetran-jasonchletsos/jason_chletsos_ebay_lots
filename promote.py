@@ -763,32 +763,8 @@ def build_deals_page(deals_data: dict) -> Path:
       const DD_MIN = {f_disc_min}, DD_MAX = {f_disc_max};
       let dealPriceRange = [DP_MIN, DP_MAX];
       let dealDiscMin    = DD_MIN;
-      if (typeof noUiSlider !== 'undefined' && DP_MAX > DP_MIN) {{
-        const ps = document.getElementById('deal-price-slider');
-        noUiSlider.create(ps, {{
-          start: [DP_MIN, DP_MAX], connect: true, step: 1,
-          range: {{ min: DP_MIN, max: DP_MAX }}
-        }});
-        ps.noUiSlider.on('update', (vals) => {{
-          const [lo, hi] = vals.map(v => Math.round(parseFloat(v)));
-          dealPriceRange = [lo, hi];
-          document.getElementById('dp-lo').textContent = '$' + lo;
-          document.getElementById('dp-hi').textContent = '$' + hi;
-          dealApply();
-        }});
-      }}
-      if (typeof noUiSlider !== 'undefined' && DD_MAX > DD_MIN) {{
-        const ds = document.getElementById('deal-disc-slider');
-        noUiSlider.create(ds, {{
-          start: DD_MIN, step: 1,
-          range: {{ min: DD_MIN, max: DD_MAX }}
-        }});
-        ds.noUiSlider.on('update', (v) => {{
-          dealDiscMin = Math.round(parseFloat(Array.isArray(v) ? v[0] : v));
-          document.getElementById('dd-lo').textContent = dealDiscMin + '%';
-          dealApply();
-        }});
-      }}
+      // dealApply MUST be defined before slider creation — noUiSlider fires
+      // an initial 'update' event during create() and we call dealApply from it.
       window.dealApply = function() {{
         const q    = (document.getElementById('deal-search').value || '').toLowerCase().trim();
         const cat  = document.getElementById('deal-cat').value;
@@ -823,6 +799,38 @@ def build_deals_page(deals_data: dict) -> Path:
         visCards.sort((a, b) => keyFn(a) - keyFn(b));
         visCards.forEach(c => grid.appendChild(c));
       }};
+
+      // Now create the sliders — dealApply is already defined so initial update event works.
+      if (typeof noUiSlider !== 'undefined' && DP_MAX > DP_MIN) {{
+        const ps = document.getElementById('deal-price-slider');
+        if (ps) {{
+          noUiSlider.create(ps, {{
+            start: [DP_MIN, DP_MAX], connect: true, step: 1,
+            range: {{ min: DP_MIN, max: DP_MAX }},
+          }});
+          ps.noUiSlider.on('update', (vals) => {{
+            const [lo, hi] = vals.map(v => Math.round(parseFloat(v)));
+            dealPriceRange = [lo, hi];
+            document.getElementById('dp-lo').textContent = '$' + lo;
+            document.getElementById('dp-hi').textContent = '$' + hi;
+            dealApply();
+          }});
+        }}
+      }}
+      if (typeof noUiSlider !== 'undefined' && DD_MAX > DD_MIN) {{
+        const ds = document.getElementById('deal-disc-slider');
+        if (ds) {{
+          noUiSlider.create(ds, {{
+            start: DD_MIN, step: 1,
+            range: {{ min: DD_MIN, max: DD_MAX }},
+          }});
+          ds.noUiSlider.on('update', (v) => {{
+            dealDiscMin = Math.round(parseFloat(Array.isArray(v) ? v[0] : v));
+            document.getElementById('dd-lo').textContent = dealDiscMin + '%';
+            dealApply();
+          }});
+        }}
+      }}
     </script>"""
     out = OUTPUT_DIR / "deals.html"
     out.write_text(html_shell(f"Deal Hunter · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="deals.html"), encoding="utf-8")
@@ -877,16 +885,26 @@ def fetch_listings(token: str, cfg: dict) -> list[dict]:
         raw_pic = pic.text.strip() if pic is not None else ""
         import re as _re
         sharp_pic = _re.sub(r's-l\d+\.jpg', 's-l500.jpg', raw_pic) if raw_pic else ""
+        listing_type_raw = t("ListingType")
+        # eBay ListingType values: FixedPriceItem, StoresFixedPrice → BIN
+        # Chinese, Dutch → Auction. AdType → not a real listing.
+        if listing_type_raw in ("FixedPriceItem", "StoresFixedPrice"):
+            ltype = "BIN"
+        elif listing_type_raw in ("Chinese", "Dutch"):
+            ltype = "Auction"
+        else:
+            ltype = "BIN"  # default
         items.append({
-            "item_id":   item_id,
-            "title":     t("Title"),
-            "price":     price_el.text.strip() if price_el is not None else "0",
-            "pic":       sharp_pic,
-            "url":       view_url.text.strip() if view_url is not None else f"https://www.ebay.com/itm/{item_id}",
-            "category":  t("PrimaryCategory/CategoryName"),
-            "condition": t("ConditionDisplayName"),
-            "quantity":  t("QuantityAvailable") or t("Quantity") or "1",
-            "desc":      t("Description"),
+            "item_id":      item_id,
+            "title":        t("Title"),
+            "price":        price_el.text.strip() if price_el is not None else "0",
+            "pic":          sharp_pic,
+            "url":          view_url.text.strip() if view_url is not None else f"https://www.ebay.com/itm/{item_id}",
+            "category":     t("PrimaryCategory/CategoryName"),
+            "condition":    t("ConditionDisplayName"),
+            "quantity":     t("QuantityAvailable") or t("Quantity") or "1",
+            "desc":         t("Description"),
+            "listing_type": ltype,
         })
 
     print(f"  Fetched {len(items)} listings")
@@ -2282,6 +2300,7 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 _NAV_ITEMS = [
     ("index.html",        "Listings",    True),
     ("sold.html",         "Sold",        True),
+    ("analytics.html",    "Analytics",   False),
     ("deals.html",        "Deals",       False),
     ("quality.html",      "Quality",     False),
     ("price_review.html", "Pricing",     False),
@@ -2814,11 +2833,13 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         m = market.get(l["item_id"], {}) if market else {}
         enriched.append({**l, "price_f": price_f, "category": cat, "big_pic": big_pic, "market": m})
 
-    # Hero: top-priced items (rotates auto)
+    # Top Picks strip: top 6 by price with images (compact horizontal scroller)
     hero_pool = [e for e in enriched if e["pic"]]
     hero_pool.sort(key=lambda e: e["price_f"], reverse=True)
-    hero_slides = hero_pool[:5]
-    hero_runners = hero_pool[5:8] if len(hero_pool) > 5 else hero_pool[1:4]
+    top_picks = hero_pool[:6]
+    # "Hot" tier threshold — top 20% by price
+    prices_sorted = sorted([e["price_f"] for e in enriched if e["price_f"] > 0], reverse=True)
+    hot_threshold = prices_sorted[max(0, int(len(prices_sorted) * 0.2) - 1)] if prices_sorted else 0
 
     # Build category chip counts
     cat_counts = {}
@@ -2912,6 +2933,8 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         else:
             thumb = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:11px;">No image</div>'
 
+        is_hot = "1" if (hot_threshold and e["price_f"] >= hot_threshold) else "0"
+        ltype  = e.get("listing_type", "BIN")
         card_html.append(f'''
       <article class="listing-card"
         data-id="{e['item_id']}"
@@ -2919,6 +2942,8 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         data-price="{e['price_f']:.2f}"
         data-cat="{e['category']}"
         data-flag="{flag or 'NONE'}"
+        data-type="{ltype}"
+        data-hot="{is_hot}"
         {f'data-locked="{lock_info["code"]}"' if lock_info else ''}>
         <div class="thumb-wrap">
           {thumb}
@@ -2945,58 +2970,99 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         </div>
       </article>''')
 
-    # Hero markup — auto-rotating carousel
+    # Compact "Top Picks" horizontal scroller — replaces the heavy hero carousel
     hero_html = ""
-    if hero_slides:
-        runners_html = ""
-        for r in hero_runners:
-            runners_html += f'''
-            <a href="items/{r['item_id']}.html" class="hero-runner">
-              <img src="{r['pic']}" alt="{r['title']}" loading="lazy">
-              <div class="hero-runner-meta">
-                <div class="hero-runner-title">{r['title'][:54]}{'…' if len(r['title']) > 54 else ''}</div>
-                <div class="hero-runner-price">${r['price_f']:.2f}</div>
-              </div>
-            </a>'''
-
-        slides_html = ""
-        for i, h in enumerate(hero_slides):
-            cls = " active" if i == 0 else ""
-            slides_html += f'''
-        <div class="hero-slide hero-feature{cls}" data-slide="{i}">
-          <div class="hero-image-wrap">
-            <a href="{h['big_pic']}" class="glightbox" data-gallery="store" data-title="{h['title']}">
-              <img src="{h['big_pic']}" alt="{h['title']}" loading="{"eager" if i == 0 else "lazy"}">
-            </a>
-            <div class="hero-tag">Featured #{i + 1}</div>
-          </div>
-          <div class="hero-body">
-            <div class="eyebrow">Top of the showcase</div>
-            <h1 class="hero-title">{h['title']}</h1>
-            <div class="hero-price">${h['price_f']:.2f}</div>
-            <div class="hero-meta">
-              <span class="tag tag-gold">{h['category']}</span>
-              {f'<span class="tag">{h["condition"]}</span>' if h["condition"] else ''}
-            </div>
-            <div class="hero-actions">
-              <a href="{h['url']}" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
-              <a href="items/{h['item_id']}.html" class="btn btn-outline">Full Details</a>
-            </div>
-          </div>
-        </div>'''
-        dots_html = "".join(f'<button class="hero-dot{" active" if i == 0 else ""}" data-slide="{i}" onclick="goToSlide({i})" aria-label="Slide {i+1}"></button>' for i in range(len(hero_slides)))
-
+    if top_picks:
+        tiles = []
+        for tp in top_picks:
+            tiles.append(f'''
+            <a href="items/{tp['item_id']}.html" class="topick-tile" title="{tp['title']}">
+              <div class="topick-img"><img src="{tp['pic']}" alt="" loading="lazy"></div>
+              <div class="topick-price">${tp['price_f']:.2f}</div>
+            </a>''')
         hero_html = f'''
-    <section class="hero">
-      <div class="hero-carousel" id="hero-carousel" onmouseenter="pauseHero()" onmouseleave="resumeHero()">
-        {slides_html}
-        <div class="hero-dots">{dots_html}</div>
+    <section class="topicks">
+      <div class="topicks-head">
+        <div class="eyebrow">Top of the showcase</div>
+        <a href="#listing-grid" class="topicks-more" onclick="setTab('hot')">See all hot cards →</a>
       </div>
-      {f'<div class="hero-runners">{runners_html}</div>' if runners_html else ''}
+      <div class="topicks-scroll">{''.join(tiles)}</div>
     </section>
     '''
 
     extra_css = """
+    /* ============ COMPACT TOP-PICKS STRIP ============ */
+    .topicks { margin-bottom: 22px; }
+    .topicks-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .topicks-more {
+      font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--gold); font-weight: 700; text-decoration: none;
+    }
+    .topicks-more:hover { color: var(--gold-bright); }
+    .topicks-scroll {
+      display: flex; gap: 10px; overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    .topick-tile {
+      flex: 0 0 130px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: transform var(--t-fast), border-color var(--t-fast);
+    }
+    .topick-tile:hover { transform: translateY(-2px); border-color: var(--border-mid); }
+    .topick-img { aspect-ratio: 1/1; background: #111; }
+    .topick-img img { width: 100%; height: 100%; object-fit: cover; }
+    .topick-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; color: var(--gold);
+      padding: 6px 10px;
+      letter-spacing: .02em;
+    }
+
+    /* ============ TAB BAR (Gallery / Hot / BIN / Auctions) ============ */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 14px;
+      padding: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--surface-2); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--brand-fg);
+    }
+    .tab-btn .tab-count {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 15px;
+      opacity: .8;
+      margin-left: 4px;
+    }
+
     .hero {
       display: grid;
       grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
@@ -3360,6 +3426,13 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       <div class="recent-scroll" id="recent-scroll"></div>
     </section>
 
+    <div class="tab-bar" role="tablist">
+      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">{len(enriched)}</span></button>
+      <button class="tab-btn"        data-tab="hot"     onclick="setTab('hot')"     role="tab">🔥 Hot <span class="tab-count" id="cnt-hot">0</span></button>
+      <button class="tab-btn"        data-tab="bin"     onclick="setTab('bin')"     role="tab">Buy It Now <span class="tab-count" id="cnt-bin">0</span></button>
+      <button class="tab-btn"        data-tab="auction" onclick="setTab('auction')" role="tab">Auctions <span class="tab-count" id="cnt-auction">0</span></button>
+    </div>
+
     <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
       <div>Showing <span id="visible-count">{len(enriched)}</span> of {len(enriched)} listings</div>
       <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
@@ -3381,8 +3454,17 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       const PRICE_MIN_INIT = {p_min};
       const PRICE_MAX_INIT = {p_max};
       let activeCat = 'All';
-      let activeFlag = null;   // null | 'UNDERPRICED' | 'OVERPRICED'
+      let activeFlag = null;     // null | 'UNDERPRICED' | 'OVERPRICED'
+      let activeTab  = 'gallery';// 'gallery' | 'hot' | 'bin' | 'auction'
       let priceRange = [PRICE_MIN_INIT, PRICE_MAX_INIT];
+
+      // Tab switcher — sets activeTab + re-applies filters
+      window.setTab = function(tab) {{
+        activeTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+        applyFilters();
+        document.getElementById('listing-grid').scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+      }};
 
       // Watchlist (localStorage)
       function getFavs() {{
@@ -3497,6 +3579,9 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
           if (ok && activeCat === '__watch') ok = favs.includes(c.dataset.id);
           else if (ok && activeCat !== 'All')  ok = c.dataset.cat === activeCat;
           if (ok && activeFlag) ok = c.dataset.flag === activeFlag;
+          if (ok && activeTab === 'hot')      ok = c.dataset.hot === '1';
+          else if (ok && activeTab === 'bin')     ok = c.dataset.type === 'BIN';
+          else if (ok && activeTab === 'auction') ok = c.dataset.type === 'Auction';
           if (ok) ok = price >= lo && price <= hi;
           c.style.display = ok ? '' : 'none';
           if (ok) visible++;
@@ -3513,6 +3598,16 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       }}
 
       refreshFavUI();
+
+      // ============ TAB COUNTS (initial) ============
+      (function initTabCounts() {{
+        const cards = document.querySelectorAll('.listing-card');
+        const setCnt = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = n; }};
+        setCnt('cnt-gallery', cards.length);
+        setCnt('cnt-hot',     Array.from(cards).filter(c => c.dataset.hot === '1').length);
+        setCnt('cnt-bin',     Array.from(cards).filter(c => c.dataset.type === 'BIN').length);
+        setCnt('cnt-auction', Array.from(cards).filter(c => c.dataset.type === 'Auction').length);
+      }})();
 
       // ============ PRICE POPOVER ============
       window.togglePricePop = function(priceEl, ev) {{
@@ -3845,6 +3940,316 @@ def build_sold_page(sold: list[dict]) -> Path:
     out = OUTPUT_DIR / "sold.html"
     out.write_text(html_shell(f"Sold Items · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="sold.html"), encoding="utf-8")
     print(f"  Sold items page: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Analytics page (analytics.html)
+# ---------------------------------------------------------------------------
+
+def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -> Path:
+    """Cross-cut analytics: active inventory vs sold history vs market position."""
+    from datetime import datetime as _dt
+    import re as _re
+
+    # ---- Active inventory ----
+    active_by_cat: dict[str, dict] = {}
+    for l in listings:
+        cat = _categorize(l)
+        try:
+            p = float(l["price"])
+        except (TypeError, ValueError):
+            p = 0.0
+        b = active_by_cat.setdefault(cat, {"count": 0, "value": 0.0})
+        b["count"] += 1
+        b["value"] += p
+
+    # ---- Sold history ----
+    sold_by_cat: dict[str, dict] = {}
+    monthly: dict[str, dict] = {}
+    velocity_by_cat: dict[str, list] = {}
+    for s in sold:
+        cat = _categorize({"title": s.get("title", "")})
+        sp = float(s.get("sale_price", 0) or 0)
+        bc = sold_by_cat.setdefault(cat, {"count": 0, "revenue": 0.0})
+        bc["count"]   += 1
+        bc["revenue"] += sp
+        velocity_by_cat.setdefault(cat, []).append(sp)
+        sd = s.get("sold_date") or ""
+        if sd:
+            try:
+                d = _dt.fromisoformat(sd.replace("Z", "+00:00"))
+                k = d.strftime("%Y-%m")
+                bm = monthly.setdefault(k, {"units": 0, "revenue": 0.0})
+                bm["units"]   += 1
+                bm["revenue"] += sp
+            except Exception:
+                pass
+
+    months = sorted(monthly.keys())
+    months_revenue = [round(monthly[m]["revenue"], 2) for m in months]
+    months_units   = [monthly[m]["units"] for m in months]
+
+    # ---- Market position: are you priced above / at / below the market median? ----
+    pos_buckets = {"Below market (UNDERPRICED)": 0, "On market (OK)": 0, "Above market (OVERPRICED)": 0, "No comps": 0}
+    pos_money_left = 0.0
+    scatter_pts = []  # (your_price, market_median, item_id, title, flag)
+    for l in listings:
+        m = market.get(l["item_id"], {}) if market else {}
+        flag = m.get("flag", "NO_COMPS")
+        med  = m.get("market_median")
+        try:
+            our = float(l["price"])
+        except (TypeError, ValueError):
+            our = 0.0
+        if flag == "UNDERPRICED":
+            pos_buckets["Below market (UNDERPRICED)"] += 1
+            if med:
+                pos_money_left += max(0, med - our)
+        elif flag == "OVERPRICED":
+            pos_buckets["Above market (OVERPRICED)"] += 1
+        elif flag == "OK":
+            pos_buckets["On market (OK)"] += 1
+        else:
+            pos_buckets["No comps"] += 1
+        if med and our > 0:
+            scatter_pts.append({
+                "x": round(med, 2),
+                "y": round(our, 2),
+                "id": l["item_id"],
+                "title": l["title"][:60],
+                "flag": flag,
+            })
+
+    # ---- Sold-vs-asking accuracy: of items sold, were you at/above/below your asking? ----
+    # (We don't track historical asking prices reliably — skip this for now)
+
+    # ---- Top-grossing items (sold) ----
+    top_sold = sorted(sold, key=lambda s: float(s.get("sale_price", 0) or 0), reverse=True)[:10]
+
+    # ---- Inventory/sales ratio (turnover proxy) ----
+    total_inventory_value = sum(b["value"] for b in active_by_cat.values())
+    total_sold_revenue    = sum(b["revenue"] for b in sold_by_cat.values())
+    turnover_ratio = round(total_sold_revenue / total_inventory_value, 2) if total_inventory_value else 0
+    # Avg sale price per category (for sold)
+    avg_sale_by_cat = {c: (round(b["revenue"] / b["count"], 2) if b["count"] else 0) for c, b in sold_by_cat.items()}
+
+    # All categories that appear anywhere
+    all_cats = sorted(set(active_by_cat.keys()) | set(sold_by_cat.keys()))
+
+    extra_css = """
+    .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+    .a-grid.cols-1 { grid-template-columns: 1fr; }
+    .a-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
+    .a-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .a-panel .a-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; letter-spacing: .02em; }
+    .a-chart-wrap { position: relative; height: 280px; }
+    .a-chart-wrap.tall { height: 340px; }
+    .a-table { width: 100%; }
+    .a-table th, .a-table td { font-size: 12.5px; padding: 8px 10px; text-align: left; }
+    .a-table th:not(:first-child), .a-table td:not(:first-child) { text-align: right; }
+    .a-table tr:hover td { background: rgba(212,175,55,0.04); }
+    .a-pct { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    @media (max-width: 760px) { .a-grid { grid-template-columns: 1fr; } }
+    """
+
+    # Top-sold rows
+    top_rows = []
+    for s in top_sold:
+        sp = float(s.get("sale_price", 0) or 0)
+        sd = (s.get("sold_date") or "")[:10]
+        top_rows.append(f'<tr><td>{s.get("title","")[:75]}</td><td>${sp:,.2f}</td><td>{sd}</td></tr>')
+    top_rows_html = "\n".join(top_rows) or '<tr><td colspan="3" style="color:var(--text-muted);text-align:center;padding:24px;">No sales yet.</td></tr>'
+
+    # Category comparison table
+    cat_rows = []
+    for c in all_cats:
+        a = active_by_cat.get(c, {"count": 0, "value": 0.0})
+        s = sold_by_cat.get(c, {"count": 0, "revenue": 0.0})
+        avg = avg_sale_by_cat.get(c, 0)
+        cat_rows.append(
+            f'<tr><td><b>{c}</b></td><td>{a["count"]}</td><td>${a["value"]:,.0f}</td>'
+            f'<td>{s["count"]}</td><td>${s["revenue"]:,.0f}</td><td>${avg:,.2f}</td></tr>'
+        )
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Cross-cut intelligence</div>
+        <h1 class="section-title">Analytics</h1>
+        <div class="section-sub">What you're selling, what you've sold, where the market is. Built from active listings, sold history, and live eBay comps.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">{len(listings)}</div><div class="lbl">Active Listings</div></div>
+      <div class="stat-card"><div class="num">${total_inventory_value:,.0f}</div><div class="lbl">Inventory Value</div></div>
+      <div class="stat-card"><div class="num">{sum(b["count"] for b in sold_by_cat.values())}</div><div class="lbl">Items Sold</div></div>
+      <div class="stat-card"><div class="num">${total_sold_revenue:,.0f}</div><div class="lbl">Sold Revenue</div></div>
+      <div class="stat-card"><div class="num">{turnover_ratio:.2f}<span style="font-size:18px;color:var(--text-muted)">×</span></div><div class="lbl">Turnover Ratio</div></div>
+      <div class="stat-card"><div class="num danger">${pos_money_left:,.0f}</div><div class="lbl">$ Left on Table (Underpriced)</div></div>
+    </div>
+
+    <div class="a-grid">
+      <div class="a-panel">
+        <h3>Inventory by category</h3>
+        <div class="a-sub">Active listings — what's on the shelf right now</div>
+        <div class="a-chart-wrap"><canvas id="ch-inv-cat"></canvas></div>
+      </div>
+      <div class="a-panel">
+        <h3>Sold revenue by category</h3>
+        <div class="a-sub">All-time accumulated from eBay sales history</div>
+        <div class="a-chart-wrap"><canvas id="ch-sold-cat"></canvas></div>
+      </div>
+    </div>
+
+    <div class="a-grid cols-1">
+      <div class="a-panel">
+        <h3>Sales velocity over time</h3>
+        <div class="a-sub">Monthly units (line) + revenue (bars)</div>
+        <div class="a-chart-wrap tall"><canvas id="ch-sales-time"></canvas></div>
+      </div>
+    </div>
+
+    <div class="a-grid">
+      <div class="a-panel">
+        <h3>Market position</h3>
+        <div class="a-sub">Each dot is one of your active listings: market median (x) vs your asking price (y). On-line = match, above = overpriced, below = underpriced.</div>
+        <div class="a-chart-wrap tall"><canvas id="ch-market-pos"></canvas></div>
+      </div>
+      <div class="a-panel">
+        <h3>Pricing position breakdown</h3>
+        <div class="a-sub">How many of your active listings are above/at/below the market median</div>
+        <div class="a-chart-wrap"><canvas id="ch-pos-bars"></canvas></div>
+      </div>
+    </div>
+
+    <div class="a-grid cols-1">
+      <div class="a-panel">
+        <h3>Category comparison</h3>
+        <div class="a-sub">Selling vs sold, side by side</div>
+        <table class="a-table">
+          <thead><tr><th>Category</th><th>Active</th><th>Listed $</th><th>Sold</th><th>Sold $</th><th>Avg Sale</th></tr></thead>
+          <tbody>{''.join(cat_rows)}</tbody>
+        </table>
+      </div>
+      <div class="a-panel">
+        <h3>Top 10 sales</h3>
+        <div class="a-sub">Biggest sold items in accumulated history</div>
+        <table class="a-table">
+          <thead><tr><th>Item</th><th>Price</th><th>Date</th></tr></thead>
+          <tbody>{top_rows_html}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      const GOLD = '#d4af37';
+      const PALETTE = ['#d4af37','#7fc77a','#6cb0ff','#e0b54a','#e07b6f','#b388e0','#5fc7c7','#f4ce5d','#8a7521'];
+
+      // Inventory by category (donut)
+      new Chart(document.getElementById('ch-inv-cat'), {{
+        type: 'doughnut',
+        data: {{
+          labels: {list(active_by_cat.keys())!r},
+          datasets: [{{
+            data: {[b['count'] for b in active_by_cat.values()]},
+            backgroundColor: PALETTE,
+            borderColor: '#0a0a0a', borderWidth: 3, hoverOffset: 8,
+          }}]
+        }},
+        options: {{ cutout: '60%', plugins: {{ legend: {{ position: 'bottom', labels: {{ usePointStyle: true, padding: 12 }} }} }} }}
+      }});
+
+      // Sold revenue by category (donut)
+      new Chart(document.getElementById('ch-sold-cat'), {{
+        type: 'doughnut',
+        data: {{
+          labels: {list(sold_by_cat.keys())!r},
+          datasets: [{{
+            data: {[round(b['revenue'], 2) for b in sold_by_cat.values()]},
+            backgroundColor: PALETTE,
+            borderColor: '#0a0a0a', borderWidth: 3, hoverOffset: 8,
+          }}]
+        }},
+        options: {{
+          cutout: '60%',
+          plugins: {{
+            legend: {{ position: 'bottom', labels: {{ usePointStyle: true, padding: 12 }} }},
+            tooltip: {{ callbacks: {{ label: (ctx) => ctx.label + ': $' + ctx.parsed.toFixed(2) }} }}
+          }}
+        }}
+      }});
+
+      // Sales velocity over time (line + bar dual axis)
+      new Chart(document.getElementById('ch-sales-time'), {{
+        type: 'bar',
+        data: {{
+          labels: {months!r},
+          datasets: [
+            {{ label: 'Revenue ($)', data: {months_revenue}, backgroundColor: 'rgba(212,175,55,.55)', borderColor: GOLD, borderWidth: 1.5, borderRadius: 6, yAxisID: 'y' }},
+            {{ label: 'Items sold', data: {months_units}, type: 'line', backgroundColor: 'rgba(127,199,122,.2)', borderColor: '#7fc77a', borderWidth: 2, tension: 0.35, yAxisID: 'y1' }}
+          ]
+        }},
+        options: {{
+          plugins: {{ legend: {{ position: 'bottom' }} }},
+          scales: {{
+            y:  {{ beginAtZero: true, position: 'left',  grid: {{ color: 'rgba(212,175,55,0.06)' }}, ticks: {{ callback: v => '$' + v }} }},
+            y1: {{ beginAtZero: true, position: 'right', grid: {{ display: false }}, ticks: {{ precision: 0 }} }},
+          }}
+        }}
+      }});
+
+      // Market position scatter
+      const scatterPts = {scatter_pts!r};
+      new Chart(document.getElementById('ch-market-pos'), {{
+        type: 'scatter',
+        data: {{
+          datasets: [{{
+            label: 'Listings',
+            data: scatterPts.map(p => ({{ x: p.x, y: p.y, _info: p }})),
+            backgroundColor: scatterPts.map(p => p.flag === 'UNDERPRICED' ? '#e07b6f' : p.flag === 'OVERPRICED' ? '#e0b54a' : '#7fc77a'),
+            pointRadius: 5, pointHoverRadius: 8,
+          }}]
+        }},
+        options: {{
+          plugins: {{
+            legend: {{ display: false }},
+            tooltip: {{ callbacks: {{ label: (ctx) => {{ const p = ctx.raw._info; return [p.title, 'Yours: $' + p.y, 'Market: $' + p.x]; }} }} }}
+          }},
+          scales: {{
+            x: {{ title: {{ display: true, text: 'Market median ($)' }}, grid: {{ color: 'rgba(212,175,55,0.06)' }} }},
+            y: {{ title: {{ display: true, text: 'Your price ($)' }}, grid: {{ color: 'rgba(212,175,55,0.06)' }} }}
+          }}
+        }}
+      }});
+
+      // Pricing position breakdown
+      new Chart(document.getElementById('ch-pos-bars'), {{
+        type: 'bar',
+        data: {{
+          labels: {list(pos_buckets.keys())!r},
+          datasets: [{{
+            data: {list(pos_buckets.values())},
+            backgroundColor: ['rgba(224,123,111,.7)','rgba(127,199,122,.7)','rgba(224,181,74,.7)','rgba(150,150,150,.4)'],
+            borderColor: ['#e07b6f','#7fc77a','#e0b54a','#888'],
+            borderWidth: 1.5, borderRadius: 6,
+          }}]
+        }},
+        options: {{
+          indexAxis: 'y',
+          plugins: {{ legend: {{ display: false }} }},
+          scales: {{ x: {{ beginAtZero: true, ticks: {{ precision: 0 }}, grid: {{ color: 'rgba(212,175,55,0.06)' }} }}, y: {{ grid: {{ display: false }} }} }}
+        }}
+      }});
+    </script>
+    """
+
+    out = OUTPUT_DIR / "analytics.html"
+    out.write_text(html_shell(f"Analytics · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="analytics.html"), encoding="utf-8")
+    print(f"  Analytics page: {out}")
     return out
 
 
@@ -6507,6 +6912,7 @@ def main():
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
     build_dashboard(listings, market, seller=seller)
+    build_analytics_page(listings, market, sold)
     build_quality_report(listings)
     build_craigslist(listings)
     build_reddit(listings)
