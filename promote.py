@@ -5763,8 +5763,12 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
           {f'<span class="tag">{l["condition"]}</span>' if l["condition"] else ''}
         </div>
         <div class="product-actions">
-          <a href="{l['url']}" target="_blank" rel="noopener" class="btn btn-gold">Buy on eBay →</a>
+          <a href="{l['url']}" target="_blank" rel="noopener" class="btn btn-gold">See full details &amp; buy on eBay →</a>
           <a href="{STORE_URL}" target="_blank" rel="noopener" class="btn btn-outline">More from {SELLER_NAME}</a>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin:-10px 0 18px;line-height:1.6;">
+          🛡 Secure checkout via eBay · Buyer protection included · Combined shipping on 2+ items<br>
+          💬 Questions? Message {SELLER_NAME} on eBay — replies usually within a few hours.
         </div>
         <div class="product-meta-grid">
           <div class="meta-cell">
