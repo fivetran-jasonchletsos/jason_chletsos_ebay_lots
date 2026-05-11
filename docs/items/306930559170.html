@@ -22,8 +22,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["1f84097ce0ae7c7f40d72002c7ff48945f5617c8dfae5676d802622d2050f39b"];
-    window.__ADMIN_SALT   = '2cd750405e870666ff5c797e93798283';
+    window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -532,16 +532,63 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
-.nav-links { display: flex; align-items: center; gap: 4px; }
-.nav-links a {
+.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links a,
+.nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
   font-size: 13px; font-weight: 500;
   padding: 10px 14px; border-radius: var(--r-sm);
   transition: all var(--t-fast);
   white-space: nowrap;
+  background: transparent; border: none; font-family: inherit;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.nav-links a:hover { color: var(--text); background: var(--surface-2); }
-.nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
+.nav-links a:hover,
+.nav-links .nav-dropdown-trigger:hover { color: var(--text); background: var(--surface-2); }
+.nav-links a.active,
+.nav-links .nav-dropdown-trigger.active { color: var(--gold); background: rgba(212,175,55,.08); }
+
+.nav-dropdown { position: relative; }
+.nav-dropdown-trigger svg { transition: transform var(--t-fast); opacity: .65; }
+.nav-dropdown[aria-expanded="true"] .nav-dropdown-trigger svg,
+.nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); opacity: 1; }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: none;
+  z-index: 150;
+}
+.nav-dropdown.open .nav-dropdown-menu,
+.nav-dropdown:hover .nav-dropdown-menu { display: block; }
+.nav-dropdown-menu a {
+  display: block;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-dropdown-menu a:hover { background: var(--surface-2); color: var(--gold); }
+.nav-dropdown-menu a.active { background: rgba(212,175,55,.12); color: var(--gold); }
+
+/* Drawer grouping headers (mobile) */
+.drawer-group {
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700;
+  padding: 16px 14px 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.drawer-group:first-of-type { margin-top: 0; border-top: none; padding-top: 8px; }
 .btn-refresh {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   color: var(--brand-fg);
@@ -1066,9 +1113,7 @@ input[type="checkbox"]:checked::after {
 .listing-card .price-wrap { position: relative; display: inline-block; }
 .listing-card .price-pop {
   display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;            /* fixed so it escapes the card's overflow clipping */
   min-width: 260px;
   max-width: 300px;
   background: var(--surface-2);
@@ -1076,11 +1121,10 @@ input[type="checkbox"]:checked::after {
   border-radius: var(--r-md);
   box-shadow: var(--shadow-lg);
   padding: 12px 14px;
-  z-index: 80;
+  z-index: 200;
   font-family: 'Inter', sans-serif;
   text-align: left;
 }
-.listing-card .price-wrap:hover .price-pop,
 .listing-card .price-pop.open { display: block; }
 .listing-card .price-pop .pp-row {
   display: grid;
@@ -1246,6 +1290,228 @@ tr:hover td { background: rgba(212,175,55,.03); }
 #no-results .big {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
+}
+
+/* ============ POLISH LAYER — round 2 (design director feedback) ============ */
+
+/* Price treatment — gold gradient text fill with subtle glow + tabular nums.
+   Cream/light themes lose the gradient (text-fill-color: transparent + light background
+   becomes invisible) so we scope this to dark themes only. */
+.listing-card .price, .hero-price, .deal-price, .product-price, .sold-price, .pr-current, .pr-new {
+  font-feature-settings: 'tnum' 1, 'ss01' 1;
+  font-variant-numeric: tabular-nums;
+}
+html:not([data-theme]) .listing-card .price,
+html:not([data-theme]) .hero-price,
+html:not([data-theme]) .deal-price,
+html:not([data-theme]) .product-price,
+html[data-theme="midnight"] .listing-card .price,
+html[data-theme="midnight"] .hero-price,
+html[data-theme="midnight"] .deal-price,
+html[data-theme="midnight"] .product-price,
+html[data-theme="crimson"] .listing-card .price,
+html[data-theme="crimson"] .hero-price,
+html[data-theme="crimson"] .deal-price,
+html[data-theme="crimson"] .product-price {
+  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-dim) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  text-shadow: 0 0 20px rgba(212,175,55,.18);
+}
+
+/* Card hover — single, expensive-feeling move (no jittery translateY) */
+.listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
+.listing-card:hover {
+  transform: none;
+  border-color: rgba(212,175,55,.35);
+  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+}
+.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+
+/* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
+.thumb-wrap::before {
+  background: radial-gradient(circle at 30% 25%, rgba(212,175,55,.07), transparent 55%);
+  opacity: .9;
+  transition: opacity .4s;
+}
+.listing-card:hover .thumb-wrap::before { opacity: 0; }
+
+/* Section header rhythm — looser sub leading, hairline rule with gold accent */
+.section-title { margin-bottom: 6px; }
+.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+.section-head  {
+  padding-bottom: 18px; margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.section-head::after {
+  content: ''; display: block;
+  width: 48px; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  position: absolute; left: 0; bottom: -1px;
+}
+
+/* Chip active — real "press" feel */
+.chip { transition: color .15s, background .15s, box-shadow .25s; }
+.chip.active {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12),
+              inset 0 -2px 0 var(--gold),
+              0 4px 12px -4px rgba(212,175,55,.4);
+}
+
+/* Item detail hero — perspective tilt + shimmer on hover. Signature collector move. */
+.product-gallery {
+  perspective: 1200px;
+  position: relative;
+  isolation: isolate;
+}
+.product-gallery a { display: block; width: 100%; height: 100%; }
+.product-gallery img {
+  transition: transform .8s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+}
+.product-gallery:hover img { transform: rotateY(-4deg) rotateX(2deg) scale(1.02); }
+.product-gallery::after {
+  content: ''; position: absolute; inset: 24px; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.14) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 1.2s ease;
+  mix-blend-mode: overlay;
+  border-radius: var(--r-xl);
+  z-index: 3;
+}
+.product-gallery:hover::after { transform: translateX(110%); }
+
+/* Hide buyer-leaking analytics from public visitors (anything tagged data-admin="1") */
+html:not(.pre-is-admin) .price-pop-wrap,
+html:not(.pre-is-admin) .price-info-ic { display: none !important; }
+
+/* ============ POLISH LAYER ============ */
+
+/* Reading-flow scroll progress indicator at top of page */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; z-index: 999;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  transition: transform 80ms linear;
+  pointer-events: none;
+}
+
+/* View Transitions — smooth cross-page navigation */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(.4,0,.2,1);
+}
+
+/* Card entrance stagger — fade up from below */
+@keyframes h2k-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.listing-card, .deal-card, .sold-card, .q-card, .pr-card, .tr-card, .cl-card, .topick-tile, .recent-card, .a-panel {
+  animation: h2k-fade-up 480ms cubic-bezier(.4,0,.2,1) both;
+  animation-delay: calc(var(--enter-idx, 0) * 28ms);
+}
+
+/* Keyboard focus rings — gold glow, never harsh blue */
+*:focus { outline: none; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+  box-shadow: 0 0 0 4px rgba(212,175,55,.18);
+}
+
+/* Empty-state illustrations */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center; gap: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--r-lg);
+}
+.empty-state-icon {
+  width: 64px; height: 64px;
+  color: var(--gold);
+  opacity: .7;
+  animation: h2k-fade-up 600ms both;
+}
+.empty-state-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: .03em;
+  color: var(--text);
+}
+.empty-state-sub { color: var(--text-muted); font-size: 14px; max-width: 380px; }
+
+/* Confetti container — DOM-injected on success */
+.h2k-confetti-host {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9998;
+  overflow: hidden;
+}
+.h2k-confetti {
+  position: absolute; top: -10px;
+  width: 10px; height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: h2k-confetti-fall 1600ms ease-out forwards;
+}
+@keyframes h2k-confetti-fall {
+  0% { opacity: 1; transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(var(--cx, 0), 110vh, 0) rotate(var(--cr, 540deg)); }
+}
+
+/* Ripple on .btn-gold click */
+.btn-gold { position: relative; overflow: hidden; }
+.btn-gold::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), rgba(255,255,255,.45), transparent 50%);
+  opacity: 0;
+  transition: opacity 400ms;
+  pointer-events: none;
+}
+.btn-gold:active::after { opacity: 1; transition: opacity 60ms; }
+
+/* Subtle tab indicator slide — handled via .active background */
+.tab-bar { position: relative; }
+
+/* Gentle pulse on price element while popover is open */
+.price-pop.open + .price,
+.listing-card .price-wrap:hover .price { animation: h2k-price-pulse 1.6s ease-in-out infinite; }
+@keyframes h2k-price-pulse {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%      { text-shadow: 0 0 18px rgba(212,175,55,.4); }
+}
+
+/* Skeleton state for charts that haven't drawn yet */
+@keyframes h2k-shimmer {
+  0% { background-position: -300px 0; }
+  100% { background-position: calc(300px + 100%) 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+  background-size: 300px 100%;
+  animation: h2k-shimmer 1.6s linear infinite;
+  border-radius: var(--r-sm);
+}
+
+/* Reduced motion respect — disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .listing-card, .deal-card, .sold-card, .q-card, .pr-card, .tr-card, .cl-card, .topick-tile, .recent-card, .a-panel {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ============ NOUISLIDER OVERRIDES ============ */
@@ -1417,15 +1683,25 @@ tr:hover td { background: rgba(212,175,55,.03); }
           <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
         </div>
       </a>
-      <nav class="nav-links"><a href="../index.html">Listings</a>
-<a href="sold.html">Sold</a>
-<a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="../quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="../price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="../title_review.html" class="admin-only" data-admin="1">Titles</a>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="../craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="../google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a></nav>
+      <nav class="nav-links"><a href="../index.html" class="nav-link">Listings</a>
+<a href="steals.html" class="nav-link">Steals</a>
+<a href="sold.html" class="nav-link">Sold</a>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Insights
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="analytics.html" data-admin="1">Analytics</a><a href="deals.html" data-admin="1">Deals</a><a href="../quality.html" data-admin="1">Quality</a><a href="../price_review.html" data-admin="1">Pricing</a><a href="../title_review.html" data-admin="1">Titles</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Cross-post
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="reddit.html" data-admin="1">Reddit</a><a href="../craigslist.html" data-admin="1">Craigslist</a><a href="../google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
+        </div></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1463,11 +1739,15 @@ tr:hover td { background: rgba(212,175,55,.03); }
       </button>
     </div>
     <a href="../index.html">Listings</a>
+<a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
+<div class="drawer-group" data-admin="1">Insights</div>
+<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
 <a href="../quality.html" class="admin-only" data-admin="1">Quality</a>
 <a href="../price_review.html" class="admin-only" data-admin="1">Pricing</a>
 <a href="../title_review.html" class="admin-only" data-admin="1">Titles</a>
+<div class="drawer-group" data-admin="1">Cross-post</div>
 <a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
 <a href="../craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="../google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
@@ -1519,8 +1799,12 @@ tr:hover td { background: rgba(212,175,55,.03); }
           
         </div>
         <div class="product-actions">
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Willis-McGahee-45-Silver-Prizm-/306930559170" target="_blank" rel="noopener" class="btn btn-gold">Buy on eBay →</a>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Willis-McGahee-45-Silver-Prizm-/306930559170" target="_blank" rel="noopener" class="btn btn-gold">See full details &amp; buy on eBay →</a>
           <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener" class="btn btn-outline">More from Harpua2001</a>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin:-10px 0 18px;line-height:1.6;">
+          🛡 Secure checkout via eBay · Buyer protection included · Combined shipping on 2+ items<br>
+          💬 Questions? Message Harpua2001 on eBay — replies usually within a few hours.
         </div>
         <div class="product-meta-grid">
           <div class="meta-cell">
@@ -1552,13 +1836,6 @@ tr:hover td { background: rgba(212,175,55,.03); }
           <div class="eyebrow">More from Football Singles</div>
           <h2 class="section-title" style="margin-bottom:16px;">You might also like</h2>
           <div class="rel-grid">
-            <a href="306926059250.html" class="rel-card">
-              <div class="rel-img"><img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14" loading="lazy"></div>
-              <div class="rel-meta">
-                <div class="rel-title">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</div>
-                <div class="rel-price">$180.00</div>
-              </div>
-            </a>
             <a href="306926030086.html" class="rel-card">
               <div class="rel-img"><img src="https://i.ebayimg.com/images/g/goUAAeSwamJp~c9y/s-l500.jpg" alt="2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm" loading="lazy"></div>
               <div class="rel-meta">
@@ -1579,6 +1856,13 @@ tr:hover td { background: rgba(212,175,55,.03); }
                 <div class="rel-title">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</div>
                 <div class="rel-price">$4.99</div>
               </div>
+            </a>
+            <a href="306930742908.html" class="rel-card">
+              <div class="rel-img"><img src="https://i.ebayimg.com/images/g/yBcAAeSwZZBqANUu/s-l500.jpg" alt="2025 Panini Prizm - Jared Verse #30 Silver Prizm" loading="lazy"></div>
+              <div class="rel-meta">
+                <div class="rel-title">2025 Panini Prizm - Jared Verse #30 Silver Prizm</div>
+                <div class="rel-price">$4.25</div>
+              </div>
             </a></div>
         </section><script>
       (function() {
@@ -1595,7 +1879,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 21:49 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 11, 2026 · 02:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -1647,6 +1931,21 @@ tr:hover td { background: rgba(212,175,55,.03); }
         document.documentElement.classList.add('pre-is-admin');
         document.getElementById('gate-overlay').classList.remove('open');
         showToast('Welcome back. Management tools unlocked.');
+
+        // Fire-and-forget alert ping (server decides if email is sent)
+        try {
+          let did = localStorage.getItem('h2k_device_id');
+          if (!did) {
+            did = (crypto.randomUUID && crypto.randomUUID()) ||
+                  (Date.now() + '-' + Math.random().toString(36).slice(2));
+            localStorage.setItem('h2k_device_id', did);
+          }
+          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
+          }).catch(() => {});
+        } catch(e) {}
       } else {
         err.textContent = 'Wrong passcode. Try again.';
         inp.value = '';
@@ -1660,6 +1959,27 @@ tr:hover td { background: rgba(212,175,55,.03); }
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
       else showToast('Signed out.');
     };
+
+    // Nav dropdown toggle (touch-friendly; desktop hover also works via CSS)
+    window.toggleNavDropdown = function(btn, ev) {
+      ev.stopPropagation();
+      const dd = btn.closest('.nav-dropdown');
+      const opening = !dd.classList.contains('open');
+      // Close any other open dropdowns
+      document.querySelectorAll('.nav-dropdown.open').forEach(d => {
+        if (d !== dd) d.classList.remove('open');
+      });
+      dd.classList.toggle('open', opening);
+      btn.setAttribute('aria-expanded', opening);
+    };
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown.open').forEach(d => {
+          d.classList.remove('open');
+          d.querySelector('.nav-dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
 
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');
@@ -1686,14 +2006,21 @@ tr:hover td { background: rgba(212,175,55,.03); }
       const btn = document.getElementById('nav-refresh-btn');
       const original = btn.textContent;
       btn.textContent = 'Refreshing…'; btn.disabled = true;
+      showToast('Refreshing inventory, prices, sold history, and deals from eBay…');
       try {
         const resp = await fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
         });
         const data = await resp.json();
-        showToast(data.success ? 'Site rebuild triggered. Live in ~2 minutes.' : 'Rebuild failed: ' + (data.error || 'Unknown'));
+        if (data.success) {
+          // Use Lambda's detailed message if present
+          const detail = data.message || 'Refresh started';
+          showToast(detail + ' · pull-to-refresh in ~2-3 min to see new prices');
+        } else {
+          showToast('Refresh failed: ' + (data.error || 'Unknown'));
+        }
       } catch (e) {
-        showToast('Request failed: ' + e.message);
+        showToast('Refresh request failed: ' + e.message);
       }
       btn.textContent = original; btn.disabled = false;
     }
@@ -1759,6 +2086,99 @@ tr:hover td { background: rgba(212,175,55,.03); }
     };
     // Apply on every page load
     window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+
+    // ============ POLISH LAYER ============
+    // Skip motion for users who request it
+    const __reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Scroll progress bar
+    (function () {
+      const bar = document.createElement('div');
+      bar.className = 'scroll-progress';
+      document.body.appendChild(bar);
+      function update() {
+        const h = document.documentElement;
+        const top = h.scrollTop || document.body.scrollTop;
+        const max = h.scrollHeight - h.clientHeight;
+        const pct = max > 0 ? top / max : 0;
+        bar.style.transform = 'scaleX(' + pct + ')';
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+
+    // Staggered card entrance — set --enter-idx so CSS calc() spaces the delays
+    (function () {
+      if (__reducedMotion) return;
+      const selectors = ['.listing-card','.deal-card','.sold-card','.q-card','.pr-card','.tr-card','.cl-card','.topick-tile','.recent-card','.a-panel'];
+      selectors.forEach(sel => {
+        const cards = document.querySelectorAll(sel);
+        cards.forEach((c, i) => {
+          if (i < 24) c.style.setProperty('--enter-idx', i);
+        });
+      });
+    })();
+
+    // Count-up animation on stat-card numbers — runs once when each card scrolls into view
+    (function () {
+      if (__reducedMotion) return;
+      const nums = document.querySelectorAll('.stat-card .num');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const el = e.target;
+          const raw = el.textContent || '';
+          // Skip anything containing letters (e.g. "5+ yrs", "100%", "★★★★★")
+          if (/[a-z%★]/i.test(raw)) { io.unobserve(el); return; }
+          const hasDollar = raw.includes('$');
+          const target = parseFloat(raw.replace(/[^0-9.\-]/g, '')) || 0;
+          if (target === 0) { io.unobserve(el); return; }
+          const isInt = !raw.includes('.');
+          const start = performance.now();
+          const dur = 900;
+          function step(now) {
+            const t = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            const cur = target * eased;
+            const fmt = isInt ? Math.round(cur).toLocaleString() : cur.toFixed(2);
+            el.textContent = (hasDollar ? '$' : '') + fmt;
+            if (t < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+          io.unobserve(el);
+        });
+      }, { threshold: 0.4 });
+      nums.forEach(n => io.observe(n));
+    })();
+
+    // Button ripple — track click coordinates as CSS custom properties
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-gold');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      btn.style.setProperty('--rx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+      btn.style.setProperty('--ry', ((e.clientY - rect.top)  / rect.height * 100) + '%');
+    }, { passive: true });
+
+    // Confetti — celebratory micro-interaction on successful Apply
+    window.h2kConfetti = function (count = 36) {
+      if (__reducedMotion) return;
+      const host = document.createElement('div');
+      host.className = 'h2k-confetti-host';
+      const colors = ['#d4af37','#f4ce5d','#7fc77a','#6cb0ff','#e07b6f','#b388e0'];
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'h2k-confetti';
+        p.style.left = (Math.random() * 100) + 'vw';
+        p.style.background = colors[i % colors.length];
+        p.style.setProperty('--cx', (Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--cr', (Math.random() * 720 - 360) + 'deg');
+        p.style.animationDelay = (Math.random() * 200) + 'ms';
+        host.appendChild(p);
+      }
+      document.body.appendChild(host);
+      setTimeout(() => host.remove(), 2200);
+    };
 
     // ---- PWA: register service worker + handle install prompt ----
     if ('serviceWorker' in navigator) {

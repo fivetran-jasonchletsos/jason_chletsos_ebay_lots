@@ -22,8 +22,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["1f84097ce0ae7c7f40d72002c7ff48945f5617c8dfae5676d802622d2050f39b"];
-    window.__ADMIN_SALT   = '2cd750405e870666ff5c797e93798283';
+    window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = true;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -532,16 +532,63 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
-.nav-links { display: flex; align-items: center; gap: 4px; }
-.nav-links a {
+.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links a,
+.nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
   font-size: 13px; font-weight: 500;
   padding: 10px 14px; border-radius: var(--r-sm);
   transition: all var(--t-fast);
   white-space: nowrap;
+  background: transparent; border: none; font-family: inherit;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.nav-links a:hover { color: var(--text); background: var(--surface-2); }
-.nav-links a.active { color: var(--gold); background: rgba(212,175,55,.08); }
+.nav-links a:hover,
+.nav-links .nav-dropdown-trigger:hover { color: var(--text); background: var(--surface-2); }
+.nav-links a.active,
+.nav-links .nav-dropdown-trigger.active { color: var(--gold); background: rgba(212,175,55,.08); }
+
+.nav-dropdown { position: relative; }
+.nav-dropdown-trigger svg { transition: transform var(--t-fast); opacity: .65; }
+.nav-dropdown[aria-expanded="true"] .nav-dropdown-trigger svg,
+.nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); opacity: 1; }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  display: none;
+  z-index: 150;
+}
+.nav-dropdown.open .nav-dropdown-menu,
+.nav-dropdown:hover .nav-dropdown-menu { display: block; }
+.nav-dropdown-menu a {
+  display: block;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-dropdown-menu a:hover { background: var(--surface-2); color: var(--gold); }
+.nav-dropdown-menu a.active { background: rgba(212,175,55,.12); color: var(--gold); }
+
+/* Drawer grouping headers (mobile) */
+.drawer-group {
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700;
+  padding: 16px 14px 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.drawer-group:first-of-type { margin-top: 0; border-top: none; padding-top: 8px; }
 .btn-refresh {
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   color: var(--brand-fg);
@@ -1066,9 +1113,7 @@ input[type="checkbox"]:checked::after {
 .listing-card .price-wrap { position: relative; display: inline-block; }
 .listing-card .price-pop {
   display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;            /* fixed so it escapes the card's overflow clipping */
   min-width: 260px;
   max-width: 300px;
   background: var(--surface-2);
@@ -1076,11 +1121,10 @@ input[type="checkbox"]:checked::after {
   border-radius: var(--r-md);
   box-shadow: var(--shadow-lg);
   padding: 12px 14px;
-  z-index: 80;
+  z-index: 200;
   font-family: 'Inter', sans-serif;
   text-align: left;
 }
-.listing-card .price-wrap:hover .price-pop,
 .listing-card .price-pop.open { display: block; }
 .listing-card .price-pop .pp-row {
   display: grid;
@@ -1248,6 +1292,228 @@ tr:hover td { background: rgba(212,175,55,.03); }
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
 }
 
+/* ============ POLISH LAYER — round 2 (design director feedback) ============ */
+
+/* Price treatment — gold gradient text fill with subtle glow + tabular nums.
+   Cream/light themes lose the gradient (text-fill-color: transparent + light background
+   becomes invisible) so we scope this to dark themes only. */
+.listing-card .price, .hero-price, .deal-price, .product-price, .sold-price, .pr-current, .pr-new {
+  font-feature-settings: 'tnum' 1, 'ss01' 1;
+  font-variant-numeric: tabular-nums;
+}
+html:not([data-theme]) .listing-card .price,
+html:not([data-theme]) .hero-price,
+html:not([data-theme]) .deal-price,
+html:not([data-theme]) .product-price,
+html[data-theme="midnight"] .listing-card .price,
+html[data-theme="midnight"] .hero-price,
+html[data-theme="midnight"] .deal-price,
+html[data-theme="midnight"] .product-price,
+html[data-theme="crimson"] .listing-card .price,
+html[data-theme="crimson"] .hero-price,
+html[data-theme="crimson"] .deal-price,
+html[data-theme="crimson"] .product-price {
+  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-dim) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  text-shadow: 0 0 20px rgba(212,175,55,.18);
+}
+
+/* Card hover — single, expensive-feeling move (no jittery translateY) */
+.listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
+.listing-card:hover {
+  transform: none;
+  border-color: rgba(212,175,55,.35);
+  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+}
+.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+
+/* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
+.thumb-wrap::before {
+  background: radial-gradient(circle at 30% 25%, rgba(212,175,55,.07), transparent 55%);
+  opacity: .9;
+  transition: opacity .4s;
+}
+.listing-card:hover .thumb-wrap::before { opacity: 0; }
+
+/* Section header rhythm — looser sub leading, hairline rule with gold accent */
+.section-title { margin-bottom: 6px; }
+.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+.section-head  {
+  padding-bottom: 18px; margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.section-head::after {
+  content: ''; display: block;
+  width: 48px; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  position: absolute; left: 0; bottom: -1px;
+}
+
+/* Chip active — real "press" feel */
+.chip { transition: color .15s, background .15s, box-shadow .25s; }
+.chip.active {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12),
+              inset 0 -2px 0 var(--gold),
+              0 4px 12px -4px rgba(212,175,55,.4);
+}
+
+/* Item detail hero — perspective tilt + shimmer on hover. Signature collector move. */
+.product-gallery {
+  perspective: 1200px;
+  position: relative;
+  isolation: isolate;
+}
+.product-gallery a { display: block; width: 100%; height: 100%; }
+.product-gallery img {
+  transition: transform .8s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+}
+.product-gallery:hover img { transform: rotateY(-4deg) rotateX(2deg) scale(1.02); }
+.product-gallery::after {
+  content: ''; position: absolute; inset: 24px; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.14) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 1.2s ease;
+  mix-blend-mode: overlay;
+  border-radius: var(--r-xl);
+  z-index: 3;
+}
+.product-gallery:hover::after { transform: translateX(110%); }
+
+/* Hide buyer-leaking analytics from public visitors (anything tagged data-admin="1") */
+html:not(.pre-is-admin) .price-pop-wrap,
+html:not(.pre-is-admin) .price-info-ic { display: none !important; }
+
+/* ============ POLISH LAYER ============ */
+
+/* Reading-flow scroll progress indicator at top of page */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; z-index: 999;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  transition: transform 80ms linear;
+  pointer-events: none;
+}
+
+/* View Transitions — smooth cross-page navigation */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(.4,0,.2,1);
+}
+
+/* Card entrance stagger — fade up from below */
+@keyframes h2k-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.listing-card, .deal-card, .sold-card, .q-card, .pr-card, .tr-card, .cl-card, .topick-tile, .recent-card, .a-panel {
+  animation: h2k-fade-up 480ms cubic-bezier(.4,0,.2,1) both;
+  animation-delay: calc(var(--enter-idx, 0) * 28ms);
+}
+
+/* Keyboard focus rings — gold glow, never harsh blue */
+*:focus { outline: none; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+  box-shadow: 0 0 0 4px rgba(212,175,55,.18);
+}
+
+/* Empty-state illustrations */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center; gap: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--r-lg);
+}
+.empty-state-icon {
+  width: 64px; height: 64px;
+  color: var(--gold);
+  opacity: .7;
+  animation: h2k-fade-up 600ms both;
+}
+.empty-state-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px; letter-spacing: .03em;
+  color: var(--text);
+}
+.empty-state-sub { color: var(--text-muted); font-size: 14px; max-width: 380px; }
+
+/* Confetti container — DOM-injected on success */
+.h2k-confetti-host {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9998;
+  overflow: hidden;
+}
+.h2k-confetti {
+  position: absolute; top: -10px;
+  width: 10px; height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: h2k-confetti-fall 1600ms ease-out forwards;
+}
+@keyframes h2k-confetti-fall {
+  0% { opacity: 1; transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(var(--cx, 0), 110vh, 0) rotate(var(--cr, 540deg)); }
+}
+
+/* Ripple on .btn-gold click */
+.btn-gold { position: relative; overflow: hidden; }
+.btn-gold::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), rgba(255,255,255,.45), transparent 50%);
+  opacity: 0;
+  transition: opacity 400ms;
+  pointer-events: none;
+}
+.btn-gold:active::after { opacity: 1; transition: opacity 60ms; }
+
+/* Subtle tab indicator slide — handled via .active background */
+.tab-bar { position: relative; }
+
+/* Gentle pulse on price element while popover is open */
+.price-pop.open + .price,
+.listing-card .price-wrap:hover .price { animation: h2k-price-pulse 1.6s ease-in-out infinite; }
+@keyframes h2k-price-pulse {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%      { text-shadow: 0 0 18px rgba(212,175,55,.4); }
+}
+
+/* Skeleton state for charts that haven't drawn yet */
+@keyframes h2k-shimmer {
+  0% { background-position: -300px 0; }
+  100% { background-position: calc(300px + 100%) 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+  background-size: 300px 100%;
+  animation: h2k-shimmer 1.6s linear infinite;
+  border-radius: var(--r-sm);
+}
+
+/* Reduced motion respect — disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .listing-card, .deal-card, .sold-card, .q-card, .pr-card, .tr-card, .cl-card, .topick-tile, .recent-card, .a-panel {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* ============ NOUISLIDER OVERRIDES ============ */
 .noUi-target {
   background: var(--surface-3);
@@ -1359,6 +1625,8 @@ tr:hover td { background: rgba(212,175,55,.03); }
       caret-color: var(--gold);
     }
     .pr-new .price-after:focus { border-bottom-style: solid; border-bottom-color: var(--gold); }
+    .pr-strategy { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-top: 6px; font-weight: 700; }
+    .pr-math { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1.4; }
     .pr-view-link { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
     .pr-view-link:hover { color: var(--gold); }
     .action-bar {
@@ -1399,15 +1667,25 @@ tr:hover td { background: rgba(212,175,55,.03); }
           <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
         </div>
       </a>
-      <nav class="nav-links"><a href="index.html">Listings</a>
-<a href="sold.html">Sold</a>
-<a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="price_review.html" class="active admin-only" data-admin="1">Pricing</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a></nav>
+      <nav class="nav-links"><a href="index.html" class="nav-link">Listings</a>
+<a href="steals.html" class="nav-link">Steals</a>
+<a href="sold.html" class="nav-link">Sold</a>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Insights
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="analytics.html" data-admin="1">Analytics</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="price_review.html" class="active" data-admin="1">Pricing</a><a href="title_review.html" data-admin="1">Titles</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Cross-post
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
+        </div></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1445,11 +1723,15 @@ tr:hover td { background: rgba(212,175,55,.03); }
       </button>
     </div>
     <a href="index.html">Listings</a>
+<a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
+<div class="drawer-group" data-admin="1">Insights</div>
+<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
 <a href="quality.html" class="admin-only" data-admin="1">Quality</a>
 <a href="price_review.html" class="active admin-only" data-admin="1">Pricing</a>
 <a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<div class="drawer-group" data-admin="1">Cross-post</div>
 <a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
 <a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
@@ -1487,9 +1769,9 @@ tr:hover td { background: rgba(212,175,55,.03); }
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num danger">9</div><div class="lbl">Underpriced</div></div>
-      <div class="stat-card"><div class="num warning">22</div><div class="lbl">Overpriced</div></div>
-      <div class="stat-card"><div class="num danger">$31</div><div class="lbl">Revenue Gap</div></div>
+      <div class="stat-card"><div class="num danger">12</div><div class="lbl">Underpriced</div></div>
+      <div class="stat-card"><div class="num warning">28</div><div class="lbl">Overpriced</div></div>
+      <div class="stat-card"><div class="num danger">$44</div><div class="lbl">Revenue Gap</div></div>
     </div>
 
     <div class="charts-row">
@@ -1539,7 +1821,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913307606" inputmode="decimal">11.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913307606" inputmode="decimal">9.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.32 fee · -$5.00 ship · <b style="color:var(--success);">$3.27 net</b>
             </div>
             <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-Football-Card-Lot-NFL-/306913307606" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1572,9 +1858,87 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930466950" inputmode="decimal">16.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930466950" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Trey-Amos-400-Red-Shimmer-Prizm-49-RC--/306930466950" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931077943"  style="--stripe:var(--danger)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931077943" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/WVQAAeSwK4lqARIa/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-danger">Underpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931077943</span>
+          </div>
+          <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931077943" target="_blank" rel="noopener" class="pr-title">6 Basketball Cards From The 90s</a>
+          <div class="pr-market">
+            Market median <b>$11.00</b> · Range $1.00–$525.00 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$4.56</div>
+            <div class="pr-gap">-58.5% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931077943" inputmode="decimal">9.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.32 fee · -$1.30 ship · <b style="color:var(--success);">$6.97 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931077943" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931142490"  style="--stripe:var(--danger)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931142490" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/uXIAAeSwJSpqAR2W/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-danger">Underpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931142490</span>
+          </div>
+          <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490" target="_blank" rel="noopener" class="pr-title">6 Basketball Cards From The 90s</a>
+          <div class="pr-market">
+            Market median <b>$11.00</b> · Range $1.00–$525.00 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$4.56</div>
+            <div class="pr-gap">-58.5% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931142490" inputmode="decimal">9.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.32 fee · -$1.30 ship · <b style="color:var(--success);">$6.97 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -1605,7 +1969,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913311444" inputmode="decimal">9.50</span>
+              <span class="price-after" contenteditable="true" data-id="306913311444" inputmode="decimal">8.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.19 fee · -$5.00 ship · <b style="color:var(--success);">$2.40 net</b>
             </div>
             <a href="https://www.ebay.com/itm/9-Michael-Irvin-Cards-Dallas-Cowboys-Football-Card-Lot-NFL-/306913311444" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1638,7 +2006,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930555649" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930555649" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Tank-Bigsby-129-Silver-Prizm-/306930555649" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1671,7 +2043,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930464091" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930464091" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Abdul-Carter-10-RC--/306930464091" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1704,7 +2080,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914169081" inputmode="decimal">4.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914169081" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1737,9 +2117,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930929280" inputmode="decimal">5.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930929280" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Carnell-Tate-68-Red-Ice-Prizm-RC--/306930929280" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306914248743"  style="--stripe:var(--danger)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306914248743" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-danger">Underpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306914248743</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a>
+          <div class="pr-market">
+            Market median <b>$1.86</b> · Range $1.25–$2.00 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$1.49</div>
+            <div class="pr-gap">-20.1% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306914248743" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 11 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -1770,7 +2191,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930909038" inputmode="decimal">2.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930909038" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Bryce-Underwood-28-Red-Ice-Prizm-RC--/306930909038" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1803,7 +2228,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930460600" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930460600" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Will-Johnson-370-White-Disco-Prizm-RC--/306930460600" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1836,7 +2265,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930914782" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930914782" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1990-91-Skybox-Michael-Jordan-41-/306930914782" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1869,9 +2302,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913939866" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913939866" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931291522"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931291522" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/hksAAeSwmT1qATUI/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931291522</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1990-Topps-Ken-Griffey-Jr-336-/306931291522" target="_blank" rel="noopener" class="pr-title">1990 Topps - Ken Griffey Jr #336</a>
+          <div class="pr-market">
+            Market median <b>$0.99</b> · Range $0.72–$0.99 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.33</div>
+            <div class="pr-gap">+236.4% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931291522" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1990-Topps-Ken-Griffey-Jr-336-/306931291522" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -1902,7 +2376,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306903937710" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306903937710" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -1935,9 +2413,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913908225" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913908225" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931236773"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931236773" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/C5gAAeSwVRdqASr4/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931236773</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457--/306931236773" target="_blank" rel="noopener" class="pr-title">1990 Bowman - Rickey Henderson #457</a>
+          <div class="pr-market">
+            Market median <b>$1.32</b> · Range $0.99–$1.49 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.99</div>
+            <div class="pr-gap">+202.3% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931236773" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457--/306931236773" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -1968,7 +2487,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904068997" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306904068997" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/11-Cards-Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-/306904068997" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2001,7 +2524,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930742908" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930742908" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-/306930742908" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2034,7 +2561,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930773940" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930773940" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-/306930773940" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2067,7 +2598,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913902750" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306913902750" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2100,7 +2635,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904078786" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306904078786" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/7-Cards-Steve-Atwater-Rookie-Cards-Denver-Broncos-/306904078786" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2133,7 +2672,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904189481" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306904189481" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2166,7 +2709,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904174454" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306904174454" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/7-Cards-Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-/306904174454" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2199,9 +2746,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930901658" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930901658" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Devin-Neal-43-Red-Ice-Prizm-RC--/306930901658" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931339580"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931339580" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/oToAAeSwZoxqATs-/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931339580</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-/306931339580" target="_blank" rel="noopener" class="pr-title">1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112</a>
+          <div class="pr-market">
+            Market median <b>$1.60</b> · Range $1.25–$3.45 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.45</div>
+            <div class="pr-gap">+115.6% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931339580" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-/306931339580" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2232,9 +2820,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306784122664" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306784122664" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Deion-Sanders-Cards-/306784122664" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931303163"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931303163" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931303163</span>
+          </div>
+          <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-/306931303163" target="_blank" rel="noopener" class="pr-title">4 1991 Playball U.S.A. - Darryl Strawberry</a>
+          <div class="pr-market">
+            Market median <b>$1.67</b> · Range $1.67–$3.33 · 3 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.33</div>
+            <div class="pr-gap">+99.4% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931303163" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-/306931303163" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2265,9 +2894,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930463268" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930463268" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Dwayne-Bowe-46-White-Disco-Prizm-/306930463268" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931048688"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931048688" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/wdkAAeSwfLxqAQtV/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931048688</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinshon-Judkins-84-Red-Ice-Prizm-RC--/306931048688" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice Prizm (RC)</a>
+          <div class="pr-market">
+            Market median <b>$1.30</b> · Range $0.99–$2.49 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.22</div>
+            <div class="pr-gap">+70.8% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931048688" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinshon-Judkins-84-Red-Ice-Prizm-RC--/306931048688" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2298,7 +2968,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930559170" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930559170" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Willis-McGahee-45-Silver-Prizm-/306930559170" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2331,7 +3005,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930938563" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930938563" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-/306930938563" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2364,7 +3042,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930919438" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930919438" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Rebound-Kings-Dennis-Rodman-10-/306930919438" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2397,42 +3079,13 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930560592" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930560592" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Isaac-Teslaa-316-RC--/306930560592" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306930746886"  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306930746886" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/IkQAAeSwWi9qANYX/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930746886</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Chris-Boswell-174-/306930746886" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Chris Boswell #174</a>
-          <div class="pr-market">
-            Market median <b>$1.10</b> · Range $0.99–$1.29 · 10 comps
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$1.49</div>
-            <div class="pr-gap">+36.1% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930746886" inputmode="decimal">1.00</span>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Chris-Boswell-174-/306930746886" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2463,7 +3116,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930562031" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930562031" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Andrew-Mukuba-330-RC--/306930562031" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2496,7 +3153,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930492125" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930492125" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Deommodore-Lenoir-Refractor-269-49-ers-/306930492125" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2529,9 +3190,87 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930939967" inputmode="decimal">2.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930939967" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Keelon-Russell-150-Red-Ice-Prizm-RC--/306930939967" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306930746886"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306930746886" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/IkQAAeSwWi9qANYX/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930746886</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Chris-Boswell-174-/306930746886" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Chris Boswell #174</a>
+          <div class="pr-market">
+            Market median <b>$1.18</b> · Range $0.99–$1.45 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$1.49</div>
+            <div class="pr-gap">+26.8% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306930746886" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Chris-Boswell-174-/306930746886" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931278274"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931278274" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/aS0AAeSwx-BqATId/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931278274</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274" target="_blank" rel="noopener" class="pr-title">1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sample</a>
+          <div class="pr-market">
+            Market median <b>$2.49</b> · Range $1.32–$4.99 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.99</div>
+            <div class="pr-gap">+20.1% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931278274" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2562,7 +3301,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914244468" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914244468" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2595,7 +3338,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930920326" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930920326" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Bobby-Hurley-161-RC--/306930920326" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2628,7 +3375,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930904430" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930904430" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Chris-Paul-Jr-2-Silver-Prizm-RC--/306930904430" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2661,42 +3412,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914911040" inputmode="decimal">3.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914911040" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306930462076"  style="--stripe:var(--success)">
+      <article class="pr-card review-row" data-id="306931209046"  style="--stripe:var(--success)">
         <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306930462076"   aria-label="Select for repricing">
+          <input type="checkbox" class="row-check" value="306931209046"   aria-label="Select for repricing">
         </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/KZ0AAeSwzJ1qASeq/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="pr-info">
           <div class="pr-meta-row">
             <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930462076</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931209046</span>
           </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</a>
+          <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-/306931209046" target="_blank" rel="noopener" class="pr-title">1983 Donruss - Rickey Henderson #35</a>
           <div class="pr-market">
-            Market median <b>$6.50</b> · Range $5.00–$8.00 · 10 comps
+            Market median <b>$1.94</b> · Range $0.99–$2.50 · 10 comps
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$7.50</div>
-            <div class="pr-gap">+15.5% vs market</div>
+            <div class="current-price pr-current">$2.22</div>
+            <div class="pr-gap">+14.7% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930462076" inputmode="decimal">6.50</span>
+              <span class="price-after" contenteditable="true" data-id="306931209046" inputmode="decimal">1.99</span>
             </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-/306931209046" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2713,7 +3472,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
           </div>
           <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-6-Quinn-Ewers-Student-Orientation-Red-Ice-/306930903609" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orientation Red Ice</a>
           <div class="pr-market">
-            Market median <b>$1.69</b> · Range $0.99–$2.41 · 10 comps
+            Market median <b>$1.69</b> · Range $0.99–$2.68 · 10 comps
           </div>
         </div>
         <div class="pr-prices">
@@ -2727,7 +3486,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930903609" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930903609" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-6-Quinn-Ewers-Student-Orientation-Red-Ice-/306930903609" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2760,75 +3523,161 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930807722" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930807722" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306930745036"  style="--stripe:var(--success)">
+      <article class="pr-card review-row" data-id="306931052623"  style="--stripe:var(--success)">
         <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306930745036"   aria-label="Select for repricing">
+          <input type="checkbox" class="row-check" value="306931052623"   aria-label="Select for repricing">
         </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/WUYAAeSwd-5qANWf/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/MeMAAeSw1URqAQzX/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="pr-info">
           <div class="pr-meta-row">
             <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930745036</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931052623</span>
           </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC--/306930745036" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)</a>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Luther-Burden-71-Red-Ice-Prizm-RC--/306931052623" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks - Luther Burden #71 Red Ice Prizm (RC)</a>
           <div class="pr-market">
-            Market median <b>$2.25</b> · Range $1.59–$3.49 · 10 comps
+            Market median <b>$1.99</b> · Range $1.19–$2.00 · 10 comps
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$1.99</div>
-            <div class="pr-gap">-11.6% vs market</div>
+            <div class="current-price pr-current">$2.22</div>
+            <div class="pr-gap">+11.6% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930745036" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306931052623" inputmode="decimal">3.99</span>
             </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC--/306930745036" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Luther-Burden-71-Red-Ice-Prizm-RC--/306931052623" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306758076966"  style="--stripe:var(--success)">
+      <article class="pr-card review-row" data-id="306931285504"  style="--stripe:var(--success)">
         <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306758076966"   aria-label="Select for repricing">
+          <input type="checkbox" class="row-check" value="306931285504"   aria-label="Select for repricing">
         </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/iy0AAeSw4ABqATRQ/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="pr-info">
           <div class="pr-meta-row">
             <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306758076966</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931285504</span>
           </div>
-          <a href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener" class="pr-title">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</a>
+          <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-/306931285504" target="_blank" rel="noopener" class="pr-title">1991 Fleer - Ken Griffey Jr, Barry Bonds #710</a>
           <div class="pr-market">
-            Market median <b>$3.15</b> · Range $0.99–$4.00 · 10 comps
+            Market median <b>$1.99</b> · Range $0.99–$1.99 · 10 comps
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$3.50</div>
-            <div class="pr-gap">+11.1% vs market</div>
+            <div class="current-price pr-current">$2.22</div>
+            <div class="pr-gap">+11.6% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306758076966" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306931285504" inputmode="decimal">1.99</span>
             </div>
-            <a href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-/306931285504" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931055732"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931055732"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/w-sAAeSwfqVqAQ4M/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931055732</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC--/306931055732" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver Prizm (RC)</a>
+          <div class="pr-market">
+            Market median <b>$2.00</b> · Range $1.00–$2.50 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.22</div>
+            <div class="pr-gap">+11.3% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931055732" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC--/306931055732" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931229229"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931229229"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/cL4AAeSwmmlqASqD/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931229229</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1989-Topps-Traded-Rickey-Henderson-48T-Collector-s-Edition-Tiffany--/306931229229" target="_blank" rel="noopener" class="pr-title">1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)</a>
+          <div class="pr-market">
+            Market median <b>$11.17</b> · Range $3.00–$14.99 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$12.34</div>
+            <div class="pr-gap">+10.5% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931229229" inputmode="decimal">10.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.46 fee · -$1.30 ship · <b style="color:var(--success);">$7.83 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1989-Topps-Traded-Rickey-Henderson-48T-Collector-s-Edition-Tiffany--/306931229229" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2859,7 +3708,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914280138" inputmode="decimal">2.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914280138" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2892,7 +3745,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914500757" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914500757" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/10-Eric-Metcalf-Cards-Cleveland-Browns-/306914500757" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2925,7 +3782,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306903933988" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306903933988" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/8-Cards-Roger-Craig-San-Francisco-49ers-Minnesota-Vikings-/306903933988" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2958,7 +3819,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930486853" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930486853" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Kyle-Monangai-274-RC--/306930486853" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2991,9 +3856,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306785270903" inputmode="decimal">2.50</span>
+              <span class="price-after" contenteditable="true" data-id="306785270903" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306930462076"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306930462076"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930462076</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</a>
+          <div class="pr-market">
+            Market median <b>$6.99</b> · Range $5.50–$8.00 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$7.50</div>
+            <div class="pr-gap">+7.3% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306930462076" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3024,7 +3930,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914913674" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914913674" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3057,9 +3967,87 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306785163679" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306785163679" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931283327"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931283327"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/eWwAAeSwcSpqATO6/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931283327</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-/306931283327" target="_blank" rel="noopener" class="pr-title">1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158</a>
+          <div class="pr-market">
+            Market median <b>$3.12</b> · Range $2.95–$5.25 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.99</div>
+            <div class="pr-gap">-4.3% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931283327" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-/306931283327" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306758076966"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306758076966"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306758076966</span>
+          </div>
+          <a href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener" class="pr-title">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</a>
+          <div class="pr-market">
+            Market median <b>$3.65</b> · Range $0.99–$4.19 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.50</div>
+            <div class="pr-gap">-4.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306758076966" inputmode="decimal">53.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 4 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$7.15 fee · -$1.30 ship · <b style="color:var(--success);">$45.14 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3090,7 +4078,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930471991" inputmode="decimal">1.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930471991" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Najee-Harris-203-Black-Green-Shock-Prizm-/306930471991" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3123,7 +4115,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930942401" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930942401" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Jayden-Daniels-178-Silver-Prizm-/306930942401" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3156,9 +4152,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913787569" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913787569" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$5.00 ship · <b style="color:var(--success);">$-3.67 net</b>
             </div>
             <a href="https://www.ebay.com/itm/10-Jim-Kelly-Cards-Buffalo-Bills-Football-Card-Lot-NFL-/306913787569" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931070594"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931070594"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/tLkAAeSwdJBqARAi/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931070594</span>
+          </div>
+          <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-90s-/306931070594" target="_blank" rel="noopener" class="pr-title">6 Basketball Cards From 90s</a>
+          <div class="pr-market">
+            Market median <b>$4.65</b> · Range $1.00–$24.95 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$4.56</div>
+            <div class="pr-gap">-2.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931070594" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-90s-/306931070594" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3189,7 +4226,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930911781" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930911781" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Will-Howard-II-WHD-Red-Ice-Prizm-/306930911781" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3222,7 +4263,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913845449" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913845449" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$5.00 ship · <b style="color:var(--success);">$-3.67 net</b>
             </div>
             <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-Football-Card-Lot-NFL-/306913845449" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3255,7 +4300,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914174921" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914174921" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3288,7 +4337,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904215389" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306904215389" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-/306904215389" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3321,7 +4374,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930930898" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306930930898" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Ashton-Jeanty-9-Red-Ice-Prizm-RC--/306930930898" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3354,42 +4411,13 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914176585" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914176585" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306914248743"  style="--stripe:var(--success)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306914248743"   aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306914248743</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a>
-          <div class="pr-market">
-            Market median <b>$1.98</b> · Range $1.25–$2.00 · 10 comps
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$1.99</div>
-            <div class="pr-gap">+0.3% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914248743" inputmode="decimal">2.00</span>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3420,7 +4448,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914249326" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914249326" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3453,7 +4485,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914915295" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914915295" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3486,7 +4522,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930465261" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930465261" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Brian-Thomas-Jr-30-Green-Yellow-Shock-Prizm-/306930465261" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3519,9 +4559,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930553146" inputmode="decimal">1.50</span>
+              <span class="price-after" contenteditable="true" data-id="306930553146" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Garrett-Williams-6-Arizona-Cardinals-/306930553146" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306930745036"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306930745036"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/WUYAAeSwd-5qANWf/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930745036</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC--/306930745036" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)</a>
+          <div class="pr-market">
+            Market median <b>$2.00</b> · Range $1.25–$3.49 · 10 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$1.99</div>
+            <div class="pr-gap">-0.3% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306930745036" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC--/306930745036" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3552,7 +4633,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904203738" inputmode="decimal">10.00</span>
+              <span class="price-after" contenteditable="true" data-id="306904203738" inputmode="decimal">9.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.32 fee · -$1.30 ship · <b style="color:var(--success);">$6.97 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3585,7 +4670,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306903941543" inputmode="decimal">4.00</span>
+              <span class="price-after" contenteditable="true" data-id="306903941543" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$5.00 ship · <b style="color:var(--success);">$-1.94 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3618,7 +4707,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306903947932" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306903947932" inputmode="decimal">1.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.26 fee · -$5.00 ship · <b style="color:var(--success);">$-3.67 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Carl-Banks-New-York-Giants-Football-Card-Lot-8-Super-Bowl-LB-/306903947932" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3651,7 +4744,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913168494" inputmode="decimal">5.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913168494" inputmode="decimal">4.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.66 fee · -$1.30 ship · <b style="color:var(--success);">$2.63 net</b>
             </div>
             <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3684,7 +4781,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913186982" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913186982" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.40 fee · -$5.00 ship · <b style="color:var(--success);">$-2.81 net</b>
             </div>
             <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-Football-Card-Lot-NFL-/306913186982" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3717,7 +4818,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913790653" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913790653" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3750,7 +4855,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913853080" inputmode="decimal">5.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913853080" inputmode="decimal">4.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.66 fee · -$5.00 ship · <b style="color:var(--success);">$-1.07 net</b>
             </div>
             <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-Football-Card-Lot-NFL-/306913853080" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3783,7 +4892,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913934898" inputmode="decimal">10.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913934898" inputmode="decimal">9.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.32 fee · -$1.30 ship · <b style="color:var(--success);">$6.97 net</b>
             </div>
             <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3816,7 +4929,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913950248" inputmode="decimal">4.00</span>
+              <span class="price-after" contenteditable="true" data-id="306913950248" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3835,7 +4952,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
           </div>
           <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" rel="noopener" class="pr-title">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)</a>
           <div class="pr-market">
-            Market median <b>$2.99</b> · Range $1.75–$3.25 · 10 comps
+            Market median <b>$2.99</b> · Range $1.75–$3.49 · 10 comps
           </div>
         </div>
         <div class="pr-prices">
@@ -3849,7 +4966,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914173441" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914173441" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3882,7 +5003,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914245253" inputmode="decimal">2.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914245253" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3915,7 +5040,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914547105" inputmode="decimal">3.50</span>
+              <span class="price-after" contenteditable="true" data-id="306914547105" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3948,7 +5077,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914912556" inputmode="decimal">3.00</span>
+              <span class="price-after" contenteditable="true" data-id="306914912556" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3981,7 +5114,11 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306751048818" inputmode="decimal">15.50</span>
+              <span class="price-after" contenteditable="true" data-id="306751048818" inputmode="decimal">14.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$1.99 fee · -$1.30 ship · <b style="color:var(--success);">$11.30 net</b>
             </div>
             <a href="https://www.ebay.com/itm/EEVEE-Poke-Ball-Reverse-Holo-PSA-9-2024-Japanese-Terastal-Fest-ex-125-/306751048818" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -4014,32 +5151,36 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306926030086" inputmode="decimal">45.00</span>
+              <span class="price-after" contenteditable="true" data-id="306926030086" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: sold_history, 10 sold">Match market (your sold median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Showtime-Signatures-Aaron-Donald-SOS-AAD-Red-Yellow-Prizm-/306926030086" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306926059250"  style="--stripe:var(--success)">
+      <article class="pr-card review-row" data-id="306931218531"  style="--stripe:var(--success)">
         <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306926059250"   aria-label="Select for repricing">
+          <input type="checkbox" class="row-check" value="306931218531"   aria-label="Select for repricing">
         </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/1KQAAeSw4vpp~dE-/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/9TwAAeSw8K9qASh1/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="pr-info">
           <div class="pr-meta-row">
             <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306926059250</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931218531</span>
           </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</a>
+          <a href="https://www.ebay.com/itm/Rickey-Henderson-New-York-Yankees-1987-3-Of-7-Card-The-Press-Box-/306931218531" target="_blank" rel="noopener" class="pr-title">Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press Box</a>
           <div class="pr-market">
-            Market median <b>$180.00</b> · Range $180.00–$180.00 · 1 comps
+            Market median <b>$3.99</b> · Range $3.99–$3.99 · 1 comps
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$180.00</div>
+            <div class="current-price pr-current">$3.99</div>
             <div class="pr-gap">+0.0% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
@@ -4047,9 +5188,50 @@ tr:hover td { background: rgba(212,175,55,.03); }
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306926059250" inputmode="decimal">180.00</span>
+              <span class="price-after" contenteditable="true" data-id="306931218531" inputmode="decimal">3.99</span>
             </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-On-Campus-Joe-Burrow-OC-14-/306926059250" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/Rickey-Henderson-New-York-Yankees-1987-3-Of-7-Card-The-Press-Box-/306931218531" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931330505"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931330505"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/XXsAAeSwDgxqATpd/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931330505</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1989-Fleer-Mike-Heathb-On-Front-Tom-Brookens-On-Back-And-Vice-Versa--/306931330505" target="_blank" rel="noopener" class="pr-title">1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. And Vice Versa.</a>
+          <div class="pr-market">
+            Market median <b>$1.23</b> · Range $1.23–$1.23 · 1 comps
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$1.23</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931330505" inputmode="decimal">0.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: active_median">Price to move (5% below active median)</div>
+            <div class="pr-math">
+              -$0.13 fee · -$1.30 ship · <b style="color:var(--success);">$-0.84 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1989-Fleer-Mike-Heathb-On-Front-Tom-Brookens-On-Back-And-Vice-Versa--/306931330505" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -4067,7 +5249,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
           labels: ['<-25%', '-25 to -10%', '-10 to +10%', '+10 to +25%', '>+25%'],
           datasets: [{
             label: 'Listings',
-            data: [6, 6, 37, 6, 22],
+            data: [8, 6, 42, 10, 27],
             backgroundColor: ['rgba(224,123,111,.7)','rgba(224,181,74,.6)','rgba(127,199,122,.6)','rgba(224,181,74,.5)','rgba(212,175,55,.6)'],
             borderColor:    ['#e07b6f','#e0b54a','#7fc77a','#e0b54a','#d4af37'],
             borderWidth: 1.5,
@@ -4144,6 +5326,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
         }
 
         LockTracker.consumeErrors(errors);
+        if (updated > 0 && window.h2kConfetti) window.h2kConfetti();
         const errMsg = errors.length ? ' · ' + errors.length + ' failed (eBay-locked, now flagged 🔒)' : '';
         showStatus('Done. ' + updated + ' price(s) updated on eBay' + errMsg,
           updated > 0 ? 'success' : 'danger');
@@ -4164,7 +5347,7 @@ tr:hover td { background: rgba(212,175,55,.03); }
   </main>
 
   <footer class="app-footer">
-    Updated May 10, 2026 · 21:49 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 11, 2026 · 02:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -4216,6 +5399,21 @@ tr:hover td { background: rgba(212,175,55,.03); }
         document.documentElement.classList.add('pre-is-admin');
         document.getElementById('gate-overlay').classList.remove('open');
         showToast('Welcome back. Management tools unlocked.');
+
+        // Fire-and-forget alert ping (server decides if email is sent)
+        try {
+          let did = localStorage.getItem('h2k_device_id');
+          if (!did) {
+            did = (crypto.randomUUID && crypto.randomUUID()) ||
+                  (Date.now() + '-' + Math.random().toString(36).slice(2));
+            localStorage.setItem('h2k_device_id', did);
+          }
+          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
+          }).catch(() => {});
+        } catch(e) {}
       } else {
         err.textContent = 'Wrong passcode. Try again.';
         inp.value = '';
@@ -4229,6 +5427,27 @@ tr:hover td { background: rgba(212,175,55,.03); }
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
       else showToast('Signed out.');
     };
+
+    // Nav dropdown toggle (touch-friendly; desktop hover also works via CSS)
+    window.toggleNavDropdown = function(btn, ev) {
+      ev.stopPropagation();
+      const dd = btn.closest('.nav-dropdown');
+      const opening = !dd.classList.contains('open');
+      // Close any other open dropdowns
+      document.querySelectorAll('.nav-dropdown.open').forEach(d => {
+        if (d !== dd) d.classList.remove('open');
+      });
+      dd.classList.toggle('open', opening);
+      btn.setAttribute('aria-expanded', opening);
+    };
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown.open').forEach(d => {
+          d.classList.remove('open');
+          d.querySelector('.nav-dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
 
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');
@@ -4255,14 +5474,21 @@ tr:hover td { background: rgba(212,175,55,.03); }
       const btn = document.getElementById('nav-refresh-btn');
       const original = btn.textContent;
       btn.textContent = 'Refreshing…'; btn.disabled = true;
+      showToast('Refreshing inventory, prices, sold history, and deals from eBay…');
       try {
         const resp = await fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
         });
         const data = await resp.json();
-        showToast(data.success ? 'Site rebuild triggered. Live in ~2 minutes.' : 'Rebuild failed: ' + (data.error || 'Unknown'));
+        if (data.success) {
+          // Use Lambda's detailed message if present
+          const detail = data.message || 'Refresh started';
+          showToast(detail + ' · pull-to-refresh in ~2-3 min to see new prices');
+        } else {
+          showToast('Refresh failed: ' + (data.error || 'Unknown'));
+        }
       } catch (e) {
-        showToast('Request failed: ' + e.message);
+        showToast('Refresh request failed: ' + e.message);
       }
       btn.textContent = original; btn.disabled = false;
     }
@@ -4328,6 +5554,99 @@ tr:hover td { background: rgba(212,175,55,.03); }
     };
     // Apply on every page load
     window.addEventListener('DOMContentLoaded', () => LockTracker.applyToCards());
+
+    // ============ POLISH LAYER ============
+    // Skip motion for users who request it
+    const __reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Scroll progress bar
+    (function () {
+      const bar = document.createElement('div');
+      bar.className = 'scroll-progress';
+      document.body.appendChild(bar);
+      function update() {
+        const h = document.documentElement;
+        const top = h.scrollTop || document.body.scrollTop;
+        const max = h.scrollHeight - h.clientHeight;
+        const pct = max > 0 ? top / max : 0;
+        bar.style.transform = 'scaleX(' + pct + ')';
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+
+    // Staggered card entrance — set --enter-idx so CSS calc() spaces the delays
+    (function () {
+      if (__reducedMotion) return;
+      const selectors = ['.listing-card','.deal-card','.sold-card','.q-card','.pr-card','.tr-card','.cl-card','.topick-tile','.recent-card','.a-panel'];
+      selectors.forEach(sel => {
+        const cards = document.querySelectorAll(sel);
+        cards.forEach((c, i) => {
+          if (i < 24) c.style.setProperty('--enter-idx', i);
+        });
+      });
+    })();
+
+    // Count-up animation on stat-card numbers — runs once when each card scrolls into view
+    (function () {
+      if (__reducedMotion) return;
+      const nums = document.querySelectorAll('.stat-card .num');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const el = e.target;
+          const raw = el.textContent || '';
+          // Skip anything containing letters (e.g. "5+ yrs", "100%", "★★★★★")
+          if (/[a-z%★]/i.test(raw)) { io.unobserve(el); return; }
+          const hasDollar = raw.includes('$');
+          const target = parseFloat(raw.replace(/[^0-9.\-]/g, '')) || 0;
+          if (target === 0) { io.unobserve(el); return; }
+          const isInt = !raw.includes('.');
+          const start = performance.now();
+          const dur = 900;
+          function step(now) {
+            const t = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            const cur = target * eased;
+            const fmt = isInt ? Math.round(cur).toLocaleString() : cur.toFixed(2);
+            el.textContent = (hasDollar ? '$' : '') + fmt;
+            if (t < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+          io.unobserve(el);
+        });
+      }, { threshold: 0.4 });
+      nums.forEach(n => io.observe(n));
+    })();
+
+    // Button ripple — track click coordinates as CSS custom properties
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-gold');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      btn.style.setProperty('--rx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+      btn.style.setProperty('--ry', ((e.clientY - rect.top)  / rect.height * 100) + '%');
+    }, { passive: true });
+
+    // Confetti — celebratory micro-interaction on successful Apply
+    window.h2kConfetti = function (count = 36) {
+      if (__reducedMotion) return;
+      const host = document.createElement('div');
+      host.className = 'h2k-confetti-host';
+      const colors = ['#d4af37','#f4ce5d','#7fc77a','#6cb0ff','#e07b6f','#b388e0'];
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'h2k-confetti';
+        p.style.left = (Math.random() * 100) + 'vw';
+        p.style.background = colors[i % colors.length];
+        p.style.setProperty('--cx', (Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--cr', (Math.random() * 720 - 360) + 'deg');
+        p.style.animationDelay = (Math.random() * 200) + 'ms';
+        host.appendChild(p);
+      }
+      document.body.appendChild(host);
+      setTimeout(() => host.remove(), 2200);
+    };
 
     // ---- PWA: register service worker + handle install prompt ----
     if ('serviceWorker' in navigator) {

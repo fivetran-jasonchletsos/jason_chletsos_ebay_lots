@@ -1113,9 +1113,7 @@ input[type="checkbox"]:checked::after {
 .listing-card .price-wrap { position: relative; display: inline-block; }
 .listing-card .price-pop {
   display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;            /* fixed so it escapes the card's overflow clipping */
   min-width: 260px;
   max-width: 300px;
   background: var(--surface-2);
@@ -1123,11 +1121,10 @@ input[type="checkbox"]:checked::after {
   border-radius: var(--r-md);
   box-shadow: var(--shadow-lg);
   padding: 12px 14px;
-  z-index: 80;
+  z-index: 200;
   font-family: 'Inter', sans-serif;
   text-align: left;
 }
-.listing-card .price-wrap:hover .price-pop,
 .listing-card .price-pop.open { display: block; }
 .listing-card .price-pop .pp-row {
   display: grid;
@@ -1907,6 +1904,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
       <nav class="nav-links"><a href="index.html" class="nav-link active">Listings</a>
+<a href="steals.html" class="nav-link">Steals</a>
 <a href="sold.html" class="nav-link">Sold</a>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1961,6 +1959,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </button>
     </div>
     <a href="index.html" class="active">Listings</a>
+<a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
 <div class="drawer-group" data-admin="1">Insights</div>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
@@ -2012,6 +2011,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="topick-img"><img src="https://i.ebayimg.com/images/g/QuAAAeSwo59pg~6o/s-l500.jpg" alt="" loading="lazy"></div>
               <div class="topick-price">$15.50</div>
             </a>
+            <a href="items/306931229229.html" class="topick-tile" title="1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)">
+              <div class="topick-img"><img src="https://i.ebayimg.com/images/g/cL4AAeSwmmlqASqD/s-l500.jpg" alt="" loading="lazy"></div>
+              <div class="topick-price">$12.34</div>
+            </a>
             <a href="items/306927035291.html" class="topick-tile" title="2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1">
               <div class="topick-img"><img src="https://i.ebayimg.com/images/g/jbwAAeSwu-dp~mT2/s-l500.jpg" alt="" loading="lazy"></div>
               <div class="topick-price">$10.00</div>
@@ -2023,31 +2026,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <a href="items/306913934898.html" class="topick-tile" title="20 Warren Moon Cards Oilers Vikings">
               <div class="topick-img"><img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="" loading="lazy"></div>
               <div class="topick-price">$10.00</div>
-            </a>
-            <a href="items/306930462076.html" class="topick-tile" title="2025 Panini Prizm - Bo Nix #142 White Disco Prizm">
-              <div class="topick-img"><img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="" loading="lazy"></div>
-              <div class="topick-price">$7.50</div>
             </a></div>
     </section>
     
 
     <div class="stat-grid">
-      <!-- Buyer-facing stats — always visible -->
-      <button class="stat-card linked" type="button" onclick="filterByKPI('all', this)">
-        <div class="num">85</div>
+      <!-- Public-facing buyer-trust signals (hidden when admin signed in — admin sees their own KPIs below) -->
+      <button class="stat-card linked" data-public="1" type="button" onclick="filterByKPI('all', this)">
+        <div class="num">96</div>
         <div class="lbl">Cards in Stock</div>
       </button>
-      <div class="stat-card">
+      <div class="stat-card" data-public="1">
         <div class="num">1<span style="font-size:18px;color:var(--text-muted);">d</span></div>
         <div class="lbl">Ship Time</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-public="1">
         <div class="num">Free</div>
         <div class="lbl">Combined Shipping (2+)</div>
       </div>
-      <!-- Admin-only inventory KPIs (hidden from public) -->
+      <!-- Admin-only inventory KPIs (hidden from public — they're internal strategy data) -->
+      <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('all', this)">
+        <div class="num">96</div>
+        <div class="lbl">Active Listings</div>
+      </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('value', this)">
-        <div class="num">$316</div>
+        <div class="num">$357</div>
         <div class="lbl">Inventory Value</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('underpriced', this)">
@@ -2055,7 +2058,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="lbl">Underpriced</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('overpriced', this)">
-        <div class="num warning">23</div>
+        <div class="num warning">28</div>
         <div class="lbl">Overpriced</div>
       </button>
     </div>
@@ -2098,7 +2101,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="filter-row">
         <input type="text" id="search" class="search-input" placeholder="Search players, sets, years…" oninput="applyFilters()" autocomplete="off">
         <select id="category-select" onchange="setCategoryFromSelect()" style="max-width:200px;">
-          <option value="All">All</option><option value="Football Singles">Football Singles</option><option value="Football Lots">Football Lots</option><option value="Basketball Lots">Basketball Lots</option><option value="Other">Other</option><option value="Basketball Singles">Basketball Singles</option><option value="Pokemon">Pokemon</option><option value="Baseball Lots">Baseball Lots</option><option value="Baseball Singles">Baseball Singles</option>
+          <option value="All">All</option><option value="Football Singles">Football Singles</option><option value="Football Lots">Football Lots</option><option value="Other">Other</option><option value="Basketball Lots">Basketball Lots</option><option value="Basketball Singles">Basketball Singles</option><option value="Pokemon">Pokemon</option><option value="Baseball Singles">Baseball Singles</option><option value="Baseball Lots">Baseball Lots</option>
         </select>
         <select id="sort-filter" onchange="applyFilters()" style="max-width:200px;">
           <option value="default">Sort: Featured</option>
@@ -2108,7 +2111,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </select>
       </div>
       <div class="filter-row">
-        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">85</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">45</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">19</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">8</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">6</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">3</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
+        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">96</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">47</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">19</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">13</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">8</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">4</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
       </div>
       <div class="filter-row">
         <div class="slider-wrap">
@@ -2130,14 +2133,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </section>
 
     <div class="tab-bar" role="tablist">
-      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">85</span></button>
+      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">96</span></button>
       <button class="tab-btn"        data-tab="hot"     onclick="setTab('hot')"     role="tab">🔥 Hot <span class="tab-count" id="cnt-hot">0</span></button>
       <button class="tab-btn"        data-tab="bin"     onclick="setTab('bin')"     role="tab">Buy It Now <span class="tab-count" id="cnt-bin">0</span></button>
       <button class="tab-btn"        data-tab="auction" onclick="setTab('auction')" role="tab">Auctions <span class="tab-count" id="cnt-auction">0</span></button>
     </div>
 
     <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
-      <div>Showing <span id="visible-count">85</span> of 85 listings</div>
+      <div>Showing <span id="visible-count">96</span> of 96 listings</div>
       <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
         Share filters
@@ -3172,7 +3175,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306914173441.html">2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sanders #1 Silver (RC)</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.75 – $3.25</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.75 – $3.49</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-gold">Rookie</span><span class="tag tag-gold">Football Singles</span></div>
         </div>
@@ -3316,14 +3319,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <article class="listing-card"
         data-id="306914248743"
         data-title="2025 panini prizm draft picks - barry sanders #188 purple wave prizm"
-        data-price="1.99"
+        data-price="1.49"
         data-cat="Football Singles"
-        data-flag="OK"
+        data-flag="UNDERPRICED"
         data-type="BIN"
         data-hot="0"
         >
         <div class="thumb-wrap">
-          <a href="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" data-description="$1.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" loading="lazy"></a>
+          <a href="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" data-description="$1.49 · Football Singles"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm" loading="lazy"></a>
           <button class="zoom-btn" type="button"
             onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306914248743&quot;] .glightbox').click();"
             aria-label="Zoom image">
@@ -3336,10 +3339,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="info">
           <h3><a href="items/306914248743.html">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</a></h3>
           <div class="price-wrap">
-            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.98</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.25 – $2.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.50</div><div class="pp-note">11 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.86</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.25 – $2.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-20.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.50</div><div class="pp-note">11 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
-          <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span></div>
+          <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger" data-admin="1">Underpriced</span></div>
         </div>
         <div class="actions">
           <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
@@ -3700,7 +3703,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306758076966.html">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.50<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.15</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $4.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+11.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$54.00</div><div class="pp-note">4 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.65</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $4.19</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-4.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$54.00</div><div class="pp-note">4 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-success">Holo</span><span class="tag tag-gold">Pokemon</span></div>
         </div>
@@ -3766,7 +3769,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306930462076.html">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$7.50<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$7.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$6.50</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$5.00 – $8.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+15.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$6.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$7.50</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$6.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$5.50 – $8.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+7.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$7.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span></div>
         </div>
@@ -4261,7 +4264,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306930746886.html">2025 Panini Prizm - Chris Boswell #174</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.10</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.29</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+36.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.18</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.45</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+26.8%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
         </div>
@@ -4393,7 +4396,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306930903609.html">2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orientation Red Ice</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.49<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.69</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.41</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-12.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.49</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.69</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.68</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-12.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.99</div><div class="pp-note">10 similar items sold (median)</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span></div>
         </div>
@@ -4869,7 +4872,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data-title="6 basketball cards from 90s"
         data-price="4.56"
         data-cat="Basketball Lots"
-        data-flag="UNDERPRICED"
+        data-flag="OK"
         data-type="BIN"
         data-hot="1"
         >
@@ -4888,9 +4891,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306931070594.html">6 Basketball Cards From 90s</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.56<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.56</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$5.62</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $30.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-18.9%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.56</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$4.65</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $24.95</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-2.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$4.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
-          <div class="meta"><span class="tag tag-gold">Basketball Lots</span><span class="tag tag-danger" data-admin="1">Underpriced</span></div>
+          <div class="meta"><span class="tag tag-gold">Basketball Lots</span></div>
         </div>
         <div class="actions">
           <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-90s-/306931070594" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
@@ -4921,7 +4924,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306931077943.html">6 Basketball Cards From The 90s</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.56<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.56</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$11.99</div><div class="pp-note">9 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $525.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-62.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$12.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.56</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$11.00</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $525.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-58.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$11.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span><span class="tag tag-danger" data-admin="1">Underpriced</span></div>
         </div>
@@ -4954,13 +4957,376 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306931142490.html">6 Basketball Cards From The 90s</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.56<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.56</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$11.99</div><div class="pp-note">9 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $525.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-62.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$12.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.56</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$11.00</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.00 – $525.00</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-58.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$11.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
           </div>
           <div class="meta"><span class="tag tag-gold">Basketball Lots</span><span class="tag tag-danger" data-admin="1">Underpriced</span></div>
         </div>
         <div class="actions">
           <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
           <a href="items/306931142490.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931209046"
+        data-title="1983 donruss - rickey henderson #35"
+        data-price="2.22"
+        data-cat="Football Singles"
+        data-flag="OK"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/KZ0AAeSwzJ1qASeq/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1983 Donruss - Rickey Henderson #35" data-description="$2.22 · Football Singles"><img src="https://i.ebayimg.com/images/g/KZ0AAeSwzJ1qASeq/s-l500.jpg" alt="1983 Donruss - Rickey Henderson #35" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931209046&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931209046" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931209046.html">1983 Donruss - Rickey Henderson #35</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.22<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.22</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.94</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $2.50</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+14.7%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Football Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-/306931209046" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931209046.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931218531"
+        data-title="rickey henderson new york yankees 1987 3 of 7 card the press box"
+        data-price="3.99"
+        data-cat="Baseball Singles"
+        data-flag="OK"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/9TwAAeSw8K9qASh1/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press Box" data-description="$3.99 · Baseball Singles"><img src="https://i.ebayimg.com/images/g/9TwAAeSw8K9qASh1/s-l500.jpg" alt="Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press Box" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931218531&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931218531" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931218531.html">Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press Box</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.99</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.99 – $3.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$4.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Baseball Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/Rickey-Henderson-New-York-Yankees-1987-3-Of-7-Card-The-Press-Box-/306931218531" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931218531.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931229229"
+        data-title="1989 topps traded - rickey henderson #48t collector's edition (tiffany)"
+        data-price="12.34"
+        data-cat="Other"
+        data-flag="OK"
+        data-type="BIN"
+        data-hot="1"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/cL4AAeSwmmlqASqD/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)" data-description="$12.34 · Other"><img src="https://i.ebayimg.com/images/g/cL4AAeSwmmlqASqD/s-l500.jpg" alt="1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931229229&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931229229" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931229229.html">1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$12.34<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$12.34</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$11.17</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$3.00 – $14.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+10.5%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$11.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1989-Topps-Traded-Rickey-Henderson-48T-Collector-s-Edition-Tiffany--/306931229229" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931229229.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931236773"
+        data-title="1990 bowman - rickey henderson #457"
+        data-price="3.99"
+        data-cat="Other"
+        data-flag="OVERPRICED"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/C5gAAeSwVRdqASr4/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1990 Bowman - Rickey Henderson #457" data-description="$3.99 · Other"><img src="https://i.ebayimg.com/images/g/C5gAAeSwVRdqASr4/s-l500.jpg" alt="1990 Bowman - Rickey Henderson #457" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931236773&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931236773" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931236773.html">1990 Bowman - Rickey Henderson #457</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.32</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.49</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+202.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457--/306931236773" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931236773.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931278274"
+        data-title="1994 sportflics 2000 rookie & traded - deion sanders #25 sample"
+        data-price="2.99"
+        data-cat="Football Singles"
+        data-flag="OVERPRICED"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/aS0AAeSwx-BqATId/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sample" data-description="$2.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/aS0AAeSwx-BqATId/s-l500.jpg" alt="1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sample" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931278274&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931278274" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931278274.html">1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sample</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$2.49</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.32 – $4.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+20.1%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Rookie</span><span class="tag tag-gold">Football Singles</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931278274.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931283327"
+        data-title="1990 sports illustrated for kids series 1 - ken griffey jr #158"
+        data-price="2.99"
+        data-cat="Other"
+        data-flag="OK"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/eWwAAeSwcSpqATO6/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158" data-description="$2.99 · Other"><img src="https://i.ebayimg.com/images/g/eWwAAeSwcSpqATO6/s-l500.jpg" alt="1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931283327&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931283327" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931283327.html">1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.99</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$3.12</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$2.95 – $5.25</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">-4.3%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$3.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-/306931283327" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931283327.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931285504"
+        data-title="1991 fleer - ken griffey jr, barry bonds #710"
+        data-price="2.22"
+        data-cat="Other"
+        data-flag="OK"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/iy0AAeSw4ABqATRQ/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1991 Fleer - Ken Griffey Jr, Barry Bonds #710" data-description="$2.22 · Other"><img src="https://i.ebayimg.com/images/g/iy0AAeSw4ABqATRQ/s-l500.jpg" alt="1991 Fleer - Ken Griffey Jr, Barry Bonds #710" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931285504&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931285504" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931285504.html">1991 Fleer - Ken Griffey Jr, Barry Bonds #710</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$2.22<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$2.22</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.99 – $1.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+11.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-/306931285504" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931285504.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931291522"
+        data-title="1990 topps - ken griffey jr #336"
+        data-price="3.33"
+        data-cat="Other"
+        data-flag="OVERPRICED"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/hksAAeSwmT1qATUI/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1990 Topps - Ken Griffey Jr #336" data-description="$3.33 · Other"><img src="https://i.ebayimg.com/images/g/hksAAeSwmT1qATUI/s-l500.jpg" alt="1990 Topps - Ken Griffey Jr #336" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931291522&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931291522" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931291522.html">1990 Topps - Ken Griffey Jr #336</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.33<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.33</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$0.99</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$0.72 – $0.99</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+236.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1990-Topps-Ken-Griffey-Jr-336-/306931291522" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931291522.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931303163"
+        data-title="4 1991 playball u.s.a. - darryl strawberry"
+        data-price="3.33"
+        data-cat="Other"
+        data-flag="OVERPRICED"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="4 1991 Playball U.S.A. - Darryl Strawberry" data-description="$3.33 · Other"><img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="4 1991 Playball U.S.A. - Darryl Strawberry" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931303163&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931303163" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931303163.html">4 1991 Playball U.S.A. - Darryl Strawberry</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.33<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.33</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.67</div><div class="pp-note">3 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.67 – $3.33</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+99.4%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-/306931303163" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931303163.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931330505"
+        data-title="1989 fleer - mike heathb on front , tom brookens on back. and vice versa."
+        data-price="1.23"
+        data-cat="Basketball Singles"
+        data-flag="OK"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/XXsAAeSwDgxqATpd/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. And Vice Versa." data-description="$1.23 · Basketball Singles"><img src="https://i.ebayimg.com/images/g/XXsAAeSwDgxqATpd/s-l500.jpg" alt="1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. And Vice Versa." loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931330505&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931330505" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931330505.html">1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. And Vice Versa.</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$1.23<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$1.23</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.23</div><div class="pp-note">1 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.23 – $1.23</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.00</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Basketball Singles</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1989-Fleer-Mike-Heathb-On-Front-Tom-Brookens-On-Back-And-Vice-Versa--/306931330505" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931330505.html" class="btn btn-ghost">Details</a>
+        </div>
+      </article>
+      <article class="listing-card"
+        data-id="306931339580"
+        data-title="1990 sports illustrated for kids series 1 - kevin mitchell #112"
+        data-price="3.45"
+        data-cat="Other"
+        data-flag="OVERPRICED"
+        data-type="BIN"
+        data-hot="0"
+        >
+        <div class="thumb-wrap">
+          <a href="https://i.ebayimg.com/images/g/oToAAeSwZoxqATs-/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112" data-description="$3.45 · Other"><img src="https://i.ebayimg.com/images/g/oToAAeSwZoxqATs-/s-l500.jpg" alt="1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112" loading="lazy"></a>
+          <button class="zoom-btn" type="button"
+            onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306931339580&quot;] .glightbox').click();"
+            aria-label="Zoom image">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3M9 11h4M11 9v4"/></svg>
+          </button>
+          <button class="fav-btn" type="button" data-id="306931339580" onclick="toggleFav(this, event)" aria-label="Favorite">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3><a href="items/306931339580.html">1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112</a></h3>
+          <div class="price-wrap">
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$3.45<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$3.45</div><div class="pp-note">what's set on eBay</div></div><div class="pp-row"><div class="pp-lbl">eBay active median</div><div class="pp-val">$1.60</div><div class="pp-note">10 active asking prices</div></div><div class="pp-row"><div class="pp-lbl">eBay range</div><div class="pp-val">$1.25 – $3.45</div><div class="pp-note">low → high asking</div></div><div class="pp-row"><div class="pp-lbl">Gap vs market</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+115.6%</span></div><div class="pp-note">your price vs. median</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val"><span style='color:var(--text-dim)'>none yet</span></div><div class="pp-note">no similar items in sold history</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$1.50</b></div><div class="pp-note">median rounded to $0.50</div></div></div></div>
+          </div>
+          <div class="meta"><span class="tag tag-gold">Other</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
+        </div>
+        <div class="actions">
+          <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-/306931339580" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="items/306931339580.html" class="btn btn-ghost">Details</a>
         </div>
       </article>
     </div>
@@ -5128,16 +5494,34 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       window.togglePricePop = function(priceEl, ev) {
         ev.stopPropagation();
         const pop = priceEl.parentElement.querySelector('.price-pop');
+        if (!pop) return;
         const wasOpen = pop.classList.contains('open');
-        // Close all popovers first
+        // Close any other open popovers first
         document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
-        if (!wasOpen) pop.classList.add('open');
+        if (wasOpen) return;
+        // Position the popover near the price element using fixed coords
+        const rect = priceEl.getBoundingClientRect();
+        const POP_W = 280; // approx; CSS min-width is 260, max 300
+        // Prefer right of price; flip to left if it would overflow viewport
+        let left = rect.left;
+        if (left + POP_W + 12 > window.innerWidth) left = Math.max(8, window.innerWidth - POP_W - 12);
+        // Prefer below; flip above if no room
+        let top = rect.bottom + 8;
+        const POP_EST_H = 260; // estimate before render
+        if (top + POP_EST_H > window.innerHeight - 8) top = Math.max(8, rect.top - POP_EST_H - 8);
+        pop.style.left = left + 'px';
+        pop.style.top  = top  + 'px';
+        pop.classList.add('open');
       };
       document.addEventListener('click', (e) => {
-        if (!e.target.closest('.price-wrap')) {
+        if (!e.target.closest('.price-wrap') && !e.target.closest('.price-pop')) {
           document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
         }
       });
+      // Close on scroll/resize so the popover doesn't desync from its anchor
+      ['scroll','resize'].forEach(evt => window.addEventListener(evt, () => {
+        document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+      }, { passive: true }));
 
       // ============ HERO AUTO-ROTATION ============
       const heroSlides = document.querySelectorAll('.hero-slide');
@@ -5263,7 +5647,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 11, 2026 · 00:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 11, 2026 · 02:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
