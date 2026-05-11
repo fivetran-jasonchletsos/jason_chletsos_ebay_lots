@@ -2628,17 +2628,18 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # - group="X"   → tucked under the "X ▾" dropdown
 # Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
-    ("index.html",        "Listings",    True,  None),
-    ("steals.html",       "Steals",      True,  None),
-    ("sold.html",         "Sold",        True,  None),
-    ("analytics.html",    "Analytics",   False, "Insights"),
-    ("deals.html",        "Deals",       False, "Insights"),
-    ("quality.html",      "Quality",     False, "Insights"),
-    ("price_review.html", "Pricing",     False, "Insights"),
-    ("title_review.html", "Titles",      False, "Insights"),
-    ("reddit.html",       "Reddit",      False, "Cross-post"),
-    ("craigslist.html",   "Craigslist",  False, "Cross-post"),
-    ("google_feed.xml",   "Google Feed", False, "Cross-post"),
+    ("index.html",         "Listings",      True,  None),
+    ("steals.html",        "Steals",        True,  None),
+    ("sold.html",          "Sold",          True,  None),
+    ("analytics.html",     "Analytics",     False, "Insights"),
+    ("market_intel.html",  "Market Intel",  False, "Insights"),
+    ("deals.html",         "Deals",         False, "Insights"),
+    ("quality.html",       "Quality",       False, "Insights"),
+    ("price_review.html",  "Pricing",       False, "Insights"),
+    ("title_review.html",  "Titles",        False, "Insights"),
+    ("reddit.html",        "Reddit",        False, "Cross-post"),
+    ("craigslist.html",    "Craigslist",    False, "Cross-post"),
+    ("google_feed.xml",    "Google Feed",   False, "Cross-post"),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
@@ -3309,6 +3310,219 @@ def _categorize(listing: dict) -> str:
     return "Other"
 
 
+# ---------------------------------------------------------------------------
+# Multi-source pricing layer — eBay + PriceCharting + PokemonTCG.io
+# Cached in pricing_cache.json with a 24h TTL so we don't hammer free-tier APIs.
+# ---------------------------------------------------------------------------
+PRICING_CACHE_FILE = Path(__file__).parent / "pricing_cache.json"
+PRICING_CACHE_TTL  = 24 * 3600
+
+
+def _pricing_cache_load() -> dict:
+    if not PRICING_CACHE_FILE.exists():
+        return {}
+    try:
+        return json.load(open(PRICING_CACHE_FILE))
+    except Exception:
+        return {}
+
+
+def _pricing_cache_save(cache: dict) -> None:
+    try:
+        PRICING_CACHE_FILE.write_text(json.dumps(cache, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def fetch_pricecharting(title: str, api_key: str, cache: dict) -> dict | None:
+    """PriceCharting API — sports cards, video games, Pokemon. Free tier ~1000/day.
+    Sign up at https://www.pricecharting.com/api to get a token.
+    Returns {median, low, high, count, url, matched_title} or None."""
+    if not api_key:
+        return None
+    key = f"pricecharting::{title[:80].lower()}"
+    cached = cache.get(key)
+    if cached and (_time.time() - cached.get("ts", 0)) < PRICING_CACHE_TTL:
+        return cached.get("data")
+    try:
+        q = _market_query(title)
+        r = requests.get(
+            "https://www.pricecharting.com/api/product",
+            params={"t": api_key, "q": q},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            return None
+        d = r.json()
+        if d.get("status") != "success":
+            cache[key] = {"data": None, "ts": _time.time()}
+            return None
+        loose = d.get("loose-price")
+        cib   = d.get("cib-price")
+        new_  = d.get("new-price")
+        prices = [p / 100.0 for p in (loose, cib, new_) if p and isinstance(p, (int, float))]
+        if not prices:
+            cache[key] = {"data": None, "ts": _time.time()}
+            return None
+        prod_id = d.get("id", "")
+        result = {
+            "median":        round(loose / 100.0, 2) if loose else round(min(prices), 2),
+            "low":           round(min(prices), 2),
+            "high":          round(max(prices), 2),
+            "count":         len(prices),
+            "url":           f"https://www.pricecharting.com/game/{prod_id}" if prod_id else "https://www.pricecharting.com",
+            "matched_title": d.get("product-name", ""),
+        }
+        cache[key] = {"data": result, "ts": _time.time()}
+        return result
+    except Exception:
+        return None
+
+
+def fetch_pokemontcg(title: str, cache: dict, api_key: str = "") -> dict | None:
+    """pokemontcg.io API — Pokemon cards. No auth needed (1000/day public);
+    free key bumps to 20000/day. Includes TCGplayer + Cardmarket prices.
+    Returns {median, low, high, count, url, matched_title} or None."""
+    if not any(w in title.lower() for w in ["pokemon", "pikachu", "charizard", "charcadet", "eevee", "mewtwo", "promo", "holo"]):
+        return None
+    key = f"pokemontcg::{title[:80].lower()}"
+    cached = cache.get(key)
+    if cached and (_time.time() - cached.get("ts", 0)) < PRICING_CACHE_TTL:
+        return cached.get("data")
+    try:
+        # Extract candidate Pokemon name — first proper-noun-looking words from title
+        tokens = [w for w in _re.findall(r"\b[A-Z][a-zA-Z]+\b", title) if w.lower() not in {"pokemon", "card", "holo", "promo", "mega", "evolution", "set", "near", "mint"}]
+        name = (tokens[0] if tokens else _market_query(title).split()[0]).strip()
+        if not name:
+            return None
+        headers = {"X-Api-Key": api_key} if api_key else {}
+        r = requests.get(
+            "https://api.pokemontcg.io/v2/cards",
+            params={"q": f'name:"{name}"', "pageSize": 5, "orderBy": "-set.releaseDate"},
+            headers=headers,
+            timeout=12,
+        )
+        if r.status_code != 200:
+            cache[key] = {"data": None, "ts": _time.time()}
+            return None
+        data = r.json().get("data", [])
+        if not data:
+            cache[key] = {"data": None, "ts": _time.time()}
+            return None
+        # Use the first match; collect TCGplayer market prices across variants
+        c = data[0]
+        prices = []
+        tcg = c.get("tcgplayer", {}).get("prices", {})
+        for variant in ("holofoil", "reverseHolofoil", "normal", "1stEditionHolofoil", "1stEditionNormal"):
+            v = tcg.get(variant) or {}
+            if v.get("market"): prices.append(float(v["market"]))
+            elif v.get("mid"):  prices.append(float(v["mid"]))
+        # Cardmarket EUR (rough USD conversion not done — show as-is, label EUR)
+        cm = c.get("cardmarket", {}).get("prices", {})
+        cm_avg = cm.get("averageSellPrice")
+        if cm_avg: prices.append(float(cm_avg))
+        if not prices:
+            cache[key] = {"data": None, "ts": _time.time()}
+            return None
+        result = {
+            "median":        round(sorted(prices)[len(prices) // 2], 2),
+            "low":           round(min(prices), 2),
+            "high":          round(max(prices), 2),
+            "count":         len(prices),
+            "url":           (c.get("tcgplayer", {}).get("url") or c.get("cardmarket", {}).get("url") or ""),
+            "matched_title": f'{c.get("name", "")} · {c.get("set", {}).get("name", "")}',
+        }
+        cache[key] = {"data": result, "ts": _time.time()}
+        return result
+    except Exception:
+        return None
+
+
+def gather_pricing_sources(title: str, cfg: dict, sold_history: list[dict],
+                           ebay_market: dict | None, cache: dict) -> dict:
+    """Aggregate pricing from every available source for one item.
+    Returns dict keyed by source name with {median, low, high, count, url, label, freshness}."""
+    out = {}
+    # 1. eBay active median (already in fetch_market_prices output)
+    if ebay_market and ebay_market.get("market_median") is not None:
+        out["ebay_active"] = {
+            "median":  ebay_market["market_median"],
+            "low":     ebay_market.get("market_min"),
+            "high":    ebay_market.get("market_max"),
+            "count":   ebay_market.get("comp_count", 0),
+            "url":     "",
+            "label":   "eBay Active",
+            "subnote": f"{ebay_market.get('comp_count', 0)} live asking prices",
+        }
+    # 2. Your sold history match
+    sm = _sold_history_match(title, sold_history or [])
+    if sm.get("count", 0) > 0:
+        out["sold_history"] = {
+            "median":  sm["median"],
+            "low":     sm.get("min"),
+            "high":    sm.get("max"),
+            "count":   sm["count"],
+            "url":     "sold.html",
+            "label":   "Your past sales",
+            "subnote": f"{sm['count']} similar items sold (median)",
+        }
+    # 3. PriceCharting (if API key)
+    pc_key = cfg.get("pricecharting_api_key") or os.environ.get("PRICECHARTING_API_KEY", "")
+    if pc_key:
+        pc = fetch_pricecharting(title, pc_key, cache)
+        if pc:
+            out["pricecharting"] = {
+                "median":  pc["median"],
+                "low":     pc.get("low"),
+                "high":    pc.get("high"),
+                "count":   pc.get("count", 0),
+                "url":     pc.get("url", ""),
+                "label":   "PriceCharting",
+                "subnote": f"loose · {pc.get('matched_title', '')[:50]}",
+            }
+    # 4. PokemonTCG.io (free, Pokemon only)
+    ptcg_key = cfg.get("pokemontcg_api_key") or os.environ.get("POKEMONTCG_API_KEY", "")
+    ptcg = fetch_pokemontcg(title, cache, ptcg_key)
+    if ptcg:
+        out["pokemontcg"] = {
+            "median":  ptcg["median"],
+            "low":     ptcg.get("low"),
+            "high":    ptcg.get("high"),
+            "count":   ptcg.get("count", 0),
+            "url":     ptcg.get("url", ""),
+            "label":   "PokemonTCG.io",
+            "subnote": f"TCGplayer · {ptcg.get('matched_title', '')[:50]}",
+        }
+    return out
+
+
+def _suggest_price_multi(your_price: float, sources: dict) -> dict:
+    """Recommend a list price using all available sources, ranked by reliability.
+    Priority: sold_history > pricecharting > pokemontcg > ebay_active*0.95."""
+    if "sold_history" in sources and sources["sold_history"]["count"] >= 3:
+        ref = sources["sold_history"]["median"]
+        basis = "Your past sales"
+    elif "pricecharting" in sources:
+        ref = sources["pricecharting"]["median"]
+        basis = "PriceCharting"
+    elif "pokemontcg" in sources:
+        ref = sources["pokemontcg"]["median"]
+        basis = "PokemonTCG.io"
+    elif "ebay_active" in sources and sources["ebay_active"]["count"] >= 3:
+        ref = sources["ebay_active"]["median"] * 0.95
+        basis = "eBay active (−5%)"
+    else:
+        return {"price": None, "basis": "no comps"}
+    # Round to .99 ending, min $0.99
+    if ref >= 1:
+        floor_d = int(ref)
+        price = floor_d - 0.01 if ref - floor_d < 0.50 else floor_d + 0.99
+    else:
+        price = 0.99
+    price = max(0.99, round(price, 2))
+    return {"price": price, "basis": basis, "reference": round(ref, 2)}
+
+
 def _sold_history_match(listing_title: str, sold_history: list[dict]) -> dict:
     """Find similar items in sold_history.json by token overlap."""
     if not sold_history:
@@ -3342,7 +3556,8 @@ def _sold_history_match(listing_title: str, sold_history: list[dict]) -> dict:
     }
 
 
-def build_dashboard(listings: list[dict], market: dict | None = None, seller: dict | None = None) -> Path:
+def build_dashboard(listings: list[dict], market: dict | None = None,
+                    seller: dict | None = None, pricing: dict | None = None) -> Path:
     import re as _re
 
     locks = load_locks()
@@ -3422,33 +3637,29 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         cat_tag  = f'<span class="tag tag-gold">{e["category"]}</span>'
         grade_tags = _extract_grade_tags(e["title"])
 
-        # Build multi-source pricing popover data
-        m = e["market"] or {}
-        sold_match = _sold_history_match(e["title"], sold_history)
-        sources = []
-        sources.append(("Your price", f"${e['price_f']:.2f}", "what's set on eBay"))
-        if m.get("market_median") is not None:
-            sources.append(("eBay active median", f"${m['market_median']:.2f}", f"{m.get('comp_count', 0)} active asking prices"))
-            sources.append(("eBay range", f"${m.get('market_min', 0):.2f} – ${m.get('market_max', 0):.2f}", "low → high asking"))
-            if m.get("gap_pct") is not None:
-                gap = m["gap_pct"]
-                tone = "var(--success)" if -15 <= gap <= 20 else ("var(--danger)" if gap < -15 else "var(--warning)")
-                sources.append(("Gap vs market", f"<span style=\"color:{tone};font-weight:700;\">{gap:+.1f}%</span>", "your price vs. median"))
-        else:
-            sources.append(("eBay active median", "<span style='color:var(--text-dim)'>no comps</span>", "no matching listings found"))
-        if sold_match.get("count", 0) > 0:
-            sources.append(("Your past sales", f"${sold_match['median']:.2f}", f"{sold_match['count']} similar items sold (median)"))
-        else:
-            sources.append(("Your past sales", "<span style='color:var(--text-dim)'>none yet</span>", "no similar items in sold history"))
-        # Suggested re-price = market median rounded to nearest $0.50, min $0.99
-        suggested = None
-        if m.get("market_median"):
-            suggested = max(0.99, round(m["market_median"] * 2) / 2)
-            sources.append(("Suggested list", f"<b style=\"color:var(--gold);\">${suggested:.2f}</b>", "median rounded to $0.50"))
-
+        # Build multi-source pricing popover from the aggregated sources dict
+        srcs = (pricing or {}).get(e["item_id"], {})
+        rows = [("Your price", f"${e['price_f']:.2f}", "currently listed", "")]
+        for sk in ("ebay_active", "sold_history", "pricecharting", "pokemontcg"):
+            if sk not in srcs:
+                continue
+            s = srcs[sk]
+            val = f"${s['median']:.2f}"
+            if s.get("low") is not None and s.get("high") is not None and s["low"] != s["high"]:
+                val += f' <span style="color:var(--text-muted);font-weight:400;font-size:11px;">(${s["low"]:.0f}–${s["high"]:.0f})</span>'
+            rows.append((s["label"], val, s.get("subnote", ""), s.get("url", "")))
+        # Gap vs eBay active
+        if "ebay_active" in srcs:
+            gap = (e["price_f"] - srcs["ebay_active"]["median"]) / srcs["ebay_active"]["median"] * 100 if srcs["ebay_active"]["median"] else 0
+            tone = "var(--success)" if -15 <= gap <= 20 else ("var(--danger)" if gap < -15 else "var(--warning)")
+            rows.append(("Gap vs eBay", f'<span style="color:{tone};font-weight:700;">{gap:+.1f}%</span>', "your price vs eBay median", ""))
+        # Suggested via multi-source algorithm
+        sug = _suggest_price_multi(e["price_f"], srcs)
+        if sug.get("price"):
+            rows.append(("Suggested list", f'<b style="color:var(--gold);">${sug["price"]:.2f}</b>', f"based on {sug['basis']}", ""))
         rows_html = "".join(
-            f'<div class="pp-row"><div class="pp-lbl">{lbl}</div><div class="pp-val">{val}</div><div class="pp-note">{note}</div></div>'
-            for lbl, val, note in sources
+            f'<div class="pp-row"><div class="pp-lbl">{lbl}</div><div class="pp-val">{val}</div><div class="pp-note">{note}{(" · <a href=\"" + url + "\" target=\"_blank\" rel=\"noopener\" style=\"color:var(--gold);\">↗</a>") if url else ""}</div></div>'
+            for lbl, val, note, url in rows
         )
         price_pop_html = f'<div class="price-pop" role="dialog" aria-label="Pricing details">{rows_html}</div>'
 
@@ -4550,6 +4761,315 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
     out = OUTPUT_DIR / "steals.html"
     out.write_text(html_shell(f"Steals · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="steals.html"), encoding="utf-8")
     print(f"  Steals page: {out}  ({len(steals)} cards below market)")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Market Intelligence page (market_intel.html) — forward-looking
+# ---------------------------------------------------------------------------
+MARKET_HISTORY_FILE = Path(__file__).parent / "market_history.json"
+
+
+def _market_history_load() -> list[dict]:
+    if not MARKET_HISTORY_FILE.exists():
+        return []
+    try:
+        return json.load(open(MARKET_HISTORY_FILE))
+    except Exception:
+        return []
+
+
+def _market_history_append(entry: dict) -> None:
+    history = _market_history_load()
+    history.append(entry)
+    # Keep last 365 snapshots (~1 year of daily builds)
+    history = history[-365:]
+    MARKET_HISTORY_FILE.write_text(json.dumps(history, indent=2, default=str), encoding="utf-8")
+
+
+def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict],
+                            deals_data: dict) -> Path:
+    """Forward-looking market intelligence:
+       - aggregate Deal Hunter query data into segments
+       - compare against inventory mix
+       - recommend underweighted categories with high market median
+       - track market metrics over time via market_history.json
+    """
+    from datetime import datetime as _dt
+    import re as _re
+
+    queries = deals_data.get("queries", [])
+
+    # --- Per-category segment aggregation from deal hunter results ---
+    segments: dict[str, dict] = {}
+    for q in queries:
+        cat = q.get("category", "Other")
+        seg = segments.setdefault(cat, {"comps": 0, "deals": 0, "prices": [], "queries": 0})
+        seg["queries"] += 1
+        seg["comps"]   += q.get("comps", 0)
+        seg["deals"]   += len(q.get("deals", []))
+        if q.get("median"):
+            # Approximate per-query weight = each comp counts as median price
+            seg["prices"].extend([q["median"]] * max(1, q.get("comps", 1) // 5))
+    for cat, seg in segments.items():
+        prices = sorted(seg["prices"])
+        seg["median"] = round(prices[len(prices) // 2], 2) if prices else 0
+        seg["min"]    = round(min(prices), 2) if prices else 0
+        seg["max"]    = round(max(prices), 2) if prices else 0
+
+    # --- Inventory mix (your current listings) ---
+    inventory: dict[str, dict] = {}
+    for l in listings:
+        cat = _categorize(l)
+        inv = inventory.setdefault(cat, {"count": 0, "value": 0.0, "avg": 0.0})
+        try:
+            p = float(l["price"])
+        except (TypeError, ValueError):
+            p = 0.0
+        inv["count"] += 1
+        inv["value"] += p
+    for cat, inv in inventory.items():
+        inv["avg"] = round(inv["value"] / inv["count"], 2) if inv["count"] else 0
+
+    # --- Sold mix (your historical sales by category) ---
+    sold_by_cat: dict[str, dict] = {}
+    for s in sold:
+        cat = _categorize({"title": s.get("title", "")})
+        sb = sold_by_cat.setdefault(cat, {"count": 0, "revenue": 0.0})
+        sb["count"]   += 1
+        sb["revenue"] += float(s.get("sale_price", 0) or 0)
+
+    # --- Recommendation engine ---
+    # Score each category by: market_median × log(buyer_demand) × inventory_gap_factor.
+    # High score = high-value market segment where you have low or no presence.
+    import math
+    recommendations = []
+    all_cats = sorted(set(segments.keys()) | set(inventory.keys()) | set(sold_by_cat.keys()))
+    for cat in all_cats:
+        m_seg = segments.get(cat, {})
+        inv   = inventory.get(cat, {"count": 0, "value": 0.0, "avg": 0.0})
+        sold_seg = sold_by_cat.get(cat, {"count": 0, "revenue": 0.0})
+        median = m_seg.get("median", 0)
+        comps  = m_seg.get("comps", 0)
+        if median < 1 or comps < 5:
+            continue  # not enough signal
+        # Inventory gap: 1.5 if no inventory, 1.0 if matches, 0.4 if heavy
+        if inv["count"] == 0:
+            gap_factor = 2.0
+        elif inv["count"] < 3:
+            gap_factor = 1.4
+        elif inv["count"] < 8:
+            gap_factor = 1.0
+        else:
+            gap_factor = 0.6
+        # Demand signal — comps = active buyer interest (more listings = more sellers chasing buyers)
+        demand = math.log(comps + 1)
+        # Track-record bonus if we've sold in this category before
+        track_bonus = 1.0 + min(0.5, sold_seg["count"] * 0.05)
+        score = median * demand * gap_factor * track_bonus
+        # Plain-English recommendation
+        if inv["count"] == 0:
+            verdict = f"You don't carry this — market median is ${median:.0f} across {comps} active listings"
+            action  = "Consider sourcing"
+        elif inv["count"] < 3:
+            verdict = f"Light inventory ({inv['count']}) vs market depth ({comps} comps at ${median:.0f} median)"
+            action  = "Add inventory"
+        elif inv["count"] < 8:
+            verdict = f"Balanced — you have {inv['count']} listings, median ${median:.0f}"
+            action  = "Maintain"
+        else:
+            verdict = f"Heavy ({inv['count']}) — wait for market to absorb before sourcing more"
+            action  = "Hold"
+        recommendations.append({
+            "category":  cat,
+            "score":     round(score, 1),
+            "median":    median,
+            "comps":     comps,
+            "inv_count": inv["count"],
+            "inv_value": inv["value"],
+            "sold_count": sold_seg["count"],
+            "verdict":   verdict,
+            "action":    action,
+        })
+    recommendations.sort(key=lambda r: -r["score"])
+
+    # --- Trending players / sets (from deal hunter results) ---
+    name_counts: dict[str, dict] = {}
+    for q in queries:
+        for d in q.get("deals", []):
+            t = (d.get("title") or "")
+            # Extract proper-noun-looking tokens; player names typically 2 capitalized words
+            tokens = _re.findall(r"\b[A-Z][a-zA-Z\-']{2,}\b", t)
+            # Skip pure brands / common words
+            skip = {"PSA", "BGS", "SGC", "Mint", "Near", "Card", "Cards", "Rookie",
+                    "Holo", "Refractor", "Auto", "Prizm", "Bowman", "Topps", "Panini",
+                    "Select", "Optic", "Donruss", "Chrome", "Marvel", "Pokemon"}
+            tokens = [t for t in tokens if t not in skip]
+            for i in range(len(tokens) - 1):
+                bigram = f"{tokens[i]} {tokens[i+1]}"
+                # Filter: must look like a name (no digits, length 6-30)
+                if 6 <= len(bigram) <= 30 and not any(c.isdigit() for c in bigram):
+                    nc = name_counts.setdefault(bigram, {"count": 0, "total_price": 0.0})
+                    nc["count"] += 1
+                    nc["total_price"] += d.get("price", 0)
+    trending = sorted(
+        [(n, d["count"], d["total_price"] / d["count"] if d["count"] else 0) for n, d in name_counts.items()],
+        key=lambda x: -x[1],
+    )[:20]
+
+    # --- Save today's market snapshot to history ---
+    today_snapshot = {
+        "ts":   _dt.now(timezone.utc).isoformat(),
+        "segments": {c: {"median": s.get("median", 0), "comps": s.get("comps", 0)} for c, s in segments.items()},
+        "inventory": {c: {"count": i.get("count", 0), "value": round(i.get("value", 0), 2)} for c, i in inventory.items()},
+    }
+    _market_history_append(today_snapshot)
+    history = _market_history_load()
+
+    # --- Time series for inventory + median chart (last 30 snapshots) ---
+    recent_history = history[-30:]
+    history_labels = [h.get("ts", "")[:10] for h in recent_history]
+    # Plot median price per top category over time
+    top_cats = [r["category"] for r in recommendations[:4]]
+    history_series = {}
+    for cat in top_cats:
+        history_series[cat] = [
+            h.get("segments", {}).get(cat, {}).get("median", 0) for h in recent_history
+        ]
+
+    # --- HTML ---
+    extra_css = """
+    .mi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .mi-grid.cols-1 { grid-template-columns: 1fr; }
+    .mi-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
+    .mi-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .mi-panel .mi-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+    .mi-chart-wrap { position: relative; height: 280px; }
+    .mi-rec-table { width: 100%; }
+    .mi-rec-table th, .mi-rec-table td { font-size: 12.5px; padding: 10px 12px; text-align: left; }
+    .mi-rec-table th:not(:first-child), .mi-rec-table td:not(:first-child) { text-align: right; }
+    .mi-action {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
+    }
+    .mi-action.consider-sourcing { background: rgba(127,199,122,.16); color: var(--success); }
+    .mi-action.add-inventory     { background: rgba(212,175,55,.16); color: var(--gold); }
+    .mi-action.maintain          { background: rgba(108,176,255,.16); color: var(--link); }
+    .mi-action.hold              { background: rgba(150,150,150,.18); color: var(--text-muted); }
+    .mi-score {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; color: var(--gold); letter-spacing: .02em;
+    }
+    .mi-verdict { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .trending-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+    .trending-tile {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+    }
+    .trending-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .trending-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    @media (max-width: 760px) { .mi-grid { grid-template-columns: 1fr; } }
+    """
+
+    rec_rows = []
+    for r in recommendations[:25]:
+        action_class = r["action"].lower().replace(" ", "-")
+        rec_rows.append(
+            f'<tr><td><b>{r["category"]}</b><span class="mi-verdict">{r["verdict"]}</span></td>'
+            f'<td><span class="mi-score">{r["score"]}</span></td>'
+            f'<td>${r["median"]:.0f}</td><td>{r["comps"]}</td><td>{r["inv_count"]}</td>'
+            f'<td><span class="mi-action {action_class}">{r["action"]}</span></td></tr>'
+        )
+    trending_html = "".join(
+        f'<div class="trending-tile"><div class="trending-name">{n}</div>'
+        f'<div class="trending-meta">{c} appearances · avg ${avg:.0f}</div></div>'
+        for n, c, avg in trending
+    ) or '<div style="color:var(--text-muted);font-size:13px;">Run a few build cycles to populate trending data.</div>'
+
+    # --- Top opportunities (categories not in inventory but with strong market) ---
+    new_opps = [r for r in recommendations if r["inv_count"] == 0][:5]
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Forward-looking · sourcing recommendations</div>
+        <h1 class="section-title">Market <span class="accent">Intelligence</span></h1>
+        <div class="section-sub">Statistical analysis of the broader market from your Deal Hunter watchlist data, compared against your current inventory mix. Tells you <em>where to look next</em>, not just what you've done.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">{len(segments)}</div><div class="lbl">Market Segments Tracked</div></div>
+      <div class="stat-card"><div class="num">{sum(s["comps"] for s in segments.values())}</div><div class="lbl">Active Comps Across Market</div></div>
+      <div class="stat-card"><div class="num">{len(recommendations)}</div><div class="lbl">Categories Scored</div></div>
+      <div class="stat-card"><div class="num">{len(new_opps)}</div><div class="lbl">Greenfield Opportunities</div></div>
+    </div>
+
+    <div class="mi-grid cols-1">
+      <div class="mi-panel">
+        <h3>Sourcing recommendations · ranked by opportunity score</h3>
+        <div class="mi-sub">Score = market median × log(comp count) × inventory-gap factor × your-track-record bonus. Higher = better target.</div>
+        <table class="mi-rec-table">
+          <thead><tr><th>Category</th><th>Score</th><th>Median</th><th>Comps</th><th>You have</th><th>Action</th></tr></thead>
+          <tbody>{''.join(rec_rows) or '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px;">Add queries to deal_queries.json to start scoring.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mi-grid">
+      <div class="mi-panel">
+        <h3>Greenfield opportunities</h3>
+        <div class="mi-sub">High-market-value segments you don't have any inventory in yet</div>
+        {''.join(f'<div style="padding:10px 0;border-bottom:1px solid var(--border);"><b style="color:var(--text);">{o["category"]}</b> · ${o["median"]:.0f} median · {o["comps"]} comps<br><span style="font-size:11px;color:var(--text-muted);">{o["verdict"]}</span></div>' for o in new_opps) or '<div style="color:var(--text-muted);font-size:13px;">No greenfield gaps — you have inventory across all tracked segments.</div>'}
+      </div>
+      <div class="mi-panel">
+        <h3>Top 20 trending names</h3>
+        <div class="mi-sub">Players/characters appearing most often in current Deal Hunter results</div>
+        <div class="trending-grid">{trending_html}</div>
+      </div>
+    </div>
+
+    {f'''<div class="mi-grid cols-1">
+      <div class="mi-panel">
+        <h3>Category median price · last {len(recent_history)} builds</h3>
+        <div class="mi-sub">Trend line for your top opportunity categories. Useful once a few weeks of builds accumulate.</div>
+        <div class="mi-chart-wrap"><canvas id="mi-trend"></canvas></div>
+      </div>
+    </div>''' if len(recent_history) >= 2 else ''}
+
+    <script>
+      Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      const histLabels = {history_labels!r};
+      const histSeries = {history_series!r};
+      const PALETTE = ['#d4af37','#7fc77a','#6cb0ff','#e0b54a','#e07b6f','#b388e0'];
+      if (histLabels.length >= 2 && document.getElementById('mi-trend')) {{
+        const datasets = Object.entries(histSeries).map(([cat, vals], i) => ({{
+          label: cat, data: vals,
+          borderColor: PALETTE[i % PALETTE.length],
+          backgroundColor: PALETTE[i % PALETTE.length] + '22',
+          borderWidth: 2, tension: 0.35, pointRadius: 3,
+        }}));
+        new Chart(document.getElementById('mi-trend'), {{
+          type: 'line',
+          data: {{ labels: histLabels, datasets }},
+          options: {{
+            plugins: {{ legend: {{ position: 'bottom' }} }},
+            scales: {{
+              x: {{ grid: {{ display: false }} }},
+              y: {{ grid: {{ color: 'rgba(212,175,55,0.06)' }}, ticks: {{ callback: v => '$' + v }} }}
+            }}
+          }}
+        }});
+      }}
+    </script>
+    """
+
+    out = OUTPUT_DIR / "market_intel.html"
+    out.write_text(html_shell(f"Market Intelligence · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="market_intel.html"), encoding="utf-8")
+    print(f"  Market intel page: {out} ({len(recommendations)} categories scored, {len(new_opps)} greenfield)")
     return out
 
 
@@ -5780,10 +6300,12 @@ def _shipping_weight(listing: dict) -> str:
         return "0.5 oz"
     return "0.1 oz"
 
-def build_google_feed(listings: list[dict], market: dict | None = None, sold_history: list[dict] | None = None) -> Path:
+def build_google_feed(listings: list[dict], market: dict | None = None,
+                      sold_history: list[dict] | None = None, pricing: dict | None = None) -> Path:
     # Module-level refs so the inner per-item page call has them in scope
-    _item_page_market = market
-    _item_page_sold   = sold_history
+    _item_page_market  = market
+    _item_page_sold    = sold_history
+    _item_page_pricing = pricing
     # Also generate individual item pages so g:link points to our verified domain
     items_dir = OUTPUT_DIR / "items"
     items_dir.mkdir(exist_ok=True)
@@ -5808,7 +6330,8 @@ def build_google_feed(listings: list[dict], market: dict | None = None, sold_his
         # --- Individual item page (fixes domain mismatch) ---
         item_page_url = f"{SITE_URL}/items/{l['item_id']}.html"
         _build_item_page(l, items_dir, all_listings=listings,
-                         market=_item_page_market, sold_history=_item_page_sold)
+                         market=_item_page_market, sold_history=_item_page_sold,
+                         pricing=_item_page_pricing)
 
         # --- Image: upgrade to s-l1600 (800px+ satisfies Google minimum) ---
         import re as _re
@@ -5848,7 +6371,8 @@ def build_google_feed(listings: list[dict], market: dict | None = None, sold_his
 
 
 def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None = None,
-                     market: dict | None = None, sold_history: list[dict] | None = None) -> None:
+                     market: dict | None = None, sold_history: list[dict] | None = None,
+                     pricing: dict | None = None) -> None:
     """
     Premium product page at docs/items/{item_id}.html.
     Verified GitHub Pages domain (satisfies Google Merchant Center).
@@ -5864,29 +6388,28 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     title_esc = l['title'].replace('"', "&quot;")
     category = _categorize(l)
 
-    # Pricing intelligence — admin-only panel showing the breakdown by source
-    m_data = (market or {}).get(l["item_id"], {}) if market else {}
-    sm = _sold_history_match(l["title"], sold_history or [])
-    pricing_rows = [("Your price", f"${price_f:.2f}", "currently listed on eBay")]
-    if m_data.get("market_median") is not None:
-        pricing_rows.append(("eBay active median", f"${m_data['market_median']:.2f}", f"{m_data.get('comp_count', 0)} active asking prices"))
-        pricing_rows.append(("eBay range", f"${m_data.get('market_min', 0):.2f} – ${m_data.get('market_max', 0):.2f}", "low → high asking"))
-        if m_data.get("gap_pct") is not None:
-            gap = m_data["gap_pct"]
-            tone = "var(--success)" if -15 <= gap <= 20 else ("var(--danger)" if gap < -15 else "var(--warning)")
-            pricing_rows.append(("Gap vs market", f'<span style="color:{tone};font-weight:700;">{gap:+.1f}%</span>', "your price vs. median"))
-    else:
-        pricing_rows.append(("eBay active median", '<span style="color:var(--text-dim);">no comps</span>', "no matching listings found"))
-    if sm.get("count", 0) > 0:
-        pricing_rows.append(("Your past sales", f"${sm['median']:.2f}", f"{sm['count']} similar items sold (median)"))
-    else:
-        pricing_rows.append(("Your past sales", '<span style="color:var(--text-dim);">none yet</span>', "no similar items in sold history"))
-    if m_data.get("market_median"):
-        suggested = max(0.99, round(m_data["market_median"]) - 0.01)
-        pricing_rows.append(("Suggested list", f'<b style="color:var(--gold);">${suggested:.2f}</b>', ".99 ending, 5% below median"))
+    # Pricing intelligence — admin-only panel with every available source
+    srcs = (pricing or {}).get(l["item_id"], {})
+    pricing_rows = [("Your price", f"${price_f:.2f}", "currently listed on eBay", "")]
+    for sk in ("ebay_active", "sold_history", "pricecharting", "pokemontcg"):
+        if sk not in srcs:
+            continue
+        s = srcs[sk]
+        val = f"${s['median']:.2f}"
+        if s.get("low") is not None and s.get("high") is not None and s["low"] != s["high"]:
+            val += f' <span style="color:var(--text-muted);font-weight:400;font-size:13px;">(${s["low"]:.2f}–${s["high"]:.2f})</span>'
+        pricing_rows.append((s["label"], val, s.get("subnote", ""), s.get("url", "")))
+    if "ebay_active" in srcs:
+        med = srcs["ebay_active"]["median"]
+        gap = (price_f - med) / med * 100 if med else 0
+        tone = "var(--success)" if -15 <= gap <= 20 else ("var(--danger)" if gap < -15 else "var(--warning)")
+        pricing_rows.append(("Gap vs eBay", f'<span style="color:{tone};font-weight:700;">{gap:+.1f}%</span>', "your price vs eBay active median", ""))
+    sug = _suggest_price_multi(price_f, srcs)
+    if sug.get("price"):
+        pricing_rows.append(("Suggested list", f'<b style="color:var(--gold);">${sug["price"]:.2f}</b>', f"based on {sug['basis']}", ""))
     pricing_rows_html = "".join(
-        f'<div class="ip-row"><div class="ip-lbl">{lbl}</div><div class="ip-val">{val}</div><div class="ip-note">{note}</div></div>'
-        for lbl, val, note in pricing_rows
+        f'<div class="ip-row"><div class="ip-lbl">{lbl}</div><div class="ip-val">{val}</div><div class="ip-note">{note}{(" · <a href=\"" + url + "\" target=\"_blank\" rel=\"noopener\" style=\"color:var(--gold);\">view ↗</a>") if url and url.startswith("http") else ""}</div></div>'
+        for lbl, val, note, url in pricing_rows
     )
     pricing_panel_html = f'''
         <section class="item-pricing-panel" data-admin="1">
@@ -6398,7 +6921,7 @@ def _suggest_list_price(market_median: float, sold_match: dict | None = None) ->
     }
 
 
-def build_price_review(listings: list[dict], market: dict) -> Path:
+def build_price_review(listings: list[dict], market: dict, pricing: dict | None = None) -> Path:
     """
     Premium price review: cards with current vs suggested side-by-side,
     market gap visualization, gap distribution chart.
@@ -6441,13 +6964,34 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
             elif gap < 25: gap_buckets["+10 to +25%"] += 1
             else: gap_buckets[">+25%"] += 1
 
-        # Apply best-practice pricing: .99 endings, prefer sold history, sub-market by 5% for fast moves
-        sm = _sold_history_match(l["title"], sold_history)
-        suggestion = _suggest_list_price(med, sm)
+        # Multi-source pricing: blend eBay active, sold history, PriceCharting, PokemonTCG.io
+        item_srcs = (pricing or {}).get(item_id, {})
+        if not item_srcs:
+            sm = _sold_history_match(l["title"], sold_history)
+            suggestion = _suggest_list_price(med, sm)
+        else:
+            mr = _suggest_price_multi(our_price, item_srcs)
+            suggestion = {
+                "price":    mr.get("price"),
+                "basis":    mr.get("basis", "no data"),
+                "math":     _ebay_net(mr["price"], DEFAULT_SHIP_COST_HIGH if "lot" in l["title"].lower() else DEFAULT_SHIP_COST_LOW) if mr.get("price") else None,
+                "strategy": f"Multi-source · {mr.get('basis', '?')}",
+            }
         suggested = suggestion["price"] if suggestion.get("price") else max(0.99, round(med) - 0.01)
-        # Net math (uses suggested price)
         ship_est = DEFAULT_SHIP_COST_HIGH if "lot" in l["title"].lower() else DEFAULT_SHIP_COST_LOW
         net_math = _ebay_net(suggested, ship_est)
+
+        # Build a tiny sources-comparison sublist for the card body
+        sources_html_parts = []
+        for sk in ("ebay_active", "sold_history", "pricecharting", "pokemontcg"):
+            if sk not in item_srcs:
+                continue
+            s = item_srcs[sk]
+            url_a = f' · <a href="{s["url"]}" target="_blank" rel="noopener" style="color:var(--gold);">↗</a>' if s.get("url", "").startswith("http") else ""
+            sources_html_parts.append(
+                f'<span class="pr-src"><b>{s["label"]}</b> ${s["median"]:.2f}{url_a}</span>'
+            )
+        sources_html = ' · '.join(sources_html_parts) if sources_html_parts else '<span style="color:var(--text-dim);">no external comps</span>'
 
         if flag == "UNDERPRICED":
             badge = '<span class="badge badge-danger">Underpriced</span>'
@@ -6492,6 +7036,10 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
           <a href="{l['url']}" target="_blank" rel="noopener" class="pr-title">{title_short}</a>
           <div class="pr-market">
             Market median <b>${med:.2f}</b> · Range ${mn:.2f}–${mx:.2f} · {comps} comps
+          </div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list">{sources_html}</div>
           </div>
         </div>
         <div class="pr-prices">
@@ -6561,6 +7109,14 @@ def build_price_review(listings: list[dict], market: dict) -> Path:
     .pr-title:hover { color: var(--gold); }
     .pr-market { font-size: 12px; color: var(--text-muted); }
     .pr-market b { color: var(--text); font-weight: 700; }
+    .pr-sources { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+    .pr-sources-lbl {
+      font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 700; margin-bottom: 4px;
+    }
+    .pr-sources-list { display: flex; flex-wrap: wrap; gap: 8px 12px; font-size: 12px; color: var(--text-muted); }
+    .pr-src { font-variant-numeric: tabular-nums; }
+    .pr-src b { color: var(--text); font-weight: 700; }
     .pr-prices {
       display: flex; align-items: center; gap: 14px;
       padding: 10px 14px;
@@ -7730,8 +8286,8 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
     issues: list[str] = []
     expected = [
         "index.html", "steals.html", "sold.html", "analytics.html",
-        "deals.html", "quality.html", "price_review.html", "title_review.html",
-        "reddit.html", "craigslist.html", "return-policy.html",
+        "market_intel.html", "deals.html", "quality.html", "price_review.html",
+        "title_review.html", "reddit.html", "craigslist.html", "return-policy.html",
         "sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest",
     ]
     expected_hashes = set(load_admin_hashes())
@@ -7786,7 +8342,7 @@ def _git_deploy():
     subprocess.run(["git", "config", "user.name", "Jason Chletsos"],
                    cwd=repo, capture_output=True)
 
-    subprocess.run(["git", "add", "docs/", "sold_history.json"], cwd=repo, check=False)
+    subprocess.run(["git", "add", "docs/", "sold_history.json", "market_history.json"], cwd=repo, check=False)
     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=repo)
     if diff.returncode == 0:
         print("  No changes to deploy.")
@@ -7837,16 +8393,28 @@ def main():
     build_deals_page(deals)
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
-    build_dashboard(listings, market, seller=seller)
+    print("  Aggregating multi-source pricing (cached 24h)...")
+    pricing_cache = _pricing_cache_load()
+    pricing_by_id: dict[str, dict] = {}
+    pc_count = ptcg_count = 0
+    for l in listings:
+        srcs = gather_pricing_sources(l["title"], cfg, sold, market.get(l["item_id"]), pricing_cache)
+        pricing_by_id[l["item_id"]] = srcs
+        if "pricecharting" in srcs: pc_count += 1
+        if "pokemontcg"    in srcs: ptcg_count += 1
+    _pricing_cache_save(pricing_cache)
+    print(f"  Pricing sources: eBay active on all · PriceCharting matched {pc_count}/{len(listings)} · PokemonTCG.io matched {ptcg_count}/{len(listings)}")
+    build_dashboard(listings, market, seller=seller, pricing=pricing_by_id)
     build_analytics_page(listings, market, sold)
     build_steals_page(listings, market)
+    build_market_intel_page(listings, market, sold, deals)
     build_quality_report(listings)
     build_craigslist(listings)
     build_reddit(listings)
-    build_google_feed(listings, market=market, sold_history=sold)
+    build_google_feed(listings, market=market, sold_history=sold, pricing=pricing_by_id)
     write_analysis_views()
     build_return_policy()
-    build_price_review(listings, market)
+    build_price_review(listings, market, pricing=pricing_by_id)
     build_title_review(listings)
     build_sitemap_and_robots(listings)
 
