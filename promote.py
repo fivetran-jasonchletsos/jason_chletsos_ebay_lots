@@ -4134,28 +4134,44 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       }})();
 
       // ============ PRICE POPOVER ============
-      window.togglePricePop = function(priceEl, ev) {{
-        ev.stopPropagation();
+      function _openPricePop(priceEl) {{
         const pop = priceEl.parentElement.querySelector('.price-pop');
-        if (!pop) return;
-        const wasOpen = pop.classList.contains('open');
-        // Close any other open popovers first
+        if (!pop || pop.classList.contains('open')) return;
         document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
-        if (wasOpen) return;
-        // Position the popover near the price element using fixed coords
         const rect = priceEl.getBoundingClientRect();
-        const POP_W = 280; // approx; CSS min-width is 260, max 300
-        // Prefer right of price; flip to left if it would overflow viewport
+        const POP_W = 280;
         let left = rect.left;
         if (left + POP_W + 12 > window.innerWidth) left = Math.max(8, window.innerWidth - POP_W - 12);
-        // Prefer below; flip above if no room
         let top = rect.bottom + 8;
-        const POP_EST_H = 260; // estimate before render
+        const POP_EST_H = 260;
         if (top + POP_EST_H > window.innerHeight - 8) top = Math.max(8, rect.top - POP_EST_H - 8);
         pop.style.left = left + 'px';
         pop.style.top  = top  + 'px';
         pop.classList.add('open');
+      }}
+      window.togglePricePop = function(priceEl, ev) {{
+        ev.stopPropagation();
+        const pop = priceEl.parentElement.querySelector('.price-pop');
+        if (!pop) return;
+        if (pop.classList.contains('open')) {{
+          pop.classList.remove('open');
+        }} else {{
+          _openPricePop(priceEl);
+        }}
       }};
+      // Hover-to-open with a short intent delay (avoids flicker when scanning past)
+      (function () {{
+        let hoverTimer = null;
+        document.querySelectorAll('.price-wrap').forEach(wrap => {{
+          const priceEl = wrap.querySelector('.price');
+          if (!priceEl) return;
+          wrap.addEventListener('mouseenter', () => {{
+            clearTimeout(hoverTimer);
+            hoverTimer = setTimeout(() => _openPricePop(priceEl), 200);
+          }});
+          wrap.addEventListener('mouseleave', () => {{ clearTimeout(hoverTimer); }});
+        }});
+      }})();
       document.addEventListener('click', (e) => {{
         if (!e.target.closest('.price-wrap') && !e.target.closest('.price-pop')) {{
           document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
@@ -4165,6 +4181,11 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       ['scroll','resize'].forEach(evt => window.addEventListener(evt, () => {{
         document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
       }}, {{ passive: true }}));
+      document.addEventListener('keydown', (e) => {{
+        if (e.key === 'Escape') {{
+          document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+        }}
+      }});
 
       // ============ HERO AUTO-ROTATION ============
       const heroSlides = document.querySelectorAll('.hero-slide');
@@ -5720,7 +5741,10 @@ def _shipping_weight(listing: dict) -> str:
         return "0.5 oz"
     return "0.1 oz"
 
-def build_google_feed(listings: list[dict]) -> Path:
+def build_google_feed(listings: list[dict], market: dict | None = None, sold_history: list[dict] | None = None) -> Path:
+    # Module-level refs so the inner per-item page call has them in scope
+    _item_page_market = market
+    _item_page_sold   = sold_history
     # Also generate individual item pages so g:link points to our verified domain
     items_dir = OUTPUT_DIR / "items"
     items_dir.mkdir(exist_ok=True)
@@ -5744,7 +5768,8 @@ def build_google_feed(listings: list[dict]) -> Path:
 
         # --- Individual item page (fixes domain mismatch) ---
         item_page_url = f"{SITE_URL}/items/{l['item_id']}.html"
-        _build_item_page(l, items_dir, all_listings=listings)
+        _build_item_page(l, items_dir, all_listings=listings,
+                         market=_item_page_market, sold_history=_item_page_sold)
 
         # --- Image: upgrade to s-l1600 (800px+ satisfies Google minimum) ---
         import re as _re
@@ -5783,7 +5808,8 @@ def build_google_feed(listings: list[dict]) -> Path:
     return out
 
 
-def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None = None) -> None:
+def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None = None,
+                     market: dict | None = None, sold_history: list[dict] | None = None) -> None:
     """
     Premium product page at docs/items/{item_id}.html.
     Verified GitHub Pages domain (satisfies Google Merchant Center).
@@ -5798,6 +5824,39 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     desc_html = desc_raw.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")[:2000]
     title_esc = l['title'].replace('"', "&quot;")
     category = _categorize(l)
+
+    # Pricing intelligence — admin-only panel showing the breakdown by source
+    m_data = (market or {}).get(l["item_id"], {}) if market else {}
+    sm = _sold_history_match(l["title"], sold_history or [])
+    pricing_rows = [("Your price", f"${price_f:.2f}", "currently listed on eBay")]
+    if m_data.get("market_median") is not None:
+        pricing_rows.append(("eBay active median", f"${m_data['market_median']:.2f}", f"{m_data.get('comp_count', 0)} active asking prices"))
+        pricing_rows.append(("eBay range", f"${m_data.get('market_min', 0):.2f} – ${m_data.get('market_max', 0):.2f}", "low → high asking"))
+        if m_data.get("gap_pct") is not None:
+            gap = m_data["gap_pct"]
+            tone = "var(--success)" if -15 <= gap <= 20 else ("var(--danger)" if gap < -15 else "var(--warning)")
+            pricing_rows.append(("Gap vs market", f'<span style="color:{tone};font-weight:700;">{gap:+.1f}%</span>', "your price vs. median"))
+    else:
+        pricing_rows.append(("eBay active median", '<span style="color:var(--text-dim);">no comps</span>', "no matching listings found"))
+    if sm.get("count", 0) > 0:
+        pricing_rows.append(("Your past sales", f"${sm['median']:.2f}", f"{sm['count']} similar items sold (median)"))
+    else:
+        pricing_rows.append(("Your past sales", '<span style="color:var(--text-dim);">none yet</span>', "no similar items in sold history"))
+    if m_data.get("market_median"):
+        suggested = max(0.99, round(m_data["market_median"]) - 0.01)
+        pricing_rows.append(("Suggested list", f'<b style="color:var(--gold);">${suggested:.2f}</b>', ".99 ending, 5% below median"))
+    pricing_rows_html = "".join(
+        f'<div class="ip-row"><div class="ip-lbl">{lbl}</div><div class="ip-val">{val}</div><div class="ip-note">{note}</div></div>'
+        for lbl, val, note in pricing_rows
+    )
+    pricing_panel_html = f'''
+        <section class="item-pricing-panel" data-admin="1">
+          <div class="ip-head">
+            <div class="ip-eyebrow">Pricing intelligence · admin only</div>
+            <h3>Where this price sits</h3>
+          </div>
+          {pricing_rows_html}
+        </section>'''
 
     # Schema.org Product JSON-LD
     product_ld = {
@@ -5940,6 +5999,44 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     }}
     .product-desc h3 {{ font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); margin-bottom: 12px; letter-spacing: .03em; }}
     .product-desc p {{ color: var(--text-muted); line-height: 1.7; font-size: 14px; }}
+    .item-pricing-panel {{
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-lg);
+      padding: 20px 22px;
+      margin-top: 16px;
+    }}
+    .item-pricing-panel .ip-head {{ margin-bottom: 12px; }}
+    .item-pricing-panel .ip-eyebrow {{
+      font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--gold); font-weight: 700; margin-bottom: 4px;
+    }}
+    .item-pricing-panel h3 {{
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: .03em; color: var(--text);
+    }}
+    .item-pricing-panel .ip-row {{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 2px 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }}
+    .item-pricing-panel .ip-row:last-child {{ border-bottom: none; }}
+    .item-pricing-panel .ip-lbl {{
+      font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 700; grid-column: 1;
+    }}
+    .item-pricing-panel .ip-val {{
+      font-size: 16px; font-weight: 700; color: var(--text);
+      text-align: right; grid-column: 2; grid-row: 1;
+      font-variant-numeric: tabular-nums;
+    }}
+    .item-pricing-panel .ip-note {{
+      font-size: 11px; color: var(--text-dim);
+      grid-column: 1 / -1; grid-row: 2;
+    }}
     .related .rel-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -6011,6 +6108,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
           <h3>Item Details</h3>
           <p>{desc_html}</p>
         </div>
+        {pricing_panel_html}
       </div>
     </article>
 
@@ -7706,7 +7804,7 @@ def main():
     build_quality_report(listings)
     build_craigslist(listings)
     build_reddit(listings)
-    build_google_feed(listings)
+    build_google_feed(listings, market=market, sold_history=sold)
     write_analysis_views()
     build_return_policy()
     build_price_review(listings, market)
