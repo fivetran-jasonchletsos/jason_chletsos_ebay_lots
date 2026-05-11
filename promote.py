@@ -4802,6 +4802,8 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
 
     # --- Per-category segment aggregation from deal hunter results ---
     segments: dict[str, dict] = {}
+    deals_by_cat: dict[str, list] = {}    # actual deal listings, grouped by category
+    queries_by_cat: dict[str, list] = {}  # the search queries that defined this category
     for q in queries:
         cat = q.get("category", "Other")
         seg = segments.setdefault(cat, {"comps": 0, "deals": 0, "prices": [], "queries": 0})
@@ -4809,13 +4811,18 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
         seg["comps"]   += q.get("comps", 0)
         seg["deals"]   += len(q.get("deals", []))
         if q.get("median"):
-            # Approximate per-query weight = each comp counts as median price
             seg["prices"].extend([q["median"]] * max(1, q.get("comps", 1) // 5))
+        deals_by_cat.setdefault(cat, []).extend(q.get("deals", []))
+        if q.get("q"):
+            queries_by_cat.setdefault(cat, []).append(q["q"])
     for cat, seg in segments.items():
         prices = sorted(seg["prices"])
         seg["median"] = round(prices[len(prices) // 2], 2) if prices else 0
         seg["min"]    = round(min(prices), 2) if prices else 0
         seg["max"]    = round(max(prices), 2) if prices else 0
+    # Sort deals within each category by discount % desc
+    for cat in deals_by_cat:
+        deals_by_cat[cat].sort(key=lambda d: -d.get("discount_pct", 0))
 
     # --- Inventory mix (your current listings) ---
     inventory: dict[str, dict] = {}
@@ -4967,24 +4974,173 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       border: 1px solid var(--border);
       border-radius: var(--r-sm);
       padding: 10px 12px;
+      text-decoration: none; color: inherit;
+      transition: all var(--t-fast);
     }
+    .trending-tile:hover { border-color: var(--gold); background: var(--surface-3); transform: translateY(-1px); }
     .trending-name { font-size: 13px; font-weight: 700; color: var(--text); }
     .trending-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+    /* Clickable rec rows with expandable detail */
+    .mi-rec-table .mi-row { cursor: pointer; transition: background var(--t-fast); }
+    .mi-rec-table .mi-row:hover { background: rgba(212,175,55,.04); }
+    .mi-rec-table .mi-row.open  { background: rgba(212,175,55,.06); }
+    .mi-row-chevron {
+      display: inline-block; margin-left: 6px;
+      color: var(--text-muted); transition: transform var(--t-fast);
+      font-size: 10px;
+    }
+    .mi-row.open .mi-row-chevron { transform: rotate(180deg); color: var(--gold); }
+
+    .mi-row-detail { display: none; }
+    .mi-row-detail.open { display: table-row; }
+    .mi-detail-inner {
+      padding: 18px 14px 22px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .mi-detail-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 16px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .mi-detail-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: .03em; color: var(--text);
+    }
+    .mi-detail-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .mi-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mi-deal-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .mi-deal-tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: all var(--t-fast);
+    }
+    .mi-deal-tile:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 6px 16px -8px rgba(212,175,55,.3); }
+    .mi-deal-img { position: relative; aspect-ratio: 1/1; background: #111; overflow: hidden; }
+    .mi-deal-img img { width: 100%; height: 100%; object-fit: cover; }
+    .mi-deal-discount {
+      position: absolute; top: 6px; right: 6px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--brand-fg);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px; padding: 2px 7px;
+      border-radius: var(--r-sm); line-height: 1;
+    }
+    .mi-deal-meta { padding: 8px 10px; }
+    .mi-deal-title { font-size: 12px; color: var(--text); line-height: 1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom: 4px; }
+    .mi-deal-price { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); letter-spacing: .02em; }
+
+    .mi-query-row {
+      font-size: 11px; color: var(--text-muted);
+      padding-top: 10px; border-top: 1px dashed var(--border);
+    }
+    .mi-query-lbl { letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-right: 6px; }
+    .mi-query-chip {
+      display: inline-block;
+      padding: 3px 10px; margin: 2px 4px 2px 0;
+      background: var(--surface-3); border: 1px solid var(--border);
+      border-radius: 999px;
+      text-decoration: none; color: var(--text-muted);
+      font-size: 11px; transition: all var(--t-fast);
+    }
+    .mi-query-chip:hover { color: var(--gold); border-color: var(--gold); }
+
+    /* Greenfield row click target */
+    .mi-greenfield {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      text-decoration: none; color: inherit;
+      transition: padding var(--t-fast);
+    }
+    .mi-greenfield:hover { padding-left: 8px; }
+    .mi-greenfield-go { color: var(--gold); font-size: 18px; opacity: 0; transition: opacity var(--t-fast); }
+    .mi-greenfield:hover .mi-greenfield-go { opacity: 1; }
+
     @media (max-width: 760px) { .mi-grid { grid-template-columns: 1fr; } }
     """
 
+    import urllib.parse as _up
+    def _ebay_search_url(q: str) -> str:
+        return f'https://www.ebay.com/sch/i.html?_nkw={_up.quote_plus(q)}&_sop=15'
+
     rec_rows = []
-    for r in recommendations[:25]:
+    for idx, r in enumerate(recommendations[:25]):
         action_class = r["action"].lower().replace(" ", "-")
-        rec_rows.append(
-            f'<tr><td><b>{r["category"]}</b><span class="mi-verdict">{r["verdict"]}</span></td>'
-            f'<td><span class="mi-score">{r["score"]}</span></td>'
-            f'<td>${r["median"]:.0f}</td><td>{r["comps"]}</td><td>{r["inv_count"]}</td>'
-            f'<td><span class="mi-action {action_class}">{r["action"]}</span></td></tr>'
+        cat = r["category"]
+        cat_deals = deals_by_cat.get(cat, [])[:5]
+        cat_queries = queries_by_cat.get(cat, [])
+        primary_query = cat_queries[0] if cat_queries else cat.lower()
+        ebay_url = _ebay_search_url(primary_query)
+        deals_filter_url = f'deals.html#cat={_up.quote(cat)}'
+
+        # Build the expandable detail panel
+        deals_html_parts = []
+        for d in cat_deals:
+            img = f'<img src="{d.get("image","")}" alt="" loading="lazy">' if d.get("image") else '<div style="width:100%;height:100%;background:var(--surface-3);"></div>'
+            deals_html_parts.append(f'''
+              <a href="{d.get("url","#")}" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img">{img}<div class="mi-deal-discount">-{d.get("discount_pct", 0):.0f}%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">{(d.get("title","") or "")[:64]}</div>
+                  <div class="mi-deal-price">${d.get("price", 0):.2f} <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">${d.get("median", 0):.2f}</span></div>
+                </div>
+              </a>''')
+        if not deals_html_parts:
+            deals_html_parts = ['<div style="color:var(--text-muted);font-size:13px;padding:12px;">No active deals in this category right now — but the segment is hot. Hit eBay directly to scout.</div>']
+
+        queries_chip = "".join(
+            f'<a href="{_ebay_search_url(q)}" target="_blank" rel="noopener" class="mi-query-chip">{q}</a>'
+            for q in cat_queries[:6]
         )
+
+        rec_rows.append(f'''
+        <tr class="mi-row" data-idx="{idx}" onclick="toggleMiRow(this)">
+          <td>
+            <b>{cat}</b>
+            <span class="mi-verdict">{r["verdict"]}</span>
+          </td>
+          <td><span class="mi-score">{r["score"]}</span></td>
+          <td>${r["median"]:.0f}</td>
+          <td>{r["comps"]}</td>
+          <td>{r["inv_count"]}</td>
+          <td>
+            <span class="mi-action {action_class}">{r["action"]}</span>
+            <span class="mi-row-chevron" aria-hidden="true">▾</span>
+          </td>
+        </tr>
+        <tr class="mi-row-detail" data-idx="{idx}">
+          <td colspan="6">
+            <div class="mi-detail-inner">
+              <div class="mi-detail-head">
+                <div class="mi-detail-info">
+                  <div class="mi-detail-title">What's actually selling in <b>{cat}</b></div>
+                  <div class="mi-detail-sub">{r["inv_count"]} of yours · {r["sold_count"]} sold in the past · {r["comps"]} active competitor listings · median ${r["median"]:.0f}</div>
+                </div>
+                <div class="mi-detail-actions">
+                  <a href="{ebay_url}" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 14px;font-size:11px;">Search on eBay ↗</a>
+                  <a href="{deals_filter_url}" class="btn btn-ghost" style="padding:9px 14px;font-size:11px;">Open in Deal Hunter</a>
+                </div>
+              </div>
+              <div class="mi-deal-grid">{''.join(deals_html_parts)}</div>
+              <div class="mi-query-row">
+                <span class="mi-query-lbl">Source queries:</span> {queries_chip}
+              </div>
+            </div>
+          </td>
+        </tr>''')
     trending_html = "".join(
-        f'<div class="trending-tile"><div class="trending-name">{n}</div>'
-        f'<div class="trending-meta">{c} appearances · avg ${avg:.0f}</div></div>'
+        f'<a href="{_ebay_search_url(n)}" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;{n}&quot;">'
+        f'<div class="trending-name">{n}</div>'
+        f'<div class="trending-meta">{c} appearances · avg ${avg:.0f}</div></a>'
         for n, c, avg in trending
     ) or '<div style="color:var(--text-muted);font-size:13px;">Run a few build cycles to populate trending data.</div>'
 
@@ -5022,7 +5178,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       <div class="mi-panel">
         <h3>Greenfield opportunities</h3>
         <div class="mi-sub">High-market-value segments you don't have any inventory in yet</div>
-        {''.join(f'<div style="padding:10px 0;border-bottom:1px solid var(--border);"><b style="color:var(--text);">{o["category"]}</b> · ${o["median"]:.0f} median · {o["comps"]} comps<br><span style="font-size:11px;color:var(--text-muted);">{o["verdict"]}</span></div>' for o in new_opps) or '<div style="color:var(--text-muted);font-size:13px;">No greenfield gaps — you have inventory across all tracked segments.</div>'}
+        {''.join(f'<a href="{_ebay_search_url(queries_by_cat.get(o["category"], [o["category"].lower()])[0])}" target="_blank" rel="noopener" class="mi-greenfield" title="Search eBay for this category"><div><b style="color:var(--text);">{o["category"]}</b> · ${o["median"]:.0f} median · {o["comps"]} comps<br><span style="font-size:11px;color:var(--text-muted);">{o["verdict"]}</span></div><span class="mi-greenfield-go">→</span></a>' for o in new_opps) or '<div style="color:var(--text-muted);font-size:13px;">No greenfield gaps — you have inventory across all tracked segments.</div>'}
       </div>
       <div class="mi-panel">
         <h3>Top 20 trending names</h3>
@@ -5040,6 +5196,22 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
     </div>''' if len(recent_history) >= 2 else ''}
 
     <script>
+      // Expandable recommendation rows
+      window.toggleMiRow = function (rowEl) {{
+        const idx = rowEl.dataset.idx;
+        const detail = document.querySelector('.mi-row-detail[data-idx="' + idx + '"]');
+        const wasOpen = rowEl.classList.contains('open');
+        // Close any other open rows first
+        document.querySelectorAll('.mi-row.open').forEach(r => {{
+          r.classList.remove('open');
+          document.querySelector('.mi-row-detail[data-idx="' + r.dataset.idx + '"]')?.classList.remove('open');
+        }});
+        if (!wasOpen) {{
+          rowEl.classList.add('open');
+          detail?.classList.add('open');
+        }}
+      }};
+
       Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.font.family = "'Inter', sans-serif";
       const histLabels = {history_labels!r};
