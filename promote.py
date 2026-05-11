@@ -395,6 +395,36 @@ def fetch_seller_profile(token: str) -> dict:
 DEAL_QUERIES_FILE = Path(__file__).parent / "deal_queries.json"
 
 
+def _required_grade_from_query(q: str):
+    """If the query implies a grade (e.g. 'psa 10'), return (label, must_match_re, exclude_re).
+    Otherwise None. Used to reject results that don't actually meet the grade requirement."""
+    ql = q.lower()
+    if _re.search(r"\bpsa\s*10\b", ql):
+        # Must literally say PSA 10 AND not contain another PSA grade like PSA 9, 8, 7…
+        return ("PSA 10", r"\bPSA\s*10\b", r"\bPSA\s*[1-9](?!\d)\b")
+    if _re.search(r"\bpsa\s*9\b", ql):
+        return ("PSA 9", r"\bPSA\s*9\b(?!\.)", None)
+    if _re.search(r"\bbgs\s*9\.?5\b", ql):
+        return ("BGS 9.5", r"\bBGS\s*9\.5\b", None)
+    if _re.search(r"\bbgs\s*10\b", ql):
+        return ("BGS 10", r"\bBGS\s*10\b", None)
+    if _re.search(r"\bsgc\s*10\b", ql):
+        return ("SGC 10", r"\bSGC\s*10\b", None)
+    return None
+
+
+def _title_meets_grade(title: str, grade_req) -> bool:
+    """Apply the grade requirement to a candidate title."""
+    if not grade_req:
+        return True
+    label, must_re, exclude_re = grade_req
+    if not _re.search(must_re, title, _re.IGNORECASE):
+        return False
+    if exclude_re and _re.search(exclude_re, title, _re.IGNORECASE):
+        return False
+    return True
+
+
 def fetch_deals(cfg: dict) -> dict:
     """Scan watchlist queries on eBay Browse API. Flag items priced significantly
     below median asking price. Returns {threshold, queries: [{q, comps, median, ...,
@@ -453,8 +483,13 @@ def fetch_deals(cfg: dict) -> dict:
             continue
 
         items = data.get("itemSummaries", []) or []
+        # If the query specifies a grade (e.g. "psa 10"), require the title to literally
+        # contain that grade. eBay's keyword search is fuzzy — without this filter,
+        # "wolverine psa 10" returns PSA 9, ungraded, etc. wherever "10" appears.
+        grade_req = _required_grade_from_query(q)
         # Filter: drop our own listings, items without an image, and obvious noise
         clean = []
+        rejected_for_grade = 0
         for it in items:
             seller_name = (it.get("seller") or {}).get("username", "").lower()
             if seller_name == own_seller.lower():
@@ -465,6 +500,10 @@ def fetch_deals(cfg: dict) -> dict:
             except (TypeError, ValueError):
                 continue
             if price_f <= 0:
+                continue
+            title_text = it.get("title", "") or ""
+            if grade_req and not _title_meets_grade(title_text, grade_req):
+                rejected_for_grade += 1
                 continue
             img = (it.get("image") or {}).get("imageUrl", "")
             options = it.get("buyingOptions") or []
