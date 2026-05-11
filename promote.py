@@ -2119,9 +2119,7 @@ input[type="checkbox"]:checked::after {
 .listing-card .price-wrap { position: relative; display: inline-block; }
 .listing-card .price-pop {
   display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;            /* fixed so it escapes the card's overflow clipping */
   min-width: 260px;
   max-width: 300px;
   background: var(--surface-2);
@@ -2129,11 +2127,10 @@ input[type="checkbox"]:checked::after {
   border-radius: var(--r-md);
   box-shadow: var(--shadow-lg);
   padding: 12px 14px;
-  z-index: 80;
+  z-index: 200;
   font-family: 'Inter', sans-serif;
   text-align: left;
 }
-.listing-card .price-wrap:hover .price-pop,
 .listing-card .price-pop.open { display: block; }
 .listing-card .price-pop .pp-row {
   display: grid;
@@ -2593,6 +2590,7 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
     ("index.html",        "Listings",    True,  None),
+    ("steals.html",       "Steals",      True,  None),
     ("sold.html",         "Sold",        True,  None),
     ("analytics.html",    "Analytics",   False, "Insights"),
     ("deals.html",        "Deals",       False, "Insights"),
@@ -3862,20 +3860,24 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     {hero_html}
 
     <div class="stat-grid">
-      <!-- Buyer-facing stats — always visible -->
-      <button class="stat-card linked" type="button" onclick="filterByKPI('all', this)">
+      <!-- Public-facing buyer-trust signals (hidden when admin signed in — admin sees their own KPIs below) -->
+      <button class="stat-card linked" data-public="1" type="button" onclick="filterByKPI('all', this)">
         <div class="num">{len(listings)}</div>
         <div class="lbl">Cards in Stock</div>
       </button>
-      <div class="stat-card">
+      <div class="stat-card" data-public="1">
         <div class="num">1<span style="font-size:18px;color:var(--text-muted);">d</span></div>
         <div class="lbl">Ship Time</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-public="1">
         <div class="num">Free</div>
         <div class="lbl">Combined Shipping (2+)</div>
       </div>
-      <!-- Admin-only inventory KPIs (hidden from public) -->
+      <!-- Admin-only inventory KPIs (hidden from public — they're internal strategy data) -->
+      <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('all', this)">
+        <div class="num">{len(listings)}</div>
+        <div class="lbl">Active Listings</div>
+      </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('value', this)">
         <div class="num">${total_value:,.0f}</div>
         <div class="lbl">Inventory Value</div>
@@ -4135,16 +4137,34 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
       window.togglePricePop = function(priceEl, ev) {{
         ev.stopPropagation();
         const pop = priceEl.parentElement.querySelector('.price-pop');
+        if (!pop) return;
         const wasOpen = pop.classList.contains('open');
-        // Close all popovers first
+        // Close any other open popovers first
         document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
-        if (!wasOpen) pop.classList.add('open');
+        if (wasOpen) return;
+        // Position the popover near the price element using fixed coords
+        const rect = priceEl.getBoundingClientRect();
+        const POP_W = 280; // approx; CSS min-width is 260, max 300
+        // Prefer right of price; flip to left if it would overflow viewport
+        let left = rect.left;
+        if (left + POP_W + 12 > window.innerWidth) left = Math.max(8, window.innerWidth - POP_W - 12);
+        // Prefer below; flip above if no room
+        let top = rect.bottom + 8;
+        const POP_EST_H = 260; // estimate before render
+        if (top + POP_EST_H > window.innerHeight - 8) top = Math.max(8, rect.top - POP_EST_H - 8);
+        pop.style.left = left + 'px';
+        pop.style.top  = top  + 'px';
+        pop.classList.add('open');
       }};
       document.addEventListener('click', (e) => {{
-        if (!e.target.closest('.price-wrap')) {{
+        if (!e.target.closest('.price-wrap') && !e.target.closest('.price-pop')) {{
           document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
         }}
       }});
+      // Close on scroll/resize so the popover doesn't desync from its anchor
+      ['scroll','resize'].forEach(evt => window.addEventListener(evt, () => {{
+        document.querySelectorAll('.price-pop.open').forEach(p => p.classList.remove('open'));
+      }}, {{ passive: true }}));
 
       // ============ HERO AUTO-ROTATION ============
       const heroSlides = document.querySelectorAll('.hero-slide');
@@ -4271,6 +4291,205 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     out = OUTPUT_DIR / "index.html"
     out.write_text(html_shell(f"{SELLER_NAME} · Sports & Pokemon Cards", body, extra_head=f"<style>{extra_css}</style>", active_page="index.html"), encoding="utf-8")
     print(f"  Dashboard: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Steals page (steals.html) — PUBLIC. The user's own listings priced below
+# the eBay market median, framed positively for buyers.
+# ---------------------------------------------------------------------------
+
+def build_steals_page(listings: list[dict], market: dict) -> Path:
+    """Surface UNDERPRICED listings to buyers with a 'Save X% vs market' frame."""
+    import re as _re
+
+    steals = []
+    for l in listings:
+        m = market.get(l["item_id"], {}) if market else {}
+        if m.get("flag") != "UNDERPRICED":
+            continue
+        med = m.get("market_median")
+        if not med:
+            continue
+        try:
+            our = float(l["price"])
+        except (TypeError, ValueError):
+            continue
+        if our <= 0 or our >= med:
+            continue
+        save_pct = round((1 - our / med) * 100, 1)
+        save_dollars = round(med - our, 2)
+        if save_pct < 15:
+            continue   # threshold — only items >=15% below market qualify
+        try:
+            price_f = float(l["price"])
+        except (TypeError, ValueError):
+            price_f = 0.0
+        big_pic = _re.sub(r's-l\d+\.jpg', 's-l500.jpg', l["pic"]) if l["pic"] else ""
+        steals.append({
+            **l,
+            "price_f":      price_f,
+            "big_pic":      big_pic,
+            "market_median": med,
+            "save_pct":     save_pct,
+            "save_dollars": save_dollars,
+            "category":     _categorize(l),
+            "grade_tags":   _extract_grade_tags(l["title"]),
+        })
+
+    steals.sort(key=lambda s: -s["save_pct"])
+
+    total_potential_savings = sum(s["save_dollars"] for s in steals)
+    biggest_save_pct = max((s["save_pct"] for s in steals), default=0)
+
+    cards = []
+    for s in steals:
+        save_pct = s["save_pct"]
+        if save_pct >= 35:
+            tier = '<span class="badge badge-danger">🔥 STEAL</span>'
+        elif save_pct >= 25:
+            tier = '<span class="badge badge-warning">DEAL</span>'
+        else:
+            tier = '<span class="badge badge-success">BARGAIN</span>'
+
+        thumb_html = (
+            f'<img src="{s["big_pic"] or s["pic"]}" alt="" loading="lazy">' if s["pic"]
+            else '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:11px;">No image</div>'
+        )
+
+        cards.append(f'''
+      <article class="steal-card">
+        <div class="steal-thumb">
+          {thumb_html}
+          <div class="steal-discount">-{save_pct:.0f}%</div>
+        </div>
+        <div class="steal-body">
+          <div class="steal-meta-row">
+            {tier}
+            <span class="tag tag-gold">{s["category"]}</span>
+            {s["grade_tags"]}
+            {f'<span class="tag">{s["condition"]}</span>' if s["condition"] else ''}
+          </div>
+          <a href="items/{s['item_id']}.html" class="steal-title">{s['title']}</a>
+          <div class="steal-sub">Save <b style="color:var(--success);">${s["save_dollars"]:.2f}</b> vs. eBay market median ({s["save_pct"]:.0f}% off)</div>
+        </div>
+        <div class="steal-price-block">
+          <div class="steal-price">${s["price_f"]:.2f}</div>
+          <div class="steal-median">market ${s["market_median"]:.2f}</div>
+          <a href="{s["url"]}" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
+        </div>
+      </article>''')
+
+    if not cards:
+        cards_html = '''<div class="empty-state">
+          <svg class="empty-state-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="32" cy="32" r="20"/><path d="M22 30l8 8 12-16"/></svg>
+          <div class="empty-state-title">Fully priced</div>
+          <div class="empty-state-sub">Everything in the store is currently priced at or above market median. Check back — new listings drop here when they're listed below market.</div>
+        </div>'''
+    else:
+        cards_html = "\n".join(cards)
+
+    extra_css = """
+    .steal-grid { display: grid; gap: 14px; margin-bottom: 28px; }
+    .steal-card {
+      display: grid;
+      grid-template-columns: 112px 1fr auto;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--success);
+      border-radius: var(--r-lg);
+      padding: 16px 20px;
+      transition: all var(--t-fast);
+      align-items: center;
+    }
+    .steal-card:hover {
+      border-color: var(--success);
+      box-shadow: 0 12px 28px -10px rgba(127,199,122,.2);
+      transform: translateY(-1px);
+    }
+    .steal-thumb {
+      position: relative;
+      width: 112px; height: 112px;
+      border-radius: var(--r-md);
+      overflow: hidden;
+      background: var(--surface-3);
+    }
+    .steal-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .steal-discount {
+      position: absolute; top: 8px; right: 8px;
+      background: linear-gradient(135deg, #e07b6f, #b54a3e);
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 17px; letter-spacing: .02em;
+      padding: 4px 9px;
+      border-radius: var(--r-sm);
+      line-height: 1;
+      box-shadow: 0 4px 12px -4px rgba(224,123,111,.6);
+    }
+    .steal-body { min-width: 0; }
+    .steal-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .steal-title {
+      display: block;
+      font-size: 15px; font-weight: 600; color: var(--text);
+      line-height: 1.4;
+      text-decoration: none;
+      margin-bottom: 6px;
+    }
+    .steal-title:hover { color: var(--gold); }
+    .steal-sub { font-size: 13px; color: var(--text-muted); }
+    .steal-price-block { text-align: right; flex-shrink: 0; }
+    .steal-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 34px; line-height: 1;
+      color: var(--gold);
+      letter-spacing: .02em;
+    }
+    .steal-median {
+      font-size: 12px; color: var(--text-muted);
+      text-decoration: line-through;
+      margin-top: 4px;
+    }
+    @media (max-width: 580px) {
+      .steal-card { grid-template-columns: 80px 1fr; padding: 14px; gap: 14px; }
+      .steal-thumb { width: 80px; height: 80px; }
+      .steal-price-block { grid-column: 1 / -1; text-align: left; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+      .steal-price { font-size: 28px; }
+    }
+    """
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Priced below market</div>
+        <h1 class="section-title">Steals &amp; <span class="accent">Bargains</span></h1>
+        <div class="section-sub">My own listings priced below the current eBay market median — straight from the live API. Auto-updated every 4 hours. The bigger the % off, the bigger the steal.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="num">{len(steals)}</div>
+        <div class="lbl">Cards Below Market</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${total_potential_savings:,.0f}</div>
+        <div class="lbl">Total Savings on Offer</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">{biggest_save_pct:.0f}<span style="font-size:24px;">%</span></div>
+        <div class="lbl">Biggest Discount Today</div>
+      </div>
+    </div>
+
+    <div class="steal-grid">
+      {cards_html}
+    </div>
+    """
+
+    out = OUTPUT_DIR / "steals.html"
+    out.write_text(html_shell(f"Steals · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="steals.html"), encoding="utf-8")
+    print(f"  Steals page: {out}  ({len(steals)} cards below market)")
     return out
 
 
@@ -4833,7 +5052,7 @@ def build_quality_report(listings: list[dict]) -> Path:
         # ALL CAPS sections in title (also flagged in description)
         caps_in_title = [m.group(0) for m in allcaps_re.finditer(title) if m.group(0) not in _KEEP_CAPS]
         if caps_in_title:
-            issues.append(f"Title has ALL-CAPS section: {', '.join(set(caps_in_title)[:3])}")
+            issues.append(f"Title has ALL-CAPS section: {', '.join(sorted(set(caps_in_title))[:3])}")
             issue_counts["ALL CAPS section"] += 1
             score -= 8
 
@@ -7367,6 +7586,47 @@ def revise_listings(cfg: dict, listings: list[dict], dry_run: bool = True):
 # Main
 # ---------------------------------------------------------------------------
 
+def _verify_build_integrity(listings: list[dict]) -> list[str]:
+    """Sanity-check every expected output file exists, is non-empty, and (for
+    HTML) carries the canonical admin hash. Returns a list of issue strings;
+    empty list = passing."""
+    issues: list[str] = []
+    expected = [
+        "index.html", "steals.html", "sold.html", "analytics.html",
+        "deals.html", "quality.html", "price_review.html", "title_review.html",
+        "reddit.html", "craigslist.html", "return-policy.html",
+        "sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest",
+    ]
+    expected_hashes = set(load_admin_hashes())
+    for f in expected:
+        p = OUTPUT_DIR / f
+        if not p.exists():
+            issues.append(f"missing: docs/{f}")
+            continue
+        # robots.txt is naturally small (~200B), HTML pages should be much larger
+        min_size = 100 if f.endswith((".txt", ".webmanifest")) else 1000
+        if p.stat().st_size < min_size:
+            issues.append(f"suspiciously small (<{min_size}B): docs/{f}")
+            continue
+        if f.endswith(".html") and expected_hashes:
+            content = p.read_text()
+            if "__ADMIN_HASHES" in content:
+                import re as _r
+                m = _r.search(r'__ADMIN_HASHES\s*=\s*\[(.*?)\]', content)
+                if m:
+                    page_hashes = set(_r.findall(r'"([a-f0-9]+)"', m.group(1)))
+                    if page_hashes != expected_hashes:
+                        issues.append(f"stale admin hash in docs/{f} (likely built before recent salt/password change)")
+    # Verify item pages — count should match active listings with item_ids
+    expected_item_ids = {l["item_id"] for l in listings if l.get("item_id")}
+    items_dir = OUTPUT_DIR / "items"
+    actual_item_files = {p.stem for p in items_dir.glob("*.html")} if items_dir.exists() else set()
+    missing_items = expected_item_ids - actual_item_files
+    if missing_items:
+        issues.append(f"missing {len(missing_items)} item pages (e.g. {sorted(missing_items)[:3]})")
+    return issues
+
+
 def _git_deploy():
     """Commit docs/ changes and push to GitHub Pages (main branch)."""
     import subprocess
@@ -7442,6 +7702,7 @@ def main():
     market = fetch_market_prices(listings, cfg)
     build_dashboard(listings, market, seller=seller)
     build_analytics_page(listings, market, sold)
+    build_steals_page(listings, market)
     build_quality_report(listings)
     build_craigslist(listings)
     build_reddit(listings)
@@ -7451,6 +7712,20 @@ def main():
     build_price_review(listings, market)
     build_title_review(listings)
     build_sitemap_and_robots(listings)
+
+    # ------------------------------------------------------------------
+    # Build integrity check — refuse to deploy if any expected page is
+    # missing or has a stale admin hash (catches silent build failures).
+    # ------------------------------------------------------------------
+    print("\nVerifying build integrity...")
+    issues = _verify_build_integrity(listings)
+    if issues:
+        print("\n❌ BUILD INTEGRITY FAILED — NOT DEPLOYING")
+        for i in issues:
+            print(f"  · {i}")
+        import sys as _sys
+        _sys.exit(1)
+    print("  ✓ All expected pages present, admin hashes consistent")
 
     print("\nDeploying to GitHub Pages...")
     if no_deploy:
