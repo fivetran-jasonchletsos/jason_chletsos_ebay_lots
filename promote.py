@@ -2301,6 +2301,100 @@ tr:hover td { background: rgba(212,175,55,.03); }
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
 }
 
+/* ============ POLISH LAYER — round 2 (design director feedback) ============ */
+
+/* Price treatment — gold gradient text fill with subtle glow + tabular nums.
+   Cream/light themes lose the gradient (text-fill-color: transparent + light background
+   becomes invisible) so we scope this to dark themes only. */
+.listing-card .price, .hero-price, .deal-price, .product-price, .sold-price, .pr-current, .pr-new {
+  font-feature-settings: 'tnum' 1, 'ss01' 1;
+  font-variant-numeric: tabular-nums;
+}
+html:not([data-theme]) .listing-card .price,
+html:not([data-theme]) .hero-price,
+html:not([data-theme]) .deal-price,
+html:not([data-theme]) .product-price,
+html[data-theme="midnight"] .listing-card .price,
+html[data-theme="midnight"] .hero-price,
+html[data-theme="midnight"] .deal-price,
+html[data-theme="midnight"] .product-price,
+html[data-theme="crimson"] .listing-card .price,
+html[data-theme="crimson"] .hero-price,
+html[data-theme="crimson"] .deal-price,
+html[data-theme="crimson"] .product-price {
+  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-dim) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  text-shadow: 0 0 20px rgba(212,175,55,.18);
+}
+
+/* Card hover — single, expensive-feeling move (no jittery translateY) */
+.listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
+.listing-card:hover {
+  transform: none;
+  border-color: rgba(212,175,55,.35);
+  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+}
+.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+
+/* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
+.thumb-wrap::before {
+  background: radial-gradient(circle at 30% 25%, rgba(212,175,55,.07), transparent 55%);
+  opacity: .9;
+  transition: opacity .4s;
+}
+.listing-card:hover .thumb-wrap::before { opacity: 0; }
+
+/* Section header rhythm — looser sub leading, hairline rule with gold accent */
+.section-title { margin-bottom: 6px; }
+.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+.section-head  {
+  padding-bottom: 18px; margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.section-head::after {
+  content: ''; display: block;
+  width: 48px; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  position: absolute; left: 0; bottom: -1px;
+}
+
+/* Chip active — real "press" feel */
+.chip { transition: color .15s, background .15s, box-shadow .25s; }
+.chip.active {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12),
+              inset 0 -2px 0 var(--gold),
+              0 4px 12px -4px rgba(212,175,55,.4);
+}
+
+/* Item detail hero — perspective tilt + shimmer on hover. Signature collector move. */
+.product-gallery {
+  perspective: 1200px;
+  position: relative;
+  isolation: isolate;
+}
+.product-gallery a { display: block; width: 100%; height: 100%; }
+.product-gallery img {
+  transition: transform .8s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+}
+.product-gallery:hover img { transform: rotateY(-4deg) rotateX(2deg) scale(1.02); }
+.product-gallery::after {
+  content: ''; position: absolute; inset: 24px; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.14) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 1.2s ease;
+  mix-blend-mode: overlay;
+  border-radius: var(--r-xl);
+  z-index: 3;
+}
+.product-gallery:hover::after { transform: translateX(110%); }
+
+/* Hide buyer-leaking analytics from public visitors (anything tagged data-admin="1") */
+html:not(.pre-is-admin) .price-pop-wrap,
+html:not(.pre-is-admin) .price-info-ic { display: none !important; }
+
 /* ============ POLISH LAYER ============ */
 
 /* Reading-flow scroll progress indicator at top of page */
@@ -3115,6 +3209,52 @@ _BASEBALL_TEAMS   = ["yankees", "red sox", "dodgers", "giants", "cubs", "white s
 _FOOTBALL_TEAMS   = ["raiders", "broncos", "cowboys", "49ers", "bears", "packers", "bengals", "chargers", "steelers", "vikings", "rams", "browns", "falcons", "giants", "jets", "patriots", "saints", "seahawks", "buccaneers", "titans", "chiefs", "colts", "eagles", "lions", "ravens", "bills", "dolphins", "texans", "cardinals", "panthers", "redskins", "commanders"]
 
 
+_GRADE_PATTERNS = [
+    (r"\bPSA\s*10\b",          ("PSA 10",  "tag-gold")),
+    (r"\bPSA\s*9(?!\.)\b",     ("PSA 9",   "tag-success")),
+    (r"\bPSA\s*8(?!\.)\b",     ("PSA 8",   "tag-success")),
+    (r"\bBGS\s*9\.5\b",        ("BGS 9.5", "tag-gold")),
+    (r"\bBGS\s*10\b",          ("BGS 10",  "tag-gold")),
+    (r"\bBGS\s*9(?!\.\d)\b",   ("BGS 9",   "tag-success")),
+    (r"\bSGC\s*10\b",          ("SGC 10",  "tag-gold")),
+    (r"\bRC\b|\bRookie\b",     ("Rookie",  "tag-gold")),
+    (r"\bAuto(graph)?\b",      ("Auto",    "tag-gold")),
+    (r"#?(\d+)/(\d+)",         None),       # numbered serial — special handling
+    (r"\bPatch\b",             ("Patch",   "tag-success")),
+    (r"\bHolo\b",              ("Holo",    "tag-success")),
+    (r"\bRefractor\b",         ("Refractor", "tag-success")),
+    (r"\bPrizm\b",             ("Prizm",   "tag-success")),
+]
+
+
+def _extract_grade_tags(title: str) -> str:
+    """Surface PSA/RC/Auto/etc from titles as visible chips on each card."""
+    if not title:
+        return ""
+    tags = []
+    seen = set()
+    for pat, value in _GRADE_PATTERNS:
+        m = _re.search(pat, title, _re.IGNORECASE)
+        if not m:
+            continue
+        if value is None:  # serial number /XX
+            try:
+                n, d = m.group(1), m.group(2)
+                if int(d) <= 999 and int(d) > 0:
+                    label = f"/{d}"
+                    if label not in seen:
+                        tags.append(f'<span class="tag tag-gold">{label}</span>')
+                        seen.add(label)
+            except Exception:
+                pass
+            continue
+        label, cls = value
+        if label not in seen:
+            tags.append(f'<span class="tag {cls}">{label}</span>')
+            seen.add(label)
+    return "".join(tags[:3])  # cap at 3 to avoid clutter
+
+
 def _categorize(listing: dict) -> str:
     """Lightweight category derivation from the listing title for filter chips."""
     t = listing["title"].lower()
@@ -3235,13 +3375,15 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     card_html = []
     for e in enriched:
         flag = e["market"].get("flag") if e["market"] else None
+        # Pricing-flag badges leak internal analytics to buyers — admin-only
         flag_tag = ""
         if flag == "UNDERPRICED":
-            flag_tag = '<span class="tag tag-danger">Underpriced</span>'
+            flag_tag = '<span class="tag tag-danger" data-admin="1">Underpriced</span>'
         elif flag == "OVERPRICED":
-            flag_tag = '<span class="tag tag-warn">Overpriced</span>'
+            flag_tag = '<span class="tag tag-warn" data-admin="1">Overpriced</span>'
         cond_tag = f'<span class="tag">{e["condition"]}</span>' if e["condition"] else ""
-        cat_tag = f'<span class="tag tag-gold">{e["category"]}</span>'
+        cat_tag  = f'<span class="tag tag-gold">{e["category"]}</span>'
+        grade_tags = _extract_grade_tags(e["title"])
 
         # Build multi-source pricing popover data
         m = e["market"] or {}
@@ -3273,14 +3415,14 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         )
         price_pop_html = f'<div class="price-pop" role="dialog" aria-label="Pricing details">{rows_html}</div>'
 
-        # eBay restriction tag
+        # eBay restriction tag (admin-only — buyers don't need to see lock state)
         lock_info = locks.get(e["item_id"])
         lock_tag = ""
         if lock_info:
             code = lock_info.get("code", "")
             label = "Title locked" if code == "240" else ("Ended" if code == "291" else "Locked")
             reason = lock_info.get("reason", "")
-            lock_tag = f'<span class="tag tag-danger" title="{reason}">🔒 {label}</span>'
+            lock_tag = f'<span class="tag tag-danger" data-admin="1" title="{reason}">🔒 {label}</span>'
 
         # eBay listing URL drives item-page link instead — we want lightbox to open the image, not the page
         item_page = f"items/{e['item_id']}.html"
@@ -3322,10 +3464,10 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
         <div class="info">
           <h3><a href="{item_page}">{e['title']}</a></h3>
           <div class="price-wrap">
-            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">${e['price_f']:.2f}<span class="price-info-ic" aria-hidden="true">ⓘ</span></div>
-            {price_pop_html}
+            <div class="price" tabindex="0" onclick="togglePricePop(this, event)">${e['price_f']:.2f}<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
+            <div data-admin="1" class="price-pop-wrap">{price_pop_html}</div>
           </div>
-          <div class="meta">{cat_tag}{cond_tag}{flag_tag}{lock_tag}</div>
+          <div class="meta">{grade_tags}{cat_tag}{cond_tag}{flag_tag}{lock_tag}</div>
         </div>
         <div class="actions">
           <a href="{ebay_url}" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
@@ -3720,19 +3862,29 @@ def build_dashboard(listings: list[dict], market: dict | None = None, seller: di
     {hero_html}
 
     <div class="stat-grid">
+      <!-- Buyer-facing stats — always visible -->
       <button class="stat-card linked" type="button" onclick="filterByKPI('all', this)">
         <div class="num">{len(listings)}</div>
-        <div class="lbl">Active Listings</div>
+        <div class="lbl">Cards in Stock</div>
       </button>
-      <button class="stat-card linked" type="button" onclick="filterByKPI('value', this)">
+      <div class="stat-card">
+        <div class="num">1<span style="font-size:18px;color:var(--text-muted);">d</span></div>
+        <div class="lbl">Ship Time</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">Free</div>
+        <div class="lbl">Combined Shipping (2+)</div>
+      </div>
+      <!-- Admin-only inventory KPIs (hidden from public) -->
+      <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('value', this)">
         <div class="num">${total_value:,.0f}</div>
         <div class="lbl">Inventory Value</div>
       </button>
-      <button class="stat-card linked" type="button" onclick="filterByKPI('underpriced', this)">
+      <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('underpriced', this)">
         <div class="num {'danger' if underpriced_count else ''}">{underpriced_count}</div>
         <div class="lbl">Underpriced</div>
       </button>
-      <button class="stat-card linked" type="button" onclick="filterByKPI('overpriced', this)">
+      <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('overpriced', this)">
         <div class="num {'warning' if overpriced_count else ''}">{overpriced_count}</div>
         <div class="lbl">Overpriced</div>
       </button>
