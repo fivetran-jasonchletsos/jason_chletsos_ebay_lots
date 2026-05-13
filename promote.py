@@ -2636,7 +2636,9 @@ _NAV_ITEMS = [
     ("deals.html",         "Deals",         False, "Insights"),
     ("quality.html",       "Quality",       False, "Insights"),
     ("price_review.html",  "Pricing",       False, "Insights"),
+    ("repricing.html",     "Repricing Agent", False, "Insights"),
     ("title_review.html",  "Titles",        False, "Insights"),
+    ("scan.html",          "Scanner",       False, "Tools"),
     ("reddit.html",        "Reddit",        False, "Cross-post"),
     ("craigslist.html",    "Craigslist",    False, "Cross-post"),
     ("google_feed.xml",    "Google Feed",   False, "Cross-post"),
@@ -8459,6 +8461,8 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
     expected = [
         "index.html", "steals.html", "sold.html", "analytics.html",
         "market_intel.html", "deals.html", "quality.html", "price_review.html",
+        "repricing.html",
+        "scan.html",
         "title_review.html", "reddit.html", "craigslist.html", "return-policy.html",
         "sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest",
     ]
@@ -8532,6 +8536,8 @@ def main():
     fix_mode    = "--fix"       in sys.argv
     dry_fix     = "--dry-fix"   in sys.argv
     no_deploy   = "--no-deploy" in sys.argv
+    reprice_dry   = "--reprice-dry"   in sys.argv
+    reprice_apply = "--reprice-apply" in sys.argv
     print("Loading config...")
     cfg = json.loads(CONFIG_FILE.read_text())
 
@@ -8588,6 +8594,41 @@ def main():
     build_return_policy()
     build_price_review(listings, market, pricing=pricing_by_id)
     build_title_review(listings)
+
+    # ------------------------------------------------------------------
+    # Repricing agent — plans (and optionally applies) price changes,
+    # writes docs/repricing.html. Imported lazily to keep this module
+    # importable even if the agent file is missing in older checkouts.
+    # ------------------------------------------------------------------
+    try:
+        import repricing_agent
+        rcfg = repricing_agent.load_config()
+        plan = repricing_agent.plan_all(listings, pricing_by_id, rcfg)
+        repricing_agent.PLAN_PATH.parent.mkdir(exist_ok=True)
+        repricing_agent.PLAN_PATH.write_text(json.dumps({
+            "generated_at":  datetime.now(timezone.utc).isoformat(),
+            "config":        rcfg,
+            "decisions":     plan,
+        }, indent=2))
+        repricing_agent.summarize(plan)
+        applied = []
+        if reprice_apply:
+            print("\n  Applying repricing changes to eBay...")
+            applied = repricing_agent.apply_plan(plan, cfg, rcfg)
+            repricing_agent.append_history(applied)
+        elif reprice_dry:
+            print("  (dry preview — re-run with --reprice-apply to push to eBay)")
+        repricing_agent.build_report(plan, repricing_agent.load_history(), rcfg)
+    except Exception as e:
+        print(f"  ⚠ Repricing agent skipped: {e}")
+        # Write a minimal placeholder so the integrity check passes
+        (OUTPUT_DIR / "repricing.html").write_text(
+            html_shell("Repricing Agent · Harpua2001",
+                       f"<section><h1>Repricing Agent</h1><p>Not run this cycle: {e}</p></section>",
+                       active_page="repricing.html"),
+            encoding="utf-8",
+        )
+
     build_sitemap_and_robots(listings)
 
     # ------------------------------------------------------------------

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Scanner">
+  <script>
+    // Apply saved theme synchronously to avoid flash-of-wrong-theme.
+    (function() {
+      try {
+        var t = localStorage.getItem('h2k_theme');
+        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    // Admin gate constants (populated at build time)
+    window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
+    window.__IS_ADMIN_PAGE = true;
+    (function() {
+      try {
+        var stored = localStorage.getItem('h2k_admin_token');
+        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        document.documentElement.classList.toggle('pre-is-admin', !!ok);
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    html:not(.pre-is-admin) body.admin-page main { filter: blur(14px); pointer-events: none; user-select: none; }
+  </style>
+  <title>Card Scanner · Harpua2001</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #0a0a0a;
+      --surface:     #141414;
+      --surface-2:   #1a1a1a;
+      --surface-3:   #232323;
+      --border:      rgba(212,175,55,0.10);
+      --border-mid:  rgba(212,175,55,0.22);
+      --border-hi:   rgba(212,175,55,0.45);
+      --gold:        #d4af37;
+      --gold-bright: #f4ce5d;
+      --gold-dim:    #8a7521;
+      --text:        #f1efe9;
+      --text-muted:  #9a9388;
+      --text-dim:    #5d574c;
+      --success:     #7fc77a;
+      --warning:     #e0b54a;
+      --danger:      #e07b6f;
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); color: var(--text); font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+    body { padding-bottom: env(safe-area-inset-bottom); }
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { color: var(--gold-bright); }
+    .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .display { font-family: "Bebas Neue", sans-serif; letter-spacing: 0.02em; }
+
+    header.app-bar {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+      padding-top: max(10px, env(safe-area-inset-top));
+    }
+    .app-bar .home {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text); font-weight: 700; font-size: 14px;
+    }
+    .app-bar .home .h-mark {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 7px;
+      background: var(--gold); color: #0a0a0a;
+      font-family: "Bebas Neue", sans-serif; font-size: 22px; line-height: 1;
+    }
+    .app-bar .title { font-family: "Bebas Neue", sans-serif; font-size: 22px; letter-spacing: 0.08em; color: var(--gold); flex: 1; }
+    .app-bar .pill {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 3px 8px; border-radius: 999px;
+      background: rgba(212,175,55,0.12); color: var(--gold);
+      border: 1px solid var(--border-mid);
+    }
+
+    main { padding: 14px; max-width: 760px; margin: 0 auto; }
+
+    /* === Camera capture === */
+    .camera-frame {
+      position: relative;
+      background: #000;
+      border: 1px solid var(--border-mid);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      width: 100%;
+      max-height: 60vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .camera-frame video, .camera-frame img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+    }
+    .camera-frame.idle { background: linear-gradient(135deg, #0e0e0e 0%, #161616 100%); }
+    .camera-frame .placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      color: var(--text-muted); padding: 24px; text-align: center;
+    }
+    .camera-frame .placeholder svg { color: var(--gold-dim); }
+    .camera-frame .placeholder .hint { font-size: 12px; color: var(--text-dim); max-width: 260px; }
+
+    /* Capture overlay corner brackets to help frame the card */
+    .frame-guides {
+      position: absolute; inset: 16px;
+      pointer-events: none;
+      border-radius: 8px;
+    }
+    .frame-guides::before, .frame-guides::after {
+      content: "";
+      position: absolute; width: 24px; height: 24px;
+      border: 2px solid var(--gold);
+      opacity: 0.85;
+    }
+    .frame-guides::before { top: 0; left: 0; border-right: none; border-bottom: none; border-top-left-radius: 4px; }
+    .frame-guides::after { bottom: 0; right: 0; border-left: none; border-top: none; border-bottom-right-radius: 4px; }
+    .frame-guides .tl-tr, .frame-guides .bl-br { position: absolute; width: 24px; height: 24px; border: 2px solid var(--gold); opacity: 0.85; }
+    .frame-guides .tl-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-top-right-radius: 4px; }
+    .frame-guides .bl-br { bottom: 0; left: 0; border-right: none; border-top: none; border-bottom-left-radius: 4px; }
+
+    .controls {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+      font-family: Inter, sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid var(--border-mid);
+      background: var(--surface-2);
+      color: var(--text);
+      transition: background 160ms ease, border-color 160ms ease, transform 80ms ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:hover { background: var(--surface-3); border-color: var(--border-hi); }
+    .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .btn.btn-gold { background: var(--gold); color: #0a0a0a; border-color: var(--gold-bright); font-weight: 800; }
+    .btn.btn-gold:hover { background: var(--gold-bright); }
+    .btn.btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
+    .btn-shutter {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 4px solid #0a0a0a;
+      box-shadow: 0 0 0 3px var(--gold), 0 10px 30px rgba(212,175,55,0.35);
+      color: #0a0a0a;
+      font-weight: 900;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+    }
+    .btn-shutter:active { transform: scale(0.92); }
+    .btn-shutter[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .btn-shutter svg { width: 30px; height: 30px; }
+
+    .status-strip {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      min-height: 18px;
+    }
+    .status-strip .err { color: var(--danger); }
+    .status-strip .ok { color: var(--success); }
+
+    /* === Settings drawer === */
+    .gear {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 6px 10px; border-radius: var(--r-sm);
+      font-size: 12px; cursor: pointer;
+    }
+    .drawer {
+      background: var(--surface-2); border: 1px solid var(--border-mid);
+      border-radius: var(--r-md); padding: 14px;
+      margin-top: 14px;
+      display: none;
+    }
+    .drawer.open { display: block; }
+    .drawer label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 6px; }
+    .drawer input, .drawer select {
+      width: 100%;
+      background: var(--surface-3); color: var(--text);
+      border: 1px solid var(--border-mid); border-radius: var(--r-sm);
+      padding: 10px 12px; font-size: 14px; font-family: "JetBrains Mono", monospace;
+    }
+    .drawer .row { display: flex; gap: 8px; margin-top: 8px; }
+    .drawer .help { font-size: 11px; color: var(--text-dim); margin-top: 6px; line-height: 1.4; }
+
+    /* === Session list === */
+    .session-header {
+      margin-top: 22px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    }
+    .session-header h2 {
+      font-family: "Bebas Neue", sans-serif;
+      letter-spacing: 0.08em;
+      font-size: 24px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .session-header .counts { font-size: 12px; color: var(--text-muted); font-family: "JetBrains Mono", monospace; }
+    .session-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .session-actions .btn { padding: 7px 10px; font-size: 12px; }
+
+    .scans { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+    .scan {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 10px;
+      padding: 10px;
+      align-items: start;
+    }
+    .scan.identifying { border-color: var(--gold-dim); animation: pulse 1.4s ease-in-out infinite; }
+    .scan.failed { border-color: rgba(224,123,111,0.4); }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.0); }
+      50%      { box-shadow: 0 0 0 4px rgba(212,175,55,0.12); }
+    }
+    .scan .thumb {
+      width: 96px; height: 128px;
+      background: #000;
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border);
+    }
+    .scan .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .scan .info { min-width: 0; }
+    .scan .info .name { font-weight: 700; font-size: 15px; color: var(--text); line-height: 1.2; }
+    .scan .info .meta { font-size: 11px; color: var(--text-muted); font-family: "JetBrains Mono", monospace; margin-top: 3px; }
+    .scan .info .price-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-top: 8px;
+    }
+    .price-cell {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 6px 8px;
+    }
+    .price-cell .label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+    .price-cell .val { font-family: "Bebas Neue", sans-serif; font-size: 20px; color: var(--gold); line-height: 1; margin-top: 2px; }
+    .price-cell.empty .val { color: var(--text-dim); }
+    .scan .info .actions {
+      display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
+    }
+    .scan .info .actions a, .scan .info .actions button {
+      font-size: 11px; padding: 5px 9px; border-radius: var(--r-sm);
+      background: var(--surface-3); color: var(--text); border: 1px solid var(--border-mid);
+      cursor: pointer; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .scan .info .actions .danger { color: var(--danger); border-color: rgba(224,123,111,0.3); }
+    .scan .err-msg { grid-column: 1 / -1; font-size: 12px; color: var(--danger); padding: 6px 4px 0; }
+    .scan .badge {
+      display: inline-block;
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 2px 6px; border-radius: 3px; margin-left: 6px;
+      background: var(--surface-3); color: var(--text-muted);
+      vertical-align: middle;
+    }
+    .scan .badge.foil { background: rgba(212,175,55,0.15); color: var(--gold); border: 1px solid var(--border-mid); }
+    .scan .badge.unsure { background: rgba(224,181,74,0.15); color: var(--warning); }
+
+    .empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 30px 16px;
+      background: var(--surface);
+      border: 1px dashed var(--border-mid);
+      border-radius: var(--r-md);
+      font-size: 13px;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid var(--text-dim);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Admin gate */
+    .gate {
+      position: fixed; inset: 0;
+      background: rgba(10,10,10,0.96);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100; padding: 16px;
+    }
+    body.admin-page:not(.is-admin) .gate { display: flex; }
+    .gate .box {
+      background: var(--surface); border: 1px solid var(--border-mid);
+      border-radius: var(--r-lg); padding: 24px;
+      max-width: 380px; width: 100%;
+    }
+    .gate h3 { font-family: "Bebas Neue", sans-serif; font-size: 28px; letter-spacing: 0.05em; color: var(--gold); margin-bottom: 6px; }
+    .gate p { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+    .gate input { width: 100%; background: var(--surface-3); color: var(--text); border: 1px solid var(--border-mid); border-radius: var(--r-sm); padding: 10px 12px; font-size: 14px; margin-bottom: 10px; }
+    .gate button { width: 100%; }
+    .gate .err { color: var(--danger); font-size: 12px; margin-top: 8px; display: none; }
+
+    @media (max-width: 480px) {
+      .scan { grid-template-columns: 80px 1fr; }
+      .scan .thumb { width: 80px; height: 108px; }
+      .scan .info .name { font-size: 14px; }
+      .price-cell .val { font-size: 17px; }
+    }
+  </style>
+</head>
+<body class="admin-page">
+  <div class="gate" id="adminGate">
+    <div class="box">
+      <h3>Admin Sign-in</h3>
+      <p>This is a private tool. Enter your admin token to continue.</p>
+      <input type="password" id="gateToken" placeholder="Token" autocomplete="off" />
+      <button class="btn btn-gold" onclick="submitGate()">Unlock</button>
+      <div class="err" id="gateErr">Wrong token — try again.</div>
+    </div>
+  </div>
+
+  <header class="app-bar">
+    <a href="index.html" class="home">
+      <span class="h-mark">H</span>
+      <span class="display">Harpua2001</span>
+    </a>
+    <div class="title">SCANNER</div>
+    <span class="pill">BETA</span>
+  </header>
+
+  <main>
+    <div class="camera-frame idle" id="cameraFrame">
+      <div class="placeholder" id="cameraPlaceholder">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <div class="display" style="font-size:18px; color: var(--gold-bright); letter-spacing: 0.08em;">TAP TO START</div>
+        <div class="hint">Open your phone's back camera. Frame one card at a time inside the gold corners and snap. Keep scanning — results stream in below.</div>
+      </div>
+      <video id="video" playsinline autoplay muted style="display:none;"></video>
+      <div class="frame-guides" id="frameGuides" style="display:none;">
+        <span class="tl-tr"></span>
+        <span class="bl-br"></span>
+      </div>
+      <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-ghost" id="btnStart" onclick="startCamera()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        Open camera
+      </button>
+      <button class="btn-shutter" id="btnShutter" onclick="capture()" disabled aria-label="Capture">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4" fill="currentColor"></circle></svg>
+      </button>
+      <button class="gear" onclick="toggleDrawer()" aria-label="Settings">⚙ Settings</button>
+    </div>
+
+    <div class="status-strip" id="status">Ready when you are.</div>
+
+    <div class="drawer" id="drawer">
+      <label>Anthropic API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off" />
+      <div class="help">Stored locally in this browser only. Used to identify each card via Claude vision. <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key →</a></div>
+      <div class="row">
+        <button class="btn btn-gold" onclick="saveApiKey()">Save</button>
+        <button class="btn btn-ghost" onclick="clearApiKey()">Clear</button>
+      </div>
+      <div style="margin-top: 14px;">
+        <label>Model</label>
+        <select id="modelChoice">
+          <option value="claude-sonnet-4-6">Sonnet 4.6 — fast + cheap (~$0.005/scan, recommended)</option>
+          <option value="claude-opus-4-7">Opus 4.7 — slower, more accurate (~$0.03/scan)</option>
+          <option value="claude-haiku-4-5-20251001">Haiku 4.5 — cheapest (~$0.002/scan)</option>
+        </select>
+      </div>
+      <div style="margin-top: 14px;">
+        <label>Capture quality</label>
+        <select id="qualityChoice">
+          <option value="0.7">Standard (smaller payload)</option>
+          <option value="0.85" selected>High (recommended)</option>
+          <option value="0.95">Maximum</option>
+        </select>
+      </div>
+      <div class="help" style="margin-top:14px;">Pokemon TCG API is free, no key required. We query it for TCGplayer + Cardmarket pricing after identification.</div>
+    </div>
+
+    <div class="session-header">
+      <h2>Session</h2>
+      <div class="counts mono" id="sessionCounts">0 scans</div>
+    </div>
+    <div class="session-actions">
+      <button class="btn btn-ghost" onclick="exportSession()">Export JSON</button>
+      <button class="btn btn-ghost" onclick="copyTotals()">Copy totals</button>
+      <button class="btn btn-ghost danger" onclick="clearSession()">Clear session</button>
+    </div>
+    <div class="scans" id="scans">
+      <div class="empty" id="emptyState">No scans yet. Tap the camera button and start snapping cards.</div>
+    </div>
+  </main>
+
+  <script>
+    // ==================== Admin gate ====================
+    async function sha256Hex(text) {
+      const buf = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function submitGate() {
+      const tok = document.getElementById('gateToken').value.trim();
+      if (!tok) return;
+      try {
+        const h = await sha256Hex(tok + (window.__ADMIN_SALT || ''));
+        if ((window.__ADMIN_HASHES || []).indexOf(h) !== -1) {
+          localStorage.setItem('h2k_admin_token', h);
+          document.body.classList.add('is-admin');
+          document.documentElement.classList.add('pre-is-admin');
+          document.getElementById('adminGate').style.display = 'none';
+        } else {
+          document.getElementById('gateErr').style.display = 'block';
+        }
+      } catch(e) { document.getElementById('gateErr').style.display = 'block'; }
+    }
+    (function() {
+      const stored = localStorage.getItem('h2k_admin_token');
+      const ok = stored && (window.__ADMIN_HASHES || []).indexOf(stored) !== -1;
+      if (ok) {
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+      }
+      document.getElementById('gateToken')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitGate(); });
+    })();
+
+    // ==================== State ====================
+    const SESSION_KEY = 'h2k_scanner_session_v1';
+    const API_KEY_KEY = 'h2k_anthropic_key';
+    const MODEL_KEY   = 'h2k_scanner_model';
+    const QUALITY_KEY = 'h2k_scanner_quality';
+
+    let stream = null;
+    let session = loadSession();
+
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch { return []; }
+    }
+    function saveSession() {
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch {}
+    }
+
+    // ==================== Settings ====================
+    function toggleDrawer() { document.getElementById('drawer').classList.toggle('open'); }
+    function saveApiKey() {
+      const k = document.getElementById('apiKey').value.trim();
+      if (k) {
+        localStorage.setItem(API_KEY_KEY, k);
+        document.getElementById('apiKey').value = '';
+        setStatus('API key saved.', 'ok');
+      }
+    }
+    function clearApiKey() {
+      localStorage.removeItem(API_KEY_KEY);
+      setStatus('API key cleared.', 'ok');
+    }
+    function getApiKey() { try { return localStorage.getItem(API_KEY_KEY); } catch { return null; } }
+    function getModel() { return document.getElementById('modelChoice').value || localStorage.getItem(MODEL_KEY) || 'claude-sonnet-4-6'; }
+    function getQuality() { return parseFloat(document.getElementById('qualityChoice').value || localStorage.getItem(QUALITY_KEY) || 0.85); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const m = localStorage.getItem(MODEL_KEY); if (m) document.getElementById('modelChoice').value = m;
+      const q = localStorage.getItem(QUALITY_KEY); if (q) document.getElementById('qualityChoice').value = q;
+      document.getElementById('modelChoice').addEventListener('change', (e) => localStorage.setItem(MODEL_KEY, e.target.value));
+      document.getElementById('qualityChoice').addEventListener('change', (e) => localStorage.setItem(QUALITY_KEY, e.target.value));
+      const k = getApiKey();
+      if (k) document.getElementById('apiKey').placeholder = '••••••••••••• (saved)';
+      renderSession();
+    });
+
+    function setStatus(text, kind) {
+      const el = document.getElementById('status');
+      el.textContent = text || '';
+      el.className = 'status-strip' + (kind ? ' ' : '');
+      const span = document.createElement('span');
+      if (kind) {
+        el.innerHTML = '';
+        span.className = kind;
+        span.textContent = text;
+        el.appendChild(span);
+      }
+    }
+
+    // ==================== Camera ====================
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus('Camera not supported in this browser.', 'err');
+        return;
+      }
+      try {
+        // Prefer rear camera on mobile
+        const constraints = {
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1440 } },
+          audio: false,
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const v = document.getElementById('video');
+        v.srcObject = stream;
+        await v.play();
+        document.getElementById('cameraPlaceholder').style.display = 'none';
+        document.getElementById('frameGuides').style.display = 'block';
+        v.style.display = 'block';
+        document.getElementById('cameraFrame').classList.remove('idle');
+        document.getElementById('btnShutter').disabled = false;
+        document.getElementById('btnStart').textContent = 'Camera live';
+        document.getElementById('btnStart').disabled = true;
+        setStatus('Frame a card inside the gold corners. Tap the gold button to scan.');
+      } catch (err) {
+        console.error(err);
+        setStatus('Camera error: ' + (err.message || err.name || 'unknown'), 'err');
+      }
+    }
+
+    async function capture() {
+      if (!stream) { setStatus('Camera not started.', 'err'); return; }
+      const v = document.getElementById('video');
+      const c = document.getElementById('canvas');
+      const w = v.videoWidth;
+      const h = v.videoHeight;
+      if (!w || !h) { setStatus('Camera not ready yet — try again.', 'err'); return; }
+      // Downscale to ~1280 max dimension for API payload size
+      const maxDim = 1280;
+      const scale = Math.min(1, maxDim / Math.max(w, h));
+      const cw = Math.round(w * scale), ch = Math.round(h * scale);
+      c.width = cw; c.height = ch;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(v, 0, 0, cw, ch);
+
+      const quality = getQuality();
+      const dataUrl = c.toDataURL('image/jpeg', quality);
+
+      // Create scan record + start identification
+      const id = 'scan_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      const scan = {
+        id,
+        captured_at: new Date().toISOString(),
+        image: dataUrl,
+        status: 'identifying',
+        card: null,
+        pricing: null,
+        error: null,
+      };
+      session.unshift(scan);
+      saveSession();
+      renderSession();
+
+      // Lightweight flash effect
+      const frame = document.getElementById('cameraFrame');
+      frame.style.transition = 'opacity 80ms ease';
+      frame.style.opacity = '0.4';
+      setTimeout(() => { frame.style.opacity = '1'; }, 100);
+
+      identifyAndPrice(id, dataUrl).catch((e) => {
+        const s = session.find((x) => x.id === id);
+        if (s) {
+          s.status = 'failed';
+          s.error = e?.message || String(e);
+          saveSession();
+          renderSession();
+        }
+      });
+    }
+
+    // ==================== Claude vision ====================
+    const VISION_SYSTEM = `You are a Pokemon Trading Card Game identifier. The user uploads a photo of a single card. Read the card carefully.
+
+Return ONLY a JSON object with this exact shape — no prose, no markdown:
+{
+  "name": "string — primary Pokemon or trainer name as printed",
+  "set_name": "string or null — set name if you can read it from the set symbol or copyright line",
+  "set_code": "string or null — printed set code from the bottom-left if visible (e.g. SV, SWSH, BS)",
+  "number": "string or null — collector number as printed (e.g. '4/102', '4', 'TG12')",
+  "total": "string or null — total in set if printed (e.g. '102')",
+  "rarity": "string or null — Common / Uncommon / Rare / Holo Rare / Ultra Rare / Secret Rare / Promo",
+  "foil": "boolean — true if the card shows holographic foil patterns",
+  "edition": "string or null — '1st Edition', 'Shadowless', 'Unlimited', or null",
+  "language": "string — 'English' unless clearly another language",
+  "condition_hints": "string or null — visible defects (whitening, scratches, dings, centering issues)",
+  "confidence": "low | medium | high — your confidence in the identification"
+}
+
+If you cannot identify the card, return {"name": null, "confidence": "low", "error": "describe what you see"}.`;
+
+    async function identifyAndPrice(id, dataUrl) {
+      const key = getApiKey();
+      if (!key) throw new Error('No Anthropic API key — set one in Settings.');
+
+      const b64 = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+
+      const body = {
+        model: getModel(),
+        max_tokens: 600,
+        system: VISION_SYSTEM,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
+            { type: 'text', text: 'Identify this card. Return JSON only.' },
+          ],
+        }],
+      };
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error('Claude ' + res.status + ': ' + t.slice(0, 200));
+      }
+      const payload = await res.json();
+      const text = payload?.content?.find((c) => c.type === 'text')?.text ?? '';
+      const card = parseCardJson(text);
+
+      const s = session.find((x) => x.id === id);
+      if (!s) return;
+      s.card = card;
+      if (!card?.name) {
+        s.status = 'failed';
+        s.error = card?.error || 'No identification returned.';
+        saveSession();
+        renderSession();
+        return;
+      }
+      s.status = 'pricing';
+      saveSession();
+      renderSession();
+
+      try {
+        s.pricing = await fetchPricing(card);
+      } catch (e) {
+        s.pricing = { error: e?.message || String(e) };
+      }
+      s.status = 'done';
+      saveSession();
+      renderSession();
+    }
+
+    function parseCardJson(text) {
+      try {
+        const m = text.match(/\{[\s\S]*\}/);
+        if (m) return JSON.parse(m[0]);
+      } catch (e) { /* fall through */ }
+      return null;
+    }
+
+    // ==================== Pokemon TCG API ====================
+    async function fetchPricing(card) {
+      if (!card?.name) return null;
+      // Build query — fuzzy on name, then narrow with number if present
+      const parts = ['name:"' + card.name.replace(/"/g, '') + '"'];
+      if (card.number) {
+        const num = String(card.number).split('/')[0].replace(/[^A-Za-z0-9]/g, '');
+        if (num) parts.push('number:' + num);
+      }
+      const url = 'https://api.pokemontcg.io/v2/cards?pageSize=5&q=' + encodeURIComponent(parts.join(' '));
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('TCG API ' + res.status);
+      const data = await res.json();
+      const cards = data?.data || [];
+      if (!cards.length) return { found: false };
+
+      // Prefer matching set if Claude returned one
+      let best = cards[0];
+      if (card.set_name) {
+        const wanted = card.set_name.toLowerCase();
+        const m = cards.find((c) => (c.set?.name || '').toLowerCase().includes(wanted) || wanted.includes((c.set?.name || '').toLowerCase()));
+        if (m) best = m;
+      }
+
+      const tcg = best.tcgplayer?.prices || null;
+      const cm  = best.cardmarket?.prices || null;
+
+      const variantPriority = card.foil
+        ? ['holofoil', 'reverseHolofoil', 'normal', '1stEditionHolofoil', '1stEditionNormal']
+        : ['normal', 'reverseHolofoil', 'holofoil', '1stEditionNormal', '1stEditionHolofoil'];
+      let chosenVariant = null;
+      if (tcg) {
+        for (const v of variantPriority) {
+          if (tcg[v]) { chosenVariant = v; break; }
+        }
+      }
+      const variant = chosenVariant ? tcg[chosenVariant] : null;
+
+      return {
+        found: true,
+        tcg_id: best.id,
+        set_name: best.set?.name || null,
+        set_series: best.set?.series || null,
+        number: best.number || null,
+        rarity: best.rarity || null,
+        image_small: best.images?.small || null,
+        image_large: best.images?.large || null,
+        variant: chosenVariant,
+        tcg_low: variant?.low ?? null,
+        tcg_mid: variant?.mid ?? null,
+        tcg_market: variant?.market ?? null,
+        tcg_high: variant?.high ?? null,
+        cm_trend: cm?.trendPrice ?? null,
+        cm_avg30: cm?.avg30 ?? null,
+        cm_low: cm?.lowPrice ?? null,
+        tcg_url: best.tcgplayer?.url || null,
+        cm_url: best.cardmarket?.url || null,
+        all_variants: tcg ? Object.keys(tcg) : [],
+      };
+    }
+
+    // ==================== Render ====================
+    function fmt(n) {
+      if (n === null || n === undefined || Number.isNaN(n)) return null;
+      return '$' + Number(n).toFixed(2);
+    }
+    function ebaySearchUrl(card) {
+      const q = [card.name];
+      if (card.set_name) q.push(card.set_name);
+      if (card.number) q.push(String(card.number).split('/')[0]);
+      if (card.foil) q.push('holo');
+      return 'https://www.ebay.com/sch/i.html?_nkw=' + encodeURIComponent(q.join(' ').slice(0, 80)) + '&_sacat=0&LH_Sold=1&LH_Complete=1';
+    }
+    function ebaySoldOnlyUrl(card) { return ebaySearchUrl(card); }
+
+    function renderSession() {
+      const counts = document.getElementById('sessionCounts');
+      const n = session.length;
+      const done = session.filter((s) => s.status === 'done').length;
+      const failed = session.filter((s) => s.status === 'failed').length;
+      counts.textContent = n === 0 ? '0 scans' : (done + ' done · ' + (n - done - failed) + ' working' + (failed ? ' · ' + failed + ' failed' : ''));
+
+      const container = document.getElementById('scans');
+      if (n === 0) {
+        container.innerHTML = '<div class="empty">No scans yet. Tap the camera button and start snapping cards.</div>';
+        return;
+      }
+      container.innerHTML = session.map(renderScan).join('');
+    }
+
+    function renderScan(s) {
+      const card = s.card || {};
+      const p = s.pricing || {};
+      const isLoading = s.status === 'identifying' || s.status === 'pricing';
+      const cls = ['scan'];
+      if (isLoading) cls.push('identifying');
+      if (s.status === 'failed') cls.push('failed');
+
+      const name = card.name ? escapeHtml(card.name) : (s.status === 'identifying' ? 'Identifying…' : (s.status === 'failed' ? 'Could not identify' : '—'));
+      const setLine = [card.set_name, card.number ? '#' + card.number : null, card.rarity].filter(Boolean).map(escapeHtml).join(' · ');
+      const tcgImage = p?.image_small || null;
+      const thumb = tcgImage ? '<img src="' + tcgImage + '" alt="">' : ('<img src="' + s.image + '" alt="">');
+
+      const priceCells = [
+        priceCell('TCG Mkt', fmt(p.tcg_market)),
+        priceCell('TCG Low', fmt(p.tcg_low)),
+        priceCell('CM Trend', fmt(p.cm_trend)),
+      ].join('');
+
+      const foilBadge = card.foil ? '<span class="badge foil">FOIL</span>' : '';
+      const confBadge = card.confidence === 'low' ? '<span class="badge unsure">LOW CONF</span>' : '';
+      const editionBadge = card.edition && card.edition !== 'Unlimited' ? '<span class="badge">' + escapeHtml(card.edition) + '</span>' : '';
+
+      const actionsHtml = card.name ? [
+        '<a href="' + ebaySoldOnlyUrl(card) + '" target="_blank" rel="noopener">eBay sold</a>',
+        p.tcg_url ? '<a href="' + escapeHtml(p.tcg_url) + '" target="_blank" rel="noopener">TCGplayer</a>' : '',
+        p.cm_url ? '<a href="' + escapeHtml(p.cm_url) + '" target="_blank" rel="noopener">Cardmarket</a>' : '',
+        '<button class="danger" onclick="deleteScan(\'' + s.id + '\')">Remove</button>',
+      ].filter(Boolean).join('') : '<button class="danger" onclick="deleteScan(\'' + s.id + '\')">Remove</button>';
+
+      const statusLine = s.status === 'identifying'
+        ? '<div class="meta"><span class="spinner"></span> Identifying with ' + escapeHtml(getModel()) + '…</div>'
+        : s.status === 'pricing'
+        ? '<div class="meta"><span class="spinner"></span> Looking up pricing…</div>'
+        : '';
+
+      const err = s.error
+        ? '<div class="err-msg">⚠ ' + escapeHtml(s.error) + '</div>'
+        : (p && p.found === false ? '<div class="err-msg">No pricing match in Pokemon TCG API. Try the eBay-sold link.</div>' : '');
+
+      return [
+        '<div class="' + cls.join(' ') + '" data-id="' + s.id + '">',
+          '<div class="thumb">' + thumb + '</div>',
+          '<div class="info">',
+            '<div class="name">' + name + foilBadge + editionBadge + confBadge + '</div>',
+            setLine ? '<div class="meta">' + setLine + '</div>' : '',
+            statusLine,
+            (s.status === 'done' || s.status === 'pricing') && card.name ? '<div class="price-grid">' + priceCells + '</div>' : '',
+            '<div class="actions">' + actionsHtml + '</div>',
+          '</div>',
+          err,
+        '</div>'
+      ].join('');
+    }
+
+    function priceCell(label, val) {
+      const empty = !val;
+      return '<div class="price-cell' + (empty ? ' empty' : '') + '"><div class="label">' + label + '</div><div class="val">' + (val || '—') + '</div></div>';
+    }
+
+    function escapeHtml(s) {
+      if (s === null || s === undefined) return '';
+      return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // ==================== Session actions ====================
+    function deleteScan(id) {
+      session = session.filter((s) => s.id !== id);
+      saveSession();
+      renderSession();
+    }
+    function clearSession() {
+      if (!session.length) return;
+      if (!confirm('Clear all ' + session.length + ' scans? This cannot be undone.')) return;
+      session = [];
+      saveSession();
+      renderSession();
+    }
+    function exportSession() {
+      // Strip image dataURLs to keep export small
+      const out = session.map((s) => ({ ...s, image: undefined }));
+      const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'scanner-session-' + new Date().toISOString().slice(0,16).replace(':','') + '.json';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function copyTotals() {
+      const done = session.filter((s) => s.status === 'done' && s.card?.name);
+      if (!done.length) { setStatus('Nothing to copy yet.', 'err'); return; }
+      const lines = done.map((s) => {
+        const c = s.card; const p = s.pricing || {};
+        return [c.name, c.number || '', c.set_name || '', c.foil ? 'FOIL' : '', p.tcg_market ? '$' + p.tcg_market.toFixed(2) : ''].filter(Boolean).join('\t');
+      });
+      const totalMkt = done.reduce((t, s) => t + (s.pricing?.tcg_market || 0), 0);
+      const txt = lines.join('\n') + '\n\nTotal TCG market: $' + totalMkt.toFixed(2);
+      navigator.clipboard.writeText(txt).then(() => setStatus('Totals copied to clipboard ($' + totalMkt.toFixed(2) + ').', 'ok'));
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+    });
+  </script>
+</body>
+</html>
