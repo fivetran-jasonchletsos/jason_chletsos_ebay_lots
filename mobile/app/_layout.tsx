@@ -36,9 +36,18 @@ export default function RootLayout() {
       <Stack screenOptions={{ contentStyle: { backgroundColor: theme.bg } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="card/[id]"
+          name="card/[id]/index"
           options={{
             title: '',
+            headerStyle: { backgroundColor: theme.bg },
+            headerTintColor: theme.gold,
+          }}
+        />
+        <Stack.Screen
+          name="card/[id]/list-on-ebay"
+          options={{
+            title: 'List on eBay',
+            presentation: 'modal',
             headerStyle: { backgroundColor: theme.bg },
             headerTintColor: theme.gold,
           }}

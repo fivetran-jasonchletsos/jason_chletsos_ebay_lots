@@ -1670,8 +1670,11 @@ html:not(.pre-is-admin) .nav-links a.admin-only,
 html:not(.pre-is-admin) .drawer a.admin-only,
 html:not(.pre-is-admin) #install-app-btn,
 html:not(.pre-is-admin) #nav-refresh-btn,
-html:not(.pre-is-admin) .btn-logout { display: none !important; }
+html:not(.pre-is-admin) .drawer .btn-refresh,
+html:not(.pre-is-admin) .btn-logout,
+html:not(.pre-is-admin) .drawer-signout { display: none !important; }
 html.pre-is-admin .btn-login,
+html.pre-is-admin .drawer-signin,
 html.pre-is-admin .gate-overlay { display: none !important; }
 .btn-login, .btn-logout {
   display: inline-flex; align-items: center; gap: 6px;
@@ -2588,6 +2591,28 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 @media (max-width: 880px) {
   .nav-links { display: none; }
   .menu-toggle { display: inline-flex; }
+  /* Header auxiliary buttons get tucked into the drawer at narrow widths so
+     the brand block + hamburger don't collide. The drawer-foot below renders
+     the same actions. */
+  .btn-install,
+  .btn-login,
+  .btn-logout,
+  .btn-refresh { display: none !important; }
+  /* Tighten header padding so the brand text gets max horizontal room. */
+  .app-header-inner { padding: 10px 12px; gap: 10px; }
+  /* Force the brand tag onto a single line, ellipsized — the forced <br>
+     breaks rendered "SPORTS & POKEMON CARDS" as a cramped stack on phones. */
+  .brand-tag {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px;
+    letter-spacing: .18em;
+  }
+  .brand-tag br { display: none; }
+  /* Slim the brand mark a hair on mobile so the title gets more room. */
+  .brand-mark { width: 32px; height: 32px; font-size: 18px; }
+  .brand-name { font-size: 20px; }
 }
 @media (max-width: 640px) {
   main { padding: 22px 14px 70px; }
@@ -2815,6 +2840,16 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     </div>
     {nav_html_mobile}
     <div class="drawer-foot">
+      <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install as app
+      </button>
+      <button class="btn-refresh drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        Sign in
+      </button>
+      <button class="btn-refresh drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
+        Sign out
+      </button>
       <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
     </div>
   </aside>
@@ -3151,16 +3186,20 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     }}
 
     let __deferredInstall = null;
+    function __toggleInstallBtns(visible) {{
+      const headerBtn = document.getElementById('install-app-btn');
+      const drawerBtn = document.getElementById('drawer-install-btn');
+      if (headerBtn) headerBtn.style.display = visible ? 'inline-flex' : 'none';
+      if (drawerBtn) drawerBtn.style.display = visible ? 'inline-flex' : 'none';
+    }}
     window.addEventListener('beforeinstallprompt', (e) => {{
       e.preventDefault();
       __deferredInstall = e;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'inline-flex';
+      __toggleInstallBtns(true);
     }});
     window.addEventListener('appinstalled', () => {{
       __deferredInstall = null;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'none';
+      __toggleInstallBtns(false);
       showToast('Installed. Find Harpua2001 on your home screen.');
     }});
     window.installApp = async function() {{
@@ -3169,8 +3208,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       const choice = await __deferredInstall.userChoice;
       if (choice.outcome === 'accepted') {{
         __deferredInstall = null;
-        const btn = document.getElementById('install-app-btn');
-        if (btn) btn.style.display = 'none';
+        __toggleInstallBtns(false);
       }}
     }};
 
@@ -3319,6 +3357,47 @@ def _categorize(listing: dict) -> str:
 PRICING_CACHE_FILE = Path(__file__).parent / "pricing_cache.json"
 PRICING_CACHE_TTL  = 24 * 3600
 
+# SportsCardsPro / PriceCharting limits API to 1 call/sec.
+_PRICECHARTING_MIN_INTERVAL = 1.05
+_pricecharting_last_call_ts = 0.0
+
+
+def _pricecharting_throttle() -> None:
+    """Block until at least 1s has passed since the last PriceCharting API call."""
+    global _pricecharting_last_call_ts
+    elapsed = _time.time() - _pricecharting_last_call_ts
+    if elapsed < _PRICECHARTING_MIN_INTERVAL:
+        _time.sleep(_PRICECHARTING_MIN_INTERVAL - elapsed)
+    _pricecharting_last_call_ts = _time.time()
+
+
+# SportsCardsPro card-grade → API field. Higher in list = higher grade priority.
+_PRICECHARTING_GRADE_FIELDS = [
+    ("psa10",  "manual-only-price"),
+    ("bgs10",  "bgs-10-price"),
+    ("cgc10",  "condition-17-price"),
+    ("sgc10",  "condition-18-price"),
+    ("bgs95",  "box-only-price"),
+    ("psa9",   "graded-price"),
+    ("psa8",   "new-price"),
+    ("psa7",   "cib-price"),
+    ("raw",    "loose-price"),
+]
+
+
+def _detect_card_grade(title: str) -> str | None:
+    """Return one of psa10/psa9/psa8/psa7/bgs10/bgs95/cgc10/sgc10 if title clearly states a grade."""
+    t = title.upper()
+    if _re.search(r"\bPSA\s*10\b|\bGEM\s*MINT\s*10\b", t):           return "psa10"
+    if _re.search(r"\bPSA\s*9\b", t):                                return "psa9"
+    if _re.search(r"\bPSA\s*8(\.5)?\b", t):                          return "psa8"
+    if _re.search(r"\bPSA\s*7(\.5)?\b", t):                          return "psa7"
+    if _re.search(r"\bBGS\s*10\b|\bBLACK\s*LABEL\b", t):             return "bgs10"
+    if _re.search(r"\bBGS\s*9\.5\b", t):                             return "bgs95"
+    if _re.search(r"\bCGC\s*10\b|\bCGC\s*PRISTINE\b", t):            return "cgc10"
+    if _re.search(r"\bSGC\s*10\b", t):                               return "sgc10"
+    return None
+
 
 def _pricing_cache_load() -> dict:
     if not PRICING_CACHE_FILE.exists():
@@ -3337,9 +3416,11 @@ def _pricing_cache_save(cache: dict) -> None:
 
 
 def fetch_pricecharting(title: str, api_key: str, cache: dict) -> dict | None:
-    """PriceCharting API — sports cards, video games, Pokemon. Free tier ~1000/day.
-    Sign up at https://www.pricecharting.com/api to get a token.
-    Returns {median, low, high, count, url, matched_title} or None."""
+    """SportsCardsPro / PriceCharting API — sports cards, video games, Pokemon.
+    Paid subscription required; rate-limited to 1 call/sec by the provider.
+    Returns {median, low, high, count, url, matched_title, grade, grades:{...}} or None.
+    `grade` is the grade detected from the title (psa10/psa9/.../raw); `median` is
+    the price for that grade. `grades` exposes all available grade prices in USD."""
     if not api_key:
         return None
     key = f"pricecharting::{title[:80].lower()}"
@@ -3348,6 +3429,7 @@ def fetch_pricecharting(title: str, api_key: str, cache: dict) -> dict | None:
         return cached.get("data")
     try:
         q = _market_query(title)
+        _pricecharting_throttle()
         r = requests.get(
             "https://www.pricecharting.com/api/product",
             params={"t": api_key, "q": q},
@@ -3359,21 +3441,38 @@ def fetch_pricecharting(title: str, api_key: str, cache: dict) -> dict | None:
         if d.get("status") != "success":
             cache[key] = {"data": None, "ts": _time.time()}
             return None
-        loose = d.get("loose-price")
-        cib   = d.get("cib-price")
-        new_  = d.get("new-price")
-        prices = [p / 100.0 for p in (loose, cib, new_) if p and isinstance(p, (int, float))]
-        if not prices:
+        # Extract every grade price returned, in dollars.
+        grades: dict[str, float] = {}
+        for grade_key, field in _PRICECHARTING_GRADE_FIELDS:
+            v = d.get(field)
+            if isinstance(v, (int, float)) and v > 0:
+                grades[grade_key] = round(v / 100.0, 2)
+        if not grades:
             cache[key] = {"data": None, "ts": _time.time()}
             return None
+        detected = _detect_card_grade(title)
+        # If we detected a grade and have a price for it, use that; otherwise
+        # fall back to raw (loose), then to the cheapest known grade price.
+        if detected and detected in grades:
+            median = grades[detected]
+            grade  = detected
+        elif "raw" in grades:
+            median = grades["raw"]
+            grade  = "raw"
+        else:
+            grade  = min(grades, key=lambda k: grades[k])
+            median = grades[grade]
+        prices = list(grades.values())
         prod_id = d.get("id", "")
         result = {
-            "median":        round(loose / 100.0, 2) if loose else round(min(prices), 2),
+            "median":        median,
             "low":           round(min(prices), 2),
             "high":          round(max(prices), 2),
             "count":         len(prices),
             "url":           f"https://www.pricecharting.com/game/{prod_id}" if prod_id else "https://www.pricecharting.com",
             "matched_title": d.get("product-name", ""),
+            "grade":         grade,
+            "grades":        grades,
         }
         cache[key] = {"data": result, "ts": _time.time()}
         return result
@@ -7095,13 +7194,30 @@ def _suggest_list_price(market_median: float, sold_match: dict | None = None) ->
     }
 
 
+def _load_sportscardspro_prices() -> dict:
+    """Load SCP 'actual' prices written by card_price_agent.py."""
+    p = Path(__file__).parent / "sportscardspro_prices.json"
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text())
+    except Exception:
+        return {}
+
+
 def build_price_review(listings: list[dict], market: dict, pricing: dict | None = None) -> Path:
     """
     Premium price review: cards with current vs suggested side-by-side,
     market gap visualization, gap distribution chart.
+
+    Two pricing bases are shown side-by-side per card:
+      - Market   = eBay live comps median (what people *are* selling for)
+      - Actual   = SportsCardsPro guide value (what the card *is worth*)
+    A toggle at the top swaps which basis drives the row's color/sort.
     """
     locks = load_locks()
     sold_history = _load_sold_history()
+    actual_prices = _load_sportscardspro_prices()
     lambda_url  = f"{LAMBDA_BASE}/reprice"
     rebuild_url = f"{LAMBDA_BASE}/rebuild"
 
@@ -7195,9 +7311,46 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
         thumb_html = f'<img src="{l["pic"]}" alt="" loading="lazy">' if l["pic"] else ''
         title_short = l['title'][:80] + ('…' if len(l['title']) > 80 else '')
 
+        # SportsCardsPro "actual" price for this listing (set by card_price_agent.py).
+        actual_rec    = actual_prices.get(item_id) or {}
+        actual_price  = actual_rec.get("actual_price")
+        actual_grade  = actual_rec.get("used_grade")
+        actual_url    = actual_rec.get("scp_url", "")
+        actual_match  = actual_rec.get("matched_product", "")
+        actual_conf   = actual_rec.get("confidence") or 0
+        is_lot_rec    = actual_rec.get("is_lot", False)
+        if actual_price and our_price:
+            actual_gap = (our_price - actual_price) / actual_price * 100.0
+        else:
+            actual_gap = None
+        actual_gap_attr = f' data-actual-gap="{actual_gap:.2f}"' if actual_gap is not None else ' data-actual-gap=""'
+        market_gap_attr = f' data-market-gap="{gap:.2f}"' if gap is not None else ' data-market-gap=""'
+
+        if actual_price is not None:
+            conf_color = "var(--success)" if actual_conf >= 0.7 else ("var(--gold)" if actual_conf >= 0.5 else "var(--warning)")
+            conf_pip   = f'<span title="Match confidence {actual_conf:.0%}" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{conf_color};margin-right:6px;vertical-align:middle;"></span>'
+            grade_lbl  = actual_grade.upper().replace("PSA", "PSA ") if actual_grade else ""
+            actual_gap_html = f'<span class="pr-gap-actual" style="margin-left:8px;color:{"var(--danger)" if actual_gap and actual_gap < -10 else ("var(--warning)" if actual_gap and actual_gap > 10 else "var(--success)")};">{actual_gap:+.0f}% vs actual</span>' if actual_gap is not None else ""
+            actual_url_html = f' · <a href="{actual_url}" target="_blank" rel="noopener" style="color:var(--gold);">↗</a>' if actual_url else ""
+            actual_line = (
+                f'<div class="pr-actual">'
+                f'{conf_pip}<b>Actual</b> <span class="pr-actual-price">${actual_price:.2f}</span>'
+                f' <span class="pr-actual-grade">· {grade_lbl}</span>'
+                f' <span class="pr-actual-match">· {actual_match[:48]}</span>'
+                f'{actual_url_html}'
+                f'{actual_gap_html}'
+                f'</div>'
+            )
+        elif is_lot_rec:
+            actual_line = '<div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>'
+        elif actual_rec.get("matched_product"):
+            actual_line = f'<div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match ({actual_rec.get("confidence",0):.0%}) — review manually</span></div>'
+        else:
+            actual_line = '<div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — no SCP match</span></div>'
+
         check_disabled = "disabled" if lock_info else ""
         cards.append(f'''
-      <article class="pr-card review-row" data-id="{item_id}" {lock_attr} style="--stripe:{stripe}">
+      <article class="pr-card review-row" data-id="{item_id}"{market_gap_attr}{actual_gap_attr} {lock_attr} style="--stripe:{stripe}">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="{item_id}" {checked} {check_disabled} aria-label="Select for repricing"{' title="eBay refuses to revise this listing"' if lock_info else ''}>
         </div>
@@ -7209,8 +7362,9 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
           </div>
           <a href="{l['url']}" target="_blank" rel="noopener" class="pr-title">{title_short}</a>
           <div class="pr-market">
-            Market median <b>${med:.2f}</b> · Range ${mn:.2f}–${mx:.2f} · {comps} comps
+            <b>Market</b> <b>${med:.2f}</b> · Range ${mn:.2f}–${mx:.2f} · {comps} comps
           </div>
+          {actual_line}
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
             <div class="pr-sources-list">{sources_html}</div>
@@ -7283,6 +7437,50 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
     .pr-title:hover { color: var(--gold); }
     .pr-market { font-size: 12px; color: var(--text-muted); }
     .pr-market b { color: var(--text); font-weight: 700; }
+    .pr-actual {
+      font-size: 12px; color: var(--text-muted); margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .pr-actual b { color: var(--gold); font-weight: 700; letter-spacing: .06em; }
+    .pr-actual-price { color: var(--text); font-weight: 700; }
+    .pr-actual-grade { color: var(--gold-dim); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .pr-actual-match { color: var(--text-dim); font-size: 11px; }
+    .pr-actual-na { font-style: italic; }
+    .pr-gap-actual { font-weight: 700; font-size: 11px; }
+    .basis-toggle {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-left: 12px;
+      padding: 4px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+    }
+    .basis-toggle-lbl {
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 700; padding: 0 8px 0 4px;
+    }
+    .basis-btn {
+      background: transparent; border: none; cursor: pointer;
+      padding: 6px 12px;
+      font-size: 12px; font-weight: 700; letter-spacing: .08em;
+      color: var(--text-muted);
+      border-radius: var(--r-sm);
+      transition: all var(--t-fast);
+    }
+    .basis-btn .basis-sub {
+      font-size: 9px; opacity: .65; margin-left: 4px;
+      font-weight: 500; letter-spacing: .14em;
+    }
+    .basis-btn:hover { color: var(--text); }
+    .basis-btn.active {
+      background: var(--gold);
+      color: var(--brand-fg);
+      box-shadow: 0 2px 8px -2px rgba(212,175,55,.5);
+    }
+    /* When basis=actual, gray out the market gap and highlight the actual gap; vice-versa. */
+    body[data-basis="actual"] .pr-gap            { opacity: .35; }
+    body[data-basis="actual"] .pr-gap-actual     { font-size: 13px; }
+    body[data-basis="market"] .pr-gap-actual     { opacity: .55; }
     .pr-sources { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
     .pr-sources-lbl {
       font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
@@ -7380,6 +7578,11 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       <button onclick="selectAll(true)"  class="btn btn-ghost">Select All</button>
       <button onclick="selectAll(false)" class="btn btn-ghost">Deselect</button>
       <span id="count-label"></span>
+      <div class="basis-toggle" role="tablist" aria-label="Compare against">
+        <span class="basis-toggle-lbl">Compare vs:</span>
+        <button class="basis-btn active" data-basis="market" onclick="setBasis('market')">Market <span class="basis-sub">eBay</span></button>
+        <button class="basis-btn"        data-basis="actual" onclick="setBasis('actual')">Actual <span class="basis-sub">SCP</span></button>
+      </div>
       <button onclick="applySelected()" class="btn btn-gold" style="margin-left:auto;">Apply to eBay →</button>
     </div>
 
@@ -7427,6 +7630,34 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       }}
       document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateCount));
       updateCount();
+
+      // Market ↔ Actual basis toggle. Re-sorts the review list by the chosen
+      // basis (worst gap first), persists choice in localStorage.
+      function setBasis(basis) {{
+        document.body.setAttribute('data-basis', basis);
+        document.querySelectorAll('.basis-btn').forEach(b => {{
+          b.classList.toggle('active', b.dataset.basis === basis);
+        }});
+        try {{ localStorage.setItem('priceReviewBasis', basis); }} catch (e) {{}}
+        const body = document.getElementById('review-body');
+        const cards = Array.from(body.querySelectorAll('.pr-card'));
+        const attr = basis === 'actual' ? 'data-actual-gap' : 'data-market-gap';
+        cards.sort((a, b) => {{
+          const av = parseFloat(a.getAttribute(attr));
+          const bv = parseFloat(b.getAttribute(attr));
+          const aValid = !isNaN(av), bValid = !isNaN(bv);
+          if (!aValid && !bValid) return 0;
+          if (!aValid) return 1;
+          if (!bValid) return -1;
+          return Math.abs(bv) - Math.abs(av);
+        }});
+        cards.forEach(c => body.appendChild(c));
+      }}
+      (function() {{
+        let basis = 'market';
+        try {{ basis = localStorage.getItem('priceReviewBasis') || 'market'; }} catch (e) {{}}
+        setBasis(basis);
+      }})();
 
       function selectAll(val) {{
         document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
@@ -8582,6 +8813,21 @@ def main():
         if "pokemontcg"    in srcs: ptcg_count += 1
     _pricing_cache_save(pricing_cache)
     print(f"  Pricing sources: eBay active on all · PriceCharting matched {pc_count}/{len(listings)} · PokemonTCG.io matched {ptcg_count}/{len(listings)}")
+
+    # Run the SportsCardsPro "actual" price agent for any stale/new listings.
+    # Rate-limited 1 req/sec by the provider; cached 7d in sportscardspro_prices.json.
+    if cfg.get("pricecharting_api_key") or os.environ.get("PRICECHARTING_API_KEY"):
+        try:
+            import subprocess, sys as _sys
+            # Snapshot the current listings for the agent to consume — promote
+            # works in-memory but the agent reads from disk.
+            snap_path = OUTPUT_DIR / "listings_snapshot.json"
+            snap_path.write_text(json.dumps(listings, indent=2, default=str), encoding="utf-8")
+            print("  Refreshing SportsCardsPro 'actual' prices (rate-limited, may take a few min)...")
+            subprocess.run([_sys.executable, str(Path(__file__).parent / "card_price_agent.py")],
+                           check=False, timeout=900)
+        except Exception as e:
+            print(f"  SCP price agent skipped: {e}")
     build_dashboard(listings, market, seller=seller, pricing=pricing_by_id)
     build_analytics_page(listings, market, sold)
     build_steals_page(listings, market)

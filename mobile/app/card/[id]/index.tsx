@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme, radii } from '@/src/theme';
 import { deleteCard, getCard, updateCard, type Card } from '@/src/db';
 import { deleteCardImages } from '@/src/image-store';
-import { ebaySearchUrl } from '@/src/api/pricing';
+import { ebaySearchUrl, type PriceSource, type SuggestedPrice, type PricingResult } from '@/src/api/pricing';
 
 const CONDITIONS = ['Near Mint', 'Lightly Played', 'Moderately Played', 'Heavily Played', 'Damaged'];
 
@@ -29,6 +29,16 @@ export default function CardDetail() {
   const [draftPrice, setDraftPrice] = useState('');
   const [draftNotes, setDraftNotes] = useState('');
   const [draftCondition, setDraftCondition] = useState<string | null>(null);
+  const [sourcesExpanded, setSourcesExpanded] = useState(false);
+
+  // Parsed pricing payload (sources + suggested) stashed in pricing_raw at scan time.
+  const pricingPayload: PricingResult | null = (() => {
+    const raw = (card as any)?.pricing_raw;
+    if (!raw || typeof raw !== 'string') return null;
+    try { return JSON.parse(raw) as PricingResult; } catch { return null; }
+  })();
+  const sources: PriceSource[] = pricingPayload?.sources ?? [];
+  const suggested: SuggestedPrice | null = pricingPayload?.suggested ?? null;
 
   useEffect(() => {
     (async () => {
@@ -74,16 +84,7 @@ export default function CardDetail() {
 
   function listOnEbay() {
     if (!card) return;
-    // Phase 4 will wire AddFixedPriceItem to your existing Trading API auth.
-    // For now: pre-fill an eBay sold-search and copy a draft title.
-    Alert.alert(
-      'List on eBay',
-      'Direct AddFixedPriceItem is wired in phase 4. For now we open eBay sold listings so you can sanity-check pricing before listing.',
-      [
-        { text: 'Open eBay sold', onPress: () => Linking.openURL(ebaySearchUrl({ name: card.name ?? '', set_name: card.set_name, number: card.number, foil: card.foil } as any)) },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
+    router.push({ pathname: '/card/[id]/list-on-ebay', params: { id: card.id } });
   }
 
   if (loading) return <SafeAreaView style={[styles.root, styles.center]}><Text style={styles.muted}>Loading…</Text></SafeAreaView>;
@@ -109,6 +110,18 @@ export default function CardDetail() {
           </View>
         </View>
 
+        {suggested && suggested.suggested > 0 ? (
+          <View style={styles.suggestWrap}>
+            <View style={[styles.suggestPill, suggestStyle(suggested.confidence)]}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.suggestEyebrow}>SUGGESTED · {suggested.basis.toUpperCase()} · {suggested.confidence.toUpperCase()}</Text>
+                <Text style={styles.suggestPrice}>${suggested.suggested.toFixed(2)}</Text>
+                <Text style={styles.suggestReason}>{suggested.reasoning}</Text>
+              </View>
+            </View>
+          </View>
+        ) : null}
+
         <View style={styles.priceGrid}>
           <PriceCell label="TCG Market" value={fmt(card.tcg_market)} accent />
           <PriceCell label="TCG Low" value={fmt(card.tcg_low)} />
@@ -119,6 +132,22 @@ export default function CardDetail() {
           <PriceCell label="TCG High" value={fmt(card.tcg_high)} />
           <PriceCell label="CM 30d avg" value={fmt(card.cm_avg30)} />
         </View>
+
+        {sources.length > 0 ? (
+          <View style={styles.section}>
+            <TouchableOpacity onPress={() => setSourcesExpanded((v) => !v)} style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>Pricing sources · {sources.length}</Text>
+              <Text style={styles.linkAction}>{sourcesExpanded ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
+            {sourcesExpanded ? (
+              <View>
+                {sources.map((s, idx) => (
+                  <SourceRow key={`${s.source}-${idx}`} src={s} />
+                ))}
+              </View>
+            ) : null}
+          </View>
+        ) : null}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -213,6 +242,45 @@ function PriceCell({ label, value, accent }: { label: string; value: string; acc
   );
 }
 
+function SourceRow({ src }: { src: PriceSource }) {
+  const confPct = src.confidence != null ? Math.round(src.confidence * 100) : null;
+  return (
+    <View style={styles.sourceRow}>
+      <View style={{ flex: 1 }}>
+        <View style={styles.sourceTopLine}>
+          <Text style={styles.sourceLabel}>{src.label}</Text>
+          {confPct != null ? (
+            <View style={[styles.confPip, confStyle(src.confidence ?? 0)]}>
+              <Text style={styles.confPipText}>{confPct}%</Text>
+            </View>
+          ) : null}
+        </View>
+        <Text style={styles.sourceMedian}>${src.median.toFixed(2)}</Text>
+        <Text style={styles.sourceMeta}>
+          Range ${src.low.toFixed(2)}–${src.high.toFixed(2)} · n={src.count}
+          {src.matched_title ? ` · matched: ${src.matched_title.slice(0, 60)}` : ''}
+        </Text>
+      </View>
+      {src.url ? (
+        <TouchableOpacity onPress={() => Linking.openURL(src.url!)} style={styles.sourceLink}>
+          <Text style={styles.sourceLinkText}>Open ↗</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+}
+
+function suggestStyle(conf: 'high' | 'medium' | 'low') {
+  if (conf === 'high')   return { borderColor: theme.gold,    backgroundColor: 'rgba(212,175,55,0.10)' };
+  if (conf === 'medium') return { borderColor: theme.borderMid, backgroundColor: 'rgba(212,175,55,0.05)' };
+  return { borderColor: 'rgba(224,123,111,0.4)', backgroundColor: 'rgba(224,123,111,0.05)' };
+}
+function confStyle(c: number) {
+  if (c >= 0.7) return { backgroundColor: 'rgba(127,199,122,0.25)', borderColor: theme.success };
+  if (c >= 0.4) return { backgroundColor: 'rgba(224,181,74,0.20)',  borderColor: theme.warning };
+  return            { backgroundColor: 'rgba(224,123,111,0.20)',    borderColor: theme.danger };
+}
+
 function LinkBtn({ label, url }: { label: string; url: string }) {
   return (
     <TouchableOpacity style={styles.linkBtn} onPress={() => Linking.openURL(url)}>
@@ -281,4 +349,20 @@ const styles = StyleSheet.create({
 
   meta: { marginTop: 24, paddingHorizontal: 14 },
   metaText: { color: theme.textDim, fontSize: 11, marginBottom: 4 },
+
+  suggestWrap: { paddingHorizontal: 14, marginBottom: 10 },
+  suggestPill: { borderWidth: 1, borderRadius: radii.md, paddingHorizontal: 14, paddingVertical: 12, flexDirection: 'row', alignItems: 'center' },
+  suggestEyebrow: { color: theme.gold, fontSize: 9, fontWeight: '800', letterSpacing: 1.8 },
+  suggestPrice: { color: theme.text, fontSize: 28, fontWeight: '800', letterSpacing: -0.5, marginTop: 2 },
+  suggestReason: { color: theme.textMuted, fontSize: 12, marginTop: 4, lineHeight: 16 },
+
+  sourceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderTopColor: theme.border, borderTopWidth: StyleSheet.hairlineWidth },
+  sourceTopLine: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sourceLabel: { color: theme.text, fontSize: 13, fontWeight: '700' },
+  sourceMedian: { color: theme.gold, fontSize: 18, fontWeight: '800', marginTop: 2 },
+  sourceMeta: { color: theme.textDim, fontSize: 11, marginTop: 2 },
+  sourceLink: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: radii.sm, backgroundColor: theme.surface2, borderColor: theme.border, borderWidth: 1 },
+  sourceLinkText: { color: theme.text, fontSize: 11, fontWeight: '700' },
+  confPip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 6, paddingVertical: 1 },
+  confPipText: { color: theme.text, fontSize: 9, fontWeight: '800' },
 });
