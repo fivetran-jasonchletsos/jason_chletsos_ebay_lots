@@ -625,8 +625,11 @@ html:not(.pre-is-admin) .nav-links a.admin-only,
 html:not(.pre-is-admin) .drawer a.admin-only,
 html:not(.pre-is-admin) #install-app-btn,
 html:not(.pre-is-admin) #nav-refresh-btn,
-html:not(.pre-is-admin) .btn-logout { display: none !important; }
+html:not(.pre-is-admin) .drawer .btn-refresh,
+html:not(.pre-is-admin) .btn-logout,
+html:not(.pre-is-admin) .drawer-signout { display: none !important; }
 html.pre-is-admin .btn-login,
+html.pre-is-admin .drawer-signin,
 html.pre-is-admin .gate-overlay { display: none !important; }
 .btn-login, .btn-logout {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1543,6 +1546,28 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 @media (max-width: 880px) {
   .nav-links { display: none; }
   .menu-toggle { display: inline-flex; }
+  /* Header auxiliary buttons get tucked into the drawer at narrow widths so
+     the brand block + hamburger don't collide. The drawer-foot below renders
+     the same actions. */
+  .btn-install,
+  .btn-login,
+  .btn-logout,
+  .btn-refresh { display: none !important; }
+  /* Tighten header padding so the brand text gets max horizontal room. */
+  .app-header-inner { padding: 10px 12px; gap: 10px; }
+  /* Force the brand tag onto a single line, ellipsized — the forced <br>
+     breaks rendered "SPORTS & POKEMON CARDS" as a cramped stack on phones. */
+  .brand-tag {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px;
+    letter-spacing: .18em;
+  }
+  .brand-tag br { display: none; }
+  /* Slim the brand mark a hair on mobile so the title gets more room. */
+  .brand-mark { width: 32px; height: 32px; font-size: 18px; }
+  .brand-name { font-size: 20px; }
 }
 @media (max-width: 640px) {
   main { padding: 22px 14px 70px; }
@@ -1802,6 +1827,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="../craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="../google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
+      <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install as app
+      </button>
+      <button class="btn-refresh drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        Sign in
+      </button>
+      <button class="btn-refresh drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
+        Sign out
+      </button>
       <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
     </div>
   </aside>
@@ -1884,7 +1919,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="ip-eyebrow">Pricing intelligence · admin only</div>
             <h3>Where this price sits</h3>
           </div>
-          <div class="ip-row"><div class="ip-lbl">Your price</div><div class="ip-val">$2.99</div><div class="ip-note">currently listed on eBay</div></div><div class="ip-row"><div class="ip-lbl">eBay Active</div><div class="ip-val">$2.99 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($1.75–$3.25)</span></div><div class="ip-note">10 live asking prices</div></div><div class="ip-row"><div class="ip-lbl">Your past sales</div><div class="ip-val">$3.45 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($1.50–$180.00)</span></div><div class="ip-note">14 similar items sold (median)</div></div><div class="ip-row"><div class="ip-lbl">PriceCharting</div><div class="ip-val">$0.25</div><div class="ip-note">loose · Sharp-Eyed Rookie #176 · <a href="https://www.pricecharting.com/game/6340256" target="_blank" rel="noopener" style="color:var(--gold);">view ↗</a></div></div><div class="ip-row"><div class="ip-lbl">Gap vs eBay</div><div class="ip-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="ip-note">your price vs eBay active median</div></div><div class="ip-row"><div class="ip-lbl">Suggested list</div><div class="ip-val"><b style="color:var(--gold);">$2.99</b></div><div class="ip-note">based on Your past sales</div></div>
+          <div class="ip-row"><div class="ip-lbl">Your price</div><div class="ip-val">$2.99</div><div class="ip-note">currently listed on eBay</div></div><div class="ip-row"><div class="ip-lbl">eBay Active</div><div class="ip-val">$2.99 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($1.75–$3.25)</span></div><div class="ip-note">10 live asking prices</div></div><div class="ip-row"><div class="ip-lbl">Your past sales</div><div class="ip-val">$3.00 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($1.50–$180.00)</span></div><div class="ip-note">15 similar items sold (median)</div></div><div class="ip-row"><div class="ip-lbl">PriceCharting</div><div class="ip-val">$0.25</div><div class="ip-note">loose · Sharp-Eyed Rookie #176 · <a href="https://www.pricecharting.com/game/6340256" target="_blank" rel="noopener" style="color:var(--gold);">view ↗</a></div></div><div class="ip-row"><div class="ip-lbl">Gap vs eBay</div><div class="ip-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="ip-note">your price vs eBay active median</div></div><div class="ip-row"><div class="ip-lbl">Suggested list</div><div class="ip-val"><b style="color:var(--gold);">$2.99</b></div><div class="ip-note">based on Your past sales</div></div>
         </section>
       </div>
     </article>
@@ -1894,6 +1929,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="eyebrow">More from Football Singles</div>
           <h2 class="section-title" style="margin-bottom:16px;">You might also like</h2>
           <div class="rel-grid">
+            <a href="306939333836.html" class="rel-card">
+              <div class="rel-img"><img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="2025-26 Topps Chrome Cam Ward RC Hot Pink X Fractor Mega Exclusive SP TN Titans" loading="lazy"></div>
+              <div class="rel-meta">
+                <div class="rel-title">2025-26 Topps Chrome Cam Ward RC Hot Pink X Fractor Mega Exc…</div>
+                <div class="rel-price">$31.23</div>
+              </div>
+            </a>
             <a href="306931446668.html" class="rel-card">
               <div class="rel-img"><img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="2025 Panini Donruss Optic - My House! DK Metcalf #8 Black Pandora Prizm /149" loading="lazy"></div>
               <div class="rel-meta">
@@ -1914,13 +1956,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="rel-title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</div>
                 <div class="rel-price">$9.99</div>
               </div>
-            </a>
-            <a href="306930462076.html" class="rel-card">
-              <div class="rel-img"><img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="2025 Panini Prizm - Bo Nix #142 White Disco Prizm" loading="lazy"></div>
-              <div class="rel-meta">
-                <div class="rel-title">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</div>
-                <div class="rel-price">$7.50</div>
-              </div>
             </a></div>
         </section><script>
       (function() {
@@ -1937,7 +1972,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 14, 2026 · 07:45 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 15, 2026 · 21:09 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -2246,16 +2281,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     }
 
     let __deferredInstall = null;
+    function __toggleInstallBtns(visible) {
+      const headerBtn = document.getElementById('install-app-btn');
+      const drawerBtn = document.getElementById('drawer-install-btn');
+      if (headerBtn) headerBtn.style.display = visible ? 'inline-flex' : 'none';
+      if (drawerBtn) drawerBtn.style.display = visible ? 'inline-flex' : 'none';
+    }
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       __deferredInstall = e;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'inline-flex';
+      __toggleInstallBtns(true);
     });
     window.addEventListener('appinstalled', () => {
       __deferredInstall = null;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'none';
+      __toggleInstallBtns(false);
       showToast('Installed. Find Harpua2001 on your home screen.');
     });
     window.installApp = async function() {
@@ -2264,8 +2303,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       const choice = await __deferredInstall.userChoice;
       if (choice.outcome === 'accepted') {
         __deferredInstall = null;
-        const btn = document.getElementById('install-app-btn');
-        if (btn) btn.style.display = 'none';
+        __toggleInstallBtns(false);
       }
     };
 

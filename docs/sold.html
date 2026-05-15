@@ -625,8 +625,11 @@ html:not(.pre-is-admin) .nav-links a.admin-only,
 html:not(.pre-is-admin) .drawer a.admin-only,
 html:not(.pre-is-admin) #install-app-btn,
 html:not(.pre-is-admin) #nav-refresh-btn,
-html:not(.pre-is-admin) .btn-logout { display: none !important; }
+html:not(.pre-is-admin) .drawer .btn-refresh,
+html:not(.pre-is-admin) .btn-logout,
+html:not(.pre-is-admin) .drawer-signout { display: none !important; }
 html.pre-is-admin .btn-login,
+html.pre-is-admin .drawer-signin,
 html.pre-is-admin .gate-overlay { display: none !important; }
 .btn-login, .btn-logout {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1543,6 +1546,28 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 @media (max-width: 880px) {
   .nav-links { display: none; }
   .menu-toggle { display: inline-flex; }
+  /* Header auxiliary buttons get tucked into the drawer at narrow widths so
+     the brand block + hamburger don't collide. The drawer-foot below renders
+     the same actions. */
+  .btn-install,
+  .btn-login,
+  .btn-logout,
+  .btn-refresh { display: none !important; }
+  /* Tighten header padding so the brand text gets max horizontal room. */
+  .app-header-inner { padding: 10px 12px; gap: 10px; }
+  /* Force the brand tag onto a single line, ellipsized — the forced <br>
+     breaks rendered "SPORTS & POKEMON CARDS" as a cramped stack on phones. */
+  .brand-tag {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px;
+    letter-spacing: .18em;
+  }
+  .brand-tag br { display: none; }
+  /* Slim the brand mark a hair on mobile so the title gets more room. */
+  .brand-mark { width: 32px; height: 32px; font-size: 18px; }
+  .brand-name { font-size: 20px; }
 }
 @media (max-width: 640px) {
   main { padding: 22px 14px 70px; }
@@ -1699,6 +1724,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
+      <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install as app
+      </button>
+      <button class="btn-refresh drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        Sign in
+      </button>
+      <button class="btn-refresh drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
+        Sign out
+      </button>
       <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
     </div>
   </aside>
@@ -1732,9 +1767,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num">57</div><div class="lbl">Items Sold</div></div>
-      <div class="stat-card"><div class="num">$1,066</div><div class="lbl">Gross Revenue</div></div>
-      <div class="stat-card"><div class="num">$18.70</div><div class="lbl">Avg Sale Price</div></div>
+      <div class="stat-card"><div class="num">59</div><div class="lbl">Items Sold</div></div>
+      <div class="stat-card"><div class="num">$1,075</div><div class="lbl">Gross Revenue</div></div>
+      <div class="stat-card"><div class="num">$18.21</div><div class="lbl">Avg Sale Price</div></div>
       <div class="stat-card"><div class="num">43</div><div class="lbl">Unique Buyers</div></div>
     </div>
 
@@ -1742,6 +1777,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="sold-grid">
       
+      <article class="sold-card" data-id="306914912556">
+        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/27IAAeSwi69p9qVk/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="sold-body">
+          <div class="sold-meta-row">
+            <span class="tag tag-success">SOLD</span>
+            <span class="sold-date">May 15, 2026</span>
+            
+          </div>
+          <a href="https://www.ebay.com/itm/306914912556" target="_blank" rel="noopener" class="sold-title">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)</a>
+          <div class="sold-meta-row" style="margin-top:6px;">
+            <span class="tag">s*********</span>
+            
+            
+          </div>
+        </div>
+        <div class="sold-price-block">
+          <div class="sold-price">$3.00</div>
+          <div class="sold-ship">+ $1.32 ship</div>
+        </div>
+      </article>
+
+      <article class="sold-card" data-id="306939330491">
+        <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/og8AAeSwHNFqBk9i/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="sold-body">
+          <div class="sold-meta-row">
+            <span class="tag tag-success">SOLD</span>
+            <span class="sold-date">May 15, 2026</span>
+            
+          </div>
+          <a href="https://www.ebay.com/itm/306939330491" target="_blank" rel="noopener" class="sold-title">Topps Chrome Football 2025 Bhayshul Tuten Jaguars Geometric Rookie /99 #389</a>
+          <div class="sold-meta-row" style="margin-top:6px;">
+            <span class="tag">s*********</span>
+            
+            
+          </div>
+        </div>
+        <div class="sold-price-block">
+          <div class="sold-price">$5.67</div>
+          <div class="sold-ship">+ $1.32 ship</div>
+        </div>
+      </article>
+
       <article class="sold-card" data-id="306913311444">
         <div class="sold-thumb"><img src="https://i.ebayimg.com/images/g/DikAAeSw77xp9Xow/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="sold-body">
@@ -2950,8 +3027,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           data: {
             labels: lbls,
             datasets: [
-              { label: 'Revenue ($)', data: [356.18, 363.06, 14.95, 331.68], backgroundColor: 'rgba(212,175,55,.55)', borderColor: '#d4af37', borderWidth: 1.5, borderRadius: 6, yAxisID: 'y' },
-              { label: 'Items',        data: [20, 9, 5, 23],   type: 'line',  backgroundColor: 'rgba(127,199,122,.2)', borderColor: '#7fc77a', borderWidth: 2, tension: 0.35, yAxisID: 'y1' }
+              { label: 'Revenue ($)', data: [356.18, 363.06, 14.95, 340.35], backgroundColor: 'rgba(212,175,55,.55)', borderColor: '#d4af37', borderWidth: 1.5, borderRadius: 6, yAxisID: 'y' },
+              { label: 'Items',        data: [20, 9, 5, 25],   type: 'line',  backgroundColor: 'rgba(127,199,122,.2)', borderColor: '#7fc77a', borderWidth: 2, tension: 0.35, yAxisID: 'y1' }
             ]
           },
           options: {
@@ -2968,7 +3045,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 14, 2026 · 07:43 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 15, 2026 · 21:06 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -3277,16 +3354,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     }
 
     let __deferredInstall = null;
+    function __toggleInstallBtns(visible) {
+      const headerBtn = document.getElementById('install-app-btn');
+      const drawerBtn = document.getElementById('drawer-install-btn');
+      if (headerBtn) headerBtn.style.display = visible ? 'inline-flex' : 'none';
+      if (drawerBtn) drawerBtn.style.display = visible ? 'inline-flex' : 'none';
+    }
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       __deferredInstall = e;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'inline-flex';
+      __toggleInstallBtns(true);
     });
     window.addEventListener('appinstalled', () => {
       __deferredInstall = null;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'none';
+      __toggleInstallBtns(false);
       showToast('Installed. Find Harpua2001 on your home screen.');
     });
     window.installApp = async function() {
@@ -3295,8 +3376,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       const choice = await __deferredInstall.userChoice;
       if (choice.outcome === 'accepted') {
         __deferredInstall = null;
-        const btn = document.getElementById('install-app-btn');
-        if (btn) btn.style.display = 'none';
+        __toggleInstallBtns(false);
       }
     };
 

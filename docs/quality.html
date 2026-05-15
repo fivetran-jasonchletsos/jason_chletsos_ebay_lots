@@ -625,8 +625,11 @@ html:not(.pre-is-admin) .nav-links a.admin-only,
 html:not(.pre-is-admin) .drawer a.admin-only,
 html:not(.pre-is-admin) #install-app-btn,
 html:not(.pre-is-admin) #nav-refresh-btn,
-html:not(.pre-is-admin) .btn-logout { display: none !important; }
+html:not(.pre-is-admin) .drawer .btn-refresh,
+html:not(.pre-is-admin) .btn-logout,
+html:not(.pre-is-admin) .drawer-signout { display: none !important; }
 html.pre-is-admin .btn-login,
+html.pre-is-admin .drawer-signin,
 html.pre-is-admin .gate-overlay { display: none !important; }
 .btn-login, .btn-logout {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1543,6 +1546,28 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 @media (max-width: 880px) {
   .nav-links { display: none; }
   .menu-toggle { display: inline-flex; }
+  /* Header auxiliary buttons get tucked into the drawer at narrow widths so
+     the brand block + hamburger don't collide. The drawer-foot below renders
+     the same actions. */
+  .btn-install,
+  .btn-login,
+  .btn-logout,
+  .btn-refresh { display: none !important; }
+  /* Tighten header padding so the brand text gets max horizontal room. */
+  .app-header-inner { padding: 10px 12px; gap: 10px; }
+  /* Force the brand tag onto a single line, ellipsized — the forced <br>
+     breaks rendered "SPORTS & POKEMON CARDS" as a cramped stack on phones. */
+  .brand-tag {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px;
+    letter-spacing: .18em;
+  }
+  .brand-tag br { display: none; }
+  /* Slim the brand mark a hair on mobile so the title gets more room. */
+  .brand-mark { width: 32px; height: 32px; font-size: 18px; }
+  .brand-name { font-size: 20px; }
 }
 @media (max-width: 640px) {
   main { padding: 22px 14px 70px; }
@@ -1729,6 +1754,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
+      <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        Install as app
+      </button>
+      <button class="btn-refresh drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        Sign in
+      </button>
+      <button class="btn-refresh drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
+        Sign out
+      </button>
       <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
     </div>
   </aside>
@@ -1762,10 +1797,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num">102</div><div class="lbl">Total Listings</div></div>
-      <div class="stat-card"><div class="num">78</div><div class="lbl">Avg Score</div></div>
-      <div class="stat-card"><div class="num success">56</div><div class="lbl">Good (80+)</div></div>
-      <div class="stat-card"><div class="num warning">46</div><div class="lbl">Fair (50-79)</div></div>
+      <div class="stat-card"><div class="num">119</div><div class="lbl">Total Listings</div></div>
+      <div class="stat-card"><div class="num">79</div><div class="lbl">Avg Score</div></div>
+      <div class="stat-card"><div class="num success">67</div><div class="lbl">Good (80+)</div></div>
+      <div class="stat-card"><div class="num warning">52</div><div class="lbl">Fair (50-79)</div></div>
       <div class="stat-card"><div class="num danger">0</div><div class="lbl">Needs Work</div></div>
     </div>
 
@@ -1986,31 +2021,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               </div>
         </div>
       </article>
-      <article class="q-card" data-id="306930914782" style="--stripe:var(--warning)" >
-        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="q-body">
-          <div class="q-head">
-            <div class="q-title-wrap">
-              <div class="q-score-wrap">
-                <span class="q-score">60</span><span class="q-score-of">/100</span>
-                <span class="badge badge-warning">Fair</span>
-                
-              </div>
-              <a href="https://www.ebay.com/itm/1990-91-Skybox-Michael-Jordan-41-/306930914782" target="_blank" rel="noopener" class="q-title">1990-91 Skybox - Michael Jordan #41</a>
-            </div>
-            <div class="q-price">$4.99</div>
-          </div>
-          <ul class="q-issues"><li>Title too short (35/80 chars)</li><li>Description missing or very short</li></ul>
-          
-              <div class="q-fix">
-                <input type="checkbox" class="row-check" value="306930914782" data-suggested="1990-91 Skybox - Michael Jordan #41 NFL" checked aria-label="Select for fix">
-                <div class="q-fix-text">
-                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
-                  <div class="q-fix-suggest">1990-91 Skybox - Michael Jordan #41 NFL</div>
-                </div>
-              </div>
-        </div>
-      </article>
       <article class="q-card" data-id="306931070594" style="--stripe:var(--warning)" >
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/tLkAAeSwdJBqARAi/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
@@ -2179,7 +2189,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$13.13</div>
           </div>
-          <ul class="q-issues"><li>Title could be longer (59/80 chars)</li><li>Description missing or very short</li><li>$13.13 is 3× your average ($3.61)</li></ul>
+          <ul class="q-issues"><li>Title could be longer (59/80 chars)</li><li>Description missing or very short</li><li>$13.13 is 3× your average ($3.76)</li></ul>
           
               <div class="q-fix">
                 <input type="checkbox" class="row-check" value="306937452121" data-suggested="2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL" checked aria-label="Select for fix">
@@ -2327,7 +2337,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               </div>
               <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman--/306904203738" target="_blank" rel="noopener" class="q-title">1994 Classic Pro Line Live - Autograph - Steve Emtman</a>
             </div>
-            <div class="q-price">$10.00</div>
+            <div class="q-price">$4.56</div>
           </div>
           <ul class="q-issues"><li>Title could be longer (53/80 chars)</li><li>Description missing or very short</li></ul>
           
@@ -2852,6 +2862,181 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               </div>
         </div>
       </article>
+      <article class="q-card" data-id="306939281535" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/86MAAeSwKDVqBkgx/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">75</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Penei-Sewell-99-Refractor-/306939281535" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome - Penei Sewell #99 Refractor</a>
+            </div>
+            <div class="q-price">$2.22</div>
+          </div>
+          <ul class="q-issues"><li>Title could be longer (46/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939281535" data-suggested="2025 Topps Chrome - Penei Sewell #99 Refractor NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome - Penei Sewell #99 Refractor NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939301767" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/gKcAAeSwIGhqBksJ/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">75</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Trey-Amos-RC-371-Commanders-/306939301767" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Football Trey Amos RC #371 Commanders</a>
+            </div>
+            <div class="q-price">$1.99</div>
+          </div>
+          <ul class="q-issues"><li>Title could be longer (55/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939301767" data-suggested="2025 Topps Chrome Football Trey Amos RC #371 Commanders NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome Football Trey Amos RC #371 Commanders NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939304842" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/aVgAAeSwxGJqBku3/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">75</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jaylen-Waddle-X-Fractor-186-Dolphins-/306939304842" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins</a>
+            </div>
+            <div class="q-price">$1.23</div>
+          </div>
+          <ul class="q-issues"><li>Title could be longer (55/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939304842" data-suggested="2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939312739" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/S10AAeSwSptqBkxq/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">75</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2024-Topps-Chrome-Rookies-Marvin-Harrison-Jr-204-RC--/306939312739" target="_blank" rel="noopener" class="q-title">2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC)</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Title could be longer (57/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939312739" data-suggested="2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC) NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC) NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939342209" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/lNEAAeSwrclqBlIQ/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">75</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-/306939342209" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Matthew Golden Pink X-fractor. Packers</a>
+            </div>
+            <div class="q-price">$5.67</div>
+          </div>
+          <ul class="q-issues"><li>Title could be longer (56/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939342209" data-suggested="2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939369726" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/AtEAAeSwICVqBlYN/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">75</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-/306939369726" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor</a>
+            </div>
+            <div class="q-price">$3.45</div>
+          </div>
+          <ul class="q-issues"><li>Title could be longer (59/80 chars)</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939369726" data-suggested="2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939475594" style="--stripe:var(--warning)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/8NQAAeSwa2BqBmgv/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">77</span><span class="q-score-of">/100</span>
+                <span class="badge badge-warning">Fair</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Ray-Wave-Refractor-254-DK-METCALF-/306939475594" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Football - Ray Wave  Refractor #254 DK METCALF</a>
+            </div>
+            <div class="q-price">$3.45</div>
+          </div>
+          <ul class="q-issues"><li>Title has ALL-CAPS section: METCALF</li><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939475594" data-suggested="2025 Topps Chrome Football - Ray Wave Refractor #254 DK Metcalf NFL" checked aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome Football - Ray Wave Refractor #254 DK Metcalf NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
       <article class="q-card" data-id="306931446668" style="--stripe:var(--success)" >
         <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="q-body">
@@ -2866,7 +3051,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$13.99</div>
           </div>
-          <ul class="q-issues"><li>Title has spammy punctuation (! or ***)</li><li>Description missing or very short</li><li>$13.99 is 3× your average ($3.61)</li></ul>
+          <ul class="q-issues"><li>Title has spammy punctuation (! or ***)</li><li>Description missing or very short</li><li>$13.99 is 3× your average ($3.76)</li></ul>
           
               <div class="q-fix">
                 <input type="checkbox" class="row-check" value="306931446668" data-suggested="2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149"  aria-label="Select for fix">
@@ -2934,7 +3119,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$12.99</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$12.99 is 3× your average ($3.61)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$12.99 is 3× your average ($3.76)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -3295,24 +3480,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" rel="noopener" class="q-title">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</a>
             </div>
             <div class="q-price">$3.99</div>
-          </div>
-          <ul class="q-issues"><li>Description missing or very short</li></ul>
-          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
-        </div>
-      </article>
-      <article class="q-card" data-id="306914912556" style="--stripe:var(--success)" >
-        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/27IAAeSwi69p9qVk/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="q-body">
-          <div class="q-head">
-            <div class="q-title-wrap">
-              <div class="q-score-wrap">
-                <span class="q-score">85</span><span class="q-score-of">/100</span>
-                <span class="badge badge-success">Good</span>
-                
-              </div>
-              <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Black-Red-Shock-Prizm-RC--/306914912556" target="_blank" rel="noopener" class="q-title">2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)</a>
-            </div>
-            <div class="q-price">$3.00</div>
           </div>
           <ul class="q-issues"><li>Description missing or very short</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
@@ -4062,7 +4229,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$16.99</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$16.99 is 3× your average ($3.61)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$16.99 is 3× your average ($3.76)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -4089,6 +4256,243 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <div class="q-fix-suggest">2025 Panini Phoenix - Rookies Shedeur Sanders #154 Silver (RC) NFL Football</div>
                 </div>
               </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939289562" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/XU4AAeSwrclqBknS/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Hot-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome - Rookies Riley Leonard #318 Hot Pink X-Fractor (RC)</a>
+            </div>
+            <div class="q-price">$4.56</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939289562" data-suggested="2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939316823" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/prcAAeSweUZqBk0i/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome #286 Vita Vea Aqua Wave Refractor /199 Buccaneers</a>
+            </div>
+            <div class="q-price">$8.90</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939326707" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/9s0AAeSwhENqBk63/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/Courtland-Sutton-2025-Topps-Chrome-Football-Refractor-Ray-Wave-Broncos-/306939326707" target="_blank" rel="noopener" class="q-title">Courtland Sutton 2025 Topps Chrome Football Refractor Ray Wave Broncos</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939333836" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Hot-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="q-title">2025-26 Topps Chrome Cam Ward RC Hot Pink X Fractor Mega Exclusive SP TN Titans</a>
+            </div>
+            <div class="q-price">$31.23</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$31.23 is 3× your average ($3.76)</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939333836" data-suggested="2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939339030" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/4mUAAeSwN8dqBlFC/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-/306939339030" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor</a>
+            </div>
+            <div class="q-price">$4.56</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306939339030" data-suggested="2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL</div>
+                </div>
+              </div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939345538" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/3WUAAeSwYudqBlLc/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints RC #398</a>
+            </div>
+            <div class="q-price">$3.45</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939349539" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/mpwAAeSwrmRqBlOC/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/Topps-Chrome-Myles-Garrett-1975-8-Cleveland-Browns-2025-NFL-Football-Card-/306939349539" target="_blank" rel="noopener" class="q-title">Topps Chrome Myles Garrett #1975-8 Cleveland Browns 2025 NFL Football Card</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939352679" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/P10AAeSw~7lqBlSQ/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroit Lions</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939367849" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/jJAAAeSwUv5qBlVE/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rookie Chargers WR</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939373376" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/BNsAAeSwFd5qBlaO/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Cooper-Kupp-Red-White-Blue-271-Seahawks-/306939373376" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Football - Cooper Kupp Red White & Blue - #271 Seahawks</a>
+            </div>
+            <div class="q-price">$5.67</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939472487" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/PqUAAeSwJy5qBmdy/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-CeeDee-Lamb-Card-Fortune-15-Refractor-Dallas-Cowboys-F15-9-/306939472487" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome CeeDee Lamb Card Fortune 15 Refractor Dallas Cowboys #F15-9</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
+        </div>
+      </article>
+      <article class="q-card" data-id="306939473666" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/0OMAAeSwPN5qBmfD/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666" target="_blank" rel="noopener" class="q-title">2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rookie RC 387 Commanders</a>
+            </div>
+            <div class="q-price">$2.34</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article></div>
 
@@ -4175,7 +4579,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data: {
           labels: ['Good (80+)','Fair (50-79)','Needs work'],
           datasets: [{
-            data: [56, 46, 0],
+            data: [67, 52, 0],
             backgroundColor: ['#7fc77a', '#e0b54a', '#e07b6f'],
             borderColor: '#0a0a0a',
             borderWidth: 3,
@@ -4193,7 +4597,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data: {
           labels: ['Short title', 'No image', 'Weak description', 'Pricing outlier', 'Hype/fluff words', 'ALL CAPS section', 'Contact info in desc', 'Placeholder values'],
           datasets: [{
-            data: [46, 0, 102, 4, 0, 0, 0, 0],
+            data: [51, 0, 119, 5, 0, 1, 0, 0],
             backgroundColor: ['rgba(224,123,111,.6)','rgba(224,181,74,.6)','rgba(108,176,255,.6)','rgba(212,175,55,.6)'],
             borderColor: ['#e07b6f','#e0b54a','#6cb0ff','#d4af37'],
             borderWidth: 1.5,
@@ -4213,7 +4617,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 14, 2026 · 07:45 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 15, 2026 · 21:09 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
   </footer>
 
   
@@ -4522,16 +4926,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     }
 
     let __deferredInstall = null;
+    function __toggleInstallBtns(visible) {
+      const headerBtn = document.getElementById('install-app-btn');
+      const drawerBtn = document.getElementById('drawer-install-btn');
+      if (headerBtn) headerBtn.style.display = visible ? 'inline-flex' : 'none';
+      if (drawerBtn) drawerBtn.style.display = visible ? 'inline-flex' : 'none';
+    }
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       __deferredInstall = e;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'inline-flex';
+      __toggleInstallBtns(true);
     });
     window.addEventListener('appinstalled', () => {
       __deferredInstall = null;
-      const btn = document.getElementById('install-app-btn');
-      if (btn) btn.style.display = 'none';
+      __toggleInstallBtns(false);
       showToast('Installed. Find Harpua2001 on your home screen.');
     });
     window.installApp = async function() {
@@ -4540,8 +4948,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       const choice = await __deferredInstall.userChoice;
       if (choice.outcome === 'accepted') {
         __deferredInstall = null;
-        const btn = document.getElementById('install-app-btn');
-        if (btn) btn.style.display = 'none';
+        __toggleInstallBtns(false);
       }
     };
 
