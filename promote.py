@@ -2653,20 +2653,28 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # - group="X"   → tucked under the "X ▾" dropdown
 # Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
-    ("index.html",         "Listings",      True,  None),
-    ("steals.html",        "Steals",        True,  None),
-    ("sold.html",          "Sold",          True,  None),
-    ("analytics.html",     "Analytics",     False, "Insights"),
-    ("market_intel.html",  "Market Intel",  False, "Insights"),
-    ("deals.html",         "Deals",         False, "Insights"),
-    ("quality.html",       "Quality",       False, "Insights"),
-    ("price_review.html",  "Pricing",       False, "Insights"),
-    ("repricing.html",     "Repricing Agent", False, "Insights"),
-    ("title_review.html",  "Titles",        False, "Insights"),
-    ("scan.html",          "Scanner",       False, "Tools"),
-    ("reddit.html",        "Reddit",        False, "Cross-post"),
-    ("craigslist.html",    "Craigslist",    False, "Cross-post"),
-    ("google_feed.xml",    "Google Feed",   False, "Cross-post"),
+    ("index.html",            "Listings",      True,  None),
+    ("steals.html",           "Steals",        True,  None),
+    ("sold.html",             "Sold",          True,  None),
+    # "Make Money" sits first in Insights — daily-driver revenue-ops rollup.
+    ("make_money.html",       "Make Money",    False, "Insights"),
+    ("analytics.html",        "Analytics",     False, "Insights"),
+    ("market_intel.html",     "Market Intel",  False, "Insights"),
+    ("deals.html",            "Deals",         False, "Insights"),
+    ("quality.html",          "Quality",       False, "Insights"),
+    ("photo_audit.html",      "Photo Audit",   False, "Insights"),
+    ("price_review.html",     "Pricing",       False, "Insights"),
+    ("repricing.html",        "Repricing Agent", False, "Insights"),
+    ("promoted_listings.html","Promoted Ads",  False, "Insights"),
+    ("watchers.html",         "Watchers",      False, "Insights"),
+    ("specifics.html",        "Specifics",     False, "Insights"),
+    ("promotions.html",       "Promotions",    False, "Insights"),
+    ("photo_audit.html",      "Photo Audit",   False, "Insights"),
+    ("title_review.html",     "Titles",        False, "Insights"),
+    ("scan.html",             "Scanner",       False, "Tools"),
+    ("reddit.html",           "Reddit",        False, "Cross-post"),
+    ("craigslist.html",       "Craigslist",    False, "Cross-post"),
+    ("google_feed.xml",       "Google Feed",   False, "Cross-post"),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
@@ -8190,6 +8198,335 @@ def build_return_policy() -> Path:
 
 
 # ---------------------------------------------------------------------------
+# Make Money — daily-driver revenue-ops dashboard. Aggregates the output of
+# every revenue agent into one rollup page with $ uplift projections.
+# ---------------------------------------------------------------------------
+
+def build_make_money(listings: list[dict]) -> Path:
+    """Rolls every revenue agent's plan into one daily-action page.
+
+    Reads (best-effort; missing files just render the section as 'not run yet'):
+      output/promoted_listings_plan.json
+      output/watcher_offers_plan.json
+      output/specifics_plan.json
+      output/promotions_plan.json
+      output/photo_audit.json
+      output/repricing_plan.json   (existing)
+      sportscardspro_prices.json   (for revenue-gap math)
+    """
+    def _load_json(name: str) -> dict | list | None:
+        p = Path(name) if "/" in name else (OUTPUT_DIR / name)
+        if not p.exists() and not name.startswith("output/"):
+            p = REPO_ROOT / name
+        if not p.exists():
+            return None
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            return None
+
+    promoted = _load_json("output/promoted_listings_plan.json") or {}
+    watchers = _load_json("output/watcher_offers_plan.json") or {}
+    specifics = _load_json("output/specifics_plan.json") or {}
+    promotions = _load_json("output/promotions_plan.json") or {}
+    photo_audit = _load_json("output/photo_audit.json") or {}
+    repricing = _load_json("output/repricing_plan.json") or {}
+
+    # ---- compute uplift per stream (heuristic but defensible) ----
+    # Each stream: count of items + dollar uplift forecast for next 30 days.
+    streams = []
+
+    # Promoted Listings: expected lift = sum(rate × current_price × eBay 4-12% lift)
+    if promoted:
+        plan = promoted.get("plan") or promoted.get("decisions") or []
+        applied_listings = [p for p in plan if (p.get("recommended_rate") or 0) > 0]
+        ad_spend_30d = sum((p.get("recommended_rate") or 0) * (p.get("price") or 0) for p in applied_listings)
+        # Lift heuristic — promoted-listings uplift is ~8% of items that got an ad rate, on already-listed inventory
+        lift_30d = sum((p.get("price") or 0) * 0.08 * ((p.get("recommended_rate") or 0) / 0.12) for p in applied_listings)
+        streams.append({
+            "key": "promoted",
+            "title": "Promoted Listings",
+            "page": "promoted_listings.html",
+            "count": len(applied_listings),
+            "label": f"{len(applied_listings)} listings · ad spend ~${ad_spend_30d:,.0f}/mo",
+            "lift_30d": round(lift_30d, 0),
+            "icon": "📢",
+            "color": "var(--gold)",
+            "status": "ready" if applied_listings else "no_plan",
+        })
+    else:
+        streams.append({"key": "promoted", "title": "Promoted Listings", "page": "promoted_listings.html",
+                        "count": 0, "label": "Run: python3 promoted_listings_agent.py",
+                        "lift_30d": 0, "icon": "📢", "color": "var(--gold)", "status": "not_run"})
+
+    # Watchers: expected lift = sum(offer_price × 0.15 take rate)
+    if watchers:
+        plan = watchers.get("plan") or watchers.get("offers") or []
+        lift_30d = sum((o.get("offer_price") or 0) * 0.15 for o in plan)
+        streams.append({
+            "key": "watchers",
+            "title": "Send Offer to Watchers",
+            "page": "watchers.html",
+            "count": len(plan),
+            "label": f"{len(plan)} offers queued · ~15% take rate",
+            "lift_30d": round(lift_30d, 0),
+            "icon": "👀",
+            "color": "var(--success)",
+            "status": "ready" if plan else "no_plan",
+        })
+    else:
+        streams.append({"key": "watchers", "title": "Send Offer to Watchers", "page": "watchers.html",
+                        "count": 0, "label": "Run: python3 watchers_offer_agent.py",
+                        "lift_30d": 0, "icon": "👀", "color": "var(--success)", "status": "not_run"})
+
+    # Item Specifics: search-rank lift, hard to quantify $; rough = 2% × monthly_revenue × pct_fixable
+    if specifics:
+        plan = specifics.get("plan") or specifics.get("listings") or []
+        fixable = [p for p in plan if p.get("gaps")]
+        # Conservative: SEO uplift = 3% on the avg-price-of-listing × fixable count
+        lift_30d = sum((p.get("price") or 10) * 0.03 for p in fixable)
+        streams.append({
+            "key": "specifics",
+            "title": "Item Specifics",
+            "page": "specifics.html",
+            "count": len(fixable),
+            "label": f"{len(fixable)} listings with fixable gaps · SEO boost",
+            "lift_30d": round(lift_30d, 0),
+            "icon": "🔍",
+            "color": "var(--link)",
+            "status": "ready" if fixable else "no_plan",
+        })
+    else:
+        streams.append({"key": "specifics", "title": "Item Specifics", "page": "specifics.html",
+                        "count": 0, "label": "Run: python3 specifics_agent.py",
+                        "lift_30d": 0, "icon": "🔍", "color": "var(--link)", "status": "not_run"})
+
+    # Markdowns: lift = sum of markdown × velocity_lift_factor (modest, since markdown reduces $/item)
+    if promotions:
+        plan = promotions.get("markdown_plan") or promotions.get("plan") or []
+        lift_30d = sum((p.get("new_price") or 0) * 0.20 for p in plan)   # 20% velocity bump on marked items
+        vol_status = "active" if (promotions.get("volume_discount", {}) or {}).get("active") else "pending"
+        streams.append({
+            "key": "promotions",
+            "title": "Markdowns + Volume Discount",
+            "page": "promotions.html",
+            "count": len(plan),
+            "label": f"{len(plan)} markdowns staged · vol discount {vol_status}",
+            "lift_30d": round(lift_30d, 0),
+            "icon": "💸",
+            "color": "var(--warning)",
+            "status": "ready" if plan else "no_plan",
+        })
+    else:
+        streams.append({"key": "promotions", "title": "Markdowns + Volume Discount", "page": "promotions.html",
+                        "count": 0, "label": "Run: python3 promotions_agent.py",
+                        "lift_30d": 0, "icon": "💸", "color": "var(--warning)", "status": "not_run"})
+
+    # Photo audit: advisory only. Lift = top-10 reshoot × $X × 40% conversion bump
+    if photo_audit:
+        plan = photo_audit.get("audit") or photo_audit.get("listings") or []
+        bad = [p for p in plan if (p.get("severity") in ("SEVERE", "POOR"))]
+        # Top 10 by sell-potential
+        top10 = sorted(bad, key=lambda p: -(p.get("sell_potential_score") or 0))[:10]
+        lift_30d = sum((p.get("price") or 0) * 0.30 for p in top10)
+        streams.append({
+            "key": "photos",
+            "title": "Photo Audit",
+            "page": "photo_audit.html",
+            "count": len(bad),
+            "label": f"{len(bad)} listings with bad photos · top 10 worth reshooting",
+            "lift_30d": round(lift_30d, 0),
+            "icon": "📷",
+            "color": "var(--danger)",
+            "status": "ready" if bad else "no_plan",
+        })
+    else:
+        streams.append({"key": "photos", "title": "Photo Audit", "page": "photo_audit.html",
+                        "count": 0, "label": "Run: python3 photo_audit_agent.py",
+                        "lift_30d": 0, "icon": "📷", "color": "var(--danger)", "status": "not_run"})
+
+    # Repricing (existing agent — included for completeness)
+    if repricing:
+        plan = repricing.get("plan") or repricing.get("decisions") or []
+        applied = [p for p in plan if p.get("action") in ("raise", "lower")]
+        lift_30d = sum(abs((p.get("delta_pct") or 0) / 100 * (p.get("current_price") or 0) * 0.5) for p in applied)
+        streams.append({
+            "key": "repricing",
+            "title": "Repricing Agent",
+            "page": "repricing.html",
+            "count": len(applied),
+            "label": f"{len(applied)} price changes queued",
+            "lift_30d": round(lift_30d, 0),
+            "icon": "🎯",
+            "color": "var(--accent)" if "var(--accent)" in (_BASE_CSS or "") else "var(--link)",
+            "status": "ready" if applied else "no_plan",
+        })
+
+    total_30d_lift = sum(s["lift_30d"] for s in streams)
+    inventory_value = sum(float(l.get("price") or 0) for l in listings) if listings else 0
+    lift_pct = (total_30d_lift / inventory_value * 100) if inventory_value > 0 else 0
+    ready_count = sum(1 for s in streams if s["status"] == "ready")
+    not_run_count = sum(1 for s in streams if s["status"] == "not_run")
+
+    # ---- HTML ----
+    def _stream_card(s: dict) -> str:
+        status_pill = {
+            "ready":   '<span class="badge badge-success">Plan ready</span>',
+            "no_plan": '<span class="badge" style="background:rgba(148,163,184,0.15);color:var(--text-muted);">No actions</span>',
+            "not_run": '<span class="badge badge-warning">Not run yet</span>',
+        }.get(s["status"], "")
+        lift_str = f"${s['lift_30d']:,.0f}" if s["lift_30d"] > 0 else "—"
+        return f"""
+        <a href="{s['page']}" class="mm-card" style="--card-accent:{s['color']};">
+          <div class="mm-card-head">
+            <span class="mm-card-icon">{s['icon']}</span>
+            <span class="mm-card-title">{s['title']}</span>
+            {status_pill}
+          </div>
+          <div class="mm-card-lift">
+            <div class="mm-lift-label">30-day uplift potential</div>
+            <div class="mm-lift-value">{lift_str}</div>
+          </div>
+          <div class="mm-card-foot">{s['label']}</div>
+        </a>"""
+
+    cards_html = "\n".join(_stream_card(s) for s in streams)
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Revenue Ops</div>
+        <h1 class="section-title">Make <span class="accent">Money</span></h1>
+        <div class="section-sub">Five revenue agents, one page. Run 'em, review the plans, hit apply.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid mm-headline">
+      <div class="stat-card">
+        <div class="num accent">${total_30d_lift:,.0f}</div>
+        <div class="lbl">Projected 30-day uplift</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">{lift_pct:.1f}%</div>
+        <div class="lbl">vs current inventory value</div>
+      </div>
+      <div class="stat-card">
+        <div class="num success">{ready_count}</div>
+        <div class="lbl">Plans ready to apply</div>
+      </div>
+      <div class="stat-card">
+        <div class="num warning">{not_run_count}</div>
+        <div class="lbl">Agents not run yet</div>
+      </div>
+    </div>
+
+    <div class="mm-grid">
+      {cards_html}
+    </div>
+
+    <div class="mm-runbook">
+      <h2>Daily runbook</h2>
+      <p>The compounding revenue play — run nightly, review, apply:</p>
+      <pre class="mm-cmd">python3 promoted_listings_agent.py     # tier ad rates; review
+python3 watchers_offer_agent.py        # send offers to anyone watching
+python3 specifics_agent.py             # fill item-specifics gaps
+python3 promotions_agent.py            # markdown stale inventory + ensure volume discount
+python3 photo_audit_agent.py           # surface reshoot priorities
+python3 repricing_agent.py             # repricing pass
+
+# After reviewing each plan in this page, re-run with --apply:
+python3 promoted_listings_agent.py --apply
+# … etc.</pre>
+      <p class="mm-note">Every agent defaults to dry-run. Nothing hits eBay without <code>--apply</code>. Every applied change is logged in <code>output/{{agent}}_history.json</code> with timestamp + reasoning.</p>
+    </div>
+    """
+
+    extra_css = """
+    .mm-headline .stat-card .num.accent { color: var(--gold); }
+    .mm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .mm-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--card-accent, var(--gold));
+      border-radius: var(--r-lg);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex; flex-direction: column; gap: 14px;
+      transition: all var(--t-fast);
+    }
+    .mm-card:hover {
+      border-color: var(--border-mid);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+    .mm-card-head { display: flex; align-items: center; gap: 8px; }
+    .mm-card-icon { font-size: 20px; }
+    .mm-card-title {
+      flex: 1;
+      font-weight: 700; font-size: 15px;
+    }
+    .mm-card-lift {
+      padding: 14px 0;
+      border-top: 1px dashed var(--border);
+      border-bottom: 1px dashed var(--border);
+    }
+    .mm-lift-label {
+      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+    }
+    .mm-lift-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px; line-height: 1;
+      color: var(--card-accent, var(--gold));
+      margin-top: 4px;
+    }
+    .mm-card-foot { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .mm-runbook {
+      margin-top: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 22px 24px;
+    }
+    .mm-runbook h2 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .03em; margin-bottom: 8px; }
+    .mm-runbook p { color: var(--text-muted); margin-bottom: 12px; font-size: 13px; }
+    .mm-cmd {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--text);
+      overflow-x: auto;
+      line-height: 1.65;
+    }
+    .mm-note { font-size: 11px; color: var(--text-muted); margin-top: 12px; }
+    .mm-note code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      background: var(--surface-3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--gold);
+      font-size: 11px;
+    }
+    """
+
+    out = OUTPUT_DIR / "make_money.html"
+    out.write_text(html_shell(f"Make Money · {SELLER_NAME}", body,
+                              extra_head=f"<style>{extra_css}</style>",
+                              active_page="make_money.html"), encoding="utf-8")
+    print(f"  Make Money: {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # 6. Title review page (title_review.html) + local apply server
 # ---------------------------------------------------------------------------
 
@@ -8840,6 +9177,7 @@ def main():
     build_return_policy()
     build_price_review(listings, market, pricing=pricing_by_id)
     build_title_review(listings)
+    build_make_money(listings)
 
     # ------------------------------------------------------------------
     # Repricing agent — plans (and optionally applies) price changes,
