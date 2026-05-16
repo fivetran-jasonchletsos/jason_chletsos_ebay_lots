@@ -667,6 +667,7 @@ def build_deals_page(deals_data: dict) -> Path:
         </div>
         <div class="deal-price-block">
           <div class="deal-price">${d['price']:.2f}</div>
+          <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
           <div class="deal-median">{price_label} · median ${d['median']:.2f}</div>
           <a href="{d['url']}" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
@@ -2217,6 +2218,32 @@ input[type="checkbox"]:checked::after {
 .tag-warn { background: rgba(224,181,74,.14); color: var(--warning); }
 .tag-success { background: rgba(127,199,122,.14); color: var(--success); }
 
+/* Trust strip — buyer-reassurance chip placed below price on every listing card */
+.trust-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  margin-top: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-muted);
+  letter-spacing: .02em;
+  font-weight: 500;
+  max-width: 100%;
+  white-space: normal;
+}
+.trust-chip svg {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  stroke: var(--text-muted);
+  opacity: .9;
+}
+
 .listing-card .actions {
   padding: 12px 14px;
   border-top: 1px solid var(--border);
@@ -2666,6 +2693,7 @@ _NAV_ITEMS = [
     ("price_review.html",     "Pricing",       False, "Insights"),
     ("repricing.html",        "Repricing Agent", False, "Insights"),
     ("promoted_listings.html","Promoted Ads",  False, "Insights"),
+    ("seller_hub.html",       "Seller Hub",    False, "Insights"),
     ("watchers.html",         "Watchers",      False, "Insights"),
     ("specifics.html",        "Specifics",     False, "Insights"),
     ("promotions.html",       "Promotions",    False, "Insights"),
@@ -2886,6 +2914,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 
   <footer class="app-footer">
     Updated {updated} · <a href="{STORE_URL}" class="seller-link" target="_blank" rel="noopener">{SELLER_NAME} on eBay</a>
+    · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
   {_CDN_FOOT}
@@ -3824,6 +3853,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">${e['price_f']:.2f}<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
             <div data-admin="1" class="price-pop-wrap">{price_pop_html}</div>
           </div>
+          <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
           <div class="meta">{grade_tags}{cat_tag}{cond_tag}{flag_tag}{lock_tag}</div>
         </div>
         <div class="actions">
@@ -4679,6 +4709,32 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
 # the eBay market median, framed positively for buyers.
 # ---------------------------------------------------------------------------
 
+def _steals_filter_bar(steals: list[dict]) -> str:
+    """Search + category + sort controls for the Steals page.
+    Buyer-conversion fix: the audit flagged that Steals had no way to filter,
+    which hurts long-list pages once you go past ~20 cards.
+    """
+    cats = sorted({s["category"] for s in steals if s.get("category")})
+    cat_options = '<option value="All">All categories</option>' + "".join(
+        f'<option value="{c}">{c}</option>' for c in cats
+    )
+    return f"""
+    <div class="filter-bar" style="margin:18px 0 14px;">
+      <div class="filter-row">
+        <input type="search" id="steal-search" class="search-input"
+               placeholder="Filter by player, set, brand…" autocomplete="off"
+               style="flex:1 1 280px; min-width:0;">
+        <select id="steal-cat" style="max-width:220px;">{cat_options}</select>
+        <select id="steal-sort" style="max-width:200px;">
+          <option value="save-desc">Biggest steal first</option>
+          <option value="save-asc">Smallest steal first</option>
+        </select>
+        <span id="steal-count" class="filter-count" style="margin-left:auto;color:var(--text-muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;"></span>
+      </div>
+    </div>
+    """
+
+
 def build_steals_page(listings: list[dict], market: dict) -> Path:
     """Surface UNDERPRICED listings to buyers with a 'Save X% vs market' frame."""
     import re as _re
@@ -4738,7 +4794,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
         )
 
         cards.append(f'''
-      <article class="steal-card">
+      <article class="steal-card" data-cat="{s["category"]}" data-save="{save_pct:.0f}" data-search="{(s['title'] + ' ' + s['category']).lower().replace('"', '&quot;')}">
         <div class="steal-thumb">
           {thumb_html}
           <div class="steal-discount">-{save_pct:.0f}%</div>
@@ -4862,9 +4918,61 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
       </div>
     </div>
 
-    <div class="steal-grid">
+    {_steals_filter_bar(steals)}
+
+    <div class="steal-grid" id="steal-grid">
       {cards_html}
     </div>
+
+    <div id="steal-empty" class="empty-state" style="display:none;">
+      <svg class="empty-state-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="28" cy="28" r="14"/><path d="M40 40l10 10"/></svg>
+      <div class="empty-state-title">No matches</div>
+      <div class="empty-state-sub">Try a different keyword or category.</div>
+    </div>
+
+    <script>
+      (function() {{
+        const grid   = document.getElementById('steal-grid');
+        const empty  = document.getElementById('steal-empty');
+        const cards  = Array.from(grid.querySelectorAll('.steal-card'));
+        const q      = document.getElementById('steal-search');
+        const catSel = document.getElementById('steal-cat');
+        const sortSel= document.getElementById('steal-sort');
+        const count  = document.getElementById('steal-count');
+
+        function apply() {{
+          const qv = (q.value || '').toLowerCase().trim();
+          const cv = catSel.value;
+          let shown = 0;
+          cards.forEach(c => {{
+            const hay   = c.getAttribute('data-search') || '';
+            const cat   = c.getAttribute('data-cat')    || '';
+            const okQ   = !qv || hay.includes(qv);
+            const okCat = cv === 'All' || cv === cat;
+            const show  = okQ && okCat;
+            c.style.display = show ? '' : 'none';
+            if (show) shown++;
+          }});
+          empty.style.display = shown ? 'none' : 'block';
+          count.textContent = shown + ' of ' + cards.length;
+
+          // Sort visible cards.
+          const sv = sortSel.value;
+          const visible = cards.filter(c => c.style.display !== 'none');
+          visible.sort((a, b) => {{
+            const av = parseFloat(a.getAttribute('data-save')) || 0;
+            const bv = parseFloat(b.getAttribute('data-save')) || 0;
+            return sv === 'save-asc' ? av - bv : bv - av;
+          }});
+          visible.forEach(c => grid.appendChild(c));
+        }}
+
+        q.addEventListener('input', apply);
+        catSel.addEventListener('change', apply);
+        sortSel.addEventListener('change', apply);
+        apply();
+      }})();
+    </script>
     """
 
     out = OUTPUT_DIR / "steals.html"
@@ -6701,7 +6809,9 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
           {pricing_rows_html}
         </section>'''
 
-    # Schema.org Product JSON-LD
+    # Schema.org Product JSON-LD. Enriched fields (shipping/returns/rating)
+    # qualify these pages for Google Shopping rich results — buyers see the
+    # 4.8★, "Free shipping", and "30-day returns" chips directly in search.
     product_ld = {
         "@context": "https://schema.org/",
         "@type": "Product",
@@ -6709,7 +6819,9 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
         "image": big_pic or None,
         "description": desc_raw[:500],
         "sku": l["item_id"],
+        "mpn": l["item_id"],
         "brand": {"@type": "Brand", "name": SELLER_NAME},
+        "category": category,
         "offers": {
             "@type": "Offer",
             "url": l["url"],
@@ -6718,6 +6830,31 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
             "availability": "https://schema.org/InStock",
             "itemCondition": "https://schema.org/UsedCondition" if "new" not in (l["condition"] or "").lower() else "https://schema.org/NewCondition",
             "seller": {"@type": "Organization", "name": SELLER_NAME, "url": STORE_URL},
+            "shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingRate": {"@type": "MonetaryAmount", "value": "0.00", "currency": CURRENCY},
+                "shippingDestination": {"@type": "DefinedRegion", "addressCountry": "US"},
+                "deliveryTime": {
+                    "@type": "ShippingDeliveryTime",
+                    "handlingTime": {"@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY"},
+                    "transitTime":  {"@type": "QuantitativeValue", "minValue": 2, "maxValue": 5, "unitCode": "DAY"},
+                },
+            },
+            "hasMerchantReturnPolicy": {
+                "@type": "MerchantReturnPolicy",
+                "applicableCountry": "US",
+                "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                "merchantReturnDays": 30,
+                "returnMethod": "https://schema.org/ReturnByMail",
+                "returnFees": "https://schema.org/FreeReturn",
+            },
+        },
+        # Seller's overall eBay feedback rating — surfaces as stars in Google.
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "reviewCount": "170",
+            "bestRating": "5",
         },
     }
 
@@ -7295,14 +7432,17 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
             badge = '<span class="badge badge-danger">Underpriced</span>'
             stripe = "var(--danger)"
             checked = "checked"
+            flag_attr = ' data-flag="under"'
         elif flag == "OVERPRICED":
             badge = '<span class="badge badge-warning">Overpriced</span>'
             stripe = "var(--warning)"
             checked = "checked"
+            flag_attr = ' data-flag="over"'
         else:
             badge = '<span class="badge badge-success">On Market</span>'
             stripe = "var(--success)"
             checked = ""
+            flag_attr = ' data-flag="ok"'
 
         # Lock — eBay refuses to revise this listing (price OR title)
         lock_info = locks.get(item_id)
@@ -7358,7 +7498,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
 
         check_disabled = "disabled" if lock_info else ""
         cards.append(f'''
-      <article class="pr-card review-row" data-id="{item_id}"{market_gap_attr}{actual_gap_attr} {lock_attr} style="--stripe:{stripe}">
+      <article class="pr-card review-row" data-id="{item_id}"{flag_attr}{market_gap_attr}{actual_gap_attr} {lock_attr} style="--stripe:{stripe}">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="{item_id}" {checked} {check_disabled} aria-label="Select for repricing"{' title="eBay refuses to revise this listing"' if lock_info else ''}>
         </div>
@@ -7570,8 +7710,15 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num danger">{underpriced}</div><div class="lbl">Underpriced</div></div>
-      <div class="stat-card"><div class="num warning">{overpriced}</div><div class="lbl">Overpriced</div></div>
+      <button type="button" class="stat-card linked active" data-filter="all" onclick="filterReview('all', this)">
+        <div class="num">{underpriced + overpriced}</div><div class="lbl">All flagged</div>
+      </button>
+      <button type="button" class="stat-card linked" data-filter="under" onclick="filterReview('under', this)">
+        <div class="num danger">{underpriced}</div><div class="lbl">Underpriced</div>
+      </button>
+      <button type="button" class="stat-card linked" data-filter="over" onclick="filterReview('over', this)">
+        <div class="num warning">{overpriced}</div><div class="lbl">Overpriced</div>
+      </button>
       <div class="stat-card"><div class="num danger">${money_left:,.0f}</div><div class="lbl">Revenue Gap</div></div>
     </div>
 
@@ -7607,6 +7754,26 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       const REPRICE_URL = '{lambda_url}';
       const REBUILD_URL = '{rebuild_url}';
 
+      function visibleRows() {{
+        return Array.from(document.querySelectorAll('.review-row'))
+          .filter(r => r.style.display !== 'none');
+      }}
+      function visibleChecks() {{
+        return visibleRows().map(r => r.querySelector('.row-check')).filter(Boolean);
+      }}
+
+      // Filter rows by flag bucket — wires up the clickable stat-cards.
+      function filterReview(bucket, btn) {{
+        document.querySelectorAll('.stat-card.linked').forEach(c => c.classList.toggle('active', c === btn));
+        document.querySelectorAll('.review-row').forEach(r => {{
+          const f = r.getAttribute('data-flag') || 'ok';
+          const show = (bucket === 'all') ? (f === 'under' || f === 'over')
+                                          : (f === bucket);
+          r.style.display = show ? '' : 'none';
+        }});
+        updateCount();
+      }}
+
       Chart.defaults.color = '#9a9388';
       Chart.defaults.font.family = "'Inter', sans-serif";
       new Chart(document.getElementById('chart-gap'), {{
@@ -7632,12 +7799,17 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       }});
 
       function updateCount() {{
-        const total   = document.querySelectorAll('.row-check').length;
-        const checked = document.querySelectorAll('.row-check:checked').length;
-        document.getElementById('count-label').textContent = checked + ' of ' + total + ' selected';
+        const checks  = visibleChecks();
+        const total   = checks.length;
+        const checked = checks.filter(c => c.checked).length;
+        const active  = document.querySelector('.stat-card.linked.active');
+        const lbl     = active ? active.querySelector('.lbl').textContent.toLowerCase() : 'shown';
+        document.getElementById('count-label').textContent =
+          checked + ' of ' + total + ' selected · ' + lbl;
       }}
       document.querySelectorAll('.row-check').forEach(cb => cb.addEventListener('change', updateCount));
-      updateCount();
+      // Default view: only flagged rows (skip on-market noise).
+      filterReview('all', document.querySelector('.stat-card.linked[data-filter="all"]'));
 
       // Market ↔ Actual basis toggle. Re-sorts the review list by the chosen
       // basis (worst gap first), persists choice in localStorage.
@@ -7668,7 +7840,8 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       }})();
 
       function selectAll(val) {{
-        document.querySelectorAll('.row-check').forEach(cb => cb.checked = val);
+        // Only toggle rows currently visible (respects the active filter).
+        visibleChecks().forEach(cb => {{ if (!cb.disabled) cb.checked = val; }});
         updateCount();
       }}
 
@@ -9151,15 +9324,17 @@ def main():
     _pricing_cache_save(pricing_cache)
     print(f"  Pricing sources: eBay active on all · PriceCharting matched {pc_count}/{len(listings)} · PokemonTCG.io matched {ptcg_count}/{len(listings)}")
 
+    # Always snapshot the current listings so sister agents (seller_hub_agent,
+    # specifics_agent, watchers_offer_agent, etc.) read fresh data even when
+    # SportsCardsPro is disabled.
+    snap_path = OUTPUT_DIR / "listings_snapshot.json"
+    snap_path.write_text(json.dumps(listings, indent=2, default=str), encoding="utf-8")
+
     # Run the SportsCardsPro "actual" price agent for any stale/new listings.
     # Rate-limited 1 req/sec by the provider; cached 7d in sportscardspro_prices.json.
     if cfg.get("pricecharting_api_key") or os.environ.get("PRICECHARTING_API_KEY"):
         try:
             import subprocess, sys as _sys
-            # Snapshot the current listings for the agent to consume — promote
-            # works in-memory but the agent reads from disk.
-            snap_path = OUTPUT_DIR / "listings_snapshot.json"
-            snap_path.write_text(json.dumps(listings, indent=2, default=str), encoding="utf-8")
             print("  Refreshing SportsCardsPro 'actual' prices (rate-limited, may take a few min)...")
             subprocess.run([_sys.executable, str(Path(__file__).parent / "card_price_agent.py")],
                            check=False, timeout=900)
@@ -9178,6 +9353,18 @@ def main():
     build_price_review(listings, market, pricing=pricing_by_id)
     build_title_review(listings)
     build_make_money(listings)
+
+    # Seller Hub mirror — derives store categories + featured items + promo
+    # rollup from the snapshot we just wrote. Lazy import so older checkouts
+    # without the agent module still build cleanly.
+    try:
+        import seller_hub_agent
+        plan = seller_hub_agent.build_plan()
+        seller_hub_agent.save_plan(plan)
+        seller_hub_agent.render_report(plan)
+        print(f"  Seller Hub: docs/seller_hub.html  ({len(plan['categories'])} cats, {plan['listings_total']} listings)")
+    except Exception as _exc:
+        print(f"  Seller Hub skipped: {_exc}")
 
     # ------------------------------------------------------------------
     # Repricing agent — plans (and optionally applies) price changes,

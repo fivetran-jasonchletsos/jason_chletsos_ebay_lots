@@ -144,6 +144,187 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)})
 
     # ------------------------------------------------------------------
+    # POST /ebay/preview-store-categories — read-only.
+    # Imports seller_hub_agent and returns the derived store-category plan.
+    # No eBay writes.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/preview-store-categories"):
+        try:
+            try:
+                import seller_hub_agent  # type: ignore
+            except Exception as imp_exc:
+                logger.error(f"seller_hub_agent import failed: {imp_exc}")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   f"seller_hub_agent module not available: {imp_exc}",
+                })
+
+            plan = seller_hub_agent.build_plan()
+            logger.info(f"preview-store-categories: plan built (type={type(plan).__name__})")
+            return _cors_response(200, {"success": True, "plan": plan})
+
+        except Exception as exc:
+            logger.error(f"preview-store-categories error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/preview-store-categories"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
+    # POST /ebay/sync-store-categories — gated behind dry_run flag.
+    # Body: {"dry_run": true|false}
+    # Dry-run: returns the plan + "would set N categories."
+    # Live:    imports seller_hub_phase2 and applies the plan via eBay.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/sync-store-categories"):
+        try:
+            body    = json.loads(event.get("body") or "{}")
+            dry_run = bool(body.get("dry_run", True))
+
+            try:
+                import seller_hub_agent  # type: ignore
+            except Exception as imp_exc:
+                logger.error(f"seller_hub_agent import failed: {imp_exc}")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   f"seller_hub_agent module not available: {imp_exc}",
+                })
+
+            plan = seller_hub_agent.build_plan()
+            # Count categories in the plan (support dict / list shapes).
+            if isinstance(plan, dict):
+                count = len(plan.get("categories", plan))
+            elif isinstance(plan, list):
+                count = len(plan)
+            else:
+                count = 0
+
+            if dry_run:
+                logger.info(f"sync-store-categories DRY-RUN: would set {count} categories")
+                return _cors_response(200, {
+                    "success": True,
+                    "dry_run": True,
+                    "plan":    plan,
+                    "message": f"would set {count} categories.",
+                })
+
+            # Live mode — requires seller_hub_phase2 (Agent A's module).
+            try:
+                import seller_hub_phase2  # type: ignore
+            except Exception as imp_exc:
+                logger.error(f"seller_hub_phase2 import failed: {imp_exc}")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   f"seller_hub_phase2 module not available yet (Agent A still building): {imp_exc}",
+                })
+
+            try:
+                access_token = _get_access_token()
+                sync_result = seller_hub_phase2.sync_store_categories(access_token, plan, dry_run=False)
+                listings = (plan.get("listings", []) if isinstance(plan, dict) else [])
+                mapping  = (plan.get("mapping",  {})  if isinstance(plan, dict) else {})
+                assign_result = seller_hub_phase2.assign_items_to_categories(
+                    access_token, listings, mapping, dry_run=False,
+                )
+                logger.info(f"sync-store-categories LIVE: synced {count} categories")
+                return _cors_response(200, {
+                    "success":       True,
+                    "dry_run":       False,
+                    "sync_result":   sync_result,
+                    "assign_result": assign_result,
+                })
+            except Exception as live_exc:
+                logger.error(f"sync-store-categories live error: {live_exc}")
+                return _cors_response(500, {"success": False, "error": str(live_exc)})
+
+        except Exception as exc:
+            logger.error(f"sync-store-categories error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/sync-store-categories"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
+    # POST /ebay/promotion-rollup — read-only.
+    # The two source JSON files (output/promotions_plan.json and
+    # output/promoted_listings_plan.json) live in the repo, NOT on the
+    # Lambda's filesystem, so the static page POSTs their parsed contents
+    # in the request body. We echo them back with a `summary` block:
+    # apply_count, total_proposed_discount, etc.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/promotion-rollup"):
+        try:
+            body = json.loads(event.get("body") or "{}")
+            promotions_plan        = body.get("promotions_plan")        or {}
+            promoted_listings_plan = body.get("promoted_listings_plan") or {}
+
+            def _iter_items(plan):
+                if isinstance(plan, list):
+                    return plan
+                if isinstance(plan, dict):
+                    for key in ("items", "listings", "promotions", "plan"):
+                        v = plan.get(key)
+                        if isinstance(v, list):
+                            return v
+                return []
+
+            def _summarize(plan):
+                items = _iter_items(plan)
+                apply_count = 0
+                total_discount = 0.0
+                for it in items:
+                    if not isinstance(it, dict):
+                        continue
+                    if str(it.get("decision", "")).lower() == "apply":
+                        apply_count += 1
+                        for key in ("proposed_discount", "discount", "discount_amount", "discount_value"):
+                            v = it.get(key)
+                            if v is None:
+                                continue
+                            try:
+                                total_discount += float(v)
+                                break
+                            except (TypeError, ValueError):
+                                pass
+                return {
+                    "total_items":              len(items),
+                    "apply_count":              apply_count,
+                    "total_proposed_discount":  round(total_discount, 2),
+                }
+
+            summary = {
+                "promotions":        _summarize(promotions_plan),
+                "promoted_listings": _summarize(promoted_listings_plan),
+            }
+            summary["apply_count_total"] = (
+                summary["promotions"]["apply_count"]
+                + summary["promoted_listings"]["apply_count"]
+            )
+            summary["total_proposed_discount"] = round(
+                summary["promotions"]["total_proposed_discount"]
+                + summary["promoted_listings"]["total_proposed_discount"],
+                2,
+            )
+
+            logger.info(
+                f"promotion-rollup: apply_total={summary['apply_count_total']} "
+                f"discount_total={summary['total_proposed_discount']:.2f}"
+            )
+            return _cors_response(200, {
+                "success":                True,
+                "promotions_plan":        promotions_plan,
+                "promoted_listings_plan": promoted_listings_plan,
+                "summary":                summary,
+            })
+
+        except Exception as exc:
+            logger.error(f"promotion-rollup error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/promotion-rollup"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
     # POST /ebay/rebuild — trigger GitHub Actions workflow_dispatch
     # Rebuilds the GitHub Pages site with fresh eBay listings
     # ------------------------------------------------------------------

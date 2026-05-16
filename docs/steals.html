@@ -1172,6 +1172,32 @@ input[type="checkbox"]:checked::after {
 .tag-warn { background: rgba(224,181,74,.14); color: var(--warning); }
 .tag-success { background: rgba(127,199,122,.14); color: var(--success); }
 
+/* Trust strip — buyer-reassurance chip placed below price on every listing card */
+.trust-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  margin-top: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-muted);
+  letter-spacing: .02em;
+  font-weight: 500;
+  max-width: 100%;
+  white-space: normal;
+}
+.trust-chip svg {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  stroke: var(--text-muted);
+  opacity: .9;
+}
+
 .listing-card .actions {
   padding: 12px 14px;
   border-top: 1px solid var(--border);
@@ -1676,7 +1702,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             Insights
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1743,6 +1769,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
 <a href="repricing.html" class="admin-only" data-admin="1">Repricing Agent</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
 <a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
@@ -1799,11 +1826,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="num">13</div>
+        <div class="num">15</div>
         <div class="lbl">Cards Below Market</div>
       </div>
       <div class="stat-card">
-        <div class="num">$107</div>
+        <div class="num">$113</div>
         <div class="lbl">Total Savings on Offer</div>
       </div>
       <div class="stat-card">
@@ -1812,9 +1839,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </div>
     </div>
 
-    <div class="steal-grid">
+    
+    <div class="filter-bar" style="margin:18px 0 14px;">
+      <div class="filter-row">
+        <input type="search" id="steal-search" class="search-input"
+               placeholder="Filter by player, set, brand…" autocomplete="off"
+               style="flex:1 1 280px; min-width:0;">
+        <select id="steal-cat" style="max-width:220px;"><option value="All">All categories</option><option value="Baseball Singles">Baseball Singles</option><option value="Basketball Lots">Basketball Lots</option><option value="Basketball Singles">Basketball Singles</option><option value="Football Lots">Football Lots</option><option value="Football Singles">Football Singles</option><option value="Other">Other</option></select>
+        <select id="steal-sort" style="max-width:200px;">
+          <option value="save-desc">Biggest steal first</option>
+          <option value="save-asc">Smallest steal first</option>
+        </select>
+        <span id="steal-count" class="filter-count" style="margin-left:auto;color:var(--text-muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;"></span>
+      </div>
+    </div>
+    
+
+    <div class="steal-grid" id="steal-grid">
       
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="66" data-search="2025 panini select - concourse chuba hubbard #43 zebra prizm football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-66%</div>
@@ -1836,7 +1879,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="65" data-search="2025-26 topps chrome cam ward rc hot pink x fractor mega exclusive sp tn titans football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-65%</div>
@@ -1858,7 +1901,29 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="64" data-search="2025 panini prizm draft picks - quinn ewers #126 red prizm /399 (rc) football singles">
+        <div class="steal-thumb">
+          <img src="https://i.ebayimg.com/images/g/7dEAAeSwPN5qB-ee/s-l500.jpg" alt="" loading="lazy">
+          <div class="steal-discount">-64%</div>
+        </div>
+        <div class="steal-body">
+          <div class="steal-meta-row">
+            <span class="badge badge-danger">🔥 STEAL</span>
+            <span class="tag tag-gold">Football Singles</span>
+            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Prizm</span>
+            
+          </div>
+          <a href="items/306941726438.html" class="steal-title">2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /399 (RC)</a>
+          <div class="steal-sub">Save <b style="color:var(--success);">$3.48</b> vs. eBay market median (64% off)</div>
+        </div>
+        <div class="steal-price-block">
+          <div class="steal-price">$1.99</div>
+          <div class="steal-median">market $5.47</div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC--/306941726438" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
+        </div>
+      </article>
+
+      <article class="steal-card" data-cat="Baseball Singles" data-save="62" data-search="2025 topps update series - 1990 topps baseball marcelo mayer #u90-9 green... baseball singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-62%</div>
@@ -1880,7 +1945,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Basketball Lots" data-save="58" data-search="6 basketball cards from the 90s basketball lots">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/WVQAAeSwK4lqARIa/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-58%</div>
@@ -1902,7 +1967,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Basketball Lots" data-save="58" data-search="6 basketball cards from the 90s basketball lots">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/uXIAAeSwJSpqAR2W/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-58%</div>
@@ -1924,7 +1989,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Other" data-save="54" data-search="1994 classic pro line live - autograph - steve emtman other">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-54%</div>
@@ -1946,7 +2011,29 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Lots" data-save="41" data-search="12 andre rison cards colts falcons rc football lots">
+        <div class="steal-thumb">
+          <img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="" loading="lazy">
+          <div class="steal-discount">-41%</div>
+        </div>
+        <div class="steal-body">
+          <div class="steal-meta-row">
+            <span class="badge badge-danger">🔥 STEAL</span>
+            <span class="tag tag-gold">Football Lots</span>
+            <span class="tag tag-gold">Rookie</span>
+            
+          </div>
+          <a href="items/306914547105.html" class="steal-title">12 Andre Rison Cards Colts Falcons RC</a>
+          <div class="steal-sub">Save <b style="color:var(--success);">$2.33</b> vs. eBay market median (41% off)</div>
+        </div>
+        <div class="steal-price-block">
+          <div class="steal-price">$3.34</div>
+          <div class="steal-median">market $5.67</div>
+          <a href="https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
+        </div>
+      </article>
+
+      <article class="steal-card" data-cat="Football Singles" data-save="38" data-search="2024 panini prizm draft picks - gold ice prizm lot (16 cards) football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/QiAAAeSwZZBqAvQg/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-38%</div>
@@ -1968,29 +2055,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/0OMAAeSwPN5qBmfD/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-33%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-warning">DEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Refractor</span>
-            
-          </div>
-          <a href="items/306939473666.html" class="steal-title">2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rookie RC 387 Commanders</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.16</b> vs. eBay market median (33% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$2.34</div>
-          <div class="steal-median">market $3.50</div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="30" data-search="2025 topps chrome jaylen waddle x-fractor #186 dolphins football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/aVgAAeSwxGJqBku3/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-30%</div>
@@ -2012,7 +2077,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="25" data-search="2025 panini prizm - prizmatic colston loveland #20 silver prizm (rc) football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-25%</div>
@@ -2034,7 +2099,29 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="22" data-search="2025 topps chrome bill jacory croskey-merritt refractor rookie rc 387 commanders football singles">
+        <div class="steal-thumb">
+          <img src="https://i.ebayimg.com/images/g/0OMAAeSwPN5qBmfD/s-l500.jpg" alt="" loading="lazy">
+          <div class="steal-discount">-22%</div>
+        </div>
+        <div class="steal-body">
+          <div class="steal-meta-row">
+            <span class="badge badge-success">BARGAIN</span>
+            <span class="tag tag-gold">Football Singles</span>
+            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Refractor</span>
+            
+          </div>
+          <a href="items/306939473666.html" class="steal-title">2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rookie RC 387 Commanders</a>
+          <div class="steal-sub">Save <b style="color:var(--success);">$0.65</b> vs. eBay market median (22% off)</div>
+        </div>
+        <div class="steal-price-block">
+          <div class="steal-price">$2.34</div>
+          <div class="steal-median">market $2.99</div>
+          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
+        </div>
+      </article>
+
+      <article class="steal-card" data-cat="Football Singles" data-save="20" data-search="2025 panini prizm draft picks - barry sanders #188 purple wave prizm football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-20%</div>
@@ -2056,7 +2143,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Football Singles" data-save="17" data-search="2025 panini select - concourse josh allen #86 pink shock prizm football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/xckAAeSwwSZqBULb/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-17%</div>
@@ -2078,7 +2165,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card">
+      <article class="steal-card" data-cat="Basketball Singles" data-save="15" data-search="2025 panini phoenix - thunderbirds drake maye #35 silver pyramids /299 basketball singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/ijMAAeSwN8dqBVPQ/s-l500.jpg" alt="" loading="lazy">
           <div class="steal-discount">-15%</div>
@@ -2100,11 +2187,62 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
     </div>
+
+    <div id="steal-empty" class="empty-state" style="display:none;">
+      <svg class="empty-state-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="28" cy="28" r="14"/><path d="M40 40l10 10"/></svg>
+      <div class="empty-state-title">No matches</div>
+      <div class="empty-state-sub">Try a different keyword or category.</div>
+    </div>
+
+    <script>
+      (function() {
+        const grid   = document.getElementById('steal-grid');
+        const empty  = document.getElementById('steal-empty');
+        const cards  = Array.from(grid.querySelectorAll('.steal-card'));
+        const q      = document.getElementById('steal-search');
+        const catSel = document.getElementById('steal-cat');
+        const sortSel= document.getElementById('steal-sort');
+        const count  = document.getElementById('steal-count');
+
+        function apply() {
+          const qv = (q.value || '').toLowerCase().trim();
+          const cv = catSel.value;
+          let shown = 0;
+          cards.forEach(c => {
+            const hay   = c.getAttribute('data-search') || '';
+            const cat   = c.getAttribute('data-cat')    || '';
+            const okQ   = !qv || hay.includes(qv);
+            const okCat = cv === 'All' || cv === cat;
+            const show  = okQ && okCat;
+            c.style.display = show ? '' : 'none';
+            if (show) shown++;
+          });
+          empty.style.display = shown ? 'none' : 'block';
+          count.textContent = shown + ' of ' + cards.length;
+
+          // Sort visible cards.
+          const sv = sortSel.value;
+          const visible = cards.filter(c => c.style.display !== 'none');
+          visible.sort((a, b) => {
+            const av = parseFloat(a.getAttribute('data-save')) || 0;
+            const bv = parseFloat(b.getAttribute('data-save')) || 0;
+            return sv === 'save-asc' ? av - bv : bv - av;
+          });
+          visible.forEach(c => grid.appendChild(c));
+        }
+
+        q.addEventListener('input', apply);
+        catSel.addEventListener('change', apply);
+        sortSel.addEventListener('change', apply);
+        apply();
+      })();
+    </script>
     
   </main>
 
   <footer class="app-footer">
-    Updated May 16, 2026 · 00:16 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 16, 2026 · 23:57 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
   
