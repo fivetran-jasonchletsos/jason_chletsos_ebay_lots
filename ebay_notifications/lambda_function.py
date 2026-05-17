@@ -325,6 +325,168 @@ def lambda_handler(event, context):
         return _cors_preflight()
 
     # ------------------------------------------------------------------
+    # POST /ebay/sync-promoted — gated behind dry_run flag.
+    # Body: {"dry_run": true|false}
+    # Dry-run: builds the per-listing ad-rate plan via promoted_listings_agent
+    #          and returns "would_apply: N" (N = items with rate > 0).
+    # Live:    calls apply_plan() which pushes per-listing bid percentages
+    #          to the eBay Marketing API.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/sync-promoted"):
+        try:
+            body    = json.loads(event.get("body") or "{}")
+            dry_run = bool(body.get("dry_run", True))
+
+            try:
+                import promoted_listings_agent  # type: ignore
+            except Exception as imp_exc:
+                logger.error(f"promoted_listings_agent import failed: {imp_exc}")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   f"promoted_listings_agent module not available: {imp_exc}",
+                })
+
+            try:
+                cfg = promoted_listings_agent.load_config()
+                plan, demoted = promoted_listings_agent.plan_all(cfg)
+            except Exception as plan_exc:
+                logger.error(f"sync-promoted plan error: {plan_exc}")
+                return _cors_response(500, {"success": False, "error": str(plan_exc)})
+
+            would_apply = sum(
+                1 for d in plan
+                if isinstance(d, dict) and d.get("rate", 0) > 0 and not d.get("blocked")
+            )
+
+            if dry_run:
+                logger.info(f"sync-promoted DRY-RUN: would apply {would_apply} bids")
+                return _cors_response(200, {
+                    "success":     True,
+                    "dry_run":     True,
+                    "would_apply": would_apply,
+                    "applied":     0,
+                    "errors":      [],
+                    "demoted_for_budget_cap": demoted,
+                })
+
+            # Live mode — push bids via apply_plan(). It mints its own marketing
+            # token from the ebay_cfg dict (sell.marketing scope needed), so we
+            # build that dict from the same env vars _get_access_token() uses.
+            try:
+                ebay_cfg = {
+                    "client_id":     CLIENT_ID,
+                    "client_secret": CLIENT_SECRET,
+                    "refresh_token": REFRESH_TOKEN,
+                }
+                history = promoted_listings_agent.apply_plan(
+                    plan, ebay_cfg, cfg, create_campaign_if_missing=True,
+                )
+                applied = sum(1 for h in history if h.get("ok"))
+                errors  = [
+                    {"item_id": h.get("item_id"), "errors": h.get("errors")}
+                    for h in history if not h.get("ok")
+                ]
+                logger.info(f"sync-promoted LIVE: applied {applied}/{len(history)} bids")
+                return _cors_response(200, {
+                    "success":     True,
+                    "dry_run":     False,
+                    "would_apply": would_apply,
+                    "applied":     applied,
+                    "errors":      errors,
+                })
+            except Exception as live_exc:
+                logger.error(f"sync-promoted live error: {live_exc}")
+                return _cors_response(500, {"success": False, "error": str(live_exc)})
+
+        except Exception as exc:
+            logger.error(f"sync-promoted error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/sync-promoted"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
+    # POST /ebay/best-offer-bulk — gated behind dry_run flag.
+    # Body: {"dry_run": true|false}
+    # Dry-run: proposes per-listing Best Offer auto-accept/decline thresholds
+    #          via best_offer_agent.propose_best_offer().
+    # Live:    applies the proposal via best_offer_agent.apply_best_offer()
+    #          using an access token from _get_access_token().
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/best-offer-bulk"):
+        try:
+            body    = json.loads(event.get("body") or "{}")
+            dry_run = bool(body.get("dry_run", True))
+
+            try:
+                import best_offer_agent  # type: ignore
+            except Exception as imp_exc:
+                logger.error(f"best_offer_agent import failed: {imp_exc}")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   f"best_offer_agent module not available yet (Agent A still building): {imp_exc}",
+                })
+
+            try:
+                plan = best_offer_agent.propose_best_offer()
+            except Exception as plan_exc:
+                logger.error(f"best-offer-bulk propose error: {plan_exc}")
+                return _cors_response(500, {"success": False, "error": str(plan_exc)})
+
+            # Count proposed changes — support dict / list plan shapes.
+            if isinstance(plan, dict):
+                items = (plan.get("items") or plan.get("listings")
+                         or plan.get("decisions") or plan.get("proposals") or [])
+            elif isinstance(plan, list):
+                items = plan
+            else:
+                items = []
+            would_apply = sum(
+                1 for it in items
+                if isinstance(it, dict) and not it.get("blocked")
+                and str(it.get("decision", "apply")).lower() == "apply"
+            )
+
+            if dry_run:
+                logger.info(f"best-offer-bulk DRY-RUN: would apply {would_apply} offers")
+                return _cors_response(200, {
+                    "success":     True,
+                    "dry_run":     True,
+                    "would_apply": would_apply,
+                    "applied":     0,
+                    "errors":      [],
+                    "plan":        plan,
+                })
+
+            try:
+                access_token = _get_access_token()
+                result = best_offer_agent.apply_best_offer(access_token, plan, dry_run=False)
+                if isinstance(result, dict):
+                    applied = int(result.get("applied", result.get("ok_count", 0)) or 0)
+                    errors  = result.get("errors", []) or []
+                else:
+                    applied = would_apply
+                    errors  = []
+                logger.info(f"best-offer-bulk LIVE: applied {applied} of {would_apply}")
+                return _cors_response(200, {
+                    "success":     True,
+                    "dry_run":     False,
+                    "would_apply": would_apply,
+                    "applied":     applied,
+                    "errors":      errors,
+                })
+            except Exception as live_exc:
+                logger.error(f"best-offer-bulk live error: {live_exc}")
+                return _cors_response(500, {"success": False, "error": str(live_exc)})
+
+        except Exception as exc:
+            logger.error(f"best-offer-bulk error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/best-offer-bulk"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
     # POST /ebay/rebuild — trigger GitHub Actions workflow_dispatch
     # Rebuilds the GitHub Pages site with fresh eBay listings
     # ------------------------------------------------------------------

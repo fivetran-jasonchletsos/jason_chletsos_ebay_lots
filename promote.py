@@ -2249,6 +2249,15 @@ input[type="checkbox"]:checked::after {
   border-top: 1px solid var(--border);
   display: flex; gap: 8px;
 }
+.listing-card .actions .btn { flex: 1 1 auto; min-height: 38px; }
+/* Mobile: stack the CTAs vertically and make View-on-eBay full width.
+   The audit flagged side-by-side buttons as a sub-48px tap target on small
+   phones, splitting buyer focus between Buy vs Details. */
+@media (max-width: 640px) {
+  .listing-card .actions { flex-direction: column; padding: 10px 12px; }
+  .listing-card .actions .btn { width: 100%; min-height: 44px; font-size: 13px; }
+  .listing-card .actions .btn-gold { order: -1; }
+}
 .grid[data-size="small"] .listing-card .info h3 { font-size: 11px; -webkit-line-clamp: 1; }
 .grid[data-size="small"] .listing-card .meta { display: none; }
 .grid[data-size="small"] .listing-card .actions { padding: 8px; }
@@ -2693,6 +2702,11 @@ _NAV_ITEMS = [
     ("price_review.html",     "Pricing",       False, "Insights"),
     ("repricing.html",        "Repricing Agent", False, "Insights"),
     ("promoted_listings.html","Promoted Ads",  False, "Insights"),
+    ("best_offer.html",       "Best Offer",    False, "Insights"),
+    ("combined_shipping.html","Combined Ship", False, "Insights"),
+    ("vault.html",            "Vault",         False, "Insights"),
+    ("photo_quality.html",    "Photo Quality", False, "Insights"),
+    ("email_campaign.html",   "Email",         False, "Insights"),
     ("seller_hub.html",       "Seller Hub",    False, "Insights"),
     ("watchers.html",         "Watchers",      False, "Insights"),
     ("specifics.html",        "Specifics",     False, "Insights"),
@@ -2791,6 +2805,17 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <!-- Default social-share meta for all non-item pages; item pages override via extra_head. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{SELLER_NAME}">
+  <meta property="og:title" content="{title}">
+  <meta property="og:description" content="Sports &amp; Pokemon cards · live inventory from harpua2001's eBay store · auto-updated daily.">
+  <meta property="og:image" content="{SITE_URL}/og-card.jpg">
+  <meta property="og:url" content="{SITE_URL}/{active_page}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{title}">
+  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 · auto-updated daily.">
+  <meta name="twitter:image" content="{SITE_URL}/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3385,6 +3410,46 @@ def _categorize(listing: dict) -> str:
     if any(w in t for w in ["prizm", "optic", "donruss", "panini", "rookie", "rc "]):
         return "Football Singles"
     return "Other"
+
+
+_SELLER_PROFILE_CACHE: dict | None = None
+
+
+def _load_seller_profile() -> dict:
+    """
+    Load the cached eBay seller profile (docs/_seller.json) once per process.
+    Returns a dict with at least: feedback_score, positive_pct, member_since,
+    member_years. Falls back to safe defaults if the file is missing or invalid
+    so the build never breaks on a fresh checkout.
+    """
+    global _SELLER_PROFILE_CACHE
+    if _SELLER_PROFILE_CACHE is not None:
+        return _SELLER_PROFILE_CACHE
+    defaults = {
+        "feedback_score": "170",
+        "positive_pct": "100.0",
+        "member_since": "Dec 1998",
+        "member_years": 27,
+        "_rating_value": "5.0",
+    }
+    try:
+        path = Path(__file__).parent / "docs" / "_seller.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        try:
+            pct = float(data.get("positive_pct", "100.0"))
+        except (TypeError, ValueError):
+            pct = 100.0
+        if pct >= 100.0:
+            rating_value = "5.0"
+        else:
+            rating_value = f"{round(1 + 4 * (pct / 100.0), 1):.1f}"
+        merged = dict(defaults)
+        merged.update(data)
+        merged["_rating_value"] = rating_value
+        _SELLER_PROFILE_CACHE = merged
+    except (OSError, ValueError, json.JSONDecodeError):
+        _SELLER_PROFILE_CACHE = defaults
+    return _SELLER_PROFILE_CACHE
 
 
 # ---------------------------------------------------------------------------
@@ -5659,8 +5724,99 @@ def build_sold_page(sold: list[dict]) -> Path:
 
 def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -> Path:
     """Cross-cut analytics: active inventory vs sold history vs market position."""
-    from datetime import datetime as _dt
+    from datetime import datetime as _dt, timedelta as _td
     import re as _re
+
+    # ---- Weekly trend buckets (last 12 ISO weeks) for KPI sparklines ----
+    # Pattern lifted from Healthcare-Epic Executive.tsx KPI tiles: each tile has
+    # a 12-point sparkline + delta (last 6 vs prior 6) + dollar-lever footer.
+    _today = _dt.utcnow()
+    _wk_start_today = (_today - _td(days=_today.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    _week_starts = [_wk_start_today - _td(weeks=(11 - i)) for i in range(12)]
+
+    def _week_idx(dtobj):
+        if dtobj < _week_starts[0] or dtobj >= _wk_start_today + _td(days=7):
+            return None
+        delta_days = (dtobj - _week_starts[0]).days
+        idx = delta_days // 7
+        return idx if 0 <= idx <= 11 else None
+
+    weekly_sold_count   = [0]   * 12
+    weekly_sold_revenue = [0.0] * 12
+    for _s in sold:
+        _sd = _s.get("sold_date") or ""
+        if not _sd:
+            continue
+        try:
+            _d = _dt.fromisoformat(_sd.replace("Z", "+00:00")).replace(tzinfo=None)
+        except Exception:
+            continue
+        _i = _week_idx(_d)
+        if _i is None:
+            continue
+        weekly_sold_count[_i]   += 1
+        weekly_sold_revenue[_i] += float(_s.get("sale_price", 0) or 0)
+
+    weekly_avg_price = [
+        round(weekly_sold_revenue[i] / weekly_sold_count[i], 2) if weekly_sold_count[i] else 0.0
+        for i in range(12)
+    ]
+    _current_active = len(listings)
+    # No per-listing creation date — hold active count flat across 12 weeks.
+    weekly_active = [_current_active] * 12
+    weekly_sellthrough = [
+        round(100.0 * weekly_sold_count[i] / (weekly_sold_count[i] + _current_active), 2)
+        if (weekly_sold_count[i] + _current_active) else 0.0
+        for i in range(12)
+    ]
+
+    _weeks_with_data = sum(1 for v in weekly_sold_count if v > 0)
+    _have_trend = _weeks_with_data >= 4
+
+    def _delta_pct(series):
+        if not _have_trend:
+            return ("—", "flat")
+        prior  = series[:6]
+        recent = series[6:]
+        pm = sum(prior)  / len(prior)  if prior  else 0
+        rm = sum(recent) / len(recent) if recent else 0
+        if pm == 0 and rm == 0: return ("0.0%", "flat")
+        if pm == 0:             return ("+new", "good")
+        pct = (rm - pm) / pm * 100.0
+        trend = "good" if pct > 1 else ("bad" if pct < -1 else "flat")
+        sign = "+" if pct >= 0 else ""
+        return (f"{sign}{pct:.1f}%", trend)
+
+    def _sparkline_svg(values, width=120, height=32, stroke="var(--gold)"):
+        if (not _have_trend) or (not values) or max(values) == 0:
+            return (
+                f'<svg class="kpi-spark" width="{width}" height="{height}" '
+                f'viewBox="0 0 {width} {height}" aria-hidden="true">'
+                f'<line x1="2" y1="{height-4}" x2="{width-2}" y2="{height-4}" '
+                f'stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" opacity="0.45"/>'
+                f'</svg>'
+            )
+        vmin = min(values); vmax = max(values)
+        rng = (vmax - vmin) or 1
+        n = len(values)
+        step = (width - 4) / (n - 1) if n > 1 else 0
+        pts = []
+        for i, v in enumerate(values):
+            x = 2 + i * step
+            y = height - 3 - ((v - vmin) / rng) * (height - 8)
+            pts.append(f"{x:.1f},{y:.1f}")
+        poly = " ".join(pts)
+        fill_pts = poly + f" {2 + (n-1)*step:.1f},{height-2} 2,{height-2}"
+        last_x, last_y = pts[-1].split(",")
+        return (
+            f'<svg class="kpi-spark" width="{width}" height="{height}" '
+            f'viewBox="0 0 {width} {height}" aria-hidden="true">'
+            f'<polygon points="{fill_pts}" fill="{stroke}" opacity="0.14"/>'
+            f'<polyline points="{poly}" fill="none" stroke="{stroke}" stroke-width="1.75" '
+            f'stroke-linejoin="round" stroke-linecap="round"/>'
+            f'<circle cx="{last_x}" cy="{last_y}" r="2.4" fill="{stroke}"/>'
+            f'</svg>'
+        )
 
     # ---- Active inventory ----
     active_by_cat: dict[str, dict] = {}
@@ -5760,7 +5916,56 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
     .a-table th:not(:first-child), .a-table td:not(:first-child) { text-align: right; }
     .a-table tr:hover td { background: rgba(212,175,55,0.04); }
     .a-pct { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-    @media (max-width: 760px) { .a-grid { grid-template-columns: 1fr; } }
+
+    /* ── KPI tile grid (Healthcare-Epic Executive cockpit pattern) ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .kpi-tile {
+      position: relative;
+      display: flex; flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: border-color .2s ease, transform .2s ease;
+    }
+    .kpi-tile:hover { border-color: rgba(212,175,55,0.55); transform: translateY(-1px); }
+    .kpi-body { padding: 14px 16px 12px; flex: 1; }
+    .kpi-label {
+      font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600; line-height: 1.1;
+    }
+    .kpi-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 34px; line-height: 1; letter-spacing: .01em;
+      color: var(--text); margin-top: 8px;
+    }
+    .kpi-value .kpi-unit { font-size: 16px; color: var(--text-muted); margin-left: 2px; letter-spacing: .02em; }
+    .kpi-row {
+      margin-top: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .kpi-delta {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px; font-weight: 700;
+    }
+    .kpi-delta .arrow { font-size: 9px; }
+    .kpi-delta.good { color: var(--success); }
+    .kpi-delta.bad  { color: var(--danger); }
+    .kpi-delta.flat { color: var(--text-muted); }
+    .kpi-delta .vs  { color: var(--text-muted); font-weight: 500; margin-left: 4px; }
+    .kpi-spark { display: block; }
+    .kpi-lever {
+      padding: 9px 16px;
+      border-top: 1px solid var(--border);
+      background: rgba(212,175,55,0.05);
+      font-size: 11px; line-height: 1.35;
+      color: var(--text-muted);
+    }
+    .kpi-lever b { color: var(--gold); font-weight: 700; letter-spacing: .01em; }
+
+    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 760px)  { .a-grid { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: 1fr; } }
     """
 
     # Top-sold rows
@@ -5782,6 +5987,67 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
             f'<td>{s["count"]}</td><td>${s["revenue"]:,.0f}</td><td>${avg:,.2f}</td></tr>'
         )
 
+    # ─── KPI metrics + sparklines + dollar levers ────────────────────────
+    total_sold_count   = sum(b["count"] for b in sold_by_cat.values())
+    avg_sale_overall   = (total_sold_revenue / total_sold_count) if total_sold_count else 0.0
+    sellthrough_now    = (100.0 * total_sold_count / (total_sold_count + _current_active)
+                          if (total_sold_count + _current_active) else 0.0)
+
+    # Recent 90-day sold revenue (for KPI #2 value display)
+    _cutoff_90 = _today - _td(days=90)
+    sold_90d_rev = 0.0; sold_90d_count = 0
+    for _s in sold:
+        try:
+            _d = _dt.fromisoformat((_s.get("sold_date") or "").replace("Z","+00:00")).replace(tzinfo=None)
+        except Exception:
+            continue
+        if _d >= _cutoff_90:
+            sold_90d_rev   += float(_s.get("sale_price", 0) or 0)
+            sold_90d_count += 1
+
+    # ── Dollar-lever math (annualised projections) ──
+    # Recent weekly avg revenue → annual run-rate
+    _recent6_rev = weekly_sold_revenue[6:]
+    _avg_wk_rev  = (sum(_recent6_rev) / len(_recent6_rev)) if _recent6_rev else 0.0
+    annual_runrate = _avg_wk_rev * 52
+    monthly_runrate = _avg_wk_rev * (52/12)
+
+    # Lever 1: each new listing = avg expected revenue (avg sale × current sell-through fraction)
+    lever_per_listing = avg_sale_overall * (sellthrough_now / 100.0) if avg_sale_overall else 0.0
+    # Lever 2: lowest-inventory category restock impact (avg sale of best-performing categories)
+    _best_cat_avg = max(avg_sale_by_cat.values()) if avg_sale_by_cat else 0.0
+    lever_restock = _best_cat_avg * 10  # restocking 10 units in top category
+    # Lever 3: 1% price lift on monthly run-rate
+    lever_price_lift = monthly_runrate * 0.01
+    # Lever 4: 10% sell-through lift → extra annual GMV
+    lever_st_lift = annual_runrate * 0.10
+
+    # Deltas + sparklines per KPI
+    d_active_pct,  d_active_t  = ("flat", "flat")  # active count is a snapshot — flat
+    d_active_pct = "snapshot"
+    d_sold_pct,    d_sold_t    = _delta_pct(weekly_sold_revenue)
+    d_avg_pct,     d_avg_t     = _delta_pct(weekly_avg_price)
+    d_st_pct,      d_st_t      = _delta_pct(weekly_sellthrough)
+
+    _spark_active = _sparkline_svg(weekly_active,      stroke="var(--text-muted)")
+    _spark_sold   = _sparkline_svg(weekly_sold_revenue, stroke=("var(--success)" if d_sold_t == "good" else "var(--danger)" if d_sold_t == "bad" else "var(--gold)"))
+    _spark_avg    = _sparkline_svg(weekly_avg_price,    stroke=("var(--success)" if d_avg_t  == "good" else "var(--danger)" if d_avg_t  == "bad" else "var(--gold)"))
+    _spark_st     = _sparkline_svg(weekly_sellthrough,  stroke=("var(--success)" if d_st_t   == "good" else "var(--danger)" if d_st_t   == "bad" else "var(--gold)"))
+
+    def _delta_html(pct_str, trend, vs="vs prior 6 wks"):
+        if pct_str == "snapshot":
+            return f'<span class="kpi-delta flat"><span class="arrow">◆</span>snapshot</span>'
+        if pct_str == "—":
+            return f'<span class="kpi-delta flat"><span class="arrow">◆</span>insufficient history</span>'
+        arrow = "▲" if trend == "good" else ("▼" if trend == "bad" else "◆")
+        return (f'<span class="kpi-delta {trend}"><span class="arrow">{arrow}</span>{pct_str}'
+                f'<span class="vs">{vs}</span></span>')
+
+    _kpi_active_html = _delta_html(d_active_pct, "flat", vs="current")
+    _kpi_sold_html   = _delta_html(d_sold_pct,   d_sold_t)
+    _kpi_avg_html    = _delta_html(d_avg_pct,    d_avg_t)
+    _kpi_st_html     = _delta_html(d_st_pct,     d_st_t)
+
     body = f"""
     <div class="section-head">
       <div>
@@ -5791,11 +6057,47 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
       </div>
     </div>
 
+    <div class="kpi-grid">
+      <div class="kpi-tile">
+        <div class="kpi-body">
+          <div class="kpi-label">Active Listings</div>
+          <div class="kpi-value">{len(listings)}</div>
+          <div class="kpi-row">{_kpi_active_html}{_spark_active}</div>
+        </div>
+        <div class="kpi-lever"><b>$ Lever ·</b> Each new listing = avg <b>${lever_per_listing:,.2f}</b> expected revenue at today's sell-through.</div>
+      </div>
+
+      <div class="kpi-tile">
+        <div class="kpi-body">
+          <div class="kpi-label">Sold · Last 90 Days</div>
+          <div class="kpi-value">${sold_90d_rev:,.0f}<span class="kpi-unit">/ {sold_90d_count} units</span></div>
+          <div class="kpi-row">{_kpi_sold_html}{_spark_sold}</div>
+        </div>
+        <div class="kpi-lever"><b>$ Lever ·</b> Restocking 10 units in top category = +<b>${lever_restock:,.0f}</b> expected GMV.</div>
+      </div>
+
+      <div class="kpi-tile">
+        <div class="kpi-body">
+          <div class="kpi-label">Avg Sale Price</div>
+          <div class="kpi-value">${avg_sale_overall:,.2f}</div>
+          <div class="kpi-row">{_kpi_avg_html}{_spark_avg}</div>
+        </div>
+        <div class="kpi-lever"><b>$ Lever ·</b> 1% price lift = +<b>${lever_price_lift:,.0f}</b>/mo at current run-rate.</div>
+      </div>
+
+      <div class="kpi-tile">
+        <div class="kpi-body">
+          <div class="kpi-label">Sell-Through</div>
+          <div class="kpi-value">{sellthrough_now:.1f}<span class="kpi-unit">%</span></div>
+          <div class="kpi-row">{_kpi_st_html}{_spark_st}</div>
+        </div>
+        <div class="kpi-lever"><b>$ Lever ·</b> 10% sell-through lift = +<b>${lever_st_lift:,.0f}</b>/yr in velocity.</div>
+      </div>
+    </div>
+
     <div class="stat-grid">
-      <div class="stat-card"><div class="num">{len(listings)}</div><div class="lbl">Active Listings</div></div>
       <div class="stat-card"><div class="num">${total_inventory_value:,.0f}</div><div class="lbl">Inventory Value</div></div>
-      <div class="stat-card"><div class="num">{sum(b["count"] for b in sold_by_cat.values())}</div><div class="lbl">Items Sold</div></div>
-      <div class="stat-card"><div class="num">${total_sold_revenue:,.0f}</div><div class="lbl">Sold Revenue</div></div>
+      <div class="stat-card"><div class="num">${total_sold_revenue:,.0f}</div><div class="lbl">All-Time Sold Revenue</div></div>
       <div class="stat-card"><div class="num">{turnover_ratio:.2f}<span style="font-size:18px;color:var(--text-muted)">×</span></div><div class="lbl">Turnover Ratio</div></div>
       <div class="stat-card"><div class="num danger">${pos_money_left:,.0f}</div><div class="lbl">$ Left on Table (Underpriced)</div></div>
     </div>
@@ -6829,7 +7131,12 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
             "price": f"{price_f:.2f}",
             "availability": "https://schema.org/InStock",
             "itemCondition": "https://schema.org/UsedCondition" if "new" not in (l["condition"] or "").lower() else "https://schema.org/NewCondition",
-            "seller": {"@type": "Organization", "name": SELLER_NAME, "url": STORE_URL},
+            "seller": {
+                "@type": "Organization",
+                "name": SELLER_NAME,
+                "url": STORE_URL,
+                "description": f"Member since {_load_seller_profile().get('member_since', 'Dec 1998')}",
+            },
             "shippingDetails": {
                 "@type": "OfferShippingDetails",
                 "shippingRate": {"@type": "MonetaryAmount", "value": "0.00", "currency": CURRENCY},
@@ -6852,8 +7159,8 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
         # Seller's overall eBay feedback rating — surfaces as stars in Google.
         "aggregateRating": {
             "@type": "AggregateRating",
-            "ratingValue": "5.0",
-            "reviewCount": "170",
+            "ratingValue": _load_seller_profile().get("_rating_value", "5.0"),
+            "reviewCount": str(_load_seller_profile().get("feedback_score", "170")),
             "bestRating": "5",
         },
     }
@@ -9354,9 +9661,16 @@ def main():
     build_title_review(listings)
     build_make_money(listings)
 
-    # Seller Hub mirror — derives store categories + featured items + promo
-    # rollup from the snapshot we just wrote. Lazy import so older checkouts
-    # without the agent module still build cleanly.
+    # Sister agents — each is dry-run, idempotent, and produces a docs/*.html
+    # admin page from the snapshot we just wrote. Lazy import so older
+    # checkouts without these modules still build cleanly.
+    def _run_agent(label: str, fn):
+        try:
+            fn()
+            print(f"  {label}")
+        except Exception as _exc:
+            print(f"  {label} skipped: {_exc}")
+
     try:
         import seller_hub_agent
         plan = seller_hub_agent.build_plan()
@@ -9365,6 +9679,32 @@ def main():
         print(f"  Seller Hub: docs/seller_hub.html  ({len(plan['categories'])} cats, {plan['listings_total']} listings)")
     except Exception as _exc:
         print(f"  Seller Hub skipped: {_exc}")
+
+    # Sister agents that don't hit per-item Trading APIs — fast, safe to chain
+    # into every build. Each is invoked as a subprocess so its own argparse
+    # doesn't conflict with promote.py's sys.argv. Failures don't abort the build.
+    import subprocess as _sp
+    _python = sys.executable
+    _here   = Path(__file__).parent
+    for label, script in [
+        ("Vault report: docs/vault.html",          "vault_eligibility.py"),
+        ("Email campaign: docs/email_campaign.html","email_campaign_agent.py"),
+    ]:
+        sp_path = _here / script
+        if not sp_path.exists():
+            print(f"  {label} skipped: agent file not present")
+            continue
+        try:
+            _sp.run([_python, str(sp_path)], check=False, timeout=120,
+                    cwd=str(_here),
+                    stdout=_sp.DEVNULL, stderr=_sp.DEVNULL)
+            print(f"  {label}")
+        except Exception as _exc:
+            print(f"  {label} skipped: {_exc}")
+
+    # photo_quality_audit + best_offer + combined_shipping hit Trading API
+    # GetItem per listing (slow). Skipped in the main build — run on demand
+    # via their CLIs or wire to /ebay/rebuild later.
 
     # ------------------------------------------------------------------
     # Repricing agent — plans (and optionally applies) price changes,

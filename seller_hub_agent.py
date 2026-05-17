@@ -120,29 +120,51 @@ def derive_featured_items(listings: list[dict], n: int = 6) -> list[dict]:
 def load_promotion_summary() -> dict:
     """Read the latest plan files from sister agents so the Seller Hub view
     shows ALL revenue moves on one page (not just store-level config).
+
+    Plan shapes (as produced by promotions_agent.py and promoted_listings_agent.py):
+      promotions_plan.json     → top-level "markdowns" list; each item has
+                                 "decision" ("apply" | "skip" | "blocked"),
+                                 "discount_pct", "current_price", "target_price",
+                                 and top-level "volume_discount" dict.
+      promoted_listings_plan.json → top-level "decisions" list; each item has
+                                 "tier" (lowercase: "standard"|"no_ad"|...),
+                                 "rate" (0..1 fraction), "price", and
+                                 "projected_30d_spend"/"projected_30d_lift_usd".
     """
     markdowns = _load_json(OUTPUT_DIR / "promotions_plan.json") or {}
     ads       = _load_json(OUTPUT_DIR / "promoted_listings_plan.json") or {}
 
-    md_plan = markdowns.get("plan") or markdowns.get("markdowns") or []
+    md_plan = (markdowns.get("markdowns") or markdowns.get("plan")
+               or markdowns.get("decisions") or [])
     md_apply = [m for m in md_plan if (m.get("decision") or "").lower() == "apply"]
-    md_total = sum((m.get("markdown_pct") or 0) * (m.get("price") or 0) / 100
-                   for m in md_apply)
+    md_total = sum(
+        max((m.get("current_price") or 0) - (m.get("target_price") or 0), 0)
+        for m in md_apply
+    )
 
-    ad_plan = ads.get("plan") or ads.get("decisions") or []
-    ad_apply = [a for a in ad_plan if (a.get("recommended_rate") or 0) > 0]
-    ad_spend = sum((a.get("recommended_rate") or 0) * (a.get("price") or 0)
-                   for a in ad_apply)
+    # Volume discount: agent emits {"action": "would_create"|"in_sync"|..., ...}
+    vol = markdowns.get("volume_discount") or {}
+    vol_enabled = (vol.get("action") in ("would_create", "in_sync", "created", "updated")
+                   if isinstance(vol, dict) else bool(vol))
+
+    ad_plan  = ads.get("decisions") or ads.get("plan") or []
+    ad_apply = [a for a in ad_plan if (a.get("rate") or a.get("recommended_rate") or 0) > 0]
+    ad_spend = sum((a.get("projected_30d_spend") or 0) for a in ad_apply) or sum(
+        (a.get("rate") or a.get("recommended_rate") or 0) * (a.get("price") or 0)
+        for a in ad_apply
+    )
+    ad_lift  = sum((a.get("projected_30d_lift_usd") or 0) for a in ad_apply)
 
     return {
         "markdowns": {
             "queued":         len(md_apply),
             "total_discount": round(md_total, 2),
-            "volume_discount_enabled": bool(markdowns.get("volume_discount")),
+            "volume_discount_enabled": vol_enabled,
         },
         "promoted_listings": {
             "queued":     len(ad_apply),
             "ad_spend":   round(ad_spend, 2),
+            "projected_lift": round(ad_lift, 2),
             "tier_split": _tier_split(ad_apply),
         },
     }
@@ -250,12 +272,13 @@ def render_report(plan: dict) -> Path:
           <tbody>{''.join(rows)}</tbody>
         </table>
         <div class="sh-actions">
-          <button class="btn btn-outline" onclick="sellerHubDryRun()">Preview SetStoreCategories XML</button>
-          <button class="btn btn-gold"    onclick="sellerHubApply('categories')" disabled
-                  title="Phase 2 — Lambda endpoint not yet wired">Push to eBay (Phase 2)</button>
-          <span class="sh-hint">Phase 1 is dry-run only. Phase 2 enables live writes through
-          <code>/ebay/sync-store-categories</code>.</span>
-        </div>"""
+          <button class="btn btn-outline" onclick="sellerHubPreview()">Preview from Lambda</button>
+          <button class="btn btn-outline" onclick="sellerHubSync(true)">Dry-run sync</button>
+          <button class="btn btn-gold"    onclick="sellerHubSync(false)"
+                  title="Live write — calls Trading SetStoreCategories + bulk ReviseItem">Push to eBay live →</button>
+          <span class="sh-hint">Live mode calls <code>/ebay/sync-store-categories</code>. Always run Dry-run first to see the diff.</span>
+        </div>
+        <pre id="sh-resp" class="sh-resp" style="display:none;"></pre>"""
 
     # ---- featured items strip ---- #
     if featured:
@@ -288,13 +311,21 @@ def render_report(plan: dict) -> Path:
         <div class="sh-row"><span>Total discount</span><b>{_fmt_money(md['total_discount'])}</b></div>
         <div class="sh-row"><span>Volume discount</span><b>{'✓ on' if md['volume_discount_enabled'] else '— off'}</b></div>
         <a class="sh-link" href="promotions.html">Open Promotions agent →</a>
+        <div class="sh-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="sellerHubPromoSync('promoted', true)">Dry-run sync</button>
+        </div>
       </div>
       <div class="sh-card">
         <h4>Promoted Listings</h4>
         <div class="sh-row"><span>Items with ads</span><b>{pl['queued']}</b></div>
         <div class="sh-row"><span>Monthly ad spend</span><b>{_fmt_money(pl['ad_spend'])}</b></div>
+        <div class="sh-row"><span>Projected 30d lift</span><b style="color:var(--success);">{_fmt_money(pl.get('projected_lift', 0))}</b></div>
         <div class="sh-row sh-tier-row"><span>Tier split</span><span class="sh-tier-chips">{tier_chips}</span></div>
         <a class="sh-link" href="promoted_listings.html">Open Promoted Ads agent →</a>
+        <div class="sh-card-actions">
+          <button class="btn btn-outline btn-sm" onclick="sellerHubPromoSync('promoted', true)">Dry-run sync</button>
+          <button class="btn btn-gold btn-sm"    onclick="sellerHubPromoSync('promoted', false)">Push bids live →</button>
+        </div>
       </div>
     </div>"""
 
@@ -341,6 +372,51 @@ def render_report(plan: dict) -> Path:
 
     <section class="sh-section">
       <div class="sh-section-head">
+        <h2>More tools</h2>
+        <span class="sh-hint">Sister agents that produce admin pages — each with its own dry-run + apply flow.</span>
+      </div>
+      <div class="sh-feat-grid">
+        <a class="sh-feat" href="best_offer.html">
+          <div class="sh-feat-info">
+            <div class="sh-feat-title">Best Offer</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Auto-accept · auto-decline</div>
+          </div>
+        </a>
+        <a class="sh-feat" href="combined_shipping.html">
+          <div class="sh-feat-info">
+            <div class="sh-feat-title">Combined Shipping</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">$0.50 ea additional · $5 cap</div>
+          </div>
+        </a>
+        <a class="sh-feat" href="vault.html">
+          <div class="sh-feat-info">
+            <div class="sh-feat-title">eBay Vault</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">$250+ singles · authenticated ship</div>
+          </div>
+        </a>
+        <a class="sh-feat" href="photo_quality.html">
+          <div class="sh-feat-info">
+            <div class="sh-feat-title">Photo Quality Audit</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Cassini rank: 8+ photos required</div>
+          </div>
+        </a>
+        <a class="sh-feat" href="email_campaign.html">
+          <div class="sh-feat-info">
+            <div class="sh-feat-title">Email Campaign</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Weekly Steals to followers</div>
+          </div>
+        </a>
+        <a class="sh-feat" href="promotions.html">
+          <div class="sh-feat-info">
+            <div class="sh-feat-title">Markdowns</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Stale-inventory ladder + volume</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="sh-section">
+      <div class="sh-section-head">
         <h2>Phased rollout</h2>
       </div>
       <ol class="sh-phases">
@@ -353,20 +429,58 @@ def render_report(plan: dict) -> Path:
     </section>
 
     <script>
-      function sellerHubDryRun() {{
-        const payload = {{
-          action: 'SetStoreCategories',
-          categories: {json.dumps([c['name'] for c in cats])}
-        }};
-        const w = window.open('', '_blank');
-        w.document.title = 'Dry run · SetStoreCategories';
-        w.document.body.style.background = '#0a0a0a';
-        w.document.body.style.color = '#e8e3d8';
-        w.document.body.innerHTML = '<pre style="padding:20px;font-family:JetBrains Mono,monospace;white-space:pre-wrap;">' +
-          JSON.stringify(payload, null, 2) + '</pre>';
+      const SH_LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
+
+      function shShow(label, data, isError) {{
+        const el = document.getElementById('sh-resp');
+        el.className = 'sh-resp' + (isError ? ' sh-resp-err' : ' sh-resp-ok');
+        el.style.display = 'block';
+        el.textContent = '// ' + label + ' · ' + new Date().toLocaleTimeString() + '\\n' +
+          (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
+        el.scrollIntoView({{behavior: 'smooth', block: 'nearest'}});
       }}
-      function sellerHubApply(kind) {{
-        alert('Phase 2 endpoint not wired yet. This will POST to /ebay/sync-' + kind + '.');
+
+      async function sellerHubPreview() {{
+        try {{
+          const r = await fetch(SH_LAMBDA + '/preview-store-categories', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: '{{}}'
+          }});
+          shShow('GET /preview-store-categories', await r.json(), !r.ok);
+        }} catch (e) {{
+          shShow('preview failed', String(e), true);
+        }}
+      }}
+
+      async function sellerHubSync(dryRun) {{
+        if (!dryRun && !confirm('LIVE write to your eBay store categories. Continue?')) return;
+        try {{
+          const r = await fetch(SH_LAMBDA + '/sync-store-categories', {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{dry_run: dryRun}})
+          }});
+          shShow(dryRun ? 'DRY-RUN /sync-store-categories' : 'LIVE /sync-store-categories',
+                 await r.json(), !r.ok);
+        }} catch (e) {{
+          shShow('sync failed', String(e), true);
+        }}
+      }}
+
+      async function sellerHubPromoSync(kind, dryRun) {{
+        if (!dryRun && !confirm('LIVE write to eBay. Continue?')) return;
+        const path = kind === 'promoted' ? '/sync-promoted' : '/best-offer-bulk';
+        try {{
+          const r = await fetch(SH_LAMBDA + path, {{
+            method: 'POST',
+            headers: {{'Content-Type': 'application/json'}},
+            body: JSON.stringify({{dry_run: dryRun}})
+          }});
+          shShow((dryRun ? 'DRY-RUN ' : 'LIVE ') + path, await r.json(), !r.ok);
+        }} catch (e) {{
+          shShow(path + ' failed', String(e), true);
+        }}
       }}
     </script>
     """
@@ -416,6 +530,11 @@ def render_report(plan: dict) -> Path:
   .sh-phases { color: var(--text-muted); line-height: 1.7; padding-left: 22px; }
   .sh-phases li { margin: 6px 0; }
   .sh-phases code { background: var(--surface-2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+  .sh-resp { margin: 14px 0; padding: 14px 16px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.5; max-height: 360px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .sh-resp-ok { border-left: 3px solid var(--success); }
+  .sh-resp-err { border-left: 3px solid var(--danger); color: var(--danger); }
+  .sh-card-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .btn-sm { padding: 6px 12px; font-size: 11px; }
 </style>
 """
 
