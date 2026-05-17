@@ -2709,6 +2709,7 @@ _NAV_ITEMS = [
     ("email_campaign.html",   "Email",         False, "Insights"),
     ("collect.html",          "My Wants",      False, "Insights"),
     ("pikachu.html",          "Pikachu",       False, "Insights"),
+    ("pokemon_news.html",     "Pokemon News",  False, "Insights"),
     ("seller_hub.html",       "Seller Hub",    False, "Insights"),
     ("watchers.html",         "Watchers",      False, "Insights"),
     ("specifics.html",        "Specifics",     False, "Insights"),
@@ -9693,6 +9694,7 @@ def main():
         ("Email campaign: docs/email_campaign.html", "email_campaign_agent.py"),
         ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py"),
         ("Pikachu Hunt: docs/pikachu.html",          "pokemon_deals_agent.py"),
+        ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py"),
     ]:
         sp_path = _here / script
         if not sp_path.exists():
