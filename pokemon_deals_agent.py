@@ -46,7 +46,8 @@ BROWSE_URL      = "https://api.ebay.com/buy/browse/v1/item_summary/search"
 # --------------------------------------------------------------------------- #
 
 def _search(token: str, q: str, min_price: float, max_price: float,
-            own: str, require_text: str | None = None) -> list[dict]:
+            own: str, require_text: str | None = None,
+            _retry: int = 0) -> list[dict]:
     rng = f"{min_price}.." + (str(max_price) if max_price else "")
     params = {
         "q": q,
@@ -64,6 +65,14 @@ def _search(token: str, q: str, min_price: float, max_price: float,
     }
     try:
         r = requests.get(BROWSE_URL, params=params, headers=headers, timeout=20)
+        # 429 Too Many Requests — eBay Browse API has burst caps that clear
+        # within seconds. Back off + retry up to 3 times before giving up.
+        if r.status_code == 429 and _retry < 3:
+            import time, random
+            wait = (2 ** _retry) * 6 + random.uniform(0, 3)
+            print(f"  Browse 429 for '{q}' — backing off {wait:.1f}s (retry {_retry+1}/3)")
+            time.sleep(wait)
+            return _search(token, q, min_price, max_price, own, require_text, _retry + 1)
         r.raise_for_status()
     except requests.RequestException as exc:
         print(f"  Browse failed for '{q}': {exc}")
