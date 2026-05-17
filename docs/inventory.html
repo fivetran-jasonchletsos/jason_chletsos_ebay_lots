@@ -1492,11 +1492,15 @@ html[data-theme="crimson"] .product-price {
   position: absolute; left: 0; bottom: -1px;
   opacity: .85;
 }
-/* Site banner — full-width hero, shown above main on index.html only. */
-.site-banner { display: block; max-width: var(--container-max, min(92vw, 1320px)); margin: var(--space-md, 18px) auto var(--space-lg, 28px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 8px 28px rgba(0,0,0,.35); transition: transform .25s ease, box-shadow .25s ease; }
-.site-banner:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(212,175,55,.25); }
-.site-banner img { width: 100%; height: auto; display: block; }
-@media (max-width: 760px) { .site-banner { margin: 12px auto 18px; border-radius: 8px; } }
+/* Site banner — proportional hero, capped tight so it doesn't dominate the
+   fold. The source art is 3:1, so 200-220px tall keeps it above-the-fold-safe. */
+.site-banner { display: block; max-width: min(92vw, 960px); margin: var(--space-md, 18px) auto var(--space-lg, 24px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .25s ease, box-shadow .25s ease; }
+.site-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,.2); }
+.site-banner img { width: 100%; height: auto; display: block; max-height: 220px; object-fit: cover; object-position: center; }
+@media (max-width: 760px) {
+  .site-banner { margin: 10px auto 14px; border-radius: 8px; max-width: 96vw; }
+  .site-banner img { max-height: 120px; }
+}
 
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -2146,7 +2150,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 19:59 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 20:30 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

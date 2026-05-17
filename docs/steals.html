@@ -1492,11 +1492,15 @@ html[data-theme="crimson"] .product-price {
   position: absolute; left: 0; bottom: -1px;
   opacity: .85;
 }
-/* Site banner — full-width hero, shown above main on index.html only. */
-.site-banner { display: block; max-width: var(--container-max, min(92vw, 1320px)); margin: var(--space-md, 18px) auto var(--space-lg, 28px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 8px 28px rgba(0,0,0,.35); transition: transform .25s ease, box-shadow .25s ease; }
-.site-banner:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(212,175,55,.25); }
-.site-banner img { width: 100%; height: auto; display: block; }
-@media (max-width: 760px) { .site-banner { margin: 12px auto 18px; border-radius: 8px; } }
+/* Site banner — proportional hero, capped tight so it doesn't dominate the
+   fold. The source art is 3:1, so 200-220px tall keeps it above-the-fold-safe. */
+.site-banner { display: block; max-width: min(92vw, 960px); margin: var(--space-md, 18px) auto var(--space-lg, 24px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .25s ease, box-shadow .25s ease; }
+.site-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,.2); }
+.site-banner img { width: 100%; height: auto; display: block; max-height: 220px; object-fit: cover; object-position: center; }
+@media (max-width: 760px) {
+  .site-banner { margin: 10px auto 14px; border-radius: 8px; max-width: 96vw; }
+  .site-banner img { max-height: 120px; }
+}
 
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -2004,15 +2008,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="num">18</div>
+        <div class="num">0</div>
         <div class="lbl">Cards Below Market</div>
       </div>
       <div class="stat-card">
-        <div class="num">$106</div>
+        <div class="num">$0</div>
         <div class="lbl">Total Savings on Offer</div>
       </div>
       <div class="stat-card">
-        <div class="num">84<span style="font-size:24px;">%</span></div>
+        <div class="num">0<span style="font-size:24px;">%</span></div>
         <div class="lbl">Biggest Discount Today</div>
       </div>
     </div>
@@ -2023,7 +2027,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <input type="search" id="steal-search" class="search-input"
                placeholder="Filter by player, set, brand…" autocomplete="off"
                style="flex:1 1 280px; min-width:0;">
-        <select id="steal-cat" style="max-width:220px;"><option value="All">All categories</option><option value="Basketball Lots">Basketball Lots</option><option value="Basketball Singles">Basketball Singles</option><option value="Football Lots">Football Lots</option><option value="Football Singles">Football Singles</option></select>
+        <select id="steal-cat" style="max-width:220px;"><option value="All">All categories</option></select>
         <select id="steal-sort" style="max-width:200px;">
           <option value="save-desc">Biggest steal first</option>
           <option value="save-asc">Smallest steal first</option>
@@ -2034,402 +2038,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 
     <div class="steal-grid" id="steal-grid">
-      
-      <article class="steal-card" data-cat="Football Lots" data-save="84" data-search="7 howie long cards raiders football card lot nfl football lots">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-84%</div>
+      <div class="empty-state">
+          <svg class="empty-state-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="32" cy="32" r="20"/><path d="M22 30l8 8 12-16"/></svg>
+          <div class="empty-state-title">Fully priced</div>
+          <div class="empty-state-sub">Everything in the store is currently priced at or above market median. Check back — new listings drop here when they're listed below market.</div>
         </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Lots</span>
-            
-            
-          </div>
-          <a href="items/306913902750.html" class="steal-title">7 Howie Long Cards Raiders Football Card Lot NFL</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$25.46</b> vs. eBay market median (84% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$4.99</div>
-          <div class="steal-median">market $30.45</div>
-          <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-Football-Card-Lot-NFL-/306913902750" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="60" data-search="2025 panini prizm draft picks - quinn ewers #126 red prizm /399 (rc) football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/7dEAAeSwPN5qB-ee/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-60%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306941726438.html" class="steal-title">2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /399 (RC) Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$3.01</b> vs. eBay market median (60% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$1.99</div>
-          <div class="steal-median">market $5.00</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC-Football-/306941726438" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Basketball Lots" data-save="58" data-search="6 basketball cards from the 90s basketball lots">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/WVQAAeSwK4lqARIa/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-58%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Basketball Lots</span>
-            
-            
-          </div>
-          <a href="items/306931077943.html" class="steal-title">6 Basketball Cards From The 90s</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$6.44</b> vs. eBay market median (58% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$4.56</div>
-          <div class="steal-median">market $11.00</div>
-          <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931077943" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Basketball Lots" data-save="58" data-search="6 basketball cards from the 90s basketball lots">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/uXIAAeSwJSpqAR2W/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-58%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Basketball Lots</span>
-            
-            
-          </div>
-          <a href="items/306931142490.html" class="steal-title">6 Basketball Cards From The 90s</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$6.44</b> vs. eBay market median (58% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$4.56</div>
-          <div class="steal-median">market $11.00</div>
-          <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="48" data-search="2025 panini select - concourse chuba hubbard #43 zebra prizm football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-48%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306937601406.html" class="steal-title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$13.99</b> vs. eBay market median (48% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$15.00</div>
-          <div class="steal-median">market $28.99</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="42" data-search="2025-26 topps chrome cam ward rc pink x fractor mega exclusive sp tn titans football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-42%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span>
-            
-          </div>
-          <a href="items/306939333836.html" class="steal-title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$28.51</b> vs. eBay market median (42% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$38.99</div>
-          <div class="steal-median">market $67.50</div>
-          <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="40" data-search="2025 panini select - club level jayden daniels #289 pink shock prizm football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/QpkAAeSwXBNqBVFh/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-40%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306937669968.html" class="steal-title">2025 Panini Select - Club Level Jayden Daniels #289 Pink Shock Prizm Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$2.01</b> vs. eBay market median (40% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$2.99</div>
-          <div class="steal-median">market $5.00</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Jayden-Daniels-289-Pink-Shock-Prizm-Football-/306937669968" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="40" data-search="2025 panini prizm - bo nix #142 white disco prizm nfl football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-40%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306930462076.html" class="steal-title">2025 Panini Prizm - Bo Nix #142 White Disco Prizm NFL Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$3.96</b> vs. eBay market median (40% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$5.99</div>
-          <div class="steal-median">market $9.95</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-NFL-Football-/306930462076" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="37" data-search="2025 topps chrome jaylen waddle x-fractor #186 dolphins nfl football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/aVgAAeSwxGJqBku3/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-37%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            
-            
-          </div>
-          <a href="items/306939304842.html" class="steal-title">2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins NFL</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.18</b> vs. eBay market median (37% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$1.99</div>
-          <div class="steal-median">market $3.17</div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jaylen-Waddle-X-Fractor-186-Dolphins-NFL-/306939304842" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="36" data-search="2025 panini prizm - brock bowers #6 silver prizm nfl football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/rY8AAeSwgntqB-nI/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-36%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-danger">🔥 STEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306941730763.html" class="steal-title">2025 Panini Prizm - Brock Bowers #6 Silver Prizm NFL Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.13</b> vs. eBay market median (36% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$1.99</div>
-          <div class="steal-median">market $3.12</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Brock-Bowers-6-Silver-Prizm-NFL-Football-/306941730763" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="33" data-search="2025 topps chrome bill jacory croskey-merritt refractor rookie rc 387 commanders football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/0OMAAeSwPN5qBmfD/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-33%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-warning">DEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Refractor</span>
-            
-          </div>
-          <a href="items/306939473666.html" class="steal-title">2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rookie RC 387 Commanders</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.16</b> vs. eBay market median (33% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$2.34</div>
-          <div class="steal-median">market $3.50</div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="32" data-search="2025 panini mosaic - rookies cam ward #382 camo pink mosaic prizm (rc) football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/0yEAAeSwbvhqBVD-/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-32%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-warning">DEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306937664217.html" class="steal-title">2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic Prizm (RC) Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.88</b> vs. eBay market median (32% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$3.99</div>
-          <div class="steal-median">market $5.87</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Rookies-Cam-Ward-382-Camo-Pink-Mosaic-Prizm-RC-Football-/306937664217" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="32" data-search="2025 panini select - concourse ashton jeanty #4 pink shock prizm (rc) football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/izwAAeSwCDZqBUNt/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-32%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-warning">DEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306937599747.html" class="steal-title">2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock Prizm (RC) Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.38</b> vs. eBay market median (32% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$2.99</div>
-          <div class="steal-median">market $4.37</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Pink-Shock-Prizm-RC-Football-/306937599747" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="29" data-search="2025 panini select - concourse josh allen #86 pink shock prizm nfl football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/xckAAeSwwSZqBULb/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-29%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-warning">DEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306937598270.html" class="steal-title">2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm NFL Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$1.20</b> vs. eBay market median (29% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$2.99</div>
-          <div class="steal-median">market $4.19</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Pink-Shock-Prizm-NFL-Football-/306937598270" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="25" data-search="2025 panini donruss optic - my house dk metcalf #8 black pandora prizm /149 football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-25%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-warning">DEAL</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306931446668.html" class="steal-title">2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$4.02</b> vs. eBay market median (25% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$11.99</div>
-          <div class="steal-median">market $16.01</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="25" data-search="2025 panini prizm - prizmatic colston loveland #20 silver prizm (rc) football football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-25%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-success">BARGAIN</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Prizm</span>
-            
-          </div>
-          <a href="items/306914169081.html" class="steal-title">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$0.99</b> vs. eBay market median (25% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$3.00</div>
-          <div class="steal-median">market $3.99</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC-Football-/306914169081" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Football Singles" data-save="22" data-search="2025 topps chrome jacory croskey-merritt refractor #387 (rc) nfl football singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/W~cAAeSwe69qCCDi/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-22%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-success">BARGAIN</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag tag-gold">Rookie</span><span class="tag tag-success">Refractor</span>
-            
-          </div>
-          <a href="items/306942007235.html" class="steal-title">2025 Topps Chrome Jacory Croskey-Merritt Refractor #387 (RC) NFL</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$0.65</b> vs. eBay market median (22% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$2.34</div>
-          <div class="steal-median">market $2.99</div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jacory-Croskey-Merritt-Refractor-387-RC-NFL-/306942007235" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
-
-      <article class="steal-card" data-cat="Basketball Singles" data-save="15" data-search="2025 panini phoenix - thunderbirds drake maye #35 silver pyramids /299 basketball singles">
-        <div class="steal-thumb">
-          <img src="https://i.ebayimg.com/images/g/ijMAAeSwN8dqBVPQ/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-15%</div>
-        </div>
-        <div class="steal-body">
-          <div class="steal-meta-row">
-            <span class="badge badge-success">BARGAIN</span>
-            <span class="tag tag-gold">Basketball Singles</span>
-            
-            
-          </div>
-          <a href="items/306937677187.html" class="steal-title">2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyramids /299</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$3.00</b> vs. eBay market median (15% off)</div>
-        </div>
-        <div class="steal-price-block">
-          <div class="steal-price">$16.99</div>
-          <div class="steal-median">market $19.99</div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Thunderbirds-Drake-Maye-35-Silver-Pyramids-299-/306937677187" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
-        </div>
-      </article>
     </div>
 
     <div id="steal-empty" class="empty-state" style="display:none;">
@@ -2485,7 +2098,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 19:58 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 20:29 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
