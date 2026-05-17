@@ -1017,7 +1017,7 @@ def main() -> int:
             for l in listings
         )
     token = None
-    if need_fetch:
+    if need_fetch or args.apply:
         try:
             print("  Getting eBay access token...")
             token = promote.get_access_token(ebay_cfg)
