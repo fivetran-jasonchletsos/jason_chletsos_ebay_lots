@@ -1046,6 +1046,19 @@ def main() -> int:
         append_history(applied)
         ok = sum(1 for a in applied if a["ok"])
         print(f"\n  Result: {ok}/{len(applied)} listings updated successfully.")
+
+        # CRITICAL: invalidate the cache for successfully-applied items so the
+        # NEXT --apply pass moves to the next batch of 25 instead of re-doing
+        # the same items. Without this, the cache still shows pre-apply
+        # specifics, plan_all() recomputes the same gaps, and we loop.
+        invalidated = 0
+        for a in applied:
+            if a["ok"] and str(a["item_id"]) in cache:
+                del cache[str(a["item_id"])]
+                invalidated += 1
+        if invalidated:
+            save_cache(cache)
+            print(f"  Invalidated cache for {invalidated} applied item(s) — next --apply pass will pick up the next batch.")
     else:
         print("\n  Dry run only. Re-run with --apply to push changes to eBay.")
 

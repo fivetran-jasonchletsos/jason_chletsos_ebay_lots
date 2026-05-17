@@ -144,6 +144,7 @@ def get_marketing_token(cfg: dict) -> str:
         "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
         "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
         "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
+        "https://api.ebay.com/oauth/api_scope/sell.negotiation",
     ])
     resp = requests.post(
         "https://api.ebay.com/identity/v1/oauth2/token",
