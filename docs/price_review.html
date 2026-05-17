@@ -1399,6 +1399,18 @@ html[data-theme="crimson"] .product-price {
   background: linear-gradient(90deg, var(--gold), transparent);
   position: absolute; left: 0; bottom: -1px;
 }
+/* Inline variant — title on the left, description on the right, single row.
+   Saves a chunk of vertical real estate above the KPI strip. */
+.section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
+.section-head--inline .sh-title { grid-column: 1; }
+.section-head--inline .sh-sub   { grid-column: 2; max-width: 64ch; padding-bottom: 6px; }
+@media (max-width: 760px) {
+  .section-head--inline { grid-template-columns: 1fr; gap: 6px; }
+  .section-head--inline .sh-sub { grid-column: 1; }
+}
+/* Stat-card link styling so clickable KPIs don't look like blue underlines */
+a.stat-card.linked { text-decoration: none; color: inherit; display: block; transition: transform .15s, border-color .15s, box-shadow .15s; }
+a.stat-card.linked:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 6px 18px rgba(212,175,55,.18); }
 
 /* Chip active — real "press" feel */
 .chip { transition: color .15s, background .15s, box-shadow .25s; }
@@ -1795,11 +1807,27 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="sold.html" class="nav-link">Sold</a>
 
         <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Insights
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" class="active" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="email_campaign.html" data-admin="1">Email</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Sell
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="price_review.html" class="active" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Marketing
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
         </div>
 
         <div class="nav-dropdown">
@@ -1807,7 +1835,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             For Us
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a><a href="price_drops.html">Price Drops</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="price_drops.html">Price Drops</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1864,23 +1892,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Insights</div>
+<div class="drawer-group" data-admin="1">Analytics</div>
 <a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
+<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Sell</div>
 <a href="price_review.html" class="active admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing Agent</a>
+<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
+<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
+<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
+<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
+<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Marketing</div>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
+<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
+<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="vault.html" class="admin-only" data-admin="1">Vault</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
 <a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
 <div class="drawer-group" data-admin="1">For Us</div>
 <a href="collect.html">My Wants</a>
+<a href="under_10.html">Under $10</a>
+<a href="price_drops.html">Price Drops</a>
 <a href="pokemon.html">Pokemon</a>
 <a href="pikachu.html">Pikachu</a>
 <a href="charizard.html">Charizard</a>
@@ -1888,15 +1926,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html">Mewtwo</a>
 <a href="eevee.html">Eevee</a>
 <a href="pokemon_news.html">Pokemon News</a>
-<a href="price_drops.html">Price Drops</a>
-<div class="drawer-group" data-admin="1">Insights</div>
-<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
-<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
-<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
-<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
 <div class="drawer-group" data-admin="1">Tools</div>
 <a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <div class="drawer-group" data-admin="1">Cross-post</div>
@@ -1948,13 +1977,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <button type="button" class="stat-card linked active" data-filter="all" onclick="filterReview('all', this)">
-        <div class="num">46</div><div class="lbl">All flagged</div>
+        <div class="num">47</div><div class="lbl">All flagged</div>
       </button>
       <button type="button" class="stat-card linked" data-filter="under" onclick="filterReview('under', this)">
         <div class="num danger">16</div><div class="lbl">Underpriced</div>
       </button>
       <button type="button" class="stat-card linked" data-filter="over" onclick="filterReview('over', this)">
-        <div class="num warning">30</div><div class="lbl">Overpriced</div>
+        <div class="num warning">31</div><div class="lbl">Overpriced</div>
       </button>
       <div class="stat-card"><div class="num danger">$116</div><div class="lbl">Revenue Gap</div></div>
     </div>
@@ -3833,6 +3862,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
+      <article class="pr-card review-row" data-id="306939289562" data-flag="over" data-market-gap="21.90" data-actual-gap="264.80"  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306939289562" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/XU4AAeSwrclqBknS/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306939289562</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$3.74</b> · Range $2.99–$4.99 · 10 comps
+          </div>
+          <div class="pr-actual"><span title="Match confidence 75%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.25</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Riley Leonard #318</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12533132" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+265% vs actual</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.74</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $4.57 · <a href="https://www.pricecharting.com/game/11823509" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$4.56</div>
+            <div class="pr-gap">+21.9% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306939289562" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
       <article class="pr-card review-row" data-id="306939367849" data-flag="over" data-market-gap="21.90" data-actual-gap="-64.81"  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306939367849" checked  aria-label="Select for repricing">
@@ -4081,48 +4152,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Paragon-Ashton-Jeanty-10-RC-NFL-Football-/306941733672" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306939289562" data-flag="ok" data-market-gap="14.30" data-actual-gap="264.80"  style="--stripe:var(--success)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306939289562"   aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/XU4AAeSwrclqBknS/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306939289562</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$3.99</b> · Range $2.99–$4.99 · 10 comps
-          </div>
-          <div class="pr-actual"><span title="Match confidence 75%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.25</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Riley Leonard #318</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12533132" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+265% vs actual</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.99</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $4.57 · <a href="https://www.pricecharting.com/game/11823509" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$4.56</div>
-            <div class="pr-gap">+14.3% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306939289562" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -4391,7 +4420,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Jayden-Daniels-289-Pink-Shock-Prizm-Football-/306937669968" target="_blank" rel="noopener" class="pr-title">2025 Panini Select - Club Level Jayden Daniels #289 Pink Shock Prizm Football</a>
           <div class="pr-market">
-            <b>Market</b> <b>$5.00</b> · Range $4.00–$7.00 · 10 comps
+            <b>Market</b> <b>$5.00</b> · Range $3.99–$7.00 · 10 comps
           </div>
           <div class="pr-actual"><span title="Match confidence 77%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.39</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Jayden Daniels #289</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12068786" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+219% vs actual</span></div>
           <div class="pr-sources">
@@ -5219,48 +5248,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306934495603" data-flag="ok" data-market-gap="-0.20" data-actual-gap=""  style="--stripe:var(--success)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306934495603"   aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/KFcAAeSwl6ZqA0pI/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306934495603</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603" target="_blank" rel="noopener" class="pr-title">2025 Panini Rookies & Stars - Airborne Cam Ward #29 Silver (RC)</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$3.00</b> · Range $2.99–$3.50 · 10 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (62%) — review manually</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.00</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $0.22 · <a href="https://www.pricecharting.com/game/7913639" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$2.99</div>
-            <div class="pr-gap">-0.2% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306934495603" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
       <article class="pr-card review-row" data-id="306933928667" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306933928667"   aria-label="Select for repricing">
@@ -5523,7 +5510,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="badge badge-success">On Market</span>
             <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306904203738</span>
           </div>
-          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman-NFL-/306904203738" target="_blank" rel="noopener" class="pr-title">1994 Classic Pro Line Live - Autograph - Steve Emtman NFL</a>
+          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="pr-title">1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts NFL Football</a>
           <div class="pr-market">
             <b>Market</b> <b>$8.99</b> · Range $8.99–$8.99 · 1 comps
           </div>
@@ -5550,7 +5537,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-math">
               -$1.19 fee · -$1.30 ship · <b style="color:var(--success);">$6.10 net</b>
             </div>
-            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman-NFL-/306904203738" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -6899,6 +6886,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
+      <article class="pr-card review-row" data-id="306934495603" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306934495603"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/KFcAAeSwl6ZqA0pI/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306934495603</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603" target="_blank" rel="noopener" class="pr-title">2025 Panini Rookies & Stars - Airborne Cam Ward #29 Silver (RC)</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$2.99</b> · Range $2.99–$3.49 · 10 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (62%) — review manually</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.99</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $0.22 · <a href="https://www.pricecharting.com/game/7913639" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306934495603" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
       <article class="pr-card review-row" data-id="306939339030" data-flag="ok" data-market-gap="0.00" data-actual-gap="221.13"  style="--stripe:var(--success)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306939339030"   aria-label="Select for repricing">
@@ -7232,7 +7261,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 16:10 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 16:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

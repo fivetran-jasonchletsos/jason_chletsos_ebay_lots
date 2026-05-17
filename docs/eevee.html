@@ -1399,6 +1399,18 @@ html[data-theme="crimson"] .product-price {
   background: linear-gradient(90deg, var(--gold), transparent);
   position: absolute; left: 0; bottom: -1px;
 }
+/* Inline variant — title on the left, description on the right, single row.
+   Saves a chunk of vertical real estate above the KPI strip. */
+.section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
+.section-head--inline .sh-title { grid-column: 1; }
+.section-head--inline .sh-sub   { grid-column: 2; max-width: 64ch; padding-bottom: 6px; }
+@media (max-width: 760px) {
+  .section-head--inline { grid-template-columns: 1fr; gap: 6px; }
+  .section-head--inline .sh-sub { grid-column: 1; }
+}
+/* Stat-card link styling so clickable KPIs don't look like blue underlines */
+a.stat-card.linked { text-decoration: none; color: inherit; display: block; transition: transform .15s, border-color .15s, box-shadow .15s; }
+a.stat-card.linked:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 6px 18px rgba(212,175,55,.18); }
 
 /* Chip active — real "press" feel */
 .chip { transition: color .15s, background .15s, box-shadow .25s; }
@@ -1735,10 +1747,26 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Insights
+            Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="email_campaign.html" data-admin="1">Email</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Sell
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Marketing
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
         </div>
 
         <div class="nav-dropdown">
@@ -1746,7 +1774,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             For Us
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html" class="active">Eevee</a><a href="pokemon_news.html">Pokemon News</a><a href="price_drops.html">Price Drops</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="price_drops.html">Price Drops</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html" class="active">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1803,23 +1831,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Insights</div>
+<div class="drawer-group" data-admin="1">Analytics</div>
 <a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
+<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Sell</div>
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing Agent</a>
+<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
+<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
+<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
+<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
+<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Marketing</div>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
+<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
+<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="vault.html" class="admin-only" data-admin="1">Vault</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
 <a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
 <div class="drawer-group" data-admin="1">For Us</div>
 <a href="collect.html">My Wants</a>
+<a href="under_10.html">Under $10</a>
+<a href="price_drops.html">Price Drops</a>
 <a href="pokemon.html">Pokemon</a>
 <a href="pikachu.html">Pikachu</a>
 <a href="charizard.html">Charizard</a>
@@ -1827,15 +1865,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html">Mewtwo</a>
 <a href="eevee.html" class="active">Eevee</a>
 <a href="pokemon_news.html">Pokemon News</a>
-<a href="price_drops.html">Price Drops</a>
-<div class="drawer-group" data-admin="1">Insights</div>
-<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
-<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
-<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
-<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
 <div class="drawer-group" data-admin="1">Tools</div>
 <a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <div class="drawer-group" data-admin="1">Cross-post</div>
@@ -1891,9 +1920,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">6</div><div class="pk-l">Categories</div></div>
-      <div class="pk-kpi"><div class="pk-n">99</div><div class="pk-l">Live listings</div></div>
+      <div class="pk-kpi"><div class="pk-n">98</div><div class="pk-l">Live listings</div></div>
       <div class="pk-kpi"><div class="pk-n">37</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">12:11</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">12:35</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -1943,12 +1972,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-grail-title">Evolving Skies Master Set - Choose Your Card! - Every Alt Art, P</div>
               </div>
             </a>
-            <a class="pk-grail-card" href="https://www.ebay.com/itm/286935484511?_skw=umbreon+vmax+alt+art&amp;hash=item42ceb0085f:g:sS0AAeSwstBpFCq-" target="_blank" rel="noopener">
+            <a class="pk-grail-card" href="https://www.ebay.com/itm/156374517016?_skw=sylveon+vmax+alt+art&amp;hash=item2468a5c518:g:E8QAAOSwMGloS7Vn" target="_blank" rel="noopener">
               <div class="pk-grail-badge">LEGENDARY</div>
-              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/sS0AAeSwstBpFCq-/s-l225.jpg');"></div>
+              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/E8QAAOSwMGloS7Vn/s-l225.jpg');"></div>
               <div class="pk-grail-meta">
-                <div class="pk-grail-price">$300</div>
-                <div class="pk-grail-title">Graded Pokemon cards select one</div>
+                <div class="pk-grail-price">$280</div>
+                <div class="pk-grail-title">Pokemon TCG - Evolving Skies: Choose Your Card! - All Holos/Reve</div>
               </div>
             </a></div>
         </section>
@@ -1959,22 +1988,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <span class="pk-hero-sub">Biggest discounts vs. median across every bucket.</span>
       </div>
       <div class="pk-hero-grid">
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/176520056972?_skw=leafeon+vmax+alt+art&amp;hash=item29196a508c:g:5W8AAeSw6yBnujrr" target="_blank" rel="noopener"
-           title="Leafeon VMAX Alt Art PSA CGC Beckett | Display Case Extended Art for Pokémon Car">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/5W8AAeSw6yBnujrr/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$20.00</span>
-            <span class="pk-hero-disc">-75%</span>
-          </div>
-        </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/176680552908?_skw=espeon+vmax+alt+art&amp;hash=item2922fb49cc:g:sVEAAeSwZPdnu~wJ" target="_blank" rel="noopener"
-           title="Espeon VMAX Alt Art PSA CGC Beckett | Extended Art Display Case for Pokémon TCG">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/sVEAAeSwZPdnu~wJ/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$20.00</span>
-            <span class="pk-hero-disc">-75%</span>
-          </div>
-        </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/397538706508?_skw=eevee+jungle+holo&amp;hash=item5c8f27444c:g:emsAAeSwYolpd6OU" target="_blank" rel="noopener"
            title="🌴 1999 Pokemon Jungle Set 🌴 CHOOSE YOUR CARD 🃏 Holos Rares NM-MP WOTC 🍃">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/emsAAeSwYolpd6OU/s-l225.jpg');"></div>
@@ -1991,20 +2004,36 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="pk-hero-disc">-72%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/157712090665?_skw=sylveon+vmax+alt+art&amp;hash=item24b85f8629:g:uw0AAeSw4rhpoR2g" target="_blank" rel="noopener"
-           title="Sylveon V 184/203 Evolving Skies Pokemon Extended Artwork For PSA CGC BGS or TAG">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/uw0AAeSw4rhpoR2g/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$25.00</span>
-            <span class="pk-hero-disc">-69%</span>
-          </div>
-        </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/357837163904?_skw=eevee+ex+151&amp;hash=item5350c1cd80:g:igcAAeSwx21pAS-k" target="_blank" rel="noopener"
            title="Pokemon SV 151 Reverse Holos Choose Your Card ex Ultra Rares Near Mint">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/igcAAeSwx21pAS-k/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.00</span>
             <span class="pk-hero-disc">-69%</span>
+          </div>
+        </a>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/336546651206?_skw=eevee+ex+151&amp;hash=item4e5bbe5c46:g:OYgAAeSwFd5p6OqF" target="_blank" rel="noopener"
+           title="Pokemon 151 &amp; Crown Zenith Holo / Reverse Holo / EX - Choose Your Card - NM Raw">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/OYgAAeSwFd5p6OqF/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$5.00</span>
+            <span class="pk-hero-disc">-69%</span>
+          </div>
+        </a>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/176520056972?_skw=leafeon+vmax+alt+art&amp;hash=item29196a508c:g:5W8AAeSw6yBnujrr" target="_blank" rel="noopener"
+           title="Leafeon VMAX Alt Art PSA CGC Beckett | Display Case Extended Art for Pokémon Car">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/5W8AAeSw6yBnujrr/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$20.00</span>
+            <span class="pk-hero-disc">-65%</span>
+          </div>
+        </a>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/176680552908?_skw=espeon+vmax+alt+art&amp;hash=item2922fb49cc:g:sVEAAeSwZPdnu~wJ" target="_blank" rel="noopener"
+           title="Espeon VMAX Alt Art PSA CGC Beckett | Extended Art Display Case for Pokémon TCG">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/sVEAAeSwZPdnu~wJ/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$20.00</span>
+            <span class="pk-hero-disc">-65%</span>
           </div>
         </a></div>
     </section>
@@ -2015,7 +2044,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
-        <option value="Grail Watch">Grail Watch (1)</option><option value="Vintage Eevee">Vintage Eevee (21)</option><option value="Eeveelution V / VMAX Alt Arts">Eeveelution V / VMAX Alt Arts (19)</option><option value="Eevee ex / SIR">Eevee ex / SIR (55)</option><option value="Eevee Heroes / Japanese">Eevee Heroes / Japanese (2)</option><option value="Eevee PSA 10">Eevee PSA 10 (1)</option>
+        <option value="Grail Watch">Grail Watch (1)</option><option value="Vintage Eevee">Vintage Eevee (21)</option><option value="Eeveelution V / VMAX Alt Arts">Eeveelution V / VMAX Alt Arts (18)</option><option value="Eevee ex / SIR">Eevee ex / SIR (55)</option><option value="Eevee Heroes / Japanese">Eevee Heroes / Japanese (2)</option><option value="Eevee PSA 10">Eevee PSA 10 (1)</option>
       </select>
       <select id="pk-max">
         <option value="0">Any price</option>
@@ -2241,7 +2270,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/155705429889?_skw=eevee+skyridge&amp;hash=item2440c44f81:g:kB0AAOSwKXZkzzfp&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYWZ4UA%2BW1oL3tv%2F8aXlFTCsk5WO0PC%2FNFTfqywyXCevieiKtw62hq1CGyhkb%2Fsv0eF9xCLYGjDe8E6xkHCMUl7gNhXNzFo6dQ3gO0zmrET73Z7kL7R0gBbooc6ll0Sa8VrVuJQTZpqvuopWgyfK6DhZX%2BNnHG7b1563xXQPyj4yseO6pWMgYvuSuEXRCx1UWoG%2FA2vLaIxaksPGn4Dg4lJjBtWiL4WSlVIWj2P8bP3ddO2vAApViWEtwuu4X0QJ4OBiMrNt5KdnX5BDvDUPvaufXhzUiAuirF8xRLPstkbqg%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/155705429889?_skw=eevee+skyridge&amp;hash=item2440c44f81:g:kB0AAOSwKXZkzzfp&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYWZ4UA%2BW1oL3tv%2F8aXlFTCsk5WO0PC%2FNFTfqywyXCevieiKtw62hq1CGyhkb%2Fsv0eF9xCLYGjDe8E6xkHCMUl7gNhXNzFo6dQ3gO0zmrET73Z7kL7R0gBbooc6ll0Sa8U%2BWJb2KB95DKXnMuzV8SsEg2uL14BWBLjkFV7TD2KJS5nboCtnoYuziirpK7yw4%2Flpu6XC%2BgAuhaZH9fLjjxWWTq2gAEzzLV7AvaLtxsottlCJSpKlPiommkSRMHMOXKvyfXvae3HdPclLYaEHMiix6ygoP2VDOmNOaF0KygquUw%3D%3D" target="_blank" rel="noopener"
                data-price="29.99"
                data-discount="-50.00"
                data-deal="0"
@@ -2394,15 +2423,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$20</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$80</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$57</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$370</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">9</div><div class="pk-stat-l">Deals / 19</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">9</div><div class="pk-stat-l">Deals / 18</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/176520056972?_skw=leafeon+vmax+alt+art&amp;hash=item29196a508c:g:5W8AAeSw6yBnujrr" target="_blank" rel="noopener"
                data-price="20.00"
-               data-discount="75.00"
+               data-discount="65.20"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="leafeon vmax alt art psa cgc beckett | display case extended art for pokémon car">
@@ -2410,7 +2439,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$20.00</span>
-                  <span class="pk-disc">-75%</span>
+                  <span class="pk-disc">-65%</span>
                 </div>
                 <div class="pk-title">Leafeon VMAX Alt Art PSA CGC Beckett | Display Case Extended Art for Pokémon Car</div>
                 <div class="pk-buying">BIN</div>
@@ -2418,7 +2447,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/176680552908?_skw=espeon+vmax+alt+art&amp;hash=item2922fb49cc:g:sVEAAeSwZPdnu~wJ" target="_blank" rel="noopener"
                data-price="20.00"
-               data-discount="75.00"
+               data-discount="65.20"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="espeon vmax alt art psa cgc beckett | extended art display case for pokémon tcg">
@@ -2426,7 +2455,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$20.00</span>
-                  <span class="pk-disc">-75%</span>
+                  <span class="pk-disc">-65%</span>
                 </div>
                 <div class="pk-title">Espeon VMAX Alt Art PSA CGC Beckett | Extended Art Display Case for Pokémon TCG</div>
                 <div class="pk-buying">BIN</div>
@@ -2434,7 +2463,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/157712090665?_skw=sylveon+vmax+alt+art&amp;hash=item24b85f8629:g:uw0AAeSw4rhpoR2g" target="_blank" rel="noopener"
                data-price="25.00"
-               data-discount="68.70"
+               data-discount="56.50"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="sylveon v 184/203 evolving skies pokemon extended artwork for psa cgc bgs or tag">
@@ -2442,7 +2471,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$25.00</span>
-                  <span class="pk-disc">-69%</span>
+                  <span class="pk-disc">-56%</span>
                 </div>
                 <div class="pk-title">Sylveon V 184/203 Evolving Skies Pokemon Extended Artwork For PSA CGC BGS or TAG</div>
                 <div class="pk-buying">BIN</div>
@@ -2450,7 +2479,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/175298028517?_skw=leafeon+vmax+alt+art&amp;hash=item28d093a3e5:g:d7sAAOSw7h5i~BRR" target="_blank" rel="noopener"
                data-price="28.00"
-               data-discount="65.00"
+               data-discount="51.30"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="charizard v espeon umbreon vaporeon alt art custom pokemon tcg card display case">
@@ -2458,7 +2487,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$28.00</span>
-                  <span class="pk-disc">-65%</span>
+                  <span class="pk-disc">-51%</span>
                 </div>
                 <div class="pk-title">Charizard V Espeon Umbreon Vaporeon Alt Art Custom Pokemon TCG Card Display Case</div>
                 <div class="pk-buying">BIN</div>
@@ -2466,7 +2495,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/175298028517?_skw=glaceon+vmax+alt+art&amp;hash=item28d093a3e5:g:d7sAAOSw7h5i~BRR" target="_blank" rel="noopener"
                data-price="28.00"
-               data-discount="65.00"
+               data-discount="51.30"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="charizard v espeon umbreon vaporeon alt art custom pokemon tcg card display case">
@@ -2474,7 +2503,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$28.00</span>
-                  <span class="pk-disc">-65%</span>
+                  <span class="pk-disc">-51%</span>
                 </div>
                 <div class="pk-title">Charizard V Espeon Umbreon Vaporeon Alt Art Custom Pokemon TCG Card Display Case</div>
                 <div class="pk-buying">BIN</div>
@@ -2482,7 +2511,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/406927208931?_skw=umbreon+vmax+alt+art&amp;hash=item5ebec071e3:g:FPYAAeSwEPFqBj~O" target="_blank" rel="noopener"
                data-price="28.99"
-               data-discount="63.70"
+               data-discount="49.60"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="umbreon vmax alt chance (read desc.)">
@@ -2490,7 +2519,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$28.99</span>
-                  <span class="pk-disc">-64%</span>
+                  <span class="pk-disc">-50%</span>
                 </div>
                 <div class="pk-title">Umbreon VMAX ALT CHANCE (Read desc.)</div>
                 <div class="pk-buying">BIN . Best Offer</div>
@@ -2498,7 +2527,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/176488003643?_skw=umbreon+vmax+alt+art&amp;hash=item291781383b:g:QM0AAeSwVERnujrX" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="56.20"
+               data-discount="39.10"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="umbreon vmax alt art psa cgc beckett | extended art display case for pokémon tcg">
@@ -2506,7 +2535,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$34.99</span>
-                  <span class="pk-disc">-56%</span>
+                  <span class="pk-disc">-39%</span>
                 </div>
                 <div class="pk-title">Umbreon VMAX Alt Art PSA CGC Beckett | Extended Art Display Case for Pokémon TCG</div>
                 <div class="pk-buying">BIN</div>
@@ -2514,7 +2543,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/176518090509?_skw=sylveon+vmax+alt+art&amp;hash=item29194c4f0d:g:bU8AAeSwIqhnujrW" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="56.20"
+               data-discount="39.10"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="sylveon vmax alt art psa cgc beckett | display case extended art for pokémon car">
@@ -2522,7 +2551,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$34.99</span>
-                  <span class="pk-disc">-56%</span>
+                  <span class="pk-disc">-39%</span>
                 </div>
                 <div class="pk-title">Sylveon VMAX Alt Art PSA CGC Beckett | Display Case Extended Art for Pokémon Car</div>
                 <div class="pk-buying">BIN</div>
@@ -2530,7 +2559,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/176523923715?_skw=glaceon+vmax+alt+art&amp;hash=item2919a55103:g:9u0AAeSwZbRns-c8" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="56.20"
+               data-discount="39.10"
                data-deal="1"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="glaceon vmax alt art psa cgc beckett | display case extended art for pokémon car">
@@ -2538,7 +2567,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$34.99</span>
-                  <span class="pk-disc">-56%</span>
+                  <span class="pk-disc">-39%</span>
                 </div>
                 <div class="pk-title">Glaceon VMAX Alt Art PSA CGC Beckett | Display Case Extended Art for Pokémon Car</div>
                 <div class="pk-buying">BIN</div>
@@ -2546,7 +2575,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145273089061?_skw=sylveon+vmax+alt+art&amp;hash=item21d2f36c25:g:3c8AAOSwbJ1jaukF" target="_blank" rel="noopener"
                data-price="79.95"
-               data-discount="0.00"
+               data-discount="-39.10"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="pokemon eeveelutions: choose your card! sylveon leafeon espeon umbreon &amp; more nm">
@@ -2562,7 +2591,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157070883554?_skw=leafeon+vmax+alt+art&amp;hash=item2492277ae2:g:rNkAAeSwd6FpsmbF" target="_blank" rel="noopener"
                data-price="129.99"
-               data-discount="-62.60"
+               data-discount="-126.20"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="pokemon cards! astral radiance holo/reverse holo ultrarare v vmax full art card">
@@ -2578,7 +2607,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177327083174?_skw=leafeon+vmax+alt+art&amp;hash=item2949848ea6:g:uDgAAeSw-4xomQuO" target="_blank" rel="noopener"
                data-price="198.98"
-               data-discount="-148.90"
+               data-discount="-246.20"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="evolving skies master set - choose your card! - every alt art, promo and more!">
@@ -2594,7 +2623,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157285345193?_skw=sylveon+vmax+alt+art&amp;hash=item249eefe7a9:g:hwsAAeSw~mVoqCtZ" target="_blank" rel="noopener"
                data-price="199.99"
-               data-discount="-150.10"
+               data-discount="-248.00"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="eevee pokemon cards! holo/reverse holos rare full art lp/nm choose your card!">
@@ -2610,7 +2639,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177327083174?_skw=sylveon+vmax+alt+art&amp;hash=item2949848ea6:g:sVQAAeSwveJomQuW" target="_blank" rel="noopener"
                data-price="248.98"
-               data-discount="-211.40"
+               data-discount="-333.20"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="evolving skies master set - choose your card! - every alt art, promo and more!">
@@ -2626,7 +2655,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177327083174?_skw=glaceon+vmax+alt+art&amp;hash=item2949848ea6:g:zKoAAeSwjXdomQuS" target="_blank" rel="noopener"
                data-price="248.98"
-               data-discount="-211.40"
+               data-discount="-333.20"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="evolving skies master set - choose your card! - every alt art, promo and more!">
@@ -2642,7 +2671,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156374517016?_skw=sylveon+vmax+alt+art&amp;hash=item2468a5c518:g:E8QAAOSwMGloS7Vn" target="_blank" rel="noopener"
                data-price="279.99"
-               data-discount="-250.20"
+               data-discount="-387.20"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="pokemon tcg - evolving skies: choose your card! - all holos/reverse holo cards!">
@@ -2656,25 +2685,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/286935484511?_skw=umbreon+vmax+alt+art&amp;hash=item42ceb0085f:g:sS0AAeSwstBpFCq-" target="_blank" rel="noopener"
-               data-price="300.00"
-               data-discount="-275.20"
-               data-deal="0"
-               data-bucket="Eeveelution V / VMAX Alt Arts"
-               data-search="graded pokemon cards select one">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/sS0AAeSwstBpFCq-/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$300.00</span>
-                  
-                </div>
-                <div class="pk-title">Graded Pokemon cards select one</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177327083174?_skw=espeon+vmax+alt+art&amp;hash=item2949848ea6:g:2lEAAeSwiaJomQsY" target="_blank" rel="noopener"
                data-price="354.98"
-               data-discount="-344.00"
+               data-discount="-517.70"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="evolving skies master set - choose your card! - every alt art, promo and more!">
@@ -2690,7 +2703,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156374517016?_skw=umbreon+vmax+alt+art&amp;hash=item2468a5c518:g:wSUAAeSwsA1pj-DU" target="_blank" rel="noopener"
                data-price="369.99"
-               data-discount="-362.80"
+               data-discount="-543.80"
                data-deal="0"
                data-bucket="Eeveelution V / VMAX Alt Arts"
                data-search="pokemon tcg - evolving skies: choose your card! - all holos/reverse holo cards!">
@@ -2751,7 +2764,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcTsGitLqv1qrRMVGiyYQ8QznETqqc%2BIcctRFahzmZ6CVA1XZJ%2FeHTFWSP6o9URdC55UWRs4DHmrZs79AMMrYFsbpZjyprkn4n%2Fa1MkimWvw0%2F0xZlkFi10awJ40Vdr%2Fsn3atfeS7fboZS5auEJ7k1%2FcLvGlfnD0xGYZ%2BxOUA2v6MQF%2FSEOsHJFbewRKrwWQhtA%3D" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcQxisJzL2qeTfamb7PmMT3kVUBjJnkU%2FdS1x542pQH91NZ%2F5GaSS%2FzEovWOLQm7sseLd5Oh0knDbBXoyoRLsoSAJNScJebKVgkreiRHk05Bw4pER%2BgRYGeamT%2BUfWhb33RKv18BDsDFI3nWf2TX8HNlvFT0Sa4BgHV5oN5CXEoCc11dQQWcKuC4bAA7OGh3lFE%3D" target="_blank" rel="noopener"
                data-price="5.99"
                data-discount="62.50"
                data-deal="1"
@@ -3391,7 +3404,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/357878400066?_skw=umbreon+ex+sir&amp;hash=item5353370442:g:XIgAAeSwK0RpE8co&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbWXTXNjldPRAoP7oo4qUCrEMbafPck31gfDtTpQEDxwcWxns8DxnRy5x97uPgR4vdtltKjGvuWtnl%2FjUsWZelKTwhjXhQw%2BmDCBX5nV4n4wI7uQFm%2F3X2hqsdtjsN9Fqh2JI683UsRSihNQiK3Af24DkHC1ZhOR%2BqfHhiN8kdrFMKhF%2BvdbKCsdjNhwf4CTuX2VU0MZ4e%2BEYc35fBTEZvlNWND2Y5xukgxrUB3JhftFdSXv%2F8IrQdi6cD4rF9vdD7RvSSR0bHC38tPOOJhOuio15jFzuz7opID8dQRLXn4vg%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/357878400066?_skw=umbreon+ex+sir&amp;hash=item5353370442:g:XIgAAeSwK0RpE8co&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbWXTXNjldPRAoP7oo4qUCrEMbafPck31gfDtTpQEDxwcWxns8DxnRy5x97uPgR4vdtltKjGvuWtnl%2FjUsWZelKTwhjXhQw%2BmDCBX5nV4n4wI7uQFm%2F3X2hqsdtjsN9Fqg3Pp%2Fd0Fw44AblVh%2BzdUDwSPs1YGnvOeu%2FkeVRG%2Fmw1wAkb4vAnJ9fPLGYbXLa3%2FyawvNVS1NReUIzC0yMKIUXXqmd2SwJBsl9wduYuKnni%2BkFyanacWP7We7Au%2FnMnpSH%2Bx8fP4rdaroLVI1YGinKEFVZOd1QEbKgRUkkSw2uGw%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="-437.50"
                data-deal="0"
@@ -3452,6 +3465,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   
                 </div>
                 <div class="pk-title">Eevee ex 167/131 Special Illustration Rare Prismatic Evolutions Pokemon</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:FOAAAeSwRsFoYKm~" target="_blank" rel="noopener"
+               data-price="119.99"
+               data-discount="-650.40"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/FOAAAeSwRsFoYKm~/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$119.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3548,22 +3577,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   
                 </div>
                 <div class="pk-title">Pokemon 151 Cards! Holo/Reverse Holo Ex Illustration Ultra Double Rare Card!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:5kMAAeSwbz1pS8~1" target="_blank" rel="noopener"
-               data-price="279.99"
-               data-discount="-1651.00"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/5kMAAeSwbz1pS8~1/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$279.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3744,7 +3757,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 16:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 16:35 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
