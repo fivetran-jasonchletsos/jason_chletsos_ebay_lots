@@ -182,12 +182,44 @@ def render_report(plan: dict) -> Path:
     buckets = plan["buckets"]
     total_listings = sum(b["n"] for b in buckets)
     total_deals    = sum(b["n_deals"] for b in buckets)
+
+    # ---- Grail Watch — most expensive Pikachus across the WHOLE scan,
+    # not just the grail bucket. A $1,200 Base Set holo from the Vintage
+    # bucket belongs in Grail Watch even if it didn't come from a grail query.
+    # Dedupe by item_id (a card might appear in multiple buckets).
+    grail_pool: dict[str, dict] = {}
+    for b in buckets:
+        for it in b["items"]:
+            grail_pool[it["item_id"]] = it
+    grail_strip = sorted(grail_pool.values(), key=lambda x: -x["price"])[:6]
+
+    grail_html = ""
+    if grail_strip:
+        cards = []
+        for it in grail_strip:
+            cards.append(f"""
+            <a class="pk-grail-card" href="{_esc(it['url'])}" target="_blank" rel="noopener">
+              <div class="pk-grail-badge">LEGENDARY</div>
+              <div class="pk-grail-img" style="background-image:url('{_esc(it['image'])}');"></div>
+              <div class="pk-grail-meta">
+                <div class="pk-grail-price">${it['price']:,.0f}</div>
+                <div class="pk-grail-title">{_esc(it['title'][:64])}</div>
+              </div>
+            </a>""")
+        grail_html = f"""
+        <section class="pk-grail">
+          <div class="pk-grail-head">
+            <h2>Grail Watch</h2>
+            <span class="pk-grail-sub">The legends. Cards built from dreams. Click to gawk.</span>
+          </div>
+          <div class="pk-grail-grid">{''.join(cards)}</div>
+        </section>"""
+
+    # ---- Hero strip: hottest deals (skip grails — those go in their own section) ---- #
     best_deals = sorted(
-        (it for b in buckets for it in b["items"] if it["is_deal"]),
+        (it for b in buckets if b.get("kind") != "grail" for it in b["items"] if it["is_deal"]),
         key=lambda x: -x["discount_pct"]
     )[:6]
-
-    # ---- Hero strip: 6 hottest deals up top ---- #
     hero_cards = []
     for it in best_deals:
         hero_cards.append(f"""
@@ -251,23 +283,38 @@ def render_report(plan: dict) -> Path:
     """
 
     # ---- Per-bucket sections ---- #
+    KIND_TAG = {
+        "grail":         "LEGENDARY",
+        "vintage":       "VINTAGE",
+        "promo":         "PROMO",
+        "tournament":    "TOURNAMENT",
+        "international": "JAPANESE",
+        "modern":        "MODERN",
+        "sealed":        "SEALED",
+        "graded":        "PSA 10",
+    }
     sections = []
     for b in buckets:
+        # Grail bucket already rendered in its own hero — skip here to avoid double-display.
+        if b.get("kind") == "grail":
+            continue
         slug = re.sub(r"[^a-z0-9]+", "-", b["label"].lower()).strip("-")
-        tag  = _EMOJI_DOT.get(b.get("emoji"), "")
-        med  = f"${b['median']:.2f}" if b.get("median") else "—"
+        kind = b.get("kind", "")
+        tag  = KIND_TAG.get(kind, "")
         if not b.get("items"):
             sections.append(f"""
             <section class="pk-bucket" id="b-{slug}" data-bucket="{_esc(b['label'])}">
               <div class="pk-bucket-head">
-                <h3>{_esc(b['label'])} <span class="pk-tag">{tag}</span></h3>
+                <h3>{_esc(b['label'])} <span class="pk-tag pk-tag-{kind}">{tag}</span></h3>
                 <p class="pk-blurb">{_esc(b.get('blurb',''))}</p>
                 <span class="pk-stats">No live listings in ${b.get('min',0):.0f}–${b.get('max',0):.0f}.</span>
               </div>
             </section>""")
             continue
+        # Sort: deals first, then cheapest first within group
+        items_sorted = sorted(b["items"], key=lambda x: (not x["is_deal"], x["price"]))
         cards = []
-        for it in b["items"]:
+        for it in items_sorted:
             deal_cls = " is-deal" if it["is_deal"] else ""
             buying = " · ".join(
                 "BIN" if x == "FIXED_PRICE" else
@@ -297,12 +344,16 @@ def render_report(plan: dict) -> Path:
         sections.append(f"""
         <section class="pk-bucket" id="b-{slug}" data-bucket="{_esc(b['label'])}">
           <div class="pk-bucket-head">
-            <h3>{_esc(b['label'])} <span class="pk-tag">{tag}</span></h3>
-            <p class="pk-blurb">{_esc(b.get('blurb',''))}</p>
-            <span class="pk-stats">
-              median {med} · range ${b['lo']:.2f}–${b['hi']:.2f} ·
-              <b>{b['n_deals']}</b> deals / {b['n']} listings
-            </span>
+            <div class="pk-bucket-title">
+              <h3>{_esc(b['label'])} <span class="pk-tag pk-tag-{kind}">{tag}</span></h3>
+              <p class="pk-blurb">{_esc(b.get('blurb',''))}</p>
+            </div>
+            <div class="pk-bucket-stats">
+              <div class="pk-stat"><div class="pk-stat-n">${b['lo']:.0f}</div><div class="pk-stat-l">Cheapest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">${b['median']:.0f}</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">${b['hi']:.0f}</div><div class="pk-stat-l">Highest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">{b['n_deals']}</div><div class="pk-stat-l">Deals / {b['n']}</div></div>
+            </div>
           </div>
           <div class="pk-grid">{''.join(cards)}</div>
         </section>""")
@@ -386,6 +437,7 @@ def render_report(plan: dict) -> Path:
     </div>
 
     {kpis}
+    {grail_html}
     {hero_html}
     {filter_bar}
 
@@ -401,7 +453,22 @@ def render_report(plan: dict) -> Path:
   .pk-n { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: #ffcc00; line-height: 1; }
   .pk-l { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }
 
-  /* Hero strip — top 6 hottest */
+  /* GRAIL WATCH — legendary cards (Illustrator, Trophy, 1st Ed Shadowless) */
+  .pk-grail { position: relative; background: linear-gradient(135deg, rgba(212,175,55,.12), rgba(255,140,0,.08), rgba(212,175,55,.12)); border: 1px solid rgba(212,175,55,.4); border-radius: var(--r-md); padding: 22px; margin: 22px 0 28px; overflow: hidden; }
+  .pk-grail::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(212,175,55,.18), transparent 60%); pointer-events: none; }
+  .pk-grail-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; position: relative; }
+  .pk-grail-head h2 { margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: #d4af37; letter-spacing: .04em; text-shadow: 0 2px 8px rgba(212,175,55,.4); }
+  .pk-grail-sub { color: #e0d8b5; font-size: 13px; font-style: italic; }
+  .pk-grail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; position: relative; }
+  .pk-grail-card { display: block; position: relative; background: #14110a; border: 2px solid rgba(212,175,55,.5); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+  .pk-grail-card:hover { transform: translateY(-4px) scale(1.02); border-color: #d4af37; box-shadow: 0 12px 40px rgba(212,175,55,.4); }
+  .pk-grail-badge { position: absolute; top: 8px; left: 8px; background: #d4af37; color: #1a1500; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 8px; border-radius: 4px; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .pk-grail-img { aspect-ratio: 3 / 4; background-size: cover; background-position: center; background-color: #0a0907; }
+  .pk-grail-meta { padding: 12px 14px; background: linear-gradient(180deg, transparent, rgba(212,175,55,.08)); }
+  .pk-grail-price { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #d4af37; line-height: 1; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  .pk-grail-title { font-size: 11px; line-height: 1.4; color: #c9c2a7; margin-top: 4px; min-height: 30px; }
+
+  /* Hero strip — top 6 hottest deals */
   .pk-hero { background: linear-gradient(180deg, rgba(255,204,0,.06), transparent); border: 1px solid rgba(255,204,0,.15); border-radius: var(--r-md); padding: 18px; margin: 18px 0 24px; }
   .pk-hero-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
   .pk-hero-head h2 { margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #ffcc00; letter-spacing: .03em; }
@@ -420,30 +487,45 @@ def render_report(plan: dict) -> Path:
   .pk-chk { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; cursor: pointer; }
   .pk-count { margin-left: auto; color: var(--text-muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
 
-  /* Per-bucket */
-  .pk-bucket { margin: 28px 0; }
-  .pk-bucket-head { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-  .pk-bucket-head h3 { margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: .02em; }
-  .pk-tag { font-size: 10px; color: #ffcc00; background: rgba(255,204,0,.1); border: 1px solid rgba(255,204,0,.3); border-radius: 999px; padding: 2px 8px; margin-left: 8px; letter-spacing: .1em; }
-  .pk-blurb { color: var(--text-muted); font-size: 13px; margin: 4px 0 4px; }
-  .pk-stats { color: var(--text-muted); font-size: 12px; }
-  .pk-stats b { color: var(--success); font-weight: 700; }
+  /* Per-bucket header — stats bar to the right */
+  .pk-bucket { margin: 36px 0; }
+  .pk-bucket-head { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .pk-bucket-title h3 { margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .02em; }
+  .pk-tag { font-size: 10px; border-radius: 999px; padding: 3px 9px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }
+  .pk-tag-vintage       { color: #c98a4d; background: rgba(201,138,77,.12);  border: 1px solid rgba(201,138,77,.35); }
+  .pk-tag-promo         { color: #e07b6f; background: rgba(224,123,111,.12); border: 1px solid rgba(224,123,111,.35); }
+  .pk-tag-tournament    { color: #d4af37; background: rgba(212,175,55,.12);  border: 1px solid rgba(212,175,55,.4); }
+  .pk-tag-international { color: #ff6b6b; background: rgba(255,107,107,.1);  border: 1px solid rgba(255,107,107,.35); }
+  .pk-tag-modern        { color: #ffcc00; background: rgba(255,204,0,.1);    border: 1px solid rgba(255,204,0,.3); }
+  .pk-tag-sealed        { color: #7fc77a; background: rgba(127,199,122,.12); border: 1px solid rgba(127,199,122,.35); }
+  .pk-tag-graded        { color: #6cb0ff; background: rgba(108,176,255,.12); border: 1px solid rgba(108,176,255,.35); }
+  .pk-blurb { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; max-width: 60ch; }
 
-  /* Grid + cards */
-  .pk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-  .pk-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
-  .pk-card:hover { transform: translateY(-2px); border-color: #ffcc00; box-shadow: 0 6px 20px rgba(255,204,0,.18); }
+  .pk-bucket-stats { display: grid; grid-template-columns: repeat(4, auto); gap: 14px; }
+  .pk-stat { text-align: center; min-width: 56px; }
+  .pk-stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); line-height: 1; }
+  .pk-stat-l { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
+
+  /* Bigger card grid (was 200px → 220px) + Pokemon-card aspect ratio */
+  .pk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+  .pk-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; position: relative; }
+  .pk-card:hover { transform: translateY(-3px) scale(1.025); border-color: #ffcc00; box-shadow: 0 10px 28px rgba(255,204,0,.22); z-index: 2; }
   .pk-card.is-deal { border-left: 3px solid var(--success); }
-  .pk-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
+  .pk-card.is-deal::after { content: "DEAL"; position: absolute; top: 8px; right: 8px; background: var(--success); color: #0a0a0a; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 7px; border-radius: 4px; z-index: 2; }
+  .pk-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); transition: transform .25s ease; }
+  .pk-card:hover .pk-img { transform: scale(1.05); }
   .pk-meta { padding: 10px 12px; }
   .pk-price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .pk-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #ffcc00; }
+  .pk-price { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ffcc00; }
   .pk-disc { background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
   .pk-title { font-size: 12px; line-height: 1.4; color: var(--text); min-height: 32px; }
   .pk-buying { font-size: 10px; color: var(--text-muted); margin-top: 6px; letter-spacing: .04em; }
   @media (max-width: 640px) {
     .pk-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
     .pk-hero-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    .pk-grail-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .pk-bucket-head { grid-template-columns: 1fr; }
+    .pk-bucket-stats { grid-template-columns: repeat(4, 1fr); width: 100%; }
     .pk-filters { position: static; }
   }
 </style>
