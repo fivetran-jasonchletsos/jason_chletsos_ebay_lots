@@ -27,7 +27,7 @@ import base64
 import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from statistics import median
 
@@ -565,10 +565,17 @@ def list_campaigns(token: str) -> list[dict]:
 
 
 def create_campaign(token: str, cfg_default: dict) -> dict:
-    """POST /sell/marketing/v1/ad_campaign — minimal bootstrap."""
-    start = datetime.now(timezone.utc)
-    end   = start.replace(microsecond=0)
-    end   = end.replace(year=end.year + (1 if end.month + 1 > 12 else 0))  # +1 month-ish
+    """POST /sell/marketing/v1/ad_campaign — minimal bootstrap.
+
+    Two gotchas eBay docs hide:
+      1. endDate must be strictly AFTER startDate (the old +month-via-replace
+         arithmetic produced end == start → HTTP 400 errorId 35024).
+      2. CPS funding model REJECTS a `budget` block (HTTP 409 errorId 36156).
+         Only include budget for fundingModels that take one (none today).
+    """
+    start = datetime.now(timezone.utc).replace(microsecond=0)
+    days  = int(cfg_default.get("duration_days", 30))
+    end   = start + timedelta(days=days)
     body = {
         "campaignName":     cfg_default.get("name", "Auto-Optimized"),
         "marketplaceId":    cfg_default.get("marketplace", "EBAY_US"),
@@ -577,13 +584,6 @@ def create_campaign(token: str, cfg_default: dict) -> dict:
         "fundingStrategy": {
             "fundingModel":          cfg_default.get("funding_model", "COST_PER_SALE"),
             "bidPercentage":         "8.0",
-        },
-        "budget": {
-            "amount": {
-                "value":    f"{cfg_default.get('daily_budget', 10.00):.2f}",
-                "currency": "USD",
-            },
-            "budgetType": "DAILY",
         },
     }
     r = requests.post(
@@ -624,8 +624,9 @@ def bulk_set_bids(token: str, campaign_id: str,
                 for d in chunk
             ],
         }
+        # Correct endpoint name (the docs example renamed; old name 404s).
         url = (f"{EBAY_MARKETING_BASE}/ad_campaign/{campaign_id}"
-               f"/bulk_create_listings_by_inventory_reference")
+               f"/bulk_create_ads_by_listing_id")
         r = requests.post(url, headers=_marketing_headers(token), json=body, timeout=60)
         ok = r.status_code in (200, 201, 207)
         try:
