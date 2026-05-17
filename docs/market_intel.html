@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,19 +1476,21 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -1957,7 +2050,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <div class="stat-card"><div class="num">5</div><div class="lbl">Market Segments Tracked</div></div>
-      <div class="stat-card"><div class="num">2192</div><div class="lbl">Active Comps Across Market</div></div>
+      <div class="stat-card"><div class="num">2183</div><div class="lbl">Active Comps Across Market</div></div>
       <div class="stat-card"><div class="num">5</div><div class="lbl">Categories Scored</div></div>
       <div class="stat-card"><div class="num">1</div><div class="lbl">Greenfield Opportunities</div></div>
     </div>
@@ -2001,14 +2094,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/ehcAAeSwuqdp4re9/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-81%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">2024 UD MARVEL MASTERPIECES '92 PLATINUM #2 JOHNNY BLAZE PSA 10</div>
-                  <div class="mi-deal-price">$28.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$149.99</span></div>
-                </div>
-              </a>
-              <a href="https://www.ebay.com/itm/318308816410?_skw=marvel+metal+psa+10&hash=item4a1caf161a:g:fhUAAOSwiith8t~l" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/fhUAAOSwiith8t~l/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-80%</div></div>
-                <div class="mi-deal-meta">
-                  <div class="mi-deal-title">1995 Marvel Metal #22 Hawkeye PSA 10 💎 Avengers Graded 10 Gem Mi</div>
-                  <div class="mi-deal-price">$25.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$133.20</span></div>
+                  <div class="mi-deal-price">$28.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$149.95</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/327003115196?_skw=deadpool+psa+10&hash=item4c22e78ebc:g:KVIAAeSwJFVpkh0k" target="_blank" rel="noopener" class="mi-deal-tile">
@@ -2031,6 +2117,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <div class="mi-deal-title">1991 COMIC IMAGES X-MEN #35 DANGER ROOM POP 3 PSA 10</div>
                   <div class="mi-deal-price">$19.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$99.99</span></div>
                 </div>
+              </a>
+              <a href="https://www.ebay.com/itm/318308816410?_skw=marvel+metal+psa+10&hash=item4a1caf161a:g:fhUAAOSwiith8t~l" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/fhUAAOSwiith8t~l/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-80%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">1995 Marvel Metal #22 Hawkeye PSA 10 💎 Avengers Graded 10 Gem Mi</div>
+                  <div class="mi-deal-price">$25.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$129.99</span></div>
+                </div>
               </a></div>
               <div class="mi-query-row">
                 <span class="mi-query-lbl">Source queries:</span> <a href="https://www.ebay.com/sch/i.html?_nkw=wolverine+psa+10&_sop=15" target="_blank" rel="noopener" class="mi-query-chip">wolverine psa 10</a><a href="https://www.ebay.com/sch/i.html?_nkw=weapon+x+psa+10&_sop=15" target="_blank" rel="noopener" class="mi-query-chip">weapon x psa 10</a><a href="https://www.ebay.com/sch/i.html?_nkw=elektra+psa+10&_sop=15" target="_blank" rel="noopener" class="mi-query-chip">elektra psa 10</a><a href="https://www.ebay.com/sch/i.html?_nkw=spider-man+psa+10&_sop=15" target="_blank" rel="noopener" class="mi-query-chip">spider-man psa 10</a><a href="https://www.ebay.com/sch/i.html?_nkw=punisher+psa+10&_sop=15" target="_blank" rel="noopener" class="mi-query-chip">punisher psa 10</a><a href="https://www.ebay.com/sch/i.html?_nkw=deadpool+psa+10&_sop=15" target="_blank" rel="noopener" class="mi-query-chip">deadpool psa 10</a>
@@ -2043,9 +2136,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <b>Basketball Singles</b>
             <span class="mi-verdict">Balanced — you have 5 listings, median $250</span>
           </td>
-          <td><span class="mi-score">1462.4</span></td>
+          <td><span class="mi-score">1459.7</span></td>
           <td>$250</td>
-          <td>203</td>
+          <td>201</td>
           <td>5</td>
           <td>
             <span class="mi-action maintain">Maintain</span>
@@ -2058,7 +2151,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="mi-detail-head">
                 <div class="mi-detail-info">
                   <div class="mi-detail-title">What's actually selling in <b>Basketball Singles</b></div>
-                  <div class="mi-detail-sub">5 of yours · 2 sold in the past · 203 active competitor listings · median $250</div>
+                  <div class="mi-detail-sub">5 of yours · 2 sold in the past · 201 active competitor listings · median $250</div>
                 </div>
                 <div class="mi-detail-actions">
                   <a href="https://www.ebay.com/sch/i.html?_nkw=victor+wembanyama+prizm+rookie&_sop=15" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 14px;font-size:11px;">Search on eBay ↗</a>
@@ -2066,6 +2159,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 </div>
               </div>
               <div class="mi-deal-grid">
+              <a href="https://www.ebay.com/itm/178141698351?_skw=victor+wembanyama+prizm+rookie&hash=item297a12992f:g:zmwAAeSwQdhqBQMp" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/zmwAAeSwQdhqBQMp/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-87%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">2023-24 Nba Hoops Premium Stock Victor Wembanyama #282 Rising St</div>
+                  <div class="mi-deal-price">$30.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$225.00</span></div>
+                </div>
+              </a>
+              <a href="https://www.ebay.com/itm/267671902418?_skw=victor+wembanyama+prizm+rookie&hash=item3e527d18d2:g:SmYAAeSwJVVqCRVG" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/SmYAAeSwJVVqCRVG/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-86%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">Panini 2023-24 Prizm Draft Picks Victor Wembanyama Rookie Green </div>
+                  <div class="mi-deal-price">$31.45 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$225.00</span></div>
+                </div>
+              </a>
               <a href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH" target="_blank" rel="noopener" class="mi-deal-tile">
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/n3YAAeSwveRn3OlH/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-86%</div></div>
                 <div class="mi-deal-meta">
@@ -2073,32 +2180,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <div class="mi-deal-price">$35.09 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$249.99</span></div>
                 </div>
               </a>
-              <a href="https://www.ebay.com/itm/178141698351?_skw=victor+wembanyama+prizm+rookie&hash=item297a12992f:g:zmwAAeSwQdhqBQMp" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/zmwAAeSwQdhqBQMp/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-85%</div></div>
+              <a href="https://www.ebay.com/itm/127863228824?_skw=victor+wembanyama+prizm+rookie&hash=item1dc53e0998:g:CSQAAeSwYOtqBMEW" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/CSQAAeSwYOtqBMEW/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-86%</div></div>
                 <div class="mi-deal-meta">
-                  <div class="mi-deal-title">2023-24 Nba Hoops Premium Stock Victor Wembanyama #282 Rising St</div>
-                  <div class="mi-deal-price">$30.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$205.00</span></div>
+                  <div class="mi-deal-title">2024-25 Panini Prizm Draft Picks - Victor Wembanyama #99 Green P</div>
+                  <div class="mi-deal-price">$32.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$225.00</span></div>
                 </div>
               </a>
-              <a href="https://www.ebay.com/itm/267671902418?_skw=victor+wembanyama+prizm+rookie&hash=item3e527d18d2:g:SmYAAeSwJVVqCRVG" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/SmYAAeSwJVVqCRVG/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-85%</div></div>
+              <a href="https://www.ebay.com/itm/800030258245?_skw=victor+wembanyama+prizm+rookie&hash=itemba4584f445:g:GA8AAeSw~F1qCYWZ" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/GA8AAeSw~F1qCYWZ/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-84%</div></div>
                 <div class="mi-deal-meta">
-                  <div class="mi-deal-title">Panini 2023-24 Prizm Draft Picks Victor Wembanyama Rookie Green </div>
-                  <div class="mi-deal-price">$31.45 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$205.00</span></div>
-                </div>
-              </a>
-              <a href="https://www.ebay.com/itm/317579018110?_skw=luka+doncic+prizm+rookie&hash=item49f12f3f7e:g:4Y0AAeSw1L5pI7nA&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGaPTGSNKeSIymui7qiZ2tIvchejGh1%2FaRtk8MEDKVtj4DmaL%2FBpMiS2%2FW5sSZR7BkXTjE%2FDDV4nkU8WMzDpcbjh5rUpgEWkRfLvs4CrneVz3jdsRYY2xkOeMFBYpYstswzvOBBMgiOcCrqibvASDiZxfGdHk7g%2FDMlxCINo1CyUbBERGZMP22OP86wvakMTIQQ947IQWZ8G3ChHIaAeu9AeqKymtYRMhyFICaAER4L3rkn49t%2BW5G9kcaixd53wuJdo4F%2Fk3m8Gzv6TI0xkVMt22s93eO4Fvlsy1Zlsn7GjgA%3D%3D" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/4Y0AAeSw1L5pI7nA/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-84%</div></div>
-                <div class="mi-deal-meta">
-                  <div class="mi-deal-title">2023 NBA HOOPS Premium Stock Luka Doncic Anti Gravity Scope /88</div>
-                  <div class="mi-deal-price">$40.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$249.99</span></div>
-                </div>
-              </a>
-              <a href="https://www.ebay.com/itm/388005964539?_skw=luka+doncic+prizm+rookie&hash=item5a56f52afb:g:XpgAAeSw6L9nwAl1&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGaAQFJk2KL738BB66l57b5iHsr8lyzVfRQxvmnxkgkPsCEZ1n4tGSayli9%2FCWfAIrX77smGZCbLImMyyd8K6NkYEF0msf5%2ByGt15XhSUOh32NgCGWCCZa8wKGABcd2gqParr7CcjoLPnz5Q4k8u2JDAKpLmuiHCMuiAhrLo9EQUQNuinR2tvqyevWhqcSfqE7gSJu6Snuie15gECHkwAGEb3dYzocLCpP5YLnHMAXPKLrx%2FiIJhS%2BabvWMrNom2WGl8iQ%2FulLovCsWodBSy36BTVdZeQ3Mh%2BUDJziUSkcRa%2Fw%3D%3D" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/XpgAAeSw6L9nwAl1/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-84%</div></div>
-                <div class="mi-deal-meta">
-                  <div class="mi-deal-title">Luka Doncic RARE CRACKED ICE REFRACTOR INVESTMENT CARD PANINI MA</div>
-                  <div class="mi-deal-price">$40.49 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$249.99</span></div>
+                  <div class="mi-deal-title">2023-24 Panini Select VICTOR WEMBANYAMA Rookie Blue Prizm #82 SP</div>
+                  <div class="mi-deal-price">$34.79 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$225.00</span></div>
                 </div>
               </a></div>
               <div class="mi-query-row">
@@ -2110,11 +2203,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="mi-row" data-idx="2" onclick="toggleMiRow(this)">
           <td>
             <b>Pokemon</b>
-            <span class="mi-verdict">Light inventory (1) vs market depth (290 comps at $45 median)</span>
+            <span class="mi-verdict">Light inventory (1) vs market depth (285 comps at $44 median)</span>
           </td>
-          <td><span class="mi-score">482.4</span></td>
-          <td>$45</td>
-          <td>290</td>
+          <td><span class="mi-score">475.7</span></td>
+          <td>$44</td>
+          <td>285</td>
           <td>1</td>
           <td>
             <span class="mi-action add-inventory">Add inventory</span>
@@ -2127,7 +2220,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="mi-detail-head">
                 <div class="mi-detail-info">
                   <div class="mi-detail-title">What's actually selling in <b>Pokemon</b></div>
-                  <div class="mi-detail-sub">1 of yours · 7 sold in the past · 290 active competitor listings · median $45</div>
+                  <div class="mi-detail-sub">1 of yours · 7 sold in the past · 285 active competitor listings · median $44</div>
                 </div>
                 <div class="mi-detail-actions">
                   <a href="https://www.ebay.com/sch/i.html?_nkw=charizard+holo+psa&_sop=15" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 14px;font-size:11px;">Search on eBay ↗</a>
@@ -2136,38 +2229,38 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               </div>
               <div class="mi-deal-grid">
               <a href="https://www.ebay.com/itm/257509285529?_skw=charizard+holo+psa&hash=item3bf4bfde99:g:ascAAeSw3UtqCIvl" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/ascAAeSw3UtqCIvl/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-75%</div></div>
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/ascAAeSw3UtqCIvl/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-70%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">Pokemon 2025 Charizard UPC Set Mega Charizard #23 PSA 8 & Orioco</div>
-                  <div class="mi-deal-price">$50.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$199.00</span></div>
+                  <div class="mi-deal-price">$50.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$166.99</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/336581938072?_skw=charizard+holo+psa&hash=item4e5dd8cb98:g:T70AAeSwZZBqBI-K" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/T70AAeSwZZBqBI-K/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-73%</div></div>
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/T70AAeSwZZBqBI-K/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-68%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">Pokemon 2025 Mega Charizard X ex 023 Ultra-Premium Collection PS</div>
-                  <div class="mi-deal-price">$53.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$199.00</span></div>
+                  <div class="mi-deal-price">$53.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$166.99</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/358562696279?_skw=charizard+holo+psa&hash=item537c008c57:g:LGQAAeSwNylqCK9g" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/LGQAAeSwNylqCK9g/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-70%</div></div>
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/LGQAAeSwNylqCK9g/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-64%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">Pokémon TCG Charizard X Ex 023 Psa 9</div>
-                  <div class="mi-deal-price">$60.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$199.00</span></div>
+                  <div class="mi-deal-price">$60.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$166.99</span></div>
+                </div>
+              </a>
+              <a href="https://www.ebay.com/itm/198362091600?_skw=charizard+holo+psa&hash=item2e2f4d5050:g:8h4AAeSwXbZqCf1u&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGZO0H9qNJMM%2BCvKVza2y%2BZcltD31z6wPP82zscOS0it%2F4hb2JZmr2zCUxp9Q5k3UJoNJmu5VuP5oWyhFriYPhmjv%2BwRZeKd0DboTosVtNfYIOhQPs4qoeSHp1eL%2FfyKt5lSIZv4RZYY4KxbkfIVrE7XKnwArS3bTr7M0ZWikGQF2pY89hBI96eWFX9mXj%2F4AmRvxIMLIw7o%2F0ZEWmtJEKWgG%2BpZPUc9hAb5Ktc8jo7pc0zssxRmXu1oX9nbfrvbHdR%2FxgTOJA5AZ2BVzXSe9ClbHcx2NLVzeYPtmyeflvrUBQ%3D%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/8h4AAeSwXbZqCf1u/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-64%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">Pokémon TCG 2016 Charizard Evolutions 011/108 Reverse Holo Rare</div>
+                  <div class="mi-deal-price">$60.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$166.99</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/358562699597?_skw=charizard+holo+psa&hash=item537c00994d:g:ec0AAeSwg6BqCK-M" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/ec0AAeSwg6BqCK-M/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-70%</div></div>
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/ec0AAeSwg6BqCK-M/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-64%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">2025 Pokemon MEP EN UPC Promo #023 Mega Charizard X ex PSA 9 MIN</div>
-                  <div class="mi-deal-price">$60.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$199.00</span></div>
-                </div>
-              </a>
-              <a href="https://www.ebay.com/itm/406929158728?_skw=charizard+holo+psa&hash=item5ebede3248:g:~IAAAeSws11qB1lv" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/~IAAAeSws11qB1lv/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-65%</div></div>
-                <div class="mi-deal-meta">
-                  <div class="mi-deal-title">Charizard VMAX SWSH 261 Ultra Premium Collection PSA 9 MINT</div>
-                  <div class="mi-deal-price">$70.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$199.00</span></div>
+                  <div class="mi-deal-price">$60.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$166.99</span></div>
                 </div>
               </a></div>
               <div class="mi-query-row">
@@ -2181,9 +2274,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <b>Baseball Singles</b>
             <span class="mi-verdict">Balanced — you have 3 listings, median $80</span>
           </td>
-          <td><span class="mi-score">444.2</span></td>
+          <td><span class="mi-score">443.6</span></td>
           <td>$80</td>
-          <td>257</td>
+          <td>255</td>
           <td>3</td>
           <td>
             <span class="mi-action maintain">Maintain</span>
@@ -2196,7 +2289,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="mi-detail-head">
                 <div class="mi-detail-info">
                   <div class="mi-detail-title">What's actually selling in <b>Baseball Singles</b></div>
-                  <div class="mi-detail-sub">3 of yours · 0 sold in the past · 257 active competitor listings · median $80</div>
+                  <div class="mi-detail-sub">3 of yours · 0 sold in the past · 255 active competitor listings · median $80</div>
                 </div>
                 <div class="mi-detail-actions">
                   <a href="https://www.ebay.com/sch/i.html?_nkw=paul+skenes+rookie+bowman+chrome&_sop=15" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 14px;font-size:11px;">Search on eBay ↗</a>
@@ -2204,39 +2297,39 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 </div>
               </div>
               <div class="mi-deal-grid">
-              <a href="https://www.ebay.com/itm/397490337592?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5c8c453738:g:1~gAAeSwNEhpZgfR&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZhKk%2Bl6WASCt8qxV6Dxp1%2BHhtWXqmr%2BuA4FjMddAaFWpKrf9%2FsPzVLcEbJt7gtVLkiLRurJ1jwEFKSyREQI4sUQgfwwN2iQv1TMLSuWhLrpsyUyH9whqC4HSjXjIN1zHMuRkSK0q2fN4e20PBJKWwLtW%2BrECoij69NOXFlEu6SLDePywSxaty%2FeOdSPGaDdbkyCB1UGj1CIDUF9EYOi8%2FVGLH9A3sKn3SEFyMn9oocLIwFnu9Cz7PRDz9GOxyry8%2BAQBsyBMR%2F2YFhdysFw0dNJ5173mWZHQEODpjpog%2FqycnC8FjAXegYxCsOxlFwNdg%3D" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/1~gAAeSwNEhpZgfR/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-91%</div></div>
+              <a href="https://www.ebay.com/itm/297707633743?_skw=shohei+ohtani+rookie+topps+chrome&hash=item4550c1fc4f:g:BWUAAeSwpd9o-vmT&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZBgnxQpZEtLdMD4rmm12tskgC%2FR%2BkhFlUzU6tNwJB8lYFjLS%2F%2BlolpaEQ1hO5Q4y8lQ5IoJUbDTDr2%2BbJBOOSL%2BY5zNaSeq8PG8O7XaSSmyn0eWn5fD9cxJrwfn%2BwpqMYjtyBx6A2qHPnmAjydVR7gzyRl4eSCxejLTPkcguR0KAm08DLjWogxLhNmyRLxZjV4JW9NNnAiQ3uTv%2F3KRu8bo1XPXaUZBdInC24ViuywcuF30OBww8vLv%2B%2FiELU4rqB8mo1IiOPnA1BIh3%2BvUfSht6a1dFlqS4LFvz1bhWln%2Br7u6Naa4gn9FOg2mthm5VY%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/BWUAAeSwpd9o-vmT/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-92%</div></div>
                 <div class="mi-deal-meta">
-                  <div class="mi-deal-title">Shohei Ohtani RARE REFRACTOR INVESTMENT CARD TOPPS CHROME ROOKIE</div>
-                  <div class="mi-deal-price">$32.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$349.99</span></div>
+                  <div class="mi-deal-title">Shohei Ohtani RARE BLUE CHROME INVESTMENT CARD TOPPS  DODGERS  M</div>
+                  <div class="mi-deal-price">$27.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$335.00</span></div>
                 </div>
               </a>
-              <a href="https://www.ebay.com/itm/388159661907?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5a601e6753:g:uRMAAeSwhcln5kbz&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZlW5qCVMwW6BMT%2FdGxNPWmPQ3ZKXfk6boLe4OYUZ3RuDcZIXWMi7QdBfvVhgovP1BHs0f1ZGw5RZcjvRF%2Fw1R0VTSn%2B7t1WzE7buWEU%2BYbgWgiVsgUCh6EMNQYpiQ4hsneNOR5OQ1N2t4G458tTSF8hHtfa1ioyq9LlaJVIo5r9A5p3Za%2BHhdG3cIKY8FZpy7GP0TZvzjSHfTPyNoUevrSwo7udGkrMRp3hZXor2E5kl59%2BFaYcoSK0GS5btZupDtTTDVItsyJ02LPqhMXjUJVrgshAQPdEF1M%2FUEY%2B4DTqBwywy2XOR%2FnZx0GXCjm4f0%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+              <a href="https://www.ebay.com/itm/397490337592?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5c8c453738:g:1~gAAeSwNEhpZgfR&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZhKk%2Bl6WASCt8qxV6Dxp1%2BHhtWXqmr%2BuA4FjMddAaFWpKrf9%2FsPzVLcEbJt7gtVLkiLRurJ1jwEFKSyREQI4sUQgfwwN2iQv1TMLSuWhLrpsyUyH9whqC4HSjXjIN1zHOVB9fRrw6OFFfCAqX9QF%2BjrEyxiO7dgU0ws8s1fVsiRwlmMxNUbyfVF8k7ftOj0j4qN%2FI4OrOaXtUJ7BFuJ2RHS4tGqJN26BxGloEieZ6hQOIpdy%2F4FZFgBVYg806Jc5TdJA9pYdk9WMq1vrZwSLnm8ssGk%2BRhg2f3EgM7Nd1Kz%2Bz4AWB7VRVK5uWcocxq%2Fmc%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/1~gAAeSwNEhpZgfR/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-90%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">Shohei Ohtani RARE REFRACTOR INVESTMENT CARD TOPPS CHROME ROOKIE</div>
+                  <div class="mi-deal-price">$32.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$335.00</span></div>
+                </div>
+              </a>
+              <a href="https://www.ebay.com/itm/297498608866?_skw=shohei+ohtani+rookie+topps+chrome&hash=item45444c84e2:g:dZcAAeSwzL9ohXYM&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGaJyfvfQ8k9JsiAq4Z0HL2hZ5MraNro9VrcTW%2FRwfmcy3jOvjnVzmw6bf3TDmdxXKACsGd5u7UKlJ6EopxebT1SVWGvUG%2B9oxVZE0VnWueJJlxHRdI3sC%2F865fOnFIM%2FMDVO3jPJZpal8ondHeZmqm1aGwQOxK7Ga5V2msIOziVyNaj2GLRArNmZCMKK3p6egiIR1er1PQikSiblDNlVAMhun%2FYL134C6KdMuE6OopwuTPdwFVqI8rTH6ohPcs1MilSpCW0RkMex9cIiMJNBMU%2F2vdO5UywZJ9SgcAt%2BWk7OfheTW9a2vZ9ARV3JIgUGns%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/dZcAAeSwzL9ohXYM/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-90%</div></div>
+                <div class="mi-deal-meta">
+                  <div class="mi-deal-title">Shohei Ohtani RARE REFRACTOR INVESTMENT CARD TOPPS CHROME DODGER</div>
+                  <div class="mi-deal-price">$34.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$335.00</span></div>
+                </div>
+              </a>
+              <a href="https://www.ebay.com/itm/388159661907?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5a601e6753:g:uRMAAeSwhcln5kbz&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZlW5qCVMwW6BMT%2FdGxNPWmPQ3ZKXfk6boLe4OYUZ3RuDcZIXWMi7QdBfvVhgovP1BHs0f1ZGw5RZcjvRF%2Fw1R0VTSn%2B7t1WzE7buWEU%2BYbgWgiVsgUCh6EMNQYpiQ4hskFI%2FNJrujdZpwV34ZVQC%2Bf1S1aS2UTxRUnVwndogD7m83ifMbQSVetF9ZxaTWabgrKi%2FIJzJgCcjEWKuHX%2BYRawpZdrwkBggoPhRih43MR21Q1EAzSeUTyuSWpZoSCST68fJ7DnhgEu2ozhZKbmTQKAQVsuCDO8CpfJjeaxS8J9gzalqSHqPXhu%2FcQ40QhH4c%3D" target="_blank" rel="noopener" class="mi-deal-tile">
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/uRMAAeSwhcln5kbz/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-89%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">Shohei Ohtani RARE REFRACTOR INVESTMENT CARD SSP TOPPS CHROME DO</div>
-                  <div class="mi-deal-price">$37.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$349.99</span></div>
+                  <div class="mi-deal-price">$37.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$335.00</span></div>
                 </div>
               </a>
-              <a href="https://www.ebay.com/itm/389922149741?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5ac92bd56d:g:o~kAAeSwFCdp6EtF&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZA%2FpFvpEZ81u%2B4tdZK2xZ9MHyEzT2S4gZdXy9kKheOdg8k%2FRb3JIePwtjHMTXZDJ57MVxsU7scixMqKb2xWfBabxX%2Fwpa3kWPBbr2VGadsj8JWyI%2B99iTWgOMvLk9EbndTPnMRIUqDSj8fKHI2VcNll%2FTnW5NycubYcnquWBzIuHV9bFPrjaGZ4ifaHNd4PkVrLXistnnfHTEEhvxKD%2BZXNYdeuL2hFgvMnEXmiixOyYQ0TsRgwo9mKA%2FUTl8VfO7FlNQKZKtldqIvQ6IvjO0e%2BiaBY53RVVneGrxR%2Ftlftlwn4Wi8CskpckB74RDMPJM%3D" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/o~kAAeSwFCdp6EtF/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-89%</div></div>
+              <a href="https://www.ebay.com/itm/389922149741?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5ac92bd56d:g:o~kAAeSwFCdp6EtF&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZA%2FpFvpEZ81u%2B4tdZK2xZ9MHyEzT2S4gZdXy9kKheOdg8k%2FRb3JIePwtjHMTXZDJ57MVxsU7scixMqKb2xWfBabxX%2Fwpa3kWPBbr2VGadsj8JWyI%2B99iTWgOMvLk9EbncTXWZqzZodLi%2Bbfdj4Qh9HRSnoVmmAkrRV%2FrKXyhSqqaVgFemX73l5D15r%2BerhOk7Y5um3OGTlIQty%2FVbwspeQYAcvvKyDP61aRb%2FL78kWDPdgRMaGmGB%2BZ83i5YatoRXnMGjJFU5sgcyalTSOKplxY3oxFBWtnF81%2FtN4pmjJeM9hmtJp2Wskdb5l%2FUIFdN4%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/o~kAAeSwFCdp6EtF/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-88%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">Shohei Ohtani RARE VARIANT REFRACTOR INVESTMENT CARD TOPPS CHROM</div>
-                  <div class="mi-deal-price">$39.59 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$349.99</span></div>
-                </div>
-              </a>
-              <a href="https://www.ebay.com/itm/206271036719?_skw=shohei+ohtani+rookie+topps+chrome&hash=item3006b63d2f:g:7ukAAeSwHQBqBByL" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/7ukAAeSwHQBqBByL/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-89%</div></div>
-                <div class="mi-deal-meta">
-                  <div class="mi-deal-title">2019 Topps Chrome - Shohei Ohtani #1 Hitting Rookie Cup 2nd Year</div>
-                  <div class="mi-deal-price">$40.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$349.99</span></div>
-                </div>
-              </a>
-              <a href="https://www.ebay.com/itm/389969526865?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5acbfec051:g:j2gAAeSwy6tp9z7r" target="_blank" rel="noopener" class="mi-deal-tile">
-                <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/j2gAAeSwy6tp9z7r/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-89%</div></div>
-                <div class="mi-deal-meta">
-                  <div class="mi-deal-title">2019 Topps Chrome Shohei Ohtani Rookie Cup #1 READ</div>
-                  <div class="mi-deal-price">$39.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$349.99</span></div>
+                  <div class="mi-deal-price">$39.59 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$335.00</span></div>
                 </div>
               </a></div>
               <div class="mi-query-row">
@@ -2250,7 +2343,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <b>Football Singles</b>
             <span class="mi-verdict">Heavy (87) — wait for market to absorb before sourcing more</span>
           </td>
-          <td><span class="mi-score">284.7</span></td>
+          <td><span class="mi-score">284.8</span></td>
           <td>$50</td>
           <td>559</td>
           <td>87</td>
@@ -2277,35 +2370,35 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/hRYAAeSwz9pp4rte/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-90%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">2017 Panini - Knight School Patrick Mahomes II #KNS-PM (RC)</div>
-                  <div class="mi-deal-price">$20.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$201.61</span></div>
+                  <div class="mi-deal-price">$20.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$200.00</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/187941589043?_skw=patrick+mahomes+rookie+card+prizm&hash=item2bc2311033:g:hQsAAeSwCqBpDWT5" target="_blank" rel="noopener" class="mi-deal-tile">
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/hQsAAeSwCqBpDWT5/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-90%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">PATRICK MAHOMES Panini GREEN PRIZM REFRACTOR College Rookie SP P</div>
-                  <div class="mi-deal-price">$20.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$201.61</span></div>
+                  <div class="mi-deal-price">$20.00 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$200.00</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/327071831062?_skw=patrick+mahomes+rookie+card+prizm&hash=item4c27001416:g:h84AAeSwqP5pxsB4" target="_blank" rel="noopener" class="mi-deal-tile">
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/h84AAeSwqP5pxsB4/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-89%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">Patrick Mahomes II 2025 Panini Prizm No Huddle Disco Flashback</div>
-                  <div class="mi-deal-price">$22.50 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$201.61</span></div>
+                  <div class="mi-deal-price">$22.50 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$200.00</span></div>
                 </div>
               </a>
               <a href="https://www.ebay.com/itm/197791319365?_skw=patrick+mahomes+rookie+card+prizm&hash=item2e0d480545:g:BKIAAeSw4o1o1Dz2" target="_blank" rel="noopener" class="mi-deal-tile">
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/BKIAAeSw4o1o1Dz2/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-88%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">2019 Panini Prizm Red White & Blue RWB Patrick Mahomes II #210 C</div>
-                  <div class="mi-deal-price">$24.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$201.61</span></div>
+                  <div class="mi-deal-price">$24.99 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$200.00</span></div>
                 </div>
               </a>
-              <a href="https://www.ebay.com/itm/388800066750?_skw=patrick+mahomes+rookie+card+prizm&hash=item5a864a34be:g:3cQAAOSwwC1lpDqi&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYv%2BsjYnrOi5G4t5phat7HWfV3P%2Bz93cIVdm3xr39uSrlCmE9kgUUSbIbwqDSAjYnVo2L4R1yQJolmB557xEz6ELD5vb%2BvqmJJCv4ivn9Afq%2BkjaiadeRYjyG1Umim5QLMxvrynNhUg59BmwJiOYO2z%2F5UelIz5AoXVaZmP4%2BhFTAcYBpD4Z3LA%2BX9I7EJvDG2uzMEzjwrzXr3It6DBcMbUUA0YgPnCll9r3InWOGw3wBJjC0tZ7oUC7o6TOWSChunnaH82Cki2OId6JIHfefEOkroEeMcigwTsl3jdT98i0srqw%2Fo7bwrdoixIvhk81vw%3D" target="_blank" rel="noopener" class="mi-deal-tile">
+              <a href="https://www.ebay.com/itm/388800066750?_skw=patrick+mahomes+rookie+card+prizm&hash=item5a864a34be:g:3cQAAOSwwC1lpDqi&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYv%2BsjYnrOi5G4t5phat7HWfV3P%2Bz93cIVdm3xr39uSrlCmE9kgUUSbIbwqDSAjYnVo2L4R1yQJolmB557xEz6ELD5vb%2BvqmJJCv4ivn9Afq%2BkjaiadeRYjyG1Umim5QLMUTCtbRX%2BGOfHbXp8dUJmU2AMk7eMRx4Bcd9ihghqBSd9VX9DrReEdlBLA%2FXX8HFXieABUBPLUblnvaaMjb47VJ8bI6bvBW%2B9DaEk4tGNtsm30jPJUn3b0f3uWRahOZmfUyHIR4KlVyOtgfFjfa%2F3rTC17ZxBAu30Kwhx5MhQeVmSOhwKWJHZ9O8Zw50SZx34%3D" target="_blank" rel="noopener" class="mi-deal-tile">
                 <div class="mi-deal-img"><img src="https://i.ebayimg.com/images/g/3cQAAOSwwC1lpDqi/s-l225.jpg" alt="" loading="lazy"><div class="mi-deal-discount">-87%</div></div>
                 <div class="mi-deal-meta">
                   <div class="mi-deal-title">2022 Panini Patrick Mahomes K.C. Chiefs Rookies & Stars Card #47</div>
-                  <div class="mi-deal-price">$25.49 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$201.61</span></div>
+                  <div class="mi-deal-price">$25.49 <span style="color:var(--text-muted);text-decoration:line-through;font-size:11px;">$200.00</span></div>
                 </div>
               </a></div>
               <div class="mi-query-row">
@@ -2327,13 +2420,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="mi-panel">
         <h3>Top 20 trending names</h3>
         <div class="mi-sub">Players/characters appearing most often in current Deal Hunter results</div>
-        <div class="trending-grid"><a href="https://www.ebay.com/sch/i.html?_nkw=GEM+MINT&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;GEM MINT&quot;"><div class="trending-name">GEM MINT</div><div class="trending-meta">61 appearances · avg $92</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Victor+Wembanyama&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Victor Wembanyama&quot;"><div class="trending-name">Victor Wembanyama</div><div class="trending-meta">51 appearances · avg $100</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=MARVEL+UNIVERSE&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;MARVEL UNIVERSE&quot;"><div class="trending-name">MARVEL UNIVERSE</div><div class="trending-meta">41 appearances · avg $84</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=INVESTMENT+CARD&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;INVESTMENT CARD&quot;"><div class="trending-name">INVESTMENT CARD</div><div class="trending-meta">34 appearances · avg $57</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Caleb+Williams&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Caleb Williams&quot;"><div class="trending-name">Caleb Williams</div><div class="trending-meta">33 appearances · avg $34</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Paul+Skenes&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Paul Skenes&quot;"><div class="trending-name">Paul Skenes</div><div class="trending-meta">32 appearances · avg $36</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Elly+Cruz&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Elly Cruz&quot;"><div class="trending-name">Elly Cruz</div><div class="trending-meta">30 appearances · avg $22</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Jayden+Daniels&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Jayden Daniels&quot;"><div class="trending-name">Jayden Daniels</div><div class="trending-meta">29 appearances · avg $34</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Base+Set&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Base Set&quot;"><div class="trending-name">Base Set</div><div class="trending-meta">29 appearances · avg $34</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Mega+Evolution&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Mega Evolution&quot;"><div class="trending-name">Mega Evolution</div><div class="trending-meta">29 appearances · avg $9</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Ja%27Marr+Chase&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Ja'Marr Chase&quot;"><div class="trending-name">Ja'Marr Chase</div><div class="trending-meta">28 appearances · avg $22</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Patrick+Mahomes&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Patrick Mahomes&quot;"><div class="trending-name">Patrick Mahomes</div><div class="trending-meta">26 appearances · avg $57</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Justin+Jefferson&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Justin Jefferson&quot;"><div class="trending-name">Justin Jefferson</div><div class="trending-meta">24 appearances · avg $22</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Evolution+Promo&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Evolution Promo&quot;"><div class="trending-name">Evolution Promo</div><div class="trending-meta">24 appearances · avg $10</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Shohei+Ohtani&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Shohei Ohtani&quot;"><div class="trending-name">Shohei Ohtani</div><div class="trending-meta">23 appearances · avg $134</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Promo+Mega&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Promo Mega&quot;"><div class="trending-name">Promo Mega</div><div class="trending-meta">22 appearances · avg $12</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=RARE+ROOKIE&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;RARE ROOKIE&quot;"><div class="trending-name">RARE ROOKIE</div><div class="trending-meta">18 appearances · avg $52</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=PANINI+PRIZM&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;PANINI PRIZM&quot;"><div class="trending-name">PANINI PRIZM</div><div class="trending-meta">17 appearances · avg $80</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Masterpieces+Platinum&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Masterpieces Platinum&quot;"><div class="trending-name">Masterpieces Platinum</div><div class="trending-meta">15 appearances · avg $73</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=REFRACTOR+INVESTMENT&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;REFRACTOR INVESTMENT&quot;"><div class="trending-name">REFRACTOR INVESTMENT</div><div class="trending-meta">14 appearances · avg $61</div></a></div>
+        <div class="trending-grid"><a href="https://www.ebay.com/sch/i.html?_nkw=GEM+MINT&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;GEM MINT&quot;"><div class="trending-name">GEM MINT</div><div class="trending-meta">64 appearances · avg $94</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Victor+Wembanyama&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Victor Wembanyama&quot;"><div class="trending-name">Victor Wembanyama</div><div class="trending-meta">50 appearances · avg $97</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=MARVEL+UNIVERSE&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;MARVEL UNIVERSE&quot;"><div class="trending-name">MARVEL UNIVERSE</div><div class="trending-meta">41 appearances · avg $84</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Jayden+Daniels&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Jayden Daniels&quot;"><div class="trending-name">Jayden Daniels</div><div class="trending-meta">35 appearances · avg $35</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=INVESTMENT+CARD&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;INVESTMENT CARD&quot;"><div class="trending-name">INVESTMENT CARD</div><div class="trending-meta">33 appearances · avg $54</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Caleb+Williams&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Caleb Williams&quot;"><div class="trending-name">Caleb Williams</div><div class="trending-meta">33 appearances · avg $33</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Elly+Cruz&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Elly Cruz&quot;"><div class="trending-name">Elly Cruz</div><div class="trending-meta">32 appearances · avg $22</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Paul+Skenes&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Paul Skenes&quot;"><div class="trending-name">Paul Skenes</div><div class="trending-meta">31 appearances · avg $39</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Base+Set&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Base Set&quot;"><div class="trending-name">Base Set</div><div class="trending-meta">30 appearances · avg $34</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Mega+Evolution&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Mega Evolution&quot;"><div class="trending-name">Mega Evolution</div><div class="trending-meta">29 appearances · avg $10</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Ja%27Marr+Chase&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Ja'Marr Chase&quot;"><div class="trending-name">Ja'Marr Chase</div><div class="trending-meta">27 appearances · avg $22</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Patrick+Mahomes&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Patrick Mahomes&quot;"><div class="trending-name">Patrick Mahomes</div><div class="trending-meta">26 appearances · avg $57</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Evolution+Promo&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Evolution Promo&quot;"><div class="trending-name">Evolution Promo</div><div class="trending-meta">24 appearances · avg $10</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Justin+Jefferson&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Justin Jefferson&quot;"><div class="trending-name">Justin Jefferson</div><div class="trending-meta">23 appearances · avg $22</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Shohei+Ohtani&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Shohei Ohtani&quot;"><div class="trending-name">Shohei Ohtani</div><div class="trending-meta">23 appearances · avg $123</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Promo+Mega&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Promo Mega&quot;"><div class="trending-name">Promo Mega</div><div class="trending-meta">20 appearances · avg $12</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=PANINI+PRIZM&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;PANINI PRIZM&quot;"><div class="trending-name">PANINI PRIZM</div><div class="trending-meta">19 appearances · avg $79</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=Masterpieces+Platinum&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;Masterpieces Platinum&quot;"><div class="trending-name">Masterpieces Platinum</div><div class="trending-meta">16 appearances · avg $74</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=RARE+ROOKIE&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;RARE ROOKIE&quot;"><div class="trending-name">RARE ROOKIE</div><div class="trending-meta">15 appearances · avg $51</div></a><a href="https://www.ebay.com/sch/i.html?_nkw=REFRACTOR+INVESTMENT&_sop=15" target="_blank" rel="noopener" class="trending-tile" title="Search eBay for &quot;REFRACTOR INVESTMENT&quot;"><div class="trending-name">REFRACTOR INVESTMENT</div><div class="trending-meta">14 appearances · avg $57</div></a></div>
       </div>
     </div>
 
     <div class="mi-grid cols-1">
       <div class="mi-panel">
-        <h3>Category median price · last 28 builds</h3>
+        <h3>Category median price · last 30 builds</h3>
         <div class="mi-sub">Trend line for your top opportunity categories. Useful once a few weeks of builds accumulate.</div>
         <div class="mi-chart-wrap"><canvas id="mi-trend"></canvas></div>
       </div>
@@ -2358,8 +2451,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
       Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.font.family = "'Inter', sans-serif";
-      const histLabels = ['2026-05-11', '2026-05-11', '2026-05-14', '2026-05-14', '2026-05-15', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17'];
-      const histSeries = {'Marvel PSA 10': [145.0, 145.0, 144.99, 149.0, 130.0, 134.4, 143.82, 144.99, 143.82, 143.82, 143.82, 143.82, 143.82, 144.99, 144.99, 144.99, 144.99, 144.99, 144.99, 149.0, 144.99, 149.0, 144.99, 132.0, 144.99, 149.0, 149.0, 149.0], 'Basketball Singles': [230.01, 225.0, 225.0, 225.0, 249.99, 230.0, 229.99, 225.99, 225.99, 225.99, 225.99, 225.99, 249.99, 229.99, 225.99, 225.99, 225.99, 229.99, 229.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99], 'Pokemon': [46.49, 46.49, 44.99, 44.99, 47.32, 47.38, 41.0, 41.0, 40.0, 41.0, 40.0, 41.94, 41.0, 41.94, 41.94, 42.0, 44.5, 42.0, 42.0, 44.5, 44.74, 44.5, 44.5, 44.5, 44.99, 46.49, 44.99, 44.99], 'Baseball Singles': [76.49, 79.99, 84.83, 84.0, 80.0, 90.0, 79.99, 84.83, 82.45, 82.45, 79.99, 84.0, 84.83, 82.45, 80.0, 80.0, 79.99, 80.0, 79.99, 79.99, 80.0, 80.0, 79.99, 79.99, 79.19, 79.99, 80.0, 79.99]};
+      const histLabels = ['2026-05-11', '2026-05-11', '2026-05-14', '2026-05-14', '2026-05-15', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-16', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17', '2026-05-17'];
+      const histSeries = {'Marvel PSA 10': [145.0, 145.0, 144.99, 149.0, 130.0, 134.4, 143.82, 144.99, 143.82, 143.82, 143.82, 143.82, 143.82, 144.99, 144.99, 144.99, 144.99, 144.99, 144.99, 149.0, 144.99, 149.0, 144.99, 132.0, 144.99, 149.0, 149.0, 149.0, 149.0, 149.0], 'Basketball Singles': [230.01, 225.0, 225.0, 225.0, 249.99, 230.0, 229.99, 225.99, 225.99, 225.99, 225.99, 225.99, 249.99, 229.99, 225.99, 225.99, 225.99, 229.99, 229.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99, 249.99], 'Pokemon': [46.49, 46.49, 44.99, 44.99, 47.32, 47.38, 41.0, 41.0, 40.0, 41.0, 40.0, 41.94, 41.0, 41.94, 41.94, 42.0, 44.5, 42.0, 42.0, 44.5, 44.74, 44.5, 44.5, 44.5, 44.99, 46.49, 44.99, 44.99, 44.5, 44.5], 'Baseball Singles': [76.49, 79.99, 84.83, 84.0, 80.0, 90.0, 79.99, 84.83, 82.45, 82.45, 79.99, 84.0, 84.83, 82.45, 80.0, 80.0, 79.99, 80.0, 79.99, 79.99, 80.0, 80.0, 79.99, 79.99, 79.19, 79.99, 80.0, 79.99, 80.0, 80.0]};
       const PALETTE = ['#d4af37','#7fc77a','#6cb0ff','#e0b54a','#e07b6f','#b388e0'];
       if (histLabels.length >= 2 && document.getElementById('mi-trend')) {
         const datasets = Object.entries(histSeries).map(([cat, vals], i) => ({
@@ -2385,7 +2478,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 17:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 18:55 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

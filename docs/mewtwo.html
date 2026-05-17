@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,19 +1476,21 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -1923,9 +2016,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">6</div><div class="pk-l">Categories</div></div>
-      <div class="pk-kpi"><div class="pk-n">69</div><div class="pk-l">Live listings</div></div>
-      <div class="pk-kpi"><div class="pk-n">22</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">13:35</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">74</div><div class="pk-l">Live listings</div></div>
+      <div class="pk-kpi"><div class="pk-n">23</div><div class="pk-l">Deals &ge;25% below median</div></div>
+      <div class="pk-kpi"><div class="pk-n">14:56</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -1996,7 +2089,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/Bx8AAOSw1-5oUKPN/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.00</span>
-            <span class="pk-hero-disc">-69%</span>
+            <span class="pk-hero-disc">-71%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/145272939298?_skw=mewtwo+vmax&amp;hash=item21d2f12322:g:PzIAAOSw-NxjbVza" target="_blank" rel="noopener"
@@ -2004,7 +2097,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/PzIAAOSw-NxjbVza/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.95</span>
-            <span class="pk-hero-disc">-63%</span>
+            <span class="pk-hero-disc">-65%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/394409332066?_skw=mewtwo+vmax&amp;hash=item5bd4a0cd62:g:G4sAAOSw4TZj00ow" target="_blank" rel="noopener"
@@ -2012,15 +2105,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/G4sAAOSw4TZj00ow/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$6.26</span>
-            <span class="pk-hero-disc">-61%</span>
+            <span class="pk-hero-disc">-63%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/146579722585?_skw=mewtwo+gym+heroes&amp;hash=item2220d51159:g:XC0AAeSwqzpoIz4H&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYUxGzP9BYYdNrwkHoE5%2FQFj4B%2FeP20KDSnvncqboAtJp%2Brobt%2FydVfZ%2F2cD%2BELx5wQhJwzkSVagSH4p%2BV1NIYXl3rnJvZSmwZpGA1zjO9aJHc2tCGO%2B%2Fa1VPpoKBcYXgckegEBxsbMaTT2hIC17VObXYNH9%2Be9oOXKqW3dp3XIVDSFwYUS5drJWp2lYZn9a1Y5ArtNu7dq6%2B7%2FZOgC6EGKNDXtNOyNB24fBjJuU%2Ba%2FL4z5pDS%2FoTPLsEh3nVaAqt72ByDq6XueOzquRY%2FeHw9cifdpJcYVPWY%2BJStGb0EN4g%3D%3D" target="_blank" rel="noopener"
-           title="Pokemon Hero Gym Promo Pack Vol.7, Vol.8, Vol.9, Sealed Japanese">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/XC0AAeSwqzpoIz4H/s-l225.jpg');"></div>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/396288530843?_skw=mewtwo+v+full+art&amp;hash=item5c44a3199b:g:BrYAAOSwbIxnzgiu" target="_blank" rel="noopener"
+           title="Pokemon V Cards - Choose Your Card - Ultra Rare, Full Art Holo English NM">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/BrYAAOSwbIxnzgiu/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
-            <span class="pk-hero-price">$11.19</span>
-            <span class="pk-hero-disc">-57%</span>
+            <span class="pk-hero-price">$6.99</span>
+            <span class="pk-hero-disc">-59%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/155067193196?_skw=mewtwo+v+alt+art&amp;hash=item241ab9976c:g:PDoAAeSwl2Rn2OVI" target="_blank" rel="noopener"
@@ -2028,15 +2121,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/PDoAAeSwl2Rn2OVI/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$7.00</span>
-            <span class="pk-hero-disc">-56%</span>
+            <span class="pk-hero-disc">-59%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/257065657455?_skw=mewtwo+vmax&amp;hash=item3bda4ea46f:g:XUUAAeSwEktoneaE&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGaOKHlbxdG7K5y%2B2mcY6njIsVpT5l22iy7i6UbXio9aJgxth5O9Lfzfhnyqg8%2FfQjlUXQW1EWkyKuELkvmMj%2F3rerhXMRpuviEJAgJGnM0s932xSFcinN6Cu1zi3ShHeqzCaujgtWnQnt3LcPixGSl4bJcUfhw6RxxEpKPFHV5XlI3XogHJMrUYXRSIUMwFbfBNXZwMk6eEHPJzAvvqYnI5kiRXn31IbrdFq2e7AhEI6rz4x9mEKn4%2BkcLVghG7LzN1tfSnJxHSNyK3Xpr1Htqc" target="_blank" rel="noopener"
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/257065657455?_skw=mewtwo+vmax&amp;hash=item3bda4ea46f:g:XUUAAeSwEktoneaE&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGaOKHlbxdG7K5y%2B2mcY6njIsVpT5l22iy7i6UbXio9aJgxth5O9Lfzfhnyqg8%2FfQjlUXQW1EWkyKuELkvmMj%2F3rerhXMRpuviEJAgJGnM0s932xSFcinN6Cu1zi3ShHeqxJ999kUAWLyEsD3n%2BbsKWYY8EgRc%2Bvjg1rbPGMBiW2%2BxFv75CuCr6TTDH8X7%2BXnz55rRCFEtBRN6YyjA%2BZH4UuWgipcR31lmbv6LllpZ45LMBQu%2F9vMTQDCiXz5MkVV5K1zpoM4mFVOT%2BhM7qrArQB" target="_blank" rel="noopener"
            title="Shadow Mewtwo Vmax Rainbow Foil Fan Art Display Card, HP880 Lord Of The Shadow💥">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/XUUAAeSwEktoneaE/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$7.99</span>
-            <span class="pk-hero-disc">-50%</span>
+            <span class="pk-hero-disc">-53%</span>
           </div>
         </a></div>
     </section>
@@ -2047,7 +2140,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
-        <option value="Grail Watch">Grail Watch (6)</option><option value="Vintage Holo Mewtwo">Vintage Holo Mewtwo (20)</option><option value="Shining Mewtwo">Shining Mewtwo (1)</option><option value="Mewtwo V / VMAX / VSTAR">Mewtwo V / VMAX / VSTAR (31)</option><option value="Mewtwo ex / SIR">Mewtwo ex / SIR (10)</option><option value="Mewtwo PSA 10">Mewtwo PSA 10 (1)</option>
+        <option value="Grail Watch">Grail Watch (6)</option><option value="Vintage Holo Mewtwo">Vintage Holo Mewtwo (21)</option><option value="Shining Mewtwo">Shining Mewtwo (1)</option><option value="Mewtwo V / VMAX / VSTAR">Mewtwo V / VMAX / VSTAR (35)</option><option value="Mewtwo ex / SIR">Mewtwo ex / SIR (10)</option><option value="Mewtwo PSA 10">Mewtwo PSA 10 (1)</option>
       </select>
       <select id="pk-max">
         <option value="0">Any price</option>
@@ -2075,15 +2168,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$11</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$26</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$22</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$1000</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">6</div><div class="pk-stat-l">Deals / 20</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">5</div><div class="pk-stat-l">Deals / 21</div></div>
             </div>
           </div>
           <div class="pk-grid">
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/146579722585?_skw=mewtwo+gym+heroes&amp;hash=item2220d51159:g:XC0AAeSwqzpoIz4H&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYUxGzP9BYYdNrwkHoE5%2FQFj4B%2FeP20KDSnvncqboAtJp%2Brobt%2FydVfZ%2F2cD%2BELx5wQhJwzkSVagSH4p%2BV1NIYXl3rnJvZSmwZpGA1zjO9aJHc2tCGO%2B%2Fa1VPpoKBcYXgckegEBxsbMaTT2hIC17VObXYNH9%2Be9oOXKqW3dp3XIVDSFwYUS5drJWp2lYZn9a1Y5ArtNu7dq6%2B7%2FZOgC6EGKNDXtNOyNB24fBjJuU%2Ba%2FL4z5pDS%2FoTPLsEh3nVaAqt72ByDq6XueOzquRY%2FeHw9cifdpJcYVPWY%2BJStGb0EN4g%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/146579722585?_skw=mewtwo+gym+heroes&amp;hash=item2220d51159:g:XC0AAeSwqzpoIz4H&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYUxGzP9BYYdNrwkHoE5%2FQFj4B%2FeP20KDSnvncqboAtJp%2Brobt%2FydVfZ%2F2cD%2BELx5wQhJwzkSVagSH4p%2BV1NIYXl3rnJvZSmwZpGA1zjO9aJHc2tCGO%2B%2Fa1VPpoKBcYXgdQVEUk2dnA%2BIo3X%2FtDO29Mhe3oEAg6Iakn63FVmfO%2B1GAT6RIyBRbAOmbng1ZaLWcol5wG9hL7nM%2BEAA4iSE5kur2C9MO5eX2lX%2BUOYdabsuh%2FTOCv9vUfZEMAZtksbsAv4uSMIq0zYkcWktzfg%2BcQB35bCBr9bgerQGt9TjXHPQ%3D%3D" target="_blank" rel="noopener"
                data-price="11.19"
-               data-discount="56.90"
+               data-discount="50.30"
                data-deal="1"
                data-bucket="Vintage Holo Mewtwo"
                data-search="pokemon hero gym promo pack vol.7, vol.8, vol.9, sealed japanese">
@@ -2091,7 +2184,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$11.19</span>
-                  <span class="pk-disc">-57%</span>
+                  <span class="pk-disc">-50%</span>
                 </div>
                 <div class="pk-title">Pokemon Hero Gym Promo Pack Vol.7, Vol.8, Vol.9, Sealed Japanese</div>
                 <div class="pk-buying">BIN</div>
@@ -2099,7 +2192,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156859531414?_skw=mewtwo+gym+heroes&amp;hash=item24858e8096:g:IlgAAOSwKWRn8llC" target="_blank" rel="noopener"
                data-price="12.99"
-               data-discount="50.00"
+               data-discount="42.30"
                data-deal="1"
                data-bucket="Vintage Holo Mewtwo"
                data-search="pokémon cards gym challenge &amp; gym heroes: choose your card! lp/nm wotc">
@@ -2107,15 +2200,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$12.99</span>
-                  <span class="pk-disc">-50%</span>
+                  <span class="pk-disc">-42%</span>
                 </div>
                 <div class="pk-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/326975832618?_skw=mewtwo+gym+heroes&amp;hash=item4c2147422a:g:nccAAeSwhf5phVbt&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGY2n3YaeujrAwoEZmtk9%2BVP5fqKL1VxSAut1rjdGor1C1xSjqcKwnrBRjYtvXGcsTmaK3TQ%2FnQEgEE3kcE4wioy4U5AAVGLP7qJaLX2%2FP3NzhVJxv53NuSCoVw6QK7iBzIKefdUOo4uYLT9RWYtDSFus%2FHG0AAxZISdAc7irzu6dAC%2B2FMzSQsemKeG7%2FYRgIq0%2FaMGx6yoNQoPcrO%2Fq1eEQT%2BOV9gnj0Vz9P4rEMaNPOPLlMflM8VCatQ7uArLzVYa7Rui3qhNgHPYGgZiN9VwLqFeYfaLL8s0M68nWY2i0w%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156863616931?_skw=mewtwo+gym+heroes&amp;hash=item2485ccd7a3:g:UvUAAOSwdmBn8iR6" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="42.30"
+               data-discount="33.40"
+               data-deal="1"
+               data-bucket="Vintage Holo Mewtwo"
+               data-search="pokémon cards gym challenge &amp; gym heroes: choose your card! lp/nm wotc holo">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/UvUAAOSwdmBn8iR6/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$14.99</span>
+                  <span class="pk-disc">-33%</span>
+                </div>
+                <div class="pk-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC Holo</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/326975832618?_skw=mewtwo+gym+heroes&amp;hash=item4c2147422a:g:nccAAeSwhf5phVbt&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGY2n3YaeujrAwoEZmtk9%2BVP5fqKL1VxSAut1rjdGor1C1xSjqcKwnrBRjYtvXGcsTmaK3TQ%2FnQEgEE3kcE4wioy4U5AAVGLP7qJaLX2%2FP3NzhVJxv53NuSCoVw6QK7iBzIHSIvRf4LcdC3tZrpuA35VMiN33ZYaTSoMMg%2FTWFeOwJZUBEVlPFCBXpU1%2BQP9uaaa8dJnGxgH5MurtgoHK1aO3DQa4I2QQKIzlYEvBY0nWx%2FdwNEKavsbXmOKd7NZVq9OJitCWCEQdYrIW02riZwCZUcU4r4upbZ5s51cPjTK%2FA%3D%3D" target="_blank" rel="noopener"
+               data-price="14.99"
+               data-discount="33.40"
                data-deal="1"
                data-bucket="Vintage Holo Mewtwo"
                data-search="2000 pokémon gym heroes!! pick your cards!! lp/nm only. volume discounts!!">
@@ -2123,7 +2232,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-42%</span>
+                  <span class="pk-disc">-33%</span>
                 </div>
                 <div class="pk-title">2000 Pokémon Gym Heroes!! Pick Your Cards!! LP/NM Only. Volume Discounts!!</div>
                 <div class="pk-buying">BIN</div>
@@ -2131,7 +2240,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/177081195509?_skw=mewtwo+gym+heroes&amp;hash=item293adc9bf5:g:DX0AAeSwiCBpr1rp" target="_blank" rel="noopener"
                data-price="15.99"
-               data-discount="38.40"
+               data-discount="28.90"
                data-deal="1"
                data-bucket="Vintage Holo Mewtwo"
                data-search="⚡️slabbies⚡️💎premium💎 ✨pokémon psa 10 keychains✨ (mini) 🔥the original🔥">
@@ -2139,39 +2248,55 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.99</span>
-                  <span class="pk-disc">-38%</span>
+                  <span class="pk-disc">-29%</span>
                 </div>
                 <div class="pk-title">⚡️SLABBIES⚡️💎PREMIUM💎 ✨Pokémon PSA 10 Keychains✨ (Mini) 🔥THE ORIGINAL🔥</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/177876854429?_skw=mewtwo+gym+heroes&amp;hash=item296a49669d:g:2pkAAeSwFXppr0x6" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/177876854429?_skw=mewtwo+base+set+1st+edition&amp;hash=item296a49669d:g:2pkAAeSwFXppr0x6" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="34.60"
-               data-deal="1"
+               data-discount="24.50"
+               data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="⚡️slabros⚡️ 💎premium💎 ✨pokémon psa 10 keychains✨ (large) 🔥the original🔥">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/2pkAAeSwFXppr0x6/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$16.99</span>
-                  <span class="pk-disc">-35%</span>
+                  <span class="pk-disc">-24%</span>
                 </div>
                 <div class="pk-title">⚡️SLABROS⚡️ 💎PREMIUM💎 ✨Pokémon PSA 10 Keychains✨ (Large) 🔥THE ORIGINAL🔥</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/227308271274?_skw=mewtwo+gym+heroes&amp;hash=item34eca0f6aa:g:5EkAAeSwe0RpaxJU" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/177876854429?_skw=mewtwo+gym+heroes&amp;hash=item296a49669d:g:2pkAAeSwFXppr0x6" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="34.60"
-               data-deal="1"
+               data-discount="24.50"
+               data-deal="0"
+               data-bucket="Vintage Holo Mewtwo"
+               data-search="⚡️slabros⚡️ 💎premium💎 ✨pokémon psa 10 keychains✨ (large) 🔥the original🔥">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/2pkAAeSwFXppr0x6/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$16.99</span>
+                  <span class="pk-disc">-24%</span>
+                </div>
+                <div class="pk-title">⚡️SLABROS⚡️ 💎PREMIUM💎 ✨Pokémon PSA 10 Keychains✨ (Large) 🔥THE ORIGINAL🔥</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/227308271274?_skw=mewtwo+gym+heroes&amp;hash=item34eca0f6aa:g:5EkAAeSwe0RpaxJU" target="_blank" rel="noopener"
+               data-price="16.99"
+               data-discount="24.50"
+               data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="pokémon gym hero&#x27;s 2000 vintage wotc nm: choose your own">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/5EkAAeSwe0RpaxJU/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$16.99</span>
-                  <span class="pk-disc">-35%</span>
+                  <span class="pk-disc">-24%</span>
                 </div>
                 <div class="pk-title">Pokémon Gym Hero&#x27;s 2000 Vintage WOTC NM: Choose Your Own</div>
                 <div class="pk-buying">BIN</div>
@@ -2179,7 +2304,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145273576132?_skw=mewtwo+base+set+holo&amp;hash=item21d2fadac4:g:VvAAAOSwaZNkfk2q" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="23.00"
+               data-discount="11.20"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="1999 pokemon base set: choose your card! all cards available - 100% authentic">
@@ -2187,7 +2312,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  <span class="pk-disc">-23%</span>
+                  <span class="pk-disc">-11%</span>
                 </div>
                 <div class="pk-title">1999 Pokemon Base Set: Choose Your Card! All Cards Available - 100% Authentic</div>
                 <div class="pk-buying">BIN</div>
@@ -2195,7 +2320,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/127628681222?_skw=mewtwo+gym+heroes&amp;hash=item1db7432006:g:sm0AAeSwKhJprMAe" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="23.00"
+               data-discount="11.20"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="1999 - 2002 pokemon card game (tcg) vintage empty theme deck boxes wotc no cards">
@@ -2203,7 +2328,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  <span class="pk-disc">-23%</span>
+                  <span class="pk-disc">-11%</span>
                 </div>
                 <div class="pk-title">1999 - 2002 Pokemon Card Game (TCG) Vintage Empty Theme Deck Boxes WOTC No cards</div>
                 <div class="pk-buying">BIN</div>
@@ -2211,7 +2336,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/137135474869?_skw=mewtwo+base+set+holo&amp;hash=item1fede948b5:g:eskAAeSwdnFptxi7" target="_blank" rel="noopener"
                data-price="22.50"
-               data-discount="13.40"
+               data-discount="0.00"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="pokemon tcg mewtwo 010/102 base set holo *mint condition*">
@@ -2219,31 +2344,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$22.50</span>
-                  <span class="pk-disc">-13%</span>
+                  
                 </div>
                 <div class="pk-title">Pokemon TCG Mewtwo 010/102 Base Set Holo *MINT CONDITION*</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156863616931?_skw=mewtwo+gym+heroes&amp;hash=item2485ccd7a3:g:uroAAOSwGV1n8iM6" target="_blank" rel="noopener"
-               data-price="24.99"
-               data-discount="3.80"
-               data-deal="0"
-               data-bucket="Vintage Holo Mewtwo"
-               data-search="pokémon cards gym challenge &amp; gym heroes: choose your card! lp/nm wotc holo">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/uroAAOSwGV1n8iM6/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$24.99</span>
-                  <span class="pk-disc">-4%</span>
-                </div>
-                <div class="pk-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC Holo</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/134350751638?_skw=mewtwo+gym+heroes&amp;hash=item1f47edc796:g:E20AAOSwY2VjisMm" target="_blank" rel="noopener"
                data-price="26.95"
-               data-discount="-3.80"
+               data-discount="-19.80"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="💪japanese gym heroes 1998 (leader&#x27;s stadium) ~ choose a card! ~ holos vintage💪">
@@ -2259,7 +2368,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/178039665637?_skw=mewtwo+team+rocket+dark&amp;var=477541652558&amp;hash=item2973fdb3e5:g:w9IAAeSw9Npp2ewT" target="_blank" rel="noopener"
                data-price="29.99"
-               data-discount="-15.50"
+               data-discount="-33.30"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="team rocket&#x27;s mewtwo ex (281/217) special illustration graded extended art case">
@@ -2275,7 +2384,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156960591379?_skw=mewtwo+base+set+holo&amp;hash=item248b948e13:g:RQIAAOSwQU9oGXsD" target="_blank" rel="noopener"
                data-price="49.99"
-               data-discount="-92.50"
+               data-discount="-122.20"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="pokemon base set 2 cards! holo rare wotc vintage lp/nm choose your card!">
@@ -2291,7 +2400,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/127629660972?_skw=mewtwo+gym+heroes&amp;hash=item1db752132c:g:pEAAAeSw7cFprL6q" target="_blank" rel="noopener"
                data-price="49.99"
-               data-discount="-92.50"
+               data-discount="-122.20"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="1999 - 2002 wotc &amp; topps pokemon card game (tcg) vintage empty booster box lot">
@@ -2305,9 +2414,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/157842285303?_skw=mewtwo+team+rocket+dark&amp;hash=item24c02222f7:g:EtwAAeSwKnpp4vG3&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGad2WEv3RIpG0gPpc%2Bcdi8UFs74zCqNzLEUZzNCWuW0ATBQJ1hFgBbJ2w32MjkKzW6p5na3TjOb%2Fk2hfQEjgxGjiwaCcgCz6hRrCpZFNeiz9lhzrLAJXBrA4s8YbfKTZXYV3GuaoDE52nxmFimBlOsswHv8HaVMSw8viFgcMPfqPF5NMPIq4PIPDnAFob2nctaYpC40jd1W7RydzxPEa4Yt5l71sNuyIbOwkykRMTsVuciK6l54wFdgFey1%2BZxYV8Y0Ah524fpatOrVtaCG3hd%2FdPQLwOETe5wcjlNSh7rO%2Bw%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/157842285303?_skw=mewtwo+team+rocket+dark&amp;hash=item24c02222f7:g:EtwAAeSwKnpp4vG3&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGad2WEv3RIpG0gPpc%2Bcdi8UFs74zCqNzLEUZzNCWuW0ATBQJ1hFgBbJ2w32MjkKzW6p5na3TjOb%2Fk2hfQEjgxGjiwaCcgCz6hRrCpZFNeiz9lhzrLAJXBrA4s8YbfKTZXZkcfHiDocMQB6oQa2w41cWvgNxQUimIjSO3bRiQ1aWhrKYy0R4hqSYH0hA8SHaRQp5zIJqvbNVIEP7uVH%2BojqqbRbgnkpzNjKDHjosS%2BHqKRaLVS%2B48wlAKx5XyjvTAmV5rjTFMASLStAjLhKsT2vbNeWXaorft%2FiVJc%2FscgrXCw%3D%3D" target="_blank" rel="noopener"
                data-price="60.00"
-               data-discount="-131.00"
+               data-discount="-166.70"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="giovanni mewtwo team rocket laser engrave zipper binder 9-12 slot binder pokemon">
@@ -2323,7 +2432,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/225576614255?_skw=mewtwo+base+set+1st+edition&amp;hash=item348569f96f:g:e~MAAeSwadlpMcX8" target="_blank" rel="noopener"
                data-price="88.88"
-               data-discount="-242.20"
+               data-discount="-295.00"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="1999 pokemon base set - authentic cards - free shipping">
@@ -2339,7 +2448,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/117131348328?_skw=mewtwo+gym+heroes&amp;hash=item1b45928968:g:CP8AAeSwYxxp1a-M" target="_blank" rel="noopener"
                data-price="99.99"
-               data-discount="-285.00"
+               data-discount="-344.40"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="1999 - 2005 wotc &amp; ex pokemon card game (tcg) theme deck case counter display +">
@@ -2355,7 +2464,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157794599150?_skw=mewtwo+gym+heroes&amp;hash=item24bd4a80ee:g:ygMAAeSwC~RpyNCm" target="_blank" rel="noopener"
                data-price="119.99"
-               data-discount="-362.00"
+               data-discount="-433.30"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="pokémon holo wotc cards vintage rare authentic lp/nm - pick your exact card!">
@@ -2371,7 +2480,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+base+set+1st+edition&amp;hash=item2483686621:g:vGkAAeSw69Jp4shb" target="_blank" rel="noopener"
                data-price="399.99"
-               data-discount="-1440.20"
+               data-discount="-1677.70"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -2387,7 +2496,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145273576132?_skw=mewtwo+base+set+1st+edition&amp;hash=item21d2fadac4:g:VvAAAOSwaZNkfk2q" target="_blank" rel="noopener"
                data-price="999.99"
-               data-discount="-3750.60"
+               data-discount="-4344.40"
                data-deal="0"
                data-bucket="Vintage Holo Mewtwo"
                data-search="1999 pokemon base set: choose your card! all cards available - 100% authentic">
@@ -2441,15 +2550,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$5</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$16</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$17</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$260</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">9</div><div class="pk-stat-l">Deals / 31</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">11</div><div class="pk-stat-l">Deals / 35</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/396753769798?_skw=mewtwo+vmax&amp;hash=item5c605e1546:g:Bx8AAOSw1-5oUKPN" target="_blank" rel="noopener"
                data-price="5.00"
-               data-discount="68.80"
+               data-discount="70.60"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon tcg - choose your card - full art/vstar/vmax/v/rainbow rares pack fresh">
@@ -2457,7 +2566,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.00</span>
-                  <span class="pk-disc">-69%</span>
+                  <span class="pk-disc">-71%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Card - Full Art/Vstar/Vmax/V/Rainbow Rares PACK FRESH</div>
                 <div class="pk-buying">BIN</div>
@@ -2465,7 +2574,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/145272939298?_skw=mewtwo+vmax&amp;hash=item21d2f12322:g:PzIAAOSw-NxjbVza" target="_blank" rel="noopener"
                data-price="5.95"
-               data-discount="62.80"
+               data-discount="65.00"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon v - choose your card - ultra rare, full art holo tcg - all available nm">
@@ -2473,7 +2582,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.95</span>
-                  <span class="pk-disc">-63%</span>
+                  <span class="pk-disc">-65%</span>
                 </div>
                 <div class="pk-title">Pokemon V - Choose Your Card - Ultra Rare, Full Art Holo TCG - All Available NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2481,7 +2590,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/394409332066?_skw=mewtwo+vmax&amp;hash=item5bd4a0cd62:g:G4sAAOSw4TZj00ow" target="_blank" rel="noopener"
                data-price="6.26"
-               data-discount="60.90"
+               data-discount="63.20"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="sword &amp; shield – tcg pokemon vivid voltage –pick your card– nm">
@@ -2489,15 +2598,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$6.26</span>
-                  <span class="pk-disc">-61%</span>
+                  <span class="pk-disc">-63%</span>
                 </div>
                 <div class="pk-title">Sword &amp; Shield – TCG Pokemon VIVID VOLTAGE –Pick your Card– NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396288530843?_skw=mewtwo+v+full+art&amp;hash=item5c44a3199b:g:BrYAAOSwbIxnzgiu" target="_blank" rel="noopener"
+               data-price="6.99"
+               data-discount="58.90"
+               data-deal="1"
+               data-bucket="Mewtwo V / VMAX / VSTAR"
+               data-search="pokemon v cards - choose your card - ultra rare, full art holo english nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/BrYAAOSwbIxnzgiu/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$6.99</span>
+                  <span class="pk-disc">-59%</span>
+                </div>
+                <div class="pk-title">Pokemon V Cards - Choose Your Card - Ultra Rare, Full Art Holo English NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/155067193196?_skw=mewtwo+v+alt+art&amp;hash=item241ab9976c:g:PDoAAeSwl2Rn2OVI" target="_blank" rel="noopener"
                data-price="7.00"
-               data-discount="56.20"
+               data-discount="58.80"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon go cards - pick your card, charizard, pikachu + psa 6 mewtwo alt art">
@@ -2505,15 +2630,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.00</span>
-                  <span class="pk-disc">-56%</span>
+                  <span class="pk-disc">-59%</span>
                 </div>
                 <div class="pk-title">Pokemon GO Cards - Pick your Card, Charizard, Pikachu + PSA 6 Mewtwo ALT ART</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/257065657455?_skw=mewtwo+vmax&amp;hash=item3bda4ea46f:g:XUUAAeSwEktoneaE&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGaOKHlbxdG7K5y%2B2mcY6njIsVpT5l22iy7i6UbXio9aJgxth5O9Lfzfhnyqg8%2FfQjlUXQW1EWkyKuELkvmMj%2F3rerhXMRpuviEJAgJGnM0s932xSFcinN6Cu1zi3ShHeqzCaujgtWnQnt3LcPixGSl4bJcUfhw6RxxEpKPFHV5XlI3XogHJMrUYXRSIUMwFbfBNXZwMk6eEHPJzAvvqYnI5kiRXn31IbrdFq2e7AhEI6rz4x9mEKn4%2BkcLVghG7LzN1tfSnJxHSNyK3Xpr1Htqc" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/257065657455?_skw=mewtwo+vmax&amp;hash=item3bda4ea46f:g:XUUAAeSwEktoneaE&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGaOKHlbxdG7K5y%2B2mcY6njIsVpT5l22iy7i6UbXio9aJgxth5O9Lfzfhnyqg8%2FfQjlUXQW1EWkyKuELkvmMj%2F3rerhXMRpuviEJAgJGnM0s932xSFcinN6Cu1zi3ShHeqxJ999kUAWLyEsD3n%2BbsKWYY8EgRc%2Bvjg1rbPGMBiW2%2BxFv75CuCr6TTDH8X7%2BXnz55rRCFEtBRN6YyjA%2BZH4UuWgipcR31lmbv6LllpZ45LMBQu%2F9vMTQDCiXz5MkVV5K1zpoM4mFVOT%2BhM7qrArQB" target="_blank" rel="noopener"
                data-price="7.99"
-               data-discount="50.10"
+               data-discount="53.00"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="shadow mewtwo vmax rainbow foil fan art display card, hp880 lord of the shadow💥">
@@ -2521,7 +2646,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-50%</span>
+                  <span class="pk-disc">-53%</span>
                 </div>
                 <div class="pk-title">Shadow Mewtwo Vmax Rainbow Foil Fan Art Display Card, HP880 Lord Of The Shadow💥</div>
                 <div class="pk-buying">BIN . Best Offer</div>
@@ -2529,7 +2654,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/187446049165?_skw=mewtwo+vmax&amp;hash=item2ba4a7b98d:g:tdYAAeSwI05oh8P1" target="_blank" rel="noopener"
                data-price="8.00"
-               data-discount="50.00"
+               data-discount="52.90"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon swsh full art - choose your card! v / vmax ultra rare fa nm tcg">
@@ -2537,7 +2662,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$8.00</span>
-                  <span class="pk-disc">-50%</span>
+                  <span class="pk-disc">-53%</span>
                 </div>
                 <div class="pk-title">Pokemon SWSH Full Art - Choose Your Card! V / VMAX Ultra Rare FA NM TCG</div>
                 <div class="pk-buying">BIN</div>
@@ -2545,7 +2670,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156776820390?_skw=mewtwo+vmax&amp;hash=item2480a06ea6:g:qY0AAOSwspNn8moI" target="_blank" rel="noopener"
                data-price="9.99"
-               data-discount="37.60"
+               data-discount="41.20"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon crown zenith - choose your card! reverse holo/holos v vmax vstar radiant">
@@ -2553,15 +2678,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-38%</span>
+                  <span class="pk-disc">-41%</span>
                 </div>
                 <div class="pk-title">Pokemon Crown Zenith - Choose Your Card! Reverse Holo/Holos V VMAX VSTAR Radiant</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/147308111176?_skw=mewtwo+v+alt+art&amp;hash=item224c3f6548:g:xwYAAeSwVNVqA2sA&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbzl%2FQ7NBl3UzVqZboJFPas5k2J56OeJQzfYlcak1zXea4AmcGbzXp00G4ZAeCkHhh3aT%2Bg6STdqp6f5eJ3iyU2x58crRFOhY2DxhvneI6BJ05EzF%2F8Gji7SOwTgeC6swVLJ9nxV2RouEnas0xxOJXzqpU5UTU%2BeoMUDZb6E8WUU5Vg13ia%2FZvtNO%2FV%2Ffs91m7%2BQurarKSkTEDgfZonCCFIyq9kWcj7MPgtLJ34f0vZV5Pj1I70HBesyNYD6OBhlpsRevm44p4sTtHYsZiFw5k24lqjIWkCt3Yntd4itQqozg%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/147308111176?_skw=mewtwo+v+alt+art&amp;hash=item224c3f6548:g:xwYAAeSwVNVqA2sA&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbzl%2FQ7NBl3UzVqZboJFPas5k2J56OeJQzfYlcak1zXea4AmcGbzXp00G4ZAeCkHhh3aT%2Bg6STdqp6f5eJ3iyU2x58crRFOhY2DxhvneI6BJ05EzF%2F8Gji7SOwTgeC6swVkujbi%2BAsnFexCmut6mFRTdQk90h3qMAsbBAoJ0BTg1Vn9GFeFygSvAk4eaPFNwY0sBKQlOJHBoZHiiyRAP0Md7YxUnfDeEFpdVWCLWQ%2ByEHRDDhOP3uEQA9MZrepODwUs1T2xNcW4XMXuMqiSBqCZNjIegemBueSo0m9Jdx2%2FIA%3D%3D" target="_blank" rel="noopener"
                data-price="10.00"
-               data-discount="37.50"
+               data-discount="41.10"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon v+">
@@ -2569,7 +2694,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$10.00</span>
-                  <span class="pk-disc">-38%</span>
+                  <span class="pk-disc">-41%</span>
                 </div>
                 <div class="pk-title">Pokemon V+</div>
                 <div class="pk-buying">BIN</div>
@@ -2577,7 +2702,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/388832143752?_skw=mewtwo+vmax&amp;hash=item5a8833a988:g:xd8AAeSwnKBo9-n0" target="_blank" rel="noopener"
                data-price="10.99"
-               data-discount="31.30"
+               data-discount="35.30"
                data-deal="1"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokémon mini slab keychains psa 10 free shipping over 50 to choose from!">
@@ -2585,15 +2710,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$10.99</span>
-                  <span class="pk-disc">-31%</span>
+                  <span class="pk-disc">-35%</span>
                 </div>
                 <div class="pk-title">Pokémon Mini Slab Keychains PSA 10 Free Shipping over 50 to choose from!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/334696051843?_skw=mewtwo+vmax&amp;hash=item4ded707483:g:piIAAOSw7Khju4TP" target="_blank" rel="noopener"
+               data-price="11.99"
+               data-discount="29.40"
+               data-deal="1"
+               data-bucket="Mewtwo V / VMAX / VSTAR"
+               data-search="pokemon trainer &amp; galarian gallery - you choose - ultra rare, full art, tg, gg">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/piIAAOSw7Khju4TP/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$11.99</span>
+                  <span class="pk-disc">-29%</span>
+                </div>
+                <div class="pk-title">Pokemon Trainer &amp; Galarian Gallery - You Choose - Ultra Rare, Full Art, TG, GG</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/167395715662?_skw=mewtwo+vmax&amp;hash=item26f98fea4e:g:9g8AAeSw43popS5B" target="_blank" rel="noopener"
                data-price="14.00"
-               data-discount="12.50"
+               data-discount="17.60"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon singles - various - vmax, vstar, v, gx - ultra rare, full art">
@@ -2601,7 +2742,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.00</span>
-                  <span class="pk-disc">-12%</span>
+                  <span class="pk-disc">-18%</span>
                 </div>
                 <div class="pk-title">Pokemon Singles - Various - VMAX, VSTAR, V, GX - Ultra Rare, Full Art</div>
                 <div class="pk-buying">BIN</div>
@@ -2609,7 +2750,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157190541903?_skw=mewtwo+vmax&amp;hash=item249949524f:g:GhUAAeSw6ppofv5O" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="6.30"
+               data-discount="11.80"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokémon card! sealed stamp promo pokémon center ex holo choose your cards!">
@@ -2617,7 +2758,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-6%</span>
+                  <span class="pk-disc">-12%</span>
                 </div>
                 <div class="pk-title">Pokémon Card! Sealed Stamp Promo Pokémon Center EX Holo Choose Your Cards!</div>
                 <div class="pk-buying">BIN</div>
@@ -2625,7 +2766,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/277727337188?_skw=mewtwo+vmax&amp;hash=item40a9d6dae4:g:sM4AAeSwv7VpkRyD" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="6.30"
+               data-discount="11.80"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="🔥pokémon psa 10 mini slab holo-keychains🔥">
@@ -2633,7 +2774,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-6%</span>
+                  <span class="pk-disc">-12%</span>
                 </div>
                 <div class="pk-title">🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥</div>
                 <div class="pk-buying">BIN</div>
@@ -2641,7 +2782,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157574130069?_skw=mewtwo+vmax&amp;hash=item24b0266995:g:F0AAAeSw2XNpUNR1" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="6.30"
+               data-discount="11.80"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="gold pokémon cards! secret rare ex v vmax gx holo choose your card!">
@@ -2649,31 +2790,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-6%</span>
+                  <span class="pk-disc">-12%</span>
                 </div>
                 <div class="pk-title">Gold Pokémon Cards! Secret Rare EX V VMAX GX Holo Choose Your Card!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+v+full+art&amp;hash=item2483686621:g:vs0AAOSwXohn3257" target="_blank" rel="noopener"
-               data-price="14.99"
-               data-discount="6.30"
-               data-deal="0"
-               data-bucket="Mewtwo V / VMAX / VSTAR"
-               data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/vs0AAOSwXohn3257/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-6%</span>
-                </div>
-                <div class="pk-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177081195509?_skw=mewtwo+vmax&amp;hash=item293adc9bf5:g:DX0AAeSwiCBpr1rp" target="_blank" rel="noopener"
                data-price="15.99"
-               data-discount="0.10"
+               data-discount="5.90"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="⚡️slabbies⚡️💎premium💎 ✨pokémon psa 10 keychains✨ (mini) 🔥the original🔥">
@@ -2681,7 +2806,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.99</span>
-                  <span class="pk-disc">-0%</span>
+                  <span class="pk-disc">-6%</span>
                 </div>
                 <div class="pk-title">⚡️SLABBIES⚡️💎PREMIUM💎 ✨Pokémon PSA 10 Keychains✨ (Mini) 🔥THE ORIGINAL🔥</div>
                 <div class="pk-buying">BIN</div>
@@ -2689,7 +2814,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156897212953?_skw=mewtwo+vmax&amp;hash=item2487cd7a19:g:6Q4AAOSwV9tn~1m6" target="_blank" rel="noopener"
                data-price="16.00"
-               data-discount="0.00"
+               data-discount="5.80"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokémon celebrations 25th anniversary set cards! holo full art charizard card nm">
@@ -2697,7 +2822,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$16.00</span>
-                  
+                  <span class="pk-disc">-6%</span>
                 </div>
                 <div class="pk-title">Pokémon Celebrations 25th Anniversary Set Cards! Holo Full Art Charizard Card NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2705,7 +2830,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177876854429?_skw=mewtwo+vmax&amp;hash=item296a49669d:g:2pkAAeSwFXppr0x6" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="-6.20"
+               data-discount="0.00"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="⚡️slabros⚡️ 💎premium💎 ✨pokémon psa 10 keychains✨ (large) 🔥the original🔥">
@@ -2719,9 +2844,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156746268986?_skw=mewtwo+vmax&amp;hash=item247ece413a:g:Q9QAAOSwLFdoM7F0" target="_blank" rel="noopener"
+               data-price="17.99"
+               data-discount="-5.90"
+               data-deal="0"
+               data-bucket="Mewtwo V / VMAX / VSTAR"
+               data-search="pokemon crown zenith - choose your card! reverse holo/holos ultra rare gg">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/Q9QAAOSwLFdoM7F0/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$17.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon Crown Zenith - Choose Your Card! Reverse Holo/Holos Ultra Rare GG</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/236563257302?_skw=mewtwo+vmax&amp;hash=item371444d7d6:g:CMsAAeSwG0VpWaiZ" target="_blank" rel="noopener"
                data-price="19.95"
-               data-discount="-24.70"
+               data-discount="-17.40"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon japanese art rare: choose your card! [pack fresh, near mint]">
@@ -2737,7 +2878,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156763625402?_skw=mewtwo+vmax&amp;hash=item247fd717ba:g:fesAAeSwWUdoylca" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-24.90"
+               data-discount="-17.70"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon go cards - choose your card! reverse holos/holos ultra rares v radiant">
@@ -2751,9 +2892,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+v+full+art&amp;hash=item2483686621:g:D3wAAOSwVKpn33Hb" target="_blank" rel="noopener"
+               data-price="19.99"
+               data-discount="-17.70"
+               data-deal="0"
+               data-bucket="Mewtwo V / VMAX / VSTAR"
+               data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/D3wAAOSwVKpn33Hb/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$19.99</span>
+                  
+                </div>
+                <div class="pk-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/364502783318?_skw=mewtwo+v+alt+art&amp;hash=item54de0f1556:g:AU4AAOSw28tlFG9H" target="_blank" rel="noopener"
                data-price="24.00"
-               data-discount="-50.00"
+               data-discount="-41.30"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="g gx v vmax  151 pokemon cards you choose  ultra rares alt art english">
@@ -2767,25 +2924,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156746268986?_skw=mewtwo+vmax&amp;hash=item247ece413a:g:QZQAAOSwwypoM7K3" target="_blank" rel="noopener"
-               data-price="29.99"
-               data-discount="-87.40"
+            <a class="pk-card" href="https://www.ebay.com/itm/157660840386?_skw=mewtwo+v+full+art&amp;hash=item24b55181c2:g:LQgAAeSwe6FphDu8" target="_blank" rel="noopener"
+               data-price="25.00"
+               data-discount="-47.10"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
-               data-search="pokemon crown zenith - choose your card! reverse holo/holos ultra rare gg">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/QZQAAOSwwypoM7K3/s-l225.jpg');"></div>
+               data-search="mewtwo v 072/078 pokemon go extended  artwork for psa cgc bgs or tag">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/LQgAAeSwe6FphDu8/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$29.99</span>
+                  <span class="pk-price">$25.00</span>
                   
                 </div>
-                <div class="pk-title">Pokemon Crown Zenith - Choose Your Card! Reverse Holo/Holos Ultra Rare GG</div>
+                <div class="pk-title">Mewtwo V 072/078 Pokemon GO Extended  Artwork For PSA CGC BGS or TAG</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177024325310?_skw=mewtwo+v+alt+art&amp;hash=item293778d6be:g:7Q8AAeSwXxtonlV1" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="-118.70"
+               data-discount="-105.90"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="mewtwo v alt art psa cgc beckett | extended art display case for pokemon card">
@@ -2799,9 +2956,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156868308381?_skw=mewtwo+v+full+art&amp;hash=item2486146d9d:g:GosAAOSwLcBn82-C" target="_blank" rel="noopener"
+               data-price="34.99"
+               data-discount="-105.90"
+               data-deal="0"
+               data-bucket="Mewtwo V / VMAX / VSTAR"
+               data-search="pokémon 151 cards japanese choose your card! holo poké ball pattern ex full art">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/GosAAOSwLcBn82-C/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$34.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokémon 151 Cards Japanese Choose Your Card! Holo Poké Ball Pattern EX Full Art</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+vstar&amp;hash=item2483686621:g:fY4AAOSwCDpoXMgD" target="_blank" rel="noopener"
                data-price="69.99"
-               data-discount="-337.40"
+               data-discount="-311.90"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -2817,7 +2990,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/354182689713?_skw=mewtwo+v+alt+art&amp;hash=item5276eef3b1:g:x9YAAOSwiupi3JeO" target="_blank" rel="noopener"
                data-price="74.50"
-               data-discount="-365.60"
+               data-discount="-338.50"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="2022 pokemon go tcg • all nm • choose your card! holos - reverse holos - alt art">
@@ -2833,7 +3006,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156718893358?_skw=mewtwo+vmax&amp;hash=item247d2c892e:g:524AAOSwu7ln~5kT" target="_blank" rel="noopener"
                data-price="89.99"
-               data-discount="-462.40"
+               data-discount="-429.70"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="2021 pokemon celebrations classic collection - choose your card! holo v vmax">
@@ -2849,7 +3022,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156746268986?_skw=mewtwo+vstar&amp;hash=item247ece413a:g:-u8AAOSwW5FoS4Q6" target="_blank" rel="noopener"
                data-price="89.99"
-               data-discount="-462.40"
+               data-discount="-429.70"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon crown zenith - choose your card! reverse holo/holos ultra rare gg">
@@ -2865,7 +3038,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156763625402?_skw=mewtwo+vstar&amp;hash=item247fd717ba:g:EzAAAeSwMbNoylce" target="_blank" rel="noopener"
                data-price="99.99"
-               data-discount="-524.90"
+               data-discount="-488.50"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon go cards - choose your card! reverse holos/holos ultra rares v radiant">
@@ -2881,7 +3054,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156763625402?_skw=mewtwo+v+full+art&amp;hash=item247fd717ba:g:f34AAeSw~~BoylcO" target="_blank" rel="noopener"
                data-price="129.99"
-               data-discount="-712.40"
+               data-discount="-665.10"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon go cards - choose your card! reverse holos/holos ultra rares v radiant">
@@ -2897,7 +3070,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156937951391?_skw=mewtwo+vmax&amp;hash=item248a3b189f:g:uIwAAeSwbGRpCJL5" target="_blank" rel="noopener"
                data-price="199.99"
-               data-discount="-1149.90"
+               data-discount="-1077.10"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon card vmax vstar - choose your card! full art ultra rare cards! nm">
@@ -2913,7 +3086,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156731105968?_skw=mewtwo+vmax&amp;hash=item247de6e2b0:g:fYMAAOSww~JoEza8" target="_blank" rel="noopener"
                data-price="219.99"
-               data-discount="-1274.90"
+               data-discount="-1194.80"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="pokemon trainer gallery: choose your card! full art galarian trainer gallery sir">
@@ -2929,7 +3102,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+vmax&amp;hash=item2483686621:g:2BEAAeSw64po26MV" target="_blank" rel="noopener"
                data-price="259.99"
-               data-discount="-1524.90"
+               data-discount="-1430.30"
                data-deal="0"
                data-bucket="Mewtwo V / VMAX / VSTAR"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -3102,7 +3275,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/406914657138?_skw=mewtwo+ex+special+illustration&amp;hash=item5ebe00eb72:g:sWIAAeSwS1dp~sHL&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGa41Ev0ozXxhVqH%2F9Lt%2B6%2FIv7Ny9gOZtHVv7J1iwmHbiFnIRUl0i8HMN6i51sohZPb0zBDKVLPlk9PAXkPA8oac7lmovrXx1CzGUulOEjbTBfFXIKubcnySFLCOais%2FwTYyICOLfJBrc%2B0BUi2vidk20c0fmfENrvqwkS2Ow5hA78krxOhJJrC9Lj%2Fh20s6bjPbN0mTZ73JupAI2VlMeArxAxRjA5N8OvgaJcgJATJDEqfW5ZutSuowyi65FPSttNJGqiBNAVfpOadLCyuDfpA7cX0NMbtGSsbmIeorPbCTYvGzguZzHZ3Yf9TtYXYTPyM%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/406914657138?_skw=mewtwo+ex+special+illustration&amp;hash=item5ebe00eb72:g:sWIAAeSwS1dp~sHL&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGa41Ev0ozXxhVqH%2F9Lt%2B6%2FIv7Ny9gOZtHVv7J1iwmHbiFnIRUl0i8HMN6i51sohZPb0zBDKVLPlk9PAXkPA8oac7lmovrXx1CzGUulOEjbTBfFXIKubcnySFLCOais%2FwTasurxFvHNxOrVFRHH2LdKmy29zJn7043cLMdpDoKAWsDr3n1%2BWxrXMAYfpj7Hs02i70TSkVqSmICNjoNshsNSDvEU%2FVqBO5cxqNmShjh%2FdH3cAL5n5lRL9p%2BFmrmsYYGxHgq04AsXrMouKWzC%2BhHAJFrvthHUbr0wvrTwVjaOAs%2BB15PI7goeeDx2xrouxsIY%3D" target="_blank" rel="noopener"
                data-price="54.99"
                data-discount="-400.40"
                data-deal="0"
@@ -3216,7 +3389,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 17:35 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 18:56 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

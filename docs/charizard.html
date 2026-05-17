@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,19 +1476,21 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -1923,9 +2016,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">6</div><div class="pk-l">Categories</div></div>
-      <div class="pk-kpi"><div class="pk-n">36</div><div class="pk-l">Live listings</div></div>
-      <div class="pk-kpi"><div class="pk-n">10</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">13:35</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">34</div><div class="pk-l">Live listings</div></div>
+      <div class="pk-kpi"><div class="pk-n">9</div><div class="pk-l">Deals &ge;25% below median</div></div>
+      <div class="pk-kpi"><div class="pk-n">14:55</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -1959,14 +2052,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-grail-title">Pokémon Base Set Choose your cards to complete your set</div>
               </div>
             </a>
-            <a class="pk-grail-card" href="https://www.ebay.com/itm/156960591379?_skw=charizard+base+set+holo&amp;hash=item248b948e13:g:kRkAAOSwBKRoGXrp" target="_blank" rel="noopener">
-              <div class="pk-grail-badge">LEGENDARY</div>
-              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/kRkAAOSwBKRoGXrp/s-l225.jpg');"></div>
-              <div class="pk-grail-meta">
-                <div class="pk-grail-price">$650</div>
-                <div class="pk-grail-title">Pokemon Base Set 2 Cards! Holo Rare WOTC Vintage LP/NM Choose Yo</div>
-              </div>
-            </a>
             <a class="pk-grail-card" href="https://www.ebay.com/itm/318314560230?_skw=charizard+psa+10&amp;hash=item4a1d06bae6:g:tukAAeSwZnJqCQiK" target="_blank" rel="noopener">
               <div class="pk-grail-badge">LEGENDARY</div>
               <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/tukAAeSwZnJqCQiK/s-l225.jpg');"></div>
@@ -1982,6 +2067,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-grail-price">$600</div>
                 <div class="pk-grail-title">1999 Pokemon 1st Edition &amp; Base Set , Vintage Holo pokemon cards</div>
               </div>
+            </a>
+            <a class="pk-grail-card" href="https://www.ebay.com/itm/156780094465?_skw=charizard+team+rocket+dark+holo&amp;var=458169636286&amp;hash=item2480d26401:g:~DUAAOSwGVRnzT6U" target="_blank" rel="noopener">
+              <div class="pk-grail-badge">LEGENDARY</div>
+              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/~DUAAOSwGVRnzT6U/s-l225.jpg');"></div>
+              <div class="pk-grail-meta">
+                <div class="pk-grail-price">$550</div>
+                <div class="pk-grail-title">Charizard Charmander Charmeleon Pokemon Card! Holo/Reverse Holo </div>
+              </div>
             </a></div>
         </section>
     
@@ -1996,7 +2089,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/9WYAAeSwCZZpfCFr/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$34.99</span>
-            <span class="pk-hero-disc">-88%</span>
+            <span class="pk-hero-disc">-86%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/157101355863?_skw=charizard+vmax+shiny&amp;hash=item2493f87357:g:If4AAOSwWDRoT0fu" target="_blank" rel="noopener"
@@ -2004,15 +2097,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/If4AAOSwWDRoT0fu/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$11.99</span>
-            <span class="pk-hero-disc">-80%</span>
-          </div>
-        </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/137300002499?_skw=charizard+base+set+holo&amp;hash=item1ff7b7c6c3:g:g0QAAeSwAKZqAYr-" target="_blank" rel="noopener"
-           title="Charizard 4/102 Base Set Holo">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/g0QAAeSwAKZqAYr-/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$76.00</span>
-            <span class="pk-hero-disc">-73%</span>
+            <span class="pk-hero-disc">-83%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/156746268986?_skw=charizard+vmax&amp;hash=item247ece413a:g:Q9QAAOSwLFdoM7F0" target="_blank" rel="noopener"
@@ -2020,15 +2105,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/Q9QAAOSwLFdoM7F0/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$17.99</span>
-            <span class="pk-hero-disc">-70%</span>
+            <span class="pk-hero-disc">-74%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/137302041724?_skw=charizard+vmax&amp;hash=item1ff7d6e47c:g:D28AAeSwto1qAmDW" target="_blank" rel="noopener"
-           title="Pokemon - ART RARE/CHARACTER RARE Choose Your Card AR/CHR A-H [JP-VAR] [ARAH]">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/D28AAeSwto1qAmDW/s-l225.jpg');"></div>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/156718893358?_skw=charizard+vmax&amp;hash=item247d2c892e:g:524AAOSwu7ln~5kT" target="_blank" rel="noopener"
+           title="2021 Pokemon Celebrations Classic Collection - Choose Your Card! Holo V VMAX">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/524AAOSwu7ln~5kT/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
-            <span class="pk-hero-price">$18.99</span>
-            <span class="pk-hero-disc">-68%</span>
+            <span class="pk-hero-price">$19.99</span>
+            <span class="pk-hero-disc">-71%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/156937951391?_skw=charizard+vstar+rainbow&amp;var=458396615345&amp;hash=item248a3b189f:g:2WoAAOSwBmBoEB5a" target="_blank" rel="noopener"
@@ -2036,7 +2121,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/2WoAAOSwBmBoEB5a/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$19.99</span>
-            <span class="pk-hero-disc">-67%</span>
+            <span class="pk-hero-disc">-71%</span>
+          </div>
+        </a>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/137300002499?_skw=charizard+base+set+holo&amp;hash=item1ff7b7c6c3:g:g0QAAeSwAKZqAYr-" target="_blank" rel="noopener"
+           title="Charizard 4/102 Base Set Holo">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/g0QAAeSwAKZqAYr-/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$76.00</span>
+            <span class="pk-hero-disc">-69%</span>
           </div>
         </a></div>
     </section>
@@ -2047,7 +2140,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
-        <option value="Grail Watch">Grail Watch (5)</option><option value="Vintage Holo Charizard">Vintage Holo Charizard (9)</option><option value="Charizard V / VMAX / VSTAR">Charizard V / VMAX / VSTAR (12)</option><option value="Charizard ex / Special Illustration Rare">Charizard ex / Special Illustration Rare (6)</option><option value="Shining / Shiny Charizard">Shining / Shiny Charizard (3)</option><option value="Charizard PSA 10">Charizard PSA 10 (1)</option>
+        <option value="Grail Watch">Grail Watch (5)</option><option value="Vintage Holo Charizard">Vintage Holo Charizard (8)</option><option value="Charizard V / VMAX / VSTAR">Charizard V / VMAX / VSTAR (11)</option><option value="Charizard ex / Special Illustration Rare">Charizard ex / Special Illustration Rare (6)</option><option value="Shining / Shiny Charizard">Shining / Shiny Charizard (3)</option><option value="Charizard PSA 10">Charizard PSA 10 (1)</option>
       </select>
       <select id="pk-max">
         <option value="0">Any price</option>
@@ -2075,15 +2168,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$35</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$280</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$244</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$1000</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">4</div><div class="pk-stat-l">Deals / 9</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">3</div><div class="pk-stat-l">Deals / 8</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/389852117929?_skw=charizard+fossil&amp;hash=item5ac4ff3ba9:g:9WYAAeSwCZZpfCFr" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="87.50"
+               data-discount="85.70"
                data-deal="1"
                data-bucket="Vintage Holo Charizard"
                data-search="wotc pokemon blister case - base set jungle fossil neo display + stand">
@@ -2091,7 +2184,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$34.99</span>
-                  <span class="pk-disc">-88%</span>
+                  <span class="pk-disc">-86%</span>
                 </div>
                 <div class="pk-title">WOTC Pokemon Blister Case - Base Set Jungle Fossil Neo Display + Stand</div>
                 <div class="pk-buying">BIN</div>
@@ -2099,7 +2192,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/137300002499?_skw=charizard+base+set+holo&amp;hash=item1ff7b7c6c3:g:g0QAAeSwAKZqAYr-" target="_blank" rel="noopener"
                data-price="76.00"
-               data-discount="72.90"
+               data-discount="68.90"
                data-deal="1"
                data-bucket="Vintage Holo Charizard"
                data-search="charizard 4/102 base set holo">
@@ -2107,7 +2200,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$76.00</span>
-                  <span class="pk-disc">-73%</span>
+                  <span class="pk-disc">-69%</span>
                 </div>
                 <div class="pk-title">Charizard 4/102 Base Set Holo</div>
                 <div class="pk-buying">BIN . Best Offer</div>
@@ -2115,7 +2208,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/145273501363?_skw=charizard+team+rocket+dark+holo&amp;var=444460766407&amp;hash=item21d2f9b6b3:g:AUUAAOSwrjxiPjfM" target="_blank" rel="noopener"
                data-price="99.99"
-               data-discount="64.30"
+               data-discount="59.10"
                data-deal="1"
                data-bucket="Vintage Holo Charizard"
                data-search="2000 pokemon team rocket: choose your card! all pokemon available">
@@ -2123,23 +2216,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$99.99</span>
-                  <span class="pk-disc">-64%</span>
+                  <span class="pk-disc">-59%</span>
                 </div>
                 <div class="pk-title">2000 Pokemon Team Rocket: Choose Your Card! All Pokemon Available</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/225576614255?_skw=charizard+base+set+unlimited&amp;hash=item348569f96f:g:e~MAAeSwadlpMcX8" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/225576614255?_skw=charizard+base+set+unlimited&amp;hash=item348569f96f:g:e~MAAeSwadlpMcX8" target="_blank" rel="noopener"
                data-price="208.88"
-               data-discount="25.40"
-               data-deal="1"
+               data-discount="14.50"
+               data-deal="0"
                data-bucket="Vintage Holo Charizard"
                data-search="1999 pokemon base set - authentic cards - free shipping">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/e~MAAeSwadlpMcX8/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$208.88</span>
-                  <span class="pk-disc">-25%</span>
+                  <span class="pk-disc">-14%</span>
                 </div>
                 <div class="pk-title">1999 Pokemon Base Set - Authentic Cards - FREE SHIPPING</div>
                 <div class="pk-buying">BIN</div>
@@ -2147,7 +2240,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157207407666?_skw=charizard+fossil&amp;hash=item249a4aac32:g:ZuIAAeSwMfdot92y" target="_blank" rel="noopener"
                data-price="279.99"
-               data-discount="0.00"
+               data-discount="-14.50"
                data-deal="0"
                data-bucket="Vintage Holo Charizard"
                data-search="vintage wotc pokemon cards! holo rares - heavy played/damaged choose your card!">
@@ -2163,7 +2256,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156780094465?_skw=charizard+team+rocket+dark+holo&amp;var=458169636286&amp;hash=item2480d26401:g:~DUAAOSwGVRnzT6U" target="_blank" rel="noopener"
                data-price="549.99"
-               data-discount="-96.40"
+               data-discount="-125.00"
                data-deal="0"
                data-bucket="Vintage Holo Charizard"
                data-search="charizard charmander charmeleon pokemon card! holo/reverse holo rare ex cards!">
@@ -2177,25 +2270,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156960591379?_skw=charizard+base+set+holo&amp;hash=item248b948e13:g:kRkAAOSwBKRoGXrp" target="_blank" rel="noopener"
-               data-price="649.99"
-               data-discount="-132.10"
-               data-deal="0"
-               data-bucket="Vintage Holo Charizard"
-               data-search="pokemon base set 2 cards! holo rare wotc vintage lp/nm choose your card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/kRkAAOSwBKRoGXrp/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$649.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon Base Set 2 Cards! Holo Rare WOTC Vintage LP/NM Choose Your Card!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/336335235609?_skw=charizard+fossil&amp;hash=item4e4f246a19:g:C0EAAeSwmUdpMO1t" target="_blank" rel="noopener"
                data-price="800.00"
-               data-discount="-185.70"
+               data-discount="-227.30"
                data-deal="0"
                data-bucket="Vintage Holo Charizard"
                data-search="pokémon base set choose your cards to complete your set">
@@ -2211,7 +2288,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145273576132?_skw=charizard+base+set+holo&amp;hash=item21d2fadac4:g:VvAAAOSwaZNkfk2q" target="_blank" rel="noopener"
                data-price="999.99"
-               data-discount="-257.20"
+               data-discount="-309.10"
                data-deal="0"
                data-bucket="Vintage Holo Charizard"
                data-search="1999 pokemon base set: choose your card! all cards available - 100% authentic">
@@ -2234,15 +2311,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$12</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$60</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$70</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$380</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">5</div><div class="pk-stat-l">Deals / 12</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">5</div><div class="pk-stat-l">Deals / 11</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/157101355863?_skw=charizard+vmax+shiny&amp;hash=item2493f87357:g:If4AAOSwWDRoT0fu" target="_blank" rel="noopener"
                data-price="11.99"
-               data-discount="80.00"
+               data-discount="82.90"
                data-deal="1"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="shiny pokémon cards! holo rare fates shining ex v vmax promo - choose your card!">
@@ -2250,7 +2327,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$11.99</span>
-                  <span class="pk-disc">-80%</span>
+                  <span class="pk-disc">-83%</span>
                 </div>
                 <div class="pk-title">Shiny Pokémon Cards! Holo Rare Fates Shining EX V VMAX Promo - Choose Your Card!</div>
                 <div class="pk-buying">BIN</div>
@@ -2258,7 +2335,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156746268986?_skw=charizard+vmax&amp;hash=item247ece413a:g:Q9QAAOSwLFdoM7F0" target="_blank" rel="noopener"
                data-price="17.99"
-               data-discount="70.00"
+               data-discount="74.30"
                data-deal="1"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="pokemon crown zenith - choose your card! reverse holo/holos ultra rare gg">
@@ -2266,31 +2343,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$17.99</span>
-                  <span class="pk-disc">-70%</span>
+                  <span class="pk-disc">-74%</span>
                 </div>
                 <div class="pk-title">Pokemon Crown Zenith - Choose Your Card! Reverse Holo/Holos Ultra Rare GG</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/137302041724?_skw=charizard+vmax&amp;hash=item1ff7d6e47c:g:D28AAeSwto1qAmDW" target="_blank" rel="noopener"
-               data-price="18.99"
-               data-discount="68.30"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156718893358?_skw=charizard+vmax&amp;hash=item247d2c892e:g:524AAOSwu7ln~5kT" target="_blank" rel="noopener"
+               data-price="19.99"
+               data-discount="71.40"
                data-deal="1"
                data-bucket="Charizard V / VMAX / VSTAR"
-               data-search="pokemon - art rare/character rare choose your card ar/chr a-h [jp-var] [arah]">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/D28AAeSwto1qAmDW/s-l225.jpg');"></div>
+               data-search="2021 pokemon celebrations classic collection - choose your card! holo v vmax">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/524AAOSwu7ln~5kT/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$18.99</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-price">$19.99</span>
+                  <span class="pk-disc">-71%</span>
                 </div>
-                <div class="pk-title">Pokemon - ART RARE/CHARACTER RARE Choose Your Card AR/CHR A-H [JP-VAR] [ARAH]</div>
+                <div class="pk-title">2021 Pokemon Celebrations Classic Collection - Choose Your Card! Holo V VMAX</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156937951391?_skw=charizard+vstar+rainbow&amp;var=458396615345&amp;hash=item248a3b189f:g:2WoAAOSwBmBoEB5a" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="66.70"
+               data-discount="71.40"
                data-deal="1"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="pokemon card vmax vstar - choose your card! full art ultra rare cards! nm">
@@ -2298,7 +2375,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  <span class="pk-disc">-67%</span>
+                  <span class="pk-disc">-71%</span>
                 </div>
                 <div class="pk-title">Pokemon Card VMAX VSTAR - Choose Your Card! Full Art Ultra Rare Cards! NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2306,7 +2383,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/177105066215?_skw=charizard+vstar+rainbow&amp;var=476794194344&amp;hash=item293c48d8e7:g:HS8AAeSwMVxpJw5F" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="41.70"
+               data-discount="50.00"
                data-deal="1"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="charizard vstar rainbow psa tag beckett | display case extended art for pokemon">
@@ -2314,31 +2391,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$34.99</span>
-                  <span class="pk-disc">-42%</span>
+                  <span class="pk-disc">-50%</span>
                 </div>
                 <div class="pk-title">Charizard VSTAR Rainbow PSA TAG Beckett | Display Case Extended Art for Pokemon</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156718893358?_skw=charizard+vmax&amp;hash=item247d2c892e:g:524AAOSwu7ln~5kT" target="_blank" rel="noopener"
-               data-price="49.99"
-               data-discount="16.70"
-               data-deal="0"
-               data-bucket="Charizard V / VMAX / VSTAR"
-               data-search="2021 pokemon celebrations classic collection - choose your card! holo v vmax">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/524AAOSwu7ln~5kT/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$49.99</span>
-                  <span class="pk-disc">-17%</span>
-                </div>
-                <div class="pk-title">2021 Pokemon Celebrations Classic Collection - Choose Your Card! Holo V VMAX</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/406929158728?_skw=charizard+vmax&amp;hash=item5ebede3248:g:~IAAAeSws11qB1lv" target="_blank" rel="noopener"
                data-price="70.00"
-               data-discount="-16.70"
+               data-discount="0.00"
                data-deal="0"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="charizard vmax swsh 261 ultra premium collection psa 9 mint">
@@ -2354,7 +2415,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157034526068?_skw=charizard+vstar+rainbow&amp;var=458762346995&amp;hash=item248ffcb574:g:ofMAAeSw9Mtoqln7" target="_blank" rel="noopener"
                data-price="94.99"
-               data-discount="-58.30"
+               data-discount="-35.70"
                data-deal="0"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="pokemon cards! brilliant stars holo/reverse holo ultrarare v vmax full art card">
@@ -2370,7 +2431,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156780094465?_skw=charizard+vmax&amp;hash=item2480d26401:g:HDYAAeSwBjJofzp~" target="_blank" rel="noopener"
                data-price="199.99"
-               data-discount="-233.30"
+               data-discount="-185.70"
                data-deal="0"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="charizard charmander charmeleon pokemon card! holo/reverse holo rare ex cards!">
@@ -2386,7 +2447,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156937951391?_skw=charizard+vmax+shiny&amp;hash=item248a3b189f:g:uIwAAeSwbGRpCJL5" target="_blank" rel="noopener"
                data-price="199.99"
-               data-discount="-233.30"
+               data-discount="-185.70"
                data-deal="0"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="pokemon card vmax vstar - choose your card! full art ultra rare cards! nm">
@@ -2402,7 +2463,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157288055080?_skw=charizard+vmax+shiny&amp;hash=item249f194128:g:hXIAAeSweTdotWzF" target="_blank" rel="noopener"
                data-price="249.99"
-               data-discount="-316.70"
+               data-discount="-257.10"
                data-deal="0"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="shining fates pokemon cards! holo/reverse holo vmax v full art choose your card!">
@@ -2418,7 +2479,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156780094465?_skw=charizard+v+full+art&amp;hash=item2480d26401:g:lAQAAOSwLsZnzT6o" target="_blank" rel="noopener"
                data-price="379.99"
-               data-discount="-533.40"
+               data-discount="-442.80"
                data-deal="0"
                data-bucket="Charizard V / VMAX / VSTAR"
                data-search="charizard charmander charmeleon pokemon card! holo/reverse holo rare ex cards!">
@@ -2442,7 +2503,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$35</div><div class="pk-stat-l">Cheapest</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$86</div><div class="pk-stat-l">Median</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$400</div><div class="pk-stat-l">Highest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$180</div><div class="pk-stat-l">Highest</div></div>
               <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">1</div><div class="pk-stat-l">Deals / 6</div></div>
             </div>
           </div>
@@ -2463,23 +2524,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/800026117274?_skw=charizard+ex+special+illustration&amp;hash=itemba4545c49a:g:X3oAAeSwTFBqAXqm" target="_blank" rel="noopener"
-               data-price="69.13"
-               data-discount="19.60"
+            <a class="pk-card" href="https://www.ebay.com/itm/127869851385?_skw=charizard+ex+special+illustration&amp;hash=item1dc5a316f9:g:CnoAAeSwkXBqBCcz" target="_blank" rel="noopener"
+               data-price="73.15"
+               data-discount="14.90"
                data-deal="0"
                data-bucket="Charizard ex / Special Illustration Rare"
-               data-search="charizard ex 223/197 sv03: obsidian flames holo">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/X3oAAeSwTFBqAXqm/s-l225.jpg');"></div>
+               data-search="charizard ex - 223/197 special illustration rare holofoil sv03: obsidian flam nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/CnoAAeSwkXBqBCcz/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$69.13</span>
-                  <span class="pk-disc">-20%</span>
+                  <span class="pk-price">$73.15</span>
+                  <span class="pk-disc">-15%</span>
                 </div>
-                <div class="pk-title">Charizard ex 223/197 SV03: Obsidian Flames Holo</div>
-                <div class="pk-buying">BIN</div>
+                <div class="pk-title">Charizard ex - 223/197 Special Illustration Rare Holofoil SV03: Obsidian Flam NM</div>
+                <div class="pk-buying">BIN . Best Offer</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/358311629161?_skw=charizard+ex+full+art&amp;hash=item536d099169:g:1zAAAeSwFAlpsMo9&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGZMwUmjPrwMuJDPxWnZ6s7gpuzvazVl71q80RZkK1eZ0PGwiPDHfrxyqlrQN6lbkR6G3%2FJWDfS6b4pfcSQH5kTQmKJaSZbCrhDnBwIxND6l4BsWbjjMb5UyZt32hNOQbS2xqaCjPwDTlFMjMwE043HHc8zrlOYGVA2CMHMf9doXaAWVShQJzsD%2Fkl56EHkOZwEai8c5UdS2Xznb0AYap6rTEBzjeunb3sF8ONnrLAeiGJLTriVjxDFmQsjDlRmU7owDYeipHDShXxt6FdZn8S%2BiWm22nySCooDgRB4caMTsNg%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/358311629161?_skw=charizard+ex+full+art&amp;hash=item536d099169:g:1zAAAeSwFAlpsMo9&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGZMwUmjPrwMuJDPxWnZ6s7gpuzvazVl71q80RZkK1eZ0PGwiPDHfrxyqlrQN6lbkR6G3%2FJWDfS6b4pfcSQH5kTQmKJaSZbCrhDnBwIxND6l4BsWbjjMb5UyZt32hNOQbS3rW0DhovhjhZ8PySsbW8GL7cMFLZu5Y3Y6MgHvvuANDpZxVUJrnMfuYAL1AT0937vddgu%2FcNQMyE1ypdVO1RYmYHCIU%2BBom7nnHe%2BBBrKUqX67sGiNVqXUGpqw563BgZSp%2FMsbMsYJ9rHF79dN3NqEZdXjj2MBNt4KDuTYFojVEQ%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="0.00"
                data-deal="0"
@@ -2495,7 +2556,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/357889150450?_skw=charizard+ex+199%2F165&amp;hash=item5353db0df2:g:pzQAAeSw5Z5pE8hM&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYN4qmJ9PLB2T%2FWrpU4Wq%2F0ErV5cQk8jbONSNL71ZTpVycutQ8urJt13UUzah5mutzpet7H58Vu56sYwoGAUb0qLjm0%2BOuCBzH2%2BLagMsvEUqO6P9%2FqW0WLHzZa9IVpza6WkdOIAMgJtucBBY0YoXVIAZotDUxyuRgs%2B9kuO5VliiLvdLBvA8NH2Go5T2HoUi005izfzUcFv1UY5SWE2kOn4rSTAPh9w6Nkruw%2FpimT3L20T8vPkLEosYYpDKNFsphxOEt8rno0DfhOkX2etgDvgwuhiQT%2B2SU6LuXPfrZ8%2Bg%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/357889150450?_skw=charizard+ex+199%2F165&amp;hash=item5353db0df2:g:pzQAAeSw5Z5pE8hM&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYN4qmJ9PLB2T%2FWrpU4Wq%2F0ErV5cQk8jbONSNL71ZTpVycutQ8urJt13UUzah5mutzpet7H58Vu56sYwoGAUb0qLjm0%2BOuCBzH2%2BLagMsvEUqO6P9%2FqW0WLHzZa9IVpza5Z%2F3SnYbVlj03Pdel8dsu8FsSsc2OKJ%2FkFhSP20vq38UpG06BiYRXnMxb74hDgnLoh3kNukY4kNkCsz0ZzPhmGjF%2FyG7zzFWmtkOMjw%2BUBnYdYRmXXnssHctJ87AKclau%2B8mLiCt9XK47Nk61S8Y6E3tw68T8sH%2BGEwnJCxDfw2A%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="0.00"
                data-deal="0"
@@ -2527,19 +2588,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156472416863?_skw=charizard+ex+special+illustration&amp;hash=item246e7b9a5f:g:9oUAAeSwMspoZJt5" target="_blank" rel="noopener"
-               data-price="399.99"
-               data-discount="-365.40"
+            <a class="pk-card" href="https://www.ebay.com/itm/156934652665?_skw=charizard+ex+special+illustration&amp;hash=item248a08c2f9:g:PN8AAeSwZ19pAp3e" target="_blank" rel="noopener"
+               data-price="180.00"
+               data-discount="-109.40"
                data-deal="0"
                data-bucket="Charizard ex / Special Illustration Rare"
-               data-search="pokemon paldean fates: choose your card! - holos/reverse holos ex baby shiny nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/9oUAAeSwMspoZJt5/s-l225.jpg');"></div>
+               data-search="pokemon cards obsidian flames! - holo/reverse holo ex full art illustration rare">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/PN8AAeSwZ19pAp3e/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$399.99</span>
+                  <span class="pk-price">$180.00</span>
                   
                 </div>
-                <div class="pk-title">Pokemon Paldean Fates: Choose Your Card! - Holos/Reverse Holos EX Baby Shiny NM</div>
+                <div class="pk-title">Pokemon Cards Obsidian Flames! - Holo/Reverse Holo Ex Full Art Illustration Rare</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a></div>
@@ -2704,7 +2765,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 17:35 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 18:55 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

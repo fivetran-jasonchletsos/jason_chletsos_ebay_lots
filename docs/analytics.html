@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,19 +1476,21 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -1939,7 +2032,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="stat-card"><div class="num">$503</div><div class="lbl">Inventory Value</div></div>
       <div class="stat-card"><div class="num">$1,087</div><div class="lbl">All-Time Sold Revenue</div></div>
       <div class="stat-card"><div class="num">2.16<span style="font-size:18px;color:var(--text-muted)">×</span></div><div class="lbl">Turnover Ratio</div></div>
-      <div class="stat-card"><div class="num danger">$116</div><div class="lbl">$ Left on Table (Underpriced)</div></div>
+      <div class="stat-card"><div class="num danger">$115</div><div class="lbl">$ Left on Table (Underpriced)</div></div>
     </div>
 
     <div class="a-grid">
@@ -2064,7 +2157,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       });
 
       // Market position scatter
-      const scatterPts = [{'x': 1.99, 'y': 1.99, 'id': '306933928667', 'title': '2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards', 'flag': 'OK'}, {'x': 28.99, 'y': 9.99, 'id': '306937601406', 'title': '2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm', 'flag': 'UNDERPRICED'}, {'x': 5.88, 'y': 5.99, 'id': '306937606464', 'title': '2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer', 'flag': 'OK'}, {'x': 0.99, 'y': 1.99, 'id': '306784122664', 'title': 'Deion Sanders Cards', 'flag': 'OVERPRICED'}, {'x': 1.04, 'y': 1.0, 'id': '306785163679', 'title': '13 Junior Seau Cards Including Rookie Cards San Diego Charge', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306785270903', 'title': '3 Marshall Faulk Cards San Diego State Indianapolis Colts', 'flag': 'OK'}, {'x': 3.99, 'y': 5.99, 'id': '306903937710', 'title': 'Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot ', 'flag': 'OVERPRICED'}, {'x': 3.99, 'y': 3.99, 'id': '306903941543', 'title': 'Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wid', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306903947932', 'title': 'Carl Banks New York Giants Football Card Lot (8) Super Bowl ', 'flag': 'OK'}, {'x': 5.99, 'y': 6.99, 'id': '306904068997', 'title': 'Marcus Allen Los Angeles Raiders Kansas City Chiefs Football', 'flag': 'OK'}, {'x': 6.99, 'y': 6.99, 'id': '306904078786', 'title': 'Steve Atwater Denver Broncos Football Card Lot (7) Includes ', 'flag': 'OK'}, {'x': 0.99, 'y': 5.99, 'id': '306904174454', 'title': 'Boomer Esiason Cincinnati Bengals New York Jets Football Car', 'flag': 'OVERPRICED'}, {'x': 8.99, 'y': 8.99, 'id': '306904189481', 'title': '4 Aaron Glenn Rookie Cards New York Jets Football Card Lot N', 'flag': 'OK'}, {'x': 8.99, 'y': 8.99, 'id': '306904203738', 'title': '1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts', 'flag': 'OK'}, {'x': 1.49, 'y': 1.99, 'id': '306904215389', 'title': '12 Jim Everett Cards Los Angeles Rams New Orleans Saints Foo', 'flag': 'OVERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306913168494', 'title': '15 Charles Haley Cards San Francisco 49ers Dallas Cowboys Fo', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306913186982', 'title': '11 Mel Gray Cards Detroit Lions Football Card Lot NFL', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306913307606', 'title': '5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL', 'flag': 'OK'}, {'x': 6.99, 'y': 6.99, 'id': '306913790653', 'title': '11 Raghib And Quadry Ismail Cards Raiders Vikings', 'flag': 'OK'}, {'x': 1.98, 'y': 1.95, 'id': '306913845449', 'title': '3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL', 'flag': 'OK'}, {'x': 4.99, 'y': 4.99, 'id': '306913853080', 'title': '9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL', 'flag': 'OK'}, {'x': 30.45, 'y': 4.99, 'id': '306913902750', 'title': '7 Howie Long Cards Raiders Football Card Lot NFL', 'flag': 'UNDERPRICED'}, {'x': 10.0, 'y': 24.99, 'id': '306913934898', 'title': '20 Warren Moon Cards Oilers Vikings', 'flag': 'OVERPRICED'}, {'x': 0.99, 'y': 7.99, 'id': '306913939866', 'title': '15 Dan Marino Cards Miami Dolphins Football Card Lot NFL', 'flag': 'OVERPRICED'}, {'x': 6.99, 'y': 6.99, 'id': '306913950248', 'title': '4 Rookie Cards Willie McGinest One Autographed Football Card', 'flag': 'OK'}, {'x': 3.99, 'y': 3.0, 'id': '306914169081', 'title': '2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Pr', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306914173441', 'title': '2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sander', 'flag': 'OK'}, {'x': 1.5, 'y': 1.99, 'id': '306914174921', 'title': '2025 Panini Rookies & Stars - Artistry in Motion Lamar Jacks', 'flag': 'OVERPRICED'}, {'x': 1.46, 'y': 1.99, 'id': '306914176585', 'title': '2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Pri', 'flag': 'OVERPRICED'}, {'x': 1.65, 'y': 1.99, 'id': '306914244468', 'title': '2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola ', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306914245253', 'title': '2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan', 'flag': 'OK'}, {'x': 1.98, 'y': 1.99, 'id': '306914248743', 'title': '2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wa', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306914249326', 'title': '2025 Panini Select - Select Numbers Jordan Love #7 Silver Pr', 'flag': 'OK'}, {'x': 2.34, 'y': 2.5, 'id': '306914280138', 'title': '5 Sam Adams Rookie Cards Seattle Seahawks', 'flag': 'OK'}, {'x': 1.0, 'y': 1.0, 'id': '306914500757', 'title': 'Eric Metcalf Cleveland Browns Football Card Lot (10) NFL Wid', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306914547105', 'title': 'Andre Rison Indianapolis Colts Atlanta Falcons Football Card', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306914911040', 'title': '2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Sh', 'flag': 'OK'}, {'x': 2.99, 'y': 3.0, 'id': '306914913674', 'title': '2025 Panini Select - Premier Level Travis Hunter #128 Pink S', 'flag': 'OK'}, {'x': 1.99, 'y': 2.99, 'id': '306914915295', 'title': '2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Pr', 'flag': 'OVERPRICED'}, {'x': 3.65, 'y': 5.99, 'id': '306758076966', 'title': 'Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM', 'flag': 'OVERPRICED'}, {'x': 1.5, 'y': 2.99, 'id': '306930460600', 'title': '2025 Panini Prizm - Rookies Will Johnson #370 White Disco Pr', 'flag': 'OVERPRICED'}, {'x': 9.95, 'y': 5.99, 'id': '306930462076', 'title': '2025 Panini Prizm - Bo Nix #142 White Disco Prizm NFL Footba', 'flag': 'UNDERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930463268', 'title': '2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm NFL Fo', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930464091', 'title': '2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC) NFL Foot', 'flag': 'OK'}, {'x': 1.62, 'y': 1.99, 'id': '306930465261', 'title': '2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & ', 'flag': 'OVERPRICED'}, {'x': 1.25, 'y': 1.99, 'id': '306930471991', 'title': '2025 Panini Select - Club Level Najee Harris #203 Black & Gr', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930486853', 'title': '2025 Panini Select - Club Level Kyle Monangai #274 (RC) NFL ', 'flag': 'OK'}, {'x': 1.0, 'y': 1.99, 'id': '306930492125', 'title': '2025 Topps Chrome Football Deommodore Lenoir Refractor #269 ', 'flag': 'OVERPRICED'}, {'x': 1.49, 'y': 1.49, 'id': '306930553146', 'title': '2025 Topps Chrome Garrett Williams #6 Arizona Cardinals', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930555649', 'title': '2025 Panini Select - Premier Level Tank Bigsby #129 Silver P', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930559170', 'title': '2025 Panini Prizm - Willis McGahee #45 Silver Prizm NFL Foot', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930742908', 'title': '2025 Panini Prizm - Jared Verse #30 Silver Prizm NFL Footbal', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306930745036', 'title': '2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC', 'flag': 'OK'}, {'x': 1.39, 'y': 1.99, 'id': '306930746886', 'title': '2025 Panini Prizm - Chris Boswell #174 NFL Football', 'flag': 'OVERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306930773940', 'title': '2025 Panini Prizm - Jared Verse #30 Silver Prizm NFL Footbal', 'flag': 'OK'}, {'x': 1.29, 'y': 1.4, 'id': '306930807722', 'title': '1991-92 Fleer - Pro Vision Magic Johnson #6', 'flag': 'OK'}, {'x': 1.3, 'y': 2.99, 'id': '306930901658', 'title': '2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm', 'flag': 'OVERPRICED'}, {'x': 1.69, 'y': 1.99, 'id': '306930903609', 'title': '2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orienta', 'flag': 'OK'}, {'x': 1.44, 'y': 1.99, 'id': '306930904430', 'title': '2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Pri', 'flag': 'OVERPRICED'}, {'x': 2.75, 'y': 2.99, 'id': '306930909038', 'title': '2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice ', 'flag': 'OK'}, {'x': 2.0, 'y': 1.99, 'id': '306930911781', 'title': '2025 Panini Prizm Draft Picks - Instant Impact Will Howard #', 'flag': 'OK'}, {'x': 1.75, 'y': 2.99, 'id': '306930919438', 'title': '1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930920326', 'title': '1993-94 Fleer Ultra - Bobby Hurley #161 (RC) NFL', 'flag': 'OK'}, {'x': 2.96, 'y': 2.99, 'id': '306930930898', 'title': '2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930938563', 'title': '2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Priz', 'flag': 'OK'}, {'x': 2.1, 'y': 2.99, 'id': '306930939967', 'title': '2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice ', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930942401', 'title': '2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver P', 'flag': 'OK'}, {'x': 1.35, 'y': 2.99, 'id': '306931048688', 'title': '2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice', 'flag': 'OVERPRICED'}, {'x': 2.0, 'y': 2.99, 'id': '306931055732', 'title': '2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver P', 'flag': 'OVERPRICED'}, {'x': 4.65, 'y': 4.56, 'id': '306931070594', 'title': '6 Basketball Cards From 90s', 'flag': 'OK'}, {'x': 11.0, 'y': 4.56, 'id': '306931077943', 'title': '6 Basketball Cards From The 90s', 'flag': 'UNDERPRICED'}, {'x': 11.0, 'y': 4.56, 'id': '306931142490', 'title': '6 Basketball Cards From The 90s', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306931209046', 'title': '1983 Donruss - Rickey Henderson #35 NFL Football', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306931218531', 'title': 'Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press', 'flag': 'OK'}, {'x': 4.99, 'y': 4.99, 'id': '306931236773', 'title': '1990 Bowman - Rickey Henderson #457 NFL', 'flag': 'OK'}, {'x': 2.49, 'y': 3.99, 'id': '306931278274', 'title': '1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sam', 'flag': 'OVERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306931283327', 'title': '1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #', 'flag': 'OK'}, {'x': 2.22, 'y': 2.22, 'id': '306931285504', 'title': '1991 Fleer - Ken Griffey Jr, Barry Bonds #710 NFL', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306931303163', 'title': '4 1991 Playball U.S.A. - Darryl Strawberry NFL', 'flag': 'OK'}, {'x': 1.23, 'y': 1.23, 'id': '306931330505', 'title': '1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. An', 'flag': 'OK'}, {'x': 3.45, 'y': 3.45, 'id': '306931339580', 'title': '1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #', 'flag': 'OK'}, {'x': 16.01, 'y': 11.99, 'id': '306931446668', 'title': '2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pan', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306934495603', 'title': '2025 Panini Rookies & Stars - Airborne Cam Ward #29 Silver (', 'flag': 'OK'}, {'x': 2.75, 'y': 3.33, 'id': '306934506774', 'title': '2025 Panini Rookies & Stars - Crusade Caleb Williams #5 Silv', 'flag': 'OVERPRICED'}, {'x': 4.36, 'y': 3.33, 'id': '306937598270', 'title': '2025 Panini Select - Concourse Josh Allen #86 Pink Shock Pri', 'flag': 'UNDERPRICED'}, {'x': 4.35, 'y': 4.44, 'id': '306937599747', 'title': '2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock P', 'flag': 'OK'}, {'x': 2.77, 'y': 4.44, 'id': '306937604288', 'title': '2025 Panini Select - Concourse Travis Hunter #28 Pink Shock ', 'flag': 'OVERPRICED'}, {'x': 4.99, 'y': 5.55, 'id': '306937663074', 'title': '2025 Panini Select - Rookie Swatches TreVeyon Henderson #RSW', 'flag': 'OK'}, {'x': 6.27, 'y': 5.55, 'id': '306937664217', 'title': '2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic ', 'flag': 'OK'}, {'x': 5.0, 'y': 4.44, 'id': '306937669968', 'title': '2025 Panini Select - Club Level Jayden Daniels #289 Pink Sho', 'flag': 'OK'}, {'x': 19.99, 'y': 16.99, 'id': '306937677187', 'title': '2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyr', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.28, 'id': '306937679957', 'title': '2025 Panini Phoenix - Rookies Shedeur Sanders #154 Silver (R', 'flag': 'UNDERPRICED'}, {'x': 1.97, 'y': 2.22, 'id': '306939281535', 'title': '2025 Topps Chrome - Penei Sewell #99 Refractor NFL', 'flag': 'OK'}, {'x': 3.74, 'y': 4.56, 'id': '306939289562', 'title': '2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fracto', 'flag': 'OVERPRICED'}, {'x': 2.0, 'y': 1.99, 'id': '306939301767', 'title': '2025 Topps Chrome Football Trey Amos RC #371 Commanders NFL', 'flag': 'OK'}, {'x': 3.17, 'y': 1.23, 'id': '306939304842', 'title': '2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins NFL', 'flag': 'UNDERPRICED'}, {'x': 2.29, 'y': 2.34, 'id': '306939312739', 'title': '2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC) NF', 'flag': 'OK'}, {'x': 9.45, 'y': 8.9, 'id': '306939316823', 'title': '2025 Topps Chrome #286 Vita Vea Aqua Wave Refractor /199 Buc', 'flag': 'OK'}, {'x': 2.0, 'y': 2.34, 'id': '306939326707', 'title': 'Courtland Sutton 2025 Topps Chrome Football Refractor Ray Wa', 'flag': 'OK'}, {'x': 67.5, 'y': 31.23, 'id': '306939333836', 'title': '2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusi', 'flag': 'UNDERPRICED'}, {'x': 4.56, 'y': 4.56, 'id': '306939339030', 'title': '2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fract', 'flag': 'OK'}, {'x': 5.33, 'y': 5.67, 'id': '306939342209', 'title': '2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL', 'flag': 'OK'}, {'x': 2.0, 'y': 3.45, 'id': '306939345538', 'title': '2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints', 'flag': 'OVERPRICED'}, {'x': 1.59, 'y': 2.34, 'id': '306939349539', 'title': 'Topps Chrome Myles Garrett #1975-8 Cleveland Browns 2025 NFL', 'flag': 'OVERPRICED'}, {'x': 1.25, 'y': 2.34, 'id': '306939352679', 'title': '2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroi', 'flag': 'OVERPRICED'}, {'x': 1.92, 'y': 2.34, 'id': '306939367849', 'title': '2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rooki', 'flag': 'OVERPRICED'}, {'x': 3.99, 'y': 3.45, 'id': '306939369726', 'title': '2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor ', 'flag': 'OK'}, {'x': 2.34, 'y': 5.67, 'id': '306939373376', 'title': '2025 Topps Chrome Football - Cooper Kupp Red White & Blue - ', 'flag': 'OVERPRICED'}, {'x': 1.75, 'y': 2.34, 'id': '306939472487', 'title': '2025 Topps Chrome CeeDee Lamb Card Fortune 15 Refractor Dall', 'flag': 'OVERPRICED'}, {'x': 3.5, 'y': 2.34, 'id': '306939473666', 'title': '2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rook', 'flag': 'UNDERPRICED'}, {'x': 3.45, 'y': 3.45, 'id': '306939475594', 'title': '2025 Topps Chrome Football - Ray Wave Refractor #254 DK Metc', 'flag': 'OK'}, {'x': 1.23, 'y': 1.23, 'id': '306941721710', 'title': '2025 Select Football Chuba Hubbard Concourse Silver Prizm #4', 'flag': 'OK'}, {'x': 2.49, 'y': 2.34, 'id': '306941724232', 'title': '2025 Panini Prizm Draft Picks - Will Howard #83 Silver Prizm', 'flag': 'OK'}, {'x': 5.47, 'y': 1.99, 'id': '306941726438', 'title': '2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /', 'flag': 'UNDERPRICED'}, {'x': 1.19, 'y': 1.23, 'id': '306941727410', 'title': '2025 Panini Prizm Draft Picks #97 Dillon Gabriel Prizms Silv', 'flag': 'OK'}, {'x': 2.49, 'y': 2.49, 'id': '306941728262', 'title': '2025 Panini Prizm Draft Picks #155 Trevor Etienne Prizms Red', 'flag': 'OK'}, {'x': 1.99, 'y': 1.75, 'id': '306941729219', 'title': '2025 Panini Rookies & Stars #16 Matthew Golden Crusade Silve', 'flag': 'OK'}, {'x': 3.12, 'y': 1.99, 'id': '306941730763', 'title': '2025 Panini Prizm - Brock Bowers #6 Silver Prizm NFL Footbal', 'flag': 'UNDERPRICED'}, {'x': 1.75, 'y': 1.49, 'id': '306941733672', 'title': '2025 Panini Phoenix - Paragon Ashton Jeanty #10 (RC) NFL Foo', 'flag': 'OK'}, {'x': 2.99, 'y': 2.34, 'id': '306942007235', 'title': '2025 Topps Chrome Jacory Croskey-Merritt Refractor #387 (RC)', 'flag': 'UNDERPRICED'}, {'x': 1.29, 'y': 1.23, 'id': '306943185140', 'title': '2009 Playoff Prestige - Rookie Louis Murphy #169 Blue Jersey', 'flag': 'OK'}];
+      const scatterPts = [{'x': 1.99, 'y': 1.99, 'id': '306933928667', 'title': '2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards', 'flag': 'OK'}, {'x': 28.99, 'y': 9.99, 'id': '306937601406', 'title': '2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm', 'flag': 'UNDERPRICED'}, {'x': 5.88, 'y': 5.99, 'id': '306937606464', 'title': '2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer', 'flag': 'OK'}, {'x': 0.99, 'y': 1.99, 'id': '306784122664', 'title': 'Deion Sanders Cards', 'flag': 'OVERPRICED'}, {'x': 1.04, 'y': 1.0, 'id': '306785163679', 'title': '13 Junior Seau Cards Including Rookie Cards San Diego Charge', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306785270903', 'title': '3 Marshall Faulk Cards San Diego State Indianapolis Colts', 'flag': 'OK'}, {'x': 3.99, 'y': 5.99, 'id': '306903937710', 'title': 'Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot ', 'flag': 'OVERPRICED'}, {'x': 3.99, 'y': 3.99, 'id': '306903941543', 'title': 'Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wid', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306903947932', 'title': 'Carl Banks New York Giants Football Card Lot (8) Super Bowl ', 'flag': 'OK'}, {'x': 5.99, 'y': 6.99, 'id': '306904068997', 'title': 'Marcus Allen Los Angeles Raiders Kansas City Chiefs Football', 'flag': 'OK'}, {'x': 6.99, 'y': 6.99, 'id': '306904078786', 'title': 'Steve Atwater Denver Broncos Football Card Lot (7) Includes ', 'flag': 'OK'}, {'x': 0.99, 'y': 5.99, 'id': '306904174454', 'title': 'Boomer Esiason Cincinnati Bengals New York Jets Football Car', 'flag': 'OVERPRICED'}, {'x': 8.99, 'y': 8.99, 'id': '306904189481', 'title': '4 Aaron Glenn Rookie Cards New York Jets Football Card Lot N', 'flag': 'OK'}, {'x': 8.99, 'y': 8.99, 'id': '306904203738', 'title': '1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts', 'flag': 'OK'}, {'x': 1.49, 'y': 1.99, 'id': '306904215389', 'title': '12 Jim Everett Cards Los Angeles Rams New Orleans Saints Foo', 'flag': 'OVERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306913168494', 'title': '15 Charles Haley Cards San Francisco 49ers Dallas Cowboys Fo', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306913186982', 'title': '11 Mel Gray Cards Detroit Lions Football Card Lot NFL', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306913307606', 'title': '5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL', 'flag': 'OK'}, {'x': 6.99, 'y': 6.99, 'id': '306913790653', 'title': '11 Raghib And Quadry Ismail Cards Raiders Vikings', 'flag': 'OK'}, {'x': 1.98, 'y': 1.95, 'id': '306913845449', 'title': '3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL', 'flag': 'OK'}, {'x': 4.99, 'y': 4.99, 'id': '306913853080', 'title': '9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL', 'flag': 'OK'}, {'x': 30.45, 'y': 4.99, 'id': '306913902750', 'title': '7 Howie Long Cards Raiders Football Card Lot NFL', 'flag': 'UNDERPRICED'}, {'x': 10.0, 'y': 24.99, 'id': '306913934898', 'title': '20 Warren Moon Cards Oilers Vikings', 'flag': 'OVERPRICED'}, {'x': 0.99, 'y': 7.99, 'id': '306913939866', 'title': '15 Dan Marino Cards Miami Dolphins Football Card Lot NFL', 'flag': 'OVERPRICED'}, {'x': 6.99, 'y': 6.99, 'id': '306913950248', 'title': '4 Rookie Cards Willie McGinest One Autographed Football Card', 'flag': 'OK'}, {'x': 3.99, 'y': 3.0, 'id': '306914169081', 'title': '2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Pr', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306914173441', 'title': '2025 Panini Rookies & Stars - Stellar Rookies Shedeur Sander', 'flag': 'OK'}, {'x': 1.5, 'y': 1.99, 'id': '306914174921', 'title': '2025 Panini Rookies & Stars - Artistry in Motion Lamar Jacks', 'flag': 'OVERPRICED'}, {'x': 1.46, 'y': 1.99, 'id': '306914176585', 'title': '2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Pri', 'flag': 'OVERPRICED'}, {'x': 1.65, 'y': 1.99, 'id': '306914244468', 'title': '2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola ', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306914245253', 'title': '2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan', 'flag': 'OK'}, {'x': 1.98, 'y': 1.99, 'id': '306914248743', 'title': '2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wa', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306914249326', 'title': '2025 Panini Select - Select Numbers Jordan Love #7 Silver Pr', 'flag': 'OK'}, {'x': 2.34, 'y': 2.5, 'id': '306914280138', 'title': '5 Sam Adams Rookie Cards Seattle Seahawks', 'flag': 'OK'}, {'x': 1.0, 'y': 1.0, 'id': '306914500757', 'title': 'Eric Metcalf Cleveland Browns Football Card Lot (10) NFL Wid', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306914547105', 'title': 'Andre Rison Indianapolis Colts Atlanta Falcons Football Card', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306914911040', 'title': '2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Sh', 'flag': 'OK'}, {'x': 2.99, 'y': 3.0, 'id': '306914913674', 'title': '2025 Panini Select - Premier Level Travis Hunter #128 Pink S', 'flag': 'OK'}, {'x': 1.99, 'y': 2.99, 'id': '306914915295', 'title': '2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Pr', 'flag': 'OVERPRICED'}, {'x': 3.65, 'y': 5.99, 'id': '306758076966', 'title': 'Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM', 'flag': 'OVERPRICED'}, {'x': 1.5, 'y': 2.99, 'id': '306930460600', 'title': '2025 Panini Prizm - Rookies Will Johnson #370 White Disco Pr', 'flag': 'OVERPRICED'}, {'x': 9.95, 'y': 5.99, 'id': '306930462076', 'title': '2025 Panini Prizm - Bo Nix #142 White Disco Prizm NFL Footba', 'flag': 'UNDERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930463268', 'title': '2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm NFL Fo', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930464091', 'title': '2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC) NFL Foot', 'flag': 'OK'}, {'x': 1.62, 'y': 1.99, 'id': '306930465261', 'title': '2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & ', 'flag': 'OVERPRICED'}, {'x': 1.25, 'y': 1.99, 'id': '306930471991', 'title': '2025 Panini Select - Club Level Najee Harris #203 Black & Gr', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930486853', 'title': '2025 Panini Select - Club Level Kyle Monangai #274 (RC) NFL ', 'flag': 'OK'}, {'x': 1.0, 'y': 1.99, 'id': '306930492125', 'title': '2025 Topps Chrome Football Deommodore Lenoir Refractor #269 ', 'flag': 'OVERPRICED'}, {'x': 1.49, 'y': 1.49, 'id': '306930553146', 'title': '2025 Topps Chrome Garrett Williams #6 Arizona Cardinals', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930555649', 'title': '2025 Panini Select - Premier Level Tank Bigsby #129 Silver P', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930559170', 'title': '2025 Panini Prizm - Willis McGahee #45 Silver Prizm NFL Foot', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930742908', 'title': '2025 Panini Prizm - Jared Verse #30 Silver Prizm NFL Footbal', 'flag': 'OK'}, {'x': 1.99, 'y': 1.99, 'id': '306930745036', 'title': '2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC', 'flag': 'OK'}, {'x': 1.39, 'y': 1.99, 'id': '306930746886', 'title': '2025 Panini Prizm - Chris Boswell #174 NFL Football', 'flag': 'OVERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306930773940', 'title': '2025 Panini Prizm - Jared Verse #30 Silver Prizm NFL Footbal', 'flag': 'OK'}, {'x': 1.29, 'y': 1.4, 'id': '306930807722', 'title': '1991-92 Fleer - Pro Vision Magic Johnson #6', 'flag': 'OK'}, {'x': 1.3, 'y': 2.99, 'id': '306930901658', 'title': '2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm', 'flag': 'OVERPRICED'}, {'x': 1.69, 'y': 1.99, 'id': '306930903609', 'title': '2025 Panini Prizm Draft Picks #6 Quinn Ewers Student Orienta', 'flag': 'OK'}, {'x': 1.44, 'y': 1.99, 'id': '306930904430', 'title': '2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Pri', 'flag': 'OVERPRICED'}, {'x': 2.75, 'y': 2.99, 'id': '306930909038', 'title': '2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice ', 'flag': 'OK'}, {'x': 2.0, 'y': 1.99, 'id': '306930911781', 'title': '2025 Panini Prizm Draft Picks - Instant Impact Will Howard #', 'flag': 'OK'}, {'x': 1.75, 'y': 2.99, 'id': '306930919438', 'title': '1993-94 Fleer Ultra - Rebound Kings Dennis Rodman #10', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930920326', 'title': '1993-94 Fleer Ultra - Bobby Hurley #161 (RC) NFL', 'flag': 'OK'}, {'x': 2.96, 'y': 2.99, 'id': '306930930898', 'title': '2025 Panini Prizm Draft Picks - New Recruits Ashton Jeanty #', 'flag': 'OK'}, {'x': 2.99, 'y': 2.99, 'id': '306930938563', 'title': '2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Priz', 'flag': 'OK'}, {'x': 2.1, 'y': 2.99, 'id': '306930939967', 'title': '2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice ', 'flag': 'OVERPRICED'}, {'x': 1.99, 'y': 1.99, 'id': '306930942401', 'title': '2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver P', 'flag': 'OK'}, {'x': 1.35, 'y': 2.99, 'id': '306931048688', 'title': '2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice', 'flag': 'OVERPRICED'}, {'x': 1.9, 'y': 2.99, 'id': '306931055732', 'title': '2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver P', 'flag': 'OVERPRICED'}, {'x': 4.65, 'y': 4.56, 'id': '306931070594', 'title': '6 Basketball Cards From 90s', 'flag': 'OK'}, {'x': 11.0, 'y': 4.56, 'id': '306931077943', 'title': '6 Basketball Cards From The 90s', 'flag': 'UNDERPRICED'}, {'x': 11.0, 'y': 4.56, 'id': '306931142490', 'title': '6 Basketball Cards From The 90s', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306931209046', 'title': '1983 Donruss - Rickey Henderson #35 NFL Football', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306931218531', 'title': 'Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press', 'flag': 'OK'}, {'x': 4.99, 'y': 4.99, 'id': '306931236773', 'title': '1990 Bowman - Rickey Henderson #457 NFL', 'flag': 'OK'}, {'x': 2.49, 'y': 3.99, 'id': '306931278274', 'title': '1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sam', 'flag': 'OVERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306931283327', 'title': '1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #', 'flag': 'OK'}, {'x': 2.22, 'y': 2.22, 'id': '306931285504', 'title': '1991 Fleer - Ken Griffey Jr, Barry Bonds #710 NFL', 'flag': 'OK'}, {'x': 3.99, 'y': 3.99, 'id': '306931303163', 'title': '4 1991 Playball U.S.A. - Darryl Strawberry NFL', 'flag': 'OK'}, {'x': 1.23, 'y': 1.23, 'id': '306931330505', 'title': '1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. An', 'flag': 'OK'}, {'x': 3.45, 'y': 3.45, 'id': '306931339580', 'title': '1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #', 'flag': 'OK'}, {'x': 16.01, 'y': 11.99, 'id': '306931446668', 'title': '2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pan', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.99, 'id': '306934495603', 'title': '2025 Panini Rookies & Stars - Airborne Cam Ward #29 Silver (', 'flag': 'OK'}, {'x': 2.75, 'y': 3.33, 'id': '306934506774', 'title': '2025 Panini Rookies & Stars - Crusade Caleb Williams #5 Silv', 'flag': 'OVERPRICED'}, {'x': 4.36, 'y': 3.33, 'id': '306937598270', 'title': '2025 Panini Select - Concourse Josh Allen #86 Pink Shock Pri', 'flag': 'UNDERPRICED'}, {'x': 4.46, 'y': 4.44, 'id': '306937599747', 'title': '2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock P', 'flag': 'OK'}, {'x': 2.77, 'y': 4.44, 'id': '306937604288', 'title': '2025 Panini Select - Concourse Travis Hunter #28 Pink Shock ', 'flag': 'OVERPRICED'}, {'x': 4.99, 'y': 5.55, 'id': '306937663074', 'title': '2025 Panini Select - Rookie Swatches TreVeyon Henderson #RSW', 'flag': 'OK'}, {'x': 6.27, 'y': 5.55, 'id': '306937664217', 'title': '2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic ', 'flag': 'OK'}, {'x': 5.0, 'y': 4.44, 'id': '306937669968', 'title': '2025 Panini Select - Club Level Jayden Daniels #289 Pink Sho', 'flag': 'OK'}, {'x': 19.99, 'y': 16.99, 'id': '306937677187', 'title': '2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyr', 'flag': 'UNDERPRICED'}, {'x': 2.99, 'y': 2.28, 'id': '306937679957', 'title': '2025 Panini Phoenix - Rookies Shedeur Sanders #154 Silver (R', 'flag': 'UNDERPRICED'}, {'x': 1.97, 'y': 2.22, 'id': '306939281535', 'title': '2025 Topps Chrome - Penei Sewell #99 Refractor NFL', 'flag': 'OK'}, {'x': 3.74, 'y': 4.56, 'id': '306939289562', 'title': '2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fracto', 'flag': 'OVERPRICED'}, {'x': 2.0, 'y': 1.99, 'id': '306939301767', 'title': '2025 Topps Chrome Football Trey Amos RC #371 Commanders NFL', 'flag': 'OK'}, {'x': 3.17, 'y': 1.23, 'id': '306939304842', 'title': '2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins NFL', 'flag': 'UNDERPRICED'}, {'x': 2.29, 'y': 2.34, 'id': '306939312739', 'title': '2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC) NF', 'flag': 'OK'}, {'x': 9.45, 'y': 8.9, 'id': '306939316823', 'title': '2025 Topps Chrome #286 Vita Vea Aqua Wave Refractor /199 Buc', 'flag': 'OK'}, {'x': 2.0, 'y': 2.34, 'id': '306939326707', 'title': 'Courtland Sutton 2025 Topps Chrome Football Refractor Ray Wa', 'flag': 'OK'}, {'x': 67.5, 'y': 31.23, 'id': '306939333836', 'title': '2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusi', 'flag': 'UNDERPRICED'}, {'x': 4.56, 'y': 4.56, 'id': '306939339030', 'title': '2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fract', 'flag': 'OK'}, {'x': 5.33, 'y': 5.67, 'id': '306939342209', 'title': '2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL', 'flag': 'OK'}, {'x': 2.0, 'y': 3.45, 'id': '306939345538', 'title': '2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints', 'flag': 'OVERPRICED'}, {'x': 1.59, 'y': 2.34, 'id': '306939349539', 'title': 'Topps Chrome Myles Garrett #1975-8 Cleveland Browns 2025 NFL', 'flag': 'OVERPRICED'}, {'x': 1.25, 'y': 2.34, 'id': '306939352679', 'title': '2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroi', 'flag': 'OVERPRICED'}, {'x': 1.92, 'y': 2.34, 'id': '306939367849', 'title': '2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rooki', 'flag': 'OVERPRICED'}, {'x': 3.99, 'y': 3.45, 'id': '306939369726', 'title': '2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor ', 'flag': 'OK'}, {'x': 2.34, 'y': 5.67, 'id': '306939373376', 'title': '2025 Topps Chrome Football - Cooper Kupp Red White & Blue - ', 'flag': 'OVERPRICED'}, {'x': 1.75, 'y': 2.34, 'id': '306939472487', 'title': '2025 Topps Chrome CeeDee Lamb Card Fortune 15 Refractor Dall', 'flag': 'OVERPRICED'}, {'x': 3.5, 'y': 2.34, 'id': '306939473666', 'title': '2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rook', 'flag': 'UNDERPRICED'}, {'x': 3.45, 'y': 3.45, 'id': '306939475594', 'title': '2025 Topps Chrome Football - Ray Wave Refractor #254 DK Metc', 'flag': 'OK'}, {'x': 1.23, 'y': 1.23, 'id': '306941721710', 'title': '2025 Select Football Chuba Hubbard Concourse Silver Prizm #4', 'flag': 'OK'}, {'x': 2.49, 'y': 2.34, 'id': '306941724232', 'title': '2025 Panini Prizm Draft Picks - Will Howard #83 Silver Prizm', 'flag': 'OK'}, {'x': 5.0, 'y': 1.99, 'id': '306941726438', 'title': '2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /', 'flag': 'UNDERPRICED'}, {'x': 1.19, 'y': 1.23, 'id': '306941727410', 'title': '2025 Panini Prizm Draft Picks #97 Dillon Gabriel Prizms Silv', 'flag': 'OK'}, {'x': 2.49, 'y': 2.49, 'id': '306941728262', 'title': '2025 Panini Prizm Draft Picks #155 Trevor Etienne Prizms Red', 'flag': 'OK'}, {'x': 1.99, 'y': 1.75, 'id': '306941729219', 'title': '2025 Panini Rookies & Stars #16 Matthew Golden Crusade Silve', 'flag': 'OK'}, {'x': 3.12, 'y': 1.99, 'id': '306941730763', 'title': '2025 Panini Prizm - Brock Bowers #6 Silver Prizm NFL Footbal', 'flag': 'UNDERPRICED'}, {'x': 1.75, 'y': 1.49, 'id': '306941733672', 'title': '2025 Panini Phoenix - Paragon Ashton Jeanty #10 (RC) NFL Foo', 'flag': 'OK'}, {'x': 2.99, 'y': 2.34, 'id': '306942007235', 'title': '2025 Topps Chrome Jacory Croskey-Merritt Refractor #387 (RC)', 'flag': 'UNDERPRICED'}, {'x': 1.29, 'y': 1.23, 'id': '306943185140', 'title': '2009 Playoff Prestige - Rookie Louis Murphy #169 Blue Jersey', 'flag': 'OK'}];
       new Chart(document.getElementById('ch-market-pos'), {
         type: 'scatter',
         data: {
@@ -2110,7 +2203,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 17:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 18:55 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

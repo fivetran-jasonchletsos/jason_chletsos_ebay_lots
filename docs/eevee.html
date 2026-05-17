@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,19 +1476,21 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -1925,7 +2018,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pk-kpi"><div class="pk-n">6</div><div class="pk-l">Categories</div></div>
       <div class="pk-kpi"><div class="pk-n">98</div><div class="pk-l">Live listings</div></div>
       <div class="pk-kpi"><div class="pk-n">37</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">13:35</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">14:56</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -1951,14 +2044,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-grail-title">Pokemon Surging Sparks: Choose Your Card! Holos/EX/Full Arts! NM</div>
               </div>
             </a>
-            <a class="pk-grail-card" href="https://www.ebay.com/itm/156447979868?_skw=eevee+ex+special+illustration&amp;hash=item246d06b95c:g:a-4AAeSwbz1pS8C0" target="_blank" rel="noopener">
-              <div class="pk-grail-badge">LEGENDARY</div>
-              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/a-4AAeSwbz1pS8C0/s-l225.jpg');"></div>
-              <div class="pk-grail-meta">
-                <div class="pk-grail-price">$400</div>
-                <div class="pk-grail-title">Pokemon TCG - Twilight Masquerade: Choose Your Card! - All Holos</div>
-              </div>
-            </a>
             <a class="pk-grail-card" href="https://www.ebay.com/itm/156374517016?_skw=umbreon+vmax+alt+art&amp;hash=item2468a5c518:g:wSUAAeSwsA1pj-DU" target="_blank" rel="noopener">
               <div class="pk-grail-badge">LEGENDARY</div>
               <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/wSUAAeSwsA1pj-DU/s-l225.jpg');"></div>
@@ -1975,12 +2060,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-grail-title">Evolving Skies Master Set - Choose Your Card! - Every Alt Art, P</div>
               </div>
             </a>
-            <a class="pk-grail-card" href="https://www.ebay.com/itm/177327083174?_skw=sylveon+vmax+alt+art&amp;hash=item2949848ea6:g:sVQAAeSwveJomQuW" target="_blank" rel="noopener">
+            <a class="pk-grail-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:5kMAAeSwbz1pS8~1" target="_blank" rel="noopener">
               <div class="pk-grail-badge">LEGENDARY</div>
-              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/sVQAAeSwveJomQuW/s-l225.jpg');"></div>
+              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/5kMAAeSwbz1pS8~1/s-l225.jpg');"></div>
               <div class="pk-grail-meta">
-                <div class="pk-grail-price">$249</div>
-                <div class="pk-grail-title">Evolving Skies Master Set - Choose Your Card! - Every Alt Art, P</div>
+                <div class="pk-grail-price">$280</div>
+                <div class="pk-grail-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Hol</div>
+              </div>
+            </a>
+            <a class="pk-grail-card" href="https://www.ebay.com/itm/156241664107?_skw=eevee+ex+special+illustration&amp;hash=item2460ba986b:g:ItUAAOSwQrBoM6E5" target="_blank" rel="noopener">
+              <div class="pk-grail-badge">LEGENDARY</div>
+              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/ItUAAOSwQrBoM6E5/s-l225.jpg');"></div>
+              <div class="pk-grail-meta">
+                <div class="pk-grail-price">$250</div>
+                <div class="pk-grail-title">Pokemon 151 Cards! Holo/Reverse Holo Ex Illustration Ultra Doubl</div>
               </div>
             </a></div>
         </section>
@@ -2031,7 +2124,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="pk-hero-disc">-65%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcTgz5LH5jpmoRD8K2euX%2F0F0pfxcCyfCTAKgT%2FSFGbbsBYLcmU6d309EI8VZACgeRkY6rFr9pYGZWXq9Q9kp4zwlU8P88lpl9WpXnqiolLDzh7NXZADVAu5dvREZIiXSxV4wW7k06SJFYD%2BXW9YxKJVy5QV4fw%2BxgTz2z6Phwlkz5BDcX%2BzUzySMc9a6SeIwLs%3D" target="_blank" rel="noopener"
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcSZgWVI5YzNpDGWozNNTAoNmAQaqHh7WUDZYqfOihu%2FWha2rM0OBROto3mkFn45W%2BjKBOa1MdXMBUrhysH7s4N4IFGz313mArO%2Fr8mGYOz1EYDwXVubRDu2T3Om1f7Hv2ZGxh2HgpyNI%2Fs%2FQqBzV05TqFVR56ntFsTrmxOKLnw9Hz1CsXVLwmZn6BiYDv9aFd0%3D" target="_blank" rel="noopener"
            title="Pokemon TCG, Special Illustration Rare - Choose Your Card, English ,Full Art,NM">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/tmAAAeSweG9pXb3R/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
@@ -2273,7 +2366,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/155705429889?_skw=eevee+skyridge&amp;hash=item2440c44f81:g:kB0AAOSwKXZkzzfp" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/155705429889?_skw=eevee+skyridge&amp;hash=item2440c44f81:g:kB0AAOSwKXZkzzfp&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYWZ4UA%2BW1oL3tv%2F8aXlFTCsk5WO0PC%2FNFTfqywyXCevieiKtw62hq1CGyhkb%2Fsv0eF9xCLYGjDe8E6xkHCMUl7gNhXNzFo6dQ3gO0zmrET73Z7kL7R0gBbooc6ll0Sa8VuYG0UFe3vwiMkAqli91c8Z04aaRlWq5uDLFSky4KSGewzlHdP8R61vPFbUiQE20F%2B%2F8oCrCsjr1LL7SN5PHlLMZI5u6C4NydFHMrOqc0WYlkpb5oa6IXusI8E3o%2FUaGv%2F38vECKIibaHqSChNfUc4ZnIdDfXgENgHS3%2FC%2Fu9hRw%3D%3D" target="_blank" rel="noopener"
                data-price="29.99"
                data-discount="-50.00"
                data-deal="0"
@@ -2767,7 +2860,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcTgz5LH5jpmoRD8K2euX%2F0F0pfxcCyfCTAKgT%2FSFGbbsBYLcmU6d309EI8VZACgeRkY6rFr9pYGZWXq9Q9kp4zwlU8P88lpl9WpXnqiolLDzh7NXZADVAu5dvREZIiXSxV4wW7k06SJFYD%2BXW9YxKJVy5QV4fw%2BxgTz2z6Phwlkz5BDcX%2BzUzySMc9a6SeIwLs%3D" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcSZgWVI5YzNpDGWozNNTAoNmAQaqHh7WUDZYqfOihu%2FWha2rM0OBROto3mkFn45W%2BjKBOa1MdXMBUrhysH7s4N4IFGz313mArO%2Fr8mGYOz1EYDwXVubRDu2T3Om1f7Hv2ZGxh2HgpyNI%2Fs%2FQqBzV05TqFVR56ntFsTrmxOKLnw9Hz1CsXVLwmZn6BiYDv9aFd0%3D" target="_blank" rel="noopener"
                data-price="5.99"
                data-discount="62.50"
                data-deal="1"
@@ -2780,6 +2873,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <span class="pk-disc">-62%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG, Special Illustration Rare - Choose Your Card, English ,Full Art,NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/198360925491?_skw=eevee+ex+151&amp;hash=item2e2f3b8533:g:iD8AAeSwLSlqCUzc" target="_blank" rel="noopener"
+               data-price="5.99"
+               data-discount="62.50"
+               data-deal="1"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon scarlet &amp; violet: 151 cards! english holo/reverse holo card!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/iD8AAeSwLSlqCUzc/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$5.99</span>
+                  <span class="pk-disc">-62%</span>
+                </div>
+                <div class="pk-title">Pokemon Scarlet &amp; Violet: 151 Cards! English Holo/Reverse Holo Card!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -2844,22 +2953,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <span class="pk-disc">-56%</span>
                 </div>
                 <div class="pk-title">Pokemon Special Illustration Ultra Rare Full Art: Choose Your Own</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/198360925491?_skw=eevee+ex+151&amp;hash=item2e2f3b8533:g:iD8AAeSwLSlqCUzc" target="_blank" rel="noopener"
-               data-price="6.99"
-               data-discount="56.30"
-               data-deal="1"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon scarlet &amp; violet: 151 cards! english holo/reverse holo card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/iD8AAeSwLSlqCUzc/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$6.99</span>
-                  <span class="pk-disc">-56%</span>
-                </div>
-                <div class="pk-title">Pokemon Scarlet &amp; Violet: 151 Cards! English Holo/Reverse Holo Card!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3375,16 +3468,32 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156468028147?_skw=eevee+ex+special+illustration&amp;hash=item246e38a2f3:g:68sAAOSwF6BoXQRt" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/156447979868?_skw=eevee+ex+special+illustration&amp;hash=item246d06b95c:g:ttUAAeSwbdBoy9lT" target="_blank" rel="noopener"
                data-price="69.99"
                data-discount="-337.70"
                data-deal="0"
                data-bucket="Eevee ex / SIR"
-               data-search="pokemon shrouded fable: choose your card! holo/reverse holo/ex/ace spec promo nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/68sAAOSwF6BoXQRt/s-l225.jpg');"></div>
+               data-search="pokemon tcg - twilight masquerade: choose your card! - all holos/reverse holos!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/ttUAAeSwbdBoy9lT/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$69.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon TCG - Twilight Masquerade: Choose Your Card! - All Holos/Reverse Holos!</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156468028147?_skw=eevee+ex+special+illustration&amp;hash=item246e38a2f3:g:QiUAAeSwDXhootuL" target="_blank" rel="noopener"
+               data-price="79.99"
+               data-discount="-400.30"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon shrouded fable: choose your card! holo/reverse holo/ex/ace spec promo nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/QiUAAeSwDXhootuL/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$79.99</span>
                   
                 </div>
                 <div class="pk-title">Pokemon Shrouded Fable: Choose Your Card! Holo/Reverse Holo/EX/ACE SPEC Promo NM</div>
@@ -3407,7 +3516,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/357878400066?_skw=umbreon+ex+sir&amp;hash=item5353370442:g:XIgAAeSwK0RpE8co&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbWXTXNjldPRAoP7oo4qUCrEMbafPck31gfDtTpQEDxwcWxns8DxnRy5x97uPgR4vdtltKjGvuWtnl%2FjUsWZelKTwhjXhQw%2BmDCBX5nV4n4wI7uQFm%2F3X2hqsdtjsN9FqjOc8xvVGh%2FfxnKFpuBKbzaNg51vIue0SO2CuWHowcO31aSUvmLEjGVW0yntQLchmtIYet8hDTe5ooHVyEU2hEaSOUKRL8iqvflOrdNxA2IuXJVsZkXOMSQ94zI773Bm0y3WwAUWbTGFnwYQEMSLhMTVEKywEaGBRDypZhqvF2MZA%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/357878400066?_skw=umbreon+ex+sir&amp;hash=item5353370442:g:XIgAAeSwK0RpE8co&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbWXTXNjldPRAoP7oo4qUCrEMbafPck31gfDtTpQEDxwcWxns8DxnRy5x97uPgR4vdtltKjGvuWtnl%2FjUsWZelKTwhjXhQw%2BmDCBX5nV4n4wI7uQFm%2F3X2hqsdtjsN9FqgFclPafOfqQ0dL3RpgzjYSiUvIatcvZVDf6u6yEYOo6HSlHemUatiqHoHirnREXaMAZk5Xt1fh%2BM82aiIGLg322Z%2BEUDIsi2jfsIDpAfDKQhY6WFm%2BnjkXP1Em49zSn4Pp%2F696DpH3urzC5WhdmeoznIvXxutkfytkqhd507i3qg%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="-437.50"
                data-deal="0"
@@ -3423,7 +3532,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/358311614958?_skw=sylveon+ex+sir&amp;hash=item536d0959ee:g:2BIAAeSwfbFpsMjw" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/358311614958?_skw=sylveon+ex+sir&amp;hash=item536d0959ee:g:2BIAAeSwfbFpsMjw&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGaetqznINlMfgSitaujsSneJz99YzO%2BjT5UYuRt%2Bei9TSETQPwKaJ%2Fc3vxZ0MEZ9q1ZbGXNvHp0H5FwkTvf%2F0YUaV%2BmiigDKoLqa9eg41XEd%2BtBOe56alRJovlf8YHJUVVRzpmMTZUQDC0O4man%2F5KqUAzvei7aAdLlw3Td80wiCLDvhctLgSVtjPjwcpesJb0Jpi%2FhSfxyqmPYnqzExAR2b%2FJo9%2FfVac3S6pENm9Ff7wIEUM6Fl52v9vMQ7dwnE1GeqHi3HDEVYq469KxH9UfJ0SQ3GDgzE9r3ipXD%2FM9bCA%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="-437.50"
                data-deal="0"
@@ -3468,22 +3577,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   
                 </div>
                 <div class="pk-title">Eevee ex 167/131 Special Illustration Rare Prismatic Evolutions Pokemon</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:FOAAAeSwRsFoYKm~" target="_blank" rel="noopener"
-               data-price="119.99"
-               data-discount="-650.40"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/FOAAAeSwRsFoYKm~/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$119.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3567,19 +3660,35 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156241664107?_skw=eevee+ex+special+illustration&amp;hash=item2460ba986b:g:j9AAAOSwzJtoM6Ex" target="_blank" rel="noopener"
-               data-price="229.99"
-               data-discount="-1338.30"
+            <a class="pk-card" href="https://www.ebay.com/itm/156241664107?_skw=eevee+ex+special+illustration&amp;hash=item2460ba986b:g:ItUAAOSwQrBoM6E5" target="_blank" rel="noopener"
+               data-price="249.99"
+               data-discount="-1463.40"
                data-deal="0"
                data-bucket="Eevee ex / SIR"
                data-search="pokemon 151 cards! holo/reverse holo ex illustration ultra double rare card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/j9AAAOSwzJtoM6Ex/s-l225.jpg');"></div>
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/ItUAAOSwQrBoM6E5/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$229.99</span>
+                  <span class="pk-price">$249.99</span>
                   
                 </div>
                 <div class="pk-title">Pokemon 151 Cards! Holo/Reverse Holo Ex Illustration Ultra Double Rare Card!</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:5kMAAeSwbz1pS8~1" target="_blank" rel="noopener"
+               data-price="279.99"
+               data-discount="-1651.00"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/5kMAAeSwbz1pS8~1/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$279.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3596,22 +3705,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   
                 </div>
                 <div class="pk-title">Pokemon Surging Sparks: Choose Your Card! Holos/EX/Full Arts! NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156447979868?_skw=eevee+ex+special+illustration&amp;hash=item246d06b95c:g:a-4AAeSwbz1pS8C0" target="_blank" rel="noopener"
-               data-price="399.99"
-               data-discount="-2401.50"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon tcg - twilight masquerade: choose your card! - all holos/reverse holos!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/a-4AAeSwbz1pS8C0/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$399.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon TCG - Twilight Masquerade: Choose Your Card! - All Holos/Reverse Holos!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a></div>
@@ -3760,7 +3853,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 17:35 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 18:56 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

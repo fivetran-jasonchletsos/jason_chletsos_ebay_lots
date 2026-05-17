@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,19 +1476,21 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
@@ -1923,9 +2016,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">8</div><div class="pk-l">Categories</div></div>
-      <div class="pk-kpi"><div class="pk-n">126</div><div class="pk-l">Live listings</div></div>
-      <div class="pk-kpi"><div class="pk-n">43</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">13:34</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">120</div><div class="pk-l">Live listings</div></div>
+      <div class="pk-kpi"><div class="pk-n">40</div><div class="pk-l">Deals &ge;25% below median</div></div>
+      <div class="pk-kpi"><div class="pk-n">14:55</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -1991,14 +2084,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <span class="pk-hero-sub">Biggest discounts vs. median across every bucket.</span>
       </div>
       <div class="pk-hero-grid">
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/397811181938?_skw=pikachu+ex+full+art&amp;hash=item5c9f64e972:g:jeMAAeSwSYZpyLhJ" target="_blank" rel="noopener"
-           title="Ascended Heroes Pokémon Cards, EX , Ultra Rare, Full Art, English, NM.">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/jeMAAeSwSYZpyLhJ/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$8.95</span>
-            <span class="pk-hero-disc">-78%</span>
-          </div>
-        </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/164757998948?_skw=pikachu+mcdonalds+25th&amp;hash=item265c578d64:g:C4AAAOSwOZJgTaRv" target="_blank" rel="noopener"
            title="2021 Pokemon cards McDonalds 25th Anniversary Complete your Set Holos Non Holos">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/C4AAAOSwOZJgTaRv/s-l225.jpg');"></div>
@@ -2012,7 +2097,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/vMUAAeSwUs1opOAk/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.00</span>
-            <span class="pk-hero-disc">-73%</span>
+            <span class="pk-hero-disc">-72%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/144024388987?_skw=pikachu+mcdonalds+25th&amp;hash=item218885c57b:g:OqcAAOSw7spgiuTH" target="_blank" rel="noopener"
@@ -2023,12 +2108,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="pk-hero-disc">-72%</span>
           </div>
         </a>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/157250595322?_skw=pikachu+ex+full+art&amp;hash=item249cdda9fa:g:F7UAAeSwdS1ooZBa" target="_blank" rel="noopener"
+           title="EX Pokémon Cards! Full Art Rare Mega Break XY Black and White Choose Your Card!">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/F7UAAeSwdS1ooZBa/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$12.99</span>
+            <span class="pk-hero-disc">-69%</span>
+          </div>
+        </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/376181296763?_skw=pikachu+vstar&amp;hash=item5796270e7b:g:VyYAAOSw-I9oONKi" target="_blank" rel="noopener"
            title="Pokémon TCG Coins - Choose Your Coin - Standard &amp; Jumbo - Pikachu Charizard etc.">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/VyYAAOSw-I9oONKi/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.95</span>
-            <span class="pk-hero-disc">-68%</span>
+            <span class="pk-hero-disc">-67%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/145272939298?_skw=pikachu+v+full+art&amp;hash=item21d2f12322:g:PzIAAOSw-NxjbVza" target="_blank" rel="noopener"
@@ -2036,7 +2129,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/PzIAAOSw-NxjbVza/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.95</span>
-            <span class="pk-hero-disc">-68%</span>
+            <span class="pk-hero-disc">-67%</span>
           </div>
         </a></div>
     </section>
@@ -2047,7 +2140,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
-        <option value="Grail Watch">Grail Watch (9)</option><option value="1st Edition Base Set">1st Edition Base Set (4)</option><option value="Vintage Holo">Vintage Holo (36)</option><option value="Surfing &amp; Flying Pikachu">Surfing &amp; Flying Pikachu (7)</option><option value="Pikachu V / VMAX / VSTAR">Pikachu V / VMAX / VSTAR (42)</option><option value="Pikachu ex / Special Illustration Rare">Pikachu ex / Special Illustration Rare (17)</option><option value="Promo &amp; Black Star Promos">Promo &amp; Black Star Promos (10)</option><option value="Pikachu PSA 10">Pikachu PSA 10 (1)</option>
+        <option value="Grail Watch">Grail Watch (9)</option><option value="1st Edition Base Set">1st Edition Base Set (4)</option><option value="Vintage Holo">Vintage Holo (32)</option><option value="Surfing &amp; Flying Pikachu">Surfing &amp; Flying Pikachu (7)</option><option value="Pikachu V / VMAX / VSTAR">Pikachu V / VMAX / VSTAR (41)</option><option value="Pikachu ex / Special Illustration Rare">Pikachu ex / Special Illustration Rare (16)</option><option value="Promo &amp; Black Star Promos">Promo &amp; Black Star Promos (10)</option><option value="Pikachu PSA 10">Pikachu PSA 10 (1)</option>
       </select>
       <select id="pk-max">
         <option value="0">Any price</option>
@@ -2154,15 +2247,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$5</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$14</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$13</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$209</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">16</div><div class="pk-stat-l">Deals / 36</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">15</div><div class="pk-stat-l">Deals / 32</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/188019472294?_skw=pikachu+jungle+holo&amp;hash=item2bc6d577a6:g:0owAAeSwBWJpeVxR" target="_blank" rel="noopener"
                data-price="5.49"
-               data-discount="62.00"
+               data-discount="59.10"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pokemon jungle: choose your card - 1st edition &amp; unlimited - lp/nm wotc - 1999">
@@ -2170,7 +2263,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.49</span>
-                  <span class="pk-disc">-62%</span>
+                  <span class="pk-disc">-59%</span>
                 </div>
                 <div class="pk-title">Pokemon Jungle: Choose Your Card - 1st Edition &amp; Unlimited - LP/NM WOTC - 1999</div>
                 <div class="pk-buying">BIN</div>
@@ -2178,7 +2271,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+base+set+holo&amp;hash=item2484684935:g:ryEAAOSwT1lme8-D" target="_blank" rel="noopener"
                data-price="5.99"
-               data-discount="58.50"
+               data-discount="55.40"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -2186,7 +2279,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.99</span>
-                  <span class="pk-disc">-58%</span>
+                  <span class="pk-disc">-55%</span>
                 </div>
                 <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
                 <div class="pk-buying">BIN</div>
@@ -2194,7 +2287,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/146426644232?_skw=pikachu+base+set+holo&amp;hash=item2217b54708:g:YQ4AAOSwwYdnwkiS" target="_blank" rel="noopener"
                data-price="5.99"
-               data-discount="58.50"
+               data-discount="55.40"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="1999 pokemon base set: choose your card!">
@@ -2202,7 +2295,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.99</span>
-                  <span class="pk-disc">-58%</span>
+                  <span class="pk-disc">-55%</span>
                 </div>
                 <div class="pk-title">1999 Pokemon Base Set: Choose Your Card!</div>
                 <div class="pk-buying">BIN</div>
@@ -2210,7 +2303,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156750664346?_skw=pikachu+evolutions+holo&amp;hash=item247f11529a:g:mDUAAOSwxpdoLsal" target="_blank" rel="noopener"
                data-price="6.99"
-               data-discount="51.60"
+               data-discount="48.00"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
@@ -2218,7 +2311,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$6.99</span>
-                  <span class="pk-disc">-52%</span>
+                  <span class="pk-disc">-48%</span>
                 </div>
                 <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2226,7 +2319,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/397645995586?_skw=pikachu+evolutions+holo&amp;hash=item5c958c5e42:g:KHYAAeSwZU5p4o6S" target="_blank" rel="noopener"
                data-price="6.99"
-               data-discount="51.60"
+               data-discount="48.00"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="prismatic evolutions pokemon cards reverse holo rare ex master set singles pick">
@@ -2234,7 +2327,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$6.99</span>
-                  <span class="pk-disc">-52%</span>
+                  <span class="pk-disc">-48%</span>
                 </div>
                 <div class="pk-title">Prismatic Evolutions Pokemon Cards Reverse Holo Rare EX Master Set Singles Pick</div>
                 <div class="pk-buying">BIN</div>
@@ -2242,7 +2335,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/157911286757?_skw=pikachu+jungle+holo&amp;hash=item24c43f03e5:g:i88AAeSws11qBl1h" target="_blank" rel="noopener"
                data-price="7.00"
-               data-discount="51.50"
+               data-discount="47.90"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="non-holo pokémon jungle 1st edition lp - choose your card">
@@ -2250,7 +2343,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.00</span>
-                  <span class="pk-disc">-52%</span>
+                  <span class="pk-disc">-48%</span>
                 </div>
                 <div class="pk-title">Non-Holo Pokémon Jungle 1st Edition LP - Choose Your Card</div>
                 <div class="pk-buying">BIN</div>
@@ -2258,7 +2351,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+jungle+holo&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
                data-price="7.99"
-               data-discount="44.60"
+               data-discount="40.50"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
@@ -2266,47 +2359,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-45%</span>
+                  <span class="pk-disc">-40%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156960591379?_skw=pikachu+jungle+holo&amp;hash=item248b948e13:g:LroAAOSwUKZoGXmx" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/157124381449?_skw=pikachu+jungle+holo&amp;hash=item249557cb09:g:DUoAAOSwbJ5oWRRt" target="_blank" rel="noopener"
                data-price="7.99"
-               data-discount="44.60"
-               data-deal="1"
-               data-bucket="Vintage Holo"
-               data-search="pokemon base set 2 cards! holo rare wotc vintage lp/nm choose your card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/LroAAOSwUKZoGXmx/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-45%</span>
-                </div>
-                <div class="pk-title">Pokemon Base Set 2 Cards! Holo Rare WOTC Vintage LP/NM Choose Your Card!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/157124381449?_skw=pikachu+jungle+holo&amp;hash=item249557cb09:g:P~sAAOSwGk9oWRRS" target="_blank" rel="noopener"
-               data-price="7.99"
-               data-discount="44.60"
+               data-discount="40.50"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pokémon cards! jungle fossil 1st edition holo rare - lp/nm choose your card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/P~sAAOSwGk9oWRRS/s-l225.jpg');"></div>
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/DUoAAOSwbJ5oWRRt/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-45%</span>
+                  <span class="pk-disc">-40%</span>
                 </div>
                 <div class="pk-title">Pokémon Cards! Jungle Fossil 1st Edition Holo Rare - LP/NM Choose Your Card!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/397538706508?_skw=pikachu+jungle+holo&amp;hash=item5c8f27444c:g:emsAAeSwYolpd6OU&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYqCEXBbUQveapJ8kmYIExvYxky8qhF1c9LxzUvNuxK9v3A6JjWxJsygcAGJ1yKSY6723sm%2BrvFdSDNjyLMpi7DAJIMQHHmdNa6ofXaqj8Jt4bmrP8eIHAw3md4jEclNM%2FWMwRMzVO3wlH2AgjXqbgTEr1WI8TXXIIyJV50KuwmnYD3QqfVoIfCCJELks9M9W2M5CUDS8Pf%2FFWVR90RRN2Q8DJbRi6Vyv4kysOAxeMIUfJm0ZCMH5uV8XWrySNGBnz1FKSomX398%2FTYyPeCNkDq3B%2FeKLCfmzqz713c%2FMyLGA%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/397538706508?_skw=pikachu+jungle+holo&amp;hash=item5c8f27444c:g:emsAAeSwYolpd6OU&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYqCEXBbUQveapJ8kmYIExvYxky8qhF1c9LxzUvNuxK9v3A6JjWxJsygcAGJ1yKSY6723sm%2BrvFdSDNjyLMpi7DAJIMQHHmdNa6ofXaqj8Jt4bmrP8eIHAw3md4jEclNM9WYVfxyZjzgRmYFfZ1E8S3qlJss4jZUNvb%2BgaJxEbUasWCqOxv14SHKZBdam06Ja06aUO8AEAoUdOsk3psR6VhbjrlPrqAHZH02vLceSx7EAbVTo8nul69hiXVCXhx9FHO%2B%2B12f8PUdVh%2BwbD4OPMzOvmtryfFCQlOWmZf%2BBfgJw%3D%3D" target="_blank" rel="noopener"
                data-price="8.37"
-               data-discount="42.00"
+               data-discount="37.70"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="🌴 1999 pokemon jungle set 🌴 choose your card 🃏 holos rares nm-mp wotc 🍃">
@@ -2314,7 +2391,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$8.37</span>
-                  <span class="pk-disc">-42%</span>
+                  <span class="pk-disc">-38%</span>
                 </div>
                 <div class="pk-title">🌴 1999 Pokemon Jungle Set 🌴 CHOOSE YOUR CARD 🃏 Holos Rares NM-MP WOTC 🍃</div>
                 <div class="pk-buying">BIN</div>
@@ -2322,7 +2399,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/317503261503?_skw=pikachu+base+set+holo&amp;hash=item49ecab4b3f:g:soEAAeSwgetpzc5M" target="_blank" rel="noopener"
                data-price="8.99"
-               data-discount="37.70"
+               data-discount="33.10"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="base set - pick your pokemon cards - complete your wotc set - holos">
@@ -2330,47 +2407,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$8.99</span>
-                  <span class="pk-disc">-38%</span>
+                  <span class="pk-disc">-33%</span>
                 </div>
                 <div class="pk-title">Base Set - Pick Your Pokemon Cards - Complete Your WOTC Set - HOLOS</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/155835343148?_skw=pikachu+jungle+holo&amp;hash=item244882a12c:g:7rIAAOSwIvRk0pU~" target="_blank" rel="noopener"
-               data-price="9.95"
-               data-discount="31.10"
-               data-deal="1"
-               data-bucket="Vintage Holo"
-               data-search="1999 pokemon 1st edition &amp; base set , vintage holo pokemon cards 100% authentic">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/7rIAAOSwIvRk0pU~/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$9.95</span>
-                  <span class="pk-disc">-31%</span>
-                </div>
-                <div class="pk-title">1999 Pokemon 1st Edition &amp; Base Set , Vintage Holo pokemon cards 100% Authentic</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+base+set+holo&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
-               data-price="9.99"
-               data-discount="30.80"
-               data-deal="1"
-               data-bucket="Vintage Holo"
-               data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-31%</span>
-                </div>
-                <div class="pk-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/146232904113?_skw=pikachu+base+set+holo&amp;hash=item220c2909b1:g:96EAAOSw1eJnSooG" target="_blank" rel="noopener"
                data-price="9.99"
-               data-discount="30.80"
+               data-discount="25.60"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pokemon tcg - choose your mini set | charizard, eevee, mew &amp; more! | near mint">
@@ -2378,15 +2423,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-31%</span>
+                  <span class="pk-disc">-26%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Mini Set | Charizard, Eevee, Mew &amp; More! | Near Mint</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+base+set+holo&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
+               data-price="9.99"
+               data-discount="25.60"
+               data-deal="1"
+               data-bucket="Vintage Holo"
+               data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$9.99</span>
+                  <span class="pk-disc">-26%</span>
+                </div>
+                <div class="pk-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+jungle+holo&amp;hash=item2484684935:g:oCoAAOSwCohme8j4" target="_blank" rel="noopener"
                data-price="9.99"
-               data-discount="30.80"
+               data-discount="25.60"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -2394,7 +2455,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-31%</span>
+                  <span class="pk-disc">-26%</span>
+                </div>
+                <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+jungle+holo&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
+               data-price="9.99"
+               data-discount="25.60"
+               data-deal="1"
+               data-bucket="Vintage Holo"
+               data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/8fMAAOSwqxpn2-c~/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$9.99</span>
+                  <span class="pk-disc">-26%</span>
                 </div>
                 <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
                 <div class="pk-buying">BIN</div>
@@ -2402,7 +2479,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156592960998?_skw=pikachu+evolutions+holo&amp;hash=item2475aaf5e6:g:1C8AAOSwORRoT9PC" target="_blank" rel="noopener"
                data-price="9.99"
-               data-discount="30.80"
+               data-discount="25.60"
                data-deal="1"
                data-bucket="Vintage Holo"
                data-search="pokemon xy: evolutions cards! choose your card - holo/reverse holos ex full art">
@@ -2410,39 +2487,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-31%</span>
+                  <span class="pk-disc">-26%</span>
                 </div>
                 <div class="pk-title">Pokemon XY: Evolutions Cards! Choose Your Card - Holo/Reverse Holos EX Full Art</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/298269976685?_skw=pikachu+evolutions+holo&amp;hash=item457246a86d:g:fLwAAeSwQp1p8MEf" target="_blank" rel="noopener"
-               data-price="13.70"
-               data-discount="5.10"
-               data-deal="0"
-               data-bucket="Vintage Holo"
-               data-search="pokémon tcg: prismatic evolutions - pikachu ex - 028/131 - tag nm mt 8">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/fLwAAeSwQp1p8MEf/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$13.70</span>
-                  <span class="pk-disc">-5%</span>
-                </div>
-                <div class="pk-title">Pokémon TCG: Prismatic Evolutions - Pikachu EX - 028/131 - TAG NM MT 8</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/364198382892?_skw=pikachu+base+set+holo&amp;hash=item54cbea4d2c:g:My8AAOSwWLllmiqW" target="_blank" rel="noopener"
-               data-price="13.99"
-               data-discount="3.10"
+            <a class="pk-card" href="https://www.ebay.com/itm/364198382892?_skw=pikachu+base+set+holo&amp;hash=item54cbea4d2c:g:MiYAAOSwfylm0iX2" target="_blank" rel="noopener"
+               data-price="11.99"
+               data-discount="10.80"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pokemon scarlet and violet base holo to ultra rare single cards 1-198 you pick">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/My8AAOSwWLllmiqW/s-l225.jpg');"></div>
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/MiYAAOSwfylm0iX2/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$13.99</span>
-                  <span class="pk-disc">-3%</span>
+                  <span class="pk-price">$11.99</span>
+                  <span class="pk-disc">-11%</span>
                 </div>
                 <div class="pk-title">Pokemon Scarlet and Violet Base Holo to Ultra Rare Single Cards 1-198 YOU PICK</div>
                 <div class="pk-buying">BIN</div>
@@ -2450,7 +2511,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/374186946738?_skw=pikachu+evolutions+holo&amp;hash=item571f47b0b2:g:BTgAAOSwLclkTC2a" target="_blank" rel="noopener"
                data-price="14.88"
-               data-discount="-3.10"
+               data-discount="-10.80"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search=" pikachu xy evolutions 35/108 reverse holo card 2016 pokemon tcg base set">
@@ -2464,41 +2525,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/196340286331?_skw=pikachu+base+set+holo&amp;hash=item2db6cb037b:g:uYkAAOSwWGdmGAv~&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbrCpTkWhWZXJoiXxw7oRHHiy4I%2FjZ6Koair3TUZIElHK1gQOhGikZ%2Fxj5iXZWuf%2B8oOcXzSx5%2BjxD%2FfC7wZ4muV6elGvBPWyRM0GvEJM9RuNYpEiNKCNYXBxnlDes%2FrXYSCtVdd6nPVZhEK1HwBtN3nzM21uK4%2Bef0pSthFjvBcVwFw75bnVLQqRNLQNr78UYFFjEaV7LqDyqTtcMGK4zo3ZQdSzBJWt5rHD0Iv7rG8LW2fWo0dqdKFZsCiZ8prPyahJ3MtuWFo%2BC2zdqFGMJNuu3O7cWyAKvRJsOCG6ggNw%3D%3D" target="_blank" rel="noopener"
-               data-price="15.49"
-               data-discount="-7.30"
+            <a class="pk-card" href="https://www.ebay.com/itm/176135947954?_skw=pikachu+jungle+holo&amp;hash=item29028546b2:g:WIYAAOSwsKdn9wcx" target="_blank" rel="noopener"
+               data-price="15.00"
+               data-discount="-11.60"
                data-deal="0"
                data-bucket="Vintage Holo"
-               data-search="pikachu 58/102 *yellow cheeks* base set non-holo pokemon card  lp/nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/uYkAAOSwWGdmGAv~/s-l225.jpg');"></div>
+               data-search="pokemon limited edition - mini slab keychains 1st edition shadowless and more!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/WIYAAOSwsKdn9wcx/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$15.49</span>
+                  <span class="pk-price">$15.00</span>
                   
                 </div>
-                <div class="pk-title">Pikachu 58/102 *Yellow Cheeks* Base Set Non-Holo Pokemon Card  LP/NM</div>
-                <div class="pk-buying">BIN . Best Offer</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+evolutions+holo&amp;hash=item2484684935:g:HH4AAOSwx-VmfG19" target="_blank" rel="noopener"
-               data-price="15.99"
-               data-discount="-10.80"
-               data-deal="0"
-               data-bucket="Vintage Holo"
-               data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/HH4AAOSwx-VmfG19/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$15.99</span>
-                  
-                </div>
-                <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
+                <div class="pk-title">Pokemon Limited Edition - Mini Slab Keychains 1st EDITION shadowless and more!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156258363010?_skw=pikachu+base+set+holo&amp;hash=item2461b96682:g:Ci8AAOSwvMBmbLnG" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="-17.70"
+               data-discount="-26.50"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="1999 pokemon base set: choose your card! all cards available- free shipping">
@@ -2514,7 +2559,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/115941923825?_skw=pikachu+jungle+holo&amp;hash=item1afead5bf1:g:pgIAAeSwOYppXdDR" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="-17.70"
+               data-discount="-26.50"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="1999 pokémon jungle lp choose your cards! volume discounts! 💎">
@@ -2530,7 +2575,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+evolutions+holo&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
                data-price="17.99"
-               data-discount="-24.60"
+               data-discount="-33.90"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -2546,7 +2591,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156897212953?_skw=pikachu+base+set+holo&amp;hash=item2487cd7a19:g:RHEAAOSwAJNn~1qd" target="_blank" rel="noopener"
                data-price="18.00"
-               data-discount="-24.70"
+               data-discount="-34.00"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pokémon celebrations 25th anniversary set cards! holo full art charizard card nm">
@@ -2560,25 +2605,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/375717310470?_skw=pikachu+jungle+holo&amp;hash=item577a7f3006:g:vp4AAOSwSURoONnz" target="_blank" rel="noopener"
-               data-price="19.95"
-               data-discount="-38.20"
-               data-deal="0"
-               data-bucket="Vintage Holo"
-               data-search="pokémon jungle unlimited - choose your card 1999 - lp/nm wizards of the coast">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/vp4AAOSwSURoONnz/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$19.95</span>
-                  
-                </div>
-                <div class="pk-title">Pokémon Jungle Unlimited - Choose Your Card 1999 - LP/NM Wizards of The Coast</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145273576132?_skw=pikachu+base+set+holo&amp;hash=item21d2fadac4:g:VvAAAOSwaZNkfk2q" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-38.50"
+               data-discount="-48.80"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="1999 pokemon base set: choose your card! all cards available - 100% authentic">
@@ -2594,7 +2623,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157665724199?_skw=pikachu+base+set+holo&amp;hash=item24b59c0727:g:SPYAAeSwLdRphU8L" target="_blank" rel="noopener"
                data-price="39.99"
-               data-discount="-177.00"
+               data-discount="-197.70"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="yuka morii pokemon cards! rare reverse holo/non holo - choose your card!">
@@ -2608,25 +2637,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+jungle+holo&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
-               data-price="39.99"
-               data-discount="-177.00"
+            <a class="pk-card" href="https://www.ebay.com/itm/198358100761?_skw=pikachu+base+set+holo&amp;hash=item2e2f106b19:g:nA8AAeSwmmlqCbnl&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYNOjO0WhZPMNBQ2UZGVewQpBiPlU1sFqFaYi6JoDiLvv7BC3uh10nQqJUM21gnSiEnkcQgi27eCYD5NMgl669YMw0GpRDMBA8BEPc87%2FT8uPJx9CKYfsGu0fiCcXkErOkaLFznfWeZVvItu29va9FB%2FHO6AkcfvTIr18Bl3gfgMZ7Wv2RgGyQ8jRPntJ4usBPKiJdphnpynq9Qu3OlBaCZMOz468Q0%2B%2FohAugFglxUJVcvenw90qcW7U%2BeFT3Z4FQlMsIphpRBqLtqcW1EgivrttG9FMlq%2FgmQ4yBefqWmVQ%3D%3D" target="_blank" rel="noopener"
+               data-price="45.00"
+               data-discount="-234.90"
                data-deal="0"
                data-bucket="Vintage Holo"
-               data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/8fMAAOSwqxpn2-c~/s-l225.jpg');"></div>
+               data-search="vintage pokémon pikachu (red cheeks) 058/102 base set (shadowless) regular">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/nA8AAeSwmmlqCbnl/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$39.99</span>
+                  <span class="pk-price">$45.00</span>
                   
                 </div>
-                <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
-                <div class="pk-buying">BIN</div>
+                <div class="pk-title">Vintage Pokémon Pikachu (Red Cheeks) 058/102 Base Set (Shadowless) Regular</div>
+                <div class="pk-buying">BIN . Best Offer</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156960591379?_skw=pikachu+base+set+holo&amp;hash=item248b948e13:g:RQIAAOSwQU9oGXsD" target="_blank" rel="noopener"
                data-price="49.99"
-               data-discount="-246.30"
+               data-discount="-272.10"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pokemon base set 2 cards! holo rare wotc vintage lp/nm choose your card!">
@@ -2642,7 +2671,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/116951046898?_skw=pikachu+base+set+holo&amp;hash=item1b3ad35af2:g:oskAAeSwkQ5pUIJs" target="_blank" rel="noopener"
                data-price="49.99"
-               data-discount="-246.30"
+               data-discount="-272.10"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="1999 - pokemon tcg - base set - pick your wotc card (s) shadowless &amp; not 1st ed.">
@@ -2658,7 +2687,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156702180321?_skw=pikachu+jungle+holo&amp;hash=item247c2d83e1:g:Q3IAAOSw7qBnrZOi" target="_blank" rel="noopener"
                data-price="59.99"
-               data-discount="-315.60"
+               data-discount="-346.50"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pokémon 1999 jungle set - choose your card! wizards of the coast - lp/nm">
@@ -2674,7 +2703,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156374517016?_skw=pikachu+evolutions+holo&amp;hash=item2468a5c518:g:TFUAAOSwVzloS7Wt" target="_blank" rel="noopener"
                data-price="69.99"
-               data-discount="-384.90"
+               data-discount="-421.00"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pokemon tcg - evolving skies: choose your card! - all holos/reverse holo cards!">
@@ -2690,7 +2719,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+base+set+holo&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
                data-price="199.99"
-               data-discount="-1285.50"
+               data-discount="-1388.60"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -2706,7 +2735,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/397719779137?_skw=pikachu+jungle+holo&amp;hash=item5c99f23741:g:KcoAAeSwD2Npto2m" target="_blank" rel="noopener"
                data-price="200.00"
-               data-discount="-1285.50"
+               data-discount="-1388.60"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="pokemon tcg: jungle - pikachu - 60/64 (non-holo) (1st edition) (spanish) (graded">
@@ -2722,7 +2751,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/225576614255?_skw=pikachu+base+set+holo&amp;hash=item348569f96f:g:e~MAAeSwadlpMcX8" target="_blank" rel="noopener"
                data-price="208.88"
-               data-discount="-1347.00"
+               data-discount="-1454.70"
                data-deal="0"
                data-bucket="Vintage Holo"
                data-search="1999 pokemon base set - authentic cards - free shipping">
@@ -2873,14 +2902,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$5</div><div class="pk-stat-l">Cheapest</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$18</div><div class="pk-stat-l">Median</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$240</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">12</div><div class="pk-stat-l">Deals / 42</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$250</div><div class="pk-stat-l">Highest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">12</div><div class="pk-stat-l">Deals / 41</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/306457589320?_skw=pikachu+vstar&amp;hash=item475a4bb648:g:vMUAAeSwUs1opOAk" target="_blank" rel="noopener"
                data-price="5.00"
-               data-discount="73.00"
+               data-discount="72.20"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="jumbo pokemon cards - many variations available!">
@@ -2888,7 +2917,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.00</span>
-                  <span class="pk-disc">-73%</span>
+                  <span class="pk-disc">-72%</span>
                 </div>
                 <div class="pk-title">Jumbo Pokemon Cards - Many Variations Available!</div>
                 <div class="pk-buying">BIN</div>
@@ -2896,7 +2925,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/376181296763?_skw=pikachu+vstar&amp;hash=item5796270e7b:g:VyYAAOSw-I9oONKi" target="_blank" rel="noopener"
                data-price="5.95"
-               data-discount="67.80"
+               data-discount="66.90"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokémon tcg coins - choose your coin - standard &amp; jumbo - pikachu charizard etc.">
@@ -2904,7 +2933,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.95</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-disc">-67%</span>
                 </div>
                 <div class="pk-title">Pokémon TCG Coins - Choose Your Coin - Standard &amp; Jumbo - Pikachu Charizard etc.</div>
                 <div class="pk-buying">BIN</div>
@@ -2912,7 +2941,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/145272939298?_skw=pikachu+v+full+art&amp;hash=item21d2f12322:g:PzIAAOSw-NxjbVza" target="_blank" rel="noopener"
                data-price="5.95"
-               data-discount="67.80"
+               data-discount="66.90"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon v - choose your card - ultra rare, full art holo tcg - all available nm">
@@ -2920,7 +2949,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.95</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-disc">-67%</span>
                 </div>
                 <div class="pk-title">Pokemon V - Choose Your Card - Ultra Rare, Full Art Holo TCG - All Available NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2928,7 +2957,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+v+full+art&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
                data-price="5.99"
-               data-discount="67.60"
+               data-discount="66.70"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
@@ -2936,7 +2965,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.99</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-disc">-67%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2944,7 +2973,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/396753769798?_skw=pikachu+vstar&amp;hash=item5c605e1546:g:Bx8AAOSw1-5oUKPN" target="_blank" rel="noopener"
                data-price="6.00"
-               data-discount="67.60"
+               data-discount="66.60"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon tcg - choose your card - full art/vstar/vmax/v/rainbow rares pack fresh">
@@ -2952,31 +2981,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$6.00</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-disc">-67%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Card - Full Art/Vstar/Vmax/V/Rainbow Rares PACK FRESH</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/394385567978?_skw=pikachu+vstar&amp;hash=item5bd33630ea:g:tx4AAOSwCgtjoCO~" target="_blank" rel="noopener"
-               data-price="6.66"
-               data-discount="64.00"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/306857379795?_skw=pikachu+vstar&amp;hash=item47722007d3:g:-7cAAeSwsgZpku8i" target="_blank" rel="noopener"
+               data-price="6.99"
+               data-discount="61.10"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
-               data-search="sword &amp; shield – pokemon tcg promo/prerelease/staff cards – pick your card – nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/tx4AAOSwCgtjoCO~/s-l225.jpg');"></div>
+               data-search="pokemon sword and shield choose your v vstar vmax huge selection eng near mint">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/-7cAAeSwsgZpku8i/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$6.66</span>
-                  <span class="pk-disc">-64%</span>
+                  <span class="pk-price">$6.99</span>
+                  <span class="pk-disc">-61%</span>
                 </div>
-                <div class="pk-title">Sword &amp; Shield – Pokemon TCG PROMO/PRERELEASE/STAFF cards – Pick your Card – NM</div>
+                <div class="pk-title">pokemon sword and shield choose your V VSTAR VMAX HUGE selection ENG Near Mint</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/396288530843?_skw=pikachu+v+full+art&amp;hash=item5c44a3199b:g:BrYAAOSwbIxnzgiu" target="_blank" rel="noopener"
                data-price="6.99"
-               data-discount="62.20"
+               data-discount="61.10"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon v cards - choose your card - ultra rare, full art holo english nm">
@@ -2984,7 +3013,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$6.99</span>
-                  <span class="pk-disc">-62%</span>
+                  <span class="pk-disc">-61%</span>
                 </div>
                 <div class="pk-title">Pokemon V Cards - Choose Your Card - Ultra Rare, Full Art Holo English NM</div>
                 <div class="pk-buying">BIN</div>
@@ -2992,7 +3021,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/376860906404?_skw=pikachu+vstar&amp;hash=item57bea913a4:g:M8cAAeSw3KdpZhWr" target="_blank" rel="noopener"
                data-price="7.52"
-               data-discount="59.30"
+               data-discount="58.20"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon choose your card v/vmax/vstar/full art/radiant near mint swsh">
@@ -3000,31 +3029,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.52</span>
-                  <span class="pk-disc">-59%</span>
+                  <span class="pk-disc">-58%</span>
                 </div>
                 <div class="pk-title">Pokemon Choose Your Card V/VMAX/VSTAR/Full Art/Radiant Near Mint SWSH</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+v+full+art&amp;hash=item2484684935:g:X8MAAOSw3k5mfG2e" target="_blank" rel="noopener"
-               data-price="7.99"
-               data-discount="56.80"
-               data-deal="1"
-               data-bucket="Pikachu V / VMAX / VSTAR"
-               data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/X8MAAOSw3k5mfG2e/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-57%</span>
-                </div>
-                <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+v+full+art&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
                data-price="7.99"
-               data-discount="56.80"
+               data-discount="55.60"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -3032,7 +3045,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-57%</span>
+                  <span class="pk-disc">-56%</span>
+                </div>
+                <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+v+full+art&amp;hash=item2484684935:g:X8MAAOSw3k5mfG2e" target="_blank" rel="noopener"
+               data-price="7.99"
+               data-discount="55.60"
+               data-deal="1"
+               data-bucket="Pikachu V / VMAX / VSTAR"
+               data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/X8MAAOSw3k5mfG2e/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$7.99</span>
+                  <span class="pk-disc">-56%</span>
                 </div>
                 <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
                 <div class="pk-buying">BIN</div>
@@ -3040,7 +3069,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156583235938?_skw=pikachu+v+full+art&amp;hash=item2475169162:g:7pcAAOSwMk1oW7nN" target="_blank" rel="noopener"
                data-price="7.99"
-               data-discount="56.80"
+               data-discount="55.60"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon tcg swsh lost origin | choose your card | reverse holo/holo/ultra rare">
@@ -3048,31 +3077,47 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-57%</span>
+                  <span class="pk-disc">-56%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG SWSH Lost Origin | Choose Your Card | Reverse Holo/Holo/Ultra Rare</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/117199009544?_skw=pikachu+vmax&amp;hash=item1b499af708:g:8PAAAeSwzRxqCPfE" target="_blank" rel="noopener"
-               data-price="9.00"
-               data-discount="51.30"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/157914887109?_skw=pikachu+vmax&amp;hash=item24c475f3c5:g:B9gAAeSwLDNqB-5W" target="_blank" rel="noopener"
+               data-price="9.95"
+               data-discount="44.70"
                data-deal="1"
                data-bucket="Pikachu V / VMAX / VSTAR"
-               data-search="pikachu vmax 044/185 swsh04: vivid voltage holo lp">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/8PAAAeSwzRxqCPfE/s-l225.jpg');"></div>
+               data-search="pikachu vmax tg29/tg30 secret rare">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/B9gAAeSwLDNqB-5W/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$9.00</span>
-                  <span class="pk-disc">-51%</span>
+                  <span class="pk-price">$9.95</span>
+                  <span class="pk-disc">-45%</span>
                 </div>
-                <div class="pk-title">Pikachu VMAX 044/185 Swsh04: Vivid Voltage Holo LP</div>
+                <div class="pk-title">Pikachu VMAX TG29/TG30 Secret Rare</div>
+                <div class="pk-buying">BIN . Best Offer</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/167395715662?_skw=pikachu+vstar&amp;hash=item26f98fea4e:g:9g8AAeSw43popS5B" target="_blank" rel="noopener"
+               data-price="14.00"
+               data-discount="22.20"
+               data-deal="0"
+               data-bucket="Pikachu V / VMAX / VSTAR"
+               data-search="pokemon singles - various - vmax, vstar, v, gx - ultra rare, full art">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/9g8AAeSw43popS5B/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$14.00</span>
+                  <span class="pk-disc">-22%</span>
+                </div>
+                <div class="pk-title">Pokemon Singles - Various - VMAX, VSTAR, V, GX - Ultra Rare, Full Art</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/376085688234?_skw=pikachu+vstar&amp;hash=item5790742faa:g:VLoAAOSwi3RoONVr" target="_blank" rel="noopener"
                data-price="14.95"
-               data-discount="19.20"
+               data-discount="16.90"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon sword &amp; shield promos - 2019-2023 choose your card lp/nm">
@@ -3080,7 +3125,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.95</span>
-                  <span class="pk-disc">-19%</span>
+                  <span class="pk-disc">-17%</span>
                 </div>
                 <div class="pk-title">Pokemon Sword &amp; Shield Promos - 2019-2023 Choose Your Card LP/NM</div>
                 <div class="pk-buying">BIN</div>
@@ -3088,7 +3133,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/176135947954?_skw=pikachu+vstar&amp;hash=item29028546b2:g:WIYAAOSwsKdn9wcx" target="_blank" rel="noopener"
                data-price="15.00"
-               data-discount="18.90"
+               data-discount="16.60"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon limited edition - mini slab keychains 1st edition shadowless and more!">
@@ -3096,7 +3141,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.00</span>
-                  <span class="pk-disc">-19%</span>
+                  <span class="pk-disc">-17%</span>
                 </div>
                 <div class="pk-title">Pokemon Limited Edition - Mini Slab Keychains 1st EDITION shadowless and more!</div>
                 <div class="pk-buying">BIN</div>
@@ -3104,7 +3149,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/176135947954?_skw=pikachu+vmax+rainbow&amp;var=475778649039&amp;hash=item29028546b2:g:90IAAOSwqYRl-Y54" target="_blank" rel="noopener"
                data-price="15.00"
-               data-discount="18.90"
+               data-discount="16.60"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon limited edition - mini slab keychains 1st edition shadowless and more!">
@@ -3112,7 +3157,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.00</span>
-                  <span class="pk-disc">-19%</span>
+                  <span class="pk-disc">-17%</span>
                 </div>
                 <div class="pk-title">Pokemon Limited Edition - Mini Slab Keychains 1st EDITION shadowless and more!</div>
                 <div class="pk-buying">BIN</div>
@@ -3120,7 +3165,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/177081195509?_skw=pikachu+vstar&amp;hash=item293adc9bf5:g:DX0AAeSwiCBpr1rp" target="_blank" rel="noopener"
                data-price="15.99"
-               data-discount="13.50"
+               data-discount="11.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="⚡️slabbies⚡️💎premium💎 ✨pokémon psa 10 keychains✨ (mini) 🔥the original🔥">
@@ -3128,7 +3173,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.99</span>
-                  <span class="pk-disc">-14%</span>
+                  <span class="pk-disc">-11%</span>
                 </div>
                 <div class="pk-title">⚡️SLABBIES⚡️💎PREMIUM💎 ✨Pokémon PSA 10 Keychains✨ (Mini) 🔥THE ORIGINAL🔥</div>
                 <div class="pk-buying">BIN</div>
@@ -3136,7 +3181,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/277727337188?_skw=pikachu+vmax+rainbow&amp;var=2560736802001&amp;hash=item40a9d6dae4:g:wU4AAeSw71Npm-gU" target="_blank" rel="noopener"
                data-price="15.99"
-               data-discount="13.50"
+               data-discount="11.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="🔥pokémon psa 10 mini slab holo-keychains🔥">
@@ -3144,7 +3189,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.99</span>
-                  <span class="pk-disc">-14%</span>
+                  <span class="pk-disc">-11%</span>
                 </div>
                 <div class="pk-title">🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥</div>
                 <div class="pk-buying">BIN</div>
@@ -3152,7 +3197,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156868308381?_skw=pikachu+v+full+art&amp;hash=item2486146d9d:g:TR8AAOSwLihn82~E" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="8.10"
+               data-discount="5.60"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokémon 151 cards japanese choose your card! holo poké ball pattern ex full art">
@@ -3160,7 +3205,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$16.99</span>
-                  <span class="pk-disc">-8%</span>
+                  <span class="pk-disc">-6%</span>
                 </div>
                 <div class="pk-title">Pokémon 151 Cards Japanese Choose Your Card! Holo Poké Ball Pattern EX Full Art</div>
                 <div class="pk-buying">BIN</div>
@@ -3168,7 +3213,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157034526068?_skw=pikachu+vstar&amp;hash=item248ffcb574:g:fk8AAOSw4PNoNYkf" target="_blank" rel="noopener"
                data-price="17.99"
-               data-discount="2.70"
+               data-discount="0.00"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon cards! brilliant stars holo/reverse holo ultrarare v vmax full art card">
@@ -3176,7 +3221,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$17.99</span>
-                  <span class="pk-disc">-3%</span>
+                  
                 </div>
                 <div class="pk-title">Pokemon Cards! Brilliant Stars Holo/Reverse Holo UltraRare V VMAX Full Art Card</div>
                 <div class="pk-buying">BIN</div>
@@ -3184,7 +3229,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=pikachu+v+full+art&amp;hash=item2483686621:g:7nMAAOSwBEtn33JT" target="_blank" rel="noopener"
                data-price="17.99"
-               data-discount="2.70"
+               data-discount="0.00"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -3192,7 +3237,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$17.99</span>
-                  <span class="pk-disc">-3%</span>
+                  
                 </div>
                 <div class="pk-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
                 <div class="pk-buying">BIN</div>
@@ -3200,7 +3245,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157197393364?_skw=pikachu+v+full+art&amp;hash=item2499b1ddd4:g:PJoAAeSwOT1ofsGL" target="_blank" rel="noopener"
                data-price="17.99"
-               data-discount="2.70"
+               data-discount="0.00"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="chilling reign pokemon cards! holo/reverse holo vmax v secret rare full art card">
@@ -3208,31 +3253,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$17.99</span>
-                  <span class="pk-disc">-3%</span>
+                  
                 </div>
                 <div class="pk-title">Chilling Reign Pokemon Cards! Holo/Reverse Holo Vmax V Secret Rare Full Art Card</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/167395715662?_skw=pikachu+vstar&amp;hash=item26f98fea4e:g:9g8AAeSw43popS5B" target="_blank" rel="noopener"
-               data-price="19.00"
-               data-discount="-2.70"
-               data-deal="0"
-               data-bucket="Pikachu V / VMAX / VSTAR"
-               data-search="pokemon singles - various - vmax, vstar, v, gx - ultra rare, full art">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/9g8AAeSw43popS5B/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$19.00</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon Singles - Various - VMAX, VSTAR, V, GX - Ultra Rare, Full Art</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145302991518?_skw=pikachu+vmax&amp;hash=item21d4bbb29e:g:dzAAAOSwmRBhm1pr" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-8.10"
+               data-discount="-11.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon vmax - choose your card - all available, ultra rare, full art holo tcg">
@@ -3248,7 +3277,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/275494121585?_skw=pikachu+vstar&amp;hash=item4024bab071:g:DDkAAOSwg2VkcRG6" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-8.10"
+               data-discount="-11.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="2x top loader necklace chain - 8 colors!!! *card not included*">
@@ -3264,7 +3293,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157574130069?_skw=pikachu+vstar&amp;hash=item24b0266995:g:JdwAAeSwp3ZpUNVo" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-8.10"
+               data-discount="-11.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="gold pokémon cards! secret rare ex v vmax gx holo choose your card!">
@@ -3280,7 +3309,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157034526068?_skw=pikachu+v+full+art&amp;hash=item248ffcb574:g:tgQAAeSwEFloqlsl" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-8.10"
+               data-discount="-11.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon cards! brilliant stars holo/reverse holo ultrarare v vmax full art card">
@@ -3296,7 +3325,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/176880806105?_skw=pikachu+vmax+rainbow&amp;var=476613895403&amp;hash=item292eeae8d9:g:1UMAAeSwmxlnwOKU" target="_blank" rel="noopener"
                data-price="20.00"
-               data-discount="-8.10"
+               data-discount="-11.20"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pikachu vmax rainbow psa cgc beckett | extended art display case for graded poke">
@@ -3312,7 +3341,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157190541903?_skw=pikachu+vstar&amp;hash=item249949524f:g:Hi4AAeSweq9ofv4H" target="_blank" rel="noopener"
                data-price="24.99"
-               data-discount="-35.10"
+               data-discount="-38.90"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokémon card! sealed stamp promo pokémon center ex holo choose your cards!">
@@ -3328,7 +3357,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/176880806090?_skw=pikachu+vmax+rainbow&amp;var=476603352449&amp;hash=item292eeae8ca:g:3gYAAeSwKJ5o2U63" target="_blank" rel="noopener"
                data-price="25.00"
-               data-discount="-35.20"
+               data-discount="-39.00"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pikachu vmax rainbow | display case extended art for pokemon card">
@@ -3342,25 +3371,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+vmax&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
-               data-price="29.99"
-               data-discount="-62.20"
-               data-deal="0"
-               data-bucket="Pikachu V / VMAX / VSTAR"
-               data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$29.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156776820390?_skw=pikachu+vstar&amp;hash=item2480a06ea6:g:qY0AAOSwspNn8moI" target="_blank" rel="noopener"
                data-price="34.99"
-               data-discount="-89.20"
+               data-discount="-94.50"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon crown zenith - choose your card! reverse holo/holos v vmax vstar radiant">
@@ -3376,7 +3389,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+vmax&amp;hash=item2484684935:g:v9sAAOSwdzln3gn7" target="_blank" rel="noopener"
                data-price="39.99"
-               data-discount="-116.20"
+               data-discount="-122.30"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -3392,7 +3405,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156583235938?_skw=pikachu+vstar&amp;hash=item2475169162:g:-HUAAOSwhbBoW7s-" target="_blank" rel="noopener"
                data-price="44.99"
-               data-discount="-143.30"
+               data-discount="-150.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon tcg swsh lost origin | choose your card | reverse holo/holo/ultra rare">
@@ -3406,13 +3419,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/157197393364?_skw=pikachu+vstar&amp;hash=item2499b1ddd4:g:UxgAAeSwedhofsJo" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/157197393364?_skw=pikachu+vstar&amp;hash=item2499b1ddd4:g:UzAAAeSwpmNofsKK" target="_blank" rel="noopener"
                data-price="44.99"
-               data-discount="-143.30"
+               data-discount="-150.10"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="chilling reign pokemon cards! holo/reverse holo vmax v secret rare full art card">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/UxgAAeSwedhofsJo/s-l225.jpg');"></div>
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/UzAAAeSwpmNofsKK/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$44.99</span>
@@ -3424,7 +3437,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156374517016?_skw=pikachu+v+full+art&amp;hash=item2468a5c518:g:kiMAAeSwwiVoZMpO" target="_blank" rel="noopener"
                data-price="59.99"
-               data-discount="-224.40"
+               data-discount="-233.50"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon tcg - evolving skies: choose your card! - all holos/reverse holo cards!">
@@ -3440,7 +3453,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156374517016?_skw=pikachu+vmax+rainbow&amp;var=458401455752&amp;hash=item2468a5c518:g:TFUAAOSwVzloS7Wt" target="_blank" rel="noopener"
                data-price="69.99"
-               data-discount="-278.40"
+               data-discount="-289.00"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon tcg - evolving skies: choose your card! - all holos/reverse holo cards!">
@@ -3456,7 +3469,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156746268986?_skw=pikachu+vstar&amp;hash=item247ece413a:g:-u8AAOSwW5FoS4Q6" target="_blank" rel="noopener"
                data-price="89.99"
-               data-discount="-386.60"
+               data-discount="-400.20"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon crown zenith - choose your card! reverse holo/holos ultra rare gg">
@@ -3472,7 +3485,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156763625402?_skw=pikachu+vstar&amp;hash=item247fd717ba:g:EzAAAeSwMbNoylce" target="_blank" rel="noopener"
                data-price="99.99"
-               data-discount="-440.60"
+               data-discount="-455.80"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon go cards - choose your card! reverse holos/holos ultra rares v radiant">
@@ -3488,7 +3501,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/304793322418?_skw=pikachu+vstar&amp;hash=item46f71903b2:g:zfoAAOSwon9j3ota" target="_blank" rel="noopener"
                data-price="100.00"
-               data-discount="-440.70"
+               data-discount="-455.90"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon crown zenith - pokemon cards - choose your card!">
@@ -3502,25 +3515,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156763625402?_skw=pikachu+v+full+art&amp;hash=item247fd717ba:g:f34AAeSw~~BoylcO" target="_blank" rel="noopener"
-               data-price="129.99"
-               data-discount="-602.80"
-               data-deal="0"
-               data-bucket="Pikachu V / VMAX / VSTAR"
-               data-search="pokemon go cards - choose your card! reverse holos/holos ultra rares v radiant">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/f34AAeSw~~BoylcO/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$129.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon GO Cards - Choose Your Card! Reverse Holos/Holos Ultra Rares V Radiant</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156731105968?_skw=pikachu+vstar&amp;hash=item247de6e2b0:g:ZnUAAOSwUwJoEzRD" target="_blank" rel="noopener"
                data-price="139.99"
-               data-discount="-656.90"
+               data-discount="-678.20"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pokemon trainer gallery: choose your card! full art galarian trainer gallery sir">
@@ -3536,7 +3533,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+vmax&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
                data-price="239.99"
-               data-discount="-1197.60"
+               data-discount="-1234.00"
                data-deal="0"
                data-bucket="Pikachu V / VMAX / VSTAR"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -3549,6 +3546,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
                 <div class="pk-buying">BIN</div>
               </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/157541379818?_skw=pikachu+v+full+art&amp;hash=item24ae32aeea:g:OnMAAeSwOn9pt4PW" target="_blank" rel="noopener"
+               data-price="249.99"
+               data-discount="-1289.60"
+               data-deal="0"
+               data-bucket="Pikachu V / VMAX / VSTAR"
+               data-search="arcanine growlithe pokémon cards! holo/reverse holo ex v rare choose your card!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/OnMAAeSwOn9pt4PW/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$249.99</span>
+                  
+                </div>
+                <div class="pk-title">Arcanine Growlithe Pokémon Cards! Holo/Reverse holo EX V Rare Choose Your Card!</div>
+                <div class="pk-buying">BIN</div>
+              </div>
             </a></div>
         </section>
         <section class="pk-bucket" id="b-pikachu-ex-special-illustration-rare" data-bucket="Pikachu ex / Special Illustration Rare">
@@ -3558,32 +3571,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <p class="pk-blurb">Scarlet &amp; Violet &#x27;ex&#x27; era. SIR = Special Illustration Rare = the prettiest art.</p>
             </div>
             <div class="pk-bucket-stats">
-              <div class="pk-stat"><div class="pk-stat-n">$9</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$40</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$13</div><div class="pk-stat-l">Cheapest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$42</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$400</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">8</div><div class="pk-stat-l">Deals / 17</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">6</div><div class="pk-stat-l">Deals / 16</div></div>
             </div>
           </div>
           <div class="pk-grid">
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/397811181938?_skw=pikachu+ex+full+art&amp;hash=item5c9f64e972:g:jeMAAeSwSYZpyLhJ" target="_blank" rel="noopener"
-               data-price="8.95"
-               data-discount="77.60"
-               data-deal="1"
-               data-bucket="Pikachu ex / Special Illustration Rare"
-               data-search="ascended heroes pokémon cards, ex , ultra rare, full art, english, nm.">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/jeMAAeSwSYZpyLhJ/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$8.95</span>
-                  <span class="pk-disc">-78%</span>
-                </div>
-                <div class="pk-title">Ascended Heroes Pokémon Cards, EX , Ultra Rare, Full Art, English, NM.</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/157250595322?_skw=pikachu+ex+full+art&amp;hash=item249cdda9fa:g:F7UAAeSwdS1ooZBa" target="_blank" rel="noopener"
                data-price="12.99"
-               data-discount="67.50"
+               data-discount="69.40"
                data-deal="1"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="ex pokémon cards! full art rare mega break xy black and white choose your card!">
@@ -3591,7 +3588,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$12.99</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-disc">-69%</span>
                 </div>
                 <div class="pk-title">EX Pokémon Cards! Full Art Rare Mega Break XY Black and White Choose Your Card!</div>
                 <div class="pk-buying">BIN</div>
@@ -3599,7 +3596,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+ex+full+art&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="62.50"
+               data-discount="64.70"
                data-deal="1"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
@@ -3607,7 +3604,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-62%</span>
+                  <span class="pk-disc">-65%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
                 <div class="pk-buying">BIN</div>
@@ -3615,7 +3612,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156472416863?_skw=pikachu+ex+238%2F091&amp;hash=item246e7b9a5f:g:8X0AAeSwl8loZJui" target="_blank" rel="noopener"
                data-price="15.99"
-               data-discount="60.00"
+               data-discount="62.40"
                data-deal="1"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon paldean fates: choose your card! - holos/reverse holos ex baby shiny nm">
@@ -3623,7 +3620,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.99</span>
-                  <span class="pk-disc">-60%</span>
+                  <span class="pk-disc">-62%</span>
                 </div>
                 <div class="pk-title">Pokemon Paldean Fates: Choose Your Card! - Holos/Reverse Holos EX Baby Shiny NM</div>
                 <div class="pk-buying">BIN</div>
@@ -3631,7 +3628,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156868308381?_skw=pikachu+ex+full+art&amp;hash=item2486146d9d:g:-MkAAOSwmh5n827m" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="57.50"
+               data-discount="60.00"
                data-deal="1"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokémon 151 cards japanese choose your card! holo poké ball pattern ex full art">
@@ -3639,7 +3636,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$16.99</span>
-                  <span class="pk-disc">-58%</span>
+                  <span class="pk-disc">-60%</span>
                 </div>
                 <div class="pk-title">Pokémon 151 Cards Japanese Choose Your Card! Holo Poké Ball Pattern EX Full Art</div>
                 <div class="pk-buying">BIN</div>
@@ -3647,7 +3644,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156823479841?_skw=pikachu+ex+full+art&amp;hash=item2483686621:g:7nMAAOSwBEtn33JT" target="_blank" rel="noopener"
                data-price="17.99"
-               data-discount="55.00"
+               data-discount="57.70"
                data-deal="1"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -3655,31 +3652,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$17.99</span>
-                  <span class="pk-disc">-55%</span>
+                  <span class="pk-disc">-58%</span>
                 </div>
                 <div class="pk-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156750664346?_skw=pikachu+ex+full+art&amp;hash=item247f11529a:g:U10AAOSwiCZoSU-g" target="_blank" rel="noopener"
-               data-price="19.99"
-               data-discount="50.00"
-               data-deal="1"
-               data-bucket="Pikachu ex / Special Illustration Rare"
-               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/U10AAOSwiCZoSU-g/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$19.99</span>
-                  <span class="pk-disc">-50%</span>
-                </div>
-                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/178039661850?_skw=pikachu+ex+special+illustration&amp;hash=item2973fda51a:g:lgEAAeSwFCdp2erL" target="_blank" rel="noopener"
                data-price="29.99"
-               data-discount="25.00"
+               data-discount="29.40"
                data-deal="1"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pikachu ex (276/217) special illustration rare graded extended art case">
@@ -3687,7 +3668,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$29.99</span>
-                  <span class="pk-disc">-25%</span>
+                  <span class="pk-disc">-29%</span>
                 </div>
                 <div class="pk-title">Pikachu ex (276/217) Special Illustration Rare Graded Extended Art Case</div>
                 <div class="pk-buying">BIN</div>
@@ -3695,7 +3676,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156641391983?_skw=pikachu+ex+full+art&amp;hash=item24788df56f:g:zNsAAOSw2-9oALfl" target="_blank" rel="noopener"
                data-price="39.99"
-               data-discount="0.00"
+               data-discount="5.90"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon surging sparks: choose your card! holos/ex/full arts! nm">
@@ -3703,7 +3684,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$39.99</span>
-                  
+                  <span class="pk-disc">-6%</span>
                 </div>
                 <div class="pk-title">Pokemon Surging Sparks: Choose Your Card! Holos/EX/Full Arts! NM</div>
                 <div class="pk-buying">BIN</div>
@@ -3711,7 +3692,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+ex+full+art&amp;hash=item2484684935:g:v9sAAOSwdzln3gn7" target="_blank" rel="noopener"
                data-price="39.99"
-               data-discount="0.00"
+               data-discount="5.90"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -3719,15 +3700,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$39.99</span>
-                  
+                  <span class="pk-disc">-6%</span>
                 </div>
                 <div class="pk-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full Art Cards</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=pikachu+ex+full+art&amp;hash=item247f11529a:g:RhkAAeSwsQ5ojdlV" target="_blank" rel="noopener"
+               data-price="44.99"
+               data-discount="-5.90"
+               data-deal="0"
+               data-bucket="Pikachu ex / Special Illustration Rare"
+               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/RhkAAeSwsQ5ojdlV/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$44.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145484500038?_skw=pikachu+ex+full+art&amp;hash=item21df8d4c46:g:NMcAAOSwQNllcMD1" target="_blank" rel="noopener"
                data-price="49.99"
-               data-discount="-25.00"
+               data-discount="-17.70"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon ex - choose your card | 100% authentic scarlet &amp; violet ultra rare cards">
@@ -3743,7 +3740,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/800026117009?_skw=pikachu+ex+full+art&amp;hash=itemba4545c391:g:fL4AAeSwPaJqAXmM" target="_blank" rel="noopener"
                data-price="67.13"
-               data-discount="-67.90"
+               data-discount="-58.00"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pikachu ex lp xy124 - holo black star promo full art - pokemon">
@@ -3757,9 +3754,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/397811181938?_skw=pikachu+ex+full+art&amp;hash=item5c9f64e972:g:jeMAAeSwSYZpyLhJ&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGaHZ%2FRGfz652T45trsW3hLuYbgdCMUOcMDrkWnu%2FreS%2Bu33Ni86kpLO8pmyFHS58Kc2iHs94Yw%2BWe1x6YlW9Uzf5yIQmjRv1SAkjtmJwu%2BvGgWj4ldn8P6JcgUflG16Yw7Hmv7K%2FgSE9ZzuETP1BpStPcYcaHEZ6EE0BpJKnmaUcc5E6Ptup5R%2FBUkU9et6YAKItfG3JLW%2F426u6Mi0XNpWjPSw%2FyxMFsYbCAlFfSmDXXmaPU2pHUrj0VTLJvY%2F%2BD2bpjJ0E4y8oZzI6MPg0g2uIBzVsX%2FL5rlRyNuF7BEbKg%3D%3D" target="_blank" rel="noopener"
+               data-price="129.99"
+               data-discount="-205.90"
+               data-deal="0"
+               data-bucket="Pikachu ex / Special Illustration Rare"
+               data-search="ascended heroes pokémon cards, ex , ultra rare, full art, english, nm.">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/jeMAAeSwSYZpyLhJ/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$129.99</span>
+                  
+                </div>
+                <div class="pk-title">Ascended Heroes Pokémon Cards, EX , Ultra Rare, Full Art, English, NM.</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156241664107?_skw=pikachu+ex+special+illustration&amp;hash=item2460ba986b:g:JT0AAOSwg4RoM6FE" target="_blank" rel="noopener"
                data-price="159.99"
-               data-discount="-300.10"
+               data-discount="-276.50"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon 151 cards! holo/reverse holo ex illustration ultra double rare card!">
@@ -3775,7 +3788,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+ex+full+art&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
                data-price="239.99"
-               data-discount="-500.10"
+               data-discount="-464.80"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
@@ -3789,25 +3802,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/157541379818?_skw=pikachu+ex+full+art&amp;hash=item24ae32aeea:g:OnMAAeSwOn9pt4PW" target="_blank" rel="noopener"
-               data-price="249.99"
-               data-discount="-525.10"
-               data-deal="0"
-               data-bucket="Pikachu ex / Special Illustration Rare"
-               data-search="arcanine growlithe pokémon cards! holo/reverse holo ex v rare choose your card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/OnMAAeSwOn9pt4PW/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$249.99</span>
-                  
-                </div>
-                <div class="pk-title">Arcanine Growlithe Pokémon Cards! Holo/Reverse holo EX V Rare Choose Your Card!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156641391983?_skw=pikachu+ex+special+illustration&amp;hash=item24788df56f:g:PEwAAeSw7H9oZ4BF" target="_blank" rel="noopener"
                data-price="399.99"
-               data-discount="-900.20"
+               data-discount="-841.40"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon surging sparks: choose your card! holos/ex/full arts! nm">
@@ -3823,7 +3820,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156472416863?_skw=pikachu+ex+special+illustration&amp;hash=item246e7b9a5f:g:9oUAAeSwMspoZJt5" target="_blank" rel="noopener"
                data-price="399.99"
-               data-discount="-900.20"
+               data-discount="-841.40"
                data-deal="0"
                data-bucket="Pikachu ex / Special Illustration Rare"
                data-search="pokemon paldean fates: choose your card! - holos/reverse holos ex baby shiny nm">
@@ -3847,7 +3844,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$4</div><div class="pk-stat-l">Cheapest</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$17</div><div class="pk-stat-l">Median</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$70</div><div class="pk-stat-l">Highest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$85</div><div class="pk-stat-l">Highest</div></div>
               <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">4</div><div class="pk-stat-l">Deals / 10</div></div>
             </div>
           </div>
@@ -3948,7 +3945,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/157722908878?_skw=pikachu+birthday+promo&amp;hash=item24b90498ce:g:CXIAAeSwFENppxG2" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/157722908878?_skw=pikachu+birthday+promo&amp;hash=item24b90498ce:g:CXIAAeSwFENppxG2&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGanYLUQm4VDbgBNOwtkOqlDEesr1mR1BJSqq9Hx0oFFQQn8kC2xpmpDOI2GIvsTdKDB43vrIz9%2Fw5HqbmZG0LlAQXFjgAAMFilnOmTyh9SvQzBim0ACJMNklwSgcqhpsNsoq4fqk5YVa6%2BKRsUsQHCcy9InEegB%2BgkeLZkC25Eng%2Ft2CrL4vlkk5ZA3%2BbmPW39Yu0w4nrZskeUXwUbuq3TduTe%2Bwidf0neswTpDwUofER3FcaAdg%2B9oL5HwzJw7mxsKQONXQIPcGmEJGc9yZ7kd9Vzu6zgOxDTqLQi2IdcbAw%3D%3D" target="_blank" rel="noopener"
                data-price="25.00"
                data-discount="-43.10"
                data-deal="0"
@@ -3962,22 +3959,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 </div>
                 <div class="pk-title">Birthday Pikachu 24 BS Promo Pokemon Extended  Artwork For PSA CGC BGS or TAG</div>
                 <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/236820212566?_skw=pikachu+black+star+promo&amp;hash=item372395ab56:g:~SEAAeSwrWdqCKxP" target="_blank" rel="noopener"
-               data-price="39.99"
-               data-discount="-128.90"
-               data-deal="0"
-               data-bucket="Promo &amp; Black Star Promos"
-               data-search="2023 pokemon svp en-sv black star promo #027 pikachu psa 9">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/~SEAAeSwrWdqCKxP/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$39.99</span>
-                  
-                </div>
-                <div class="pk-title">2023 POKEMON SVP EN-SV BLACK STAR PROMO #027 PIKACHU PSA 9</div>
-                <div class="pk-buying">BIN . Best Offer</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/257239511369?_skw=pikachu+mcdonalds+25th&amp;hash=item3be4ab7149:g:RK0AAeSw5MBpLldb" target="_blank" rel="noopener"
@@ -4010,6 +3991,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 </div>
                 <div class="pk-title">Pokemon Celebrations You Pick Holo, Reverse Holo, V, VMAX</div>
                 <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/147314713078?_skw=pikachu+black+star+promo&amp;hash=item224ca421f6:g:w14AAeSwFd5qCXJD" target="_blank" rel="noopener"
+               data-price="85.00"
+               data-discount="-386.50"
+               data-deal="0"
+               data-bucket="Promo &amp; Black Star Promos"
+               data-search="pikachu 012 promo nintendo black star promos pokemon moderately played">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/w14AAeSwFd5qCXJD/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$85.00</span>
+                  
+                </div>
+                <div class="pk-title">Pikachu 012 Promo Nintendo Black Star Promos Pokemon Moderately Played</div>
+                <div class="pk-buying">BIN . Best Offer</div>
               </div>
             </a></div>
         </section>
@@ -4110,7 +4107,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 17:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 18:55 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
