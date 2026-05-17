@@ -98,6 +98,27 @@ STORE_URL    = "https://www.ebay.com/usr/harpua2001"
 SITE_URL     = "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots"
 CURRENCY     = "USD"
 
+# eBay Partner Network — turn outbound /itm/* links into affiliate links so the
+# site earns commission on third-party cards buyers click through to. Reads
+# from configuration.json["epn_campid"] (sign up at partnernetwork.ebay.com).
+# Falls back to no-op when not configured.
+def _epn_wrap(url: str) -> str:
+    """Append EPN tracking params to any eBay item URL. Idempotent (skips
+    URLs that already carry mkcid). Returns the URL unchanged if EPN isn't
+    configured or the URL isn't an eBay link."""
+    if not url or "ebay.com" not in url or "mkcid=" in url:
+        return url
+    try:
+        cfg = json.loads(CONFIG_FILE.read_text())
+        campid = cfg.get("epn_campid")
+    except Exception:
+        campid = None
+    if not campid:
+        return url
+    sep = "&" if "?" in url else "?"
+    return (f"{url}{sep}mkcid=1&mkrid=711-53200-19255-0&siteid=0"
+            f"&campid={campid}&customid=h2k&toolid=10049&mkevt=1")
+
 # ---------------------------------------------------------------------------
 # eBay auth
 # ---------------------------------------------------------------------------
@@ -2733,6 +2754,7 @@ _NAV_ITEMS = [
     ("deals.html",            "Deals",         False, "Analytics"),
 
     # ── SELL — listing optimization (Cassini rank levers) ──
+    ("inventory.html",        "Inventory",     False, "Sell"),
     ("price_review.html",     "Pricing",       False, "Sell"),
     ("repricing.html",        "Repricing",     False, "Sell"),
     ("title_review.html",     "Titles",        False, "Sell"),
@@ -2754,7 +2776,9 @@ _NAV_ITEMS = [
     # ── FOR US — public, buyer-side (son can bookmark) ──
     ("collect.html",          "My Wants",      True,  "For Us"),
     ("under_10.html",         "Under $10",     True,  "For Us"),
+    ("top_sellers.html",      "Top Sellers",   True,  "For Us"),
     ("price_drops.html",      "Price Drops",   True,  "For Us"),
+    ("assistant.html",        "AI Assistant",  True,  "For Us"),
     ("pokemon.html",          "Pokemon",       True,  "For Us"),
     ("pikachu.html",          "Pikachu",       True,  "For Us"),
     ("charizard.html",        "Charizard",     True,  "For Us"),
@@ -9753,6 +9777,9 @@ def main():
         ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py"),
         ("Listing perf: docs/listing_performance.html","listing_performance_agent.py"),
         ("Under $10: docs/under_10.html",            "under_10_agent.py"),
+        ("Top Sellers: docs/top_sellers.html",       "top_sellers_agent.py"),
+        ("Inventory: docs/inventory.html",           "inventory_agent.py"),
+        ("AI Assistant: docs/assistant.html",        "ai_assistant_agent.py"),
         ("Price Drops: docs/price_drops.html",       "price_drops_agent.py"),
     ]:
         sp_path = _here / script
