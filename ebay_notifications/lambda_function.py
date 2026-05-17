@@ -487,6 +487,188 @@ def lambda_handler(event, context):
         return _cors_preflight()
 
     # ------------------------------------------------------------------
+    # POST /ebay/create-listing — create a single fixed-price listing
+    # Body: inventory_plan item dict
+    #   { title, category_id|ebay_category, store_category, price,
+    #     specifics: {k: v, ...}, image_url, store_category_id?,
+    #     dry_run?: bool (default true) }
+    # Dry-run: returns the XML envelope that WOULD be POSTed.
+    # Live:    POSTs Trading API AddItem, returns {success, item_id, ...}.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/create-listing"):
+        try:
+            body = json.loads(event.get("body") or "{}")
+            dry_run = body.get("dry_run", True)
+            # Default to dry-run unless explicitly set to False
+            if dry_run is not False:
+                dry_run = True
+
+            title           = str(body.get("title", "")).strip()[:80]
+            category_id     = str(body.get("category_id") or body.get("ebay_category_id") or "").strip()
+            store_cat_id    = str(body.get("store_category_id") or body.get("store_category") or "").strip()
+            price           = body.get("price")
+            quantity        = int(body.get("quantity") or 1)
+            image_url       = str(body.get("image_url") or "").strip()
+            specifics       = body.get("specifics") or {}
+            condition_id    = str(body.get("condition_id") or "4000")  # Used
+            shipping_cost   = float(body.get("shipping_cost") or 4.50)
+
+            if not title:
+                return _cors_response(400, {"success": False, "error": "title required"})
+            if not category_id:
+                return _cors_response(400, {"success": False, "error": "category_id required"})
+            try:
+                price_f = round(float(price), 2)
+                if price_f <= 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "price must be a positive number"})
+
+            xml_body = _build_additem_xml(
+                access_token   = "{{ACCESS_TOKEN}}" if dry_run else _get_access_token(),
+                title          = title,
+                category_id    = category_id,
+                store_cat_id   = store_cat_id,
+                price          = price_f,
+                quantity       = quantity,
+                image_url      = image_url,
+                specifics      = specifics,
+                condition_id   = condition_id,
+                shipping_cost  = shipping_cost,
+            )
+
+            if dry_run:
+                logger.info(f"create-listing DRY-RUN: title='{title[:40]}...' cat={category_id} price=${price_f:.2f}")
+                return _cors_response(200, {
+                    "success":  True,
+                    "dry_run":  True,
+                    "xml":      xml_body,
+                    "message":  "Dry run — XML envelope returned, not POSTed to eBay.",
+                })
+
+            ok, result = _add_item(xml_body)
+            if ok:
+                item_id = result.get("item_id", "")
+                listing_url = f"https://www.ebay.com/itm/{item_id}" if item_id else ""
+                logger.info(f"create-listing LIVE: created {item_id} ('{title[:40]}...')")
+                return _cors_response(200, {
+                    "success":     True,
+                    "item_id":     item_id,
+                    "ack":         result.get("ack", ""),
+                    "errors":      result.get("errors", []),
+                    "listing_url": listing_url,
+                })
+            else:
+                logger.error(f"create-listing LIVE failed: {result.get('errors')}")
+                return _cors_response(200, {
+                    "success": False,
+                    "ack":     result.get("ack", ""),
+                    "errors":  result.get("errors", []),
+                })
+
+        except Exception as exc:
+            logger.error(f"create-listing error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/create-listing"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
+    # POST /ebay/ai-chat — proxy to Anthropic Claude for the assistant page
+    # Body: {question: str, context?: dict, history?: list[{role, content}]}
+    # Returns: {answer, model, usage, success}
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/ai-chat"):
+        try:
+            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                logger.error("ai-chat: ANTHROPIC_API_KEY not set")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "AI assistant not configured — ANTHROPIC_API_KEY missing on Lambda.",
+                })
+
+            body = json.loads(event.get("body") or "{}")
+            question = str(body.get("question") or "").strip()
+            history  = body.get("history") or []
+            if not question:
+                return _cors_response(400, {"success": False, "error": "question required"})
+
+            system_prompt = (
+                "You are Jason Chletsos's personal sports-card and Pokemon-card assistant. "
+                "Jason sells on eBay as 'harpua2001' and runs a dashboard site that surfaces "
+                "inventory_plan.json, sold_history.json, pokemon_pikachu_plan.json, and "
+                "related JSON data sources. Jason's young son is an avid collector — his "
+                "favorites are Pikachu, Charizard, Mew, Mewtwo, and Eevee — so when Pokemon "
+                "comes up, mention the son angle where relevant. You are knowledgeable about "
+                "card sets, parallels, grading (PSA/BGS/CGC), recent comp pricing, eBay best "
+                "practices (titles, item specifics, promoted listings, Best Offer), and the "
+                "modern sports-card hobby (Topps Chrome, Panini Prizm, Bowman, etc). "
+                "Answer concisely (1-3 short paragraphs unless a list is clearer). Be direct, "
+                "card-knowledgeable, and practical — Jason is a working seller, not a beginner."
+            )
+
+            messages = []
+            for h in history:
+                if not isinstance(h, dict):
+                    continue
+                role = h.get("role")
+                content = h.get("content")
+                if role in ("user", "assistant") and isinstance(content, str) and content.strip():
+                    messages.append({"role": role, "content": content[:8000]})
+            messages.append({"role": "user", "content": question[:8000]})
+
+            payload = json.dumps({
+                "model":      "claude-opus-4-7",
+                "max_tokens": 1024,
+                "system":     system_prompt,
+                "messages":   messages,
+            }).encode()
+
+            req = urllib.request.Request(
+                "https://api.anthropic.com/v1/messages",
+                data=payload,
+                headers={
+                    "x-api-key":         api_key,
+                    "anthropic-version": "2023-06-01",
+                    "Content-Type":      "application/json",
+                },
+                method="POST",
+            )
+            try:
+                resp = urllib.request.urlopen(req, timeout=30)
+                data = json.loads(resp.read().decode())
+            except urllib.error.HTTPError as exc:
+                err_body = exc.read().decode()[:400]
+                logger.error(f"ai-chat Anthropic HTTP {exc.code}: {err_body}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Anthropic API HTTP {exc.code}: {err_body}",
+                })
+
+            # Extract text from content blocks
+            answer_parts = []
+            for block in data.get("content", []):
+                if isinstance(block, dict) and block.get("type") == "text":
+                    answer_parts.append(block.get("text", ""))
+            answer = "\n".join(answer_parts).strip()
+
+            logger.info(f"ai-chat: model={data.get('model')} usage={data.get('usage')}")
+            return _cors_response(200, {
+                "success": True,
+                "answer":  answer,
+                "model":   data.get("model", ""),
+                "usage":   data.get("usage", {}),
+            })
+
+        except Exception as exc:
+            logger.error(f"ai-chat error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)})
+
+    if method == "OPTIONS" and path.endswith("/ebay/ai-chat"):
+        return _cors_preflight()
+
+    # ------------------------------------------------------------------
     # POST /ebay/rebuild — trigger GitHub Actions workflow_dispatch
     # Rebuilds the GitHub Pages site with fresh eBay listings
     # ------------------------------------------------------------------
@@ -819,6 +1001,124 @@ def _revise_item_price(access_token: str, item_id: str, price: float):
         errors.append(f"[{code}] {short} :: {long_}")
     msg = " | ".join(errors) if errors else "Unknown error (no Errors node)"
     return False, msg
+
+
+def _xml_escape(s: str) -> str:
+    """Minimal XML escape for text nodes."""
+    return (str(s)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;"))
+
+
+def _build_additem_xml(access_token, title, category_id, store_cat_id, price,
+                       quantity, image_url, specifics, condition_id,
+                       shipping_cost) -> str:
+    """Build the Trading API AddItem XML envelope (FixedPriceItem, GTC)."""
+    # Item specifics — NameValueList nodes
+    specifics_xml = ""
+    if specifics and isinstance(specifics, dict):
+        rows = []
+        for name, value in specifics.items():
+            if value is None or str(value).strip() == "":
+                continue
+            rows.append(
+                f"      <NameValueList>"
+                f"<Name>{_xml_escape(name)}</Name>"
+                f"<Value>{_xml_escape(value)}</Value>"
+                f"</NameValueList>"
+            )
+        if rows:
+            specifics_xml = "    <ItemSpecifics>\n" + "\n".join(rows) + "\n    </ItemSpecifics>"
+
+    pictures_xml = ""
+    if image_url:
+        pictures_xml = (
+            f"    <PictureDetails>\n"
+            f"      <PictureURL>{_xml_escape(image_url)}</PictureURL>\n"
+            f"    </PictureDetails>"
+        )
+
+    storefront_xml = ""
+    if store_cat_id and str(store_cat_id).strip().isdigit():
+        storefront_xml = (
+            f"    <Storefront>\n"
+            f"      <StoreCategoryID>{store_cat_id}</StoreCategoryID>\n"
+            f"    </Storefront>"
+        )
+
+    return (
+        f"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        f"<AddItemRequest xmlns=\"{NS_URI}\">\n"
+        f"  <RequesterCredentials><eBayAuthToken>{access_token}</eBayAuthToken></RequesterCredentials>\n"
+        f"  <Item>\n"
+        f"    <Title>{_xml_escape(title)}</Title>\n"
+        f"    <PrimaryCategory><CategoryID>{_xml_escape(category_id)}</CategoryID></PrimaryCategory>\n"
+        f"    <StartPrice currencyID=\"USD\">{price:.2f}</StartPrice>\n"
+        f"    <Quantity>{int(quantity)}</Quantity>\n"
+        f"    <ListingType>FixedPriceItem</ListingType>\n"
+        f"    <ListingDuration>GTC</ListingDuration>\n"
+        f"    <Country>US</Country>\n"
+        f"    <Currency>USD</Currency>\n"
+        f"    <Location>United States</Location>\n"
+        f"    <ConditionID>{_xml_escape(condition_id)}</ConditionID>\n"
+        f"    <DispatchTimeMax>1</DispatchTimeMax>\n"
+        f"{pictures_xml}\n"
+        f"{specifics_xml}\n"
+        f"{storefront_xml}\n"
+        f"    <ShippingDetails>\n"
+        f"      <ShippingType>Flat</ShippingType>\n"
+        f"      <ApplyShippingDiscount>true</ApplyShippingDiscount>\n"
+        f"      <ShippingServiceOptions>\n"
+        f"        <ShippingServicePriority>1</ShippingServicePriority>\n"
+        f"        <ShippingService>USPSFirstClass</ShippingService>\n"
+        f"        <ShippingServiceCost currencyID=\"USD\">{shipping_cost:.2f}</ShippingServiceCost>\n"
+        f"      </ShippingServiceOptions>\n"
+        f"    </ShippingDetails>\n"
+        f"    <ReturnPolicy>\n"
+        f"      <ReturnsAcceptedOption>ReturnsAccepted</ReturnsAcceptedOption>\n"
+        f"      <ReturnsWithinOption>Days_30</ReturnsWithinOption>\n"
+        f"      <RefundOption>MoneyBack</RefundOption>\n"
+        f"      <ShippingCostPaidByOption>Seller</ShippingCostPaidByOption>\n"
+        f"    </ReturnPolicy>\n"
+        f"  </Item>\n"
+        f"</AddItemRequest>\n"
+    )
+
+
+def _add_item(xml_body: str):
+    """POST AddItem XML to Trading API; return (ok, {item_id, ack, errors})."""
+    headers = {
+        "X-EBAY-API-SITEID":              "0",
+        "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
+        "X-EBAY-API-CALL-NAME":           "AddItem",
+        "X-EBAY-API-APP-NAME":            CLIENT_ID,
+        "X-EBAY-API-DEV-NAME":            DEV_ID,
+        "X-EBAY-API-CERT-NAME":           CLIENT_SECRET,
+        "Content-Type":                   "text/xml",
+    }
+    try:
+        req  = urllib.request.Request(TRADING_API_URL, data=xml_body.encode(), headers=headers, method="POST")
+        resp = urllib.request.urlopen(req, timeout=20)
+        root = ET.fromstring(resp.read().decode())
+    except urllib.error.HTTPError as exc:
+        return False, {"ack": "HTTPError", "errors": [f"HTTP {exc.code}: {exc.read().decode()[:300]}"], "item_id": ""}
+    except Exception as exc:
+        return False, {"ack": "Exception", "errors": [str(exc)], "item_id": ""}
+
+    ack     = root.findtext(f"{{{NS_URI}}}Ack", "")
+    item_id = root.findtext(f"{{{NS_URI}}}ItemID", "")
+    errors  = []
+    for err in root.findall(f".//{{{NS_URI}}}Errors"):
+        code  = err.findtext(f"{{{NS_URI}}}ErrorCode", "?")
+        short = err.findtext(f"{{{NS_URI}}}ShortMessage", "")
+        long_ = err.findtext(f"{{{NS_URI}}}LongMessage", "")
+        sev   = err.findtext(f"{{{NS_URI}}}SeverityCode", "")
+        errors.append(f"[{code}/{sev}] {short} :: {long_}")
+    ok = ack in ("Success", "Warning") and bool(item_id)
+    return ok, {"ack": ack, "item_id": item_id, "errors": errors}
 
 
 # ---------------------------------------------------------------------------

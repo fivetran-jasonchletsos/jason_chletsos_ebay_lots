@@ -80,7 +80,7 @@ def _search(token: str, q: str, own_seller: str, limit: int = 50) -> list[dict]:
             "item_id":   iid,
             "title":     title,
             "price":     price,
-            "url":       it.get("itemWebUrl") or "",
+            "url":       promote._epn_wrap(it.get("itemWebUrl") or ""),
             "image":     ((it.get("image") or {}).get("imageUrl")) or "",
             "buying":    it.get("buyingOptions", []) or [],
             "seller":    seller,

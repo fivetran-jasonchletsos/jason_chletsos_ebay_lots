@@ -82,7 +82,7 @@ def find_vault_eligible(listings: list[dict]) -> list[dict]:
             "price":              p,
             "category":           cat,
             "pic":                l.get("pic"),
-            "url":                l.get("url"),
+            "url":                promote._epn_wrap(l.get("url") or ""),
             "recommended_action": action,
         })
     # sort: route first, then consider, then by price desc

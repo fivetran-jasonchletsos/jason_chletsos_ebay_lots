@@ -23,6 +23,8 @@ import html
 import json
 import os
 import sys
+
+import promote
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -84,7 +86,7 @@ def _walk_items(node: Any, source: str, context: Optional[str] = None) -> Iterab
                 "item_id": str(node.get("item_id") or ""),
                 "title": str(node.get("title") or "").strip(),
                 "price": float(node["price"]),
-                "url": node.get("url"),
+                "url": promote._epn_wrap(node.get("url") or ""),
                 "image": node.get("image") or "",
                 "seller": node.get("seller") or "",
                 "condition": node.get("condition") or "",

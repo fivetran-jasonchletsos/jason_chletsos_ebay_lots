@@ -189,7 +189,7 @@ def pick_steals(seller_hub_plan: dict, snapshot: list[dict], scp: dict,
             "was_price": was,
             "save_pct":  save_pct,
             "pic":       _big_pic(c.get("pic", "")),
-            "url":       c.get("url", ""),
+            "url":       promote._epn_wrap(c.get("url", "")),
             "source":    source,
         })
     return steals
