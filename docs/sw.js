@@ -6,7 +6,7 @@
 //   - CDN libs (cdn.jsdelivr.net, fonts.googleapis.com): cache-first
 //   - Lambda API calls (jw0hur2091.execute-api...): network-only, never cached
 
-const VERSION    = 'h2k-v1';
+const VERSION    = 'h2k-v2-pwa';
 const STATIC_CACHE  = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const IMG_CACHE     = `${VERSION}-img`;
@@ -21,6 +21,8 @@ const PRECACHE = [
   'craigslist.html',
   'return-policy.html',
   'manifest.webmanifest',
+  'banner.jpg',
+  'store_logo_512.png',
 ];
 
 self.addEventListener('install', (e) => {
@@ -62,7 +64,13 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Same-origin HTML — network-first (fresh content wins, fall back to cache offline)
+  // Same-origin images — cache-first (logos, banners, og-card, etc.)
+  if (url.origin === self.location.origin && /\.(png|jpe?g|gif|svg|webp|ico)$/i.test(url.pathname)) {
+    e.respondWith(cacheFirst(e.request, IMG_CACHE));
+    return;
+  }
+
+  // Same-origin HTML & everything else — network-first (fresh content wins, fall back to cache offline)
   if (url.origin === self.location.origin) {
     e.respondWith(networkFirst(e.request, STATIC_CACHE));
     return;

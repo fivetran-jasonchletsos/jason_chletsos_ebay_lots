@@ -1835,6 +1835,29 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       overflow-y: auto;
     }
     .rd-preview .pv-title { color: var(--gold); font-weight: 700; font-family: inherit; font-size: 13px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed var(--border); }
+    /* Dry-run toggle + result panel (added for Lambda live-post wiring) */
+    .rd-dryrun {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer; user-select: none;
+    }
+    .rd-dryrun input { accent-color: var(--gold); margin: 0; }
+    .rd-dryrun.on { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,.08); }
+    .rd-result {
+      margin-top: 12px; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      background: #0d0d0d; font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--text); line-height: 1.5;
+      display: none; word-break: break-word;
+    }
+    .rd-result.show { display: block; }
+    .rd-result.ok { border-color: #2e8b3d; background: rgba(46,139,61,.08); }
+    .rd-result.err { border-color: #b03a3a; background: rgba(176,58,58,.08); }
+    .rd-result.info { border-color: var(--gold); background: rgba(212,175,55,.06); }
+    .rd-result .rd-result-head { font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 10px; margin-bottom: 6px; }
+    .rd-result a { color: var(--gold); }
     @media (max-width: 880px) {
       .rd-layout { grid-template-columns: 1fr; }
       .rd-picker { max-height: 320px; position: relative; top: 0; }
@@ -2026,6 +2049,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="eyebrow">Cross-post to Reddit</div>
         <h1 class="section-title">Reddit <span class="accent">Cross-Post</span></h1>
         <div class="section-sub">Pick a listing on the left, refine the post, choose a subreddit, send. r/SportsCardSales pre-selected — biggest dedicated sales sub.</div>
+      </div>
+      <div>
+        <label class="rd-dryrun" id="rd-dryrun-wrap" title="When enabled, 'Post via Lambda' previews the payload locally and does NOT hit the API.">
+          <input type="checkbox" id="rd-dryrun" onchange="rdDryrunToggle()">
+          <span>Dry run</span>
+        </label>
       </div>
     </div>
 
@@ -3061,14 +3090,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <button type="button" class="btn btn-ghost" onclick="rdCopy()">Copy text</button>
             <a id="rd-eitr" target="_blank" rel="noopener" class="btn btn-ghost">View eBay</a>
             <a id="rd-open-reddit" href="#" target="_blank" rel="noopener" class="btn btn-outline" onclick="rdOpenReddit(event)">
-              Open Reddit Submit Page →
+              Open Reddit submit page →
             </a>
-            <button type="submit" class="btn btn-gold" style="margin-left:auto;">Post via API →</button>
+            <button type="submit" class="btn btn-gold" id="rd-submit-btn" style="margin-left:auto;">Post via Lambda (live) →</button>
           </div>
           <div style="margin-top:8px;font-size:11px;color:var(--text-dim);letter-spacing:.04em;">
-            Tip: <strong style="color:var(--text-muted);">Open Reddit Submit Page</strong> opens reddit.com with title + body pre-filled — no API needed. <strong style="color:var(--text-muted);">Post via API</strong> sends directly (requires deployed Lambda + Reddit credentials).
+            Tip: <strong style="color:var(--text-muted);">Open Reddit submit page</strong> opens reddit.com with title + body pre-filled — no API needed. <strong style="color:var(--text-muted);">Post via Lambda (live)</strong> POSTs to <code>/ebay/reddit-post</code> and submits via PRAW. Toggle <strong style="color:var(--text-muted);">Dry run</strong> above to preview the payload without hitting Reddit.
           </div>
 
+          <div class="rd-result" id="rd-result" role="status" aria-live="polite"></div>
           <div class="rd-preview" id="rd-preview"></div>
         </form>
       </section>
@@ -3169,32 +3199,97 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         bar.scrollIntoView({ behavior:'smooth', block:'nearest' });
       }
 
+      function rdIsDryRun() {
+        const el = document.getElementById('rd-dryrun');
+        return !!(el && el.checked);
+      }
+      function rdDryrunToggle() {
+        const wrap = document.getElementById('rd-dryrun-wrap');
+        if (wrap) wrap.classList.toggle('on', rdIsDryRun());
+        const btn = document.getElementById('rd-submit-btn');
+        if (btn) btn.textContent = rdIsDryRun() ? 'Post via Lambda (DRY RUN) →' : 'Post via Lambda (live) →';
+      }
+
+      function rdResult(kind, headline, html) {
+        const box = document.getElementById('rd-result');
+        if (!box) return;
+        box.className = 'rd-result show ' + kind;
+        box.innerHTML = '<div class="rd-result-head">' + headline + '</div>' + html;
+        box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      }
+      function rdEscape(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+      }
+
       async function rdSubmit() {
         if (!activeId || !activeSub) { rdStatus('Select a listing and subreddit first.', 'warning'); return; }
+        const dryRun = rdIsDryRun();
+        // Lambda body shape (per /ebay/reddit-post handler):
+        //   { subreddit, title, body, item_id?, dry_run? }
         const payload = {
           item_id:   activeId,
           subreddit: activeSub,
           title:     document.getElementById('rd-title').value,
           body:      document.getElementById('rd-body').value,
+          dry_run:   dryRun,
         };
-        rdStatus('Posting to r/' + activeSub + '…', 'info');
+        if (dryRun) {
+          rdResult('info', 'Dry run — payload NOT sent',
+            'Would POST to <code>' + rdEscape(REDDIT_URL) + '</code>:<br>'
+            + '<pre style="white-space:pre-wrap;margin-top:6px;font-size:11px;">'
+            + rdEscape(JSON.stringify(payload, null, 2)) + '</pre>');
+          rdStatus('Dry run — payload printed below; no API call made.', 'info');
+          return;
+        }
+        rdStatus('Posting to r/' + activeSub + ' via Lambda…', 'info');
+        rdResult('info', 'Posting…', 'POST ' + rdEscape(REDDIT_URL) + ' → r/' + rdEscape(activeSub));
+        let resp, data;
         try {
-          const resp = await fetch(REDDIT_URL, {
+          resp = await fetch(REDDIT_URL, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify(payload),
           });
-          const data = await resp.json();
-          if (data.success) {
-            rdStatus('Posted! ' + (data.url ? 'View: ' + data.url : ''), 'success');
-            if (data.url) window.open(data.url, '_blank');
-          } else if (data.error && data.error.includes('not deployed')) {
-            rdStatus('Reddit Lambda not deployed yet. Use Copy → paste at reddit.com/r/' + activeSub + '/submit (see README setup steps).', 'warning');
-          } else {
-            rdStatus('Failed: ' + (data.error || 'Unknown'), 'danger');
-          }
         } catch(e) {
-          rdStatus('Reddit endpoint unreachable. Use Copy → paste manually. (' + e.message + ')', 'warning');
+          rdResult('err', 'Network error',
+            'Reddit endpoint unreachable: ' + rdEscape(e.message)
+            + '<br>Falling back: click <strong>Open Reddit submit page</strong> to paste manually.');
+          rdStatus('Lambda unreachable: ' + e.message, 'danger');
+          return;
+        }
+        try {
+          data = await resp.json();
+        } catch(e) {
+          rdResult('err', 'Lambda ' + resp.status + ' — non-JSON response',
+            'Could not parse response body. Check CloudWatch logs.');
+          rdStatus('Lambda ' + resp.status + ' (non-JSON)', 'danger');
+          return;
+        }
+        if (data && data.success) {
+          const url = data.url || '';
+          const idMatch = url.match(/\/comments\/([a-z0-9]+)/i);
+          const postId = idMatch ? idMatch[1] : '(id unknown)';
+          rdResult('ok', 'Posted to r/' + rdEscape(activeSub),
+            'ID: <strong>' + rdEscape(postId) + '</strong><br>'
+            + (url ? 'URL: <a href="' + rdEscape(url) + '" target="_blank" rel="noopener">' + rdEscape(url) + '</a>' : ''));
+          rdStatus('Posted to r/' + activeSub + ' — ' + (url || 'no URL returned'), 'success');
+          if (url) window.open(url, '_blank');
+        } else {
+          const err = (data && data.error) || ('HTTP ' + resp.status);
+          let hint = '';
+          if (/not deployed|credentials missing/i.test(err)) {
+            hint = '<br><span style="color:var(--text-muted);">Hint: Lambda env vars REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET / REDDIT_REFRESH_TOKEN are missing. See README setup.</span>';
+          } else if (/scope|forbidden|403/i.test(err)) {
+            hint = '<br><span style="color:var(--text-muted);">Hint: refresh-token likely missing the <code>submit</code> scope. Re-authorise with scope=submit,identity,read.</span>';
+          } else if (/300|title/i.test(err)) {
+            hint = '<br><span style="color:var(--text-muted);">Hint: trim the title (Reddit caps at 300 chars).</span>';
+          } else if (/rate|ratelimit|too fast/i.test(err)) {
+            hint = '<br><span style="color:var(--text-muted);">Hint: Reddit rate-limit — wait a few minutes between posts.</span>';
+          }
+          rdResult('err', 'Lambda ' + resp.status + ' — failed', rdEscape(err) + hint);
+          rdStatus('Failed (' + resp.status + '): ' + err, 'danger');
         }
       }
     </script>
@@ -3202,7 +3297,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 20:29 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 20:33 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
