@@ -2707,6 +2707,7 @@ _NAV_ITEMS = [
     ("vault.html",            "Vault",         False, "Insights"),
     ("photo_quality.html",    "Photo Quality", False, "Insights"),
     ("email_campaign.html",   "Email",         False, "Insights"),
+    ("collect.html",          "My Wants",      False, "Insights"),
     ("seller_hub.html",       "Seller Hub",    False, "Insights"),
     ("watchers.html",         "Watchers",      False, "Insights"),
     ("specifics.html",        "Specifics",     False, "Insights"),
@@ -9687,8 +9688,9 @@ def main():
     _python = sys.executable
     _here   = Path(__file__).parent
     for label, script in [
-        ("Vault report: docs/vault.html",          "vault_eligibility.py"),
-        ("Email campaign: docs/email_campaign.html","email_campaign_agent.py"),
+        ("Vault report: docs/vault.html",            "vault_eligibility.py"),
+        ("Email campaign: docs/email_campaign.html", "email_campaign_agent.py"),
+        ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py"),
     ]:
         sp_path = _here / script
         if not sp_path.exists():

@@ -131,43 +131,48 @@ def _xml_get_store_categories(token: str) -> str:
 
 
 def _xml_set_store_categories(token: str, actions: list[dict]) -> str:
-    """Build a single SetStoreCategoriesRequest with Add/Rename/Delete actions.
+    """Build a single SetStoreCategoriesRequest. eBay's Trading API accepts
+    exactly ONE <Action> per request, with multiple <CustomCategory> children
+    inside the single <Store>/<Categories> block. So we group by action and
+    return a single envelope per action — caller is responsible for splitting
+    Add/Rename/Delete across separate calls.
 
     actions = [{"action": "Add" | "Rename" | "Delete",
                 "category_id": "0" (for Add) | existing id,
                 "name": "Pokemon Lots"}]
     """
-    parts: list[str] = []
-    for a in actions:
-        if a["action"] == "Add":
-            parts.append(
-                "  <Action>Add</Action>\n"
-                "  <Store><Categories><CustomCategory>"
-                f"<Name>{_xml_escape(a['name'])}</Name>"
-                "</CustomCategory></Categories></Store>"
-            )
-        elif a["action"] == "Rename":
-            parts.append(
-                "  <Action>Rename</Action>\n"
-                "  <Store><Categories><CustomCategory>"
-                f"<CategoryID>{a['category_id']}</CategoryID>"
-                f"<Name>{_xml_escape(a['name'])}</Name>"
-                "</CustomCategory></Categories></Store>"
-            )
-        elif a["action"] == "Delete":
-            parts.append(
-                "  <Action>Delete</Action>\n"
-                "  <DestinationParentCategoryID>0</DestinationParentCategoryID>\n"
-                "  <Store><Categories><CustomCategory>"
-                f"<CategoryID>{a['category_id']}</CategoryID>"
-                "</CustomCategory></Categories></Store>"
-            )
-    body = "\n".join(parts)
+    if not actions:
+        return ""
+    # All actions must share the same Action verb in a single call.
+    action_kind = actions[0]["action"]
+    assert all(a["action"] == action_kind for a in actions), \
+        "Split Add/Rename/Delete into separate calls"
+
+    category_xml = "\n".join(
+        "    <CustomCategory>"
+        + (f"<CategoryID>{a['category_id']}</CategoryID>"
+           if action_kind in ("Rename", "Delete") else "")
+        + (f"<Name>{_xml_escape(a['name'])}</Name>"
+           if action_kind in ("Add", "Rename") else "")
+        + "</CustomCategory>"
+        for a in actions
+    )
+
+    extra = ""
+    if action_kind == "Delete":
+        extra = "  <DestinationParentCategoryID>0</DestinationParentCategoryID>\n"
+
     return (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         f'<SetStoreCategoriesRequest xmlns="{EBAY_NS}">\n'
         f'  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>\n'
-        f'{body}\n'
+        f'  <Action>{action_kind}</Action>\n'
+        f'{extra}'
+        f'  <Store>\n'
+        f'    <Categories>\n'
+        f'{category_xml}\n'
+        f'    </Categories>\n'
+        f'  </Store>\n'
         f'</SetStoreCategoriesRequest>'
     )
 
@@ -322,20 +327,40 @@ def sync_store_categories(token: str, plan: dict, ebay_cfg: dict | None = None,
         print("  No category changes — store sidebar already matches plan.")
         return result
 
-    envelope = _xml_set_store_categories(token if not dry_run else "<TOKEN>",
-                                         actions)
+    # SetStoreCategories accepts only ONE <Action> per request. Group the
+    # actions by verb and make one call per non-empty group. eBay assigns
+    # CategoryIDs on Add; we re-fetch after to populate them.
+    grouped: dict[str, list[dict]] = {}
+    for a in actions:
+        grouped.setdefault(a["action"], []).append(a)
+
+    envelopes = {k: _xml_set_store_categories(token if not dry_run else "<TOKEN>", v)
+                 for k, v in grouped.items()}
     if dry_run:
-        result["envelope"] = envelope
-        print("  DRY RUN — SetStoreCategories envelope follows:")
-        print(envelope)
+        result["envelope"] = "\n\n--- next action ---\n\n".join(envelopes.values())
+        print("  DRY RUN — SetStoreCategories envelopes follow:")
+        print(result["envelope"])
         return result
 
-    root = _trading_post("SetStoreCategories", envelope, ebay_cfg)
-    result["ack"]    = root.findtext(f"{NS}Ack", "") or ""
-    result["errors"] = _parse_errors(root)
+    acks: list[str] = []
+    all_errors: list[dict] = []
+    for verb, env in envelopes.items():
+        root = _trading_post("SetStoreCategories", env, ebay_cfg)
+        ack  = root.findtext(f"{NS}Ack", "") or ""
+        errs = _parse_errors(root)
+        acks.append(ack)
+        all_errors.extend([{**e, "verb": verb} for e in errs])
 
-    # Re-fetch to populate real IDs for the just-created categories so
-    # the caller can use them for item assignment without a second run.
+    # Roll up: any Failure = Failure, all Success = Success, mix = Warning
+    if any(a == "Failure" for a in acks):
+        result["ack"] = "Failure"
+    elif all(a == "Success" for a in acks):
+        result["ack"] = "Success"
+    else:
+        result["ack"] = "Warning"
+    result["errors"] = all_errors
+
+    # Re-fetch to populate real IDs for the just-created categories.
     if result["ack"] in ("Success", "Warning"):
         fresh = fetch_existing_categories(token, ebay_cfg)
         for name in created:
