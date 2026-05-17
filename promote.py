@@ -2707,9 +2707,16 @@ _NAV_ITEMS = [
     ("vault.html",            "Vault",         False, "Insights"),
     ("photo_quality.html",    "Photo Quality", False, "Insights"),
     ("email_campaign.html",   "Email",         False, "Insights"),
-    ("collect.html",          "My Wants",      False, "Insights"),
-    ("pikachu.html",          "Pikachu",       False, "Insights"),
-    ("pokemon_news.html",     "Pokemon News",  False, "Insights"),
+    ("collect.html",          "My Wants",      True,  "For Us"),
+    ("pokemon.html",          "Pokemon",       True,  "For Us"),
+    ("pikachu.html",          "Pikachu",       True,  "For Us"),
+    ("charizard.html",        "Charizard",     True,  "For Us"),
+    ("mew.html",              "Mew",           True,  "For Us"),
+    ("mewtwo.html",           "Mewtwo",        True,  "For Us"),
+    ("eevee.html",            "Eevee",         True,  "For Us"),
+    ("pokemon_news.html",     "Pokemon News",  True,  "For Us"),
+    ("price_drops.html",      "Price Drops",   True,  "For Us"),
+    ("listing_performance.html","Listing Perf",False, "Insights"),
     ("seller_hub.html",       "Seller Hub",    False, "Insights"),
     ("watchers.html",         "Watchers",      False, "Insights"),
     ("specifics.html",        "Specifics",     False, "Insights"),
@@ -9466,14 +9473,20 @@ def revise_listings(cfg: dict, listings: list[dict], dry_run: bool = True):
         return
 
     print("\n  Applying changes to eBay...")
+    # XML-escape any reserved chars in the title — unescaped &, <, >, ', " produce
+    # Trading API "XML Parse error" (errorId 5). Trading API ReviseItem accepts
+    # exactly ONE <Item> per envelope, so we loop with gentle pacing.
+    from xml.sax.saxutils import escape as _xml_escape
     success = 0
     for l, new_title in improved:
+        safe_item_id = _xml_escape(str(l['item_id']))
+        safe_title   = _xml_escape(new_title, {'"': "&quot;", "'": "&apos;"})
         xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
 <ReviseItemRequest xmlns="{ns_uri}">
   <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
   <Item>
-    <ItemID>{l['item_id']}</ItemID>
-    <Title>{new_title}</Title>
+    <ItemID>{safe_item_id}</ItemID>
+    <Title>{safe_title}</Title>
   </Item>
 </ReviseItemRequest>"""
         headers = {
@@ -9486,7 +9499,7 @@ def revise_listings(cfg: dict, listings: list[dict], dry_run: bool = True):
             "Content-Type":                   "text/xml",
         }
         r = requests.post("https://api.ebay.com/ws/api.dll",
-                          headers=headers, data=xml_body.encode())
+                          headers=headers, data=xml_body.encode("utf-8"))
         root = ET.fromstring(r.text)
         ack = root.findtext(f"{{{ns_uri}}}Ack", "")
         if ack in ("Success", "Warning"):
@@ -9496,6 +9509,8 @@ def revise_listings(cfg: dict, listings: list[dict], dry_run: bool = True):
             errs = root.findall(f".//{{{ns_uri}}}ShortMessage""")
             msg = errs[0].text if errs else r.text[:100]
             print(f"    FAILED {l['item_id']}: {msg}")
+        # gentle pacing — eBay throttles bursty ReviseItem callers
+        _time.sleep(0.6)
 
     print(f"\n  Done. {success}/{len(improved)} listings updated on eBay.")
 
@@ -9693,8 +9708,10 @@ def main():
         ("Vault report: docs/vault.html",            "vault_eligibility.py"),
         ("Email campaign: docs/email_campaign.html", "email_campaign_agent.py"),
         ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py"),
-        ("Pikachu Hunt: docs/pikachu.html",          "pokemon_deals_agent.py"),
+        ("Pokemon hunt (all chars): docs/pokemon.html", "pokemon_deals_agent.py"),
         ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py"),
+        ("Listing perf: docs/listing_performance.html","listing_performance_agent.py"),
+        ("Price Drops: docs/price_drops.html",       "price_drops_agent.py"),
     ]:
         sp_path = _here / script
         if not sp_path.exists():

@@ -1,18 +1,22 @@
 """
-pokemon_deals_agent.py — Pikachu deal-hunter for the family page.
+pokemon_deals_agent.py — multi-character Pokemon deal-hunter for the family page.
 
-Reads pokemon_queries.json (a list of Pikachu search buckets), hits the
-eBay Browse API for each, computes a median per bucket, flags items
-≥25% below median as deals (min 6 comps), and renders
-docs/pikachu.html — a kid-friendly card grid with filter UI.
+Reads pokemon_characters.json (a list of characters, each with their own search
+buckets) and for each character:
+  • Hits the eBay Browse API for every query in every bucket
+  • Computes a median per bucket, flags items >=25% below median as deals (min 6 comps)
+  • Renders docs/{slug}.html — a kid-friendly card grid with filter UI
+  • Saves output/pokemon_{slug}_plan.json
 
-Output:
-  output/pokemon_pikachu_plan.json    structured plan
-  docs/pikachu.html                   buyer page
+Also renders docs/pokemon.html — a landing tile-grid linking to every character.
+
+Legacy fallback: if pokemon_characters.json does not exist, falls back to
+pokemon_queries.json and renders just docs/pikachu.html.
 
 CLI:
   python3 pokemon_deals_agent.py
-  python3 pokemon_deals_agent.py --bucket "Vintage Holo Pikachu"   # one bucket only
+  python3 pokemon_deals_agent.py --character charizard
+  python3 pokemon_deals_agent.py --bucket "Vintage Holo"   # one bucket across all chars
 """
 from __future__ import annotations
 
@@ -29,11 +33,12 @@ import requests
 
 import promote
 
-REPO_ROOT   = Path(__file__).parent
-QUERIES     = REPO_ROOT / "pokemon_queries.json"
-PLAN_PATH   = REPO_ROOT / "output" / "pokemon_pikachu_plan.json"
-REPORT_PATH = REPO_ROOT / "docs" / "pikachu.html"
-BROWSE_URL  = "https://api.ebay.com/buy/browse/v1/item_summary/search"
+REPO_ROOT       = Path(__file__).parent
+CHARACTERS_FILE = REPO_ROOT / "pokemon_characters.json"
+LEGACY_QUERIES  = REPO_ROOT / "pokemon_queries.json"
+OUTPUT_DIR      = REPO_ROOT / "output"
+DOCS_DIR        = REPO_ROOT / "docs"
+BROWSE_URL      = "https://api.ebay.com/buy/browse/v1/item_summary/search"
 
 
 # --------------------------------------------------------------------------- #
@@ -97,23 +102,39 @@ def _search(token: str, q: str, min_price: float, max_price: float,
 
 
 # --------------------------------------------------------------------------- #
+# Config loading                                                               #
+# --------------------------------------------------------------------------- #
+
+def load_characters() -> dict:
+    """Load pokemon_characters.json, or fall back to legacy pokemon_queries.json."""
+    if CHARACTERS_FILE.exists():
+        return json.loads(CHARACTERS_FILE.read_text())
+    # Legacy fallback: wrap pikachu-only config in characters shape
+    legacy = json.loads(LEGACY_QUERIES.read_text())
+    return {
+        "deal_threshold_pct":   legacy.get("deal_threshold_pct", 25),
+        "min_comps_for_median": legacy.get("min_comps_for_median", 6),
+        "characters": [{
+            "slug": "pikachu",
+            "name": "Pikachu",
+            "color": "#ffcc00",
+            "tagline": "The mascot. The icon. The card that built the hobby.",
+            "buckets": legacy.get("buckets", []),
+        }],
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Plan                                                                         #
 # --------------------------------------------------------------------------- #
 
-def build_plan(only_bucket: str | None = None) -> dict:
-    cfg_full = json.loads(QUERIES.read_text())
-    cfg = json.loads(promote.CONFIG_FILE.read_text())
-    own = cfg.get("seller_username") or "harpua2001"
-    token = promote.get_app_token(cfg)
-
-    threshold = float(cfg_full.get("deal_threshold_pct", 25))
-    min_comps = int(cfg_full.get("min_comps_for_median", 6))
-
+def build_plan(character: dict, threshold: float, min_comps: int,
+               token: str, own: str, only_bucket: str | None = None) -> dict:
     buckets_out = []
-    for b in cfg_full.get("buckets", []):
+    for b in character.get("buckets", []):
         if only_bucket and b["label"].lower() != only_bucket.lower():
             continue
-        print(f"  → {b['label']}")
+        print(f"    -> {b['label']}")
         all_items: list[dict] = []
         seen_ids: set[str] = set()
         for q in b["queries"]:
@@ -146,6 +167,10 @@ def build_plan(only_bucket: str | None = None) -> dict:
 
     return {
         "generated_at":  datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "slug":          character["slug"],
+        "name":          character["name"],
+        "color":         character.get("color", "#ffcc00"),
+        "tagline":       character.get("tagline", ""),
         "threshold_pct": threshold,
         "min_comps":     min_comps,
         "buckets":       buckets_out,
@@ -153,9 +178,10 @@ def build_plan(only_bucket: str | None = None) -> dict:
 
 
 def save_plan(plan: dict) -> Path:
-    PLAN_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PLAN_PATH.write_text(json.dumps(plan, indent=2), encoding="utf-8")
-    return PLAN_PATH
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = OUTPUT_DIR / f"pokemon_{plan['slug']}_plan.json"
+    path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+    return path
 
 
 # --------------------------------------------------------------------------- #
@@ -166,27 +192,18 @@ def _esc(s: Any) -> str:
     return html.escape(str(s or ""))
 
 
-_EMOJI_DOT = {
-    "vintage": "VINTAGE",
-    "surf":    "SURF",
-    "go":      "GO!",
-    "vmax":    "VMAX",
-    "ex":      "ex",
-    "promo":   "PROMO",
-    "psa":     "PSA 10",
-}
-
-
 def render_report(plan: dict) -> Path:
     threshold = plan["threshold_pct"]
-    buckets = plan["buckets"]
+    buckets   = plan["buckets"]
+    name      = plan["name"]
+    slug      = plan["slug"]
+    color     = plan.get("color", "#ffcc00")
+    tagline   = plan.get("tagline", "")
+
     total_listings = sum(b["n"] for b in buckets)
     total_deals    = sum(b["n_deals"] for b in buckets)
 
-    # ---- Grail Watch — most expensive Pikachus across the WHOLE scan,
-    # not just the grail bucket. A $1,200 Base Set holo from the Vintage
-    # bucket belongs in Grail Watch even if it didn't come from a grail query.
-    # Dedupe by item_id (a card might appear in multiple buckets).
+    # ---- Grail Watch — most expensive cards across the WHOLE scan ---- #
     grail_pool: dict[str, dict] = {}
     for b in buckets:
         for it in b["items"]:
@@ -215,7 +232,7 @@ def render_report(plan: dict) -> Path:
           <div class="pk-grail-grid">{''.join(cards)}</div>
         </section>"""
 
-    # ---- Hero strip: hottest deals (skip grails — those go in their own section) ---- #
+    # ---- Hero strip: hottest deals (skip grails) ---- #
     best_deals = sorted(
         (it for b in buckets if b.get("kind") != "grail" for it in b["items"] if it["is_deal"]),
         key=lambda x: -x["discount_pct"]
@@ -246,7 +263,7 @@ def render_report(plan: dict) -> Path:
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">{len(buckets)}</div><div class="pk-l">Categories</div></div>
       <div class="pk-kpi"><div class="pk-n">{total_listings}</div><div class="pk-l">Live listings</div></div>
-      <div class="pk-kpi"><div class="pk-n">{total_deals}</div><div class="pk-l">Deals ≥{threshold:.0f}% below median</div></div>
+      <div class="pk-kpi"><div class="pk-n">{total_deals}</div><div class="pk-l">Deals &ge;{threshold:.0f}% below median</div></div>
       <div class="pk-kpi"><div class="pk-n">{datetime.now().strftime('%H:%M')}</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     """
@@ -259,7 +276,7 @@ def render_report(plan: dict) -> Path:
     filter_bar = f"""
     <div class="pk-filters">
       <input type="search" id="pk-q" class="search-input"
-             placeholder="Search card name, set, parallel…" autocomplete="off"
+             placeholder="Search card name, set, parallel..." autocomplete="off"
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
@@ -295,28 +312,26 @@ def render_report(plan: dict) -> Path:
     }
     sections = []
     for b in buckets:
-        # Grail bucket already rendered in its own hero — skip here to avoid double-display.
         if b.get("kind") == "grail":
             continue
-        slug = re.sub(r"[^a-z0-9]+", "-", b["label"].lower()).strip("-")
+        bslug = re.sub(r"[^a-z0-9]+", "-", b["label"].lower()).strip("-")
         kind = b.get("kind", "")
         tag  = KIND_TAG.get(kind, "")
         if not b.get("items"):
             sections.append(f"""
-            <section class="pk-bucket" id="b-{slug}" data-bucket="{_esc(b['label'])}">
+            <section class="pk-bucket" id="b-{bslug}" data-bucket="{_esc(b['label'])}">
               <div class="pk-bucket-head">
                 <h3>{_esc(b['label'])} <span class="pk-tag pk-tag-{kind}">{tag}</span></h3>
                 <p class="pk-blurb">{_esc(b.get('blurb',''))}</p>
-                <span class="pk-stats">No live listings in ${b.get('min',0):.0f}–${b.get('max',0):.0f}.</span>
+                <span class="pk-stats">No live listings in ${b.get('min',0):.0f}-${b.get('max',0):.0f}.</span>
               </div>
             </section>""")
             continue
-        # Sort: deals first, then cheapest first within group
         items_sorted = sorted(b["items"], key=lambda x: (not x["is_deal"], x["price"]))
         cards = []
         for it in items_sorted:
             deal_cls = " is-deal" if it["is_deal"] else ""
-            buying = " · ".join(
+            buying = " . ".join(
                 "BIN" if x == "FIXED_PRICE" else
                 "Auction" if x == "AUCTION" else
                 "Best Offer" if x == "BEST_OFFER" else _esc(x)
@@ -342,7 +357,7 @@ def render_report(plan: dict) -> Path:
               </div>
             </a>""")
         sections.append(f"""
-        <section class="pk-bucket" id="b-{slug}" data-bucket="{_esc(b['label'])}">
+        <section class="pk-bucket" id="b-{bslug}" data-bucket="{_esc(b['label'])}">
           <div class="pk-bucket-head">
             <div class="pk-bucket-title">
               <h3>{_esc(b['label'])} <span class="pk-tag pk-tag-{kind}">{tag}</span></h3>
@@ -358,7 +373,7 @@ def render_report(plan: dict) -> Path:
           <div class="pk-grid">{''.join(cards)}</div>
         </section>""")
 
-    # ---- JS — client-side filter ---- #
+    # ---- JS ---- #
     script = """
     <script>
       (function () {
@@ -391,7 +406,6 @@ def render_report(plan: dict) -> Path:
           });
           count.textContent = shown + ' / ' + cards.length + ' shown';
 
-          // Sort within each grid
           document.querySelectorAll('.pk-grid').forEach(grid => {
             const items = Array.from(grid.querySelectorAll('.pk-card')).filter(c => c.style.display !== 'none');
             items.sort((a, b) => {
@@ -408,7 +422,6 @@ def render_report(plan: dict) -> Path:
             items.forEach(c => grid.appendChild(c));
           });
 
-          // Hide empty bucket sections after filtering
           document.querySelectorAll('.pk-bucket').forEach(section => {
             const grid = section.querySelector('.pk-grid');
             if (!grid) return;
@@ -423,15 +436,19 @@ def render_report(plan: dict) -> Path:
     </script>
     """
 
+    sub_line = (f"Live {name} deals for my son — every category, every grade, sorted by biggest discount. "
+                f"A &quot;deal&quot; = &ge;{threshold:.0f}% below the median of that bucket (min {plan['min_comps']} comps).")
+    if tagline:
+        sub_line = f"{_esc(tagline)} " + sub_line
+
     body = f"""
     <div class="section-head">
       <div>
-        <div class="eyebrow">Pokemon · live eBay scan</div>
-        <h1 class="section-title">Pikachu <span class="accent">Hunt</span></h1>
+        <div class="eyebrow">Pokemon &middot; live eBay scan</div>
+        <h1 class="section-title">{_esc(name)} <span class="accent">Hunt</span></h1>
         <div class="section-sub">
-          Live Pikachu deals for my son — every category, every grade, sorted by biggest discount.
-          A "deal" = ≥{threshold:.0f}% below the median of that bucket (min {plan['min_comps']} comps).
-          Edit <code>pokemon_queries.json</code> to add or tweak buckets.
+          {sub_line}
+          <br><a href="pokemon.html" style="color:{color};">&larr; Back to all Pokemon</a>
         </div>
       </div>
     </div>
@@ -446,116 +463,199 @@ def render_report(plan: dict) -> Path:
     {script}
     """
 
-    extra_css = """
+    # Compute a darker shade of color for shadow / hover
+    extra_css = f"""
 <style>
-  .pk-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 22px 0; }
-  .pk-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px 18px; border-left: 3px solid #ffcc00; }
-  .pk-n { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: #ffcc00; line-height: 1; }
-  .pk-l { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }
+  .pk-kpis {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 22px 0; }}
+  .pk-kpi {{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px 18px; border-left: 3px solid {color}; }}
+  .pk-n {{ font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: {color}; line-height: 1; }}
+  .pk-l {{ color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }}
 
-  /* GRAIL WATCH — legendary cards (Illustrator, Trophy, 1st Ed Shadowless) */
-  .pk-grail { position: relative; background: linear-gradient(135deg, rgba(212,175,55,.12), rgba(255,140,0,.08), rgba(212,175,55,.12)); border: 1px solid rgba(212,175,55,.4); border-radius: var(--r-md); padding: 22px; margin: 22px 0 28px; overflow: hidden; }
-  .pk-grail::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(212,175,55,.18), transparent 60%); pointer-events: none; }
-  .pk-grail-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; position: relative; }
-  .pk-grail-head h2 { margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: #d4af37; letter-spacing: .04em; text-shadow: 0 2px 8px rgba(212,175,55,.4); }
-  .pk-grail-sub { color: #e0d8b5; font-size: 13px; font-style: italic; }
-  .pk-grail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; position: relative; }
-  .pk-grail-card { display: block; position: relative; background: #14110a; border: 2px solid rgba(212,175,55,.5); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
-  .pk-grail-card:hover { transform: translateY(-4px) scale(1.02); border-color: #d4af37; box-shadow: 0 12px 40px rgba(212,175,55,.4); }
-  .pk-grail-badge { position: absolute; top: 8px; left: 8px; background: #d4af37; color: #1a1500; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 8px; border-radius: 4px; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
-  .pk-grail-img { aspect-ratio: 3 / 4; background-size: cover; background-position: center; background-color: #0a0907; }
-  .pk-grail-meta { padding: 12px 14px; background: linear-gradient(180deg, transparent, rgba(212,175,55,.08)); }
-  .pk-grail-price { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #d4af37; line-height: 1; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
-  .pk-grail-title { font-size: 11px; line-height: 1.4; color: #c9c2a7; margin-top: 4px; min-height: 30px; }
+  /* GRAIL WATCH */
+  .pk-grail {{ position: relative; background: linear-gradient(135deg, rgba(212,175,55,.12), rgba(255,140,0,.08), rgba(212,175,55,.12)); border: 1px solid rgba(212,175,55,.4); border-radius: var(--r-md); padding: 22px; margin: 22px 0 28px; overflow: hidden; }}
+  .pk-grail::before {{ content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(212,175,55,.18), transparent 60%); pointer-events: none; }}
+  .pk-grail-head {{ display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; position: relative; }}
+  .pk-grail-head h2 {{ margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: #d4af37; letter-spacing: .04em; text-shadow: 0 2px 8px rgba(212,175,55,.4); }}
+  .pk-grail-sub {{ color: #e0d8b5; font-size: 13px; font-style: italic; }}
+  .pk-grail-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; position: relative; }}
+  .pk-grail-card {{ display: block; position: relative; background: #14110a; border: 2px solid rgba(212,175,55,.5); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }}
+  .pk-grail-card:hover {{ transform: translateY(-4px) scale(1.02); border-color: #d4af37; box-shadow: 0 12px 40px rgba(212,175,55,.4); }}
+  .pk-grail-badge {{ position: absolute; top: 8px; left: 8px; background: #d4af37; color: #1a1500; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 8px; border-radius: 4px; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.4); }}
+  .pk-grail-img {{ aspect-ratio: 3 / 4; background-size: cover; background-position: center; background-color: #0a0907; }}
+  .pk-grail-meta {{ padding: 12px 14px; background: linear-gradient(180deg, transparent, rgba(212,175,55,.08)); }}
+  .pk-grail-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #d4af37; line-height: 1; text-shadow: 0 1px 4px rgba(0,0,0,.5); }}
+  .pk-grail-title {{ font-size: 11px; line-height: 1.4; color: #c9c2a7; margin-top: 4px; min-height: 30px; }}
 
-  /* Hero strip — top 6 hottest deals */
-  .pk-hero { background: linear-gradient(180deg, rgba(255,204,0,.06), transparent); border: 1px solid rgba(255,204,0,.15); border-radius: var(--r-md); padding: 18px; margin: 18px 0 24px; }
-  .pk-hero-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-  .pk-hero-head h2 { margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #ffcc00; letter-spacing: .03em; }
-  .pk-hero-sub { color: var(--text-muted); font-size: 13px; }
-  .pk-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-  .pk-hero-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
-  .pk-hero-card:hover { transform: translateY(-3px); border-color: #ffcc00; box-shadow: 0 8px 26px rgba(255,204,0,.15); }
-  .pk-hero-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
-  .pk-hero-meta { padding: 8px 10px; display: flex; justify-content: space-between; align-items: baseline; }
-  .pk-hero-price { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #ffcc00; }
-  .pk-hero-disc { color: var(--success); font-size: 11px; font-weight: 700; }
+  /* Hero strip */
+  .pk-hero {{ background: linear-gradient(180deg, rgba(0,0,0,.06), transparent); border: 1px solid {color}26; border-radius: var(--r-md); padding: 18px; margin: 18px 0 24px; }}
+  .pk-hero-head {{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }}
+  .pk-hero-head h2 {{ margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: {color}; letter-spacing: .03em; }}
+  .pk-hero-sub {{ color: var(--text-muted); font-size: 13px; }}
+  .pk-hero-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }}
+  .pk-hero-card {{ display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }}
+  .pk-hero-card:hover {{ transform: translateY(-3px); border-color: {color}; box-shadow: 0 8px 26px {color}26; }}
+  .pk-hero-img {{ aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }}
+  .pk-hero-meta {{ padding: 8px 10px; display: flex; justify-content: space-between; align-items: baseline; }}
+  .pk-hero-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: {color}; }}
+  .pk-hero-disc {{ color: var(--success); font-size: 11px; font-weight: 700; }}
 
   /* Filter bar */
-  .pk-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; margin: 18px 0 24px; position: sticky; top: 64px; z-index: 5; backdrop-filter: blur(8px); }
-  .pk-filters select { padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 13px; }
-  .pk-chk { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; cursor: pointer; }
-  .pk-count { margin-left: auto; color: var(--text-muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
+  .pk-filters {{ display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; margin: 18px 0 24px; position: sticky; top: 64px; z-index: 5; backdrop-filter: blur(8px); }}
+  .pk-filters select {{ padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 13px; }}
+  .pk-chk {{ display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; cursor: pointer; }}
+  .pk-count {{ margin-left: auto; color: var(--text-muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }}
 
-  /* Per-bucket header — stats bar to the right */
-  .pk-bucket { margin: 36px 0; }
-  .pk-bucket-head { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .pk-bucket-title h3 { margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .02em; }
-  .pk-tag { font-size: 10px; border-radius: 999px; padding: 3px 9px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }
-  .pk-tag-vintage       { color: #c98a4d; background: rgba(201,138,77,.12);  border: 1px solid rgba(201,138,77,.35); }
-  .pk-tag-promo         { color: #e07b6f; background: rgba(224,123,111,.12); border: 1px solid rgba(224,123,111,.35); }
-  .pk-tag-tournament    { color: #d4af37; background: rgba(212,175,55,.12);  border: 1px solid rgba(212,175,55,.4); }
-  .pk-tag-international { color: #ff6b6b; background: rgba(255,107,107,.1);  border: 1px solid rgba(255,107,107,.35); }
-  .pk-tag-modern        { color: #ffcc00; background: rgba(255,204,0,.1);    border: 1px solid rgba(255,204,0,.3); }
-  .pk-tag-sealed        { color: #7fc77a; background: rgba(127,199,122,.12); border: 1px solid rgba(127,199,122,.35); }
-  .pk-tag-graded        { color: #6cb0ff; background: rgba(108,176,255,.12); border: 1px solid rgba(108,176,255,.35); }
-  .pk-blurb { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; max-width: 60ch; }
+  /* Per-bucket */
+  .pk-bucket {{ margin: 36px 0; }}
+  .pk-bucket-head {{ display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }}
+  .pk-bucket-title h3 {{ margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .02em; }}
+  .pk-tag {{ font-size: 10px; border-radius: 999px; padding: 3px 9px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }}
+  .pk-tag-vintage       {{ color: #c98a4d; background: rgba(201,138,77,.12);  border: 1px solid rgba(201,138,77,.35); }}
+  .pk-tag-promo         {{ color: #e07b6f; background: rgba(224,123,111,.12); border: 1px solid rgba(224,123,111,.35); }}
+  .pk-tag-tournament    {{ color: #d4af37; background: rgba(212,175,55,.12);  border: 1px solid rgba(212,175,55,.4); }}
+  .pk-tag-international {{ color: #ff6b6b; background: rgba(255,107,107,.1);  border: 1px solid rgba(255,107,107,.35); }}
+  .pk-tag-modern        {{ color: {color}; background: {color}1a;    border: 1px solid {color}4d; }}
+  .pk-tag-sealed        {{ color: #7fc77a; background: rgba(127,199,122,.12); border: 1px solid rgba(127,199,122,.35); }}
+  .pk-tag-graded        {{ color: #6cb0ff; background: rgba(108,176,255,.12); border: 1px solid rgba(108,176,255,.35); }}
+  .pk-blurb {{ color: var(--text-muted); font-size: 13px; margin: 4px 0 0; max-width: 60ch; }}
 
-  .pk-bucket-stats { display: grid; grid-template-columns: repeat(4, auto); gap: 14px; }
-  .pk-stat { text-align: center; min-width: 56px; }
-  .pk-stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); line-height: 1; }
-  .pk-stat-l { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
+  .pk-bucket-stats {{ display: grid; grid-template-columns: repeat(4, auto); gap: 14px; }}
+  .pk-stat {{ text-align: center; min-width: 56px; }}
+  .pk-stat-n {{ font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); line-height: 1; }}
+  .pk-stat-l {{ font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }}
 
-  /* Bigger card grid (was 200px → 220px) + Pokemon-card aspect ratio */
-  .pk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
-  .pk-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; position: relative; }
-  .pk-card:hover { transform: translateY(-3px) scale(1.025); border-color: #ffcc00; box-shadow: 0 10px 28px rgba(255,204,0,.22); z-index: 2; }
-  .pk-card.is-deal { border-left: 3px solid var(--success); }
-  .pk-card.is-deal::after { content: "DEAL"; position: absolute; top: 8px; right: 8px; background: var(--success); color: #0a0a0a; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 7px; border-radius: 4px; z-index: 2; }
-  .pk-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); transition: transform .25s ease; }
-  .pk-card:hover .pk-img { transform: scale(1.05); }
-  .pk-meta { padding: 10px 12px; }
-  .pk-price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .pk-price { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #ffcc00; }
-  .pk-disc { background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-  .pk-title { font-size: 12px; line-height: 1.4; color: var(--text); min-height: 32px; }
-  .pk-buying { font-size: 10px; color: var(--text-muted); margin-top: 6px; letter-spacing: .04em; }
-  @media (max-width: 640px) {
-    .pk-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-    .pk-hero-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-    .pk-grail-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-    .pk-bucket-head { grid-template-columns: 1fr; }
-    .pk-bucket-stats { grid-template-columns: repeat(4, 1fr); width: 100%; }
-    .pk-filters { position: static; }
-  }
+  /* Card grid */
+  .pk-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }}
+  .pk-card {{ display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; position: relative; }}
+  .pk-card:hover {{ transform: translateY(-3px) scale(1.025); border-color: {color}; box-shadow: 0 10px 28px {color}38; z-index: 2; }}
+  .pk-card.is-deal {{ border-left: 3px solid var(--success); }}
+  .pk-card.is-deal::after {{ content: "DEAL"; position: absolute; top: 8px; right: 8px; background: var(--success); color: #0a0a0a; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 7px; border-radius: 4px; z-index: 2; }}
+  .pk-img {{ aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); transition: transform .25s ease; }}
+  .pk-card:hover .pk-img {{ transform: scale(1.05); }}
+  .pk-meta {{ padding: 10px 12px; }}
+  .pk-price-row {{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }}
+  .pk-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: {color}; }}
+  .pk-disc {{ background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }}
+  .pk-title {{ font-size: 12px; line-height: 1.4; color: var(--text); min-height: 32px; }}
+  .pk-buying {{ font-size: 10px; color: var(--text-muted); margin-top: 6px; letter-spacing: .04em; }}
+  @media (max-width: 640px) {{
+    .pk-grid {{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }}
+    .pk-hero-grid {{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }}
+    .pk-grail-grid {{ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }}
+    .pk-bucket-head {{ grid-template-columns: 1fr; }}
+    .pk-bucket-stats {{ grid-template-columns: repeat(4, 1fr); width: 100%; }}
+    .pk-filters {{ position: static; }}
+  }}
 </style>
 """
 
-    html_doc = promote.html_shell("Pikachu Hunt · For My Son", body,
+    html_doc = promote.html_shell(f"{name} Hunt &middot; For My Son", body,
                                   extra_head=extra_css,
-                                  active_page="pikachu.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html_doc, encoding="utf-8")
-    return REPORT_PATH
+                                  active_page=f"{slug}.html")
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = DOCS_DIR / f"{slug}.html"
+    out_path.write_text(html_doc, encoding="utf-8")
+    return out_path
 
 
 # --------------------------------------------------------------------------- #
-# Nav registration (runtime — persist via promote._NAV_ITEMS edit)            #
+# Landing page: docs/pokemon.html                                              #
 # --------------------------------------------------------------------------- #
 
-def ensure_nav_entry() -> None:
-    entry = ("pikachu.html", "Pikachu", False, "Insights")
-    if entry in promote._NAV_ITEMS:
-        return
-    items = list(promote._NAV_ITEMS)
-    for idx, it in enumerate(items):
-        if it[0] == "collect.html":
-            items.insert(idx + 1, entry)
-            break
-    else:
-        items.append(entry)
-    promote._NAV_ITEMS = items
-    promote._ADMIN_PAGES = {p for p, _, public, _ in items if not public}
+def render_landing(plans: list[dict]) -> Path:
+    """Render docs/pokemon.html — a tile grid with one tile per character."""
+    tiles = []
+    for p in plans:
+        slug   = p["slug"]
+        name   = p["name"]
+        color  = p.get("color", "#ffcc00")
+        n      = sum(b["n"] for b in p["buckets"])
+        deals  = sum(b["n_deals"] for b in p["buckets"])
+        # Pick a hero image: the most expensive scanned card across all buckets
+        all_items = [it for b in p["buckets"] for it in b["items"]]
+        hero_img = ""
+        if all_items:
+            top = max(all_items, key=lambda x: x["price"])
+            hero_img = top.get("image", "")
+        tiles.append(f"""
+        <a class="pmon-tile" href="{slug}.html" style="--accent:{color};">
+          <div class="pmon-tile-img" style="background-image:url('{_esc(hero_img)}');"></div>
+          <div class="pmon-tile-meta">
+            <div class="pmon-tile-name">{_esc(name)}</div>
+            <div class="pmon-tile-stats">
+              <span class="pmon-tile-n">{n}</span> <span class="pmon-tile-l">listings</span>
+              &middot;
+              <span class="pmon-tile-n" style="color:var(--success);">{deals}</span> <span class="pmon-tile-l">deals</span>
+            </div>
+            <div class="pmon-tile-tag">{_esc(p.get('tagline','Click to hunt.'))}</div>
+          </div>
+        </a>""")
+
+    body = f"""
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Pokemon &middot; live eBay scan</div>
+        <h1 class="section-title">Pokemon <span class="accent">Hunt</span></h1>
+        <div class="section-sub">
+          Pick a Pokemon. Every page is a live scan of eBay: vintage holos, modern alt arts,
+          PSA 10s, and grail watch &mdash; sorted by biggest discount vs. median.
+        </div>
+      </div>
+    </div>
+
+    <div class="pmon-grid">
+      {''.join(tiles)}
+    </div>
+    """
+
+    extra_css = """
+<style>
+  .pmon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin: 24px 0 48px; }
+  .pmon-tile { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; position: relative; }
+  .pmon-tile::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent); z-index: 2; }
+  .pmon-tile:hover { transform: translateY(-4px) scale(1.02); border-color: var(--accent); box-shadow: 0 14px 36px rgba(0,0,0,.4); }
+  .pmon-tile-img { aspect-ratio: 4 / 3; background-size: cover; background-position: center; background-color: var(--surface-2); transition: transform .3s ease; }
+  .pmon-tile:hover .pmon-tile-img { transform: scale(1.05); }
+  .pmon-tile-meta { padding: 14px 16px 18px; }
+  .pmon-tile-name { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); letter-spacing: .03em; line-height: 1; }
+  .pmon-tile-stats { margin-top: 8px; color: var(--text-muted); font-size: 13px; }
+  .pmon-tile-n { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text); }
+  .pmon-tile-l { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+  .pmon-tile-tag { margin-top: 10px; font-size: 12px; color: var(--text-muted); font-style: italic; line-height: 1.4; min-height: 32px; }
+</style>
+"""
+
+    html_doc = promote.html_shell("Pokemon Hunt &middot; All Characters", body,
+                                  extra_head=extra_css,
+                                  active_page="pokemon.html")
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    out = DOCS_DIR / "pokemon.html"
+    out.write_text(html_doc, encoding="utf-8")
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# Orchestration                                                                #
+# --------------------------------------------------------------------------- #
+
+def build_all_characters(config: dict, only_character: str | None = None,
+                         only_bucket: str | None = None) -> list[dict]:
+    cfg = json.loads(promote.CONFIG_FILE.read_text())
+    own = cfg.get("seller_username") or "harpua2001"
+    token = promote.get_app_token(cfg)
+    threshold = float(config.get("deal_threshold_pct", 25))
+    min_comps = int(config.get("min_comps_for_median", 6))
+
+    plans: list[dict] = []
+    for ch in config.get("characters", []):
+        if only_character and ch["slug"].lower() != only_character.lower():
+            continue
+        print(f"== {ch['name']} ==")
+        plan = build_plan(ch, threshold, min_comps, token, own, only_bucket=only_bucket)
+        save_plan(plan)
+        render_report(plan)
+        plans.append(plan)
+    return plans
 
 
 # --------------------------------------------------------------------------- #
@@ -564,19 +664,36 @@ def ensure_nav_entry() -> None:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.strip())
-    ap.add_argument("--bucket", help="Narrow to a single bucket label.")
+    ap.add_argument("--character", help="Narrow to a single character slug (e.g. pikachu).")
+    ap.add_argument("--bucket",    help="Narrow to a single bucket label.")
     args = ap.parse_args()
 
-    ensure_nav_entry()
-    plan = build_plan(only_bucket=args.bucket)
-    save_plan(plan)
-    out = render_report(plan)
+    config = load_characters()
+    plans = build_all_characters(config,
+                                 only_character=args.character,
+                                 only_bucket=args.bucket)
 
-    total = sum(b["n"] for b in plan["buckets"])
-    deals = sum(b["n_deals"] for b in plan["buckets"])
-    print(f"  Buckets: {len(plan['buckets'])}  ·  Listings: {total}  ·  Deals: {deals}")
-    print(f"  Plan:   {PLAN_PATH}")
-    print(f"  Report: {out}")
+    # Always rebuild the landing page from whatever plans we have on disk so
+    # single-character runs do not blow away the grid.
+    all_plans: list[dict] = []
+    for ch in config.get("characters", []):
+        match = next((p for p in plans if p["slug"] == ch["slug"]), None)
+        if match:
+            all_plans.append(match)
+            continue
+        plan_path = OUTPUT_DIR / f"pokemon_{ch['slug']}_plan.json"
+        if plan_path.exists():
+            try:
+                all_plans.append(json.loads(plan_path.read_text()))
+            except (OSError, json.JSONDecodeError):
+                pass
+    if all_plans:
+        landing = render_landing(all_plans)
+        print(f"  Landing: {landing}")
+
+    total_listings = sum(sum(b["n"] for b in p["buckets"]) for p in plans)
+    total_deals    = sum(sum(b["n_deals"] for b in p["buckets"]) for p in plans)
+    print(f"  Characters: {len(plans)}  .  Listings: {total_listings}  .  Deals: {total_deals}")
 
 
 if __name__ == "__main__":

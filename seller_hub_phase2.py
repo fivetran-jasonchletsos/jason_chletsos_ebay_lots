@@ -177,26 +177,22 @@ def _xml_set_store_categories(token: str, actions: list[dict]) -> str:
     )
 
 
-def _xml_revise_item_bulk(token: str, assignments: list[tuple[str, str]]) -> str:
-    """ReviseItem batch — each Item gets Storefront/StoreCategoryID.
+def _xml_revise_item_single(token: str, item_id: str, cat_id: str) -> str:
+    """ReviseItem envelope for ONE listing — assigns Storefront/StoreCategoryID.
 
-    Trading bulk is structured as multiple ReviseItem siblings inside
-    a single envelope; eBay accepts these via the ReviseItem call name
-    with up to ITEMS_PER_BULK_CALL items. Larger batches use the
-    eBay Bulk Data Exchange — overkill for our volume.
+    The Trading API ReviseItem call accepts exactly one <Item> per envelope;
+    multi-Item siblings produce "XML Parse error" (errorId 5). For bulk we
+    issue N sequential single-Item calls with gentle pacing (matches the
+    pattern in repricing_agent.revise_price).
     """
-    items = "\n".join(
-        f'  <Item>\n'
-        f'    <ItemID>{item_id}</ItemID>\n'
-        f'    <Storefront><StoreCategoryID>{cat_id}</StoreCategoryID></Storefront>\n'
-        f'  </Item>'
-        for item_id, cat_id in assignments
-    )
     return (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         f'<ReviseItemRequest xmlns="{EBAY_NS}">\n'
         f'  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>\n'
-        f'{items}\n'
+        f'  <Item>\n'
+        f'    <ItemID>{_xml_escape(item_id)}</ItemID>\n'
+        f'    <Storefront><StoreCategoryID>{_xml_escape(cat_id)}</StoreCategoryID></Storefront>\n'
+        f'  </Item>\n'
         f'</ReviseItemRequest>'
     )
 
@@ -422,11 +418,11 @@ def assign_items_to_categories(token: str, listings: list[dict],
             continue
         planned.append((l["item_id"], cat_id, cat_name_trunc))
 
-    # Budget check
-    n_calls = (len(planned) + ITEMS_PER_BULK_CALL - 1) // ITEMS_PER_BULK_CALL
+    # Budget check — Trading ReviseItem is ONE Item per call, so n_calls == len(planned)
+    n_calls = len(planned)
     if n_calls > DAILY_CALL_BUDGET:
         raise RuntimeError(
-            f"Plan would issue {n_calls} ReviseItem batches — exceeds "
+            f"Plan would issue {n_calls} ReviseItem calls — exceeds "
             f"daily budget {DAILY_CALL_BUDGET}. Aborting."
         )
 
@@ -445,25 +441,25 @@ def assign_items_to_categories(token: str, listings: list[dict],
         print("  No item reassignments needed.")
         return result
 
-    for batch_idx, batch in enumerate(_chunked(planned, ITEMS_PER_BULK_CALL)):
-        assignments = [(iid, cid) for iid, cid, _ in batch]
-        envelope = _xml_revise_item_bulk(token if not dry_run else "<TOKEN>",
-                                         assignments)
+    for idx, (item_id, cat_id, cat_name) in enumerate(planned):
+        envelope = _xml_revise_item_single(
+            token if not dry_run else "<TOKEN>", item_id, cat_id
+        )
         if dry_run:
             result["envelopes"].append(envelope)
-            print(f"  DRY RUN — ReviseItem batch {batch_idx+1}/{n_calls} "
-                  f"({len(batch)} items):")
+            print(f"  DRY RUN — ReviseItem {idx+1}/{n_calls} "
+                  f"(item {item_id} → {cat_name}):")
             print(envelope)
             continue
         root = _trading_post("ReviseItem", envelope, ebay_cfg)
         result["results"].append({
-            "batch":   batch_idx + 1,
+            "batch":   idx + 1,
             "ack":     root.findtext(f"{NS}Ack", "") or "",
             "errors":  _parse_errors(root),
-            "items":   [iid for iid, _, _ in batch],
+            "items":   [item_id],
         })
         # gentle pacing — eBay throttles bursty ReviseItem callers
-        time.sleep(0.4)
+        time.sleep(0.6)
 
     return result
 
