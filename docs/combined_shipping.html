@@ -35,7 +35,7 @@
     // Admin gate constants (populated at build time)
     window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
     window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
-    window.__IS_ADMIN_PAGE = false;
+    window.__IS_ADMIN_PAGE = true;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
       try {
@@ -1214,6 +1214,15 @@ input[type="checkbox"]:checked::after {
   border-top: 1px solid var(--border);
   display: flex; gap: 8px;
 }
+.listing-card .actions .btn { flex: 1 1 auto; min-height: 38px; }
+/* Mobile: stack the CTAs vertically and make View-on-eBay full width.
+   The audit flagged side-by-side buttons as a sub-48px tap target on small
+   phones, splitting buyer focus between Buy vs Details. */
+@media (max-width: 640px) {
+  .listing-card .actions { flex-direction: column; padding: 10px 12px; }
+  .listing-card .actions .btn { width: 100%; min-height: 44px; font-size: 13px; }
+  .listing-card .actions .btn-gold { order: -1; }
+}
 .grid[data-size="small"] .listing-card .info h3 { font-size: 11px; -webkit-line-clamp: 1; }
 .grid[data-size="small"] .listing-card .meta { display: none; }
 .grid[data-size="small"] .listing-card .actions { padding: 8px; }
@@ -1627,7 +1636,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </style>
   <style>.hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}.stat-n{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1}.stat-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}.cfg{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:18px 0}.cfg h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}.cfg-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 18px}.cfg .hint{color:var(--text-muted);font-size:13px;margin:10px 0 0}.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:13px;font-weight:600}.badge-ok{background:rgba(127,199,122,.15);color:var(--success)}.badge-warn{background:rgba(212,175,55,.15);color:var(--gold)}.badge-err{background:rgba(220,80,80,.15);color:var(--danger)}.badge-info{background:rgba(120,160,220,.15);color:var(--text)}.badge-muted{background:var(--surface);color:var(--text-muted)}.drift{margin:8px 0 0 18px;color:var(--gold)}.kv{display:grid;grid-template-columns:220px 1fr;gap:4px 18px;margin:8px 0}.kv dt{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.kv dd{margin:0;color:var(--text)}.tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}table.reprice-tbl{width:100%;border-collapse:collapse;font-size:13px}.reprice-tbl th,.reprice-tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}.reprice-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.reprice-tbl tr:hover td{background:var(--surface-2)}.reprice-tbl .num{text-align:right;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace}.reprice-tbl .target{color:var(--gold);font-weight:600}.reprice-tbl .delta{color:var(--danger)}.empty{color:var(--text-muted);padding:20px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md)}</style>
 </head>
-<body class="">
+<body class="admin-page">
   <header class="app-header">
     <div class="app-header-inner">
       <a href="index.html" class="brand">
@@ -1642,11 +1651,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="sold.html" class="nav-link">Sold</a>
 
         <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Insights
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" class="active" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="email_campaign.html" data-admin="1">Email</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1714,6 +1723,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="repricing.html" class="admin-only" data-admin="1">Repricing Agent</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
+<a href="combined_shipping.html" class="active admin-only" data-admin="1">Combined Ship</a>
+<a href="vault.html" class="admin-only" data-admin="1">Vault</a>
+<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
+<a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
 <a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
@@ -1763,10 +1776,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 <section class='hero'>
   <h1>Combined Shipping</h1>
-  <p class='sub'>Last run: <code>2026-05-17 00:23 UTC</code> · Mode: <code>dry-run</code></p>
+  <p class='sub'>Last run: <code>2026-05-17 01:21 UTC</code> · Mode: <code>apply</code></p>
   <div class='stat-grid'>
-    <div class='stat'><div class='stat-n'><span class='badge badge-info'>would create</span></div><div class='stat-l'>profile state</div></div>
-    <div class='stat'><div class='stat-n'>128</div><div class='stat-l'>listings need flip</div></div>
+    <div class='stat'><div class='stat-n'><span class='badge badge-err'>create failed</span></div><div class='stat-l'>profile state</div></div>
+    <div class='stat'><div class='stat-n'>0</div><div class='stat-l'>listings need flip</div></div>
     <div class='stat'><div class='stat-n'>0</div><div class='stat-l'>already opted in</div></div>
     <div class='stat'><div class='stat-n'>128</div><div class='stat-l'>active listings</div></div>
     <div class='stat'><div class='stat-n'>$17.50</div><div class='stat-l'>5-card buyer saves</div></div>
@@ -1821,7 +1834,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 00:23 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 01:21 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
