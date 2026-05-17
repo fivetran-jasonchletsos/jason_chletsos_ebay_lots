@@ -2571,6 +2571,12 @@ html[data-theme="crimson"] .product-price {
   position: absolute; left: 0; bottom: -1px;
   opacity: .85;
 }
+/* Site banner — full-width hero, shown above main on index.html only. */
+.site-banner { display: block; max-width: var(--container-max, min(92vw, 1320px)); margin: var(--space-md, 18px) auto var(--space-lg, 28px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 8px 28px rgba(0,0,0,.35); transition: transform .25s ease, box-shadow .25s ease; }
+.site-banner:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(212,175,55,.25); }
+.site-banner img { width: 100%; height: auto; display: block; }
+@media (max-width: 760px) { .site-banner { margin: 12px auto 18px; border-radius: 8px; } }
+
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
 .section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
@@ -3104,6 +3110,8 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
     </div>
   </div>
+
+  {('<a href="' + STORE_URL + '" class="site-banner" target="_blank" rel="noopener" aria-label="Visit Harpua2001 on eBay"><img src="banner.jpg" alt="' + SELLER_NAME + ' Storefront — Sports + Pokemon Cards" loading="eager" width="1600" height="533"></a>') if active_page == 'index.html' and (Path(__file__).parent / 'docs' / 'banner.jpg').exists() else ''}
 
   <main>
     {body}
