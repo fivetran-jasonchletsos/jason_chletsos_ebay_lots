@@ -35,7 +35,7 @@
     // Admin gate constants (populated at build time)
     window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
     window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
-    window.__IS_ADMIN_PAGE = false;
+    window.__IS_ADMIN_PAGE = true;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
       try {
@@ -1751,7 +1751,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </style>
   <style>.hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)} .ret-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0 28px} .ret-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden} .ret-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7} .ret-kpi.bad::before{background:#ef4444} .ret-kpi.ok::before{background:#22c55e} .ret-kpi.warn::before{background:#facc15} .ret-kpi .n{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);line-height:1} .ret-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px} .ret-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 24px} .ret-note h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)} .ret-note ul{margin:0;padding-left:18px;color:var(--text)} .tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px} table.ret-tbl{width:100%;border-collapse:collapse;font-size:13px} .ret-tbl th,.ret-tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top} .ret-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em} .ret-tbl .item{width:240px} .ret-tbl .item img{width:64px;height:64px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);float:left;margin-right:10px;background:var(--surface-2)} .ret-tbl .item .title{color:var(--text);font-weight:600;font-size:13px;line-height:1.35} .ret-tbl .item .iid{color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:2px} .ret-tbl .who .b{color:var(--text);font-weight:600} .ret-tbl .who .d{color:var(--text-dim);font-size:11px;margin-top:2px} .ret-tbl .reason{max-width:260px;color:var(--text-muted);white-space:pre-wrap;line-height:1.45} .ret-tbl .amt{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:600} .ret-tbl .age{font-family:'JetBrains Mono',monospace;color:var(--text)} .ret-tbl .age.old{color:#ef4444} .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px} .badge.buyer{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.4)} .badge.seller{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.4)} .badge.unclear{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.4)} .ret-tbl .draft{width:34%} .ret-tbl textarea{width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-family:inherit;font-size:13px;line-height:1.5;resize:vertical} .row-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .btn{background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;text-decoration:none;display:inline-block} .btn:hover{filter:brightness(1.1)} .btn.ok{background:#22c55e;color:#0a0a0a;border-color:#22c55e} .btn.no{background:#ef4444;color:#fff;border-color:#ef4444} .btn.gold{background:var(--gold);color:#0a0a0a;border-color:var(--gold)} .empty{color:var(--text-muted);padding:36px 28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md);font-size:15px} .empty .big{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);display:block;margin-bottom:6px}</style><script>document.addEventListener('click',function(e){var b=e.target.closest('.btn[data-action]');if(!b)return;var act=b.getAttribute('data-action');var rid=b.getAttribute('data-return-id');if(!confirm('Confirm '+act+' on return '+rid+'?'))return;b.disabled=true;b.textContent='…';var payload={return_id:rid,action:act};if(act==='send'){var t=document.querySelector('textarea[data-return-id="'+rid+'"]');if(t)payload.body=t.value;}fetch('/ebay/returns-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();}).then(function(d){b.textContent=d&&d.ok?'Done ✓':'Failed';}).catch(function(){b.disabled=false;b.textContent=act;});});</script>
 </head>
-<body class="">
+<body class="admin-page">
   <header class="app-header">
     <div class="app-header-inner">
       <a href="index.html" class="brand">
@@ -1770,7 +1770,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1782,11 +1782,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
 
         <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Marketing
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="returns.html" class="active" data-admin="1">Returns</a><a href="tracking.html" data-admin="1">Tracking</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
         </div>
 
         <div class="nav-dropdown">
@@ -1853,6 +1853,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="sold.html">Sold</a>
 <div class="drawer-group" data-admin="1">Analytics</div>
 <a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
+<a href="daily.html" class="admin-only" data-admin="1">Daily Digest</a>
+<a href="cassini.html" class="admin-only" data-admin="1">Cassini Score</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
 <a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
@@ -1868,6 +1870,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
 <div class="drawer-group" data-admin="1">Marketing</div>
 <a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="returns.html" class="active admin-only" data-admin="1">Returns</a>
+<a href="tracking.html" class="admin-only" data-admin="1">Tracking</a>
+<a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
 <a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
@@ -1930,11 +1935,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-17 20:34 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
+    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-17 20:44 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 20:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 20:44 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
