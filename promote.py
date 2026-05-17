@@ -584,6 +584,14 @@ def build_deals_page(deals_data: dict) -> Path:
     cheapest = min((d["price"] for d in all_deals), default=0)
     total_savings = sum(d["median"] - d["price"] for d in all_deals)
 
+    # KPI deep-links: each stat card opens the actual item that drove it.
+    _best_deal = all_deals[0] if all_deals else None
+    _cheapest  = min(all_deals, key=lambda d: d["price"], default=None) if all_deals else None
+    _biggest_save = max(all_deals, key=lambda d: (d["median"] - d["price"]), default=None) if all_deals else None
+    _best_deal_url    = (_best_deal or {}).get("url") or "#"
+    _cheapest_url     = (_cheapest  or {}).get("url") or "#"
+    _biggest_save_url = (_biggest_save or {}).get("url") or "#"
+
     # Compute filter ranges from full deal set (before slicing)
     if all_deals:
         prices_all   = [d["price"] for d in all_deals]
@@ -746,19 +754,30 @@ def build_deals_page(deals_data: dict) -> Path:
     """
 
     body = f"""
-    <div class="section-head">
-      <div>
+    <div class="section-head section-head--inline">
+      <div class="sh-title">
         <div class="eyebrow">Underpriced listings · &gt;{threshold:g}% below median</div>
         <h1 class="section-title">Deal <span class="accent">Hunter</span></h1>
-        <div class="section-sub">Live scans of eBay watchlist queries from <code>deal_queries.json</code>. Flagged when current asking price is at least {threshold:g}% below the median price for the same query.</div>
       </div>
+      <div class="section-sub sh-sub">Live scans of eBay watchlist queries from <code>deal_queries.json</code>. Flagged when current asking price is at least {threshold:g}% below the median price for the same query.</div>
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num">{total_deals}</div><div class="lbl">Deals Right Now</div></div>
-      <div class="stat-card"><div class="num">{best_deal_pct:.0f}<span style="font-size:24px;">%</span></div><div class="lbl">Best Discount</div></div>
-      <div class="stat-card"><div class="num">${cheapest:,.0f}</div><div class="lbl">Cheapest Find</div></div>
-      <div class="stat-card"><div class="num">${total_savings:,.0f}</div><div class="lbl">Potential Savings</div></div>
+      <a class="stat-card linked" href="#deal-grid" title="Scroll to all {total_deals} deals">
+        <div class="num">{total_deals}</div><div class="lbl">Deals Right Now</div>
+      </a>
+      <a class="stat-card linked" href="{_best_deal_url}" target="_blank" rel="noopener"
+         title="Open best-discount item on eBay">
+        <div class="num">{best_deal_pct:.0f}<span style="font-size:24px;">%</span></div><div class="lbl">Best Discount</div>
+      </a>
+      <a class="stat-card linked" href="{_cheapest_url}" target="_blank" rel="noopener"
+         title="Open cheapest deal on eBay">
+        <div class="num">${cheapest:,.0f}</div><div class="lbl">Cheapest Find</div>
+      </a>
+      <a class="stat-card linked" href="{_biggest_save_url}" target="_blank" rel="noopener"
+         title="Open biggest-dollar-savings item on eBay">
+        <div class="num">${total_savings:,.0f}</div><div class="lbl">Potential Savings</div>
+      </a>
     </div>
 
     <div class="filter-bar">
@@ -2434,6 +2453,18 @@ html[data-theme="crimson"] .product-price {
   background: linear-gradient(90deg, var(--gold), transparent);
   position: absolute; left: 0; bottom: -1px;
 }
+/* Inline variant — title on the left, description on the right, single row.
+   Saves a chunk of vertical real estate above the KPI strip. */
+.section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
+.section-head--inline .sh-title { grid-column: 1; }
+.section-head--inline .sh-sub   { grid-column: 2; max-width: 64ch; padding-bottom: 6px; }
+@media (max-width: 760px) {
+  .section-head--inline { grid-template-columns: 1fr; gap: 6px; }
+  .section-head--inline .sh-sub { grid-column: 1; }
+}
+/* Stat-card link styling so clickable KPIs don't look like blue underlines */
+a.stat-card.linked { text-decoration: none; color: inherit; display: block; transition: transform .15s, border-color .15s, box-shadow .15s; }
+a.stat-card.linked:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 6px 18px rgba(212,175,55,.18); }
 
 /* Chip active — real "press" feel */
 .chip { transition: color .15s, background .15s, box-shadow .25s; }
@@ -2689,25 +2720,41 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # - group="X"   → tucked under the "X ▾" dropdown
 # Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
+    # Public buyer-facing storefront — no group, top-level
     ("index.html",            "Listings",      True,  None),
     ("steals.html",           "Steals",        True,  None),
     ("sold.html",             "Sold",          True,  None),
-    # "Make Money" sits first in Insights — daily-driver revenue-ops rollup.
-    ("make_money.html",       "Make Money",    False, "Insights"),
-    ("analytics.html",        "Analytics",     False, "Insights"),
-    ("market_intel.html",     "Market Intel",  False, "Insights"),
-    ("deals.html",            "Deals",         False, "Insights"),
-    ("quality.html",          "Quality",       False, "Insights"),
-    ("photo_audit.html",      "Photo Audit",   False, "Insights"),
-    ("price_review.html",     "Pricing",       False, "Insights"),
-    ("repricing.html",        "Repricing Agent", False, "Insights"),
-    ("promoted_listings.html","Promoted Ads",  False, "Insights"),
-    ("best_offer.html",       "Best Offer",    False, "Insights"),
-    ("combined_shipping.html","Combined Ship", False, "Insights"),
-    ("vault.html",            "Vault",         False, "Insights"),
-    ("photo_quality.html",    "Photo Quality", False, "Insights"),
-    ("email_campaign.html",   "Email",         False, "Insights"),
+
+    # ── ANALYTICS — what's happening, no writes ──
+    ("make_money.html",       "Make Money",    False, "Analytics"),
+    ("analytics.html",        "Analytics",     False, "Analytics"),
+    ("listing_performance.html","Listing Perf",False, "Analytics"),
+    ("market_intel.html",     "Market Intel",  False, "Analytics"),
+    ("deals.html",            "Deals",         False, "Analytics"),
+
+    # ── SELL — listing optimization (Cassini rank levers) ──
+    ("price_review.html",     "Pricing",       False, "Sell"),
+    ("repricing.html",        "Repricing",     False, "Sell"),
+    ("title_review.html",     "Titles",        False, "Sell"),
+    ("specifics.html",        "Specifics",     False, "Sell"),
+    ("quality.html",          "Quality",       False, "Sell"),
+    ("photo_quality.html",    "Photo Quality", False, "Sell"),
+    ("photo_audit.html",      "Photo Audit",   False, "Sell"),
+
+    # ── MARKETING — promotions, ads, offers, store ──
+    ("seller_hub.html",       "Seller Hub",    False, "Marketing"),
+    ("promoted_listings.html","Promoted Ads",  False, "Marketing"),
+    ("promotions.html",       "Promotions",    False, "Marketing"),
+    ("best_offer.html",       "Best Offer",    False, "Marketing"),
+    ("combined_shipping.html","Combined Ship", False, "Marketing"),
+    ("watchers.html",         "Watchers",      False, "Marketing"),
+    ("vault.html",            "Vault",         False, "Marketing"),
+    ("email_campaign.html",   "Email",         False, "Marketing"),
+
+    # ── FOR US — public, buyer-side (son can bookmark) ──
     ("collect.html",          "My Wants",      True,  "For Us"),
+    ("under_10.html",         "Under $10",     True,  "For Us"),
+    ("price_drops.html",      "Price Drops",   True,  "For Us"),
     ("pokemon.html",          "Pokemon",       True,  "For Us"),
     ("pikachu.html",          "Pikachu",       True,  "For Us"),
     ("charizard.html",        "Charizard",     True,  "For Us"),
@@ -2715,14 +2762,8 @@ _NAV_ITEMS = [
     ("mewtwo.html",           "Mewtwo",        True,  "For Us"),
     ("eevee.html",            "Eevee",         True,  "For Us"),
     ("pokemon_news.html",     "Pokemon News",  True,  "For Us"),
-    ("price_drops.html",      "Price Drops",   True,  "For Us"),
-    ("listing_performance.html","Listing Perf",False, "Insights"),
-    ("seller_hub.html",       "Seller Hub",    False, "Insights"),
-    ("watchers.html",         "Watchers",      False, "Insights"),
-    ("specifics.html",        "Specifics",     False, "Insights"),
-    ("promotions.html",       "Promotions",    False, "Insights"),
-    ("photo_audit.html",      "Photo Audit",   False, "Insights"),
-    ("title_review.html",     "Titles",        False, "Insights"),
+
+    # ── TOOLS — utilities ──
     ("scan.html",             "Scanner",       False, "Tools"),
     ("reddit.html",           "Reddit",        False, "Cross-post"),
     ("craigslist.html",       "Craigslist",    False, "Cross-post"),
@@ -9711,6 +9752,7 @@ def main():
         ("Pokemon hunt (all chars): docs/pokemon.html", "pokemon_deals_agent.py"),
         ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py"),
         ("Listing perf: docs/listing_performance.html","listing_performance_agent.py"),
+        ("Under $10: docs/under_10.html",            "under_10_agent.py"),
         ("Price Drops: docs/price_drops.html",       "price_drops_agent.py"),
     ]:
         sp_path = _here / script
