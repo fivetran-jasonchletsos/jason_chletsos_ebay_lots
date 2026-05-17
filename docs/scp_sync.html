@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SportsCardsPro Sync · harpua2001</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+         background:#0b0d12; color:#e6e9ef; margin:0; padding:24px; max-width:1100px;
+         margin-left:auto; margin-right:auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 8px; }
+  h2 { font-size: 1.15rem; margin: 28px 0 10px; border-bottom:1px solid #222; padding-bottom:6px; }
+  .muted { opacity:.65; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:99px; background:#1b2030; font-size:.78rem; }
+  .card { background:#12151c; border:1px solid #1d2230; border-radius:12px; padding:18px; margin:14px 0; }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #1d2230; vertical-align:top; }
+  th { background:#161a25; font-weight:600; }
+  td.num, th.num { text-align:right; font-variant-numeric: tabular-nums; }
+  .btn { display:inline-block; padding:10px 16px; border-radius:8px; background:#3a6cff;
+          color:#fff; text-decoration:none; font-weight:600; cursor:pointer; border:0; }
+  .btn.alt { background:#1b2030; border:1px solid #2c3550; }
+  .drop { border:2px dashed #2c3550; border-radius:12px; padding:32px; text-align:center;
+           background:#101319; }
+  .drop.over { border-color:#3a6cff; background:#161c2e; }
+  table.mini th, table.mini td { font-size:.8rem; padding:4px 8px; }
+  code { background:#1b2030; padding:1px 6px; border-radius:4px; }
+  a.book { display:inline-block; padding:10px 16px; background:#5a4cff; color:#fff;
+            text-decoration:none; border-radius:8px; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+  .stat { background:#161a25; padding:12px; border-radius:8px; }
+  .stat .v { font-size:1.4rem; font-weight:700; }
+  .stat .l { opacity:.65; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+</style>
+</head><body>
+  <h1>SportsCardsPro Sync</h1>
+  <p class="muted">Bidirectional bridge between your <strong>SCP "My Collection"</strong>
+     and this site's <code>inventory.csv</code> / eBay sold history.
+     Generated 2026-05-17T19:18:50+00:00.</p>
+
+  <div class="grid">
+    <div class="stat"><div class="v">1</div><div class="l">Sold matches</div></div>
+    <div class="stat"><div class="v">62</div><div class="l">eBay sales not in inventory</div></div>
+    <div class="stat"><div class="v">—</div><div class="l">Inventory rows</div></div>
+  </div>
+
+  <h2>1 · Import from SCP</h2>
+  <div class="card">
+    <div class="drop" id="drop">
+      <p><strong>Drop a SCP collection CSV here</strong> or
+         <input type="file" id="file" accept=".csv,text/csv"></p>
+      <p class="muted" style="margin-top:0">We'll guess the column mapping. You can edit it before importing.</p>
+    </div>
+    <div id="preview" style="margin-top:14px"></div>
+    <p class="muted" style="margin-top:14px">
+      <strong>Server-side import:</strong>
+      <code>python3 scp_sync_agent.py --import-scp PATH/TO/scp_export.csv</code>
+    </p>
+    <h3 style="font-size:1rem;margin-top:18px">Last import mapping</h3>
+    <p class='muted'>No SCP import has been run yet. Use the file picker above to map columns.</p>
+  </div>
+
+  <h2>2 · Sold-back to SCP</h2>
+  <div class="card">
+    <p class="muted">eBay sales matched (token overlap ≥ 4) to inventory rows.
+       Download the CSV, then bulk-import it into SCP to mark these cards sold.</p>
+    <p>
+      <a class="btn" href="../output/scp_mark_sold.csv" download>Download SCP mark-sold CSV</a>
+      <a class="btn alt" href="../output/scp_sync_plan.json" download>Plan JSON</a>
+    </p>
+    <table>
+      <thead><tr>
+        <th>Inventory card</th><th>SCP id</th><th>eBay title</th>
+        <th class="num">Sale $</th><th>Sold</th><th class="num">Tokens</th>
+      </tr></thead>
+      <tbody><tr><td>1999 Pokemon Base Set Pikachu 58/102</td><td></td><td>Pikachu Yellow Cheeks “NORMAL” 58/102 Base Set Pokemon TCG</td><td class='num'>$2.99</td><td>2026-03-01</td><td class='num'>6</td></tr></tbody>
+    </table>
+  </div>
+
+  <h2>3 · Bookmarklet</h2>
+  <div class="card">
+    <p class="muted">Drag this button to your bookmarks bar. On SCP's
+       <em>My Collection</em> page, click it to scrape the table and download a JSON
+       snapshot. (A future Lambda route <code>/ebay/scp-import</code> will accept POSTs.)</p>
+    <p><a class="book" href="javascript:(function(){var rows=document.querySelectorAll(&#x27;table tr&#x27;);var out=[];rows.forEach(function(tr){var cells=tr.querySelectorAll(&#x27;td,th&#x27;);var r=[];cells.forEach(function(c){r.push((c.innerText||&#x27;&#x27;).trim());});if(r.length)out.push(r);});var blob=new Blob([JSON.stringify(out,null,2)],{type:&#x27;application/json&#x27;});var a=document.createElement(&#x27;a&#x27;);a.href=URL.createObjectURL(blob);a.download=&#x27;scp_collection_&#x27;+Date.now()+&#x27;.json&#x27;;document.body.appendChild(a);a.click();a.remove();})();">SCP → JSON</a></p>
+    <details>
+      <summary class="muted">View bookmarklet source</summary>
+      <pre style="overflow:auto;background:#0a0c12;padding:12px;border-radius:8px;font-size:.78rem">javascript:(function(){var rows=document.querySelectorAll(&#x27;table tr&#x27;);var out=[];rows.forEach(function(tr){var cells=tr.querySelectorAll(&#x27;td,th&#x27;);var r=[];cells.forEach(function(c){r.push((c.innerText||&#x27;&#x27;).trim());});if(r.length)out.push(r);});var blob=new Blob([JSON.stringify(out,null,2)],{type:&#x27;application/json&#x27;});var a=document.createElement(&#x27;a&#x27;);a.href=URL.createObjectURL(blob);a.download=&#x27;scp_collection_&#x27;+Date.now()+&#x27;.json&#x27;;document.body.appendChild(a);a.click();a.remove();})();</pre>
+    </details>
+  </div>
+
+<script>
+(function() {
+  var drop = document.getElementById('drop');
+  var fileInput = document.getElementById('file');
+  var preview = document.getElementById('preview');
+  function handle(file) {
+    if (!file) return;
+    var fr = new FileReader();
+    fr.onload = function(e) {
+      var text = e.target.result;
+      var lines = text.split(/\r?\n/).filter(Boolean).slice(0, 8);
+      var rows = lines.map(function(l) { return l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/); });
+      var headers = rows[0] || [];
+      var rules = {"productname": "name", "product": "name", "title": "name", "cardname": "name", "name": "name", "consolename": "set", "console": "set", "set": "set", "category": "sport", "sport": "sport", "genre": "sport", "cardnumber": "card_number", "number": "card_number", "cardno": "card_number", "year": "year", "player": "player", "character": "player", "parallel": "parallel", "variant": "parallel", "variation": "parallel", "grade": "grade", "grader": "grader", "condition": "condition", "quantity": "quantity", "qty": "quantity", "loosepriceprice": "acquired_price", "looseprice": "acquired_price", "cibprice": "acquired_price", "newprice": "acquired_price", "price": "acquired_price", "value": "acquired_price", "cost": "acquired_price", "imageurl": "image_url", "image": "image_url", "photo": "image_url", "note": "notes", "comment": "notes", "id": "scp_id"};
+      // Build a normalized lookup once.
+      function norm(s) { return (s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+      var guessed = {};
+      var taken = {};
+      var ruleEntries = Object.keys(rules).sort(function(a,b) { return b.length - a.length; }).map(function(k) { return [k, rules[k]]; });
+      headers.forEach(function(h, idx) {
+        var nh = norm(h);
+        for (var i = 0; i < ruleEntries.length; i++) {
+          var rk = ruleEntries[i][0], tgt = ruleEntries[i][1];
+          if (taken[tgt]) continue;
+          if (nh.indexOf(rk) !== -1) {
+            guessed[h] = tgt; taken[tgt] = true; break;
+          }
+        }
+      });
+      var html = '<h3 style="font-size:1rem;margin:8px 0">Preview · ' + file.name + '</h3>';
+      html += '<table class="mini"><thead><tr>';
+      headers.forEach(function(h) {
+        var g = guessed[h] || '';
+        html += '<th>' + (h || '') + '<br><small style="opacity:.6">→ ' + (g || '(skip)') + '</small></th>';
+      });
+      html += '</tr></thead><tbody>';
+      rows.slice(1).forEach(function(r) {
+        html += '<tr>';
+        r.forEach(function(c) { html += '<td>' + (c || '').replace(/^"|"$/g, '') + '</td>'; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      html += '<p style="margin-top:12px"><button class="btn" type="button" onclick="alert(\'Run on the server:\\npython3 scp_sync_agent.py --import-scp \' + ' + JSON.stringify(file.name) + ')">Import to inventory.csv</button></p>';
+      preview.innerHTML = html;
+    };
+    fr.readAsText(file);
+  }
+  if (fileInput) fileInput.addEventListener('change', function(e) { handle(e.target.files[0]); });
+  if (drop) {
+    ['dragenter','dragover'].forEach(function(ev) {
+      drop.addEventListener(ev, function(e) { e.preventDefault(); drop.classList.add('over'); });
+    });
+    ['dragleave','drop'].forEach(function(ev) {
+      drop.addEventListener(ev, function(e) { e.preventDefault(); drop.classList.remove('over'); });
+    });
+    drop.addEventListener('drop', function(e) {
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      handle(f);
+    });
+  }
+})();
+</script>
+</body></html>

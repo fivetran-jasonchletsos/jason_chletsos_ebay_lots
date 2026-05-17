@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -792,63 +866,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +944,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1016,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1173,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1336,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1463,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,20 +1476,34 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
+/* Inline variant — title on the left, description on the right, single row.
+   Saves a chunk of vertical real estate above the KPI strip. */
+.section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
+.section-head--inline .sh-title { grid-column: 1; }
+.section-head--inline .sh-sub   { grid-column: 2; max-width: 64ch; padding-bottom: 6px; }
+@media (max-width: 760px) {
+  .section-head--inline { grid-template-columns: 1fr; gap: 6px; }
+  .section-head--inline .sh-sub { grid-column: 1; }
+}
+/* Stat-card link styling so clickable KPIs don't look like blue underlines */
+a.stat-card.linked { text-decoration: none; color: inherit; display: block; transition: transform .15s, border-color .15s, box-shadow .15s; }
+a.stat-card.linked:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 6px 18px rgba(212,175,55,.18); }
 
 /* Chip active — real "press" feel */
 .chip { transition: color .15s, background .15s, box-shadow .25s; }
@@ -1690,11 +1795,35 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="sold.html" class="nav-link">Sold</a>
 
         <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Insights
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" class="active" data-admin="1">Promoted Ads</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="email_campaign.html" data-admin="1">Email</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Sell
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Marketing
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" class="active" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
+        </div>
+
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            For Us
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1751,27 +1880,43 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Insights</div>
+<div class="drawer-group" data-admin="1">Analytics</div>
 <a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
+<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Sell</div>
+<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing Agent</a>
+<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
+<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
+<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
+<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
+<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Marketing</div>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="promoted_listings.html" class="active admin-only" data-admin="1">Promoted Ads</a>
+<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
-<a href="vault.html" class="admin-only" data-admin="1">Vault</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
-<a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
-<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
-<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="vault.html" class="admin-only" data-admin="1">Vault</a>
+<a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
+<div class="drawer-group" data-admin="1">For Us</div>
+<a href="collect.html">My Wants</a>
+<a href="under_10.html">Under $10</a>
+<a href="top_sellers.html">Top Sellers</a>
+<a href="price_drops.html">Price Drops</a>
+<a href="assistant.html">AI Assistant</a>
+<a href="pokemon.html">Pokemon</a>
+<a href="pikachu.html">Pikachu</a>
+<a href="charizard.html">Charizard</a>
+<a href="mew.html">Mew</a>
+<a href="mewtwo.html">Mewtwo</a>
+<a href="eevee.html">Eevee</a>
+<a href="pokemon_news.html">Pokemon News</a>
 <div class="drawer-group" data-admin="1">Tools</div>
 <a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <div class="drawer-group" data-admin="1">Cross-post</div>
@@ -1815,14 +1960,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 <section class="hero">
   <h1>Promoted Listings Agent</h1>
-  <p class="sub">Last run: <code>2026-05-17 01:03 UTC</code> · 128 listings classified</p>
+  <p class="sub">Last run: <code>2026-05-17 19:27 UTC</code> · 128 listings classified</p>
   <div class="stat-grid">
-    <div class="stat"><div class="stat-n">64</div><div class="stat-l">Promoted</div></div>
-    <div class="stat"><div class="stat-n">64</div><div class="stat-l">Self-selling</div></div>
-    <div class="stat"><div class="stat-n">$6.70</div><div class="stat-l">30d ad spend</div></div>
-    <div class="stat"><div class="stat-n">$7.26</div><div class="stat-l">Est. lift</div></div>
+    <div class="stat"><div class="stat-n">92</div><div class="stat-l">Promoted</div></div>
+    <div class="stat"><div class="stat-n">36</div><div class="stat-l">Self-selling</div></div>
+    <div class="stat"><div class="stat-n">$7.84</div><div class="stat-l">30d ad spend</div></div>
+    <div class="stat"><div class="stat-n">$8.01</div><div class="stat-l">Est. lift</div></div>
   </div>
-  <div class='cap-note cap-ok'>Projected 30d ad spend: <b>$6.70</b> of cap <b>$200.00</b>. Within cap.</div>
+  <div class='cap-note cap-ok'>Projected 30d ad spend: <b>$7.84</b> of cap <b>$200.00</b>. Within cap.</div>
 </section>
 
 <section class="cfg">
@@ -1834,9 +1979,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="tier-no-ad">
           <td class="tier-label">NO_AD</td>
           <td class="num">0.0%</td>
-          <td class="num">64</td>
+          <td class="num">36</td>
           <td class="num">$0.00</td>
-          <td class="num gold">$1.23</td>
+          <td class="num gold">$0.95</td>
           <td class="criteria">sold_in_7d_count >= 1 OR (watchers >= 3 AND age_days < 30)</td>
         </tr>
         <tr class="tier-low">
@@ -1850,9 +1995,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="tier-standard">
           <td class="tier-label">STANDARD</td>
           <td class="num">8.0%</td>
-          <td class="num">64</td>
-          <td class="num">$6.70</td>
-          <td class="num gold">$6.03</td>
+          <td class="num">92</td>
+          <td class="num">$7.84</td>
+          <td class="num gold">$7.06</td>
           <td class="criteria">age_days <= 60</td>
         </tr>
         <tr class="tier-aggressive">
@@ -1901,7 +2046,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -352% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -1918,7 +2063,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -104% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -1989,7 +2134,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Update-Series-1990-Topps-Baseball-Marcelo-Mayer-U90-9-Green--/306937606464" target="_blank" rel="noopener">
               <span class="title">2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</span>
@@ -2000,13 +2145,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 10% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/Deion-Sanders-Cards-/306784122664" target="_blank" rel="noopener">
               <span class="title">Deion Sanders Cards</span>
@@ -2017,10 +2162,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2037,7 +2182,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -83% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2088,7 +2233,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -49% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2105,7 +2250,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -184% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2207,7 +2352,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -27% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2241,7 +2386,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -94% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2258,7 +2403,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -184% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2271,11 +2416,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$2.00</td>
           <td class="num">—</td>
           <td class="num">0</td>
-          <td class="num">0</td>
+          <td class="num">1</td>
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">sold 1x in last 7d — no ad spend needed</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2309,7 +2454,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -190% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2326,7 +2471,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -21% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2346,7 +2491,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-standard">
+        <tr class="row-tier-no-ad">
           <td class="item">
             <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" rel="noopener">
               <span class="title">9 Joe Montana Cards 49ers Chiefs</span>
@@ -2356,11 +2501,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$5.99</td>
           <td class="num">—</td>
           <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="tier-cell tier-standard">STANDARD</td>
-          <td class="num gold">8.0%</td>
-          <td class="num">$0.12</td>
-          <td class="reasons">no age signal available — defaulting to standard</td>
+          <td class="num">1</td>
+          <td class="tier-cell tier-no-ad">NO_AD</td>
+          <td class="num gold">0.0%</td>
+          <td class="num">$0.00</td>
+          <td class="reasons">sold 1x in last 7d — no ad spend needed</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2462,7 +2607,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -27% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2479,10 +2624,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Instant-Impact-Dylan-Raiola-II-Gold-Ice-Prizm-/306914244468" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Instant Impact Dylan Raiola #II- Gold Ice Prizm</span>
@@ -2493,13 +2638,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Tetairoa-McMillan-11-Gold-Ice-Prizm-/306914245253" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks New Recruits Tetairoa McMillan #11 Gold Ice Prizm</span>
@@ -2510,10 +2655,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2530,7 +2675,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2547,7 +2692,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -27% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2581,7 +2726,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -83% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2635,7 +2780,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</span>
@@ -2646,10 +2791,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2669,7 +2814,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Will-Johnson-370-White-Disco-Prizm-RC--/306930460600" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Rookies Will Johnson #370 White Disco Prizm (RC)</span>
@@ -2680,10 +2825,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2703,7 +2848,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Dwayne-Bowe-46-White-Disco-Prizm-/306930463268" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm</span>
@@ -2714,10 +2859,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2751,7 +2896,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2768,7 +2913,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -55% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2785,7 +2930,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -10% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2802,7 +2947,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2819,7 +2964,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2839,7 +2984,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Willis-McGahee-45-Silver-Prizm-/306930559170" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Willis McGahee #45 Silver Prizm</span>
@@ -2850,10 +2995,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 12% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2866,11 +3011,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$1.99</td>
           <td class="num">—</td>
           <td class="num">0</td>
-          <td class="num">0</td>
+          <td class="num">1</td>
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="reasons">sold 1x in last 7d — no ad spend needed</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2890,7 +3035,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC--/306930745036" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)</span>
@@ -2901,10 +3046,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -2921,7 +3066,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2955,7 +3100,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -35% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -2989,7 +3134,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -3006,10 +3151,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -14% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Bryce-Underwood-28-Red-Ice-Prizm-RC--/306930909038" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC)</span>
@@ -3020,10 +3165,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -3040,7 +3185,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -5% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3060,7 +3205,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Bobby-Hurley-161-RC--/306930920326" target="_blank" rel="noopener">
               <span class="title">1993-94 Fleer Ultra - Bobby Hurley #161 (RC)</span>
@@ -3071,10 +3216,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3142,10 +3287,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -50% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinshon-Judkins-84-Red-Ice-Prizm-RC--/306931048688" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice Prizm (RC)</span>
@@ -3156,13 +3301,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 10% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC--/306931055732" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver Prizm (RC)</span>
@@ -3173,10 +3318,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 10% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3230,7 +3375,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-/306931209046" target="_blank" rel="noopener">
               <span class="title">1983 Donruss - Rickey Henderson #35</span>
@@ -3241,10 +3386,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 10% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3315,7 +3460,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-/306931285504" target="_blank" rel="noopener">
               <span class="title">1991 Fleer - Ken Griffey Jr, Barry Bonds #710</span>
@@ -3326,10 +3471,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 10% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3363,7 +3508,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -51% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3553,7 +3698,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Rookies-Shedeur-Sanders-154-Silver-RC--/306937679957" target="_blank" rel="noopener">
               <span class="title">2025 Panini Phoenix - Rookies Shedeur Sanders #154 Silver (RC)</span>
@@ -3564,13 +3709,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 12% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Penei-Sewell-99-Refractor-/306939281535" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome - Penei Sewell #99 Refractor</span>
@@ -3581,10 +3726,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 10% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3604,7 +3749,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Trey-Amos-RC-371-Commanders-/306939301767" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome Football Trey Amos RC #371 Commanders</span>
@@ -3615,10 +3760,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -3635,10 +3780,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -51% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2024-Topps-Chrome-Rookies-Marvin-Harrison-Jr-204-RC--/306939312739" target="_blank" rel="noopener">
               <span class="title">2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC)</span>
@@ -3649,10 +3794,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3672,7 +3817,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/Courtland-Sutton-2025-Topps-Chrome-Football-Refractor-Ray-Wave-Broncos-/306939326707" target="_blank" rel="noopener">
               <span class="title">Courtland Sutton 2025 Topps Chrome Football Refractor Ray Wave Broncos</span>
@@ -3683,10 +3828,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3757,7 +3902,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/Topps-Chrome-Myles-Garrett-1975-8-Cleveland-Browns-2025-NFL-Football-Card-/306939349539" target="_blank" rel="noopener">
               <span class="title">Topps Chrome Myles Garrett #1975-8 Cleveland Browns 2025 NFL Football Card</span>
@@ -3768,13 +3913,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroit Lions</span>
@@ -3785,13 +3930,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rookie Chargers WR</span>
@@ -3802,10 +3947,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3842,7 +3987,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-CeeDee-Lamb-Card-Fortune-15-Refractor-Dallas-Cowboys-F15-9-/306939472487" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome CeeDee Lamb Card Fortune 15 Refractor Dallas Cowboys #F15-9</span>
@@ -3853,13 +3998,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome Bill Jacory Croskey-Merritt Refractor Rookie RC 387 Commanders</span>
@@ -3870,10 +4015,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3907,10 +4052,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -51% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Will-Howard-83-Silver-Prizm-RC--/306941724232" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Will Howard #83 Silver Prizm (RC)</span>
@@ -3921,13 +4066,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC--/306941726438" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /399 (RC)</span>
@@ -3938,10 +4083,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -3958,7 +4103,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -51% < min 0% — forcing NO_AD</td>
         </tr>
 
         <tr class="row-tier-standard">
@@ -3992,10 +4137,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -10% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Brock-Bowers-6-Silver-Prizm-/306941730763" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Brock Bowers #6 Silver Prizm</span>
@@ -4006,10 +4151,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 2% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.04</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -4026,10 +4171,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -28% < min 0% — forcing NO_AD</td>
         </tr>
 
-        <tr class="row-tier-no-ad">
+        <tr class="row-tier-standard">
           <td class="item">
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jacory-Croskey-Merritt-Refractor-387-RC--/306942007235" target="_blank" rel="noopener">
               <span class="title">2025 Topps Chrome Jacory Croskey-Merritt Refractor #387 (RC)</span>
@@ -4040,10 +4185,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="num">0</td>
           <td class="num">0</td>
-          <td class="tier-cell tier-no-ad">NO_AD</td>
-          <td class="num gold">0.0%</td>
-          <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 14% < min 15% — forcing NO_AD</td>
+          <td class="tier-cell tier-standard">STANDARD</td>
+          <td class="num gold">8.0%</td>
+          <td class="num">$0.05</td>
+          <td class="reasons">no age signal available — defaulting to standard</td>
         </tr>
 
         <tr class="row-tier-no-ad">
@@ -4060,7 +4205,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="tier-cell tier-no-ad">NO_AD</td>
           <td class="num gold">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy 0% < min 15% — forcing NO_AD</td>
+          <td class="reasons">no age signal available — defaulting to standard<br>margin proxy -51% < min 0% — forcing NO_AD</td>
         </tr></tbody>
     </table>
   </div>
@@ -4068,62 +4213,62 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
 <section>
   <h3>Recent applied bid changes</h3>
-  <div class='tbl-wrap'><table class='promo-tbl'><thead><tr><th>Applied</th><th>Item</th><th>Tier</th><th>Rate</th><th>Result</th></tr></thead><tbody><tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-/306941728262' target='_blank'>306941728262</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Ray-Wave-Refractor-254-DK-METCALF-/306939475594' target='_blank'>306939475594</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Cooper-Kupp-Red-White-Blue-271-Seahawks-/306939373376' target='_blank'>306939373376</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-/306939369726' target='_blank'>306939369726</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-/306939342209' target='_blank'>306939342209</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-/306939339030' target='_blank'>306939339030</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Hot-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836' target='_blank'>306939333836</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823' target='_blank'>306939316823</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Hot-Pink-X-Fractor-RC--/306939289562' target='_blank'>306939289562</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Phoenix-Thunderbirds-Drake-Maye-35-Silver-Pyramids-299-/306937677187' target='_blank'>306937677187</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Jayden-Daniels-289-Pink-Shock-Prizm-/306937669968' target='_blank'>306937669968</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Mosaic-Rookies-Cam-Ward-382-Camo-Pink-Mosaic-Prizm-RC--/306937664217' target='_blank'>306937664217</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Rookie-Swatches-TreVeyon-Henderson-RSW-THN-Red-Prizm-MEM--/306937663074' target='_blank'>306937663074</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Travis-Hunter-28-Pink-Shock-Prizm-RC--/306937604288' target='_blank'>306937604288</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Pink-Shock-Prizm-RC--/306937599747' target='_blank'>306937599747</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Pink-Shock-Prizm-/306937598270' target='_blank'>306937598270</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Crusade-Caleb-Williams-5-Silver-/306934506774' target='_blank'>306934506774</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603' target='_blank'>306934495603</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668' target='_blank'>306931446668</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-/306931339580' target='_blank'>306931339580</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-/306931303163' target='_blank'>306931303163</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-/306931283327' target='_blank'>306931283327</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274' target='_blank'>306931278274</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457--/306931236773' target='_blank'>306931236773</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/Rickey-Henderson-New-York-Yankees-1987-3-Of-7-Card-The-Press-Box-/306931218531' target='_blank'>306931218531</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490' target='_blank'>306931142490</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931077943' target='_blank'>306931077943</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/6-Basketball-Cards-From-90s-/306931070594' target='_blank'>306931070594</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Keelon-Russell-150-Red-Ice-Prizm-RC--/306930939967' target='_blank'>306930939967</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-/306930938563' target='_blank'>306930938563</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Ashton-Jeanty-9-Red-Ice-Prizm-RC--/306930930898' target='_blank'>306930930898</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/1993-94-Fleer-Ultra-Rebound-Kings-Dennis-Rodman-10-/306930919438' target='_blank'>306930919438</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Devin-Neal-43-Red-Ice-Prizm-RC--/306930901658' target='_blank'>306930901658</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-/306930773940' target='_blank'>306930773940</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-/306930742908' target='_blank'>306930742908</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Tank-Bigsby-129-Silver-Prizm-/306930555649' target='_blank'>306930555649</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Abdul-Carter-10-RC--/306930464091' target='_blank'>306930464091</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076' target='_blank'>306930462076</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966' target='_blank'>306758076966</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Travis-Hunter-128-Pink-Shock-Prizm-RC--/306914913674' target='_blank'>306914913674</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040' target='_blank'>306914911040</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/12-Andre-Rison-Cards-Colts-Falcons-RC-/306914547105' target='_blank'>306914547105</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138' target='_blank'>306914280138</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Stellar-Rookies-Shedeur-Sanders-1-Silver-RC--/306914173441' target='_blank'>306914173441</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081' target='_blank'>306914169081</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-/306913950248' target='_blank'>306913950248</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-/306913939866' target='_blank'>306913939866</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898' target='_blank'>306913934898</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
-<tr><td>2026-05-17T01:03:01.651990+00:00</td><td><a href='https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225' target='_blank'>306913908225</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr></tbody></table></div>
+  <div class='tbl-wrap'><table class='promo-tbl'><thead><tr><th>Applied</th><th>Item</th><th>Tier</th><th>Rate</th><th>Result</th></tr></thead><tbody><tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Jacory-Croskey-Merritt-Refractor-387-RC--/306942007235' target='_blank'>306942007235</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Brock-Bowers-6-Silver-Prizm-/306941730763' target='_blank'>306941730763</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-/306941728262' target='_blank'>306941728262</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC--/306941726438' target='_blank'>306941726438</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Will-Howard-83-Silver-Prizm-RC--/306941724232' target='_blank'>306941724232</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Ray-Wave-Refractor-254-DK-METCALF-/306939475594' target='_blank'>306939475594</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666' target='_blank'>306939473666</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-CeeDee-Lamb-Card-Fortune-15-Refractor-Dallas-Cowboys-F15-9-/306939472487' target='_blank'>306939472487</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Cooper-Kupp-Red-White-Blue-271-Seahawks-/306939373376' target='_blank'>306939373376</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-/306939369726' target='_blank'>306939369726</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849' target='_blank'>306939367849</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679' target='_blank'>306939352679</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/Topps-Chrome-Myles-Garrett-1975-8-Cleveland-Browns-2025-NFL-Football-Card-/306939349539' target='_blank'>306939349539</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-/306939342209' target='_blank'>306939342209</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-/306939339030' target='_blank'>306939339030</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Hot-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836' target='_blank'>306939333836</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/Courtland-Sutton-2025-Topps-Chrome-Football-Refractor-Ray-Wave-Broncos-/306939326707' target='_blank'>306939326707</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823' target='_blank'>306939316823</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2024-Topps-Chrome-Rookies-Marvin-Harrison-Jr-204-RC--/306939312739' target='_blank'>306939312739</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Trey-Amos-RC-371-Commanders-/306939301767' target='_blank'>306939301767</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Hot-Pink-X-Fractor-RC--/306939289562' target='_blank'>306939289562</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Penei-Sewell-99-Refractor-/306939281535' target='_blank'>306939281535</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Phoenix-Rookies-Shedeur-Sanders-154-Silver-RC--/306937679957' target='_blank'>306937679957</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Phoenix-Thunderbirds-Drake-Maye-35-Silver-Pyramids-299-/306937677187' target='_blank'>306937677187</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Jayden-Daniels-289-Pink-Shock-Prizm-/306937669968' target='_blank'>306937669968</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Mosaic-Rookies-Cam-Ward-382-Camo-Pink-Mosaic-Prizm-RC--/306937664217' target='_blank'>306937664217</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Rookie-Swatches-TreVeyon-Henderson-RSW-THN-Red-Prizm-MEM--/306937663074' target='_blank'>306937663074</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Travis-Hunter-28-Pink-Shock-Prizm-RC--/306937604288' target='_blank'>306937604288</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Pink-Shock-Prizm-RC--/306937599747' target='_blank'>306937599747</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Pink-Shock-Prizm-/306937598270' target='_blank'>306937598270</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Crusade-Caleb-Williams-5-Silver-/306934506774' target='_blank'>306934506774</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603' target='_blank'>306934495603</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668' target='_blank'>306931446668</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-/306931339580' target='_blank'>306931339580</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-/306931303163' target='_blank'>306931303163</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-/306931285504' target='_blank'>306931285504</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-/306931283327' target='_blank'>306931283327</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274' target='_blank'>306931278274</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457--/306931236773' target='_blank'>306931236773</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/Rickey-Henderson-New-York-Yankees-1987-3-Of-7-Card-The-Press-Box-/306931218531' target='_blank'>306931218531</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-/306931209046' target='_blank'>306931209046</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490' target='_blank'>306931142490</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931077943' target='_blank'>306931077943</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/6-Basketball-Cards-From-90s-/306931070594' target='_blank'>306931070594</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC--/306931055732' target='_blank'>306931055732</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinshon-Judkins-84-Red-Ice-Prizm-RC--/306931048688' target='_blank'>306931048688</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Keelon-Russell-150-Red-Ice-Prizm-RC--/306930939967' target='_blank'>306930939967</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-/306930938563' target='_blank'>306930938563</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr>
+<tr><td>2026-05-17T19:27:52.345088+00:00</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-New-Recruits-Ashton-Jeanty-9-Red-Ice-Prizm-RC--/306930930898' target='_blank'>306930930898</a></td><td>standard</td><td class='num'>8.0%</td><td>FAIL</td></tr></tbody></table></div>
 </section>
 
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 01:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 17, 2026 · 19:27 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

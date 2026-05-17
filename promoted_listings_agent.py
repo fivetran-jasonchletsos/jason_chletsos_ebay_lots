@@ -66,8 +66,10 @@ DEFAULT_CONFIG: dict = {
                        "criteria": "age_days > 120"},
     },
     # Don't promote a listing whose margin would dip below this fraction of list
-    # price after fees + the ad bid would eat the rest.
-    "min_margin_pct_to_promote": 0.15,
+    # price after fees + the ad bid would eat the rest. Lowered 2026-05-17 from
+    # 0.15 to 0.0 to match eBay's "promote 62% of your listings" recommendation
+    # for harpua2001 Trading Card Lots. Negative-margin items still skip ads.
+    "min_margin_pct_to_promote": 0.0,
     # eBay leaf categoryIds to entirely skip. (e.g. high-fee categories.)
     "skip_categories":           [],
     # Hard cap on projected 30-day ad spend across the catalog. Tier rates are
@@ -331,7 +333,9 @@ def _est_margin_pct(listing: dict) -> float | None:
         net = promote._ebay_net(price, ship_cost).get("net", 0.0)
     except Exception:
         return None
-    return max(0.0, net) / price
+    # Return raw margin (may be negative). The caller uses the sign + threshold
+    # to decide; zero-clamping here was hiding the real signal.
+    return net / price
 
 
 def build_decision(listing: dict, sold_idx: dict[str, list[dict]],
