@@ -2861,41 +2861,32 @@ _NAV_ITEMS = [
     ("by_set.html",           "By Set",        True,  "Browse"),
     ("by_player.html",        "By Player",     True,  "Browse"),
 
-    # ── ANALYTICS — what's happening, no writes ──
-    ("make_money.html",       "Make Money",    False, "Analytics"),
-    ("daily.html",            "Daily Digest",  False, "Analytics"),
-    ("cassini.html",          "Cassini Score", False, "Analytics"),
-    ("pnl.html",              "P&L",           False, "Analytics"),
-    ("price_consistency.html","Price Gate",    False, "Analytics"),
-    ("analytics.html",        "Analytics",     False, "Analytics"),
-    ("listing_performance.html","Listing Perf",False, "Analytics"),
-    ("market_intel.html",     "Market Intel",  False, "Analytics"),
-    ("deals.html",            "Deals",         False, "Analytics"),
+    # ── ADMIN HUBS — four consolidated dropdowns replace the previous sprawl.
+    # Each hub links to its component pages (which remain reachable at their
+    # original URLs).  See hub_pages_agent.py.
+    ("analytics_hub.html",    "Analytics",     False, "Analytics"),
+    ("listings_hub.html",     "Listings",      False, "Listings"),
+    ("cx_hub.html",           "CX",            False, "CX"),
+    ("photo_hub.html",        "Photos",        False, "Photos"),
 
-    # ── SELL — listing optimization (Cassini rank levers) ──
-    ("inventory.html",        "Inventory",     False, "Sell"),
-    ("price_review.html",     "Pricing",       False, "Sell"),
-    ("repricing.html",        "Repricing",     False, "Sell"),
-    ("title_review.html",     "Titles",        False, "Sell"),
-    ("specifics.html",        "Specifics",     False, "Sell"),
-    ("quality.html",          "Quality",       False, "Sell"),
-    ("photo_quality.html",    "Photo Quality", False, "Sell"),
-    ("photo_audit.html",      "Photo Audit",   False, "Sell"),
-
-    # ── MARKETING — promotions, ads, offers, store ──
-    ("seller_hub.html",       "Seller Hub",    False, "Marketing"),
-    ("returns.html",          "Returns",       False, "Marketing"),
-    ("tracking.html",         "Tracking",      False, "Marketing"),
-    ("whatnot.html",          "Whatnot Prep",  False, "Marketing"),
-    ("relist.html",           "Relist Unsold", False, "Marketing"),
-    ("buyers.html",           "Repeat Buyers", False, "Marketing"),
-    ("promoted_listings.html","Promoted Ads",  False, "Marketing"),
-    ("promotions.html",       "Promotions",    False, "Marketing"),
-    ("best_offer.html",       "Best Offer",    False, "Marketing"),
-    ("combined_shipping.html","Combined Ship", False, "Marketing"),
-    ("watchers.html",         "Watchers",      False, "Marketing"),
-    ("vault.html",            "Vault",         False, "Marketing"),
-    ("email_campaign.html",   "Email",         False, "Marketing"),
+    # ── MORE — admin orphans not part of any hub (kept lean) ──
+    ("inventory.html",        "Inventory",     False, "More"),
+    ("seller_hub.html",       "Seller Hub",    False, "More"),
+    ("scan.html",             "Scanner",       False, "More"),
+    ("market_intel.html",     "Market Intel",  False, "More"),
+    ("deals.html",            "Deals",         False, "More"),
+    ("price_consistency.html","Price Gate",    False, "More"),
+    ("promoted_listings.html","Promoted Ads",  False, "More"),
+    ("promotions.html",       "Promotions",    False, "More"),
+    ("best_offer.html",       "Best Offer",    False, "More"),
+    ("combined_shipping.html","Combined Ship", False, "More"),
+    ("vault.html",            "Vault",         False, "More"),
+    ("email_campaign.html",   "Email",         False, "More"),
+    ("whatnot.html",          "Whatnot Prep",  False, "More"),
+    ("relist.html",           "Relist Unsold", False, "More"),
+    ("reddit.html",           "Reddit",        False, "More"),
+    ("craigslist.html",       "Craigslist",    False, "More"),
+    ("google_feed.xml",       "Google Feed",   False, "More"),
 
     # ── FOR US — public, buyer-side (son can bookmark) ──
     ("collect.html",          "My Wants",      True,  "For Us"),
@@ -2912,11 +2903,6 @@ _NAV_ITEMS = [
     ("eevee.html",            "Eevee",         True,  "For Us"),
     ("pokemon_news.html",     "Pokemon News",  True,  "For Us"),
 
-    # ── TOOLS — utilities ──
-    ("scan.html",             "Scanner",       False, "Tools"),
-    ("reddit.html",           "Reddit",        False, "Cross-post"),
-    ("craigslist.html",       "Craigslist",    False, "Cross-post"),
-    ("google_feed.xml",       "Google Feed",   False, "Cross-post"),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
@@ -9819,6 +9805,8 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
         "scan.html",
         "title_review.html", "reddit.html", "craigslist.html", "return-policy.html",
         "sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest",
+        # Admin hub pages (consolidated nav)
+        "analytics_hub.html", "listings_hub.html", "cx_hub.html", "photo_hub.html",
     ]
     expected_hashes = set(load_admin_hashes())
     for f in expected:
@@ -10065,6 +10053,18 @@ def main():
         )
 
     build_sitemap_and_robots(listings)
+
+    # ------------------------------------------------------------------
+    # Admin hub pages — four consolidated dropdowns that replace the prior
+    # sprawl in the top nav.  Each hub links to its component pages, which
+    # all remain reachable at their original URLs.
+    # ------------------------------------------------------------------
+    try:
+        import hub_pages_agent
+        print("\nBuilding admin hubs...")
+        hub_pages_agent.build_all_hubs()
+    except Exception as _hub_exc:
+        print(f"  ⚠ Hub pages agent skipped: {_hub_exc}")
 
     # ------------------------------------------------------------------
     # Build integrity check — refuse to deploy if any expected page is
