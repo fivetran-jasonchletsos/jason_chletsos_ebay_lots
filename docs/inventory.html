@@ -617,6 +617,11 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
+/* Below 1200px the nav links eat into the brand block — hide the tag so
+   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
 .nav-links { display: flex; align-items: center; gap: 2px; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
@@ -1808,7 +1813,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1898,6 +1903,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="daily.html" class="admin-only" data-admin="1">Daily Digest</a>
 <a href="cassini.html" class="admin-only" data-admin="1">Cassini Score</a>
 <a href="pnl.html" class="admin-only" data-admin="1">P&L</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
 <a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
@@ -1999,16 +2005,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="stat-grid">
       <a class="stat-card linked" href="#inventory-table" title="Scroll to inventory">
-        <div class="num">3</div><div class="lbl">Cards in inventory</div>
+        <div class="num">0</div><div class="lbl">Cards in inventory</div>
       </a>
       <a class="stat-card linked" href="#ready" title="Ready to list">
         <div class="num">0</div><div class="lbl">Ready (have photo)</div>
       </a>
       <a class="stat-card linked" href="#needs-photo" title="Missing photo">
-        <div class="num">3</div><div class="lbl">Need photo upload</div>
+        <div class="num">0</div><div class="lbl">Need photo upload</div>
       </a>
       <div class="stat-card">
-        <div class="num">$46</div><div class="lbl">Total list value</div>
+        <div class="num">$0</div><div class="lbl">Total list value</div>
       </div>
     </div>
     
@@ -2023,76 +2029,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <thead>
           <tr><th>Photo</th><th>Title (eBay-optimized)</th><th class="num">Suggested price</th><th>Specifics</th><th>Actions</th></tr>
         </thead>
-        <tbody>
-            <tr id="row-0" data-ready="0">
-              <td class="inv-img-cell"><div class="inv-noimg">no photo</div></td>
-              <td>
-                <div class="inv-title">2024 Topps Chrome Cam Ward #287 Refractor Football</div>
-                <div class="inv-sub">Near Mint · Football → eBay cat 215</div>
-              </td>
-              <td class="num">
-                <div class="inv-price">$6.00</div>
-                <div class="inv-pb">2x acquired</div>
-                <div class="inv-pb">range $4.50–$9.00</div>
-              </td>
-              <td>
-                <details><summary>8 specifics</summary>
-                  <ul class="inv-spec"><li><b>Year</b>: 2024</li><li><b>Set</b>: Topps Chrome</li><li><b>Player/Athlete</b>: Cam Ward</li><li><b>Athlete</b>: Cam Ward</li><li><b>Card Number</b>: 287</li><li><b>Parallel/Variety</b>: Refractor</li><li><b>Graded</b>: No</li><li><b>Sport</b>: Football</li></ul>
-                </details>
-              </td>
-              <td>
-                <button class="btn btn-outline btn-sm" onclick='invShowListing(0)'>Show listing info</button>
-                <button class="btn btn-gold btn-sm" disabled title="Add image_url to CSV first"
-                        onclick='invDraftOnEbay(0)'>Draft on eBay →</button>
-              </td>
-            </tr>
-            <script type="application/json" id="listing-0">{"Year": "2024", "Set": "Topps Chrome", "Player/Athlete": "Cam Ward", "Athlete": "Cam Ward", "Card Number": "287", "Parallel/Variety": "Refractor", "Graded": "No", "Sport": "Football"}</script>
-            <tr id="row-1" data-ready="0">
-              <td class="inv-img-cell"><div class="inv-noimg">no photo</div></td>
-              <td>
-                <div class="inv-title">2023 Panini Prizm CJ Stroud #325 Silver Prizm Football</div>
-                <div class="inv-sub">Near Mint · Football → eBay cat 215</div>
-              </td>
-              <td class="num">
-                <div class="inv-price">$16.00</div>
-                <div class="inv-pb">2x acquired</div>
-                <div class="inv-pb">range $12.00–$24.00</div>
-              </td>
-              <td>
-                <details><summary>8 specifics</summary>
-                  <ul class="inv-spec"><li><b>Year</b>: 2023</li><li><b>Set</b>: Panini Prizm</li><li><b>Player/Athlete</b>: CJ Stroud</li><li><b>Athlete</b>: CJ Stroud</li><li><b>Card Number</b>: 325</li><li><b>Parallel/Variety</b>: Silver Prizm</li><li><b>Graded</b>: No</li><li><b>Sport</b>: Football</li></ul>
-                </details>
-              </td>
-              <td>
-                <button class="btn btn-outline btn-sm" onclick='invShowListing(1)'>Show listing info</button>
-                <button class="btn btn-gold btn-sm" disabled title="Add image_url to CSV first"
-                        onclick='invDraftOnEbay(1)'>Draft on eBay →</button>
-              </td>
-            </tr>
-            <script type="application/json" id="listing-1">{"Year": "2023", "Set": "Panini Prizm", "Player/Athlete": "CJ Stroud", "Athlete": "CJ Stroud", "Card Number": "325", "Parallel/Variety": "Silver Prizm", "Graded": "No", "Sport": "Football"}</script>
-            <tr id="row-2" data-ready="0">
-              <td class="inv-img-cell"><div class="inv-noimg">no photo</div></td>
-              <td>
-                <div class="inv-title">1999 Base Set Pikachu #58/102 Pokemon</div>
-                <div class="inv-sub">Lightly Played · Pokemon → eBay cat 183454</div>
-              </td>
-              <td class="num">
-                <div class="inv-price">$24.00</div>
-                <div class="inv-pb">2x acquired</div>
-                <div class="inv-pb">range $18.00–$36.00</div>
-              </td>
-              <td>
-                <details><summary>5 specifics</summary>
-                  <ul class="inv-spec"><li><b>Year</b>: 1999</li><li><b>Set</b>: Base Set</li><li><b>Character</b>: Pikachu</li><li><b>Card Number</b>: 58/102</li><li><b>Graded</b>: No</li></ul>
-                </details>
-              </td>
-              <td>
-                <button class="btn btn-outline btn-sm" onclick='invShowListing(2)'>Show listing info</button>
-                <button class="btn btn-gold btn-sm" disabled title="Add image_url to CSV first"
-                        onclick='invDraftOnEbay(2)'>Draft on eBay →</button>
-              </td>
-            </tr>
-            <script type="application/json" id="listing-2">{"Year": "1999", "Set": "Base Set", "Character": "Pikachu", "Card Number": "58/102", "Graded": "No"}</script></tbody>
+        <tbody><tr><td colspan="6" class="inv-empty">No inventory yet. Create <code>inventory.csv</code> at the repo root with columns: name,year,set,card_number,player,sport,parallel,grade,grader,condition,quantity,acquired_price,image_url,notes</td></tr></tbody>
       </table>
     </div>
 
@@ -2106,7 +2043,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 
     <script>
-      const INV_ITEMS = [{"raw": {"name": "2024 Topps Chrome Cam Ward Refractor #287", "year": "2024", "set": "Topps Chrome", "card_number": "287", "player": "Cam Ward", "sport": "Football", "parallel": "Refractor", "grade": "", "grader": "", "condition": "Near Mint", "quantity": "1", "acquired_price": "3.00", "image_url": "", "notes": "Rookie card", "scp_id": "", "sold_at": "", "sold_price": "", "ebay_item_id": ""}, "title": "2024 Topps Chrome Cam Ward #287 Refractor Football", "ebay_category": "Football", "category_id": "215", "store_category": "Football", "price": 6.0, "price_basis": "2x acquired", "price_low": 4.5, "price_high": 9.0, "specifics": {"Year": "2024", "Set": "Topps Chrome", "Player/Athlete": "Cam Ward", "Athlete": "Cam Ward", "Card Number": "287", "Parallel/Variety": "Refractor", "Graded": "No", "Sport": "Football"}, "scp_match": false, "image_url": ""}, {"raw": {"name": "2023 Panini Prizm CJ Stroud Silver Prizm #325", "year": "2023", "set": "Panini Prizm", "card_number": "325", "player": "CJ Stroud", "sport": "Football", "parallel": "Silver Prizm", "grade": "", "grader": "", "condition": "Near Mint", "quantity": "1", "acquired_price": "8.00", "image_url": "", "notes": "Rookie", "scp_id": "", "sold_at": "", "sold_price": "", "ebay_item_id": ""}, "title": "2023 Panini Prizm CJ Stroud #325 Silver Prizm Football", "ebay_category": "Football", "category_id": "215", "store_category": "Football", "price": 16.0, "price_basis": "2x acquired", "price_low": 12.0, "price_high": 24.0, "specifics": {"Year": "2023", "Set": "Panini Prizm", "Player/Athlete": "CJ Stroud", "Athlete": "CJ Stroud", "Card Number": "325", "Parallel/Variety": "Silver Prizm", "Graded": "No", "Sport": "Football"}, "scp_match": false, "image_url": ""}, {"raw": {"name": "1999 Pokemon Base Set Pikachu 58/102", "year": "1999", "set": "Base Set", "card_number": "58/102", "player": "Pikachu", "sport": "Pokemon", "parallel": "", "grade": "", "grader": "", "condition": "Lightly Played", "quantity": "1", "acquired_price": "12.00", "image_url": "", "notes": "Yellow cheeks variant", "scp_id": "", "sold_at": "2026-03-01T00:32:17.000Z", "sold_price": "2.99", "ebay_item_id": "306751073160"}, "title": "1999 Base Set Pikachu #58/102 Pokemon", "ebay_category": "Pokemon", "category_id": "183454", "store_category": "Pokemon", "price": 24.0, "price_basis": "2x acquired", "price_low": 18.0, "price_high": 36.0, "specifics": {"Year": "1999", "Set": "Base Set", "Character": "Pikachu", "Card Number": "58/102", "Graded": "No"}, "scp_match": false, "image_url": ""}];
+      const INV_ITEMS = [];
       const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
 
       function invShowListing(i) {
@@ -2171,7 +2108,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 21:02 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 18, 2026 · 04:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

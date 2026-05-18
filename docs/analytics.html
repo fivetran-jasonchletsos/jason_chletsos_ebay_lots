@@ -617,6 +617,11 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
+/* Below 1200px the nav links eat into the brand block — hide the tag so
+   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
 .nav-links { display: flex; align-items: center; gap: 2px; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
@@ -1841,7 +1846,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="analytics.html" class="active" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="analytics.html" class="active" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1931,6 +1936,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="daily.html" class="admin-only" data-admin="1">Daily Digest</a>
 <a href="cassini.html" class="admin-only" data-admin="1">Cassini Score</a>
 <a href="pnl.html" class="admin-only" data-admin="1">P&L</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="analytics.html" class="active admin-only" data-admin="1">Analytics</a>
 <a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
@@ -2027,17 +2033,17 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="kpi-tile">
         <div class="kpi-body">
           <div class="kpi-label">Active Listings</div>
-          <div class="kpi-value">125</div>
+          <div class="kpi-value">126</div>
           <div class="kpi-row"><span class="kpi-delta flat"><span class="arrow">◆</span>snapshot</span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,29.0 12.5,29.0 23.1,29.0 33.6,29.0 44.2,29.0 54.7,29.0 65.3,29.0 75.8,29.0 86.4,29.0 96.9,29.0 107.5,29.0 118.0,29.0 118.0,30 2,30" fill="var(--text-muted)" opacity="0.14"/><polyline points="2.0,29.0 12.5,29.0 23.1,29.0 33.6,29.0 44.2,29.0 54.7,29.0 65.3,29.0 75.8,29.0 86.4,29.0 96.9,29.0 107.5,29.0 118.0,29.0" fill="none" stroke="var(--text-muted)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="29.0" r="2.4" fill="var(--text-muted)"/></svg></div>
         </div>
-        <div class="kpi-lever"><b>$ Lever ·</b> Each new listing = avg <b>$5.78</b> expected revenue at today's sell-through.</div>
+        <div class="kpi-lever"><b>$ Lever ·</b> Each new listing = avg <b>$5.75</b> expected revenue at today's sell-through.</div>
       </div>
 
       <div class="kpi-tile">
         <div class="kpi-body">
           <div class="kpi-label">Sold · Last 90 Days</div>
           <div class="kpi-value">$857<span class="kpi-unit">/ 54 units</span></div>
-          <div class="kpi-row"><span class="kpi-delta bad"><span class="arrow">▼</span>-10.7%<span class="vs">vs prior 6 wks</span></span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,24.0 12.5,12.3 23.1,28.3 33.6,5.4 44.2,28.8 54.7,28.6 65.3,29.0 75.8,29.0 86.4,27.9 96.9,26.7 107.5,5.0 118.0,14.7 118.0,30 2,30" fill="var(--danger)" opacity="0.14"/><polyline points="2.0,24.0 12.5,12.3 23.1,28.3 33.6,5.4 44.2,28.8 54.7,28.6 65.3,29.0 75.8,29.0 86.4,27.9 96.9,26.7 107.5,5.0 118.0,14.7" fill="none" stroke="var(--danger)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="14.7" r="2.4" fill="var(--danger)"/></svg></div>
+          <div class="kpi-row"><span class="kpi-delta flat"><span class="arrow">◆</span>+0.1%<span class="vs">vs prior 6 wks</span></span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,12.3 12.5,28.3 23.1,5.4 33.6,28.8 44.2,28.6 54.7,29.0 65.3,29.0 75.8,27.9 86.4,26.7 96.9,5.0 107.5,14.7 118.0,29.0 118.0,30 2,30" fill="var(--gold)" opacity="0.14"/><polyline points="2.0,12.3 12.5,28.3 23.1,5.4 33.6,28.8 44.2,28.6 54.7,29.0 65.3,29.0 75.8,27.9 86.4,26.7 96.9,5.0 107.5,14.7 118.0,29.0" fill="none" stroke="var(--gold)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="29.0" r="2.4" fill="var(--gold)"/></svg></div>
         </div>
         <div class="kpi-lever"><b>$ Lever ·</b> Restocking 10 units in top category = +<b>$471</b> expected GMV.</div>
       </div>
@@ -2046,7 +2052,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="kpi-body">
           <div class="kpi-label">Avg Sale Price</div>
           <div class="kpi-value">$17.25</div>
-          <div class="kpi-row"><span class="kpi-delta bad"><span class="arrow">▼</span>-72.3%<span class="vs">vs prior 6 wks</span></span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,27.3 12.5,20.5 23.1,27.6 33.6,5.0 44.2,28.7 54.7,28.2 65.3,29.0 75.8,29.0 86.4,28.3 96.9,28.2 107.5,22.0 118.0,27.3 118.0,30 2,30" fill="var(--danger)" opacity="0.14"/><polyline points="2.0,27.3 12.5,20.5 23.1,27.6 33.6,5.0 44.2,28.7 54.7,28.2 65.3,29.0 75.8,29.0 86.4,28.3 96.9,28.2 107.5,22.0 118.0,27.3" fill="none" stroke="var(--danger)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="27.3" r="2.4" fill="var(--danger)"/></svg></div>
+          <div class="kpi-row"><span class="kpi-delta bad"><span class="arrow">▼</span>-71.0%<span class="vs">vs prior 6 wks</span></span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,20.5 12.5,27.6 23.1,5.0 33.6,28.7 44.2,28.2 54.7,29.0 65.3,29.0 75.8,28.3 86.4,28.2 96.9,22.0 107.5,27.3 118.0,29.0 118.0,30 2,30" fill="var(--danger)" opacity="0.14"/><polyline points="2.0,20.5 12.5,27.6 23.1,5.0 33.6,28.7 44.2,28.2 54.7,29.0 65.3,29.0 75.8,28.3 86.4,28.2 96.9,22.0 107.5,27.3 118.0,29.0" fill="none" stroke="var(--danger)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="29.0" r="2.4" fill="var(--danger)"/></svg></div>
         </div>
         <div class="kpi-lever"><b>$ Lever ·</b> 1% price lift = +<b>$3</b>/mo at current run-rate.</div>
       </div>
@@ -2054,17 +2060,17 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="kpi-tile">
         <div class="kpi-body">
           <div class="kpi-label">Sell-Through</div>
-          <div class="kpi-value">33.5<span class="kpi-unit">%</span></div>
-          <div class="kpi-row"><span class="kpi-delta good"><span class="arrow">▲</span>+108.2%<span class="vs">vs prior 6 wks</span></span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,19.8 12.5,22.8 23.1,27.4 33.6,25.9 44.2,27.4 54.7,27.4 65.3,29.0 75.8,29.0 86.4,24.3 96.9,19.8 107.5,18.4 118.0,5.0 118.0,30 2,30" fill="var(--success)" opacity="0.14"/><polyline points="2.0,19.8 12.5,22.8 23.1,27.4 33.6,25.9 44.2,27.4 54.7,27.4 65.3,29.0 75.8,29.0 86.4,24.3 96.9,19.8 107.5,18.4 118.0,5.0" fill="none" stroke="var(--success)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="5.0" r="2.4" fill="var(--success)"/></svg></div>
+          <div class="kpi-value">33.3<span class="kpi-unit">%</span></div>
+          <div class="kpi-row"><span class="kpi-delta good"><span class="arrow">▲</span>+242.8%<span class="vs">vs prior 6 wks</span></span><svg class="kpi-spark" width="120" height="32" viewBox="0 0 120 32" aria-hidden="true"><polygon points="2.0,22.8 12.5,27.4 23.1,25.9 33.6,27.4 44.2,27.4 54.7,29.0 65.3,29.0 75.8,24.3 86.4,19.8 96.9,18.4 107.5,5.0 118.0,29.0 118.0,30 2,30" fill="var(--success)" opacity="0.14"/><polyline points="2.0,22.8 12.5,27.4 23.1,25.9 33.6,27.4 44.2,27.4 54.7,29.0 65.3,29.0 75.8,24.3 86.4,19.8 96.9,18.4 107.5,5.0 118.0,29.0" fill="none" stroke="var(--success)" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/><circle cx="118.0" cy="29.0" r="2.4" fill="var(--success)"/></svg></div>
         </div>
         <div class="kpi-lever"><b>$ Lever ·</b> 10% sell-through lift = +<b>$315</b>/yr in velocity.</div>
       </div>
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num">$549</div><div class="lbl">Inventory Value</div></div>
+      <div class="stat-card"><div class="num">$503</div><div class="lbl">Inventory Value</div></div>
       <div class="stat-card"><div class="num">$1,087</div><div class="lbl">All-Time Sold Revenue</div></div>
-      <div class="stat-card"><div class="num">1.98<span style="font-size:18px;color:var(--text-muted)">×</span></div><div class="lbl">Turnover Ratio</div></div>
+      <div class="stat-card"><div class="num">2.16<span style="font-size:18px;color:var(--text-muted)">×</span></div><div class="lbl">Turnover Ratio</div></div>
       <div class="stat-card"><div class="num danger">$0</div><div class="lbl">$ Left on Table (Underpriced)</div></div>
     </div>
 
@@ -2108,7 +2114,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="a-sub">Selling vs sold, side by side</div>
         <table class="a-table">
           <thead><tr><th>Category</th><th>Active</th><th>Listed $</th><th>Sold</th><th>Sold $</th><th>Avg Sale</th></tr></thead>
-          <tbody><tr><td><b>Baseball Lots</b></td><td>1</td><td>$2</td><td>3</td><td>$9</td><td>$2.91</td></tr><tr><td><b>Baseball Singles</b></td><td>3</td><td>$11</td><td>0</td><td>$0</td><td>$0.00</td></tr><tr><td><b>Basketball Lots</b></td><td>7</td><td>$68</td><td>1</td><td>$2</td><td>$1.50</td></tr><tr><td><b>Basketball Singles</b></td><td>5</td><td>$29</td><td>2</td><td>$10</td><td>$5.00</td></tr><tr><td><b>Football Lots</b></td><td>19</td><td>$98</td><td>10</td><td>$28</td><td>$2.79</td></tr><tr><td><b>Football Singles</b></td><td>88</td><td>$329</td><td>19</td><td>$291</td><td>$15.30</td></tr><tr><td><b>Other</b></td><td>1</td><td>$2</td><td>21</td><td>$418</td><td>$19.92</td></tr><tr><td><b>Pokemon</b></td><td>1</td><td>$9</td><td>7</td><td>$329</td><td>$47.07</td></tr></tbody>
+          <tbody><tr><td><b>Baseball Lots</b></td><td>1</td><td>$2</td><td>3</td><td>$9</td><td>$2.91</td></tr><tr><td><b>Baseball Singles</b></td><td>3</td><td>$11</td><td>0</td><td>$0</td><td>$0.00</td></tr><tr><td><b>Basketball Lots</b></td><td>7</td><td>$38</td><td>1</td><td>$2</td><td>$1.50</td></tr><tr><td><b>Basketball Singles</b></td><td>5</td><td>$27</td><td>2</td><td>$10</td><td>$5.00</td></tr><tr><td><b>Football Lots</b></td><td>19</td><td>$91</td><td>10</td><td>$28</td><td>$2.79</td></tr><tr><td><b>Football Singles</b></td><td>89</td><td>$323</td><td>19</td><td>$291</td><td>$15.30</td></tr><tr><td><b>Other</b></td><td>1</td><td>$2</td><td>21</td><td>$418</td><td>$19.92</td></tr><tr><td><b>Pokemon</b></td><td>1</td><td>$9</td><td>7</td><td>$329</td><td>$47.07</td></tr></tbody>
         </table>
       </div>
       <div class="a-panel">
@@ -2142,7 +2148,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data: {
           labels: ['Football Lots', 'Football Singles', 'Baseball Singles', 'Other', 'Baseball Lots', 'Basketball Lots', 'Pokemon', 'Basketball Singles'],
           datasets: [{
-            data: [19, 88, 3, 1, 1, 7, 1, 5],
+            data: [19, 89, 3, 1, 1, 7, 1, 5],
             backgroundColor: PALETTE,
             borderColor: '#0a0a0a', borderWidth: 3, hoverOffset: 8,
           }]
@@ -2219,7 +2225,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data: {
           labels: ['Below market (UNDERPRICED)', 'On market (OK)', 'Above market (OVERPRICED)', 'No comps'],
           datasets: [{
-            data: [0, 0, 0, 125],
+            data: [0, 0, 0, 126],
             backgroundColor: ['rgba(224,123,111,.7)','rgba(127,199,122,.7)','rgba(224,181,74,.7)','rgba(150,150,150,.4)'],
             borderColor: ['#e07b6f','#7fc77a','#e0b54a','#888'],
             borderWidth: 1.5, borderRadius: 6,
@@ -2236,7 +2242,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 21:00 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 18, 2026 · 04:09 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

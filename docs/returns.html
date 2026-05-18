@@ -617,6 +617,11 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
+/* Below 1200px the nav links eat into the brand block — hide the tag so
+   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
 .nav-links { display: flex; align-items: center; gap: 2px; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
@@ -1778,7 +1783,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1868,6 +1873,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="daily.html" class="admin-only" data-admin="1">Daily Digest</a>
 <a href="cassini.html" class="admin-only" data-admin="1">Cassini Score</a>
 <a href="pnl.html" class="admin-only" data-admin="1">P&L</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
 <a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
@@ -1951,11 +1957,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-17 21:02 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
+    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-18 04:11 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 21:02 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 18, 2026 · 04:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

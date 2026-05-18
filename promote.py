@@ -1696,6 +1696,11 @@ a:hover { color: var(--gold-bright); }
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
 }
+/* Below 1200px the nav links eat into the brand block — hide the tag so
+   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
 .nav-links { display: flex; align-items: center; gap: 2px; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
@@ -2861,6 +2866,7 @@ _NAV_ITEMS = [
     ("daily.html",            "Daily Digest",  False, "Analytics"),
     ("cassini.html",          "Cassini Score", False, "Analytics"),
     ("pnl.html",              "P&L",           False, "Analytics"),
+    ("price_consistency.html","Price Gate",    False, "Analytics"),
     ("analytics.html",        "Analytics",     False, "Analytics"),
     ("listing_performance.html","Listing Perf",False, "Analytics"),
     ("market_intel.html",     "Market Intel",  False, "Analytics"),
@@ -10073,6 +10079,31 @@ def main():
         import sys as _sys
         _sys.exit(1)
     print("  ✓ All expected pages present, admin hashes consistent")
+
+    # ------------------------------------------------------------------
+    # SRE consistency gate — every page that renders a live listing's
+    # price must show the same price as eBay. Built after the
+    # Cam-Ward-Reddit-mismatch incident (2026-05-18). Lazy-imported so
+    # older checkouts without the agent still build.
+    # ------------------------------------------------------------------
+    try:
+        import price_consistency_agent
+        print("\nPrice consistency gate...")
+        pc_report = price_consistency_agent.run_check(strict=True)
+        if pc_report["drift_count"]:
+            print(f"\n❌ PRICE DRIFT — NOT DEPLOYING ({pc_report['drift_count']} occurrences)")
+            for d in pc_report["drift"][:8]:
+                print(f"  · {d['file']}: {d['item_id']} ${d['rendered']:.2f} vs live ${d['live_ebay']:.2f}")
+            import sys as _sys
+            _sys.exit(1)
+        print(f"  ✓ All prices match live eBay ({pc_report['files_scanned']} files / {pc_report['live_listings']} listings)")
+    except SystemExit:
+        raise
+    except Exception as _pc_exc:
+        # Non-fatal: log + continue. The integrity check above already
+        # caught any structural breakage; price-consistency is a safety
+        # net, not a hard dep.
+        print(f"  Price consistency gate skipped: {_pc_exc}")
 
     print("\nDeploying to GitHub Pages...")
     if no_deploy:
