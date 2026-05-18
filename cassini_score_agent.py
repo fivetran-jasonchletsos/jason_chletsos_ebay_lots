@@ -73,9 +73,7 @@ FLUFF_RE = re.compile(
 )
 
 
-# ----------------------------------------------------------------------------
-# Loaders — every input is optional. Missing => empty index, score continues.
-# ----------------------------------------------------------------------------
+# --- Loaders: every input is optional; missing => empty index. ---
 
 def _load_json(path: Path, default: Any) -> Any:
     if not path.exists():
@@ -107,28 +105,23 @@ def _index_specifics(raw: Any) -> dict[str, dict]:
 
 
 def _index_perf(raw: Any) -> dict[str, dict]:
-    """Walk every bucket in the perf plan and merge into one item_id index."""
+    """Merge every bucket in the perf plan into one item_id index."""
     if not isinstance(raw, dict):
         return {}
-    buckets = raw.get("buckets") or {}
     idx: dict[str, dict] = {}
     for key in ("impression_leaders", "ctr_leaders", "needs_help"):
-        for r in buckets.get(key, []) or []:
+        for r in (raw.get("buckets") or {}).get(key, []) or []:
             iid = str(r.get("item_id") or "")
-            if not iid:
-                continue
-            # Merge — later buckets overwrite, which is fine; the same rows
-            # show up across buckets with consistent counters.
-            idx.setdefault(iid, {}).update({
-                "impressions": int(r.get("impressions", 0) or 0),
-                "search_impressions": int(r.get("search_impressions", 0) or 0),
-                "ctr": float(r.get("ctr", 0.0) or 0.0),
-            })
+            if iid:
+                idx.setdefault(iid, {}).update({
+                    "impressions": int(r.get("impressions", 0) or 0),
+                    "ctr": float(r.get("ctr", 0.0) or 0.0),
+                })
     return idx
 
 
 def _index_sold_recent(raw: Any) -> set[str]:
-    """Set of item_ids that had at least one sale in the last 90 days."""
+    """Item-ids with at least one sale in the last SOLD_LOOKBACK_DAYS days."""
     if not isinstance(raw, list):
         return set()
     cutoff = datetime.now(timezone.utc) - timedelta(days=SOLD_LOOKBACK_DAYS)
@@ -137,10 +130,8 @@ def _index_sold_recent(raw: Any) -> set[str]:
         iid = str(row.get("item_id") or "")
         if not iid:
             continue
-        ts = row.get("sold_date") or row.get("date") or ""
         try:
-            # eBay timestamps come back as ISO-8601 with trailing Z.
-            dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(str(row.get("sold_date") or row.get("date") or "").replace("Z", "+00:00"))
         except (ValueError, TypeError):
             continue
         if dt >= cutoff:
@@ -148,9 +139,7 @@ def _index_sold_recent(raw: Any) -> set[str]:
     return recent
 
 
-# ----------------------------------------------------------------------------
-# Scoring
-# ----------------------------------------------------------------------------
+# --- Scoring ---
 
 def _filled_specifics_count(spec_row: dict | None) -> int:
     """Count non-empty current_specifics values; ignores generic placeholders."""
@@ -268,9 +257,7 @@ def _score_one(listing: dict, photo_idx: dict, spec_idx: dict, perf_idx: dict,
     }
 
 
-# ----------------------------------------------------------------------------
-# Plan assembly
-# ----------------------------------------------------------------------------
+# --- Plan assembly ---
 
 def build_plan() -> dict:
     listings = _index_listings(_load_json(SNAPSHOT_PATH, []))
@@ -337,9 +324,7 @@ def write_snapshot(plan: dict) -> None:
     PRIOR_SNAPSHOT.write_text(json.dumps(trimmed, indent=2))
 
 
-# ----------------------------------------------------------------------------
-# Report
-# ----------------------------------------------------------------------------
+# --- Report ---
 
 def _delta_html(delta: int | None) -> str:
     if delta is None:
@@ -504,9 +489,7 @@ def build_report(plan: dict) -> Path:
     return REPORT_PATH
 
 
-# ----------------------------------------------------------------------------
-# Entry point
-# ----------------------------------------------------------------------------
+# --- Entry point ---
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Synthesize a per-listing Cassini health score.")

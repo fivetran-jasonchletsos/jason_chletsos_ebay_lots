@@ -2852,9 +2852,15 @@ _NAV_ITEMS = [
     ("index.html",            "Listings",      True,  None),
     ("steals.html",           "Steals",        True,  None),
     ("sold.html",             "Sold",          True,  None),
+    ("browse.html",           "Browse",        True,  "Browse"),
+    ("by_set.html",           "By Set",        True,  "Browse"),
+    ("by_player.html",        "By Player",     True,  "Browse"),
 
     # ── ANALYTICS — what's happening, no writes ──
     ("make_money.html",       "Make Money",    False, "Analytics"),
+    ("daily.html",            "Daily Digest",  False, "Analytics"),
+    ("cassini.html",          "Cassini Score", False, "Analytics"),
+    ("pnl.html",              "P&L",           False, "Analytics"),
     ("analytics.html",        "Analytics",     False, "Analytics"),
     ("listing_performance.html","Listing Perf",False, "Analytics"),
     ("market_intel.html",     "Market Intel",  False, "Analytics"),
@@ -2872,6 +2878,11 @@ _NAV_ITEMS = [
 
     # ── MARKETING — promotions, ads, offers, store ──
     ("seller_hub.html",       "Seller Hub",    False, "Marketing"),
+    ("returns.html",          "Returns",       False, "Marketing"),
+    ("tracking.html",         "Tracking",      False, "Marketing"),
+    ("whatnot.html",          "Whatnot Prep",  False, "Marketing"),
+    ("relist.html",           "Relist Unsold", False, "Marketing"),
+    ("buyers.html",           "Repeat Buyers", False, "Marketing"),
     ("promoted_listings.html","Promoted Ads",  False, "Marketing"),
     ("promotions.html",       "Promotions",    False, "Marketing"),
     ("best_offer.html",       "Best Offer",    False, "Marketing"),
@@ -2885,6 +2896,7 @@ _NAV_ITEMS = [
     ("under_10.html",         "Under $10",     True,  "For Us"),
     ("top_sellers.html",      "Top Sellers",   True,  "For Us"),
     ("price_drops.html",      "Price Drops",   True,  "For Us"),
+    ("sets.html",             "Set Completion",True,  "For Us"),
     ("assistant.html",        "AI Assistant",  True,  "For Us"),
     ("pokemon.html",          "Pokemon",       True,  "For Us"),
     ("pikachu.html",          "Pikachu",       True,  "For Us"),
@@ -9985,6 +9997,15 @@ def main():
         ("Top Sellers: docs/top_sellers.html",       "top_sellers_agent.py"),
         ("Inventory: docs/inventory.html",           "inventory_agent.py"),
         ("AI Assistant: docs/assistant.html",        "ai_assistant_agent.py"),
+        ("Returns: docs/returns.html",               "returns_agent.py"),
+        ("Whatnot Prep: docs/whatnot.html",          "whatnot_prep_agent.py"),
+        ("Daily Digest: docs/daily.html",            "daily_digest_agent.py"),
+        ("Cassini Score: docs/cassini.html",         "cassini_score_agent.py"),
+        ("P&L: docs/pnl.html",                       "pnl_agent.py"),
+        ("Repeat Buyers: docs/buyers.html",          "repeat_buyers_agent.py"),
+        ("Browse index: docs/browse.html",           "browse_index_agent.py"),
+        ("Relist unsold: docs/relist.html",          "relist_agent.py"),
+        ("Set completion: docs/sets.html",           "set_completion_agent.py"),
         ("Price Drops: docs/price_drops.html",       "price_drops_agent.py"),
     ]:
         sp_path = _here / script

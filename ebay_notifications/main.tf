@@ -195,8 +195,46 @@ resource "aws_iam_role_policy" "lambda_sns_publish" {
 # ---------------------------------------------------------------------------
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/lambda_function.py"
+  source_dir  = "${path.module}/.build/lambda_src"
   output_path = "${path.module}/.build/ebay_notifications.zip"
+  depends_on  = [null_resource.stage_lambda_src]
+}
+
+# Stage agent modules + lambda_function.py into .build/lambda_src before zip.
+# Re-runs whenever any of the source files change.
+resource "null_resource" "stage_lambda_src" {
+  triggers = {
+    lambda_function   = filesha256("${path.module}/lambda_function.py")
+    seller_hub        = filesha256("${path.module}/../seller_hub_agent.py")
+    seller_hub_phase2 = filesha256("${path.module}/../seller_hub_phase2.py")
+    promoted_listings = filesha256("${path.module}/../promoted_listings_agent.py")
+    best_offer        = filesha256("${path.module}/../best_offer_agent.py")
+    promote_module    = filesha256("${path.module}/../promote.py")
+  }
+  provisioner "local-exec" {
+    command = <<-EOT
+      set -e
+      mkdir -p ${path.module}/.build/lambda_src
+      # Wipe stale stage
+      rm -rf ${path.module}/.build/lambda_src/*
+      # Copy Lambda entrypoint + every Python module Lambda routes import
+      cp ${path.module}/lambda_function.py        ${path.module}/.build/lambda_src/
+      cp ${path.module}/../seller_hub_agent.py    ${path.module}/.build/lambda_src/
+      cp ${path.module}/../seller_hub_phase2.py   ${path.module}/.build/lambda_src/
+      cp ${path.module}/../promoted_listings_agent.py ${path.module}/.build/lambda_src/
+      cp ${path.module}/../best_offer_agent.py    ${path.module}/.build/lambda_src/
+      cp ${path.module}/../promote.py             ${path.module}/.build/lambda_src/
+      # promote.py imports a bunch of optional pricing modules — touch empty
+      # shims so import doesn't fail in the Lambda runtime.
+      for f in card_price_agent.py photo_audit_agent.py specifics_agent.py; do
+        [ -f ${path.module}/../$f ] && cp ${path.module}/../$f ${path.module}/.build/lambda_src/ || true
+      done
+      # Lambda's Python runtime doesn't ship `requests`. Vendor it so the
+      # agent modules (which all use requests for eBay REST calls) work.
+      pip3 install --quiet --target ${path.module}/.build/lambda_src requests || \
+        echo "  WARN: pip3 install requests failed — Lambda routes that need it will 503"
+    EOT
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -336,6 +374,37 @@ resource "aws_apigatewayv2_route" "admin_login_post" {
 resource "aws_apigatewayv2_route" "admin_login_options" {
   api_id    = aws_apigatewayv2_api.ebay_notifications.id
   route_key = "OPTIONS /ebay/admin-login"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+# ---------------------------------------------------------------------------
+# Wave 7-10 routes — all the new agent endpoints. Each route is a POST +
+# OPTIONS (CORS preflight). All target the same Lambda integration.
+# ---------------------------------------------------------------------------
+locals {
+  agent_routes = [
+    "preview-store-categories",
+    "sync-store-categories",
+    "promotion-rollup",
+    "sync-promoted",
+    "best-offer-bulk",
+    "create-listing",
+    "ai-chat",
+    "upload-photos",
+  ]
+}
+
+resource "aws_apigatewayv2_route" "agent_post" {
+  for_each  = toset(local.agent_routes)
+  api_id    = aws_apigatewayv2_api.ebay_notifications.id
+  route_key = "POST /ebay/${each.value}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "agent_options" {
+  for_each  = toset(local.agent_routes)
+  api_id    = aws_apigatewayv2_api.ebay_notifications.id
+  route_key = "OPTIONS /ebay/${each.value}"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
