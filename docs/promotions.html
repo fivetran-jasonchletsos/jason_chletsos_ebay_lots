@@ -64,16 +64,17 @@
 
   <style>
 :root {
-  /* Default: Dark Luxe (gold on black) */
+  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
   --bg:          #0a0a0a;
   --surface:     #141414;
   --surface-2:   #1a1a1a;
   --surface-3:   #232323;
-  --border:      rgba(212,175,55,0.10);
-  --border-mid:  rgba(212,175,55,0.22);
-  --border-hi:   rgba(212,175,55,0.45);
-  --gold:        #d4af37;
-  --gold-bright: #f4ce5d;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  /* Slightly desaturated gold — calmer, more print-like */
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
@@ -81,12 +82,12 @@
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
-  --link:        #6cb0ff;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,175,55,.25);
-  --bg-radial-1: rgba(212,175,55,.08);
-  --bg-radial-2: rgba(212,175,55,.05);
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --bg-radial-1: rgba(201,165,66,.06);
+  --bg-radial-2: rgba(201,165,66,.04);
   --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
   --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
   --r-sm: 6px;
@@ -95,6 +96,41 @@
   --r-xl: 22px;
   --t-fast: 160ms cubic-bezier(.4,0,.2,1);
   --t-base: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* ----- Fluid type scale (Marcotte) ----- */
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-md:    clamp(15.5px, 0.94rem + 0.25vw, 18px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h4:    clamp(17px,   1rem + 0.5vw, 22px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-h1:    clamp(2rem,   1.6rem + 2vw, 3.4rem);
+  --fs-display-sm: clamp(22px, 1.2rem + 1.2vw, 30px);
+  --fs-display:    clamp(28px, 1.4rem + 2.2vw, 44px);
+  --fs-num:    clamp(32px,   1.5rem + 2.4vw, 48px);
+  --fs-num-sm: clamp(26px,   1.3rem + 1.4vw, 36px);
+  --fs-eyebrow: clamp(10.5px, 0.65rem + 0.05vw, 11.5px);
+  --fs-lbl:     clamp(10.5px, 0.65rem + 0.08vw, 12px);
+
+  /* ----- Fluid spacing scale ----- */
+  --space-2xs: clamp(4px,  0.25rem + 0.1vw, 6px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+
+  /* ----- Fluid container ----- */
+  --container-max: min(92vw, 1320px);
+
+  /* Line heights */
+  --lh-display: 1.05;
+  --lh-tight:   1.2;
+  --lh-body:    1.65;
 }
 
 /* ============ ALT THEME: CREAM & NAVY ============ */
@@ -488,8 +524,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
   font-feature-settings: 'cv11','ss01','cv02';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -498,12 +534,49 @@ body {
     radial-gradient(1200px 600px at 80% -10%, var(--bg-radial-1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, var(--bg-radial-2), transparent 60%);
   background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
+
+/* Low-specificity heading defaults (Coyier :where) */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-wrap: balance;
+}
+:where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
+:where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
+:where(h3) { font-size: var(--fs-h3); }
+:where(h4) { font-size: var(--fs-h4); }
+:where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
+
 ::selection { background: var(--gold); color: #000; }
-a { color: var(--link); text-decoration: none; transition: color var(--t-fast); }
+
+/* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
+a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])) {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:where(:not(.btn):not(.nav-link):not(.stat-card):not(.listing-card):not(.deal-card):not(.pr-card):not(.steal-card):not(.brand):not(.nav-dropdown-menu a):not(.drawer a):not(.app-footer a):not([class*="-card"]):not([class*="card-"])):hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: 2px;
+}
 a:hover { color: var(--gold-bright); }
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; }
-.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* Global focus-visible — Coyier hallmark. Replaces sparse focus rings. */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
 .app-header {
@@ -514,9 +587,10 @@ a:hover { color: var(--gold-bright); }
   border-bottom: 1px solid var(--border);
 }
 .app-header-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 18px;
+  max-width: var(--container-max); margin-inline: auto;
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -542,6 +616,11 @@ a:hover { color: var(--gold-bright); }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+}
+/* Below 1200px the nav links eat into the brand block — hide the tag so
+   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
 }
 .nav-links { display: flex; align-items: center; gap: 2px; }
 .nav-links a,
@@ -792,63 +871,65 @@ html.pre-is-admin .gate-overlay { display: none !important; }
 
 /* ============ LAYOUT ============ */
 main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+  padding-block: var(--space-lg) var(--space-2xl);
 }
 .section-head {
   display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: .03em; line-height: 1;
+  font-size: var(--fs-display);
+  letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
 }
 .section-title .accent { color: var(--gold); }
-.section-sub { color: var(--text-muted); font-size: 14px; }
+.section-sub { color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-body); }
 .eyebrow {
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+  font-size: var(--fs-eyebrow); letter-spacing: .25em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-block-end: var(--space-xs);
 }
 
 /* ============ STATS ============ */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-lg);
 }
 .stat-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px 20px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-md);
   overflow: hidden;
-  transition: all var(--t-base);
+  transition: border-color var(--t-base), background-color var(--t-base), box-shadow var(--t-base), transform var(--t-base);
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(400px 200px at 100% 0%, rgba(212,175,55,.08), transparent 60%);
+  background: radial-gradient(360px 180px at 100% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 60%);
   pointer-events: none;
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 44px; line-height: 1;
+  font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
-  text-shadow: 0 0 28px rgba(212,175,55,.25);
+  font-variant-numeric: tabular-nums;
 }
-.stat-card .num.danger  { color: var(--danger); text-shadow: 0 0 28px rgba(224,123,111,.25); }
-.stat-card .num.warning { color: var(--warning); text-shadow: 0 0 28px rgba(224,181,74,.25); }
-.stat-card .num.success { color: var(--success); text-shadow: 0 0 28px rgba(127,199,122,.25); }
+.stat-card .num.danger  { color: var(--danger); }
+.stat-card .num.warning { color: var(--warning); }
+.stat-card .num.success { color: var(--success); }
 .stat-card .lbl {
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  font-size: var(--fs-lbl); letter-spacing: .18em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 600;
-  margin-top: 8px;
+  margin-block-start: var(--space-xs);
 }
 .stat-card.linked { cursor: pointer; }
 .stat-card.linked:hover { border-color: var(--border-hi); box-shadow: var(--glow-gold); }
@@ -868,21 +949,21 @@ button.stat-card.active .num { filter: brightness(1.15); }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 22px;
-  margin-bottom: 16px;
+  padding: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
+  margin-block-end: var(--space-md);
+  padding-block-end: var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: .03em;
+  font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
-.panel-sub { color: var(--text-muted); font-size: 13px; }
+.panel-sub { color: var(--text-muted); font-size: var(--fs-sm); }
 
 /* ============ BUTTONS / CHIPS ============ */
 .btn {
@@ -940,22 +1021,24 @@ button.stat-card.active .num { filter: brightness(1.15); }
 .chip .count { color: inherit; opacity: .7; }
 
 /* ============ FORM CONTROLS ============ */
-input, select, textarea {
+:where(input, select, textarea) {
   width: 100%;
-  padding: 12px 14px;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-family: inherit;
-  transition: all var(--t-fast);
+  line-height: 1.45;
+  transition: border-color var(--t-fast), background-color var(--t-fast), box-shadow var(--t-fast);
 }
-input:focus, select:focus, textarea:focus {
+input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--gold);
   background: var(--surface-3);
-  box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
 .search-input {
@@ -1095,27 +1178,33 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover .zoom-btn { opacity: 1; }
 .zoom-btn:hover { color: var(--gold); }
 
-.listing-card .info { padding: 14px 16px; flex: 1; min-width: 0; }
+.listing-card .info {
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-sm);
+  flex: 1; min-width: 0;
+}
 .listing-card .info h3 {
-  font-size: 13px; font-weight: 600;
-  margin-bottom: 8px;
+  font-size: var(--fs-sm); font-weight: 600;
+  margin-block-end: var(--space-xs);
   line-height: 1.4;
   color: var(--text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-decoration: none;
 }
-.listing-card .info h3 a { color: inherit; }
+.listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 26px; line-height: 1;
+  font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
   display: inline-flex; align-items: center; gap: 6px;
   cursor: pointer;
   outline: none;
+  font-variant-numeric: tabular-nums;
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
@@ -1252,26 +1341,33 @@ input[type="checkbox"]:checked::after {
 }
 
 /* ============ TABLES ============ */
-.table-wrap { overflow-x: auto; margin: 0 -22px; }
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: calc(var(--space-md) * -1);
+  -webkit-overflow-scrolling: touch;
+}
 .table-wrap table { min-width: 600px; }
-table { width: 100%; border-collapse: collapse; }
+table, .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th {
   text-align: left;
-  padding: 14px 18px;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  font-size: var(--fs-lbl); letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-weight: 700;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 14px 18px;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
   border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   vertical-align: top;
   color: var(--text);
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(212,175,55,.03); }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 50%, transparent); }
+tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
 
 /* ============ BADGES ============ */
 .badge {
@@ -1372,10 +1468,10 @@ html[data-theme="crimson"] .product-price {
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
   transform: none;
-  border-color: rgba(212,175,55,.35);
-  box-shadow: 0 1px 0 rgba(212,175,55,.12) inset, 0 28px 56px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(212,175,55,.08);
+  border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+  box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
 }
-.listing-card:hover img { transform: scale(1.06); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
+.listing-card:hover img { transform: scale(1.04); transition: transform 900ms cubic-bezier(.2,.7,.2,1); }
 
 /* Drop the harsh dark-bottom gradient on thumbs — it kills foil/holo color */
 .thumb-wrap::before {
@@ -1385,20 +1481,44 @@ html[data-theme="crimson"] .product-price {
 }
 .listing-card:hover .thumb-wrap::before { opacity: 0; }
 
-/* Section header rhythm — looser sub leading, hairline rule with gold accent */
-.section-title { margin-bottom: 6px; }
-.section-sub   { line-height: 1.7; max-width: 60ch; color: var(--text-muted); }
+/* Section header rhythm — Zeldman: hierarchy through type & whitespace, not flourishes */
+.section-title { margin-block-end: var(--space-2xs); }
+.section-sub   { line-height: var(--lh-body); max-width: 60ch; color: var(--text-muted); }
 .section-head  {
-  padding-bottom: 18px; margin-bottom: 28px;
+  padding-block-end: var(--space-md);
+  margin-block-end: var(--space-lg);
   border-bottom: 1px solid var(--border);
   position: relative;
 }
 .section-head::after {
   content: ''; display: block;
-  width: 48px; height: 2px;
-  background: linear-gradient(90deg, var(--gold), transparent);
+  width: 40px; height: 1px;
+  background: var(--gold);
   position: absolute; left: 0; bottom: -1px;
+  opacity: .85;
 }
+/* Site banner — proportional hero, capped tight so it doesn't dominate the
+   fold. The source art is 3:1, so 200-220px tall keeps it above-the-fold-safe. */
+.site-banner { display: block; max-width: min(92vw, 960px); margin: var(--space-md, 18px) auto var(--space-lg, 24px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .25s ease, box-shadow .25s ease; }
+.site-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,.2); }
+.site-banner img { width: 100%; height: auto; display: block; max-height: 220px; object-fit: cover; object-position: center; }
+@media (max-width: 760px) {
+  .site-banner { margin: 10px auto 14px; border-radius: 8px; max-width: 96vw; }
+  .site-banner img { max-height: 120px; }
+}
+
+/* Inline variant — title on the left, description on the right, single row.
+   Saves a chunk of vertical real estate above the KPI strip. */
+.section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
+.section-head--inline .sh-title { grid-column: 1; }
+.section-head--inline .sh-sub   { grid-column: 2; max-width: 64ch; padding-bottom: 6px; }
+@media (max-width: 760px) {
+  .section-head--inline { grid-template-columns: 1fr; gap: 6px; }
+  .section-head--inline .sh-sub { grid-column: 1; }
+}
+/* Stat-card link styling so clickable KPIs don't look like blue underlines */
+a.stat-card.linked { text-decoration: none; color: inherit; display: block; transition: transform .15s, border-color .15s, box-shadow .15s; }
+a.stat-card.linked:hover { transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 6px 18px rgba(212,175,55,.18); }
 
 /* Chip active — real "press" feel */
 .chip { transition: color .15s, background .15s, box-shadow .25s; }
@@ -1699,12 +1819,52 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="steals.html" class="nav-link">Steals</a>
 <a href="sold.html" class="nav-link">Sold</a>
 
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Browse
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="browse.html">Browse</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Analytics
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="daily.html" data-admin="1">Daily Digest</a><a href="cassini.html" data-admin="1">Cassini Score</a><a href="pnl.html" data-admin="1">P&L</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Sell
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+        </div>
+
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Insights
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing Agent</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="email_campaign.html" data-admin="1">Email</a><a href="collect.html" data-admin="1">My Wants</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="watchers.html" data-admin="1">Watchers</a><a href="specifics.html" data-admin="1">Specifics</a><a href="promotions.html" class="active" data-admin="1">Promotions</a><a href="photo_audit.html" data-admin="1">Photo Audit</a><a href="title_review.html" data-admin="1">Titles</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="promotions.html" class="active" data-admin="1">Promotions</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Marketing
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="returns.html" data-admin="1">Returns</a><a href="tracking.html" data-admin="1">Tracking</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="buyers.html" data-admin="1">Repeat Buyers</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" class="active" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
+        </div>
+
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            For Us
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="sets.html">Set Completion</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
@@ -1761,28 +1921,60 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Insights</div>
+<div class="drawer-group" data-admin="1">Browse</div>
+<a href="browse.html">Browse</a>
+<a href="by_set.html">By Set</a>
+<a href="by_player.html">By Player</a>
+<div class="drawer-group" data-admin="1">Analytics</div>
 <a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
+<a href="daily.html" class="admin-only" data-admin="1">Daily Digest</a>
+<a href="cassini.html" class="admin-only" data-admin="1">Cassini Score</a>
+<a href="pnl.html" class="admin-only" data-admin="1">P&L</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
+<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Sell</div>
+<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
 <a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing Agent</a>
+<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
+<div class="drawer-group" data-admin="1">Insights</div>
+<a href="promotions.html" class="active admin-only" data-admin="1">Promotions</a>
+<div class="drawer-group" data-admin="1">Sell</div>
+<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
+<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
+<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
+<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
+<div class="drawer-group" data-admin="1">Marketing</div>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="returns.html" class="admin-only" data-admin="1">Returns</a>
+<a href="tracking.html" class="admin-only" data-admin="1">Tracking</a>
+<a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
+<a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
+<a href="buyers.html" class="admin-only" data-admin="1">Repeat Buyers</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
+<a href="promotions.html" class="active admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
-<a href="vault.html" class="admin-only" data-admin="1">Vault</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
-<a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
-<a href="collect.html" class="admin-only" data-admin="1">My Wants</a>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
-<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
-<a href="promotions.html" class="active admin-only" data-admin="1">Promotions</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
+<a href="vault.html" class="admin-only" data-admin="1">Vault</a>
+<a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
+<div class="drawer-group" data-admin="1">For Us</div>
+<a href="collect.html">My Wants</a>
+<a href="under_10.html">Under $10</a>
+<a href="top_sellers.html">Top Sellers</a>
+<a href="price_drops.html">Price Drops</a>
+<a href="sets.html">Set Completion</a>
+<a href="assistant.html">AI Assistant</a>
+<a href="pokemon.html">Pokemon</a>
+<a href="pikachu.html">Pikachu</a>
+<a href="charizard.html">Charizard</a>
+<a href="mew.html">Mew</a>
+<a href="mewtwo.html">Mewtwo</a>
+<a href="eevee.html">Eevee</a>
+<a href="pokemon_news.html">Pokemon News</a>
 <div class="drawer-group" data-admin="1">Tools</div>
 <a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <div class="drawer-group" data-admin="1">Cross-post</div>
@@ -1822,11 +2014,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
   </div>
 
+  
+
   <main>
     
 <section class='hero'>
   <h1>Promotions Agent</h1>
-  <p class='sub'>Last run: <code>2026-05-17 15:08 UTC</code> · Mode: <code>apply</code></p>
+  <p class='sub'>Last run: <code>2026-05-18 04:18 UTC</code> · Mode: <code>apply</code></p>
   <div class='stat-grid'>
     <div class='stat'><div class='stat-n'>0</div><div class='stat-l'>markdowns to apply</div></div>
     <div class='stat'><div class='stat-n'>0</div><div class='stat-l'>tier 5%</div></div>
@@ -1861,7 +2055,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
 <h3>🎯 Markdowns to apply <span class='count'>(0)</span></h3><p class='empty'>None.</p>
 
-        <h3>⊝ Skipped <span class='count'>(125)</span></h3>
+        <h3>⊝ Skipped <span class='count'>(126)</span></h3>
         <div class='tbl-wrap'>
           <table class='reprice-tbl'>
             <thead><tr>
@@ -1895,33 +2089,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306934532731</span>
             </a>
           </td>
-          <td class='num'>4d <small class='src'>start_time</small></td>
+          <td class='num'>5d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$0.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$0.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 4d below first tier (61d)</td>
+          <td class='reasons'>age 5d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-/306937452121' target='_blank' rel='noopener'>
-              <span class='title'>2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King</span>
+            <a href='https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121' target='_blank' rel='noopener'>
+              <span class='title'>2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</span>
               <span class='item-id'>306937452121</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$7.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$7.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -1933,14 +2127,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306937463442</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$7.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$7.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -1952,14 +2146,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306937466251</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$7.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$7.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -1971,14 +2165,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306937601406</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$9.99</td>
+          <td class='num'>$15.00</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$9.99</td>
+          <td class='num delta'>−$15.00</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -1990,14 +2184,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306937606464</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$5.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$5.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2028,7 +2222,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306785163679</span>
             </a>
           </td>
-          <td class='num'>83d <small class='src'>start_time</small></td>
+          <td class='num'>84d <small class='src'>start_time</small></td>
           <td class='band'>61-120d</td>
           <td class='num'>$1.00</td>
           <td class='num target'>—</td>
@@ -2047,7 +2241,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306785270903</span>
             </a>
           </td>
-          <td class='num'>83d <small class='src'>start_time</small></td>
+          <td class='num'>84d <small class='src'>start_time</small></td>
           <td class='band'>61-120d</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
@@ -2066,14 +2260,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306903937710</span>
             </a>
           </td>
-          <td class='num'>20d <small class='src'>start_time</small></td>
+          <td class='num'>21d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.99</td>
+          <td class='num'>$4.24</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.99</td>
+          <td class='num delta'>−$4.24</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 20d below first tier (61d)</td>
+          <td class='reasons'>age 21d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2085,14 +2279,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306903941543</span>
             </a>
           </td>
-          <td class='num'>20d <small class='src'>start_time</small></td>
+          <td class='num'>21d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 20d below first tier (61d)</td>
+          <td class='reasons'>age 21d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2104,14 +2298,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306903947932</span>
             </a>
           </td>
-          <td class='num'>20d <small class='src'>start_time</small></td>
+          <td class='num'>21d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 20d below first tier (61d)</td>
+          <td class='reasons'>age 21d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2125,9 +2319,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>20d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$6.99</td>
+          <td class='num'>$10.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$6.99</td>
+          <td class='num delta'>−$10.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 20d below first tier (61d)</td>
@@ -2144,9 +2338,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>20d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$6.99</td>
+          <td class='num'>$9.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$6.99</td>
+          <td class='num delta'>−$9.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 20d below first tier (61d)</td>
@@ -2163,9 +2357,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>20d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.99</td>
+          <td class='num'>$8.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.99</td>
+          <td class='num delta'>−$8.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 20d below first tier (61d)</td>
@@ -2182,9 +2376,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>20d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$8.99</td>
+          <td class='num'>$4.24</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$8.99</td>
+          <td class='num delta'>−$4.24</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 20d below first tier (61d)</td>
@@ -2194,8 +2388,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Autograph-Steve-Emtman-NFL-/306904203738' target='_blank' rel='noopener'>
-              <span class='title'>1994 Classic Pro Line Live - Autograph - Steve Emtman NFL</span>
+            <a href='https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738' target='_blank' rel='noopener'>
+              <span class='title'>1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts NFL Football</span>
               <span class='item-id'>306904203738</span>
             </a>
           </td>
@@ -2237,14 +2431,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306913168494</span>
             </a>
           </td>
-          <td class='num'>15d <small class='src'>start_time</small></td>
+          <td class='num'>16d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 15d below first tier (61d)</td>
+          <td class='reasons'>age 16d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2256,14 +2450,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306913186982</span>
             </a>
           </td>
-          <td class='num'>15d <small class='src'>start_time</small></td>
+          <td class='num'>16d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 15d below first tier (61d)</td>
+          <td class='reasons'>age 16d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2275,14 +2469,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306913307606</span>
             </a>
           </td>
-          <td class='num'>15d <small class='src'>start_time</small></td>
+          <td class='num'>16d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 15d below first tier (61d)</td>
+          <td class='reasons'>age 16d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2296,9 +2490,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$6.99</td>
+          <td class='num'>$10.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$6.99</td>
+          <td class='num delta'>−$10.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 15d below first tier (61d)</td>
@@ -2372,9 +2566,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$24.99</td>
+          <td class='num'>$8.50</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$24.99</td>
+          <td class='num delta'>−$8.50</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 15d below first tier (61d)</td>
@@ -2427,14 +2621,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914169081</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.00</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.00</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2446,33 +2640,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914173441</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921' target='_blank' rel='noopener'>
-              <span class='title'>2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2</span>
+            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-Football-/306914174921' target='_blank' rel='noopener'>
+              <span class='title'>2025 Panini Rookies & Stars - Artistry in Motion Lamar Jackson #2 Football</span>
               <span class='item-id'>306914174921</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2484,14 +2678,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914176585</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2503,14 +2697,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914244468</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2522,14 +2716,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914245253</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2541,14 +2735,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914248743</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2560,14 +2754,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914249326</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2579,14 +2773,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914280138</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.50</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.50</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2598,14 +2792,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914500757</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.00</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.00</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2617,14 +2811,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914547105</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$3.99</td>
+          <td class='num'>$5.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$3.99</td>
+          <td class='num delta'>−$5.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2636,14 +2830,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914911040</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2655,14 +2849,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914913674</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.00</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.00</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2674,14 +2868,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306914915295</span>
             </a>
           </td>
-          <td class='num'>14d <small class='src'>start_time</small></td>
+          <td class='num'>15d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 14d below first tier (61d)</td>
+          <td class='reasons'>age 15d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2693,14 +2887,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306758076966</span>
             </a>
           </td>
-          <td class='num'>97d <small class='src'>start_time</small></td>
+          <td class='num'>98d <small class='src'>start_time</small></td>
           <td class='band'>61-120d</td>
-          <td class='num'>$5.99</td>
+          <td class='num'>$8.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.99</td>
+          <td class='num delta'>−$8.99</td>
           <td class='num'>$26.25</td>
           <td class='flag'></td>
-          <td class='reasons'>computed target $25.99 >= current $5.99 after floor/round</td>
+          <td class='reasons'>computed target $25.99 >= current $8.99 after floor/round</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2712,14 +2906,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930460600</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2731,14 +2925,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930462076</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.99</td>
+          <td class='num'>$6.38</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.99</td>
+          <td class='num delta'>−$6.38</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2750,14 +2944,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930463268</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2769,14 +2963,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930464091</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2788,14 +2982,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930465261</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2807,14 +3001,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930471991</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2826,14 +3020,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930486853</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2845,14 +3039,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930492125</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2864,14 +3058,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930553146</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.49</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.49</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2883,14 +3077,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930555649</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2902,14 +3096,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930559170</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2921,14 +3115,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930742908</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2940,14 +3134,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930745036</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2959,14 +3153,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930746886</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2978,14 +3172,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930773940</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -2997,14 +3191,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930807722</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.40</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.40</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3016,14 +3210,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930901658</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3035,14 +3229,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930903609</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3054,14 +3248,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930904430</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3073,14 +3267,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930909038</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3092,14 +3286,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930911781</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3111,14 +3305,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930919438</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$2.99</td>
+          <td class='num'>$3.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$2.99</td>
+          <td class='num delta'>−$3.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3130,14 +3324,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930920326</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3149,14 +3343,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930930898</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3168,14 +3362,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930938563</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3187,14 +3381,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930939967</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3206,14 +3400,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306930942401</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3225,14 +3419,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931048688</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3244,14 +3438,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931055732</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3263,14 +3457,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931070594</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$4.56</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$4.56</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3282,14 +3476,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931077943</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$4.56</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$4.56</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3301,14 +3495,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931142490</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$4.56</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$4.56</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3320,14 +3514,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931209046</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3339,14 +3533,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931218531</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3358,33 +3552,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931236773</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$4.99</td>
+          <td class='num'>$5.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$4.99</td>
+          <td class='num delta'>−$5.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274' target='_blank' rel='noopener'>
-              <span class='title'>1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sample</span>
+            <a href='https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-NFL-/306931278274' target='_blank' rel='noopener'>
+              <span class='title'>1994 Sportflics 2000 Rookie & Traded - Deion Sanders #25 Sample NFL</span>
               <span class='item-id'>306931278274</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$3.99</td>
+          <td class='num'>$5.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$3.99</td>
+          <td class='num delta'>−$5.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3396,14 +3590,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931283327</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3415,14 +3609,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931285504</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.22</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.22</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3434,14 +3628,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931303163</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$3.99</td>
+          <td class='num'>$5.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$3.99</td>
+          <td class='num delta'>−$5.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3453,14 +3647,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931330505</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.23</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.23</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3472,14 +3666,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931339580</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.45</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.45</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3491,23 +3685,61 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306931446668</span>
             </a>
           </td>
-          <td class='num'>6d <small class='src'>start_time</small></td>
+          <td class='num'>7d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$11.99</td>
+          <td class='num'>$12.59</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$11.99</td>
+          <td class='num delta'>−$12.59</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 6d below first tier (61d)</td>
+          <td class='reasons'>age 7d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603' target='_blank' rel='noopener'>
-              <span class='title'>2025 Panini Rookies & Stars - Airborne Cam Ward #29 Silver (RC)</span>
+            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC-NFL-Football-/306934495603' target='_blank' rel='noopener'>
+              <span class='title'>2025 Panini Rookies & Stars - Airborne Cam Ward #29 Silver (RC) NFL Football</span>
               <span class='item-id'>306934495603</span>
+            </a>
+          </td>
+          <td class='num'>5d <small class='src'>start_time</small></td>
+          <td class='band'>—</td>
+          <td class='num'>$2.99</td>
+          <td class='num target'>—</td>
+          <td class='num delta'>−$2.99</td>
+          <td class='num'>—</td>
+          <td class='flag'></td>
+          <td class='reasons'>age 5d below first tier (61d)</td>
+          <td class='decision decision-skip'>SKIP</td>
+        </tr>
+        
+
+        <tr class='row-skip'>
+          <td class='item'>
+            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Crusade-Caleb-Williams-5-Silver-NFL-Football-/306934506774' target='_blank' rel='noopener'>
+              <span class='title'>2025 Panini Rookies & Stars - Crusade Caleb Williams #5 Silver NFL Football</span>
+              <span class='item-id'>306934506774</span>
+            </a>
+          </td>
+          <td class='num'>5d <small class='src'>start_time</small></td>
+          <td class='band'>—</td>
+          <td class='num'>$2.99</td>
+          <td class='num target'>—</td>
+          <td class='num delta'>−$2.99</td>
+          <td class='num'>—</td>
+          <td class='flag'></td>
+          <td class='reasons'>age 5d below first tier (61d)</td>
+          <td class='decision decision-skip'>SKIP</td>
+        </tr>
+        
+
+        <tr class='row-skip'>
+          <td class='item'>
+            <a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Pink-Shock-Prizm-NFL-Football-/306937598270' target='_blank' rel='noopener'>
+              <span class='title'>2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm NFL Football</span>
+              <span class='item-id'>306937598270</span>
             </a>
           </td>
           <td class='num'>4d <small class='src'>start_time</small></td>
@@ -3524,57 +3756,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Crusade-Caleb-Williams-5-Silver-/306934506774' target='_blank' rel='noopener'>
-              <span class='title'>2025 Panini Rookies & Stars - Crusade Caleb Williams #5 Silver</span>
-              <span class='item-id'>306934506774</span>
-            </a>
-          </td>
-          <td class='num'>4d <small class='src'>start_time</small></td>
-          <td class='band'>—</td>
-          <td class='num'>$3.33</td>
-          <td class='num target'>—</td>
-          <td class='num delta'>−$3.33</td>
-          <td class='num'>—</td>
-          <td class='flag'></td>
-          <td class='reasons'>age 4d below first tier (61d)</td>
-          <td class='decision decision-skip'>SKIP</td>
-        </tr>
-        
-
-        <tr class='row-skip'>
-          <td class='item'>
-            <a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Pink-Shock-Prizm-NFL-Football-/306937598270' target='_blank' rel='noopener'>
-              <span class='title'>2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm NFL Football</span>
-              <span class='item-id'>306937598270</span>
-            </a>
-          </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
-          <td class='band'>—</td>
-          <td class='num'>$3.33</td>
-          <td class='num target'>—</td>
-          <td class='num delta'>−$3.33</td>
-          <td class='num'>—</td>
-          <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
-          <td class='decision decision-skip'>SKIP</td>
-        </tr>
-        
-
-        <tr class='row-skip'>
-          <td class='item'>
             <a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Pink-Shock-Prizm-RC-Football-/306937599747' target='_blank' rel='noopener'>
               <span class='title'>2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock Prizm (RC) Football</span>
               <span class='item-id'>306937599747</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$4.44</td>
+          <td class='num'>$2.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$4.44</td>
+          <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3586,14 +3780,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306937604288</span>
             </a>
           </td>
-          <td class='num'>3d <small class='src'>start_time</small></td>
+          <td class='num'>4d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$4.44</td>
+          <td class='num'>$2.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$4.44</td>
+          <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 3d below first tier (61d)</td>
+          <td class='reasons'>age 4d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3607,9 +3801,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.55</td>
+          <td class='num'>$4.72</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.55</td>
+          <td class='num delta'>−$4.72</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 3d below first tier (61d)</td>
@@ -3626,9 +3820,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.55</td>
+          <td class='num'>$4.72</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.55</td>
+          <td class='num delta'>−$4.72</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 3d below first tier (61d)</td>
@@ -3645,9 +3839,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$4.44</td>
+          <td class='num'>$2.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$4.44</td>
+          <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 3d below first tier (61d)</td>
@@ -3664,9 +3858,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$16.99</td>
+          <td class='num'>$15.29</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$16.99</td>
+          <td class='num delta'>−$15.29</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 3d below first tier (61d)</td>
@@ -3683,9 +3877,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </td>
           <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$2.28</td>
+          <td class='num'>$2.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$2.28</td>
+          <td class='num delta'>−$2.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 3d below first tier (61d)</td>
@@ -3700,14 +3894,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939281535</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.22</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.22</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3719,14 +3913,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939289562</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$4.56</td>
+          <td class='num'>$3.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$4.56</td>
+          <td class='num delta'>−$3.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3738,14 +3932,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939301767</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3757,14 +3951,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939304842</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$1.23</td>
+          <td class='num'>$1.99</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$1.23</td>
+          <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3776,14 +3970,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939312739</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3795,14 +3989,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939316823</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$8.90</td>
+          <td class='num'>$7.57</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$8.90</td>
+          <td class='num delta'>−$7.57</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3814,14 +4008,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939326707</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3833,14 +4027,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939333836</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$31.23</td>
+          <td class='num'>$28.11</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$31.23</td>
+          <td class='num delta'>−$28.11</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3852,14 +4046,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939339030</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$4.56</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$4.56</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3871,14 +4065,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939342209</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.67</td>
+          <td class='num'>$4.82</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.67</td>
+          <td class='num delta'>−$4.82</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3890,14 +4084,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939345538</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.45</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.45</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3909,14 +4103,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939349539</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3928,14 +4122,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939352679</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3947,14 +4141,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939367849</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3966,14 +4160,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939369726</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.45</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.45</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -3985,14 +4179,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939373376</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
-          <td class='num'>$5.67</td>
+          <td class='num'>$4.82</td>
           <td class='num target'>—</td>
-          <td class='num delta'>−$5.67</td>
+          <td class='num delta'>−$4.82</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4004,14 +4198,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939472487</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4023,14 +4217,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939473666</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4042,14 +4236,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306939475594</span>
             </a>
           </td>
-          <td class='num'>2d <small class='src'>start_time</small></td>
+          <td class='num'>3d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$3.45</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$3.45</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 2d below first tier (61d)</td>
+          <td class='reasons'>age 3d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4061,14 +4255,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941721710</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.23</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.23</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4080,14 +4274,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941724232</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.34</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.34</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4099,14 +4293,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941726438</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4118,14 +4312,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941727410</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.23</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.23</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4137,33 +4331,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941728262</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$2.49</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$2.49</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
 
         <tr class='row-skip'>
           <td class='item'>
-            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-16-Matthew-Golden-Crusade-Silver-/306941729219' target='_blank' rel='noopener'>
-              <span class='title'>2025 Panini Rookies & Stars #16 Matthew Golden Crusade Silver</span>
+            <a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-16-Matthew-Golden-Crusade-Silver-NFL-Football-/306941729219' target='_blank' rel='noopener'>
+              <span class='title'>2025 Panini Rookies & Stars #16 Matthew Golden Crusade Silver NFL Football</span>
               <span class='item-id'>306941729219</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.75</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.75</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4175,14 +4369,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941730763</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.99</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.99</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4194,14 +4388,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306941733672</span>
             </a>
           </td>
-          <td class='num'>1d <small class='src'>start_time</small></td>
+          <td class='num'>2d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.49</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.49</td>
           <td class='num'>—</td>
           <td class='flag'></td>
-          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='reasons'>age 2d below first tier (61d)</td>
           <td class='decision decision-skip'>SKIP</td>
         </tr>
         
@@ -4232,11 +4426,30 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <span class='item-id'>306943185140</span>
             </a>
           </td>
-          <td class='num'>0d <small class='src'>start_time</small></td>
+          <td class='num'>1d <small class='src'>start_time</small></td>
           <td class='band'>—</td>
           <td class='num'>$1.23</td>
           <td class='num target'>—</td>
           <td class='num delta'>−$1.23</td>
+          <td class='num'>—</td>
+          <td class='flag'></td>
+          <td class='reasons'>age 1d below first tier (61d)</td>
+          <td class='decision decision-skip'>SKIP</td>
+        </tr>
+        
+
+        <tr class='row-skip'>
+          <td class='item'>
+            <a href='https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731' target='_blank' rel='noopener'>
+              <span class='title'>2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</span>
+              <span class='item-id'>306945569731</span>
+            </a>
+          </td>
+          <td class='num'>0d <small class='src'>start_time</small></td>
+          <td class='band'>—</td>
+          <td class='num'>$5.67</td>
+          <td class='num target'>—</td>
+          <td class='num delta'>−$5.67</td>
           <td class='num'>—</td>
           <td class='flag'></td>
           <td class='reasons'>age 0d below first tier (61d)</td>
@@ -4256,7 +4469,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 15:08 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 18, 2026 · 04:18 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
