@@ -41,7 +41,7 @@ import json
 import sys
 import time
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -84,6 +84,7 @@ DEFAULT_CONFIG: dict = {
     "dead_zone_cents":          5,
     "marketplace_id":           "EBAY_US",
     "promotion_status_when_creating": "SCHEDULED",
+    "promotion_duration_days":  30,
 }
 
 # Marketing API needs its own scope on the user OAuth token.
@@ -443,12 +444,15 @@ def _markdown_payload(decision: dict, cfg: dict, marketplace_id: str) -> dict:
     """
     discount_amount = round(decision["current_price"] - decision["target_price"], 2)
     now = datetime.now(timezone.utc)
+    duration_days = int(cfg.get("promotion_duration_days", 30))
     start_iso = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    end_iso = (now + timedelta(days=duration_days)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     return {
         "name":                  f"Markdown {decision['item_id']} ({decision['tier']})",
         "marketplaceId":         marketplace_id,
         "promotionStatus":       cfg["promotion_status_when_creating"],
         "startDate":             start_iso,
+        "endDate":               end_iso,
         "applyMarkdownDiscount": True,
         "promotionType":         "MARKDOWN_SALE",
         "selectedInventoryDiscounts": [{
@@ -504,7 +508,9 @@ def _volume_discount_payload(cfg: dict, marketplace_id: str) -> dict:
     """
     vd = cfg["volume_discount"]
     now = datetime.now(timezone.utc)
+    duration_days = int(cfg.get("promotion_duration_days", 30))
     start_iso = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    end_iso = (now + timedelta(days=duration_days)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     discount_rules = []
     for tier in vd["tiers"]:
         discount_rules.append({
@@ -522,6 +528,7 @@ def _volume_discount_payload(cfg: dict, marketplace_id: str) -> dict:
         "promotionStatus":       cfg["promotion_status_when_creating"],
         "promotionType":         "VOLUME_DISCOUNT",
         "startDate":             start_iso,
+        "endDate":               end_iso,
         "applyDiscountToSingleItemOnly": False,
         "selectionRules": [{
             "selectionType":      "ALL_INVENTORY_BY_SELLER",
