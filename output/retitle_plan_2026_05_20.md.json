@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-05-20T00:00:00+00:00",
+  "snapshot_saved_at": "2026-05-20T00:25:59.843866+00:00",
+  "seller": "harpua2001",
+  "active_listings_scanned": 127,
+  "methodology": "Re-run of /tmp/retitle_audit_2026_05_19.md against output/listings_snapshot.json. Filters: drop lots (is_lot_listing), drop listings with SportsCardsPro confidence >= 0.40, drop item_ids already retitled last night (5), drop ambiguous edge cases noted in prior audit, flag remaining candidates whose parse_title() player starts with a known descriptor token.",
+  "fixed_last_night": [
+    "306937463442",
+    "306937466251",
+    "306904203738",
+    "306931283327",
+    "306931339580"
+  ],
+  "failed_last_night": [
+    "306937452121"
+  ],
+  "candidates": [
+    {
+      "item_id": "306937452121",
+      "listing_type": "Auction",
+      "status": "skipped_auction",
+      "note": "may have bids, ReviseItem could fail; this is the same auction that rejected ReviseItem last night",
+      "old_title": "2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL",
+      "new_title": "2026 Joe Burrow & Justin Jefferson Wild Card- Card 1/1 King NFL",
+      "old_len": 63,
+      "new_len": 63,
+      "current_parsed_player": "Wild Card- Joe",
+      "new_parsed_player": "Joe Burrow Justin",
+      "reason": "parser captures 'Wild Card-' before player names; reorder puts Joe Burrow & Justin Jefferson first. Retried from 2026-05-19 plan (last night's apply failed: auction with active bids)."
+    }
+  ],
+  "new_candidates_excluding_last_night": 0,
+  "notes": [
+    "No NEW listings since last night surface as retitle candidates -- last night's audit cleared the queue.",
+    "Item 306937452121 (Burrow/Jefferson auction) carries over from last night: the ReviseItem call failed because the listing has bids. Still flagged here as 'skipped_auction' per the standing rule that auctions with bids reject ReviseItem. Recommend: do not auto-apply; let the auction run.",
+    "Item 306931303163 ('4 1991 Playball U.S.A. - Darryl Strawberry NFL') re-surfaced again as ambiguous (possible 4-card lot). Same as last night's skip -- still needs human review, not auto-retitle.",
+    "All other 12 listings whose parse_title() captures a descriptor first already have an SCP comp at confidence >= 0.40, so they are working in practice (the SCP fuzzy matcher recovered) -- leave alone."
+  ]
+}

@@ -2960,19 +2960,22 @@ _NAV_ITEMS = [
     ("google_feed.xml",       "Google Feed",   False, "More"),
 
     # ── FOR US — public, buyer-side (son can bookmark) ──
-    ("collect.html",          "My Wants",      True,  "For Us"),
-    ("under_10.html",         "Under $10",     True,  "For Us"),
-    ("top_sellers.html",      "Top Sellers",   True,  "For Us"),
-    ("price_drops.html",      "Price Drops",   True,  "For Us"),
-    ("sets.html",             "Set Completion",True,  "For Us"),
-    ("assistant.html",        "AI Assistant",  True,  "For Us"),
-    ("pokemon.html",          "Pokemon",       True,  "For Us"),
-    ("pikachu.html",          "Pikachu",       True,  "For Us"),
-    ("charizard.html",        "Charizard",     True,  "For Us"),
-    ("mew.html",              "Mew",           True,  "For Us"),
-    ("mewtwo.html",           "Mewtwo",        True,  "For Us"),
-    ("eevee.html",            "Eevee",         True,  "For Us"),
-    ("pokemon_news.html",     "Pokemon News",  True,  "For Us"),
+    ("collect.html",          "My Wants",      False, "For Us"),
+    ("under_10.html",         "Under $10",     False, "For Us"),
+    ("top_sellers.html",      "Top Sellers",   False, "For Us"),
+    ("price_drops.html",      "Price Drops",   False, "For Us"),
+    ("sets.html",             "Set Completion",False, "For Us"),
+    ("assistant.html",        "AI Assistant",  False, "For Us"),
+    ("pokemon.html",          "Pokemon",       False, "For Us"),
+    ("pikachu.html",          "Pikachu",       False, "For Us"),
+    ("charizard.html",        "Charizard",     False, "For Us"),
+    ("mew.html",              "Mew",           False, "For Us"),
+    ("mewtwo.html",           "Mewtwo",        False, "For Us"),
+    ("eevee.html",            "Eevee",         False, "For Us"),
+    ("pokemon_news.html",     "Pokemon News",  False, "For Us"),
+
+    # ── PUBLIC buyer-facing Pokemon search (no password) ──
+    ("japanese_holo.html",    "JP Holo / Art Rare", True, "Pokemon"),
 
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
