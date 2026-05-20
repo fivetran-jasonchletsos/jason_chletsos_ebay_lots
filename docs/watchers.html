@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1986,12 +1992,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 <section class="hero">
   <h1>Watcher Offers</h1>
-  <p class="sub">Last run: <code>2026-05-19 01:56 UTC</code> · Anyone who hits Watch is 80% sold — we close the other 20%.</p>
+  <p class="sub">Last run: <code>2026-05-20 14:03 UTC</code> · Anyone who hits Watch is 80% sold — we close the other 20%.</p>
   <div class="stat-grid">
-    <div class="stat"><div class="stat-n">3</div><div class="stat-l">offers queued</div></div>
-    <div class="stat"><div class="stat-n">3</div><div class="stat-l">total watchers</div></div>
-    <div class="stat"><div class="stat-n">$0.21</div><div class="stat-l">expected uplift</div></div>
-    <div class="stat"><div class="stat-n">13</div><div class="stat-l">blocked</div></div>
+    <div class="stat"><div class="stat-n">15</div><div class="stat-l">offers queued</div></div>
+    <div class="stat"><div class="stat-n">39</div><div class="stat-l">total watchers</div></div>
+    <div class="stat"><div class="stat-n">$6.58</div><div class="stat-l">expected uplift</div></div>
+    <div class="stat"><div class="stat-n">0</div><div class="stat-l">blocked</div></div>
   </div>
 </section>
 
@@ -2009,14 +2015,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
 <section class="spark-card">
   <div class="spark-meta">
-    <div class="spark-n">15</div>
-    <div class="spark-l">offers sent all-time · <strong>15</strong> in last 30d</div>
+    <div class="spark-n">33</div>
+    <div class="spark-l">offers sent all-time · <strong>33</strong> in last 30d</div>
   </div>
-  <div class="spark-svg"><svg viewBox="0 0 240 36" width="240" height="36" aria-hidden="true" style="display:block"><polyline fill="none" stroke="var(--gold)" stroke-width="1.8" points="2.0,34.0 10.1,34.0 18.3,34.0 26.4,34.0 34.6,34.0 42.7,34.0 50.8,34.0 59.0,34.0 67.1,34.0 75.2,34.0 83.4,34.0 91.5,34.0 99.7,34.0 107.8,34.0 115.9,34.0 124.1,34.0 132.2,34.0 140.3,34.0 148.5,34.0 156.6,34.0 164.8,34.0 172.9,34.0 181.0,34.0 189.2,34.0 197.3,34.0 205.4,34.0 213.6,34.0 221.7,2.0 229.9,2.0 238.0,2.0"/></svg></div>
+  <div class="spark-svg"><svg viewBox="0 0 240 36" width="240" height="36" aria-hidden="true" style="display:block"><polyline fill="none" stroke="var(--gold)" stroke-width="1.8" points="2.0,34.0 10.1,34.0 18.3,34.0 26.4,34.0 34.6,34.0 42.7,34.0 50.8,34.0 59.0,34.0 67.1,34.0 75.2,34.0 83.4,34.0 91.5,34.0 99.7,34.0 107.8,34.0 115.9,34.0 124.1,34.0 132.2,34.0 140.3,34.0 148.5,34.0 156.6,34.0 164.8,34.0 172.9,34.0 181.0,34.0 189.2,34.0 197.3,34.0 205.4,34.0 213.6,19.5 221.7,19.5 229.9,19.5 238.0,2.0"/></svg></div>
 </section>
 
 
-        <h3>🎯 Will send <span class='count'>(3)</span></h3>
+        <h3>🎯 Will send <span class='count'>(15)</span></h3>
         <div class="tbl-wrap">
           <table class="watchers-tbl">
             <thead><tr>
@@ -2025,38 +2031,254 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </tr></thead>
             <tbody>
         <tr class="row-apply">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/qgAAAeSwDgxqCntg/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</span>
-              <span class="item-id">306945569731</span>
+            <a href="https://www.ebay.com/itm/2026-Jeremiyah-Love-5-Card-Draw-Stacked-Deck-Wild-Card-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener">
+              <span class="title">2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie</span>
+              <span class="item-id">306937466251</span>
             </a>
           </td>
-          <td class="num">1</td>
-          <td class="num">$5.67</td>
-          <td class="num target">$4.99</td>
+          <td class="num">12</td>
+          <td class="num">$7.99</td>
+          <td class="num target">$7.03</td>
           <td class="num">12.0%</td>
-          <td class="num">$4.82</td>
-          <td class="num uplift">$0.10</td>
-          <td class="reasons">1 watcher(s) · 12% off $5.67 → $4.99 (floor $4.82)</td>
+          <td class="num">$6.79</td>
+          <td class="num uplift">$1.73</td>
+          <td class="reasons">12 watcher(s) · 12% off $7.99 → $7.03 (floor $6.79)</td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
 
         <tr class="row-apply">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/IUQAAeSwCctqC7HL/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Ashton-Jeanty-Fortune-15-ROOKIE-F15-24-Raiders-/306947427453" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome - Ashton Jeanty Fortune 15 ROOKIE #F15-24 - Raiders</span>
-              <span class="item-id">306947427453</span>
+            <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
+              <span class="title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</span>
+              <span class="item-id">306939333836</span>
+            </a>
+          </td>
+          <td class="num">2</td>
+          <td class="num">$43.99</td>
+          <td class="num target">$38.71</td>
+          <td class="num">12.0%</td>
+          <td class="num">$37.39</td>
+          <td class="num uplift">$1.58</td>
+          <td class="reasons">2 watcher(s) · 12% off $43.99 → $38.71 (floor $37.39)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</span>
+              <span class="item-id">306937601406</span>
+            </a>
+          </td>
+          <td class="num">4</td>
+          <td class="num">$15.00</td>
+          <td class="num target">$13.20</td>
+          <td class="num">12.0%</td>
+          <td class="num">$12.75</td>
+          <td class="num uplift">$1.08</td>
+          <td class="reasons">4 watcher(s) · 12% off $15.00 → $13.20 (floor $12.75)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121" target="_blank" rel="noopener">
+              <span class="title">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</span>
+              <span class="item-id">306937452121</span>
+            </a>
+          </td>
+          <td class="num">5</td>
+          <td class="num">$8.50</td>
+          <td class="num target">$7.48</td>
+          <td class="num">12.0%</td>
+          <td class="num">$7.22</td>
+          <td class="num uplift">$0.76</td>
+          <td class="reasons">5 watcher(s) · 12% off $8.50 → $7.48 (floor $7.22)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener">
+              <span class="title">11 Raghib And Quadry Ismail Cards Raiders Vikings</span>
+              <span class="item-id">306913790653</span>
             </a>
           </td>
           <td class="num">1</td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.51</td>
+          <td class="num">$21.99</td>
+          <td class="num target">$19.35</td>
           <td class="num">12.0%</td>
-          <td class="num">$3.39</td>
-          <td class="num uplift">$0.07</td>
-          <td class="reasons">1 watcher(s) · 12% off $3.99 → $3.51 (floor $3.39)</td>
+          <td class="num">$18.69</td>
+          <td class="num uplift">$0.40</td>
+          <td class="reasons">1 watcher(s) · 12% off $21.99 → $19.35 (floor $18.69)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/lNEAAeSwrclqBlIQ/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-NFL-/306939342209" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL</span>
+              <span class="item-id">306939342209</span>
+            </a>
+          </td>
+          <td class="num">3</td>
+          <td class="num">$4.19</td>
+          <td class="num target">$3.69</td>
+          <td class="num">12.0%</td>
+          <td class="num">$3.56</td>
+          <td class="num uplift">$0.23</td>
+          <td class="reasons">3 watcher(s) · 12% off $4.19 → $3.69 (floor $3.56)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener">
+              <span class="title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</span>
+              <span class="item-id">306904078786</span>
+            </a>
+          </td>
+          <td class="num">1</td>
+          <td class="num">$10.99</td>
+          <td class="num target">$9.67</td>
+          <td class="num">12.0%</td>
+          <td class="num">$9.34</td>
+          <td class="num uplift">$0.20</td>
+          <td class="reasons">1 watcher(s) · 12% off $10.99 → $9.67 (floor $9.34)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</span>
+              <span class="item-id">306914911040</span>
+            </a>
+          </td>
+          <td class="num">3</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.16</td>
+          <td class="reasons">3 watcher(s) · 12% off $2.99 → $2.63 (floor $2.54)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC-Football-/306914169081" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football</span>
+              <span class="item-id">306914169081</span>
+            </a>
+          </td>
+          <td class="num">2</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.11</td>
+          <td class="reasons">2 watcher(s) · 12% off $2.99 → $2.63 (floor $2.54)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/tAUAAeSwxGJqC7FH/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271" target="_blank" rel="noopener">
+              <span class="title">Topps Chrome All-Chrome Insert Justin Jefferson ACT-6 Vikings 2025 NFL</span>
+              <span class="item-id">306947434271</span>
+            </a>
+          </td>
+          <td class="num">1</td>
+          <td class="num">$5.99</td>
+          <td class="num target">$5.27</td>
+          <td class="num">12.0%</td>
+          <td class="num">$5.09</td>
+          <td class="num uplift">$0.11</td>
+          <td class="reasons">1 watcher(s) · 12% off $5.99 → $5.27 (floor $5.09)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/P10AAeSw~7lqBlSQ/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroit Lions</span>
+              <span class="item-id">306939352679</span>
+            </a>
+          </td>
+          <td class="num">1</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.05</td>
+          <td class="reasons">1 watcher(s) · 12% off $2.99 → $2.63 (floor $2.54)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/jFwAAeSweUpqB-hz/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-Football-/306941728262" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Prizm Draft Picks #155 Trevor Etienne Prizms Red #/399 Football</span>
+              <span class="item-id">306941728262</span>
+            </a>
+          </td>
+          <td class="num">1</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.05</td>
+          <td class="reasons">1 watcher(s) · 12% off $2.99 → $2.63 (floor $2.54)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-Football-/306914248743" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm Football</span>
+              <span class="item-id">306914248743</span>
+            </a>
+          </td>
+          <td class="num">1</td>
+          <td class="num">$1.99</td>
+          <td class="num target">$1.75</td>
+          <td class="num">12.0%</td>
+          <td class="num">$1.69</td>
+          <td class="num uplift">$0.04</td>
+          <td class="reasons">1 watcher(s) · 12% off $1.99 → $1.75 (floor $1.69)</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+
+        <tr class="row-apply">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/6dYAAeSw4vpqAOEd/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722" target="_blank" rel="noopener">
+              <span class="title">1991-92 Fleer - Pro Vision Magic Johnson #6</span>
+              <span class="item-id">306930807722</span>
+            </a>
+          </td>
+          <td class="num">1</td>
+          <td class="num">$1.99</td>
+          <td class="num target">$1.75</td>
+          <td class="num">12.0%</td>
+          <td class="num">$1.69</td>
+          <td class="num uplift">$0.04</td>
+          <td class="reasons">1 watcher(s) · 12% off $1.99 → $1.75 (floor $1.69)</td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
 
@@ -2080,7 +2302,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </table>
         </div>
 
-        <h3>⊝ Skipped (no watchers) <span class='count'>(114)</span></h3>
+        <h3>⊝ Skipped (no watchers) <span class='count'>(118)</span></h3>
         <div class="tbl-wrap">
           <table class="watchers-tbl">
             <thead><tr>
@@ -2089,46 +2311,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </tr></thead>
             <tbody>
         <tr class="row-skip">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/QiAAAeSwZZBqAvQg/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2024-Panini-Prizm-Draft-Picks-Gold-Ice-Prizm-Lot-16-Cards-Football-Card-Lot-/306933928667" target="_blank" rel="noopener">
-              <span class="title">2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards) Football Card Lot</span>
-              <span class="item-id">306933928667</span>
-            </a>
-          </td>
-          <td class="num">0</td>
-          <td class="num">$1.99</td>
-          <td class="num target">$1.75</td>
-          <td class="num">12.0%</td>
-          <td class="num">$1.69</td>
-          <td class="num uplift">$0.00</td>
-          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-
-        <tr class="row-skip">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/3-Neon-Green-Pulsar-and-5-Purple-Wave-Prizm-2025-Cards-/306934532731" target="_blank" rel="noopener">
-              <span class="title">3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</span>
-              <span class="item-id">306934532731</span>
-            </a>
-          </td>
-          <td class="num">0</td>
-          <td class="num">$0.99</td>
-          <td class="num target">$0.87</td>
-          <td class="num">12.0%</td>
-          <td class="num">$1.00</td>
-          <td class="num uplift">$0.00</td>
-          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-
-        <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Garrett-Nussmeier-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener">
-              <span class="title">2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen</span>
+            <a href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener">
+              <span class="title">2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen</span>
               <span class="item-id">306937463442</span>
             </a>
           </td>
@@ -2215,6 +2401,24 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </tr>
 
         <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/3-Neon-Green-Pulsar-and-5-Purple-Wave-Prizm-2025-Cards-/306948827365" target="_blank" rel="noopener">
+              <span class="title">3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</span>
+              <span class="item-id">306948827365</span>
+            </a>
+          </td>
+          <td class="num">0</td>
+          <td class="num">$0.99</td>
+          <td class="num target">$0.87</td>
+          <td class="num">12.0%</td>
+          <td class="num">$1.00</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
+        </tr>
+
+        <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
             <a href="https://www.ebay.com/itm/Jerome-Bettis-Los-Angeles-Rams-Notre-Dame-Football-Card-Lot-10-HOF-The-Bus-/306903937710" target="_blank" rel="noopener">
@@ -2241,10 +2445,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.51</td>
+          <td class="num">$5.99</td>
+          <td class="num target">$5.27</td>
           <td class="num">12.0%</td>
-          <td class="num">$3.39</td>
+          <td class="num">$5.09</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2277,10 +2481,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$20.99</td>
-          <td class="num target">$18.47</td>
+          <td class="num">$23.99</td>
+          <td class="num target">$21.11</td>
           <td class="num">12.0%</td>
-          <td class="num">$17.84</td>
+          <td class="num">$20.39</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2295,10 +2499,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$16.99</td>
-          <td class="num target">$14.95</td>
+          <td class="num">$25.99</td>
+          <td class="num target">$22.87</td>
           <td class="num">12.0%</td>
-          <td class="num">$14.44</td>
+          <td class="num">$22.09</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2325,16 +2529,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener">
-              <span class="title">1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts NFL Football</span>
+            <a href="https://www.ebay.com/itm/1994-Steve-Emtman-Classic-Pro-Line-Live-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener">
+              <span class="title">1994 Steve Emtman Classic Pro Line Live AUTO Autograph Colts NFL Football</span>
               <span class="item-id">306904203738</span>
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$5.99</td>
-          <td class="num target">$5.27</td>
+          <td class="num">$8.99</td>
+          <td class="num target">$7.91</td>
           <td class="num">12.0%</td>
-          <td class="num">$5.09</td>
+          <td class="num">$7.64</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2457,10 +2661,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$5.99</td>
-          <td class="num target">$5.27</td>
+          <td class="num">$7.99</td>
+          <td class="num target">$7.03</td>
           <td class="num">12.0%</td>
-          <td class="num">$5.09</td>
+          <td class="num">$6.79</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2475,10 +2679,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$16.99</td>
-          <td class="num target">$14.95</td>
+          <td class="num">$11.99</td>
+          <td class="num target">$10.55</td>
           <td class="num">12.0%</td>
-          <td class="num">$14.44</td>
+          <td class="num">$10.19</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2611,24 +2815,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </tr>
 
         <tr class="row-skip">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/xWoAAeSwzANp9is3/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/5-Sam-Adams-Rookie-Cards-Seattle-Seahawks-/306914280138" target="_blank" rel="noopener">
-              <span class="title">5 Sam Adams Rookie Cards Seattle Seahawks</span>
-              <span class="item-id">306914280138</span>
-            </a>
-          </td>
-          <td class="num">0</td>
-          <td class="num">$2.50</td>
-          <td class="num target">$2.20</td>
-          <td class="num">12.0%</td>
-          <td class="num">$2.12</td>
-          <td class="num uplift">$0.00</td>
-          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-
-        <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/SocAAeSwqZVp9k4F/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
             <a href="https://www.ebay.com/itm/Eric-Metcalf-Cleveland-Browns-Football-Card-Lot-10-NFL-Wide-Receiver-/306914500757" target="_blank" rel="noopener">
@@ -2655,10 +2841,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$10.99</td>
-          <td class="num target">$9.67</td>
+          <td class="num">$20.99</td>
+          <td class="num target">$18.47</td>
           <td class="num">12.0%</td>
-          <td class="num">$9.34</td>
+          <td class="num">$17.84</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2709,10 +2895,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$16.99</td>
-          <td class="num target">$14.95</td>
+          <td class="num">$31.99</td>
+          <td class="num target">$28.15</td>
           <td class="num">12.0%</td>
-          <td class="num">$14.44</td>
+          <td class="num">$27.19</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -2983,24 +3169,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
           <td class="num">$2.54</td>
-          <td class="num uplift">$0.00</td>
-          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-
-        <tr class="row-skip">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/6dYAAeSw4vpqAOEd/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722" target="_blank" rel="noopener">
-              <span class="title">1991-92 Fleer - Pro Vision Magic Johnson #6</span>
-              <span class="item-id">306930807722</span>
-            </a>
-          </td>
-          <td class="num">0</td>
-          <td class="num">$1.40</td>
-          <td class="num target">$1.23</td>
-          <td class="num">12.0%</td>
-          <td class="num">$1.19</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3369,8 +3537,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/eWwAAeSwcSpqATO6/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-NFL-/306931283327" target="_blank" rel="noopener">
-              <span class="title">1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158 NFL</span>
+            <a href="https://www.ebay.com/itm/1990-Ken-Griffey-Jr-Sports-Illustrated-for-Kids-Series-1-158-NFL-/306931283327" target="_blank" rel="noopener">
+              <span class="title">1990 Ken Griffey Jr Sports Illustrated for Kids Series 1 #158 NFL</span>
               <span class="item-id">306931283327</span>
             </a>
           </td>
@@ -3393,10 +3561,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$10.99</td>
-          <td class="num target">$9.67</td>
+          <td class="num">$20.99</td>
+          <td class="num target">$18.47</td>
           <td class="num">12.0%</td>
-          <td class="num">$9.34</td>
+          <td class="num">$17.84</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3423,8 +3591,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/oToAAeSwZoxqATs-/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-NFL-/306931339580" target="_blank" rel="noopener">
-              <span class="title">1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112 NFL</span>
+            <a href="https://www.ebay.com/itm/1990-Kevin-Mitchell-Sports-Illustrated-for-Kids-Series-1-112-NFL-/306931339580" target="_blank" rel="noopener">
+              <span class="title">1990 Kevin Mitchell Sports Illustrated for Kids Series 1 #112 NFL</span>
               <span class="item-id">306931339580</span>
             </a>
           </td>
@@ -3681,10 +3849,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$2.34</td>
-          <td class="num target">$2.06</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$1.99</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3699,10 +3867,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$4.99</td>
-          <td class="num target">$4.39</td>
+          <td class="num">$3.99</td>
+          <td class="num target">$3.51</td>
           <td class="num">12.0%</td>
-          <td class="num">$4.24</td>
+          <td class="num">$3.39</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3717,10 +3885,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$3.45</td>
-          <td class="num target">$3.04</td>
+          <td class="num">$3.99</td>
+          <td class="num target">$3.51</td>
           <td class="num">12.0%</td>
-          <td class="num">$2.93</td>
+          <td class="num">$3.39</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3735,10 +3903,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.51</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$3.39</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3753,10 +3921,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$2.34</td>
-          <td class="num target">$2.06</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$1.99</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3771,10 +3939,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$4.99</td>
-          <td class="num target">$4.39</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$4.24</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3789,10 +3957,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$5.99</td>
-          <td class="num target">$5.27</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$5.09</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3843,10 +4011,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.51</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$3.39</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3933,10 +4101,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$1.75</td>
-          <td class="num target">$1.54</td>
+          <td class="num">$1.99</td>
+          <td class="num target">$1.75</td>
           <td class="num">12.0%</td>
-          <td class="num">$1.49</td>
+          <td class="num">$1.69</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3969,10 +4137,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$1.49</td>
-          <td class="num target">$1.31</td>
+          <td class="num">$1.99</td>
+          <td class="num target">$1.75</td>
           <td class="num">12.0%</td>
-          <td class="num">$1.27</td>
+          <td class="num">$1.69</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -3987,10 +4155,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$2.34</td>
-          <td class="num target">$2.06</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$1.99</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -4005,10 +4173,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$1.23</td>
-          <td class="num target">$1.08</td>
+          <td class="num">$1.99</td>
+          <td class="num target">$1.75</td>
           <td class="num">12.0%</td>
-          <td class="num">$1.05</td>
+          <td class="num">$1.69</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -4023,10 +4191,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.51</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$3.39</td>
+          <td class="num">$2.54</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -4035,16 +4203,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/PxUAAeSwhLRqC68-/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-160-Khalil-Mack-Lime-Green-X-Fractor-Chargers-Color-Match-/306947421543" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome #160 Khalil Mack Lime Green X-Fractor Chargers Color Match</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Khalil-Mack-Lime-Green-X-Fractor-160-Chargers-Color-Match-/306947421543" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome Khalil Mack Lime Green X-Fractor #160 Chargers Color Match</span>
               <span class="item-id">306947421543</span>
             </a>
           </td>
           <td class="num">0</td>
-          <td class="num">$6.99</td>
-          <td class="num target">$6.15</td>
+          <td class="num">$4.99</td>
+          <td class="num target">$4.39</td>
           <td class="num">12.0%</td>
-          <td class="num">$5.94</td>
+          <td class="num">$4.24</td>
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
@@ -4087,24 +4255,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </tr>
 
         <tr class="row-skip">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/tAUAAeSwxGJqC7FH/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271" target="_blank" rel="noopener">
-              <span class="title">Topps Chrome All-Chrome Insert Justin Jefferson ACT-6 Vikings 2025 NFL</span>
-              <span class="item-id">306947434271</span>
-            </a>
-          </td>
-          <td class="num">0</td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.51</td>
-          <td class="num">12.0%</td>
-          <td class="num">$3.39</td>
-          <td class="num uplift">$0.00</td>
-          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-
-        <tr class="row-skip">
           <td class="thumb"><img src="https://i.ebayimg.com/images/g/lL0AAeSws11qC7Kh/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
             <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener">
@@ -4138,257 +4288,176 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num uplift">$0.00</td>
           <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
           <td class="decision decision-skip">SKIP</td>
-        </tr></tbody>
-          </table>
-        </div>
-
-        <h3>⛔ Blocked <span class='count'>(13)</span></h3>
-        <div class="tbl-wrap">
-          <table class="watchers-tbl">
-            <thead><tr>
-              <th></th><th>Listing</th><th>Watch</th><th>Now</th><th>Offer</th>
-              <th>%</th><th>Floor</th><th>Exp Uplift</th><th>Reasoning</th><th>Decision</th>
-            </tr></thead>
-            <tbody>
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</span>
-              <span class="item-id">306937601406</span>
-            </a>
-          </td>
-          <td class="num">4</td>
-          <td class="num">$15.00</td>
-          <td class="num target">$13.20</td>
-          <td class="num">12.0%</td>
-          <td class="num">$12.75</td>
-          <td class="num uplift">$1.08</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
         </tr>
 
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/jcQAAeSwpHRqDQLF/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
-              <span class="title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</span>
-              <span class="item-id">306939333836</span>
+            <a href="https://www.ebay.com/itm/Bucky-Irving-2025-Topps-Chrome-Pulsar-Refractor-Tampa-Bay-Buccaneers-285-/306949682127" target="_blank" rel="noopener">
+              <span class="title">Bucky Irving 2025 Topps Chrome Pulsar Refractor Tampa Bay Buccaneers #285</span>
+              <span class="item-id">306949682127</span>
             </a>
           </td>
-          <td class="num">1</td>
-          <td class="num">$43.99</td>
-          <td class="num target">$38.71</td>
-          <td class="num">12.0%</td>
-          <td class="num">$37.39</td>
-          <td class="num uplift">$0.79</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121" target="_blank" rel="noopener">
-              <span class="title">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</span>
-              <span class="item-id">306937452121</span>
-            </a>
-          </td>
-          <td class="num">5</td>
-          <td class="num">$8.50</td>
-          <td class="num target">$7.48</td>
-          <td class="num">12.0%</td>
-          <td class="num">$7.22</td>
-          <td class="num uplift">$0.76</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Stacked-Deck-Jeremiyah-Love-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener">
-              <span class="title">2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie</span>
-              <span class="item-id">306937466251</span>
-            </a>
-          </td>
-          <td class="num">6</td>
-          <td class="num">$5.59</td>
-          <td class="num target">$4.92</td>
-          <td class="num">12.0%</td>
-          <td class="num">$4.75</td>
-          <td class="num uplift">$0.60</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener">
-              <span class="title">11 Raghib And Quadry Ismail Cards Raiders Vikings</span>
-              <span class="item-id">306913790653</span>
-            </a>
-          </td>
-          <td class="num">1</td>
-          <td class="num">$14.69</td>
-          <td class="num target">$12.93</td>
-          <td class="num">12.0%</td>
-          <td class="num">$12.49</td>
-          <td class="num uplift">$0.26</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/lNEAAeSwrclqBlIQ/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-NFL-/306939342209" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL</span>
-              <span class="item-id">306939342209</span>
-            </a>
-          </td>
-          <td class="num">3</td>
-          <td class="num">$4.19</td>
-          <td class="num target">$3.69</td>
-          <td class="num">12.0%</td>
-          <td class="num">$3.56</td>
-          <td class="num uplift">$0.23</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener">
-              <span class="title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</span>
-              <span class="item-id">306904078786</span>
-            </a>
-          </td>
-          <td class="num">1</td>
-          <td class="num">$7.69</td>
-          <td class="num target">$6.77</td>
-          <td class="num">12.0%</td>
-          <td class="num">$6.54</td>
-          <td class="num uplift">$0.14</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/wMMAAeSwx-Bp9fCx/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/15-Dan-Marino-Cards-Miami-Dolphins-Football-Card-Lot-NFL-/306913939866" target="_blank" rel="noopener">
-              <span class="title">15 Dan Marino Cards Miami Dolphins Football Card Lot NFL</span>
-              <span class="item-id">306913939866</span>
-            </a>
-          </td>
-          <td class="num">1</td>
-          <td class="num">$5.99</td>
-          <td class="num target">$5.27</td>
-          <td class="num">12.0%</td>
-          <td class="num">$5.09</td>
-          <td class="num uplift">$0.11</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/M~sAAeSwSeRp9hel/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC-Football-/306914169081" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football</span>
-              <span class="item-id">306914169081</span>
-            </a>
-          </td>
-          <td class="num">2</td>
-          <td class="num">$2.09</td>
-          <td class="num target">$1.84</td>
-          <td class="num">12.0%</td>
-          <td class="num">$1.78</td>
-          <td class="num uplift">$0.07</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/kOQAAeSwcCJp9qUO/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</span>
-              <span class="item-id">306914911040</span>
-            </a>
-          </td>
-          <td class="num">2</td>
-          <td class="num">$2.09</td>
-          <td class="num target">$1.84</td>
-          <td class="num">12.0%</td>
-          <td class="num">$1.78</td>
-          <td class="num uplift">$0.07</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/P10AAeSw~7lqBlSQ/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroit Lions</span>
-              <span class="item-id">306939352679</span>
-            </a>
-          </td>
-          <td class="num">1</td>
+          <td class="num">0</td>
           <td class="num">$3.99</td>
           <td class="num target">$3.51</td>
           <td class="num">12.0%</td>
           <td class="num">$3.39</td>
-          <td class="num uplift">$0.07</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
         </tr>
 
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/jFwAAeSweUpqB-hz/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/AuUAAeSwkB5qDRpQ/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-Football-/306941728262" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Prizm Draft Picks #155 Trevor Etienne Prizms Red #/399 Football</span>
-              <span class="item-id">306941728262</span>
+            <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener">
+              <span class="title">2025 TOPPS CHROME FOOTBALL POWER PLAYERS JAHMYR GIBBS LIONS</span>
+              <span class="item-id">306949800437</span>
             </a>
           </td>
-          <td class="num">1</td>
-          <td class="num">$2.49</td>
-          <td class="num target">$2.19</td>
+          <td class="num">0</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
           <td class="num">12.0%</td>
-          <td class="num">$2.12</td>
-          <td class="num uplift">$0.05</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
         </tr>
 
-        <tr class="row-blocked">
-          <td class="thumb"><img src="https://i.ebayimg.com/images/g/p9EAAeSw7LZp9idy/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/JMoAAeSweBdqDRqw/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-Football-/306914248743" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm Football</span>
-              <span class="item-id">306914248743</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Phoenix - Trey Benson #27 Light Blue Pyramids /385</span>
+              <span class="item-id">306949801383</span>
             </a>
           </td>
-          <td class="num">1</td>
+          <td class="num">0</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
+        </tr>
+
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/uIIAAeSwT05qDRtS/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</span>
+              <span class="item-id">306949802296</span>
+            </a>
+          </td>
+          <td class="num">0</td>
+          <td class="num">$5.99</td>
+          <td class="num target">$5.27</td>
+          <td class="num">12.0%</td>
+          <td class="num">$5.09</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
+        </tr>
+
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/GdcAAeSwmT1qDZz9/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-Caleb-Williams-8-Stars-Prizm-/306950542310" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Donruss Optic - Caleb Williams #8 Stars Prizm</span>
+              <span class="item-id">306950542310</span>
+            </a>
+          </td>
+          <td class="num">0</td>
+          <td class="num">$5.99</td>
+          <td class="num target">$5.27</td>
+          <td class="num">12.0%</td>
+          <td class="num">$5.09</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
+        </tr>
+
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/c40AAeSwHpNqDZ1z/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-1975-31-Baker-Mayfield-1975-Silver-Refractor-/306950544510" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome Football #1975-31 Baker Mayfield 1975 Silver Refractor</span>
+              <span class="item-id">306950544510</span>
+            </a>
+          </td>
+          <td class="num">0</td>
+          <td class="num">$2.99</td>
+          <td class="num target">$2.63</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.54</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
+        </tr>
+
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/n~cAAeSw5D5qDZ4f/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2023-Panini-Prizm-Travis-Etienne-138-Lazer-Prizm-/306950549048" target="_blank" rel="noopener">
+              <span class="title">2023 Panini Prizm - Travis Etienne #138 Lazer Prizm</span>
+              <span class="item-id">306950549048</span>
+            </a>
+          </td>
+          <td class="num">0</td>
           <td class="num">$1.99</td>
           <td class="num target">$1.75</td>
           <td class="num">12.0%</td>
           <td class="num">$1.69</td>
-          <td class="num uplift">$0.04</td>
-          <td class="reasons">cooldown: offered within last 7d</td>
-          <td class="decision decision-blocked">BLOCKED</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
+        </tr>
+
+        <tr class="row-skip">
+          <td class="thumb"><img src="https://i.ebayimg.com/images/g/fTkAAeSwu-dqDZ63/s-l500.jpg" alt="" loading="lazy" style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)"></td>
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Silver-Prizm-/306950551537" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Select - Concourse Josh Allen #86 Silver Prizm</span>
+              <span class="item-id">306950551537</span>
+            </a>
+          </td>
+          <td class="num">0</td>
+          <td class="num">$2.49</td>
+          <td class="num target">$2.19</td>
+          <td class="num">12.0%</td>
+          <td class="num">$2.12</td>
+          <td class="num uplift">$0.00</td>
+          <td class="reasons">watchers=0 < min_watchers_to_offer=1</td>
+          <td class="decision decision-skip">SKIP</td>
         </tr></tbody>
           </table>
         </div>
+<h3>⛔ Blocked <span class='count'>(0)</span></h3><p class='empty'>None.</p>
 
 <section>
   <h3>Recent offer history</h3>
-  <div class='tbl-wrap'><table class='watchers-tbl'><thead><tr><th>Sent</th><th>Item</th><th>Watch</th><th>Was</th><th>Offer</th><th>%</th><th>Result</th></tr></thead><tbody><tr><td>2026-05-17T15:19:09</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679' target='_blank'>306939352679</a></td><td>1</td><td class='num'>$2.34</td><td class='num'>$2.06</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
+  <div class='tbl-wrap'><table class='watchers-tbl'><thead><tr><th>Sent</th><th>Item</th><th>Watch</th><th>Was</th><th>Offer</th><th>%</th><th>Result</th></tr></thead><tbody><tr><td>2026-05-20T14:02:00</td><td><a href='https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-NFL-/306931285504' target='_blank'>306931285504</a></td><td>1</td><td class='num'>$2.22</td><td class='num'>$1.95</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:59</td><td><a href='https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722' target='_blank'>306930807722</a></td><td>1</td><td class='num'>$1.99</td><td class='num'>$1.75</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:58</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-Football-/306914248743' target='_blank'>306914248743</a></td><td>1</td><td class='num'>$1.99</td><td class='num'>$1.75</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:57</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-Football-/306941728262' target='_blank'>306941728262</a></td><td>1</td><td class='num'>$2.99</td><td class='num'>$2.63</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:57</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679' target='_blank'>306939352679</a></td><td>1</td><td class='num'>$2.99</td><td class='num'>$2.63</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:56</td><td><a href='https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271' target='_blank'>306947434271</a></td><td>1</td><td class='num'>$4.99</td><td class='num'>$4.39</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:55</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC-Football-/306914169081' target='_blank'>306914169081</a></td><td>2</td><td class='num'>$2.99</td><td class='num'>$2.63</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:54</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040' target='_blank'>306914911040</a></td><td>3</td><td class='num'>$2.99</td><td class='num'>$2.63</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:53</td><td><a href='https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786' target='_blank'>306904078786</a></td><td>1</td><td class='num'>$9.99</td><td class='num'>$8.79</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:53</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-NFL-/306939342209' target='_blank'>306939342209</a></td><td>3</td><td class='num'>$4.19</td><td class='num'>$3.69</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:52</td><td><a href='https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653' target='_blank'>306913790653</a></td><td>1</td><td class='num'>$17.99</td><td class='num'>$15.83</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:51</td><td><a href='https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121' target='_blank'>306937452121</a></td><td>5</td><td class='num'>$8.50</td><td class='num'>$7.48</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:50</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406' target='_blank'>306937601406</a></td><td>4</td><td class='num'>$15.00</td><td class='num'>$13.20</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:49</td><td><a href='https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836' target='_blank'>306939333836</a></td><td>2</td><td class='num'>$43.99</td><td class='num'>$38.71</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T14:01:49</td><td><a href='https://www.ebay.com/itm/2026-Jeremiyah-Love-5-Card-Draw-Stacked-Deck-Wild-Card-RC-3-5-Silver-Holo-Rookie-/306937466251' target='_blank'>306937466251</a></td><td>12</td><td class='num'>$7.99</td><td class='num'>$7.03</td><td>12.0%</td><td>FAIL: [2] Unsupported API call.</td></tr>
+<tr><td>2026-05-20T13:55:13</td><td><a href='https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-NFL-/306931285504' target='_blank'>306931285504</a></td><td>1</td><td class='num'>$2.22</td><td class='num'>$1.95</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
+<tr><td>2026-05-20T13:55:12</td><td><a href='https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722' target='_blank'>306930807722</a></td><td>1</td><td class='num'>$1.99</td><td class='num'>$1.75</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
+<tr><td>2026-05-20T13:55:11</td><td><a href='https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271' target='_blank'>306947434271</a></td><td>1</td><td class='num'>$5.99</td><td class='num'>$5.27</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
+<tr><td>2026-05-17T15:19:09</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679' target='_blank'>306939352679</a></td><td>1</td><td class='num'>$2.34</td><td class='num'>$2.06</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
 <tr><td>2026-05-17T15:19:09</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-Football-/306914248743' target='_blank'>306914248743</a></td><td>1</td><td class='num'>$1.99</td><td class='num'>$1.75</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
 <tr><td>2026-05-17T15:19:08</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-Football-/306941728262' target='_blank'>306941728262</a></td><td>1</td><td class='num'>$2.49</td><td class='num'>$2.19</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
 <tr><td>2026-05-17T15:19:07</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Tetairoa-McMillan-44-Pink-Shock-Prizm-RC--/306914911040' target='_blank'>306914911040</a></td><td>1</td><td class='num'>$2.99</td><td class='num'>$2.63</td><td>12.0%</td><td>FAIL: Access denied</td></tr>
@@ -4408,7 +4477,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 19, 2026 · 01:56 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 14:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

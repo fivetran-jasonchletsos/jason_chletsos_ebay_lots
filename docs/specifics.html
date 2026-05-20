@@ -35,7 +35,7 @@
     // Admin gate constants (populated at build time)
     window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
     window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
-    window.__IS_ADMIN_PAGE = true;
+    window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
       try {
@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,12 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1492,6 +1503,16 @@ html[data-theme="crimson"] .product-price {
   position: absolute; left: 0; bottom: -1px;
   opacity: .85;
 }
+/* Site banner — proportional hero, capped tight so it doesn't dominate the
+   fold. The source art is 3:1, so 200-220px tall keeps it above-the-fold-safe. */
+.site-banner { display: block; max-width: min(92vw, 960px); margin: var(--space-md, 18px) auto var(--space-lg, 24px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .25s ease, box-shadow .25s ease; }
+.site-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,.2); }
+.site-banner img { width: 100%; height: auto; display: block; max-height: 220px; object-fit: cover; object-position: center; }
+@media (max-width: 760px) {
+  .site-banner { margin: 10px auto 14px; border-radius: 8px; max-width: 96vw; }
+  .site-banner img { max-height: 120px; }
+}
+
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
 .section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
@@ -1790,7 +1811,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </style>
 
 </head>
-<body class="admin-page">
+<body class="">
   <header class="app-header">
     <div class="app-header-inner">
       <a href="index.html" class="brand">
@@ -1804,28 +1825,52 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="steals.html" class="nav-link">Steals</a>
 <a href="sold.html" class="nav-link">Sold</a>
 
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Browse
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="browse.html">Browse</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a></div>
+        </div>
+
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Sell
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" class="active" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="analytics_hub.html" data-admin="1">Analytics</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Marketing
+            Listings
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="listings_hub.html" data-admin="1">Listings</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            CX
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="cx_hub.html" data-admin="1">CX</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Photos
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="photo_hub.html" data-admin="1">Photos</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            More
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="scan.html" data-admin="1">Scanner</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
         </div>
 
         <div class="nav-dropdown">
@@ -1833,23 +1878,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             For Us
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Tools
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="scan.html" data-admin="1">Scanner</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Cross-post
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="sets.html">Set Completion</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
@@ -1890,35 +1919,42 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
+<div class="drawer-group" data-admin="1">Browse</div>
+<a href="browse.html">Browse</a>
+<a href="by_set.html">By Set</a>
+<a href="by_player.html">By Player</a>
 <div class="drawer-group" data-admin="1">Analytics</div>
-<a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
-<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
-<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
+<a href="analytics_hub.html" class="admin-only" data-admin="1">Analytics</a>
+<div class="drawer-group" data-admin="1">Listings</div>
+<a href="listings_hub.html" class="admin-only" data-admin="1">Listings</a>
+<div class="drawer-group" data-admin="1">CX</div>
+<a href="cx_hub.html" class="admin-only" data-admin="1">CX</a>
+<div class="drawer-group" data-admin="1">Photos</div>
+<a href="photo_hub.html" class="admin-only" data-admin="1">Photos</a>
+<div class="drawer-group" data-admin="1">More</div>
+<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<div class="drawer-group" data-admin="1">Sell</div>
-<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
-<a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
-<a href="specifics.html" class="active admin-only" data-admin="1">Specifics</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<div class="drawer-group" data-admin="1">Marketing</div>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
 <a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
-<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="vault.html" class="admin-only" data-admin="1">Vault</a>
 <a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
+<a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
+<a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
+<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
+<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
+<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
 <div class="drawer-group" data-admin="1">For Us</div>
 <a href="collect.html">My Wants</a>
 <a href="under_10.html">Under $10</a>
 <a href="top_sellers.html">Top Sellers</a>
 <a href="price_drops.html">Price Drops</a>
+<a href="sets.html">Set Completion</a>
 <a href="assistant.html">AI Assistant</a>
 <a href="pokemon.html">Pokemon</a>
 <a href="pikachu.html">Pikachu</a>
@@ -1927,12 +1963,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html">Mewtwo</a>
 <a href="eevee.html">Eevee</a>
 <a href="pokemon_news.html">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Tools</div>
-<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
-<div class="drawer-group" data-admin="1">Cross-post</div>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
@@ -1966,18 +1996,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
   </div>
 
+  
+
   <main>
     
 <section class="hero">
   <h1>Item Specifics Agent</h1>
-  <p class="sub">Last run: <code>2026-05-17 19:24 UTC</code></p>
+  <p class="sub">Last run: <code>2026-05-20 13:59 UTC</code></p>
   <div class="stat-grid">
-    <div class="stat"><div class="stat-n">6</div><div class="stat-l">gaps fixable today</div></div>
-    <div class="stat"><div class="stat-n">174</div><div class="stat-l">total gaps detected</div></div>
-    <div class="stat"><div class="stat-n">85/128</div><div class="stat-l">listings with gaps</div></div>
-    <div class="stat"><div class="stat-n">66%</div><div class="stat-l">coverage opportunity</div></div>
+    <div class="stat"><div class="stat-n">30</div><div class="stat-l">gaps fixable today</div></div>
+    <div class="stat"><div class="stat-n">194</div><div class="stat-l">total gaps detected</div></div>
+    <div class="stat"><div class="stat-n">90/129</div><div class="stat-l">listings with gaps</div></div>
+    <div class="stat"><div class="stat-n">70%</div><div class="stat-l">coverage opportunity</div></div>
   </div>
-  <p class="headline">6 gaps fixable today across 85 listings.</p>
+  <p class="headline">30 gaps fixable today across 90 listings.</p>
 </section>
 
 <section class="cfg">
@@ -1995,44 +2027,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <section>
   <h3>Per-listing gap detail</h3>
   
-        <div class="listing-card decision-review">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2024-Panini-Prizm-Draft-Picks-Gold-Ice-Prizm-Lot-16-Cards--/306933928667" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards)</span>
-              <span class="liid">306933928667</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">10 existing · 2 gaps</span>
-              <span class="dec dec-review">REVIEW</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
-        <div class="listing-card decision-review">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/3-Neon-Green-Pulsar-and-5-Purple-Wave-Prizm-2025-Cards-/306934532731" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</span>
-              <span class="liid">306934532731</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">9 existing · 2 gaps</span>
-              <span class="dec dec-review">REVIEW</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
         <div class="listing-card decision-apply">
           <div class="listing-head">
             <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener" class="lhead-link">
@@ -2073,8 +2067,27 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC--/306914169081" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/3-Neon-Green-Pulsar-and-5-Purple-Wave-Prizm-2025-Cards-/306948827365" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</span>
+              <span class="liid">306948827365</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">9 existing · 2 gaps</span>
+              <span class="dec dec-review">REVIEW</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-review">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Colston-Loveland-20-Silver-Prizm-RC-Football-/306914169081" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Prizmatic Colston Loveland #20 Silver Prizm (RC) Football</span>
               <span class="liid">306914169081</span>
             </a>
             <div class="lmeta">
@@ -2111,8 +2124,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-/306914174921" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Rookies &amp; Stars - Artistry in Motion Lamar Jackson #2</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Artistry-in-Motion-Lamar-Jackson-2-Football-/306914174921" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Rookies &amp; Stars - Artistry in Motion Lamar Jackson #2 Football</span>
               <span class="liid">306914174921</span>
             </a>
             <div class="lmeta">
@@ -2130,8 +2143,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC--/306914176585" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Andrew-Marsh-157-Silver-Prizm-RC-Football-/306914176585" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Andrew Marsh #157 Silver Prizm (RC) Football</span>
               <span class="liid">306914176585</span>
             </a>
             <div class="lmeta">
@@ -2187,8 +2200,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-/306914248743" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Barry-Sanders-188-Purple-Wave-Prizm-Football-/306914248743" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Barry Sanders #188 Purple Wave Prizm Football</span>
               <span class="liid">306914248743</span>
             </a>
             <div class="lmeta">
@@ -2206,8 +2219,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-/306914249326" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Select-Numbers-Jordan-Love-7-Silver-Prizm-NFL-Football-/306914249326" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Select - Select Numbers Jordan Love #7 Silver Prizm NFL Football</span>
               <span class="liid">306914249326</span>
             </a>
             <div class="lmeta">
@@ -2263,8 +2276,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-20-Silver-Prizm-RC--/306914915295" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Travis Hunter #20 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-RC-20-Silver-Prizm-Football-/306914915295" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Prizm Football</span>
               <span class="liid">306914915295</span>
             </a>
             <div class="lmeta">
@@ -2301,8 +2314,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Will-Johnson-370-White-Disco-Prizm-RC--/306930460600" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Rookies Will Johnson #370 White Disco Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Will-Johnson-370-White-Disco-Prizm-RC-Football-/306930460600" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Rookies Will Johnson #370 White Disco Prizm (RC) Football</span>
               <span class="liid">306930460600</span>
             </a>
             <div class="lmeta">
@@ -2320,8 +2333,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-NFL-Football-/306930462076" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Bo Nix #142 White Disco Prizm NFL Football</span>
               <span class="liid">306930462076</span>
             </a>
             <div class="lmeta">
@@ -2339,8 +2352,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Dwayne-Bowe-46-White-Disco-Prizm-/306930463268" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Dwayne-Bowe-46-White-Disco-Prizm-NFL-Football-/306930463268" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Dwayne Bowe #46 White Disco Prizm NFL Football</span>
               <span class="liid">306930463268</span>
             </a>
             <div class="lmeta">
@@ -2358,8 +2371,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Abdul-Carter-10-RC--/306930464091" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Abdul-Carter-10-RC-NFL-Football-/306930464091" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC) NFL Football</span>
               <span class="liid">306930464091</span>
             </a>
             <div class="lmeta">
@@ -2415,8 +2428,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Kyle-Monangai-274-RC--/306930486853" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Club Level Kyle Monangai #274 (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Kyle-Monangai-274-RC-NFL-Football-/306930486853" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Select - Club Level Kyle Monangai #274 (RC) NFL Football</span>
               <span class="liid">306930486853</span>
             </a>
             <div class="lmeta">
@@ -2472,8 +2485,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Tank-Bigsby-129-Silver-Prizm-/306930555649" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Premier Level Tank Bigsby #129 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Premier-Level-Tank-Bigsby-129-Silver-Prizm-NFL-Football-/306930555649" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Select - Premier Level Tank Bigsby #129 Silver Prizm NFL Football</span>
               <span class="liid">306930555649</span>
             </a>
             <div class="lmeta">
@@ -2491,8 +2504,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Willis-McGahee-45-Silver-Prizm-/306930559170" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Willis McGahee #45 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Willis-McGahee-45-Silver-Prizm-NFL-Football-/306930559170" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Willis McGahee #45 Silver Prizm NFL Football</span>
               <span class="liid">306930559170</span>
             </a>
             <div class="lmeta">
@@ -2508,29 +2521,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         
 
-        <div class="listing-card decision-apply">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Isaac-Teslaa-316-RC--/306930560592" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC)</span>
-              <span class="liid">306930560592</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">11 existing · 4 gaps</span>
-              <span class="dec dec-apply">APPLY</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-/306930742908" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Jared Verse #30 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-NFL-Football-/306930742908" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Jared Verse #30 Silver Prizm NFL Football</span>
               <span class="liid">306930742908</span>
             </a>
             <div class="lmeta">
@@ -2548,8 +2542,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC--/306930745036" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Grey-Zabel-387-Silver-Prizm-RC-NFL-Football-/306930745036" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Rookies Grey Zabel #387 Silver Prizm (RC) NFL Football</span>
               <span class="liid">306930745036</span>
             </a>
             <div class="lmeta">
@@ -2567,8 +2561,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Chris-Boswell-174-/306930746886" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Chris Boswell #174</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Chris-Boswell-174-NFL-Football-/306930746886" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Chris Boswell #174 NFL Football</span>
               <span class="liid">306930746886</span>
             </a>
             <div class="lmeta">
@@ -2586,8 +2580,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-/306930773940" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Jared Verse #30 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Jared-Verse-30-Silver-Prizm-NFL-Football-/306930773940" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Jared Verse #30 Silver Prizm NFL Football</span>
               <span class="liid">306930773940</span>
             </a>
             <div class="lmeta">
@@ -2624,8 +2618,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Devin-Neal-43-Red-Ice-Prizm-RC--/306930901658" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Devin-Neal-43-Red-Ice-Prizm-RC-Football-/306930901658" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Devin Neal #43 Red Ice Prizm (RC) Football</span>
               <span class="liid">306930901658</span>
             </a>
             <div class="lmeta">
@@ -2662,8 +2656,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Chris-Paul-Jr-2-Silver-Prizm-RC--/306930904430" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Chris-Paul-Jr-2-Silver-Prizm-RC-Football-/306930904430" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Chris Paul Jr. #2 Silver Prizm (RC) Football</span>
               <span class="liid">306930904430</span>
             </a>
             <div class="lmeta">
@@ -2681,8 +2675,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Bryce-Underwood-28-Red-Ice-Prizm-RC--/306930909038" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Bryce-Underwood-28-Red-Ice-Prizm-RC-Football-/306930909038" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Bryce Underwood #28 Red Ice Prizm (RC) Football</span>
               <span class="liid">306930909038</span>
             </a>
             <div class="lmeta">
@@ -2738,8 +2732,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Bobby-Hurley-161-RC--/306930920326" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1993-94 Fleer Ultra - Bobby Hurley #161 (RC)</span>
+            <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Bobby-Hurley-161-RC-NFL-/306930920326" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1993-94 Fleer Ultra - Bobby Hurley #161 (RC) NFL</span>
               <span class="liid">306930920326</span>
             </a>
             <div class="lmeta">
@@ -2776,8 +2770,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-/306930938563" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-NFL-Football-/306930938563" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm NFL Football</span>
               <span class="liid">306930938563</span>
             </a>
             <div class="lmeta">
@@ -2795,8 +2789,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Keelon-Russell-150-Red-Ice-Prizm-RC--/306930939967" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Keelon-Russell-150-Red-Ice-Prizm-RC-Football-/306930939967" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Keelon Russell #150 Red Ice Prizm (RC) Football</span>
               <span class="liid">306930939967</span>
             </a>
             <div class="lmeta">
@@ -2814,8 +2808,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Jayden-Daniels-178-Silver-Prizm-/306930942401" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Jayden-Daniels-178-Silver-Prizm-NFL-Football-/306930942401" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm NFL Football</span>
               <span class="liid">306930942401</span>
             </a>
             <div class="lmeta">
@@ -2833,8 +2827,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinshon-Judkins-84-Red-Ice-Prizm-RC--/306931048688" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinshon-Judkins-84-Red-Ice-Prizm-RC-Football-/306931048688" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Quinshon Judkins #84 Red Ice Prizm (RC) Football</span>
               <span class="liid">306931048688</span>
             </a>
             <div class="lmeta">
@@ -2852,8 +2846,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC--/306931055732" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC-Football-/306931055732" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Shedeur Sanders #19 Silver Prizm (RC) Football</span>
               <span class="liid">306931055732</span>
             </a>
             <div class="lmeta">
@@ -2928,8 +2922,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-/306931209046" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1983 Donruss - Rickey Henderson #35</span>
+            <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-NFL-Football-/306931209046" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1983 Donruss - Rickey Henderson #35 NFL Football</span>
               <span class="liid">306931209046</span>
             </a>
             <div class="lmeta">
@@ -2947,8 +2941,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457--/306931236773" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1990 Bowman - Rickey Henderson #457</span>
+            <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457-NFL-/306931236773" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1990 Bowman - Rickey Henderson #457 NFL</span>
               <span class="liid">306931236773</span>
             </a>
             <div class="lmeta">
@@ -2966,8 +2960,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-/306931278274" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1994 Sportflics 2000 Rookie &amp; Traded - Deion Sanders #25 Sample</span>
+            <a href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-NFL-/306931278274" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1994 Sportflics 2000 Rookie &amp; Traded - Deion Sanders #25 Sample NFL</span>
               <span class="liid">306931278274</span>
             </a>
             <div class="lmeta">
@@ -2985,8 +2979,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-/306931283327" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158</span>
+            <a href="https://www.ebay.com/itm/1990-Ken-Griffey-Jr-Sports-Illustrated-for-Kids-Series-1-158-NFL-/306931283327" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1990 Ken Griffey Jr Sports Illustrated for Kids Series 1 #158 NFL</span>
               <span class="liid">306931283327</span>
             </a>
             <div class="lmeta">
@@ -3004,8 +2998,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-/306931285504" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1991 Fleer - Ken Griffey Jr, Barry Bonds #710</span>
+            <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-NFL-/306931285504" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1991 Fleer - Ken Griffey Jr, Barry Bonds #710 NFL</span>
               <span class="liid">306931285504</span>
             </a>
             <div class="lmeta">
@@ -3023,8 +3017,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-/306931303163" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">4 1991 Playball U.S.A. - Darryl Strawberry</span>
+            <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">4 1991 Playball U.S.A. - Darryl Strawberry NFL</span>
               <span class="liid">306931303163</span>
             </a>
             <div class="lmeta">
@@ -3061,8 +3055,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-/306931339580" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112</span>
+            <a href="https://www.ebay.com/itm/1990-Kevin-Mitchell-Sports-Illustrated-for-Kids-Series-1-112-NFL-/306931339580" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">1990 Kevin Mitchell Sports Illustrated for Kids Series 1 #112 NFL</span>
               <span class="liid">306931339580</span>
             </a>
             <div class="lmeta">
@@ -3081,7 +3075,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="listing-card decision-review">
           <div class="listing-head">
             <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Donruss Optic - My House! DK Metcalf #8 Black Pandora Prizm /149</span>
+              <span class="ltitle">2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149</span>
               <span class="liid">306931446668</span>
             </a>
             <div class="lmeta">
@@ -3099,8 +3093,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC--/306934495603" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Rookies &amp; Stars - Airborne Cam Ward #29 Silver (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Airborne-Cam-Ward-29-Silver-RC-NFL-Football-/306934495603" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Rookies &amp; Stars - Airborne Cam Ward #29 Silver (RC) NFL Football</span>
               <span class="liid">306934495603</span>
             </a>
             <div class="lmeta">
@@ -3118,8 +3112,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Crusade-Caleb-Williams-5-Silver-/306934506774" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Rookies &amp; Stars - Crusade Caleb Williams #5 Silver</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-Crusade-Caleb-Williams-5-Silver-NFL-Football-/306934506774" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Rookies &amp; Stars - Crusade Caleb Williams #5 Silver NFL Football</span>
               <span class="liid">306934506774</span>
             </a>
             <div class="lmeta">
@@ -3137,46 +3131,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Josh-Allen-86-Pink-Shock-Prizm-/306937598270" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm</span>
-              <span class="liid">306937598270</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">13 existing · 2 gaps</span>
-              <span class="dec dec-review">REVIEW</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
-        <div class="listing-card decision-review">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Ashton-Jeanty-4-Pink-Shock-Prizm-RC--/306937599747" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock Prizm (RC)</span>
-              <span class="liid">306937599747</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">13 existing · 2 gaps</span>
-              <span class="dec dec-review">REVIEW</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
-        <div class="listing-card decision-review">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Travis-Hunter-28-Pink-Shock-Prizm-RC--/306937604288" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Concourse Travis Hunter #28 Pink Shock Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Travis-Hunter-28-Pink-Shock-Prizm-RC-Football-/306937604288" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Select - Concourse Travis Hunter #28 Pink Shock Prizm (RC) Football</span>
               <span class="liid">306937604288</span>
             </a>
             <div class="lmeta">
@@ -3213,27 +3169,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Rookies-Cam-Ward-382-Camo-Pink-Mosaic-Prizm-RC--/306937664217" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic Prizm (RC)</span>
-              <span class="liid">306937664217</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">13 existing · 2 gaps</span>
-              <span class="dec dec-review">REVIEW</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
-        <div class="listing-card decision-review">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Jayden-Daniels-289-Pink-Shock-Prizm-/306937669968" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Select - Club Level Jayden Daniels #289 Pink Shock Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Club-Level-Jayden-Daniels-289-Pink-Shock-Prizm-Football-/306937669968" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Select - Club Level Jayden Daniels #289 Pink Shock Prizm Football</span>
               <span class="liid">306937669968</span>
             </a>
             <div class="lmeta">
@@ -3251,27 +3188,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Thunderbirds-Drake-Maye-35-Silver-Pyramids-299-/306937677187" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyramids /299</span>
-              <span class="liid">306937677187</span>
-            </a>
-            <div class="lmeta">
-              <span class="badge badge-sports_card">sports card</span>
-              <span class="muted">15 existing · 2 gaps</span>
-              <span class="dec dec-review">REVIEW</span>
-            </div>
-          </div>
-          <table class="gap-tbl">
-            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
-            <tbody><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
-          </table>
-        </div>
-        
-
-        <div class="listing-card decision-review">
-          <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Rookies-Shedeur-Sanders-154-Silver-RC--/306937679957" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Phoenix - Rookies Shedeur Sanders #154 Silver (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Rookies-Shedeur-Sanders-154-Silver-RC-NFL-Football-/306937679957" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Phoenix - Rookies Shedeur Sanders #154 Silver (RC) NFL Football</span>
               <span class="liid">306937679957</span>
             </a>
             <div class="lmeta">
@@ -3289,8 +3207,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Penei-Sewell-99-Refractor-/306939281535" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Topps Chrome - Penei Sewell #99 Refractor</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Penei-Sewell-99-Refractor-NFL-/306939281535" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome - Penei Sewell #99 Refractor NFL</span>
               <span class="liid">306939281535</span>
             </a>
             <div class="lmeta">
@@ -3308,8 +3226,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Hot-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Topps Chrome - Rookies Riley Leonard #318 Hot Pink X-Fractor (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)</span>
               <span class="liid">306939289562</span>
             </a>
             <div class="lmeta">
@@ -3327,8 +3245,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jaylen-Waddle-X-Fractor-186-Dolphins-/306939304842" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jaylen-Waddle-X-Fractor-186-Dolphins-NFL-/306939304842" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome Jaylen Waddle X-Fractor #186 Dolphins NFL</span>
               <span class="liid">306939304842</span>
             </a>
             <div class="lmeta">
@@ -3346,8 +3264,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2024-Topps-Chrome-Rookies-Marvin-Harrison-Jr-204-RC--/306939312739" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC)</span>
+            <a href="https://www.ebay.com/itm/2024-Topps-Chrome-Rookies-Marvin-Harrison-Jr-204-RC-NFL-/306939312739" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC) NFL</span>
               <span class="liid">306939312739</span>
             </a>
             <div class="lmeta">
@@ -3384,8 +3302,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Hot-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025-26 Topps Chrome Cam Ward RC Hot Pink X Fractor Mega Exclusive SP TN Titans</span>
+            <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</span>
               <span class="liid">306939333836</span>
             </a>
             <div class="lmeta">
@@ -3403,8 +3321,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-/306939339030" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-NFL-/306939339030" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL</span>
               <span class="liid">306939339030</span>
             </a>
             <div class="lmeta">
@@ -3441,8 +3359,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-/306939369726" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-NFL-/306939369726" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor NFL</span>
               <span class="liid">306939369726</span>
             </a>
             <div class="lmeta">
@@ -3498,8 +3416,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Will-Howard-83-Silver-Prizm-RC--/306941724232" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Will Howard #83 Silver Prizm (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Will-Howard-83-Silver-Prizm-RC-Football-/306941724232" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Will Howard #83 Silver Prizm (RC) Football</span>
               <span class="liid">306941724232</span>
             </a>
             <div class="lmeta">
@@ -3517,8 +3435,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC--/306941726438" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /399 (RC)</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC-Football-/306941726438" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks - Quinn Ewers #126 Red Prizm /399 (RC) Football</span>
               <span class="liid">306941726438</span>
             </a>
             <div class="lmeta">
@@ -3536,8 +3454,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-/306941728262" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm Draft Picks #155 Trevor Etienne Prizms Red #/399</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-Football-/306941728262" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm Draft Picks #155 Trevor Etienne Prizms Red #/399 Football</span>
               <span class="liid">306941728262</span>
             </a>
             <div class="lmeta">
@@ -3555,8 +3473,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-16-Matthew-Golden-Crusade-Silver-/306941729219" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Rookies &amp; Stars #16 Matthew Golden Crusade Silver</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Rookies-Stars-16-Matthew-Golden-Crusade-Silver-NFL-Football-/306941729219" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Rookies &amp; Stars #16 Matthew Golden Crusade Silver NFL Football</span>
               <span class="liid">306941729219</span>
             </a>
             <div class="lmeta">
@@ -3574,8 +3492,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <div class="listing-card decision-review">
           <div class="listing-head">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Brock-Bowers-6-Silver-Prizm-/306941730763" target="_blank" rel="noopener" class="lhead-link">
-              <span class="ltitle">2025 Panini Prizm - Brock Bowers #6 Silver Prizm</span>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Brock-Bowers-6-Silver-Prizm-NFL-Football-/306941730763" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Brock Bowers #6 Silver Prizm NFL Football</span>
               <span class="liid">306941730763</span>
             </a>
             <div class="lmeta">
@@ -3609,11 +3527,233 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </table>
         </div>
         
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome Micah Parsons Hot Pink X-Fractor Refractor #77</span>
+              <span class="liid">306947419189</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">21 existing · 2 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Khalil-Mack-Lime-Green-X-Fractor-160-Chargers-Color-Match-/306947421543" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome Khalil Mack Lime Green X-Fractor #160 Chargers Color Match</span>
+              <span class="liid">306947421543</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">13 existing · 4 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Jackson-Powers-Johnson-Hot-Pink-X-Fractor-177-/306947424819" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome Football Jackson Powers-Johnson Hot Pink X-Fractor #177</span>
+              <span class="liid">306947424819</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">12 existing · 4 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-All-Chrome-CeeDee-Lamb-ACT-8-Cowboys-/306947431771" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome Football All Chrome CeeDee Lamb #ACT-8 Cowboys</span>
+              <span class="liid">306947431771</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">27 existing · 2 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">Topps Chrome All-Chrome Insert Justin Jefferson ACT-6 Vikings 2025 NFL</span>
+              <span class="liid">306947434271</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">25 existing · 2 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">Topps 2024 Chrome Checkerboard Jayden Daniels #74TF-2 Commanders NFL Card</span>
+              <span class="liid">306947440872</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">18 existing · 2 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2024</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-X-Fractor-Rome-Odunze-Bears-/306947445050" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Topps Chrome X-Fractor Rome Odunze Bears</span>
+              <span class="liid">306947445050</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">13 existing · 4 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>League</td><td class='current'>—</td><td class='proposed'>MLB</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Features</td><td class='current'>—</td><td class='proposed'>Refractor</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/Bucky-Irving-2025-Topps-Chrome-Pulsar-Refractor-Tampa-Bay-Buccaneers-285-/306949682127" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">Bucky Irving 2025 Topps Chrome Pulsar Refractor Tampa Bay Buccaneers #285</span>
+              <span class="liid">306949682127</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">19 existing · 4 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>League</td><td class='current'>—</td><td class='proposed'>MLB</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Features</td><td class='current'>—</td><td class='proposed'>Refractor</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 TOPPS CHROME FOOTBALL POWER PLAYERS JAHMYR GIBBS LIONS</span>
+              <span class="liid">306949800437</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">23 existing · 2 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Phoenix - Trey Benson #27 Light Blue Pyramids /385</span>
+              <span class="liid">306949801383</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">12 existing · 4 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
+          </table>
+        </div>
+        
+
+        <div class="listing-card decision-apply">
+          <div class="listing-head">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener" class="lhead-link">
+              <span class="ltitle">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</span>
+              <span class="liid">306949802296</span>
+            </a>
+            <div class="lmeta">
+              <span class="badge badge-sports_card">sports card</span>
+              <span class="muted">11 existing · 4 gaps</span>
+              <span class="dec dec-apply">APPLY</span>
+            </div>
+          </div>
+          <table class="gap-tbl">
+            <thead><tr><th>Specific</th><th>Current</th><th>Proposed</th><th>Confidence</th></tr></thead>
+            <tbody><tr class='gap-row gap-high'><td class='field'>Year</td><td class='current'>—</td><td class='proposed'>2025</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-high'><td class='field'>Graded</td><td class='current'>—</td><td class='proposed'>No</td><td><span class='conf conf-high'>high</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Licensed Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr><tr class='gap-row gap-medium'><td class='field'>Original/Reprint</td><td class='current'>—</td><td class='proposed'>Original</td><td><span class='conf conf-medium'>medium</span></td></tr></tbody>
+          </table>
+        </div>
+        
 </section>
 
 <section>
   <h3>Recent applies</h3>
-  <div class='tbl-wrap'><table class='reprice-tbl'><thead><tr><th>Applied</th><th>Item</th><th>Added</th><th>Result</th></tr></thead><tbody><tr><td>2026-05-17T19:24:35</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Features's value of "1st Edition | Chase | Collectors Edition | Exclusive | Limited Edition | Rookie" has too many characters.</td></tr>
+  <div class='tbl-wrap'><table class='reprice-tbl'><thead><tr><th>Applied</th><th>Item</th><th>Added</th><th>Result</th></tr></thead><tbody><tr><td>2026-05-20T13:59:45</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296' target='_blank'>306949802296</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:42</td><td><a href='https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383' target='_blank'>306949801383</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:40</td><td><a href='https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437' target='_blank'>306949800437</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:37</td><td><a href='https://www.ebay.com/itm/Bucky-Irving-2025-Topps-Chrome-Pulsar-Refractor-Tampa-Bay-Buccaneers-285-/306949682127' target='_blank'>306949682127</a></td><td class='added'>Year=2025, League=MLB, Features=Refractor, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:34</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-X-Fractor-Rome-Odunze-Bears-/306947445050' target='_blank'>306947445050</a></td><td class='added'>Year=2025, League=MLB, Features=Refractor, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:31</td><td><a href='https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872' target='_blank'>306947440872</a></td><td class='added'>Year=2024, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:28</td><td><a href='https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271' target='_blank'>306947434271</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:26</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-All-Chrome-CeeDee-Lamb-ACT-8-Cowboys-/306947431771' target='_blank'>306947431771</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:23</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Jackson-Powers-Johnson-Hot-Pink-X-Fractor-177-/306947424819' target='_blank'>306947424819</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:21</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Khalil-Mack-Lime-Green-X-Fractor-160-Chargers-Color-Match-/306947421543' target='_blank'>306947421543</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:17</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189' target='_blank'>306947419189</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
+<tr><td>2026-05-20T13:59:15</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Features's value of "1st Edition | Chase | Collectors Edition | Exclusive | Limited Edition | Rookie" has too many characters.</td></tr>
+<tr><td>2026-05-20T13:59:13</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406' target='_blank'>306937601406</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Listing cannot be revised.</td></tr>
+<tr><td>2026-05-17T19:24:35</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Features's value of "1st Edition | Chase | Collectors Edition | Exclusive | Limited Edition | Rookie" has too many characters.</td></tr>
 <tr><td>2026-05-17T19:24:34</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Isaac-Teslaa-316-RC--/306930560592' target='_blank'>306930560592</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Auction ended.</td></tr>
 <tr><td>2026-05-17T19:24:33</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406' target='_blank'>306937601406</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Listing cannot be revised.</td></tr>
 <tr><td>2026-05-17T19:24:30</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Features's value of "1st Edition | Chase | Collectors Edition | Exclusive | Limited Edition | Rookie" has too many characters.</td></tr>
@@ -3629,26 +3769,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <tr><td>2026-05-17T15:38:34</td><td><a href='https://www.ebay.com/itm/2025-Panini-Rookies-Stars-16-Matthew-Golden-Crusade-Silver-/306941729219' target='_blank'>306941729219</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
 <tr><td>2026-05-17T15:38:31</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-155-Trevor-Etienne-Prizms-Red-399-/306941728262' target='_blank'>306941728262</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
 <tr><td>2026-05-17T15:38:29</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538' target='_blank'>306939345538</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Features's value of "1st Edition | Chase | Collectors Edition | Exclusive | Limited Edition | Rookie" has too many characters.</td></tr>
-<tr><td>2026-05-17T15:38:27</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Isaac-Teslaa-316-RC--/306930560592' target='_blank'>306930560592</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Auction ended.</td></tr>
-<tr><td>2026-05-17T15:38:26</td><td><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406' target='_blank'>306937601406</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Listing cannot be revised.</td></tr>
-<tr><td>2026-05-17T15:37:45</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-97-Dillon-Gabriel-Prizms-Silver-Oregon-Ducks-/306941727410' target='_blank'>306941727410</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:42</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Quinn-Ewers-126-Red-Prizm-399-RC--/306941726438' target='_blank'>306941726438</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:39</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Will-Howard-83-Silver-Prizm-RC--/306941724232' target='_blank'>306941724232</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:36</td><td><a href='https://www.ebay.com/itm/2025-Select-Football-Chuba-Hubbard-Concourse-Silver-Prizm-43-/306941721710' target='_blank'>306941721710</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:33</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Ray-Wave-Refractor-254-DK-METCALF-/306939475594' target='_blank'>306939475594</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:30</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Bill-Jacory-Croskey-Merritt-Refractor-Rookie-RC-387-Commanders-/306939473666' target='_blank'>306939473666</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:27</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-CeeDee-Lamb-Card-Fortune-15-Refractor-Dallas-Cowboys-F15-9-/306939472487' target='_blank'>306939472487</a></td><td class='added'>Year=2025, Features=Refractor, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:25</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Cooper-Kupp-Red-White-Blue-271-Seahawks-/306939373376' target='_blank'>306939373376</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:23</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-/306939369726' target='_blank'>306939369726</a></td><td class='added'>Year=2025, League=NFL, Features=Refractor, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:21</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849' target='_blank'>306939367849</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:18</td><td><a href='https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679' target='_blank'>306939352679</a></td><td class='added'>Year=2025, Graded=No</td><td>OK</td></tr>
-<tr><td>2026-05-17T15:37:15</td><td><a href='https://www.ebay.com/itm/Topps-Chrome-Myles-Garrett-1975-8-Cleveland-Browns-2025-NFL-Football-Card-/306939349539' target='_blank'>306939349539</a></td><td class='added'>Year=1975, Set=Chrome, Graded=No</td><td>OK</td></tr></tbody></table></div>
+<tr><td>2026-05-17T15:38:27</td><td><a href='https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Isaac-Teslaa-316-RC--/306930560592' target='_blank'>306930560592</a></td><td class='added'>Year=2025, Graded=No</td><td>FAIL: Auction ended.</td></tr></tbody></table></div>
 </section>
 
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 19:24 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 13:59 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

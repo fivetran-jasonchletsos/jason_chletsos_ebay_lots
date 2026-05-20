@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,12 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1765,28 +1776,52 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="steals.html" class="nav-link">Steals</a>
 <a href="sold.html" class="nav-link">Sold</a>
 
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Browse
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="browse.html">Browse</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a></div>
+        </div>
+
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="analytics_hub.html" data-admin="1">Analytics</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Sell
+            Listings
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="listings_hub.html" data-admin="1">Listings</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Marketing
+            CX
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="cx_hub.html" data-admin="1">CX</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Photos
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="photo_hub.html" data-admin="1">Photos</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            More
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="scan.html" data-admin="1">Scanner</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
         </div>
 
         <div class="nav-dropdown">
@@ -1794,23 +1829,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             For Us
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Tools
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="scan.html" data-admin="1">Scanner</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Cross-post
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="sets.html">Set Completion</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
@@ -1851,35 +1870,42 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
+<div class="drawer-group" data-admin="1">Browse</div>
+<a href="browse.html">Browse</a>
+<a href="by_set.html">By Set</a>
+<a href="by_player.html">By Player</a>
 <div class="drawer-group" data-admin="1">Analytics</div>
-<a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
-<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
-<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
+<a href="analytics_hub.html" class="admin-only" data-admin="1">Analytics</a>
+<div class="drawer-group" data-admin="1">Listings</div>
+<a href="listings_hub.html" class="admin-only" data-admin="1">Listings</a>
+<div class="drawer-group" data-admin="1">CX</div>
+<a href="cx_hub.html" class="admin-only" data-admin="1">CX</a>
+<div class="drawer-group" data-admin="1">Photos</div>
+<a href="photo_hub.html" class="admin-only" data-admin="1">Photos</a>
+<div class="drawer-group" data-admin="1">More</div>
+<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<div class="drawer-group" data-admin="1">Sell</div>
-<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
-<a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
-<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<div class="drawer-group" data-admin="1">Marketing</div>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
 <a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
-<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="vault.html" class="admin-only" data-admin="1">Vault</a>
 <a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
+<a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
+<a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
+<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
+<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
+<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
 <div class="drawer-group" data-admin="1">For Us</div>
 <a href="collect.html">My Wants</a>
 <a href="under_10.html">Under $10</a>
 <a href="top_sellers.html">Top Sellers</a>
 <a href="price_drops.html">Price Drops</a>
+<a href="sets.html">Set Completion</a>
 <a href="assistant.html">AI Assistant</a>
 <a href="pokemon.html">Pokemon</a>
 <a href="pikachu.html">Pikachu</a>
@@ -1888,12 +1914,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html">Mewtwo</a>
 <a href="eevee.html">Eevee</a>
 <a href="pokemon_news.html">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Tools</div>
-<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
-<div class="drawer-group" data-admin="1">Cross-post</div>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
@@ -1930,11 +1950,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Order Tracking Replies</h1><p class='sub'>Last run: <code>2026-05-17 20:38 UTC</code> · 33 order(s) indexed from the last 30 days</p><div class='trk-kpis'><div class='trk-kpi'><div class='n'>0</div><div class='l'>Tracking msgs</div></div><div class='trk-kpi'><div class='n'>0</div><div class='l'>Auto-matched</div></div><div class='trk-kpi'><div class='n'>0</div><div class='l'>Need lookup</div></div><div class='trk-kpi'><div class='n'>33</div><div class='l'>Orders indexed</div></div></div></section><section class='trk-note'><h3>How this works</h3><ul><li>Pulls recent orders via GetOrders (last 30 days) keyed by buyer.</li><li>Filters unanswered messages to tracking keywords (<code>track</code>, <code>where</code>, <code>shipped</code>, <code>delivery</code>, <code>lost</code>, …).</li><li>Matches each message to the buyer's most recent order, then drafts a reply with carrier + tracking number + a one-click carrier tracking link.</li><li>Review the draft, edit if needed, click Send via eBay.</li></ul></section><p class='empty'>No tracking-related buyer messages in the last 30 days. When a buyer asks "where's my order?" their message will appear here with the tracking lookup pre-filled.</p>
+    <section class='hero'><h1>Order Tracking Replies</h1><p class='sub'>Last run: <code>2026-05-20 13:46 UTC</code> · 42 order(s) indexed from the last 30 days</p><div class='trk-kpis'><div class='trk-kpi'><div class='n'>0</div><div class='l'>Tracking msgs</div></div><div class='trk-kpi'><div class='n'>0</div><div class='l'>Auto-matched</div></div><div class='trk-kpi'><div class='n'>0</div><div class='l'>Need lookup</div></div><div class='trk-kpi'><div class='n'>42</div><div class='l'>Orders indexed</div></div></div></section><section class='trk-note'><h3>How this works</h3><ul><li>Pulls recent orders via GetOrders (last 30 days) keyed by buyer.</li><li>Filters unanswered messages to tracking keywords (<code>track</code>, <code>where</code>, <code>shipped</code>, <code>delivery</code>, <code>lost</code>, …).</li><li>Matches each message to the buyer's most recent order, then drafts a reply with carrier + tracking number + a one-click carrier tracking link.</li><li>Review the draft, edit if needed, click Send via eBay.</li></ul></section><p class='empty'>No tracking-related buyer messages in the last 30 days. When a buyer asks "where's my order?" their message will appear here with the tracking lookup pre-filled.</p>
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 20:38 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 13:46 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
