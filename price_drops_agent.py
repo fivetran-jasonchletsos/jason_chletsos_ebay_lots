@@ -372,18 +372,7 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
     gone_html = "\n".join(_card_basic(r, "gone") for r in gone_today[:60])
 
     os.makedirs(DOCS_DIR, exist_ok=True)
-    page = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0a">
-  <title>Price Drops · Daily Watch</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>{_CSS}</style>
-</head>
-<body>
-  <main>
+    body = f"""
     <h1>Price Drops</h1>
     <p class="pd-sub">Daily diff against the last scan · generated <b>{_esc(generated_at)}</b><br>{hero_note}</p>
 
@@ -426,10 +415,13 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
         gone_html,
         "Nothing has dropped off since the prior run.",
     )}
-  </main>
-</body>
-</html>
 """
+    page = promote.html_shell(
+        "Price Drops · Daily Watch",
+        body,
+        extra_head=f"<style>{_CSS}</style>",
+        active_page="price_drops.html",
+    )
     with open(HTML_PATH, "w", encoding="utf-8") as fh:
         fh.write(page)
 

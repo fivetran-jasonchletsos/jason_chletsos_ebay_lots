@@ -431,16 +431,7 @@ def render_html(plan: dict) -> str:
         "</div>"
     )
 
-    return f"""<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Listing Performance · Harpua2001</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>{CSS}</style>
-</head><body>
+    body = f"""
 <h1>Listing Performance</h1>
 <div class="sub">Sell Analytics traffic_report · last {days} days · generated {_esc(fetched)} · HTTP {_esc(status)}</div>
 {alert}
@@ -461,9 +452,13 @@ seller-side work (specifics, categories, repricing) is moving these into search 
 <p class="hint">Fewer than 10 impressions in 30 days. Almost always a title, category, or Item Specifics problem.</p>
 {_table(buckets.get('needs_help') or [], with_hint=True,
         empty_msg='Nothing under 10 impressions — your specifics work paid off.')}
-
-</body></html>
 """
+    return promote.html_shell(
+        "Listing Performance · Harpua2001",
+        body,
+        extra_head=f"<style>{CSS}</style>",
+        active_page="listing_performance.html",
+    )
 
 
 # --------------------------------------------------------------------------- #
