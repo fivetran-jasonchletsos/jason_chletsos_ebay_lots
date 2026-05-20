@@ -65,6 +65,12 @@ ACCEPT_FALLBACK_PCT      = 0.98     # if no market median
 DECLINE_FALLBACK_PCT     = 0.70
 ROUND_TO_CENT            = 0.01
 
+# eBay requires MinimumBestOfferPrice < BIN. Clamp to a small buffer below
+# the live BIN to absorb rounding / propagation lag after a reprice down.
+DECLINE_BIN_CAP_PCT      = 0.95     # auto_decline <= price * 0.95
+ACCEPT_BIN_CAP_PCT       = 0.98     # auto_accept  <= price * 0.98
+MIN_ACCEPT_DECLINE_GAP   = 0.05     # accept must clear decline by >= 5¢
+
 # eBay throttles aggressive ReviseItem callers — pace per item.
 PACE_SEC = 0.6
 
@@ -197,12 +203,14 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
         return {
             "ok": False, "errors": errs, "best_offer_enabled": None,
             "auto_accept": None, "min_offer": None, "listing_type": None,
+            "listing_status": None,
         }
     bo_enabled = (root.findtext(f".//{NS}BestOfferDetails/{NS}BestOfferEnabled", "")
                   or "").lower() == "true"
     auto_accept = root.findtext(f".//{NS}ListingDetails/{NS}BestOfferAutoAcceptPrice", "")
     min_offer   = root.findtext(f".//{NS}ListingDetails/{NS}MinimumBestOfferPrice", "")
-    listing_type = root.findtext(f".//{NS}ListingType", "") or ""
+    listing_type   = root.findtext(f".//{NS}ListingType", "") or ""
+    listing_status = root.findtext(f".//{NS}SellingStatus/{NS}ListingStatus", "") or ""
     return {
         "ok":                 True,
         "errors":             [],
@@ -210,6 +218,7 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
         "auto_accept":        float(auto_accept) if auto_accept else None,
         "min_offer":          float(min_offer) if min_offer else None,
         "listing_type":       listing_type,
+        "listing_status":     listing_status,
         "fetched_at":         datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
@@ -276,20 +285,37 @@ def propose_best_offer(listings: list[dict], market: dict, cfg: dict) -> list[di
             decline = _round2(price * DECLINE_FALLBACK_PCT)
             basis   = f"no market data — fallback to list price ${price:.2f}"
 
-        # Guarantee accept >= decline + 1 cent to keep eBay happy.
-        if accept <= decline:
-            accept = _round2(decline + ROUND_TO_CENT)
+        # Clamp below current BIN. eBay rejects ReviseItem when
+        # MinimumBestOfferPrice >= BIN; this fires after a reprice-down
+        # when market_median still trails the new lower list price.
+        accept_cap  = _round2(price * ACCEPT_BIN_CAP_PCT)
+        decline_cap = _round2(price * DECLINE_BIN_CAP_PCT)
+        clamped = (accept > accept_cap) or (decline > decline_cap)
+        accept  = min(accept,  accept_cap)
+        decline = min(decline, decline_cap)
+
+        # Guarantee accept >= decline + 5¢ to keep eBay happy. If the clamp
+        # collapsed the band, drop decline further; if that pushes decline
+        # under the BO floor, skip the listing.
+        if accept - decline < MIN_ACCEPT_DECLINE_GAP:
+            decline = _round2(accept - MIN_ACCEPT_DECLINE_GAP)
 
         # eBay floor: auto-accept and min-offer must each be >= $0.99.
-        accept  = max(accept,  0.99)
-        decline = max(decline, 0.99)
+        if accept < 0.99 or decline < 0.99:
+            row["reason"] = (
+                f"clamp-collapsed: BIN ${price:.2f} too low vs median "
+                f"${median:.2f}" if median else
+                f"clamp-collapsed: BIN ${price:.2f} below floor after clamp"
+            )
+            plan.append(row); continue
 
         row["auto_accept"]  = accept
         row["auto_decline"] = decline
         row["decision"]     = "apply"
+        clamp_note = " [clamped<BIN]" if clamped else ""
         row["reason"]       = (
             f"FP eligible; {basis}; accept@${accept:.2f} ({ACCEPT_PCT_OF_MARKET*100:.0f}%) "
-            f"decline@${decline:.2f} ({DECLINE_PCT_OF_MARKET*100:.0f}%)"
+            f"decline@${decline:.2f} ({DECLINE_PCT_OF_MARKET*100:.0f}%){clamp_note}"
         )
         plan.append(row)
     return plan
@@ -304,6 +330,13 @@ def filter_for_idempotency(plan: list[dict],
             out.append(d); continue
         state = cache.get(d["item_id"]) or {}
         if not state.get("ok"):
+            out.append(d); continue
+        # ReviseItem only succeeds on Active listings; skip Completed/Ended.
+        status = (state.get("listing_status") or "").strip()
+        if status and status.lower() != "active":
+            d = dict(d)
+            d["decision"] = "skip"
+            d["reason"]   = f"listing_status={status} — ReviseItem requires Active"
             out.append(d); continue
         cur_acc = state.get("auto_accept")
         cur_dec = state.get("min_offer")
