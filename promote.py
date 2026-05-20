@@ -9357,11 +9357,14 @@ def build_make_money(listings: list[dict]) -> Path:
 
     # Promoted Listings: expected lift = sum(rate × current_price × eBay 4-12% lift)
     if promoted:
-        plan = promoted.get("plan") or promoted.get("decisions") or []
-        applied_listings = [p for p in plan if (p.get("recommended_rate") or 0) > 0]
-        ad_spend_30d = sum((p.get("recommended_rate") or 0) * (p.get("price") or 0) for p in applied_listings)
-        # Lift heuristic — promoted-listings uplift is ~8% of items that got an ad rate, on already-listed inventory
-        lift_30d = sum((p.get("price") or 0) * 0.08 * ((p.get("recommended_rate") or 0) / 0.12) for p in applied_listings)
+        plan = promoted.get("decisions") or promoted.get("plan") or []
+        applied_listings = [p for p in plan if (p.get("rate") or p.get("recommended_rate") or 0) > 0]
+        ad_spend_30d = sum((p.get("projected_30d_spend") or ((p.get("rate") or p.get("recommended_rate") or 0) * (p.get("price") or 0))) for p in applied_listings)
+        # Lift heuristic — prefer per-row projected_30d_lift_usd; else fallback heuristic
+        lift_30d = sum((p.get("projected_30d_lift_usd") if p.get("projected_30d_lift_usd") is not None else ((p.get("price") or 0) * 0.08 * ((p.get("rate") or p.get("recommended_rate") or 0) / 0.12))) for p in applied_listings)
+        # If per-row projections are tiny (dry-run heuristic), fall back to ad-rate × price × 0.08
+        if lift_30d < 1 and applied_listings:
+            lift_30d = sum((p.get("price") or 0) * 0.08 * ((p.get("rate") or 0) / 0.12) for p in applied_listings if (p.get("rate") or 0) > 0)
         streams.append({
             "key": "promoted",
             "title": "Promoted Listings",
@@ -9380,18 +9383,20 @@ def build_make_money(listings: list[dict]) -> Path:
 
     # Watchers: expected lift = sum(offer_price × 0.15 take rate)
     if watchers:
-        plan = watchers.get("plan") or watchers.get("offers") or []
-        lift_30d = sum((o.get("offer_price") or 0) * 0.15 for o in plan)
+        plan = watchers.get("decisions") or watchers.get("plan") or watchers.get("offers") or []
+        # Only count rows actually scheduled to send (decision == 'apply'); fall back to all rows with an offer_price if no decision field present
+        sendable = [o for o in plan if (o.get("decision") in (None, "apply", "send_offer")) and (o.get("offer_price") or 0) > 0]
+        lift_30d = sum((o.get("expected_uplift") or ((o.get("offer_price") or 0) * 0.15)) for o in sendable)
         streams.append({
             "key": "watchers",
             "title": "Send Offer to Watchers",
             "page": "watchers.html",
-            "count": len(plan),
-            "label": f"{len(plan)} offers queued · ~15% take rate",
+            "count": len(sendable),
+            "label": f"{len(sendable)} offers queued · ~15% take rate",
             "lift_30d": round(lift_30d, 0),
             "icon": "👀",
             "color": "var(--success)",
-            "status": "ready" if plan else "no_plan",
+            "status": "ready" if sendable else "no_plan",
         })
     else:
         streams.append({"key": "watchers", "title": "Send Offer to Watchers", "page": "watchers.html",
@@ -9400,8 +9405,8 @@ def build_make_money(listings: list[dict]) -> Path:
 
     # Item Specifics: search-rank lift, hard to quantify $; rough = 2% × monthly_revenue × pct_fixable
     if specifics:
-        plan = specifics.get("plan") or specifics.get("listings") or []
-        fixable = [p for p in plan if p.get("gaps")]
+        plan = specifics.get("plans") or specifics.get("plan") or specifics.get("listings") or []
+        fixable = [p for p in plan if (p.get("applicable_gaps") or p.get("gaps"))]
         # Conservative: SEO uplift = 3% on the avg-price-of-listing × fixable count
         lift_30d = sum((p.get("price") or 10) * 0.03 for p in fixable)
         streams.append({
@@ -9422,9 +9427,11 @@ def build_make_money(listings: list[dict]) -> Path:
 
     # Markdowns: lift = sum of markdown × velocity_lift_factor (modest, since markdown reduces $/item)
     if promotions:
-        plan = promotions.get("markdown_plan") or promotions.get("plan") or []
-        lift_30d = sum((p.get("new_price") or 0) * 0.20 for p in plan)   # 20% velocity bump on marked items
-        vol_status = "active" if (promotions.get("volume_discount", {}) or {}).get("active") else "pending"
+        plan = promotions.get("markdowns") or promotions.get("markdown_plan") or promotions.get("plan") or []
+        lift_30d = sum((p.get("new_price") or p.get("markdown_price") or 0) * 0.20 for p in plan)   # 20% velocity bump on marked items
+        vd = promotions.get("volume_discount") or {}
+        vol_action = vd.get("action") or ""
+        vol_status = "active" if (vd.get("active") or vol_action == "no_change" or (vd.get("existing") and not vd.get("drift"))) else ("pending" if vol_action else "pending")
         streams.append({
             "key": "promotions",
             "title": "Markdowns + Volume Discount",
@@ -9443,7 +9450,7 @@ def build_make_money(listings: list[dict]) -> Path:
 
     # Photo audit: advisory only. Lift = top-10 reshoot × $X × 40% conversion bump
     if photo_audit:
-        plan = photo_audit.get("audit") or photo_audit.get("listings") or []
+        plan = photo_audit.get("audits") or photo_audit.get("audit") or photo_audit.get("listings") or []
         bad = [p for p in plan if (p.get("severity") in ("SEVERE", "POOR"))]
         # Top 10 by sell-potential
         top10 = sorted(bad, key=lambda p: -(p.get("sell_potential_score") or 0))[:10]
@@ -9466,8 +9473,8 @@ def build_make_money(listings: list[dict]) -> Path:
 
     # Repricing (existing agent — included for completeness)
     if repricing:
-        plan = repricing.get("plan") or repricing.get("decisions") or []
-        applied = [p for p in plan if p.get("action") in ("raise", "lower")]
+        plan = repricing.get("decisions") or repricing.get("plan") or []
+        applied = [p for p in plan if p.get("decision") in ("apply", "raise", "lower")]
         lift_30d = sum(abs((p.get("delta_pct") or 0) / 100 * (p.get("current_price") or 0) * 0.5) for p in applied)
         streams.append({
             "key": "repricing",
