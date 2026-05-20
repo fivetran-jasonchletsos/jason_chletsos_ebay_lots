@@ -36,13 +36,72 @@
     }
     .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.25rem; }
     @media (min-width: 768px) { .container { padding: 2rem 2.5rem; } }
+
+    /* ── Collapsible filter wrapper (mobile) ── */
+    .filter-toggle {
+      display: none; /* shown only on mobile via media query */
+    }
+    .filter-toggle-btn {
+      width: 100%;
+      background: rgba(245,241,234,0.06);
+      border: 1px solid rgba(245,241,234,0.15);
+      color: #f5f1ea;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0;
+    }
+    .filter-toggle-btn:focus { outline: 2px solid #d4af37; outline-offset: 1px; }
+    .filter-toggle-btn .toggle-arrow {
+      font-size: 0.7rem;
+      transition: transform 200ms;
+      display: inline-block;
+    }
+    .filter-toggle-btn[aria-expanded="true"] .toggle-arrow { transform: rotate(180deg); }
+    .filter-toggle-btn[aria-expanded="true"] { border-bottom: none; }
+
+    .filter-collapsible-body {
+      /* expanded by default on desktop; toggled on mobile */
+    }
+
+    @media (max-width: 767px) {
+      .filter-toggle { display: block; margin-bottom: 1.5rem; }
+      .filter-collapsible-body {
+        overflow: hidden;
+        transition: max-height 280ms ease;
+        border: 1px solid rgba(245,241,234,0.15);
+        border-top: none;
+      }
+      .filter-collapsible-body[aria-hidden="true"] {
+        max-height: 0 !important;
+      }
+    }
+    @media (min-width: 768px) {
+      .filter-toggle { display: none; }
+      .filter-collapsible-body { display: block !important; }
+    }
+
     .filters {
       display: flex; flex-direction: column; gap: 0.75rem;
       background: rgba(245,241,234,0.04);
       border: 1px solid rgba(245,241,234,0.1);
       padding: 1rem;
-      margin-bottom: 1.5rem;
     }
+    /* on mobile the border is managed by the collapsible wrapper */
+    @media (max-width: 767px) {
+      .filters {
+        border: none;
+        background: rgba(245,241,234,0.04);
+        margin-bottom: 0;
+      }
+    }
+
     .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
     .filter-label {
       font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
@@ -62,10 +121,19 @@
       padding: 0.4rem 0.7rem; cursor: pointer; transition: all 150ms;
       border: 1px solid rgba(245,241,234,0.15);
       background: transparent; color: rgba(245,241,234,0.7);
+      /* ensure minimum tap target via line-height, without blowing up desktop size */
+      line-height: 1.2;
     }
     .pill:hover { border-color: #d4af37; color: #f5f1ea; }
     .pill[aria-pressed="true"] { background: #d4af37; color: #0a0a0a; border-color: #d4af37; font-weight: 700; }
     .pill .swatch { display:inline-block; width:0.6em; height:0.6em; border-radius:50%; margin-right:0.4em; vertical-align: middle; border: 1px solid rgba(0,0,0,0.2); }
+    /* Bigger tap targets on mobile */
+    @media (max-width: 767px) {
+      .pill {
+        font-size: 0.85rem;
+        padding: 0.7rem 1rem;
+      }
+    }
     .clear-all {
       font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
       padding: 0.4rem 0.7rem; cursor: pointer;
@@ -73,7 +141,62 @@
       color: rgba(245,241,234,0.8);
     }
     .clear-all:hover { border-color: #d4af37; color: #d4af37; }
-    .meta { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,241,234,0.55); margin-bottom: 1rem; }
+
+    /* ── Sticky active-filter summary bar ── */
+    #filter-summary-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #111;
+      border-bottom: 1px solid rgba(245,241,234,0.1);
+      padding: 0.5rem 1.25rem;
+      display: none; /* shown when there are active filters */
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    #filter-summary-bar.has-filters { display: flex; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+      background: #d4af37; color: #0a0a0a;
+      padding: 0.25rem 0.5rem;
+      font-weight: 700;
+    }
+    .chip-x {
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1;
+      opacity: 0.75;
+      border: none;
+      background: none;
+      color: #0a0a0a;
+      padding: 0;
+    }
+    .chip-x:hover { opacity: 1; }
+
+    /* ── Result meta + sort row ── */
+    .result-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+    }
+    .meta { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,241,234,0.55); }
+    .sort-select {
+      background: #1a1a1a;
+      color: #f5f1ea;
+      border: 1px solid rgba(245,241,234,0.2);
+      padding: 0.35rem 0.6rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+    }
+    .sort-select:focus { outline: 2px solid #d4af37; outline-offset: 1px; }
+
     .grid {
       display: grid; gap: 1.25rem;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -82,13 +205,29 @@
       .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
     }
     .card { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    /* ── Image skeleton / lazy placeholder ── */
+    .card-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2/3;
+    }
+    .card-img-skeleton {
+      position: absolute;
+      inset: 0;
+      background: rgba(245,241,234,0.07);
+      transition: opacity 300ms;
+    }
     .card img {
-      width: 100%; aspect-ratio: 2/3; object-fit: contain;
-      background: rgba(245,241,234,0.04);
+      width: 100%; height: 100%; object-fit: contain;
+      background: transparent;
       border: 1px solid rgba(245,241,234,0.08);
-      transition: transform 200ms, border-color 200ms;
+      transition: transform 200ms, border-color 200ms, opacity 300ms;
+      display: block;
+      position: relative;
     }
     .card a:hover img { transform: scale(1.02); border-color: #d4af37; }
+
     .card-name { font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
     .card-meta { font-size: 0.72rem; color: rgba(245,241,234,0.55); }
     .card-price { font-size: 0.92rem; font-weight: 700; color: #d4af37; }
@@ -106,9 +245,27 @@
       letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700;
       border: 1px solid #d4af37; color: #d4af37; margin-left: 0.3rem;
     }
+
+    /* ── Load more button ── */
+    .load-more-wrap { text-align: center; margin-top: 2rem; }
+    .load-more-btn {
+      background: transparent;
+      border: 1px solid rgba(245,241,234,0.3);
+      color: rgba(245,241,234,0.8);
+      padding: 0.65rem 1.75rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 150ms, color 150ms;
+    }
+    .load-more-btn:hover { border-color: #d4af37; color: #d4af37; }
   </style>
 </head>
 <body>
+  <!-- Sticky active-filter summary bar -->
+  <div id="filter-summary-bar" aria-label="Active filters" role="region"></div>
+
   <header class="hdr">
     <div class="hdr-inner">
       <p class="crumb">
@@ -123,50 +280,72 @@
   </header>
 
   <main class="container">
-    <div class="filters">
-      <div class="filter-row">
-        <span class="filter-label">Pokemon</span>
-        <input id="search" class="search-input" type="search" placeholder="Charizard, Gardevoir, Mew, Eevee…" aria-label="Pokemon name" />
-        <button id="clear-all" class="clear-all" type="button">Clear all</button>
-      </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Special</span>
-        <div id="special-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
-      </div>
+    <!-- Mobile filter toggle button (hidden on desktop) -->
+    <div class="filter-toggle">
+      <button id="filter-toggle-btn" class="filter-toggle-btn" type="button"
+              aria-expanded="false" aria-controls="filter-collapsible-body">
+        <span id="filter-toggle-label">Filters</span>
+        <span class="toggle-arrow" aria-hidden="true">&#9660;</span>
+      </button>
+    </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Rarity</span>
-        <div id="rarity-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
-      </div>
+    <!-- Collapsible body — open by default on desktop, closed on mobile -->
+    <div id="filter-collapsible-body" class="filter-collapsible-body" aria-hidden="true">
+      <div class="filters">
+        <div class="filter-row">
+          <span class="filter-label">Pokemon</span>
+          <input id="search" class="search-input" type="search" placeholder="Charizard, Gardevoir, Mew, Eevee…" aria-label="Pokemon name" />
+          <button id="clear-all" class="clear-all" type="button">Clear all</button>
+        </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Color</span>
-        <div id="color-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
-      </div>
+        <div class="filter-row">
+          <span class="filter-label">Special</span>
+          <div id="special-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Year</span>
-        <div id="year-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
-      </div>
+        <div class="filter-row">
+          <span class="filter-label">Rarity</span>
+          <div id="rarity-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Theme</span>
-        <div id="theme-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
-      </div>
+        <div class="filter-row">
+          <span class="filter-label">Color</span>
+          <div id="color-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Team</span>
-        <div id="team-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
-      </div>
+        <div class="filter-row">
+          <span class="filter-label">Year</span>
+          <div id="year-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Price</span>
-        <div id="price-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        <div class="filter-row">
+          <span class="filter-label">Theme</span>
+          <div id="theme-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">Team</span>
+          <div id="team-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
+
+        <div class="filter-row">
+          <span class="filter-label">Price</span>
+          <div id="price-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+        </div>
       </div>
     </div>
 
-    <p id="result-meta" class="meta">Loading cards…</p>
+    <div class="result-controls">
+      <p id="result-meta" class="meta">Loading cards…</p>
+      <select id="sort-select" class="sort-select" aria-label="Sort order">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="price-desc">Price: high to low</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="name-asc">Name A&#8594;Z</option>
+      </select>
+    </div>
 
     <div id="grid" class="grid" aria-live="polite"></div>
 
@@ -174,7 +353,13 @@
       No cards match. Try a different combination.
     </div>
 
-    <a href="index.html" class="nav-back">← Back to listings</a>
+    <div class="load-more-wrap">
+      <button id="load-more-btn" class="load-more-btn" type="button" style="display:none;">
+        Load more
+      </button>
+    </div>
+
+    <a href="index.html" class="nav-back">&#8592; Back to listings</a>
   </main>
 
   <script>
@@ -193,7 +378,6 @@
       { id: "Rare Holo",                     label: "Holo Rare" },
       { id: "Rare Secret",                   label: "Secret Rare" }
     ];
-    // Pokemon energy types = "Color"
     const COLOR_OPTIONS = [
       { id: "",          label: "Any",        hex: null },
       { id: "Fire",      label: "Fire",       hex: "#ef4444" },
@@ -217,7 +401,6 @@
       { id: "2020", label: "2020" },
       { id: "older", label: "Older" }
     ];
-    // Pokemon TCG subtypes — represented as "Theme"
     const THEME_OPTIONS = [
       { id: "",         label: "Any" },
       { id: "ex",       label: "ex" },
@@ -229,7 +412,6 @@
       { id: "Prism Star", label: "Prism Star" },
       { id: "Radiant",  label: "Radiant" }
     ];
-    // Villain teams + Star — matched against card name (client-side)
     const TEAM_OPTIONS = [
       { id: "",          label: "Any" },
       { id: "Rocket",    label: "Team Rocket" },
@@ -245,9 +427,9 @@
     const PRICE_OPTIONS = [
       { id: "",         label: "Any" },
       { id: "0-20",     label: "< $20" },
-      { id: "20-50",    label: "$20–50" },
-      { id: "50-100",   label: "$50–100" },
-      { id: "100-250",  label: "$100–250" },
+      { id: "20-50",    label: "$20-50" },
+      { id: "50-100",   label: "$50-100" },
+      { id: "100-250",  label: "$100-250" },
       { id: "250-",     label: "$250+" }
     ];
 
@@ -260,11 +442,138 @@
       theme: "",
       team: "",
       price: "",
-      series: "Scarlet & Violet", // hidden default series
+      series: "Scarlet & Violet",
+      sort: "newest",
       cards: [],
-      filtered: []
+      filtered: [],
+      visibleCount: 80
     };
 
+    // ─── Collapsible filter toggle (mobile only) ───────────────────────
+    const filterToggleBtn = document.getElementById("filter-toggle-btn");
+    const filterBody      = document.getElementById("filter-collapsible-body");
+
+    function isMobile() { return window.innerWidth < 768; }
+
+    function initFilterPanel() {
+      if (isMobile()) {
+        filterBody.setAttribute("aria-hidden", "true");
+        filterBody.style.maxHeight = "0px";
+        filterToggleBtn.setAttribute("aria-expanded", "false");
+      } else {
+        filterBody.removeAttribute("aria-hidden");
+        filterBody.style.maxHeight = "";
+        filterToggleBtn.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    filterToggleBtn.addEventListener("click", () => {
+      const isOpen = filterToggleBtn.getAttribute("aria-expanded") === "true";
+      if (isOpen) {
+        filterToggleBtn.setAttribute("aria-expanded", "false");
+        filterBody.setAttribute("aria-hidden", "true");
+        filterBody.style.maxHeight = "0px";
+      } else {
+        filterToggleBtn.setAttribute("aria-expanded", "true");
+        filterBody.removeAttribute("aria-hidden");
+        // measure scrollHeight and set to allow transition
+        filterBody.style.maxHeight = filterBody.scrollHeight + "px";
+      }
+    });
+
+    window.addEventListener("resize", initFilterPanel);
+    initFilterPanel();
+
+    // ─── Active filter count for toggle label ─────────────────────────
+    function countActiveFilters() {
+      let n = 0;
+      if (state.query)   n++;
+      if (state.special) n++;
+      if (state.rarity)  n++;
+      if (state.color)   n++;
+      if (state.year)    n++;
+      if (state.theme)   n++;
+      if (state.team)    n++;
+      if (state.price)   n++;
+      return n;
+    }
+
+    function updateFilterToggleLabel() {
+      const n = countActiveFilters();
+      const label = document.getElementById("filter-toggle-label");
+      label.textContent = n > 0 ? `Filters (${n} active)` : "Filters";
+    }
+
+    // ─── Sticky active-filter summary bar ─────────────────────────────
+    function renderSummaryBar() {
+      const bar = document.getElementById("filter-summary-bar");
+      bar.innerHTML = "";
+
+      const chips = [];
+      if (state.query)   chips.push({ key: "query",   label: `"${state.query}"` });
+      if (state.special) chips.push({ key: "special",  label: SPECIAL_OPTIONS.find(o => o.id === state.special)?.label || state.special });
+      if (state.rarity)  chips.push({ key: "rarity",   label: state.rarity });
+      if (state.color)   chips.push({ key: "color",    label: state.color });
+      if (state.year)    chips.push({ key: "year",     label: state.year === "older" ? "Pre-2020" : state.year });
+      if (state.theme)   chips.push({ key: "theme",    label: state.theme });
+      if (state.team)    chips.push({ key: "team",     label: "Team " + state.team });
+      if (state.price)   chips.push({ key: "price",    label: PRICE_OPTIONS.find(p => p.id === state.price)?.label });
+
+      if (chips.length === 0) {
+        bar.classList.remove("has-filters");
+        return;
+      }
+      bar.classList.add("has-filters");
+
+      chips.forEach(chip => {
+        const el = document.createElement("span");
+        el.className = "chip";
+        el.innerHTML = `${chip.label} <button class="chip-x" aria-label="Clear ${chip.label}" data-key="${chip.key}">&times;</button>`;
+        bar.appendChild(el);
+      });
+    }
+
+    // Handle chip-x clears via event delegation
+    document.getElementById("filter-summary-bar").addEventListener("click", (e) => {
+      const btn = e.target.closest(".chip-x");
+      if (!btn) return;
+      const key = btn.dataset.key;
+      const needsFetch = ["special", "rarity", "color", "theme"].includes(key);
+      if (key === "query") {
+        state.query = "";
+        document.getElementById("search").value = "";
+      } else {
+        state[key] = "";
+      }
+      if (needsFetch) fetchCards();
+      else applyClientFilter();
+    });
+
+    // ─── Sort ──────────────────────────────────────────────────────────
+    document.getElementById("sort-select").addEventListener("change", (e) => {
+      state.sort = e.target.value;
+      applyClientFilter();
+    });
+
+    function sortFiltered(arr) {
+      const a = arr.slice(); // copy to avoid mutating state.filtered during sort
+      switch (state.sort) {
+        case "newest":
+          return a.sort((x, y) => (y.set?.releaseDate || "").localeCompare(x.set?.releaseDate || ""));
+        case "oldest":
+          return a.sort((x, y) => (x.set?.releaseDate || "").localeCompare(y.set?.releaseDate || ""));
+        case "price-desc":
+          return a.sort((x, y) => (getCardPrice(y) ?? -1) - (getCardPrice(x) ?? -1));
+        case "price-asc":
+          return a.sort((x, y) => (getCardPrice(x) ?? Infinity) - (getCardPrice(y) ?? Infinity));
+        case "name-asc":
+          return a.sort((x, y) => x.name.localeCompare(y.name));
+        default:
+          return a;
+      }
+    }
+
+    // ─── Pill builder ─────────────────────────────────────────────────
     function buildPills(host, opts, selected, onPick) {
       host.innerHTML = "";
       opts.forEach(opt => {
@@ -279,15 +588,26 @@
     }
 
     function renderFilters() {
-      buildPills(document.getElementById("special-pills"), SPECIAL_OPTIONS, state.special, (v) => { state.special = v; fetchCards(); });
-      buildPills(document.getElementById("rarity-pills"),  RARITY_OPTIONS,  state.rarity,  (v) => { state.rarity = v;  fetchCards(); });
-      buildPills(document.getElementById("color-pills"),   COLOR_OPTIONS,   state.color,   (v) => { state.color = v;   fetchCards(); });
-      buildPills(document.getElementById("year-pills"),    YEAR_OPTIONS,    state.year,    (v) => { state.year = v;    applyClientFilter(); });
-      buildPills(document.getElementById("theme-pills"),   THEME_OPTIONS,   state.theme,   (v) => { state.theme = v;   fetchCards(); });
-      buildPills(document.getElementById("team-pills"),    TEAM_OPTIONS,    state.team,    (v) => { state.team = v;    applyClientFilter(); });
-      buildPills(document.getElementById("price-pills"),   PRICE_OPTIONS,   state.price,   (v) => { state.price = v;   applyClientFilter(); });
+      buildPills(document.getElementById("special-pills"), SPECIAL_OPTIONS, state.special, (v) => { state.special = v; scrollToGrid(); fetchCards(); });
+      buildPills(document.getElementById("rarity-pills"),  RARITY_OPTIONS,  state.rarity,  (v) => { state.rarity = v;  scrollToGrid(); fetchCards(); });
+      buildPills(document.getElementById("color-pills"),   COLOR_OPTIONS,   state.color,   (v) => { state.color = v;   scrollToGrid(); fetchCards(); });
+      buildPills(document.getElementById("year-pills"),    YEAR_OPTIONS,    state.year,    (v) => { state.year = v;    scrollToGrid(); applyClientFilter(); });
+      buildPills(document.getElementById("theme-pills"),   THEME_OPTIONS,   state.theme,   (v) => { state.theme = v;   scrollToGrid(); fetchCards(); });
+      buildPills(document.getElementById("team-pills"),    TEAM_OPTIONS,    state.team,    (v) => { state.team = v;    scrollToGrid(); applyClientFilter(); });
+      buildPills(document.getElementById("price-pills"),   PRICE_OPTIONS,   state.price,   (v) => { state.price = v;   scrollToGrid(); applyClientFilter(); });
     }
 
+    // ─── Scroll to grid top after filter change ────────────────────────
+    function scrollToGrid() {
+      const grid = document.getElementById("grid");
+      const rc   = document.querySelector(".result-controls");
+      const target = rc || grid;
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    // ─── Price helpers ─────────────────────────────────────────────────
     function getCardPrice(c) {
       const p = c.tcgplayer?.prices || {};
       return p.holofoil?.market ?? p.normal?.market ?? p.reverseHolofoil?.market ?? p["1stEditionHolofoil"]?.market ?? null;
@@ -314,11 +634,11 @@
       if (!state.team) return true;
       const haystack = (card.name + " " + (card.subtypes || []).join(" ")).toLowerCase();
       const needle = ("Team " + state.team).toLowerCase();
-      // Also match raw word for Star (since "Team Star" subset uses Star characters)
       const altNeedle = state.team.toLowerCase();
       return haystack.includes(needle) || haystack.includes(altNeedle);
     }
 
+    // ─── Filter + render ───────────────────────────────────────────────
     function applyClientFilter() {
       const q = state.query.trim().toLowerCase();
       state.filtered = state.cards.filter(c => {
@@ -328,14 +648,19 @@
         if (!priceMatches(c)) return false;
         return true;
       });
+      state.visibleCount = 80; // reset on any filter change
       renderFilters();
+      updateFilterToggleLabel();
+      renderSummaryBar();
       renderGrid();
     }
 
+    // ─── Render grid ───────────────────────────────────────────────────
     function renderGrid() {
-      const grid = document.getElementById("grid");
-      const empty = document.getElementById("empty");
-      const meta = document.getElementById("result-meta");
+      const grid      = document.getElementById("grid");
+      const empty     = document.getElementById("empty");
+      const meta      = document.getElementById("result-meta");
+      const loadMore  = document.getElementById("load-more-btn");
 
       const parts = [];
       if (state.special) parts.push(state.special === "TG" ? "Trainer Gallery" : "Galarian Gallery");
@@ -346,16 +671,23 @@
       if (state.year)   parts.push(state.year === "older" ? "Pre-2020" : state.year);
       if (state.price)  parts.push(PRICE_OPTIONS.find(p => p.id === state.price)?.label);
       const label = parts.length ? parts.join(" · ") : "Any";
-      meta.textContent = `${state.filtered.length} card${state.filtered.length === 1 ? "" : "s"} · ${label}`;
 
-      if (state.filtered.length === 0 && state.cards.length > 0) {
+      const total   = state.filtered.length;
+      const showing = Math.min(state.visibleCount, total);
+      meta.textContent = `Showing ${showing} of ${total} card${total === 1 ? "" : "s"} · ${label}`;
+
+      if (total === 0 && state.cards.length > 0) {
         grid.innerHTML = "";
         empty.style.display = "block";
+        loadMore.style.display = "none";
         return;
       }
       empty.style.display = "none";
 
-      grid.innerHTML = state.filtered.slice(0, 80).map(c => {
+      const sorted = sortFiltered(state.filtered);
+      const slice  = sorted.slice(0, state.visibleCount);
+
+      grid.innerHTML = slice.map(c => {
         const img = c.images?.small || c.images?.large || "";
         const price = getCardPrice(c);
         const ebaySearch = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(c.name + " " + (c.set?.name || "") + " " + (c.number || ""))}`;
@@ -365,20 +697,39 @@
         return `
           <article class="card">
             <a href="${tcg}" target="_blank" rel="noopener" aria-label="${c.name} on TCGplayer">
-              <img src="${img}" alt="${c.name}" loading="lazy" />
+              <div class="card-img-wrap">
+                <div class="card-img-skeleton" id="skel-${c.id}"></div>
+                <img src="${img}" alt="${c.name}" loading="lazy"
+                     onload="var s=document.getElementById('skel-${c.id}');if(s)s.style.opacity='0';" />
+              </div>
             </a>
             <div class="card-name">${c.name}</div>
             <div class="card-meta">${c.set?.name || "—"} · ${yearStr} · #${c.number || "?"}${isGallery ? `<span class="badge">${c.number.startsWith("TG") ? "Trainer" : "Galarian"}</span>` : ""}</div>
             ${price !== null ? `<div class="card-price">$${price.toFixed(2)}</div>` : `<div class="card-meta">Price TBD</div>`}
             <div style="display:flex; gap:0.5rem;">
-              ${c.tcgplayer?.url ? `<a href="${c.tcgplayer.url}" target="_blank" rel="noopener" style="font-size:0.72rem; color:#d4af37;">TCGplayer →</a>` : ""}
-              <a href="${ebaySearch}" target="_blank" rel="noopener" style="font-size:0.72rem; color:rgba(245,241,234,0.55);">eBay →</a>
+              ${c.tcgplayer?.url ? `<a href="${c.tcgplayer.url}" target="_blank" rel="noopener" style="font-size:0.72rem; color:#d4af37;">TCGplayer &#8594;</a>` : ""}
+              <a href="${ebaySearch}" target="_blank" rel="noopener" style="font-size:0.72rem; color:rgba(245,241,234,0.55);">eBay &#8594;</a>
             </div>
           </article>
         `;
       }).join("");
+
+      // Load-more button visibility
+      if (state.visibleCount < total) {
+        loadMore.style.display = "inline-block";
+        loadMore.textContent = `Load more (${total - state.visibleCount} remaining)`;
+      } else {
+        loadMore.style.display = "none";
+      }
     }
 
+    // ─── Load more ─────────────────────────────────────────────────────
+    document.getElementById("load-more-btn").addEventListener("click", () => {
+      state.visibleCount += 80;
+      renderGrid();
+    });
+
+    // ─── API fetch ─────────────────────────────────────────────────────
     async function fetchCards() {
       const grid = document.getElementById("grid");
       const meta = document.getElementById("result-meta");
@@ -411,11 +762,13 @@
       }
     }
 
+    // ─── Search input ──────────────────────────────────────────────────
     document.getElementById("search").addEventListener("input", (e) => {
       state.query = e.target.value;
       applyClientFilter();
     });
 
+    // ─── Clear all ─────────────────────────────────────────────────────
     document.getElementById("clear-all").addEventListener("click", () => {
       state.query = ""; state.special = ""; state.rarity = ""; state.color = "";
       state.year = ""; state.theme = ""; state.team = ""; state.price = "";
@@ -423,6 +776,7 @@
       fetchCards();
     });
 
+    // ─── Init ──────────────────────────────────────────────────────────
     renderFilters();
     fetchCards();
   </script>
