@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Japanese Holo / Art Rare Pokemon · Harpua2001</title>
+  <meta property="og:title" content="Japanese Holo / Art Rare Pokemon">
+  <meta property="og:description" content="Browse Japanese Art Rare and Special Illustration Rare Pokemon cards. Filter by Pokemon, set, and rarity.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #0a0a0a;
+      color: #f5f1ea;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .hdr {
+      border-bottom: 1px solid rgba(245,241,234,0.08);
+      padding: 1.5rem 1.25rem 2rem;
+    }
+    .hdr-inner { max-width: 1200px; margin: 0 auto; }
+    .crumb { font-size: 0.72rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,241,234,0.5); }
+    .crumb a { color: rgba(245,241,234,0.7); }
+    .crumb a:hover { color: #d4af37; }
+    .title { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0.5rem 0 0.25rem; line-height: 1.05; }
+    .sub { color: rgba(245,241,234,0.65); font-size: 0.95rem; max-width: 640px; line-height: 1.5; }
+    @media (min-width: 768px) {
+      .hdr { padding: 2rem 2.5rem 2.5rem; }
+      .title { font-size: 3rem; }
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+    @media (min-width: 768px) { .container { padding: 2rem 2.5rem; } }
+    .filters {
+      display: flex; flex-direction: column; gap: 1rem;
+      background: rgba(245,241,234,0.04);
+      border: 1px solid rgba(245,241,234,0.1);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+    .filter-label {
+      font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: rgba(245,241,234,0.45); min-width: 5rem;
+    }
+    .search-input {
+      flex: 1; min-width: 12rem;
+      background: #1a1a1a; color: #f5f1ea;
+      border: 1px solid rgba(245,241,234,0.15);
+      padding: 0.5rem 0.75rem;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.875rem;
+    }
+    .search-input:focus { outline: 2px solid #d4af37; outline-offset: 1px; }
+    .pill {
+      font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 0.4rem 0.75rem; cursor: pointer; transition: all 150ms;
+      border: 1px solid rgba(245,241,234,0.15);
+      background: transparent; color: rgba(245,241,234,0.65);
+    }
+    .pill:hover { border-color: #d4af37; color: #f5f1ea; }
+    .pill[aria-pressed="true"] { background: #d4af37; color: #0a0a0a; border-color: #d4af37; }
+    .meta { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,241,234,0.5); margin-bottom: 1rem; }
+    .grid {
+      display: grid; gap: 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    }
+    .card { display: flex; flex-direction: column; gap: 0.5rem; }
+    .card img {
+      width: 100%; aspect-ratio: 2/3; object-fit: contain;
+      background: rgba(245,241,234,0.04);
+      border: 1px solid rgba(245,241,234,0.08);
+      transition: transform 200ms, border-color 200ms;
+    }
+    .card a:hover img { transform: scale(1.02); border-color: #d4af37; }
+    .card-name { font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
+    .card-meta { font-size: 0.72rem; color: rgba(245,241,234,0.5); }
+    .card-price { font-size: 0.85rem; font-weight: 600; color: #d4af37; }
+    .empty {
+      text-align: center; padding: 3rem 1rem;
+      color: rgba(245,241,234,0.45); font-style: italic;
+    }
+    .loading {
+      text-align: center; padding: 3rem 1rem;
+      color: rgba(245,241,234,0.55);
+    }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.4; } }
+    .nav-back {
+      display: inline-block;
+      margin-top: 2rem;
+      font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(245,241,234,0.55); text-decoration: none;
+    }
+    .nav-back:hover { color: #d4af37; }
+  </style>
+</head>
+<body>
+  <header class="hdr">
+    <div class="hdr-inner">
+      <p class="crumb">
+        <a href="index.html">Harpua2001</a> &middot; Japanese Holo / Art Rare
+      </p>
+      <h1 class="title">Japanese Holo &amp; Art Rare</h1>
+      <p class="sub">
+        Filter the modern Pokemon TCG by rarity — Illustration Rare, Special Illustration Rare,
+        Hyper Rare, and Special Art tier. Click any card to see TCGplayer pricing and current eBay listings.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="filters">
+      <div class="filter-row">
+        <span class="filter-label">Search</span>
+        <input
+          id="search"
+          class="search-input"
+          type="search"
+          placeholder="Pokemon name (e.g. Charizard, Gardevoir, Mew)"
+          aria-label="Search Pokemon by name"
+        />
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Rarity</span>
+        <div id="rarity-pills" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Set series</span>
+        <div id="series-pills" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+      </div>
+    </div>
+
+    <p id="result-meta" class="meta">Loading cards…</p>
+
+    <div id="grid" class="grid" aria-live="polite"></div>
+
+    <div id="empty" class="empty" style="display:none;">
+      No cards match the current filter. Try clearing it or selecting a different rarity.
+    </div>
+
+    <a href="index.html" class="nav-back">← Back to listings</a>
+  </main>
+
+  <script>
+    // The "Art Rare" tier popular in modern Japanese sets.
+    // The Pokemon TCG API uses these rarity names for the high-tier illustrations.
+    const RARITY_OPTIONS = [
+      { id: "Illustration Rare", label: "Illustration Rare (IR)" },
+      { id: "Special Illustration Rare", label: "Special Illustration Rare (SIR/SAR)" },
+      { id: "Hyper Rare", label: "Hyper Rare" },
+      { id: "Rare Secret", label: "Rare Secret" },
+      { id: "Rare Rainbow", label: "Rainbow Rare" }
+    ];
+
+    // Modern series most commonly referred to as "Japanese-set / Art Rare"
+    const SERIES_OPTIONS = [
+      { id: "", label: "Any" },
+      { id: "Scarlet & Violet", label: "Scarlet & Violet" },
+      { id: "Sword & Shield", label: "Sword & Shield" },
+      { id: "Sun & Moon", label: "Sun & Moon" }
+    ];
+
+    const state = {
+      query: "",
+      rarity: "Illustration Rare",
+      series: "Scarlet & Violet",
+      cards: [],
+      filtered: []
+    };
+
+    function buildPills(host, opts, selected, onPick, includeAll = true) {
+      const items = includeAll && opts[0]?.id !== "" ? [{ id: "__ALL__", label: "Any" }, ...opts] : opts;
+      host.innerHTML = "";
+      items.forEach(opt => {
+        const b = document.createElement("button");
+        b.className = "pill";
+        b.type = "button";
+        b.textContent = opt.label;
+        const isActive =
+          (opt.id === "__ALL__" && !selected) ||
+          (opt.id === selected);
+        b.setAttribute("aria-pressed", isActive ? "true" : "false");
+        b.addEventListener("click", () => onPick(opt.id === "__ALL__" ? "" : opt.id));
+        host.appendChild(b);
+      });
+    }
+
+    function renderFilters() {
+      buildPills(
+        document.getElementById("rarity-pills"),
+        RARITY_OPTIONS,
+        state.rarity,
+        (v) => { state.rarity = v; fetchCards(); }
+      );
+      buildPills(
+        document.getElementById("series-pills"),
+        SERIES_OPTIONS,
+        state.series,
+        (v) => { state.series = v; fetchCards(); },
+        false
+      );
+    }
+
+    function applyClientFilter() {
+      const q = state.query.trim().toLowerCase();
+      state.filtered = state.cards.filter(c => {
+        if (!q) return true;
+        return c.name.toLowerCase().includes(q) ||
+               (c.set?.name || "").toLowerCase().includes(q);
+      });
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById("grid");
+      const empty = document.getElementById("empty");
+      const meta = document.getElementById("result-meta");
+
+      meta.textContent = `${state.filtered.length} card${state.filtered.length === 1 ? "" : "s"} · ${state.rarity || "Any rarity"}${state.series ? " · " + state.series : ""}`;
+
+      if (state.filtered.length === 0 && state.cards.length > 0) {
+        grid.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      grid.innerHTML = state.filtered.slice(0, 60).map(c => {
+        const img = c.images?.small || c.images?.large || "";
+        const price = c.tcgplayer?.prices?.holofoil?.market ||
+                      c.tcgplayer?.prices?.normal?.market ||
+                      c.tcgplayer?.prices?.reverseHolofoil?.market ||
+                      c.tcgplayer?.prices?.["1stEditionHolofoil"]?.market;
+        const ebaySearch = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(c.name + " " + (c.set?.name || "") + " " + (c.number || ""))}`;
+        const tcg = c.tcgplayer?.url || ebaySearch;
+        return `
+          <article class="card">
+            <a href="${tcg}" target="_blank" rel="noopener" aria-label="${c.name} on TCGplayer">
+              <img src="${img}" alt="${c.name}" loading="lazy" />
+            </a>
+            <div class="card-name">${c.name}</div>
+            <div class="card-meta">${c.set?.name || "—"} · #${c.number || "?"}</div>
+            ${price ? `<div class="card-price">$${price.toFixed(2)}</div>` : `<div class="card-meta">Price TBD</div>`}
+            <div style="display:flex; gap:0.5rem;">
+              ${c.tcgplayer?.url ? `<a href="${c.tcgplayer.url}" target="_blank" rel="noopener" style="font-size:0.7rem; color:#d4af37;">TCGplayer →</a>` : ""}
+              <a href="${ebaySearch}" target="_blank" rel="noopener" style="font-size:0.7rem; color:rgba(245,241,234,0.55);">eBay →</a>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function fetchCards() {
+      const grid = document.getElementById("grid");
+      const meta = document.getElementById("result-meta");
+      meta.classList.add("pulse");
+      meta.textContent = "Loading cards…";
+      grid.innerHTML = "";
+
+      const parts = [];
+      if (state.rarity) parts.push(`rarity:"${state.rarity}"`);
+      if (state.series) parts.push(`set.series:"${state.series}"`);
+      const q = parts.join(" ");
+      const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=60`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        state.cards = data.data || [];
+      } catch (err) {
+        meta.textContent = `Error: ${err.message}. Try again in a moment.`;
+        state.cards = [];
+      } finally {
+        meta.classList.remove("pulse");
+        renderFilters();
+        applyClientFilter();
+      }
+    }
+
+    document.getElementById("search").addEventListener("input", (e) => {
+      state.query = e.target.value;
+      applyClientFilter();
+    });
+
+    renderFilters();
+    fetchCards();
+  </script>
+</body>
+</html>
