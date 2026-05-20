@@ -108,12 +108,19 @@ def append_history(entries: list[dict]) -> None:
 
 
 def _recent_offer_ids(history: list[dict], cooldown_days: int) -> set[str]:
-    """Return item_ids that received an offer within cooldown window."""
+    """Return item_ids that received a SUCCESSFUL offer within cooldown window.
+
+    Failed offers do not count — they didn't reach the buyer, so the listing
+    is not actually in cooldown. Skipping h.get("ok") == False here was the
+    bug that locked out 12 of 15 eligible items in the 2026-05-20 run.
+    """
     if not history:
         return set()
     cutoff = datetime.now(timezone.utc) - timedelta(days=cooldown_days)
     recent: set[str] = set()
     for h in history:
+        if not h.get("ok"):
+            continue
         ts = h.get("offered_at") or ""
         try:
             t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
