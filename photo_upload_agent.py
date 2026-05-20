@@ -89,6 +89,9 @@ def _build_queue() -> list[dict]:
     """Rank Cassini-fail listings by listing price desc."""
     plan = _load_json(PHOTO_QUALITY_PLAN)
     snapshot = _load_json(LISTINGS_SNAPSHOT)
+    # Snapshot can be a bare list (older shape) or wrapped dict {listings:[...], ...}.
+    if isinstance(snapshot, dict):
+        snapshot = snapshot.get("listings") or []
     prices = _price_index(snapshot)
 
     rows: list[dict] = []

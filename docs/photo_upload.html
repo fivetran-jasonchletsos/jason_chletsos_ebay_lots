@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,12 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
+@media (max-width: 1200px) {
+  .brand-tag { display: none; }
+}
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1492,6 +1503,16 @@ html[data-theme="crimson"] .product-price {
   position: absolute; left: 0; bottom: -1px;
   opacity: .85;
 }
+/* Site banner — proportional hero, capped tight so it doesn't dominate the
+   fold. The source art is 3:1, so 200-220px tall keeps it above-the-fold-safe. */
+.site-banner { display: block; max-width: min(92vw, 960px); margin: var(--space-md, 18px) auto var(--space-lg, 24px); border-radius: var(--r-md, 12px); overflow: hidden; line-height: 0; box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .25s ease, box-shadow .25s ease; }
+.site-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(212,175,55,.2); }
+.site-banner img { width: 100%; height: auto; display: block; max-height: 220px; object-fit: cover; object-position: center; }
+@media (max-width: 760px) {
+  .site-banner { margin: 10px auto 14px; border-radius: 8px; max-width: 96vw; }
+  .site-banner img { max-height: 120px; }
+}
+
 /* Inline variant — title on the left, description on the right, single row.
    Saves a chunk of vertical real estate above the KPI strip. */
 .section-head--inline { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 28px; align-items: end; }
@@ -1807,28 +1828,52 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="steals.html" class="nav-link">Steals</a>
 <a href="sold.html" class="nav-link">Sold</a>
 
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Browse
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="browse.html">Browse</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a></div>
+        </div>
+
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Analytics
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="make_money.html" data-admin="1">Make Money</a><a href="analytics.html" data-admin="1">Analytics</a><a href="listing_performance.html" data-admin="1">Listing Perf</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="analytics_hub.html" data-admin="1">Analytics</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Sell
+            Listings
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="price_review.html" data-admin="1">Pricing</a><a href="repricing.html" data-admin="1">Repricing</a><a href="title_review.html" data-admin="1">Titles</a><a href="specifics.html" data-admin="1">Specifics</a><a href="quality.html" data-admin="1">Quality</a><a href="photo_quality.html" data-admin="1">Photo Quality</a><a href="photo_audit.html" data-admin="1">Photo Audit</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="listings_hub.html" data-admin="1">Listings</a></div>
         </div>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Marketing
+            CX
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="watchers.html" data-admin="1">Watchers</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="cx_hub.html" data-admin="1">CX</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            Photos
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="photo_hub.html" data-admin="1">Photos</a></div>
+        </div>
+
+        <div class="nav-dropdown" data-admin="1">
+          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
+            More
+            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="scan.html" data-admin="1">Scanner</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
         </div>
 
         <div class="nav-dropdown">
@@ -1836,23 +1881,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             For Us
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Tools
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="scan.html" data-admin="1">Scanner</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Cross-post
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="sets.html">Set Completion</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
         </div></nav>
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
@@ -1893,35 +1922,42 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
+<div class="drawer-group" data-admin="1">Browse</div>
+<a href="browse.html">Browse</a>
+<a href="by_set.html">By Set</a>
+<a href="by_player.html">By Player</a>
 <div class="drawer-group" data-admin="1">Analytics</div>
-<a href="make_money.html" class="admin-only" data-admin="1">Make Money</a>
-<a href="analytics.html" class="admin-only" data-admin="1">Analytics</a>
-<a href="listing_performance.html" class="admin-only" data-admin="1">Listing Perf</a>
+<a href="analytics_hub.html" class="admin-only" data-admin="1">Analytics</a>
+<div class="drawer-group" data-admin="1">Listings</div>
+<a href="listings_hub.html" class="admin-only" data-admin="1">Listings</a>
+<div class="drawer-group" data-admin="1">CX</div>
+<a href="cx_hub.html" class="admin-only" data-admin="1">CX</a>
+<div class="drawer-group" data-admin="1">Photos</div>
+<a href="photo_hub.html" class="admin-only" data-admin="1">Photos</a>
+<div class="drawer-group" data-admin="1">More</div>
+<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
 <a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
 <a href="deals.html" class="admin-only" data-admin="1">Deals</a>
-<div class="drawer-group" data-admin="1">Sell</div>
-<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
-<a href="price_review.html" class="admin-only" data-admin="1">Pricing</a>
-<a href="repricing.html" class="admin-only" data-admin="1">Repricing</a>
-<a href="title_review.html" class="admin-only" data-admin="1">Titles</a>
-<a href="specifics.html" class="admin-only" data-admin="1">Specifics</a>
-<a href="quality.html" class="admin-only" data-admin="1">Quality</a>
-<a href="photo_quality.html" class="admin-only" data-admin="1">Photo Quality</a>
-<a href="photo_audit.html" class="admin-only" data-admin="1">Photo Audit</a>
-<div class="drawer-group" data-admin="1">Marketing</div>
-<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
 <a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
 <a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
-<a href="watchers.html" class="admin-only" data-admin="1">Watchers</a>
 <a href="vault.html" class="admin-only" data-admin="1">Vault</a>
 <a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
+<a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
+<a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
+<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
+<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
+<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
 <div class="drawer-group" data-admin="1">For Us</div>
 <a href="collect.html">My Wants</a>
 <a href="under_10.html">Under $10</a>
 <a href="top_sellers.html">Top Sellers</a>
 <a href="price_drops.html">Price Drops</a>
+<a href="sets.html">Set Completion</a>
 <a href="assistant.html">AI Assistant</a>
 <a href="pokemon.html">Pokemon</a>
 <a href="pikachu.html">Pikachu</a>
@@ -1930,12 +1966,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html">Mewtwo</a>
 <a href="eevee.html">Eevee</a>
 <a href="pokemon_news.html">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Tools</div>
-<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
-<div class="drawer-group" data-admin="1">Cross-post</div>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
@@ -1969,17 +1999,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
   </div>
 
+  
+
   <main>
     <section class="rs-wrap">
   <header class="rs-hero">
-    <h1>Reshoot Queue — 128 listings <span class="rs-killer">· current rank-killer: 1 pic at 500px</span></h1>
+    <h1>Reshoot Queue — 129 listings <span class="rs-killer">· current rank-killer: 1 pic at 500px</span></h1>
     <p class="rs-lede">
       Cassini de-ranks listings with &lt;8 photos or images smaller than 1600&times;1600.
       Reshoot the highest-margin items first — sellers who fix this see a 20-40% impressions lift per listing.
     </p>
     <div class="rs-strip">
       <div class="rs-stat">
-        <div class="rs-stat-n">128</div>
+        <div class="rs-stat-n">129</div>
         <div class="rs-stat-l">Cassini-fail listings</div>
       </div>
       <div class="rs-stat">
@@ -2006,14 +2038,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   <header class="rs-card-head">
     <div class="rs-rank">#1</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Hot-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="rs-title">2025-26 Topps Chrome Cam Ward RC Hot Pink X Fractor Mega Exclusive SP TN Titans</a>
+      <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="rs-title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</a>
       <div class="rs-sub">
-        <span class="rs-price">$31.23</span>
+        <span class="rs-price">$43.99</span>
         <span class="rs-iid">306939333836</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Hot-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
       <img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
@@ -2032,133 +2064,193 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </div>
   <div class="rs-status" id="status-306939333836"></div>
 </article>
-<article class="rs-card" data-item-id="306937677187" id="card-306937677187">
+<article class="rs-card" data-item-id="306758076966" id="card-306758076966">
   <header class="rs-card-head">
     <div class="rs-rank">#2</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Thunderbirds-Drake-Maye-35-Silver-Pyramids-299-/306937677187" target="_blank" rel="noopener" class="rs-title">2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyramids /299</a>
+      <a href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener" class="rs-title">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</a>
       <div class="rs-sub">
-        <span class="rs-price">$16.99</span>
-        <span class="rs-iid">306937677187</span>
+        <span class="rs-price">$25.99</span>
+        <span class="rs-iid">306758076966</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Phoenix-Thunderbirds-Drake-Maye-35-Silver-Pyramids-299-/306937677187" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/ijMAAeSwN8dqBVPQ/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
-  <div class="rs-drop" data-drop="306937677187">
-    <input type="file" id="files-306937677187" multiple accept="image/*" hidden>
-    <label for="files-306937677187" class="rs-drop-label">
+  <div class="rs-drop" data-drop="306758076966">
+    <input type="file" id="files-306758076966" multiple accept="image/*" hidden>
+    <label for="files-306758076966" class="rs-drop-label">
       <strong>Drop 8+ photos here</strong>
       <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
     </label>
   </div>
-  <div class="rs-staged" id="staged-306937677187"></div>
-  <div class="rs-validation" id="valid-306937677187"></div>
+  <div class="rs-staged" id="staged-306758076966"></div>
+  <div class="rs-validation" id="valid-306758076966"></div>
   <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937677187">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937677187">Mark complete</button>
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306758076966">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306758076966">Mark complete</button>
   </div>
-  <div class="rs-status" id="status-306937677187"></div>
+  <div class="rs-status" id="status-306758076966"></div>
 </article>
-<article class="rs-card" data-item-id="306931446668" id="card-306931446668">
+<article class="rs-card" data-item-id="306904068997" id="card-306904068997">
   <header class="rs-card-head">
     <div class="rs-rank">#3</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="rs-title">2025 Panini Donruss Optic - My House! DK Metcalf #8 Black Pandora Prizm /149</a>
+      <a href="https://www.ebay.com/itm/Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-Football-Card-Lot-11-HOF-/306904068997" target="_blank" rel="noopener" class="rs-title">Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF</a>
       <div class="rs-sub">
-        <span class="rs-price">$13.99</span>
-        <span class="rs-iid">306931446668</span>
+        <span class="rs-price">$23.99</span>
+        <span class="rs-iid">306904068997</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-Football-Card-Lot-11-HOF-/306904068997" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/sc0AAeSwVNVp7uZe/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
-  <div class="rs-drop" data-drop="306931446668">
-    <input type="file" id="files-306931446668" multiple accept="image/*" hidden>
-    <label for="files-306931446668" class="rs-drop-label">
+  <div class="rs-drop" data-drop="306904068997">
+    <input type="file" id="files-306904068997" multiple accept="image/*" hidden>
+    <label for="files-306904068997" class="rs-drop-label">
       <strong>Drop 8+ photos here</strong>
       <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
     </label>
   </div>
-  <div class="rs-staged" id="staged-306931446668"></div>
-  <div class="rs-validation" id="valid-306931446668"></div>
+  <div class="rs-staged" id="staged-306904068997"></div>
+  <div class="rs-validation" id="valid-306904068997"></div>
   <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306931446668">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306931446668">Mark complete</button>
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306904068997">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306904068997">Mark complete</button>
   </div>
-  <div class="rs-status" id="status-306931446668"></div>
+  <div class="rs-status" id="status-306904068997"></div>
 </article>
-<article class="rs-card" data-item-id="306937452121" id="card-306937452121">
+<article class="rs-card" data-item-id="306904174454" id="card-306904174454">
   <header class="rs-card-head">
     <div class="rs-rank">#4</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-/306937452121" target="_blank" rel="noopener" class="rs-title">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King</a>
+      <a href="https://www.ebay.com/itm/Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-Football-Card-Lot-7--/306904174454" target="_blank" rel="noopener" class="rs-title">Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)</a>
       <div class="rs-sub">
-        <span class="rs-price">$13.13</span>
-        <span class="rs-iid">306937452121</span>
+        <span class="rs-price">$20.99</span>
+        <span class="rs-iid">306904174454</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-/306937452121" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-Football-Card-Lot-7--/306904174454" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/JnAAAeSwLQ1p7wMT/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
-  <div class="rs-drop" data-drop="306937452121">
-    <input type="file" id="files-306937452121" multiple accept="image/*" hidden>
-    <label for="files-306937452121" class="rs-drop-label">
+  <div class="rs-drop" data-drop="306904174454">
+    <input type="file" id="files-306904174454" multiple accept="image/*" hidden>
+    <label for="files-306904174454" class="rs-drop-label">
       <strong>Drop 8+ photos here</strong>
       <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
     </label>
   </div>
-  <div class="rs-staged" id="staged-306937452121"></div>
-  <div class="rs-validation" id="valid-306937452121"></div>
+  <div class="rs-staged" id="staged-306904174454"></div>
+  <div class="rs-validation" id="valid-306904174454"></div>
   <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937452121">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937452121">Mark complete</button>
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306904174454">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306904174454">Mark complete</button>
   </div>
-  <div class="rs-status" id="status-306937452121"></div>
+  <div class="rs-status" id="status-306904174454"></div>
 </article>
-<article class="rs-card" data-item-id="306913934898" id="card-306913934898">
+<article class="rs-card" data-item-id="306913790653" id="card-306913790653">
   <header class="rs-card-head">
     <div class="rs-rank">#5</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="rs-title">20 Warren Moon Cards Oilers Vikings</a>
+      <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener" class="rs-title">11 Raghib And Quadry Ismail Cards Raiders Vikings</a>
       <div class="rs-sub">
-        <span class="rs-price">$10.0</span>
-        <span class="rs-iid">306913934898</span>
+        <span class="rs-price">$17.99</span>
+        <span class="rs-iid">306913790653</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
-  <div class="rs-drop" data-drop="306913934898">
-    <input type="file" id="files-306913934898" multiple accept="image/*" hidden>
-    <label for="files-306913934898" class="rs-drop-label">
+  <div class="rs-drop" data-drop="306913790653">
+    <input type="file" id="files-306913790653" multiple accept="image/*" hidden>
+    <label for="files-306913790653" class="rs-drop-label">
       <strong>Drop 8+ photos here</strong>
       <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
     </label>
   </div>
-  <div class="rs-staged" id="staged-306913934898"></div>
-  <div class="rs-validation" id="valid-306913934898"></div>
+  <div class="rs-staged" id="staged-306913790653"></div>
+  <div class="rs-validation" id="valid-306913790653"></div>
   <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913934898">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913934898">Mark complete</button>
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913790653">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913790653">Mark complete</button>
   </div>
-  <div class="rs-status" id="status-306913934898"></div>
+  <div class="rs-status" id="status-306913790653"></div>
 </article>
-<article class="rs-card" data-item-id="306937601406" id="card-306937601406">
+<article class="rs-card" data-item-id="306914547105" id="card-306914547105">
   <header class="rs-card-head">
     <div class="rs-rank">#6</div>
     <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener" class="rs-title">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</a>
+      <div class="rs-sub">
+        <span class="rs-price">$16.99</span>
+        <span class="rs-iid">306914547105</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306914547105">
+    <input type="file" id="files-306914547105" multiple accept="image/*" hidden>
+    <label for="files-306914547105" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306914547105"></div>
+  <div class="rs-validation" id="valid-306914547105"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306914547105">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306914547105">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306914547105"></div>
+</article>
+<article class="rs-card" data-item-id="306931303163" id="card-306931303163">
+  <header class="rs-card-head">
+    <div class="rs-rank">#7</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener" class="rs-title">4 1991 Playball U.S.A. - Darryl Strawberry NFL</a>
+      <div class="rs-sub">
+        <span class="rs-price">$16.99</span>
+        <span class="rs-iid">306931303163</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306931303163">
+    <input type="file" id="files-306931303163" multiple accept="image/*" hidden>
+    <label for="files-306931303163" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306931303163"></div>
+  <div class="rs-validation" id="valid-306931303163"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306931303163">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306931303163">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306931303163"></div>
+</article>
+<article class="rs-card" data-item-id="306937601406" id="card-306937601406">
+  <header class="rs-card-head">
+    <div class="rs-rank">#8</div>
+    <div class="rs-card-meta">
       <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener" class="rs-title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a>
       <div class="rs-sub">
-        <span class="rs-price">$9.99</span>
+        <span class="rs-price">$15.0</span>
         <span class="rs-iid">306937601406</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
@@ -2182,13 +2274,283 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </div>
   <div class="rs-status" id="status-306937601406"></div>
 </article>
+<article class="rs-card" data-item-id="306913934898" id="card-306913934898">
+  <header class="rs-card-head">
+    <div class="rs-rank">#9</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="rs-title">20 Warren Moon Cards Oilers Vikings</a>
+      <div class="rs-sub">
+        <span class="rs-price">$13.99</span>
+        <span class="rs-iid">306913934898</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306913934898">
+    <input type="file" id="files-306913934898" multiple accept="image/*" hidden>
+    <label for="files-306913934898" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306913934898"></div>
+  <div class="rs-validation" id="valid-306913934898"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913934898">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913934898">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306913934898"></div>
+</article>
+<article class="rs-card" data-item-id="306931446668" id="card-306931446668">
+  <header class="rs-card-head">
+    <div class="rs-rank">#10</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="rs-title">2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149</a>
+      <div class="rs-sub">
+        <span class="rs-price">$10.99</span>
+        <span class="rs-iid">306931446668</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306931446668">
+    <input type="file" id="files-306931446668" multiple accept="image/*" hidden>
+    <label for="files-306931446668" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306931446668"></div>
+  <div class="rs-validation" id="valid-306931446668"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306931446668">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306931446668">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306931446668"></div>
+</article>
+<article class="rs-card" data-item-id="306904078786" id="card-306904078786">
+  <header class="rs-card-head">
+    <div class="rs-rank">#11</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener" class="rs-title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</a>
+      <div class="rs-sub">
+        <span class="rs-price">$9.99</span>
+        <span class="rs-iid">306904078786</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306904078786">
+    <input type="file" id="files-306904078786" multiple accept="image/*" hidden>
+    <label for="files-306904078786" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306904078786"></div>
+  <div class="rs-validation" id="valid-306904078786"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306904078786">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306904078786">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306904078786"></div>
+</article>
+<article class="rs-card" data-item-id="306904203738" id="card-306904203738">
+  <header class="rs-card-head">
+    <div class="rs-rank">#12</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/1994-Steve-Emtman-Classic-Pro-Line-Live-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="rs-title">1994 Steve Emtman Classic Pro Line Live AUTO Autograph Colts NFL Football</a>
+      <div class="rs-sub">
+        <span class="rs-price">$8.99</span>
+        <span class="rs-iid">306904203738</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/1994-Steve-Emtman-Classic-Pro-Line-Live-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306904203738">
+    <input type="file" id="files-306904203738" multiple accept="image/*" hidden>
+    <label for="files-306904203738" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306904203738"></div>
+  <div class="rs-validation" id="valid-306904203738"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306904203738">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306904203738">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306904203738"></div>
+</article>
+<article class="rs-card" data-item-id="306937452121" id="card-306937452121">
+  <header class="rs-card-head">
+    <div class="rs-rank">#13</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121" target="_blank" rel="noopener" class="rs-title">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</a>
+      <div class="rs-sub">
+        <span class="rs-price">$8.5</span>
+        <span class="rs-iid">306937452121</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306937452121">
+    <input type="file" id="files-306937452121" multiple accept="image/*" hidden>
+    <label for="files-306937452121" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306937452121"></div>
+  <div class="rs-validation" id="valid-306937452121"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937452121">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937452121">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306937452121"></div>
+</article>
+<article class="rs-card" data-item-id="306913902750" id="card-306913902750">
+  <header class="rs-card-head">
+    <div class="rs-rank">#14</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-Football-Card-Lot-NFL-/306913902750" target="_blank" rel="noopener" class="rs-title">7 Howie Long Cards Raiders Football Card Lot NFL</a>
+      <div class="rs-sub">
+        <span class="rs-price">$7.99</span>
+        <span class="rs-iid">306913902750</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-Football-Card-Lot-NFL-/306913902750" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306913902750">
+    <input type="file" id="files-306913902750" multiple accept="image/*" hidden>
+    <label for="files-306913902750" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306913902750"></div>
+  <div class="rs-validation" id="valid-306913902750"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913902750">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913902750">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306913902750"></div>
+</article>
+<article class="rs-card" data-item-id="306937463442" id="card-306937463442">
+  <header class="rs-card-head">
+    <div class="rs-rank">#15</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener" class="rs-title">2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen</a>
+      <div class="rs-sub">
+        <span class="rs-price">$7.99</span>
+        <span class="rs-iid">306937463442</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306937463442">
+    <input type="file" id="files-306937463442" multiple accept="image/*" hidden>
+    <label for="files-306937463442" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306937463442"></div>
+  <div class="rs-validation" id="valid-306937463442"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937463442">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937463442">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306937463442"></div>
+</article>
+<article class="rs-card" data-item-id="306937466251" id="card-306937466251">
+  <header class="rs-card-head">
+    <div class="rs-rank">#16</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/2026-Jeremiyah-Love-5-Card-Draw-Stacked-Deck-Wild-Card-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener" class="rs-title">2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie</a>
+      <div class="rs-sub">
+        <span class="rs-price">$7.99</span>
+        <span class="rs-iid">306937466251</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/2026-Jeremiyah-Love-5-Card-Draw-Stacked-Deck-Wild-Card-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306937466251">
+    <input type="file" id="files-306937466251" multiple accept="image/*" hidden>
+    <label for="files-306937466251" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306937466251"></div>
+  <div class="rs-validation" id="valid-306937466251"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937466251">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937466251">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306937466251"></div>
+</article>
+<article class="rs-card" data-item-id="306947440872" id="card-306947440872">
+  <header class="rs-card-head">
+    <div class="rs-rank">#17</div>
+    <div class="rs-card-meta">
+      <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener" class="rs-title">Topps 2024 Chrome Checkerboard Jayden Daniels #74TF-2 Commanders NFL Card</a>
+      <div class="rs-sub">
+        <span class="rs-price">$7.99</span>
+        <span class="rs-iid">306947440872</span>
+        <span class="rs-bad">1 pic · 500px</span>
+      </div>
+    </div>
+    <a class="rs-thumb" href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/lL0AAeSws11qC7Kh/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    </a>
+  </header>
+  <div class="rs-drop" data-drop="306947440872">
+    <input type="file" id="files-306947440872" multiple accept="image/*" hidden>
+    <label for="files-306947440872" class="rs-drop-label">
+      <strong>Drop 8+ photos here</strong>
+      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
+    </label>
+  </div>
+  <div class="rs-staged" id="staged-306947440872"></div>
+  <div class="rs-validation" id="valid-306947440872"></div>
+  <div class="rs-actions">
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306947440872">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306947440872">Mark complete</button>
+  </div>
+  <div class="rs-status" id="status-306947440872"></div>
+</article>
 <article class="rs-card" data-item-id="306939316823" id="card-306939316823">
   <header class="rs-card-head">
-    <div class="rs-rank">#7</div>
+    <div class="rs-rank">#18</div>
     <div class="rs-card-meta">
       <a href="https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823" target="_blank" rel="noopener" class="rs-title">2025 Topps Chrome #286 Vita Vea Aqua Wave Refractor /199 Buccaneers</a>
       <div class="rs-sub">
-        <span class="rs-price">$8.9</span>
+        <span class="rs-price">$7.57</span>
         <span class="rs-iid">306939316823</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
@@ -2212,395 +2574,65 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </div>
   <div class="rs-status" id="status-306939316823"></div>
 </article>
-<article class="rs-card" data-item-id="306937466251" id="card-306937466251">
-  <header class="rs-card-head">
-    <div class="rs-rank">#8</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Stacked-Deck-Jeremiyah-Love-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener" class="rs-title">2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie</a>
-      <div class="rs-sub">
-        <span class="rs-price">$7.99</span>
-        <span class="rs-iid">306937466251</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Stacked-Deck-Jeremiyah-Love-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306937466251">
-    <input type="file" id="files-306937466251" multiple accept="image/*" hidden>
-    <label for="files-306937466251" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306937466251"></div>
-  <div class="rs-validation" id="valid-306937466251"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937466251">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937466251">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306937466251"></div>
-</article>
-<article class="rs-card" data-item-id="306930462076" id="card-306930462076">
-  <header class="rs-card-head">
-    <div class="rs-rank">#9</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener" class="rs-title">2025 Panini Prizm - Bo Nix #142 White Disco Prizm</a>
-      <div class="rs-sub">
-        <span class="rs-price">$7.5</span>
-        <span class="rs-iid">306930462076</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Prizm-Bo-Nix-142-White-Disco-Prizm-/306930462076" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/gKcAAeSwhPFqAKYk/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306930462076">
-    <input type="file" id="files-306930462076" multiple accept="image/*" hidden>
-    <label for="files-306930462076" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306930462076"></div>
-  <div class="rs-validation" id="valid-306930462076"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306930462076">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306930462076">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306930462076"></div>
-</article>
-<article class="rs-card" data-item-id="306913908225" id="card-306913908225">
-  <header class="rs-card-head">
-    <div class="rs-rank">#10</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" rel="noopener" class="rs-title">9 Joe Montana Cards 49ers Chiefs</a>
-      <div class="rs-sub">
-        <span class="rs-price">$5.99</span>
-        <span class="rs-iid">306913908225</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/9-Joe-Montana-Cards-49ers-Chiefs-/306913908225" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/GuUAAeSw0F5p9e1k/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306913908225">
-    <input type="file" id="files-306913908225" multiple accept="image/*" hidden>
-    <label for="files-306913908225" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306913908225"></div>
-  <div class="rs-validation" id="valid-306913908225"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913908225">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913908225">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306913908225"></div>
-</article>
-<article class="rs-card" data-item-id="306937463442" id="card-306937463442">
-  <header class="rs-card-head">
-    <div class="rs-rank">#11</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Garrett-Nussmeier-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener" class="rs-title">2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen</a>
-      <div class="rs-sub">
-        <span class="rs-price">$5.99</span>
-        <span class="rs-iid">306937463442</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Garrett-Nussmeier-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306937463442">
-    <input type="file" id="files-306937463442" multiple accept="image/*" hidden>
-    <label for="files-306937463442" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306937463442"></div>
-  <div class="rs-validation" id="valid-306937463442"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937463442">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937463442">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306937463442"></div>
-</article>
-<article class="rs-card" data-item-id="306939342209" id="card-306939342209">
-  <header class="rs-card-head">
-    <div class="rs-rank">#12</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-/306939342209" target="_blank" rel="noopener" class="rs-title">2025 Topps Chrome Matthew Golden Pink X-fractor. Packers</a>
-      <div class="rs-sub">
-        <span class="rs-price">$5.67</span>
-        <span class="rs-iid">306939342209</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Topps-Chrome-Matthew-Golden-Pink-X-fractor-Packers-/306939342209" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/lNEAAeSwrclqBlIQ/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306939342209">
-    <input type="file" id="files-306939342209" multiple accept="image/*" hidden>
-    <label for="files-306939342209" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306939342209"></div>
-  <div class="rs-validation" id="valid-306939342209"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306939342209">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306939342209">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306939342209"></div>
-</article>
-<article class="rs-card" data-item-id="306939373376" id="card-306939373376">
-  <header class="rs-card-head">
-    <div class="rs-rank">#13</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Cooper-Kupp-Red-White-Blue-271-Seahawks-/306939373376" target="_blank" rel="noopener" class="rs-title">2025 Topps Chrome Football - Cooper Kupp Red White & Blue - #271 Seahawks</a>
-      <div class="rs-sub">
-        <span class="rs-price">$5.67</span>
-        <span class="rs-iid">306939373376</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Cooper-Kupp-Red-White-Blue-271-Seahawks-/306939373376" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/BNsAAeSwFd5qBlaO/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306939373376">
-    <input type="file" id="files-306939373376" multiple accept="image/*" hidden>
-    <label for="files-306939373376" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306939373376"></div>
-  <div class="rs-validation" id="valid-306939373376"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306939373376">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306939373376">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306939373376"></div>
-</article>
-<article class="rs-card" data-item-id="306937663074" id="card-306937663074">
-  <header class="rs-card-head">
-    <div class="rs-rank">#14</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Panini-Select-Rookie-Swatches-TreVeyon-Henderson-RSW-THN-Red-Prizm-MEM--/306937663074" target="_blank" rel="noopener" class="rs-title">2025 Panini Select - Rookie Swatches TreVeyon Henderson #RSW-THN Red Prizm (MEM,</a>
-      <div class="rs-sub">
-        <span class="rs-price">$5.55</span>
-        <span class="rs-iid">306937663074</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Select-Rookie-Swatches-TreVeyon-Henderson-RSW-THN-Red-Prizm-MEM--/306937663074" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/FKQAAeSwZXNqBVBy/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306937663074">
-    <input type="file" id="files-306937663074" multiple accept="image/*" hidden>
-    <label for="files-306937663074" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306937663074"></div>
-  <div class="rs-validation" id="valid-306937663074"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937663074">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937663074">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306937663074"></div>
-</article>
-<article class="rs-card" data-item-id="306937664217" id="card-306937664217">
-  <header class="rs-card-head">
-    <div class="rs-rank">#15</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Rookies-Cam-Ward-382-Camo-Pink-Mosaic-Prizm-RC--/306937664217" target="_blank" rel="noopener" class="rs-title">2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic Prizm (RC)</a>
-      <div class="rs-sub">
-        <span class="rs-price">$5.55</span>
-        <span class="rs-iid">306937664217</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Mosaic-Rookies-Cam-Ward-382-Camo-Pink-Mosaic-Prizm-RC--/306937664217" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/0yEAAeSwbvhqBVD-/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306937664217">
-    <input type="file" id="files-306937664217" multiple accept="image/*" hidden>
-    <label for="files-306937664217" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306937664217"></div>
-  <div class="rs-validation" id="valid-306937664217"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306937664217">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306937664217">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306937664217"></div>
-</article>
-<article class="rs-card" data-item-id="306903937710" id="card-306903937710">
-  <header class="rs-card-head">
-    <div class="rs-rank">#16</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" rel="noopener" class="rs-title">Jerome Bettis Notre Dame Los Angeles Rams 10 Cards</a>
-      <div class="rs-sub">
-        <span class="rs-price">$4.99</span>
-        <span class="rs-iid">306903937710</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/Jerome-Bettis-Notre-Dame-Los-Angeles-Rams-10-Cards-/306903937710" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306903937710">
-    <input type="file" id="files-306903937710" multiple accept="image/*" hidden>
-    <label for="files-306903937710" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306903937710"></div>
-  <div class="rs-validation" id="valid-306903937710"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306903937710">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306903937710">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306903937710"></div>
-</article>
-<article class="rs-card" data-item-id="306904189481" id="card-306904189481">
-  <header class="rs-card-head">
-    <div class="rs-rank">#17</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" rel="noopener" class="rs-title">4 Aaron Glenn Rookie Cards New York Jets</a>
-      <div class="rs-sub">
-        <span class="rs-price">$4.99</span>
-        <span class="rs-iid">306904189481</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-/306904189481" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/pjoAAeSwN8dp7wmI/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306904189481">
-    <input type="file" id="files-306904189481" multiple accept="image/*" hidden>
-    <label for="files-306904189481" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306904189481"></div>
-  <div class="rs-validation" id="valid-306904189481"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306904189481">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306904189481">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306904189481"></div>
-</article>
-<article class="rs-card" data-item-id="306913168494" id="card-306913168494">
-  <header class="rs-card-head">
-    <div class="rs-rank">#18</div>
-    <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" rel="noopener" class="rs-title">15 Charles Haley Cards San Francisco 49ers Dallas Cowboys</a>
-      <div class="rs-sub">
-        <span class="rs-price">$4.99</span>
-        <span class="rs-iid">306913168494</span>
-        <span class="rs-bad">1 pic · 500px</span>
-      </div>
-    </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/15-Charles-Haley-Cards-San-Francisco-49ers-Dallas-Cowboys-/306913168494" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/1VIAAeSwrHRp9Vkl/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
-    </a>
-  </header>
-  <div class="rs-drop" data-drop="306913168494">
-    <input type="file" id="files-306913168494" multiple accept="image/*" hidden>
-    <label for="files-306913168494" class="rs-drop-label">
-      <strong>Drop 8+ photos here</strong>
-      <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
-    </label>
-  </div>
-  <div class="rs-staged" id="staged-306913168494"></div>
-  <div class="rs-validation" id="valid-306913168494"></div>
-  <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913168494">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913168494">Mark complete</button>
-  </div>
-  <div class="rs-status" id="status-306913168494"></div>
-</article>
-<article class="rs-card" data-item-id="306913853080" id="card-306913853080">
+<article class="rs-card" data-item-id="306949802296" id="card-306949802296">
   <header class="rs-card-head">
     <div class="rs-rank">#19</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-Football-Card-Lot-NFL-/306913853080" target="_blank" rel="noopener" class="rs-title">9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL</a>
+      <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener" class="rs-title">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</a>
       <div class="rs-sub">
-        <span class="rs-price">$4.99</span>
-        <span class="rs-iid">306913853080</span>
+        <span class="rs-price">$7.5</span>
+        <span class="rs-iid">306949802296</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-Football-Card-Lot-NFL-/306913853080" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/RFMAAeSwa5xp9eoC/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/uIIAAeSwT05qDRtS/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
-  <div class="rs-drop" data-drop="306913853080">
-    <input type="file" id="files-306913853080" multiple accept="image/*" hidden>
-    <label for="files-306913853080" class="rs-drop-label">
+  <div class="rs-drop" data-drop="306949802296">
+    <input type="file" id="files-306949802296" multiple accept="image/*" hidden>
+    <label for="files-306949802296" class="rs-drop-label">
       <strong>Drop 8+ photos here</strong>
       <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
     </label>
   </div>
-  <div class="rs-staged" id="staged-306913853080"></div>
-  <div class="rs-validation" id="valid-306913853080"></div>
+  <div class="rs-staged" id="staged-306949802296"></div>
+  <div class="rs-validation" id="valid-306949802296"></div>
   <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913853080">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913853080">Mark complete</button>
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306949802296">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306949802296">Mark complete</button>
   </div>
-  <div class="rs-status" id="status-306913853080"></div>
+  <div class="rs-status" id="status-306949802296"></div>
 </article>
-<article class="rs-card" data-item-id="306913902750" id="card-306913902750">
+<article class="rs-card" data-item-id="306913950248" id="card-306913950248">
   <header class="rs-card-head">
     <div class="rs-rank">#20</div>
     <div class="rs-card-meta">
-      <a href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" rel="noopener" class="rs-title">7 Howie Long Cards Raiders</a>
+      <a href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-Football-Card-Lot-NFL-/306913950248" target="_blank" rel="noopener" class="rs-title">4 Rookie Cards Willie McGinest One Autographed Football Card Lot NFL</a>
       <div class="rs-sub">
-        <span class="rs-price">$4.99</span>
-        <span class="rs-iid">306913902750</span>
+        <span class="rs-price">$6.99</span>
+        <span class="rs-iid">306913950248</span>
         <span class="rs-bad">1 pic · 500px</span>
       </div>
     </div>
-    <a class="rs-thumb" href="https://www.ebay.com/itm/7-Howie-Long-Cards-Raiders-/306913902750" target="_blank" rel="noopener">
-      <img src="https://i.ebayimg.com/images/g/M6YAAeSwS1dp9ews/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <a class="rs-thumb" href="https://www.ebay.com/itm/4-Rookie-Cards-Willie-McGinest-One-Autographed-Football-Card-Lot-NFL-/306913950248" target="_blank" rel="noopener">
+      <img src="https://i.ebayimg.com/images/g/cDgAAeSwPaJp9fK~/s-l500.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">
     </a>
   </header>
-  <div class="rs-drop" data-drop="306913902750">
-    <input type="file" id="files-306913902750" multiple accept="image/*" hidden>
-    <label for="files-306913902750" class="rs-drop-label">
+  <div class="rs-drop" data-drop="306913950248">
+    <input type="file" id="files-306913950248" multiple accept="image/*" hidden>
+    <label for="files-306913950248" class="rs-drop-label">
       <strong>Drop 8+ photos here</strong>
       <span>or click to choose — JPG/PNG, &ge;1600&times;1600</span>
     </label>
   </div>
-  <div class="rs-staged" id="staged-306913902750"></div>
-  <div class="rs-validation" id="valid-306913902750"></div>
+  <div class="rs-staged" id="staged-306913950248"></div>
+  <div class="rs-validation" id="valid-306913950248"></div>
   <div class="rs-actions">
-    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913902750">Push to eBay</button>
-    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913902750">Mark complete</button>
+    <button class="rs-btn rs-btn-primary" data-action="push" data-item-id="306913950248">Push to eBay</button>
+    <button class="rs-btn rs-btn-ghost"   data-action="done" data-item-id="306913950248">Mark complete</button>
   </div>
-  <div class="rs-status" id="status-306913902750"></div>
+  <div class="rs-status" id="status-306913950248"></div>
 </article>
   </div>
 
@@ -2756,7 +2788,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 17, 2026 · 19:16 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 13:54 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
