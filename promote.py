@@ -1735,11 +1735,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* Prevent any child from growing wider than the viewport */
+  overflow: hidden;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -1772,7 +1776,30 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   - min-width: 0 is required on flex children to allow them to shrink below
+     their content size (without it, overflow never triggers).
+   - overflow-x: auto lets the nav scroll horizontally on tight viewports
+     rather than pushing the logo off-screen or creating overlap.
+   - justify-content: flex-end keeps links right-aligned (closest to the
+     action buttons on the right), which is the natural reading order. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
+     hamburger breakpoint at 880px should activate well before it's needed. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2987,7 +3014,21 @@ def _nav_link_html(active_page: str, mobile: bool = False) -> str:
     Mobile (drawer): everything as a flat list (drawer scrolls).
     """
     if mobile:
-        # Drawer: flat list, group items get a small section header
+        # Drawer: flat list, group items get a small section header.
+        # Pre-compute which groups are entirely admin-only so we can tag
+        # the group header correctly — a public group (e.g. "Browse" or
+        # "Pokemon") must NOT get data-admin="1", otherwise its header
+        # vanishes for non-authenticated visitors even though the links
+        # below it are public.
+        group_is_admin: dict[str, bool] = {}
+        for _h, _l, _pub, _g in _NAV_ITEMS:
+            if _g is None:
+                continue
+            if _g not in group_is_admin:
+                group_is_admin[_g] = True   # assume admin until proven otherwise
+            if _pub:
+                group_is_admin[_g] = False  # at least one public item → not admin-only
+
         out = []
         last_group = None
         for href, label, public, group in _NAV_ITEMS:
@@ -3000,7 +3041,9 @@ def _nav_link_html(active_page: str, mobile: bool = False) -> str:
             attrs = ' target="_blank" rel="noopener"' if is_external else ""
             if not public: attrs += ' data-admin="1"'
             if group and group != last_group:
-                out.append(f'<div class="drawer-group" data-admin="1">{group}</div>')
+                # Only hide the group header when every item in it is private
+                grp_adm_attr = ' data-admin="1"' if group_is_admin.get(group, True) else ''
+                out.append(f'<div class="drawer-group"{grp_adm_attr}>{group}</div>')
                 last_group = group
             out.append(f'<a href="{href}"{cls}{attrs}>{label}</a>')
         return "\n".join(out)
@@ -3123,6 +3166,9 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         </div>
       </a>
       <nav class="nav-links">{nav_html_desktop}</nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -3142,6 +3188,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
