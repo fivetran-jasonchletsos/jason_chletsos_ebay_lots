@@ -575,8 +575,8 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  /* Prevent any child from growing wider than the viewport */
-  overflow: hidden;
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -617,23 +617,13 @@ a:hover { color: var(--gold-bright); }
   .brand-tag { display: none; }
 }
 /* Nav rail: takes the remaining space between brand and action buttons.
-   - min-width: 0 is required on flex children to allow them to shrink below
-     their content size (without it, overflow never triggers).
-   - overflow-x: auto lets the nav scroll horizontally on tight viewports
-     rather than pushing the logo off-screen or creating overlap.
-   - justify-content: flex-end keeps links right-aligned (closest to the
-     action buttons on the right), which is the natural reading order. */
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
 .nav-links {
   display: flex; align-items: center; gap: 2px;
   margin-left: auto;
   min-width: 0;
-  overflow-x: auto;
-  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
-     hamburger breakpoint at 880px should activate well before it's needed. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.nav-links::-webkit-scrollbar { display: none; }
 /* Action-button cluster (theme picker, install, sign-in, refresh).
    flex-shrink: 0 ensures these never get compressed when the nav fills up. */
 .nav-actions {
@@ -2086,15 +2076,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <button type="button" class="stat-card linked active" data-filter="all" onclick="filterReview('all', this)">
-        <div class="num">57</div><div class="lbl">All flagged</div>
+        <div class="num">58</div><div class="lbl">All flagged</div>
       </button>
       <button type="button" class="stat-card linked" data-filter="under" onclick="filterReview('under', this)">
         <div class="num danger">18</div><div class="lbl">Underpriced</div>
       </button>
       <button type="button" class="stat-card linked" data-filter="over" onclick="filterReview('over', this)">
-        <div class="num warning">39</div><div class="lbl">Overpriced</div>
+        <div class="num warning">40</div><div class="lbl">Overpriced</div>
       </button>
-      <div class="stat-card"><div class="num danger">$94</div><div class="lbl">Revenue Gap</div></div>
+      <div class="stat-card"><div class="num danger">$96</div><div class="lbl">Revenue Gap</div></div>
     </div>
 
     <div class="charts-row">
@@ -2333,7 +2323,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306937601406" data-flag="under" data-market-gap="-50.00" data-actual-gap=""  style="--stripe:var(--danger)">
+      <article class="pr-card review-row" data-id="306937601406" data-flag="under" data-market-gap="-53.80" data-actual-gap=""  style="--stripe:var(--danger)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306937601406" checked  aria-label="Select for repricing">
         </div>
@@ -2345,19 +2335,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener" class="pr-title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a>
           <div class="pr-market">
-            <b>Market</b> <b>$30.00</b> · Range $17.00–$99.99 · 9 comps
+            <b>Market</b> <b>$32.50</b> · Range $17.00–$99.99 · 10 comps
           </div>
           <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (74%) — review manually</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $30.00</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $32.50</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
             <div class="current-price pr-current">$15.00</div>
-            <div class="pr-gap">-50.0% vs market</div>
+            <div class="pr-gap">-53.8% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
@@ -3799,6 +3789,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Shedeur-Sanders-19-Silver-Prizm-RC-Football-/306931055732" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306951563598" data-flag="over" data-market-gap="53.70" data-actual-gap=""  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306951563598" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/MdQAAeSwhANqDkDB/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306951563598</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Dylan-Sampson-365-Silver-Prizm-RC--/306951563598" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Rookies Dylan Sampson #365 Silver Prizm (RC)</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$1.62</b> · Range $0.99–$2.50 · 10 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — no SCP match</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.62</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.49</div>
+            <div class="pr-gap">+53.7% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306951563598" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Dylan-Sampson-365-Silver-Prizm-RC--/306951563598" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -7532,7 +7564,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           labels: ['<-25%', '-25 to -10%', '-10 to +10%', '+10 to +25%', '>+25%'],
           datasets: [{
             label: 'Listings',
-            data: [14, 7, 63, 9, 35],
+            data: [14, 7, 63, 9, 36],
             backgroundColor: ['rgba(224,123,111,.7)','rgba(224,181,74,.6)','rgba(127,199,122,.6)','rgba(224,181,74,.5)','rgba(212,175,55,.6)'],
             borderColor:    ['#e07b6f','#e0b54a','#7fc77a','#e0b54a','#d4af37'],
             borderWidth: 1.5,
@@ -7664,7 +7696,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 23:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 23:21 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

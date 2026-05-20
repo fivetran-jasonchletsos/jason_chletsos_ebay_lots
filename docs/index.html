@@ -575,8 +575,8 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  /* Prevent any child from growing wider than the viewport */
-  overflow: hidden;
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -617,23 +617,13 @@ a:hover { color: var(--gold-bright); }
   .brand-tag { display: none; }
 }
 /* Nav rail: takes the remaining space between brand and action buttons.
-   - min-width: 0 is required on flex children to allow them to shrink below
-     their content size (without it, overflow never triggers).
-   - overflow-x: auto lets the nav scroll horizontally on tight viewports
-     rather than pushing the logo off-screen or creating overlap.
-   - justify-content: flex-end keeps links right-aligned (closest to the
-     action buttons on the right), which is the natural reading order. */
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
 .nav-links {
   display: flex; align-items: center; gap: 2px;
   margin-left: auto;
   min-width: 0;
-  overflow-x: auto;
-  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
-     hamburger breakpoint at 880px should activate well before it's needed. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.nav-links::-webkit-scrollbar { display: none; }
 /* Action-button cluster (theme picker, install, sign-in, refresh).
    flex-shrink: 0 ensures these never get compressed when the nav fills up. */
 .nav-actions {
@@ -2415,7 +2405,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <div class="stat-grid">
       <!-- Public-facing buyer-trust signals (hidden when admin signed in — admin sees their own KPIs below) -->
       <button class="stat-card linked" data-public="1" type="button" onclick="filterByKPI('all', this)">
-        <div class="num">132</div>
+        <div class="num">133</div>
         <div class="lbl">Cards in Stock</div>
       </button>
       <div class="stat-card" data-public="1">
@@ -2428,11 +2418,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </div>
       <!-- Admin-only inventory KPIs (hidden from public — they're internal strategy data) -->
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('all', this)">
-        <div class="num">132</div>
+        <div class="num">133</div>
         <div class="lbl">Active Listings</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('value', this)">
-        <div class="num">$636</div>
+        <div class="num">$639</div>
         <div class="lbl">Inventory Value</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('underpriced', this)">
@@ -2440,7 +2430,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="lbl">Underpriced</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('overpriced', this)">
-        <div class="num warning">39</div>
+        <div class="num warning">40</div>
         <div class="lbl">Overpriced</div>
       </button>
     </div>
@@ -2488,10 +2478,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3 class="cat-sidebar-title">Categories</h3>
         </div>
         <nav class="cat-sidebar-list">
-          <button type="button" class="cat-nav-item active" data-cat="All" onclick="setCategory(this)"><span class="cat-nav-label">All</span><span class="cat-nav-count">132</span></button><button type="button" class="cat-nav-item" data-cat="Football Singles" onclick="setCategory(this)"><span class="cat-nav-label">Football Singles</span><span class="cat-nav-count">98</span></button><button type="button" class="cat-nav-item" data-cat="Football Lots" onclick="setCategory(this)"><span class="cat-nav-label">Football Lots</span><span class="cat-nav-count">17</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Lots</span><span class="cat-nav-count">6</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Singles</span><span class="cat-nav-count">5</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Singles</span><span class="cat-nav-count">2</span></button><button type="button" class="cat-nav-item" data-cat="Other" onclick="setCategory(this)"><span class="cat-nav-label">Other</span><span class="cat-nav-count">2</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Lots</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="Pokemon" onclick="setCategory(this)"><span class="cat-nav-label">Pokemon</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="__watch" onclick="setCategory(this)"><span class="cat-nav-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-right:6px;vertical-align:-1px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist</span><span class="cat-nav-count" id="watch-count-sidebar">0</span></button>
+          <button type="button" class="cat-nav-item active" data-cat="All" onclick="setCategory(this)"><span class="cat-nav-label">All</span><span class="cat-nav-count">133</span></button><button type="button" class="cat-nav-item" data-cat="Football Singles" onclick="setCategory(this)"><span class="cat-nav-label">Football Singles</span><span class="cat-nav-count">99</span></button><button type="button" class="cat-nav-item" data-cat="Football Lots" onclick="setCategory(this)"><span class="cat-nav-label">Football Lots</span><span class="cat-nav-count">17</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Lots</span><span class="cat-nav-count">6</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Singles</span><span class="cat-nav-count">5</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Singles</span><span class="cat-nav-count">2</span></button><button type="button" class="cat-nav-item" data-cat="Other" onclick="setCategory(this)"><span class="cat-nav-label">Other</span><span class="cat-nav-count">2</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Lots</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="Pokemon" onclick="setCategory(this)"><span class="cat-nav-label">Pokemon</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="__watch" onclick="setCategory(this)"><span class="cat-nav-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-right:6px;vertical-align:-1px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist</span><span class="cat-nav-count" id="watch-count-sidebar">0</span></button>
         </nav>
         <div class="cat-sidebar-foot">
-          <span class="cat-sidebar-foot-num">132</span>
+          <span class="cat-sidebar-foot-num">133</span>
           <span class="cat-sidebar-foot-lbl">total listings</span>
         </div>
       </div>
@@ -2511,7 +2501,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </select>
       </div>
       <div class="filter-row">
-        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">132</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">98</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">17</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">6</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">5</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">2</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
+        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">133</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">99</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">17</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">6</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">5</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">2</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
       </div>
       <div class="filter-row">
         <div class="slider-wrap">
@@ -2533,14 +2523,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </section>
 
     <div class="tab-bar" role="tablist">
-      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">132</span></button>
+      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">133</span></button>
       <button class="tab-btn"        data-tab="hot"     onclick="setTab('hot')"     role="tab">🔥 Hot <span class="tab-count" id="cnt-hot">0</span></button>
       <button class="tab-btn"        data-tab="bin"     onclick="setTab('bin')"     role="tab">Buy It Now <span class="tab-count" id="cnt-bin">0</span></button>
       <button class="tab-btn"        data-tab="auction" onclick="setTab('auction')" role="tab">Auctions <span class="tab-count" id="cnt-auction">0</span></button>
     </div>
 
     <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
-      <div>Showing <span id="visible-count">132</span> of 132 listings</div>
+      <div>Showing <span id="visible-count">133</span> of 133 listings</div>
       <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
         Share filters
@@ -2560,7 +2550,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
 
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"Product","position":1,"name":"2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL","sku":"306937452121","url":"items/306937452121.html","image":"https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg","offers":{"@type":"Offer","price":"10.50","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937452121.html"}}},{"@type":"ListItem","position":2,"item":{"@type":"Product","position":2,"name":"2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen","sku":"306937463442","url":"items/306937463442.html","image":"https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg","offers":{"@type":"Offer","price":"7.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937463442.html"}}},{"@type":"ListItem","position":3,"item":{"@type":"Product","position":3,"name":"2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie","sku":"306937466251","url":"items/306937466251.html","image":"https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg","offers":{"@type":"Offer","price":"7.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937466251.html"}}},{"@type":"ListItem","position":4,"item":{"@type":"Product","position":4,"name":"2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm","sku":"306937601406","url":"items/306937601406.html","image":"https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg","offers":{"@type":"Offer","price":"15.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937601406.html"}}},{"@type":"ListItem","position":5,"item":{"@type":"Product","position":5,"name":"2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...","sku":"306937606464","url":"items/306937606464.html","image":"https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937606464.html"}}},{"@type":"ListItem","position":6,"item":{"@type":"Product","position":6,"name":"Deion Sanders Cards","sku":"306784122664","url":"items/306784122664.html","image":"https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l500.jpg","offers":{"@type":"Offer","price":"1.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306784122664.html"}}},{"@type":"ListItem","position":7,"item":{"@type":"Product","position":7,"name":"13 Junior Seau Cards Including Rookie Cards San Diego Chargers","sku":"306785163679","url":"items/306785163679.html","image":"https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l500.jpg","offers":{"@type":"Offer","price":"1.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306785163679.html"}}},{"@type":"ListItem","position":8,"item":{"@type":"Product","position":8,"name":"3 Marshall Faulk Cards San Diego State Indianapolis Colts","sku":"306785270903","url":"items/306785270903.html","image":"https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg","offers":{"@type":"Offer","price":"2.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306785270903.html"}}},{"@type":"ListItem","position":9,"item":{"@type":"Product","position":9,"name":"3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards","sku":"306948827365","url":"items/306948827365.html","image":"https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l500.jpg","offers":{"@type":"Offer","price":"0.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306948827365.html"}}},{"@type":"ListItem","position":10,"item":{"@type":"Product","position":10,"name":"Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus","sku":"306903937710","url":"items/306903937710.html","image":"https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903937710.html"}}},{"@type":"ListItem","position":11,"item":{"@type":"Product","position":11,"name":"Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver","sku":"306903941543","url":"items/306903941543.html","image":"https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903941543.html"}}},{"@type":"ListItem","position":12,"item":{"@type":"Product","position":12,"name":"Carl Banks New York Giants Football Card Lot (8) Super Bowl LB","sku":"306903947932","url":"items/306903947932.html","image":"https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l500.jpg","offers":{"@type":"Offer","price":"1.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903947932.html"}}}]}</script>
-    <div class="grid" id="listing-grid" data-size="medium" data-total="132" data-inline="12">
+    <div class="grid" id="listing-grid" data-size="medium" data-total="133" data-inline="12">
       
       <article class="listing-card"
         data-id="306937452121"
@@ -2688,7 +2678,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306937601406.html">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$15.00<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$15.00</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$30.00 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($17–$100)</span></div><div class="pp-note">9 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($2–$180)</span></div><div class="pp-note">22 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-50.0%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$15.00</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$32.50 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($17–$100)</span></div><div class="pp-note">10 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($2–$180)</span></div><div class="pp-note">22 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-53.8%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
           </div>
           <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
           <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger" data-admin="1">Underpriced</span></div>
@@ -3369,7 +3359,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 23:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 23:21 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

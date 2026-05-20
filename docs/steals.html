@@ -575,8 +575,8 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  /* Prevent any child from growing wider than the viewport */
-  overflow: hidden;
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -617,23 +617,13 @@ a:hover { color: var(--gold-bright); }
   .brand-tag { display: none; }
 }
 /* Nav rail: takes the remaining space between brand and action buttons.
-   - min-width: 0 is required on flex children to allow them to shrink below
-     their content size (without it, overflow never triggers).
-   - overflow-x: auto lets the nav scroll horizontally on tight viewports
-     rather than pushing the logo off-screen or creating overlap.
-   - justify-content: flex-end keeps links right-aligned (closest to the
-     action buttons on the right), which is the natural reading order. */
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
 .nav-links {
   display: flex; align-items: center; gap: 2px;
   margin-left: auto;
   min-width: 0;
-  overflow-x: auto;
-  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
-     hamburger breakpoint at 880px should activate well before it's needed. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.nav-links::-webkit-scrollbar { display: none; }
 /* Action-button cluster (theme picker, install, sign-in, refresh).
    flex-shrink: 0 ensures these never get compressed when the nav fills up. */
 .nav-actions {
@@ -2013,7 +2003,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="lbl">Cards Below Market</div>
       </div>
       <div class="stat-card">
-        <div class="num">$94</div>
+        <div class="num">$96</div>
         <div class="lbl">Total Savings on Offer</div>
       </div>
       <div class="stat-card">
@@ -2150,10 +2140,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="steal-card" data-cat="Football Singles" data-save="50" data-search="2025 panini select - concourse chuba hubbard #43 zebra prizm football singles">
+      <article class="steal-card" data-cat="Football Singles" data-save="54" data-search="2025 panini select - concourse chuba hubbard #43 zebra prizm football singles">
         <div class="steal-thumb">
           <img src="https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg" alt="" loading="lazy">
-          <div class="steal-discount">-50%</div>
+          <div class="steal-discount">-54%</div>
         </div>
         <div class="steal-body">
           <div class="steal-meta-row">
@@ -2163,11 +2153,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             
           </div>
           <a href="items/306937601406.html" class="steal-title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a>
-          <div class="steal-sub">Save <b style="color:var(--success);">$15.00</b> vs. eBay market median (50% off)</div>
+          <div class="steal-sub">Save <b style="color:var(--success);">$17.50</b> vs. eBay market median (54% off)</div>
         </div>
         <div class="steal-price-block">
           <div class="steal-price">$15.00</div>
-          <div class="steal-median">market $30.00</div>
+          <div class="steal-median">market $32.50</div>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener" class="btn btn-gold" style="padding:9px 16px;font-size:12px;margin-top:8px;">Grab it on eBay →</a>
         </div>
       </article>
@@ -2490,7 +2480,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 23:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 23:21 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

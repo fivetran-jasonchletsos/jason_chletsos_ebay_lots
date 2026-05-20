@@ -575,8 +575,8 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  /* Prevent any child from growing wider than the viewport */
-  overflow: hidden;
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -617,23 +617,13 @@ a:hover { color: var(--gold-bright); }
   .brand-tag { display: none; }
 }
 /* Nav rail: takes the remaining space between brand and action buttons.
-   - min-width: 0 is required on flex children to allow them to shrink below
-     their content size (without it, overflow never triggers).
-   - overflow-x: auto lets the nav scroll horizontally on tight viewports
-     rather than pushing the logo off-screen or creating overlap.
-   - justify-content: flex-end keeps links right-aligned (closest to the
-     action buttons on the right), which is the natural reading order. */
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
 .nav-links {
   display: flex; align-items: center; gap: 2px;
   margin-left: auto;
   min-width: 0;
-  overflow-x: auto;
-  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
-     hamburger breakpoint at 880px should activate well before it's needed. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.nav-links::-webkit-scrollbar { display: none; }
 /* Action-button cluster (theme picker, install, sign-in, refresh).
    flex-shrink: 0 ensures these never get compressed when the nav fills up. */
 .nav-actions {
@@ -2014,9 +2004,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card"><div class="num">132</div><div class="lbl">Total Listings</div></div>
+      <div class="stat-card"><div class="num">133</div><div class="lbl">Total Listings</div></div>
       <div class="stat-card"><div class="num">82</div><div class="lbl">Avg Score</div></div>
-      <div class="stat-card"><div class="num success">101</div><div class="lbl">Good (80+)</div></div>
+      <div class="stat-card"><div class="num success">102</div><div class="lbl">Good (80+)</div></div>
       <div class="stat-card"><div class="num warning">31</div><div class="lbl">Fair (50-79)</div></div>
       <div class="stat-card"><div class="num danger">0</div><div class="lbl">Needs Work</div></div>
     </div>
@@ -2285,7 +2275,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$21.99</div>
           </div>
-          <ul class="q-issues"><li>Title could be longer (49/80 chars)</li><li>Description missing or very short</li><li>$21.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Title could be longer (49/80 chars)</li><li>Description missing or very short</li><li>$21.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -2321,7 +2311,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$31.99</div>
           </div>
-          <ul class="q-issues"><li>Title could be longer (55/80 chars)</li><li>Description missing or very short</li><li>$31.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Title could be longer (55/80 chars)</li><li>Description missing or very short</li><li>$31.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -2465,7 +2455,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$20.99</div>
           </div>
-          <ul class="q-issues"><li>Title could be longer (46/80 chars)</li><li>Description missing or very short</li><li>$20.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Title could be longer (46/80 chars)</li><li>Description missing or very short</li><li>$20.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -2734,7 +2724,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$15.00</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$15.00 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$15.00 is 3× your average ($4.80)</li></ul>
           
               <div class="q-fix">
                 <input type="checkbox" class="row-check" value="306937601406" data-suggested="2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm NFL Football"  aria-label="Select for fix">
@@ -2856,7 +2846,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$23.99</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$23.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$23.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -2892,7 +2882,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$25.99</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$25.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$25.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -3180,7 +3170,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$20.99</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$20.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$20.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -3954,7 +3944,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="q-price">$43.99</div>
           </div>
-          <ul class="q-issues"><li>Description missing or very short</li><li>$43.99 is 3× your average ($4.82)</li></ul>
+          <ul class="q-issues"><li>Description missing or very short</li><li>$43.99 is 3× your average ($4.80)</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
       </article>
@@ -4525,6 +4515,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <ul class="q-issues"><li>Description missing or very short</li></ul>
           <div class="q-fix-none">Title already optimized · use Price Review for pricing fixes</div>
         </div>
+      </article>
+      <article class="q-card" data-id="306951563598" style="--stripe:var(--success)" >
+        <div class="q-thumb"><img src="https://i.ebayimg.com/images/g/MdQAAeSwhANqDkDB/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="q-body">
+          <div class="q-head">
+            <div class="q-title-wrap">
+              <div class="q-score-wrap">
+                <span class="q-score">85</span><span class="q-score-of">/100</span>
+                <span class="badge badge-success">Good</span>
+                
+              </div>
+              <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Dylan-Sampson-365-Silver-Prizm-RC--/306951563598" target="_blank" rel="noopener" class="q-title">2025 Panini Prizm - Rookies Dylan Sampson #365 Silver Prizm (RC)</a>
+            </div>
+            <div class="q-price">$2.49</div>
+          </div>
+          <ul class="q-issues"><li>Description missing or very short</li></ul>
+          
+              <div class="q-fix">
+                <input type="checkbox" class="row-check" value="306951563598" data-suggested="2025 Panini Prizm - Rookies Dylan Sampson #365 Silver Prizm (RC) NFL Football"  aria-label="Select for fix">
+                <div class="q-fix-text">
+                  <div class="q-fix-lbl">Suggested title (will replace on eBay)</div>
+                  <div class="q-fix-suggest">2025 Panini Prizm - Rookies Dylan Sampson #365 Silver Prizm (RC) NFL Football</div>
+                </div>
+              </div>
+        </div>
       </article></div>
 
     <script>
@@ -4610,7 +4625,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data: {
           labels: ['Good (80+)','Fair (50-79)','Needs work'],
           datasets: [{
-            data: [101, 31, 0],
+            data: [102, 31, 0],
             backgroundColor: ['#7fc77a', '#e0b54a', '#e07b6f'],
             borderColor: '#0a0a0a',
             borderWidth: 3,
@@ -4628,7 +4643,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data: {
           labels: ['Short title', 'No image', 'Weak description', 'Pricing outlier', 'Hype/fluff words', 'ALL CAPS section', 'Contact info in desc', 'Placeholder values'],
           datasets: [{
-            data: [30, 0, 132, 8, 0, 2, 0, 0],
+            data: [30, 0, 133, 8, 0, 2, 0, 0],
             backgroundColor: ['rgba(224,123,111,.6)','rgba(224,181,74,.6)','rgba(108,176,255,.6)','rgba(212,175,55,.6)'],
             borderColor: ['#e07b6f','#e0b54a','#6cb0ff','#d4af37'],
             borderWidth: 1.5,
@@ -4648,7 +4663,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 23:11 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 23:21 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
