@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0a0a0a">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>Japanese Holo / Art Rare Pokemon · Harpua2001</title>
-  <meta property="og:title" content="Japanese Holo / Art Rare Pokemon">
-  <meta property="og:description" content="Browse Japanese Art Rare and Special Illustration Rare Pokemon cards. Filter by Pokemon, set, and rarity.">
+  <title>Pokemon Search · Harpua2001</title>
+  <meta property="og:title" content="Pokemon Search — rarity, gallery, color, year, team, theme, price">
+  <meta property="og:description" content="Filter Pokemon TCG by Trainer/Galarian Gallery, rarity, color, year, team, theme, and price.">
   <link rel="manifest" href="manifest.webmanifest">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -28,16 +28,16 @@
     .crumb { font-size: 0.72rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,241,234,0.5); }
     .crumb a { color: rgba(245,241,234,0.7); }
     .crumb a:hover { color: #d4af37; }
-    .title { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0.5rem 0 0.25rem; line-height: 1.05; }
-    .sub { color: rgba(245,241,234,0.65); font-size: 0.95rem; max-width: 640px; line-height: 1.5; }
+    .title { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em; margin: 0.5rem 0 0.25rem; line-height: 1.05; }
+    .sub { color: rgba(245,241,234,0.65); font-size: 0.95rem; max-width: 720px; line-height: 1.5; }
     @media (min-width: 768px) {
       .hdr { padding: 2rem 2.5rem 2.5rem; }
-      .title { font-size: 3rem; }
+      .title { font-size: 2.75rem; }
     }
     .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.25rem; }
     @media (min-width: 768px) { .container { padding: 2rem 2.5rem; } }
     .filters {
-      display: flex; flex-direction: column; gap: 1rem;
+      display: flex; flex-direction: column; gap: 0.75rem;
       background: rgba(245,241,234,0.04);
       border: 1px solid rgba(245,241,234,0.1);
       padding: 1rem;
@@ -46,26 +46,34 @@
     .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
     .filter-label {
       font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
-      color: rgba(245,241,234,0.45); min-width: 5rem;
+      color: rgba(245,241,234,0.5); min-width: 5.5rem;
     }
     .search-input {
       flex: 1; min-width: 12rem;
       background: #1a1a1a; color: #f5f1ea;
       border: 1px solid rgba(245,241,234,0.15);
-      padding: 0.5rem 0.75rem;
+      padding: 0.55rem 0.75rem;
       font-family: ui-monospace, Menlo, monospace;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
     }
     .search-input:focus { outline: 2px solid #d4af37; outline-offset: 1px; }
     .pill {
-      font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
-      padding: 0.4rem 0.75rem; cursor: pointer; transition: all 150ms;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.4rem 0.7rem; cursor: pointer; transition: all 150ms;
       border: 1px solid rgba(245,241,234,0.15);
-      background: transparent; color: rgba(245,241,234,0.65);
+      background: transparent; color: rgba(245,241,234,0.7);
     }
     .pill:hover { border-color: #d4af37; color: #f5f1ea; }
-    .pill[aria-pressed="true"] { background: #d4af37; color: #0a0a0a; border-color: #d4af37; }
-    .meta { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,241,234,0.5); margin-bottom: 1rem; }
+    .pill[aria-pressed="true"] { background: #d4af37; color: #0a0a0a; border-color: #d4af37; font-weight: 700; }
+    .pill .swatch { display:inline-block; width:0.6em; height:0.6em; border-radius:50%; margin-right:0.4em; vertical-align: middle; border: 1px solid rgba(0,0,0,0.2); }
+    .clear-all {
+      font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0.4rem 0.7rem; cursor: pointer;
+      background: transparent; border: 1px solid rgba(245,241,234,0.25);
+      color: rgba(245,241,234,0.8);
+    }
+    .clear-all:hover { border-color: #d4af37; color: #d4af37; }
+    .meta { font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(245,241,234,0.55); margin-bottom: 1rem; }
     .grid {
       display: grid; gap: 1.25rem;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -73,7 +81,7 @@
     @media (min-width: 768px) {
       .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
     }
-    .card { display: flex; flex-direction: column; gap: 0.5rem; }
+    .card { display: flex; flex-direction: column; gap: 0.4rem; }
     .card img {
       width: 100%; aspect-ratio: 2/3; object-fit: contain;
       background: rgba(245,241,234,0.04);
@@ -82,37 +90,34 @@
     }
     .card a:hover img { transform: scale(1.02); border-color: #d4af37; }
     .card-name { font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
-    .card-meta { font-size: 0.72rem; color: rgba(245,241,234,0.5); }
-    .card-price { font-size: 0.85rem; font-weight: 600; color: #d4af37; }
-    .empty {
-      text-align: center; padding: 3rem 1rem;
-      color: rgba(245,241,234,0.45); font-style: italic;
-    }
-    .loading {
-      text-align: center; padding: 3rem 1rem;
-      color: rgba(245,241,234,0.55);
-    }
+    .card-meta { font-size: 0.72rem; color: rgba(245,241,234,0.55); }
+    .card-price { font-size: 0.92rem; font-weight: 700; color: #d4af37; }
+    .empty { text-align: center; padding: 3rem 1rem; color: rgba(245,241,234,0.45); font-style: italic; }
     .pulse { animation: pulse 1.5s ease-in-out infinite; }
     @keyframes pulse { 50% { opacity: 0.4; } }
     .nav-back {
-      display: inline-block;
-      margin-top: 2rem;
-      font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
-      color: rgba(245,241,234,0.55); text-decoration: none;
+      display: inline-block; margin-top: 2rem;
+      font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(245,241,234,0.55);
     }
     .nav-back:hover { color: #d4af37; }
+    .badge {
+      display: inline-block; padding: 0.1rem 0.4rem; font-size: 0.62rem;
+      letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700;
+      border: 1px solid #d4af37; color: #d4af37; margin-left: 0.3rem;
+    }
   </style>
 </head>
 <body>
   <header class="hdr">
     <div class="hdr-inner">
       <p class="crumb">
-        <a href="index.html">Harpua2001</a> &middot; Japanese Holo / Art Rare
+        <a href="index.html">Harpua2001</a> &middot; Pokemon Search
       </p>
-      <h1 class="title">Japanese Holo &amp; Art Rare</h1>
+      <h1 class="title">Pokemon Search.</h1>
       <p class="sub">
-        Filter the modern Pokemon TCG by rarity — Illustration Rare, Special Illustration Rare,
-        Hyper Rare, and Special Art tier. Click any card to see TCGplayer pricing and current eBay listings.
+        Rarity, special set (Trainer Gallery, Galarian Gallery), Pokemon name, color, year, team, theme,
+        and price. Click any card for TCGplayer and eBay.
       </p>
     </div>
   </header>
@@ -120,22 +125,44 @@
   <main class="container">
     <div class="filters">
       <div class="filter-row">
-        <span class="filter-label">Search</span>
-        <input
-          id="search"
-          class="search-input"
-          type="search"
-          placeholder="Pokemon name (e.g. Charizard, Gardevoir, Mew)"
-          aria-label="Search Pokemon by name"
-        />
+        <span class="filter-label">Pokemon</span>
+        <input id="search" class="search-input" type="search" placeholder="Charizard, Gardevoir, Mew, Eevee…" aria-label="Pokemon name" />
+        <button id="clear-all" class="clear-all" type="button">Clear all</button>
       </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Special</span>
+        <div id="special-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+      </div>
+
       <div class="filter-row">
         <span class="filter-label">Rarity</span>
-        <div id="rarity-pills" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+        <div id="rarity-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
       </div>
+
       <div class="filter-row">
-        <span class="filter-label">Set series</span>
-        <div id="series-pills" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+        <span class="filter-label">Color</span>
+        <div id="color-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Year</span>
+        <div id="year-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Theme</span>
+        <div id="theme-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Team</span>
+        <div id="team-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Price</span>
+        <div id="price-pills" class="filter-row" style="margin-left:0; flex:1;"></div>
       </div>
     </div>
 
@@ -144,79 +171,164 @@
     <div id="grid" class="grid" aria-live="polite"></div>
 
     <div id="empty" class="empty" style="display:none;">
-      No cards match the current filter. Try clearing it or selecting a different rarity.
+      No cards match. Try a different combination.
     </div>
 
     <a href="index.html" class="nav-back">← Back to listings</a>
   </main>
 
   <script>
-    // The "Art Rare" tier popular in modern Japanese sets.
-    // The Pokemon TCG API uses these rarity names for the high-tier illustrations.
-    const RARITY_OPTIONS = [
-      { id: "Illustration Rare", label: "Illustration Rare (IR)" },
-      { id: "Special Illustration Rare", label: "Special Illustration Rare (SIR/SAR)" },
-      { id: "Hyper Rare", label: "Hyper Rare" },
-      { id: "Rare Secret", label: "Rare Secret" },
-      { id: "Rare Rainbow", label: "Rainbow Rare" }
+    // ─── Filter option sets ───────────────────────────────────────────
+    const SPECIAL_OPTIONS = [
+      { id: "",   label: "All" },
+      { id: "TG", label: "Trainer Gallery (TG)" },
+      { id: "GG", label: "Galarian Gallery (GG)" }
     ];
-
-    // Modern series most commonly referred to as "Japanese-set / Art Rare"
-    const SERIES_OPTIONS = [
-      { id: "", label: "Any" },
-      { id: "Scarlet & Violet", label: "Scarlet & Violet" },
-      { id: "Sword & Shield", label: "Sword & Shield" },
-      { id: "Sun & Moon", label: "Sun & Moon" }
+    const RARITY_OPTIONS = [
+      { id: "",                              label: "Any" },
+      { id: "Illustration Rare",             label: "Illustration Rare" },
+      { id: "Special Illustration Rare",     label: "Special Illustration Rare" },
+      { id: "Trainer Gallery Rare Holo",     label: "Trainer Gallery Holo" },
+      { id: "Hyper Rare",                    label: "Hyper Rare" },
+      { id: "Rare Holo",                     label: "Holo Rare" },
+      { id: "Rare Secret",                   label: "Secret Rare" }
+    ];
+    // Pokemon energy types = "Color"
+    const COLOR_OPTIONS = [
+      { id: "",          label: "Any",        hex: null },
+      { id: "Fire",      label: "Fire",       hex: "#ef4444" },
+      { id: "Water",     label: "Water",      hex: "#3b82f6" },
+      { id: "Grass",     label: "Grass",      hex: "#22c55e" },
+      { id: "Lightning", label: "Lightning",  hex: "#facc15" },
+      { id: "Psychic",   label: "Psychic",    hex: "#a855f7" },
+      { id: "Fighting",  label: "Fighting",   hex: "#b45309" },
+      { id: "Darkness",  label: "Darkness",   hex: "#1f2937" },
+      { id: "Metal",     label: "Metal",      hex: "#9ca3af" },
+      { id: "Fairy",     label: "Fairy",      hex: "#ec4899" },
+      { id: "Dragon",    label: "Dragon",     hex: "#f59e0b" },
+      { id: "Colorless", label: "Colorless",  hex: "#e5e7eb" }
+    ];
+    const YEAR_OPTIONS = [
+      { id: "",     label: "Any" },
+      { id: "2024", label: "2024" },
+      { id: "2023", label: "2023" },
+      { id: "2022", label: "2022" },
+      { id: "2021", label: "2021" },
+      { id: "2020", label: "2020" },
+      { id: "older", label: "Older" }
+    ];
+    // Pokemon TCG subtypes — represented as "Theme"
+    const THEME_OPTIONS = [
+      { id: "",         label: "Any" },
+      { id: "ex",       label: "ex" },
+      { id: "V",        label: "V" },
+      { id: "VMAX",     label: "VMAX" },
+      { id: "VSTAR",    label: "VSTAR" },
+      { id: "GX",       label: "GX" },
+      { id: "Tag Team", label: "Tag Team" },
+      { id: "Prism Star", label: "Prism Star" },
+      { id: "Radiant",  label: "Radiant" }
+    ];
+    // Villain teams + Star — matched against card name (client-side)
+    const TEAM_OPTIONS = [
+      { id: "",          label: "Any" },
+      { id: "Rocket",    label: "Team Rocket" },
+      { id: "Aqua",      label: "Team Aqua" },
+      { id: "Magma",     label: "Team Magma" },
+      { id: "Galactic",  label: "Team Galactic" },
+      { id: "Plasma",    label: "Team Plasma" },
+      { id: "Flare",     label: "Team Flare" },
+      { id: "Skull",     label: "Team Skull" },
+      { id: "Yell",      label: "Team Yell" },
+      { id: "Star",      label: "Team Star" }
+    ];
+    const PRICE_OPTIONS = [
+      { id: "",         label: "Any" },
+      { id: "0-20",     label: "< $20" },
+      { id: "20-50",    label: "$20–50" },
+      { id: "50-100",   label: "$50–100" },
+      { id: "100-250",  label: "$100–250" },
+      { id: "250-",     label: "$250+" }
     ];
 
     const state = {
       query: "",
+      special: "",
       rarity: "Illustration Rare",
-      series: "Scarlet & Violet",
+      color: "",
+      year: "",
+      theme: "",
+      team: "",
+      price: "",
+      series: "Scarlet & Violet", // hidden default series
       cards: [],
       filtered: []
     };
 
-    function buildPills(host, opts, selected, onPick, includeAll = true) {
-      const items = includeAll && opts[0]?.id !== "" ? [{ id: "__ALL__", label: "Any" }, ...opts] : opts;
+    function buildPills(host, opts, selected, onPick) {
       host.innerHTML = "";
-      items.forEach(opt => {
+      opts.forEach(opt => {
         const b = document.createElement("button");
         b.className = "pill";
         b.type = "button";
-        b.textContent = opt.label;
-        const isActive =
-          (opt.id === "__ALL__" && !selected) ||
-          (opt.id === selected);
-        b.setAttribute("aria-pressed", isActive ? "true" : "false");
-        b.addEventListener("click", () => onPick(opt.id === "__ALL__" ? "" : opt.id));
+        b.innerHTML = (opt.hex ? `<span class="swatch" style="background:${opt.hex}"></span>` : "") + opt.label;
+        b.setAttribute("aria-pressed", (opt.id === selected) ? "true" : "false");
+        b.addEventListener("click", () => onPick(opt.id));
         host.appendChild(b);
       });
     }
 
     function renderFilters() {
-      buildPills(
-        document.getElementById("rarity-pills"),
-        RARITY_OPTIONS,
-        state.rarity,
-        (v) => { state.rarity = v; fetchCards(); }
-      );
-      buildPills(
-        document.getElementById("series-pills"),
-        SERIES_OPTIONS,
-        state.series,
-        (v) => { state.series = v; fetchCards(); },
-        false
-      );
+      buildPills(document.getElementById("special-pills"), SPECIAL_OPTIONS, state.special, (v) => { state.special = v; fetchCards(); });
+      buildPills(document.getElementById("rarity-pills"),  RARITY_OPTIONS,  state.rarity,  (v) => { state.rarity = v;  fetchCards(); });
+      buildPills(document.getElementById("color-pills"),   COLOR_OPTIONS,   state.color,   (v) => { state.color = v;   fetchCards(); });
+      buildPills(document.getElementById("year-pills"),    YEAR_OPTIONS,    state.year,    (v) => { state.year = v;    applyClientFilter(); });
+      buildPills(document.getElementById("theme-pills"),   THEME_OPTIONS,   state.theme,   (v) => { state.theme = v;   fetchCards(); });
+      buildPills(document.getElementById("team-pills"),    TEAM_OPTIONS,    state.team,    (v) => { state.team = v;    applyClientFilter(); });
+      buildPills(document.getElementById("price-pills"),   PRICE_OPTIONS,   state.price,   (v) => { state.price = v;   applyClientFilter(); });
+    }
+
+    function getCardPrice(c) {
+      const p = c.tcgplayer?.prices || {};
+      return p.holofoil?.market ?? p.normal?.market ?? p.reverseHolofoil?.market ?? p["1stEditionHolofoil"]?.market ?? null;
+    }
+
+    function priceMatches(card) {
+      if (!state.price) return true;
+      const price = getCardPrice(card);
+      if (price === null) return false;
+      const [lo, hi] = state.price.split("-").map(s => s === "" ? Infinity : Number(s));
+      return price >= lo && price < (hi === undefined ? Infinity : hi);
+    }
+
+    function yearMatches(card) {
+      if (!state.year) return true;
+      const date = card.set?.releaseDate;
+      if (!date) return false;
+      const cardYear = parseInt(date.slice(0, 4), 10);
+      if (state.year === "older") return cardYear < 2020;
+      return String(cardYear) === state.year;
+    }
+
+    function teamMatches(card) {
+      if (!state.team) return true;
+      const haystack = (card.name + " " + (card.subtypes || []).join(" ")).toLowerCase();
+      const needle = ("Team " + state.team).toLowerCase();
+      // Also match raw word for Star (since "Team Star" subset uses Star characters)
+      const altNeedle = state.team.toLowerCase();
+      return haystack.includes(needle) || haystack.includes(altNeedle);
     }
 
     function applyClientFilter() {
       const q = state.query.trim().toLowerCase();
       state.filtered = state.cards.filter(c => {
-        if (!q) return true;
-        return c.name.toLowerCase().includes(q) ||
-               (c.set?.name || "").toLowerCase().includes(q);
+        if (q && !c.name.toLowerCase().includes(q)) return false;
+        if (!yearMatches(c)) return false;
+        if (!teamMatches(c)) return false;
+        if (!priceMatches(c)) return false;
+        return true;
       });
+      renderFilters();
       renderGrid();
     }
 
@@ -225,7 +337,16 @@
       const empty = document.getElementById("empty");
       const meta = document.getElementById("result-meta");
 
-      meta.textContent = `${state.filtered.length} card${state.filtered.length === 1 ? "" : "s"} · ${state.rarity || "Any rarity"}${state.series ? " · " + state.series : ""}`;
+      const parts = [];
+      if (state.special) parts.push(state.special === "TG" ? "Trainer Gallery" : "Galarian Gallery");
+      if (state.rarity) parts.push(state.rarity);
+      if (state.color)  parts.push(state.color);
+      if (state.theme)  parts.push(state.theme);
+      if (state.team)   parts.push("Team " + state.team);
+      if (state.year)   parts.push(state.year === "older" ? "Pre-2020" : state.year);
+      if (state.price)  parts.push(PRICE_OPTIONS.find(p => p.id === state.price)?.label);
+      const label = parts.length ? parts.join(" · ") : "Any";
+      meta.textContent = `${state.filtered.length} card${state.filtered.length === 1 ? "" : "s"} · ${label}`;
 
       if (state.filtered.length === 0 && state.cards.length > 0) {
         grid.innerHTML = "";
@@ -234,25 +355,24 @@
       }
       empty.style.display = "none";
 
-      grid.innerHTML = state.filtered.slice(0, 60).map(c => {
+      grid.innerHTML = state.filtered.slice(0, 80).map(c => {
         const img = c.images?.small || c.images?.large || "";
-        const price = c.tcgplayer?.prices?.holofoil?.market ||
-                      c.tcgplayer?.prices?.normal?.market ||
-                      c.tcgplayer?.prices?.reverseHolofoil?.market ||
-                      c.tcgplayer?.prices?.["1stEditionHolofoil"]?.market;
+        const price = getCardPrice(c);
         const ebaySearch = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(c.name + " " + (c.set?.name || "") + " " + (c.number || ""))}`;
         const tcg = c.tcgplayer?.url || ebaySearch;
+        const isGallery = c.number?.startsWith("TG") || c.number?.startsWith("GG");
+        const yearStr = c.set?.releaseDate?.slice(0, 4) || "—";
         return `
           <article class="card">
             <a href="${tcg}" target="_blank" rel="noopener" aria-label="${c.name} on TCGplayer">
               <img src="${img}" alt="${c.name}" loading="lazy" />
             </a>
             <div class="card-name">${c.name}</div>
-            <div class="card-meta">${c.set?.name || "—"} · #${c.number || "?"}</div>
-            ${price ? `<div class="card-price">$${price.toFixed(2)}</div>` : `<div class="card-meta">Price TBD</div>`}
+            <div class="card-meta">${c.set?.name || "—"} · ${yearStr} · #${c.number || "?"}${isGallery ? `<span class="badge">${c.number.startsWith("TG") ? "Trainer" : "Galarian"}</span>` : ""}</div>
+            ${price !== null ? `<div class="card-price">$${price.toFixed(2)}</div>` : `<div class="card-meta">Price TBD</div>`}
             <div style="display:flex; gap:0.5rem;">
-              ${c.tcgplayer?.url ? `<a href="${c.tcgplayer.url}" target="_blank" rel="noopener" style="font-size:0.7rem; color:#d4af37;">TCGplayer →</a>` : ""}
-              <a href="${ebaySearch}" target="_blank" rel="noopener" style="font-size:0.7rem; color:rgba(245,241,234,0.55);">eBay →</a>
+              ${c.tcgplayer?.url ? `<a href="${c.tcgplayer.url}" target="_blank" rel="noopener" style="font-size:0.72rem; color:#d4af37;">TCGplayer →</a>` : ""}
+              <a href="${ebaySearch}" target="_blank" rel="noopener" style="font-size:0.72rem; color:rgba(245,241,234,0.55);">eBay →</a>
             </div>
           </article>
         `;
@@ -267,10 +387,14 @@
       grid.innerHTML = "";
 
       const parts = [];
+      if (state.special === "TG") parts.push(`number:TG*`);
+      else if (state.special === "GG") parts.push(`number:GG*`);
       if (state.rarity) parts.push(`rarity:"${state.rarity}"`);
-      if (state.series) parts.push(`set.series:"${state.series}"`);
+      if (state.color)  parts.push(`types:"${state.color}"`);
+      if (state.theme)  parts.push(`subtypes:"${state.theme}"`);
+      if (state.series && !state.special) parts.push(`set.series:"${state.series}"`);
       const q = parts.join(" ");
-      const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=60`;
+      const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=250`;
 
       try {
         const res = await fetch(url);
@@ -278,7 +402,7 @@
         const data = await res.json();
         state.cards = data.data || [];
       } catch (err) {
-        meta.textContent = `Error: ${err.message}. Try again in a moment.`;
+        meta.textContent = `Error: ${err.message}. Try again.`;
         state.cards = [];
       } finally {
         meta.classList.remove("pulse");
@@ -290,6 +414,13 @@
     document.getElementById("search").addEventListener("input", (e) => {
       state.query = e.target.value;
       applyClientFilter();
+    });
+
+    document.getElementById("clear-all").addEventListener("click", () => {
+      state.query = ""; state.special = ""; state.rarity = ""; state.color = "";
+      state.year = ""; state.theme = ""; state.team = ""; state.price = "";
+      document.getElementById("search").value = "";
+      fetchCards();
     });
 
     renderFilters();
