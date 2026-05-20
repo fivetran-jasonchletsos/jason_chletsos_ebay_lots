@@ -55,12 +55,20 @@ EPSILON_CENTS = 1
 def _load_live_prices() -> dict[str, float]:
     """Source of truth: eBay's GetMyeBaySelling. Skips paginating beyond a
     single page since the store is small (<500 listings). Returns dict
-    item_id -> current_price."""
+    item_id -> current_price.
+
+    Auction listings are excluded — their "price" is the live high bid, which
+    changes every time a bid comes in. The gate would flag bid-induced moves
+    during the 3-5 min build as drift even though the rendered page correctly
+    showed the bid as of build start. Pure-BIN listings have stable prices.
+    """
     cfg = json.loads(promote.CONFIG_FILE.read_text())
     token = promote.get_access_token(cfg)
     listings = promote.fetch_listings(token, cfg)
     out: dict[str, float] = {}
     for l in listings:
+        if "Auction" in str(l.get("listing_type", "")):
+            continue
         try:
             p = float(l.get("price") or 0)
         except (TypeError, ValueError):

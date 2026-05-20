@@ -706,10 +706,51 @@ def build_deals_page(deals_data: dict) -> Path:
         </div>
       </article>''')
 
+    # P2 page-weight fix: only the first 12 deal cards ship inline. The rest
+    # are written to _deals_listings.json and hydrated client-side after first
+    # paint. Cassini/Googlebot still see real HTML for the top of the page.
+    INLINE_DEAL_CARDS = 12
+    inline_deal_cards   = cards[:INLINE_DEAL_CARDS]
+    deferred_deal_cards = cards[INLINE_DEAL_CARDS:]
+
+    deals_json_path = OUTPUT_DIR / "_deals_listings.json"
+    deals_json_path.write_text(
+        json.dumps({"cards": deferred_deal_cards}, separators=(",", ":")),
+        encoding="utf-8",
+    )
+
+    # JSON-LD ItemList for the first 12 deal cards — gives Google structured
+    # data for the above-the-fold deals (Products with discounted offers).
+    inline_deal_products_ld = []
+    for i, d in enumerate(all_deals[:INLINE_DEAL_CARDS]):
+        prod = {
+            "@type": "Product",
+            "position": i + 1,
+            "name": d.get("title", "")[:200],
+            "image": d.get("image") or "",
+            "offers": {
+                "@type": "Offer",
+                "price": f"{d['price']:.2f}",
+                "priceCurrency": CURRENCY,
+                "availability": "https://schema.org/InStock",
+                "url": d.get("url") or "",
+            },
+        }
+        inline_deal_products_ld.append(prod)
+    deal_itemlist_ld = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "item": p}
+            for i, p in enumerate(inline_deal_products_ld)
+        ],
+    }
+    deal_itemlist_ld_script = f'<script type="application/ld+json">{json.dumps(deal_itemlist_ld, separators=(",", ":"))}</script>'
+
     if not cards:
         cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No deals matched the threshold today. Lower the bar in <code>deal_queries.json</code> (increase <code>discount_threshold_pct</code>) or add new queries.</div>'
     else:
-        cards_html = "\n".join(cards)
+        cards_html = "\n".join(inline_deal_cards)
 
     # Query summary table
     summary_rows = []
@@ -848,7 +889,8 @@ def build_deals_page(deals_data: dict) -> Path:
       Showing <span id="deal-visible-count">{len(cards)}</span> of {len(cards)} deals
     </div>
 
-    <div class="deal-grid" id="deal-grid">
+    {deal_itemlist_ld_script}
+    <div class="deal-grid" id="deal-grid" data-total="{len(cards)}" data-inline="{len(inline_deal_cards)}">
       {cards_html}
     </div>
 
@@ -938,6 +980,29 @@ def build_deals_page(deals_data: dict) -> Path:
           }});
         }}
       }}
+
+      // ============ HYDRATE DEFERRED DEAL CARDS (P2 page-weight fix) ============
+      (function hydrateDeals() {{
+        const grid = document.getElementById('deal-grid');
+        if (!grid) return;
+        const total = parseInt(grid.dataset.total || '0', 10);
+        const inline = parseInt(grid.dataset.inline || '0', 10);
+        if (total <= inline) return;
+        const start = () => fetch('_deals_listings.json', {{ cache: 'force-cache' }})
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(data => {{
+            const cards = (data && data.cards) || [];
+            if (!cards.length) return;
+            grid.insertAdjacentHTML('beforeend', cards.join(''));
+            try {{ dealApply(); }} catch(e) {{}}
+          }})
+          .catch(() => {{ /* fail silent — inline 12 still render */ }});
+        if ('requestIdleCallback' in window) {{
+          requestIdleCallback(start, {{ timeout: 1500 }});
+        }} else {{
+          setTimeout(start, 200);
+        }}
+      }})();
     </script>"""
     out = OUTPUT_DIR / "deals.html"
     out.write_text(html_shell(f"Deal Hunter · {SELLER_NAME}", body, extra_head=f"<style>{extra_css}</style>", active_page="deals.html"), encoding="utf-8")
@@ -4009,13 +4074,61 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
         'Watchlist <span class="count" id="watch-count">0</span></button>'
     )
 
+    # ============ STICKY CATEGORY SIDEBAR ============
+    # Mirrors chip_order for the desktop left-rail nav. Same data-cat values so
+    # a single setCategory() handler updates both the rail and the inline chips.
+    sidebar_items = []
+    total_listings = len(enriched)
+    for cat in chip_order:
+        cnt = total_listings if cat == "All" else cat_counts.get(cat, 0)
+        if cnt == 0 and cat != "All":
+            continue
+        active = " active" if cat == "All" else ""
+        sidebar_items.append(
+            f'<button type="button" class="cat-nav-item{active}" data-cat="{cat}" '
+            f'onclick="setCategory(this)">'
+            f'<span class="cat-nav-label">{cat}</span>'
+            f'<span class="cat-nav-count">{cnt}</span></button>'
+        )
+    # Watchlist row in the sidebar (matches the watchlist chip's behavior)
+    sidebar_items.append(
+        '<button type="button" class="cat-nav-item" data-cat="__watch" onclick="setCategory(this)">'
+        '<span class="cat-nav-label">'
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-right:6px;vertical-align:-1px;">'
+        '<path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>'
+        'Watchlist</span>'
+        '<span class="cat-nav-count" id="watch-count-sidebar">0</span></button>'
+    )
+    sidebar_html = f'''
+    <aside class="cat-sidebar" aria-label="Browse by category">
+      <div class="cat-sidebar-inner">
+        <div class="cat-sidebar-head">
+          <div class="eyebrow">Browse</div>
+          <h3 class="cat-sidebar-title">Categories</h3>
+        </div>
+        <nav class="cat-sidebar-list">
+          {''.join(sidebar_items)}
+        </nav>
+        <div class="cat-sidebar-foot">
+          <span class="cat-sidebar-foot-num">{total_listings}</span>
+          <span class="cat-sidebar-foot-lbl">total listings</span>
+        </div>
+      </div>
+    </aside>'''
+
     # Price range
     prices = [e["price_f"] for e in enriched if e["price_f"] > 0]
     p_min = int((min(prices) if prices else 0) // 1)
     p_max = int(((max(prices) if prices else 100)) + 1)
 
     # Build cards
+    # P2 page-weight fix: only the first 12 cards ship inline as real HTML
+    # (above the fold + Cassini/Googlebot crawlability). The rest are written
+    # to docs/_index_listings.json as pre-rendered HTML strings and hydrated
+    # client-side after first paint. See _hydrate script at the bottom.
+    INLINE_CARDS = 12
     card_html = []
+    inline_products_ld = []  # JSON-LD Product entries for first 12 cards
     for e in enriched:
         flag = e["market"].get("flag") if e["market"] else None
         # Pricing-flag badges leak internal analytics to buyers — admin-only
@@ -4115,6 +4228,57 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
         </div>
       </article>''')
 
+        # JSON-LD Product schema — only for first INLINE_CARDS cards (the ones
+        # Googlebot will actually see in the static HTML). Hydrated cards 13+
+        # don't ship JSON-LD; their item pages carry it instead.
+        if len(inline_products_ld) < INLINE_CARDS:
+            prod = {
+                "@type": "Product",
+                "position": len(inline_products_ld) + 1,
+                "name": e["title"],
+                "sku": e["item_id"],
+                "url": f"items/{e['item_id']}.html",
+                "image": e["pic"] or "",
+                "offers": {
+                    "@type": "Offer",
+                    "price": f"{e['price_f']:.2f}",
+                    "priceCurrency": CURRENCY,
+                    "availability": "https://schema.org/InStock",
+                    "url": f"items/{e['item_id']}.html",
+                },
+            }
+            if e["condition"]:
+                prod["category"] = e["condition"]
+            inline_products_ld.append(prod)
+
+    # Split cards into inline (first 12, fast first paint + SEO) and deferred
+    # (hydrated from JSON after first paint). This is the P2 page-weight fix
+    # — index.html drops from ~540KB to ~50–80KB while preserving Cassini
+    # crawlability of the above-the-fold cards.
+    inline_card_html  = card_html[:INLINE_CARDS]
+    deferred_card_html = card_html[INLINE_CARDS:]
+
+    # Write deferred cards as a JSON array of pre-rendered HTML strings.
+    # Pre-rendered (vs. a structured data dict) keeps the JS hydrator trivial:
+    # it just appends innerHTML chunks. Identical DOM as the inline path.
+    listings_json_path = OUTPUT_DIR / "_index_listings.json"
+    listings_json_path.write_text(
+        json.dumps({"cards": deferred_card_html}, separators=(",", ":")),
+        encoding="utf-8",
+    )
+
+    # ItemList JSON-LD wrapping the inline 12 Products — gives Google a
+    # structured-data hook for the visible portion of the catalog.
+    itemlist_ld = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "item": p}
+            for i, p in enumerate(inline_products_ld)
+        ],
+    }
+    itemlist_ld_script = f'<script type="application/ld+json">{json.dumps(itemlist_ld, separators=(",", ":"))}</script>'
+
     # Compact "Top Picks" horizontal scroller — replaces the heavy hero carousel
     hero_html = ""
     if top_picks:
@@ -4136,6 +4300,124 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     '''
 
     extra_css = """
+    /* ============ STICKY CATEGORY SIDEBAR ============ */
+    .showcase-layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .showcase-main { min-width: 0; }
+    .cat-sidebar {
+      position: sticky;
+      top: 80px;
+      align-self: start;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    .cat-sidebar-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 16px 12px;
+      box-shadow: var(--shadow-lg);
+    }
+    .cat-sidebar-head { padding: 0 6px 12px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+    .cat-sidebar-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: .04em;
+      color: var(--text);
+      margin: 2px 0 0;
+    }
+    .cat-sidebar-list { display: flex; flex-direction: column; gap: 2px; }
+    .cat-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--r-md);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .01em;
+      text-align: left;
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+    .cat-nav-item:hover {
+      color: var(--text);
+      background: var(--surface-2);
+      border-color: var(--border);
+    }
+    .cat-nav-item.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--brand-fg);
+      border-color: var(--gold);
+    }
+    .cat-nav-item.active .cat-nav-count { color: var(--brand-fg); opacity: .85; }
+    .cat-nav-label {
+      display: inline-flex; align-items: center;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      flex: 1 1 auto; min-width: 0;
+    }
+    .cat-nav-count {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 15px;
+      letter-spacing: .04em;
+      color: var(--gold);
+      opacity: .85;
+      flex: 0 0 auto;
+    }
+    .cat-sidebar-foot {
+      margin-top: 12px;
+      padding: 10px 12px 4px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 6px;
+    }
+    .cat-sidebar-foot-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      color: var(--gold);
+    }
+    .cat-sidebar-foot-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+    /* Mobile: collapse to a horizontal scrollable chip strip — no vertical real-estate hit */
+    @media (max-width: 900px) {
+      .showcase-layout { grid-template-columns: 1fr; gap: 14px; }
+      .cat-sidebar { position: static; max-height: none; overflow: visible; }
+      .cat-sidebar-inner { padding: 10px 10px 12px; }
+      .cat-sidebar-head { display: none; }
+      .cat-sidebar-foot { display: none; }
+      .cat-sidebar-list {
+        flex-direction: row;
+        gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .cat-nav-item {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        padding: 7px 14px;
+        background: var(--surface-2);
+        border-color: var(--border);
+        white-space: nowrap;
+      }
+      .cat-nav-count { font-size: 13px; margin-left: 4px; }
+    }
+
     /* ============ COMPACT TOP-PICKS STRIP ============ */
     .topicks { margin-bottom: 22px; }
     .topicks-head {
@@ -4550,6 +4832,9 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       </div>
     </section>
 
+    <div class="showcase-layout">
+      {sidebar_html}
+      <div class="showcase-main">
     <div class="filter-bar">
       <div class="filter-row">
         <input type="text" id="search" class="search-input" placeholder="Search players, sets, years…" oninput="applyFilters()" autocomplete="off">
@@ -4612,9 +4897,12 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       <div class="empty-state-sub">Try widening the price range, switching tabs, or clearing the search box. The card catalog updates every 4 hours automatically.</div>
     </div>
 
-    <div class="grid" id="listing-grid" data-size="medium">
-      {''.join(card_html)}
+    {itemlist_ld_script}
+    <div class="grid" id="listing-grid" data-size="medium" data-total="{len(enriched)}" data-inline="{len(inline_card_html)}">
+      {''.join(inline_card_html)}
     </div>
+      </div><!-- /.showcase-main -->
+    </div><!-- /.showcase-layout -->
 
     <script>
       const PRICE_MIN_INIT = {p_min};
@@ -4644,6 +4932,8 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
         }});
         const wc = document.getElementById('watch-count');
         if (wc) wc.textContent = favs.length;
+        const wcSide = document.getElementById('watch-count-sidebar');
+        if (wcSide) wcSide.textContent = favs.length;
       }}
       function toggleFav(btn, ev) {{
         ev.preventDefault(); ev.stopPropagation();
@@ -4668,20 +4958,30 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
         document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === savedSize));
       }}
 
-      // Category chips
+      // Category chips + sticky-sidebar nav (both share data-cat)
       function setCategory(btn) {{
         activeCat = btn.dataset.cat;
-        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === btn));
+        // Sync inline chips
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
+        // Sync sidebar nav items
+        document.querySelectorAll('.cat-nav-item').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
         // Sync the dropdown
         const sel = document.getElementById('category-select');
-        if (sel) sel.value = activeCat;
+        if (sel && activeCat !== '__watch') sel.value = activeCat;
         applyFilters();
+        // Mobile only — smooth-scroll the grid into view when the click came
+        // from the collapsed chip-strip variant of the sidebar
+        if (btn.classList.contains('cat-nav-item') && window.matchMedia('(max-width: 900px)').matches) {{
+          const grid = document.getElementById('listing-grid');
+          if (grid) grid.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+        }}
       }}
       // Category dropdown
       window.setCategoryFromSelect = function() {{
         const sel = document.getElementById('category-select');
         activeCat = sel.value;
         document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
+        document.querySelectorAll('.cat-nav-item').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
         applyFilters();
       }};
       // KPI stat-card click → filter the grid
@@ -4690,6 +4990,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
         // Reset other filters when clicking a KPI
         activeCat = 'All';
         document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === 'All'));
+        document.querySelectorAll('.cat-nav-item').forEach(c => c.classList.toggle('active', c.dataset.cat === 'All'));
         const sel = document.getElementById('category-select');
         if (sel) sel.value = 'All';
         document.getElementById('search').value = '';
@@ -4928,6 +5229,8 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
         if (s.cat && s.cat !== 'All') {{
           const chip = document.querySelector('.chip[data-cat="' + s.cat + '"]');
           if (chip) {{ document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); activeCat = s.cat; }}
+          // Mirror into the sticky sidebar nav so hash-deep-links land both UIs in sync
+          document.querySelectorAll('.cat-nav-item').forEach(c => c.classList.toggle('active', c.dataset.cat === s.cat));
         }}
         if (s.min !== PRICE_MIN_INIT || s.max !== PRICE_MAX_INIT) {{
           slider.noUiSlider.set([s.min, s.max]);
@@ -4949,6 +5252,49 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
           showToast('Copy failed. URL: ' + location.href);
         }}
       }};
+
+      // ============ HYDRATE DEFERRED CARDS (P2 page-weight fix) ============
+      // First 12 cards ship inline as real HTML (above the fold + Cassini SEO).
+      // The rest live in _index_listings.json and hydrate after first paint.
+      // After hydration we re-run tab counts, fav UI, and filters so the
+      // newly-appended cards participate in search/sort/filter.
+      (function hydrateListings() {{
+        const grid = document.getElementById('listing-grid');
+        if (!grid) return;
+        const total = parseInt(grid.dataset.total || '0', 10);
+        const inline = parseInt(grid.dataset.inline || '0', 10);
+        if (total <= inline) return; // nothing deferred
+        const url = '_index_listings.json';
+        const start = () => fetch(url, {{ cache: 'force-cache' }})
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(data => {{
+            const cards = (data && data.cards) || [];
+            if (!cards.length) return;
+            // Append in one shot — innerHTML+= would re-parse existing cards
+            // and break event listeners; use insertAdjacentHTML on the grid.
+            grid.insertAdjacentHTML('beforeend', cards.join(''));
+            // Re-run UI hooks that depend on the full card set
+            try {{ refreshFavUI(); }} catch(e) {{}}
+            try {{
+              const all = document.querySelectorAll('.listing-card');
+              const setCnt = (id, n) => {{ const el = document.getElementById(id); if (el) el.textContent = n; }};
+              setCnt('cnt-gallery', all.length);
+              setCnt('cnt-hot',     Array.from(all).filter(c => c.dataset.hot === '1').length);
+              setCnt('cnt-bin',     Array.from(all).filter(c => c.dataset.type === 'BIN').length);
+              setCnt('cnt-auction', Array.from(all).filter(c => c.dataset.type === 'Auction').length);
+            }} catch(e) {{}}
+            try {{ applyFilters(); }} catch(e) {{}}
+            // GLightbox needs to know about the new <a class="glightbox"> nodes.
+            try {{ if (window.GLightbox) window.GLightbox({{ selector: '.glightbox' }}); }} catch(e) {{}}
+          }})
+          .catch(() => {{ /* fail silent — inline 12 still render */ }});
+        // Defer until the browser is idle so we don't block first paint.
+        if ('requestIdleCallback' in window) {{
+          requestIdleCallback(start, {{ timeout: 1500 }});
+        }} else {{
+          setTimeout(start, 200);
+        }}
+      }})();
     </script>"""
 
     out = OUTPUT_DIR / "index.html"
@@ -7346,12 +7692,15 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
             },
         },
         # Seller's overall eBay feedback rating — surfaces as stars in Google.
-        "aggregateRating": {
+        # Dynamic: pulled from docs/_seller.json via _load_seller_profile().
+        # eBay sometimes returns feedback_score as a string, so cast to int
+        # before re-stringifying — schema.org wants a numeric count, not "173".
+        "aggregateRating": (lambda _sp: {
             "@type": "AggregateRating",
-            "ratingValue": _load_seller_profile().get("_rating_value", "5.0"),
-            "reviewCount": str(_load_seller_profile().get("feedback_score", "170")),
+            "ratingValue": _sp.get("_rating_value", "5.0"),
+            "reviewCount": str(int(float(_sp.get("feedback_score") or 170))),
             "bestRating": "5",
-        },
+        })(_load_seller_profile()),
     }
 
     # Related items: same category, exclude self, top by price
@@ -9905,6 +10254,20 @@ def main():
     if seller:
         (OUTPUT_DIR / "_seller.json").write_text(json.dumps(seller, indent=2), encoding="utf-8")
         print(f"  Seller: {seller.get('user_id')} · feedback {seller.get('feedback_score')} ({seller.get('positive_pct')}% positive) · since {seller.get('member_since')}")
+        # Invalidate the in-process seller-profile cache so JSON-LD aggregateRating
+        # picks up the fresh feedback_score / positive_pct on this very build.
+        global _SELLER_PROFILE_CACHE
+        _SELLER_PROFILE_CACHE = None
+    # Regenerate the Open Graph / Twitter Card image so social scrapers stay
+    # in sync with the current seller rating (no-op if Pillow is missing).
+    try:
+        from build_og_card import build as _build_og_card
+        _og_path = _build_og_card()
+        print(f"  OG card regenerated: {_og_path.name} ({_og_path.stat().st_size/1024:.1f} KB)")
+    except ImportError:
+        print("  OG card skipped — Pillow not installed (pip install Pillow)")
+    except Exception as _og_exc:
+        print(f"  OG card skipped — {_og_exc}")
     print("  Fetching sold listings (last 90 days; merged into all-time history)...")
     sold = fetch_sold_listings(token, cfg, days_back=90)
     build_sold_page(sold)
