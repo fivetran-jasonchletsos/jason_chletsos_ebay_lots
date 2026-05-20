@@ -586,13 +586,13 @@ def lambda_handler(event, context):
                 return _cors_response(503, {
                     "success": False,
                     "error":   "AI assistant not configured — ANTHROPIC_API_KEY missing on Lambda.",
-                })
+                }, event)
 
             body = json.loads(event.get("body") or "{}")
             question = str(body.get("question") or "").strip()
             history  = body.get("history") or []
             if not question:
-                return _cors_response(400, {"success": False, "error": "question required"})
+                return _cors_response(400, {"success": False, "error": "question required"}, event)
 
             system_prompt = (
                 "You are Jason Chletsos's personal sports-card and Pokemon-card assistant. "
@@ -644,7 +644,7 @@ def lambda_handler(event, context):
                 return _cors_response(502, {
                     "success": False,
                     "error":   f"Anthropic API HTTP {exc.code}: {err_body}",
-                })
+                }, event)
 
             # Extract text from content blocks
             answer_parts = []
@@ -659,14 +659,14 @@ def lambda_handler(event, context):
                 "answer":  answer,
                 "model":   data.get("model", ""),
                 "usage":   data.get("usage", {}),
-            })
+            }, event)
 
         except Exception as exc:
             logger.error(f"ai-chat error: {exc}")
-            return _cors_response(500, {"success": False, "error": str(exc)})
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/ai-chat"):
-        return _cors_preflight()
+        return _cors_preflight(event)
 
     # ------------------------------------------------------------------
     # POST /ebay/rebuild — trigger GitHub Actions workflow_dispatch
@@ -1212,8 +1212,52 @@ def _reddit_submit(subreddit: str, title: str, text: str):
 # ---------------------------------------------------------------------------
 # Response helpers
 # ---------------------------------------------------------------------------
+_CORS_DEFAULT_ORIGIN = "https://fivetran-jasonchletsos.github.io"
+
+# Allow-list of additional origins for local dev. Browsers send Origin "null"
+# for file:// loads; localhost/127.0.0.1 cover the typical local-server cases.
+# Anything not on this list (including production) falls through to the
+# default origin in _pick_allowed_origin().
+_CORS_ALLOWED_ORIGINS = {
+    _CORS_DEFAULT_ORIGIN,
+    "null",
+}
+_CORS_ALLOWED_HOST_PREFIXES = (
+    "http://localhost",
+    "http://127.0.0.1",
+    "https://localhost",
+    "https://127.0.0.1",
+)
+
+def _pick_allowed_origin(event: dict) -> str:
+    """Return the Origin header iff it is on the allow-list, else the
+    production default. Browsers compare the response Allow-Origin against
+    their request Origin exactly — mismatch = preflight failure."""
+    if not isinstance(event, dict):
+        return _CORS_DEFAULT_ORIGIN
+    headers = event.get("headers") or {}
+    # API Gateway preserves header case; some local test events lowercase.
+    origin = headers.get("origin") or headers.get("Origin") or ""
+    if not origin:
+        return _CORS_DEFAULT_ORIGIN
+    if origin in _CORS_ALLOWED_ORIGINS:
+        return origin
+    if origin.startswith(_CORS_ALLOWED_HOST_PREFIXES):
+        return origin
+    return _CORS_DEFAULT_ORIGIN
+
+def _cors_headers_for(event: dict) -> dict:
+    return {
+        "Access-Control-Allow-Origin":  _pick_allowed_origin(event),
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+    }
+
+# Static headers kept for routes that only the production site calls (the
+# Refresh button, repricing webhook, etc). The AI-chat route uses the dynamic
+# variant above so localhost / file:// testing works.
 _CORS_HEADERS = {
-    "Access-Control-Allow-Origin":  "https://fivetran-jasonchletsos.github.io",
+    "Access-Control-Allow-Origin":  _CORS_DEFAULT_ORIGIN,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
 }
@@ -1225,17 +1269,19 @@ def _response(status_code: int, body: dict) -> dict:
         "body":       json.dumps(body),
     }
 
-def _cors_response(status_code: int, body: dict) -> dict:
+def _cors_response(status_code: int, body: dict, event: dict | None = None) -> dict:
+    headers = _cors_headers_for(event) if event is not None else dict(_CORS_HEADERS)
     return {
         "statusCode": status_code,
-        "headers":    {"Content-Type": "application/json", **_CORS_HEADERS},
+        "headers":    {"Content-Type": "application/json", **headers},
         "body":       json.dumps(body),
     }
 
-def _cors_preflight() -> dict:
+def _cors_preflight(event: dict | None = None) -> dict:
+    headers = _cors_headers_for(event) if event is not None else dict(_CORS_HEADERS)
     return {
         "statusCode": 200,
-        "headers":    _CORS_HEADERS,
+        "headers":    headers,
         "body":       "",
     }
 
