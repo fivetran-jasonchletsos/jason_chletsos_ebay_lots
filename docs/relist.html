@@ -591,11 +591,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* Prevent any child from growing wider than the viewport */
+  overflow: hidden;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -628,7 +632,30 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   - min-width: 0 is required on flex children to allow them to shrink below
+     their content size (without it, overflow never triggers).
+   - overflow-x: auto lets the nav scroll horizontally on tight viewports
+     rather than pushing the logo off-screen or creating overlap.
+   - justify-content: flex-end keeps links right-aligned (closest to the
+     action buttons on the right), which is the natural reading order. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
+     hamburger breakpoint at 880px should activate well before it's needed. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1839,6 +1866,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
           <div class="nav-dropdown-menu" role="menu"><a href="japanese_holo.html">JP Holo / Art Rare</a></div>
         </div></nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1858,6 +1888,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
@@ -1878,7 +1909,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Browse</div>
+<div class="drawer-group">Browse</div>
 <a href="browse.html">Browse</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
@@ -1922,7 +1953,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html" class="admin-only" data-admin="1">Mewtwo</a>
 <a href="eevee.html" class="admin-only" data-admin="1">Eevee</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Pokemon</div>
+<div class="drawer-group">Pokemon</div>
 <a href="japanese_holo.html">JP Holo / Art Rare</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
@@ -1960,11 +1991,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Relist Unsold</h1><p class='sub'>Last run: <code>2026-05-20 22:18 UTC</code> · window: <code>14d</code></p><div class='rl-kpis'><div class='rl-kpi warn'><div class='n'>4</div><div class='l'>Unsold listings</div></div><div class='rl-kpi'><div class='n'>$10.93</div><div class='l'>Total unsold value</div></div><div class='rl-kpi bad'><div class='n'>10d</div><div class='l'>Oldest unsold</div></div><div class='rl-kpi'><div class='n'>6.2d</div><div class='l'>Average days unsold</div></div></div></section><section class='rl-note'><h3>How this works</h3><ul><li>Pulls all ended-without-bid auctions via Trading <code>GetMyeBaySelling</code> (<code>UnsoldList.Include=true</code>) for the past 14 days.</li><li>Suggests a Fixed-Price relist price: original BIN if set, else 2× the starting bid (auctions usually open very low), else market median × 0.95.</li><li><b>Relist as FP</b> calls Trading <code>RelistFixedPriceItem</code>, which takes the previous auction's ItemID and re-publishes it as a GTC Fixed-Price item — photos, store category, item specifics, condition, shipping & returns carry over.</li><li>Run <code>python3 relist_agent.py --apply</code> to actually relist; otherwise everything is dry-run.</li></ul></section><div class='tbl-wrap'><table class='rl-tbl'><thead><tr><th>Item</th><th>Original</th><th>Ended</th><th>Days ago</th><th>Suggested FP</th><th>Action</th></tr></thead><tbody><tr><td class='item'><img src="https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l140.jpg" alt="" loading="lazy"><div class='title'>3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</div><div class='iid'>item 306934532731 · Chinese</div></td><td class='price'>$0.99</td><td class='age'>2026-05-19</td><td class='age '>1d</td><td class='suggest'>$1.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306934532731">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306934532731">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306934532731">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306934532731' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l140.jpg" alt="" loading="lazy"><div class='title'>1990-91 Skybox - Michael Jordan #41</div><div class='iid'>item 306930914782 · FixedPriceItem</div></td><td class='price'>$3.45</td><td class='age'>2026-05-15</td><td class='age '>5d</td><td class='suggest'>$3.46</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930914782">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930914782">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930914782">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930914782' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/9HsAAeSwLuFqALiW/s-l140.jpg" alt="" loading="lazy"><div class='title'>2025 Panini Prizm - Rookies Andrew Mukuba #330 (RC)</div><div class='iid'>item 306930562031 · FixedPriceItem</div></td><td class='price'>$1.99</td><td class='age'>2026-05-11</td><td class='age old'>9d</td><td class='suggest'>$2.00</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930562031">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930562031">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930562031">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930562031' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/WngAAeSw1upputrS/s-l140.jpg" alt="" loading="lazy"><div class='title'>Australia 1942 Silver Sixpence King George VI + 1968 20 Cents Coin Lot</div><div class='iid'>item 306829826433 · FixedPriceItem</div></td><td class='price'>$4.50</td><td class='age'>2026-05-10</td><td class='age old'>10d</td><td class='suggest'>$4.51</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306829826433">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306829826433">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306829826433">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306829826433' target='_blank' rel='noopener'>View</a></div></td></tr></tbody></table></div>
+    <section class='hero'><h1>Relist Unsold</h1><p class='sub'>Last run: <code>2026-05-20 22:28 UTC</code> · window: <code>14d</code></p><div class='rl-kpis'><div class='rl-kpi warn'><div class='n'>4</div><div class='l'>Unsold listings</div></div><div class='rl-kpi'><div class='n'>$10.93</div><div class='l'>Total unsold value</div></div><div class='rl-kpi bad'><div class='n'>10d</div><div class='l'>Oldest unsold</div></div><div class='rl-kpi'><div class='n'>6.2d</div><div class='l'>Average days unsold</div></div></div></section><section class='rl-note'><h3>How this works</h3><ul><li>Pulls all ended-without-bid auctions via Trading <code>GetMyeBaySelling</code> (<code>UnsoldList.Include=true</code>) for the past 14 days.</li><li>Suggests a Fixed-Price relist price: original BIN if set, else 2× the starting bid (auctions usually open very low), else market median × 0.95.</li><li><b>Relist as FP</b> calls Trading <code>RelistFixedPriceItem</code>, which takes the previous auction's ItemID and re-publishes it as a GTC Fixed-Price item — photos, store category, item specifics, condition, shipping & returns carry over.</li><li>Run <code>python3 relist_agent.py --apply</code> to actually relist; otherwise everything is dry-run.</li></ul></section><div class='tbl-wrap'><table class='rl-tbl'><thead><tr><th>Item</th><th>Original</th><th>Ended</th><th>Days ago</th><th>Suggested FP</th><th>Action</th></tr></thead><tbody><tr><td class='item'><img src="https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l140.jpg" alt="" loading="lazy"><div class='title'>3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</div><div class='iid'>item 306934532731 · Chinese</div></td><td class='price'>$0.99</td><td class='age'>2026-05-19</td><td class='age '>1d</td><td class='suggest'>$1.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306934532731">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306934532731">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306934532731">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306934532731' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l140.jpg" alt="" loading="lazy"><div class='title'>1990-91 Skybox - Michael Jordan #41</div><div class='iid'>item 306930914782 · FixedPriceItem</div></td><td class='price'>$3.45</td><td class='age'>2026-05-15</td><td class='age '>5d</td><td class='suggest'>$3.46</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930914782">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930914782">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930914782">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930914782' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/9HsAAeSwLuFqALiW/s-l140.jpg" alt="" loading="lazy"><div class='title'>2025 Panini Prizm - Rookies Andrew Mukuba #330 (RC)</div><div class='iid'>item 306930562031 · FixedPriceItem</div></td><td class='price'>$1.99</td><td class='age'>2026-05-11</td><td class='age old'>9d</td><td class='suggest'>$2.00</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930562031">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930562031">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930562031">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930562031' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/WngAAeSw1upputrS/s-l140.jpg" alt="" loading="lazy"><div class='title'>Australia 1942 Silver Sixpence King George VI + 1968 20 Cents Coin Lot</div><div class='iid'>item 306829826433 · FixedPriceItem</div></td><td class='price'>$4.50</td><td class='age'>2026-05-10</td><td class='age old'>10d</td><td class='suggest'>$4.51</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306829826433">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306829826433">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306829826433">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306829826433' target='_blank' rel='noopener'>View</a></div></td></tr></tbody></table></div>
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 22:18 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 22:28 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

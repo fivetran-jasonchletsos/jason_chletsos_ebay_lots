@@ -591,11 +591,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* Prevent any child from growing wider than the viewport */
+  overflow: hidden;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -628,7 +632,30 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   - min-width: 0 is required on flex children to allow them to shrink below
+     their content size (without it, overflow never triggers).
+   - overflow-x: auto lets the nav scroll horizontally on tight viewports
+     rather than pushing the logo off-screen or creating overlap.
+   - justify-content: flex-end keeps links right-aligned (closest to the
+     action buttons on the right), which is the natural reading order. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
+     hamburger breakpoint at 880px should activate well before it's needed. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1883,6 +1910,9 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
           </button>
           <div class="nav-dropdown-menu" role="menu"><a href="japanese_holo.html">JP Holo / Art Rare</a></div>
         </div></nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1902,6 +1932,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
         Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
@@ -1922,7 +1953,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Browse</div>
+<div class="drawer-group">Browse</div>
 <a href="browse.html">Browse</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
@@ -1966,7 +1997,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
 <a href="mewtwo.html" class="admin-only" data-admin="1">Mewtwo</a>
 <a href="eevee.html" class="admin-only" data-admin="1">Eevee</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Pokemon</div>
+<div class="drawer-group">Pokemon</div>
 <a href="japanese_holo.html">JP Holo / Art Rare</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
@@ -2006,7 +2037,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
   <main>
     
     <h1>Price Drops</h1>
-    <p class="pd-sub">Daily diff against the last scan · generated <b>2026-05-20T22:19:27+00:00</b><br>Diff between today's scan and the prior run. Drops trigger at &ge;5% AND &ge;$1.00.</p>
+    <p class="pd-sub">Daily diff against the last scan · generated <b>2026-05-20T22:29:05+00:00</b><br>Diff between today's scan and the prior run. Drops trigger at &ge;5% AND &ge;$1.00.</p>
 
     <div class="pk-kpis">
       <div class="pk-kpi kpi-drop">
@@ -2018,7 +2049,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
         <div class="pk-l">New today</div>
       </div>
       <div class="pk-kpi kpi-gone">
-        <div class="pk-n">11</div>
+        <div class="pk-n">17</div>
         <div class="pk-l">Gone today</div>
       </div>
       <div class="pk-kpi">
@@ -2044,18 +2075,6 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
         <p>Listings that didn&#x27;t exist in the last snapshot. Fresh inventory the agents found.</p>
       </div>
       <div class="pd-grid">
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/394409332066?_skw=mewtwo+vmax&amp;hash=item5bd4a0cd62:g:G4sAAOSw4TZj00ow" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/G4sAAOSw4TZj00ow/s-l225.jpg')">
-        <span class="pd-badge pd-badge-new">NEW</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Mewtwo V / VMAX / VSTAR</div>
-        <div class="pd-title">Sword &amp; Shield – TCG Pokemon VIVID VOLTAGE –Pick your Card– NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$6.26</span></div>
-      </div>
-    </a>
-    
-
     <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/327045803122?_skw=eevee+ex+151&amp;hash=item4c2572ec72:g:ECEAAeSwnQFptNO5" target="_blank" rel="noopener">
       <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/ECEAAeSwnQFptNO5/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
@@ -2063,84 +2082,72 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
       <div class="pd-meta">
         <div class="pd-ctx">Eevee ex / SIR</div>
         <div class="pd-title">Pokemon Scarlet &amp; Violet 151: Choose Your Card! Holo/Reverse Holo EX Cards NM</div>
+        <div class="pd-price-row"><span class="pd-price-new">$5.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/198367669241?_skw=eevee+ex+151&amp;hash=item2e2fa26bf9:g:R4YAAeSw0lVqDTgF" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/R4YAAeSw0lVqDTgF/s-l225.jpg')">
+        <span class="pd-badge pd-badge-new">NEW</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Eevee ex / SIR</div>
+        <div class="pd-title">Pokemon Scarlet &amp; Violet: 151 ENG Cards Holo/Reverse Holo Card for MASTER SET</div>
         <div class="pd-price-row"><span class="pd-price-new">$6.99</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156750664346?_skw=pikachu+evolutions+holo&amp;hash=item247f11529a:g:mDUAAOSwxpdoLsal" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/mDUAAOSwxpdoLsal/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/134644629044?_skw=pikachu+jungle+holo&amp;hash=item1f5971fe34:g:KEIAAOSwAvhkpwAh" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/KEIAAOSwAvhkpwAh/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
         <div class="pd-ctx">Vintage Holo</div>
-        <div class="pd-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$6.99</span></div>
+        <div class="pd-title">Vintage Pokémon Gym Heroes Unlimited WOTC - Pick Your Card - Complete Your Set</div>
+        <div class="pd-price-row"><span class="pd-price-new">$10.50</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+vmax&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156780094465?_skw=charizard+ex+obsidian+flames&amp;hash=item2480d26401:g:qYUAAOSwma5nzUPI" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/qYUAAOSwma5nzUPI/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
-        <div class="pd-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$8.99</span></div>
+        <div class="pd-ctx">Charizard ex / Special Illustration Rare</div>
+        <div class="pd-title">Charizard Charmander Charmeleon Pokemon Card! Holo/Reverse Holo Rare EX Cards!</div>
+        <div class="pd-price-row"><span class="pd-price-new">$14.99</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/157288055080?_skw=charizard+vmax+shiny&amp;hash=item249f194128:g:Q08AAeSwdiBotWSL" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/Q08AAeSwdiBotWSL/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/277727337188?_skw=mew+vmax+rainbow&amp;var=2560736742498&amp;hash=item40a9d6dae4:g:d8wAAeSwVe5pm-fp" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/d8wAAeSwVe5pm-fp/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Charizard V / VMAX / VSTAR</div>
-        <div class="pd-title">Shining Fates Pokemon Cards! Holo/Reverse Holo VMAX V Full Art Choose Your Card!</div>
-        <div class="pd-price-row"><span class="pd-price-new">$12.99</span></div>
+        <div class="pd-ctx">Mew V / VMAX</div>
+        <div class="pd-title">🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥</div>
+        <div class="pd-price-row"><span class="pd-price-new">$15.99</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/154404151067?_skw=pikachu+mcdonalds+25th&amp;hash=item23f3345f1b:g:M9gAAOSwnJhgbBdw" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/M9gAAOSwnJhgbBdw/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+vmax&amp;hash=item2483686621:g:9jQAAOSwMpJoXMgS" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/9jQAAOSwMpJoXMgS/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Promo &amp; Black Star Promos</div>
-        <div class="pd-title">Pokemon 2021 McDonalds 25th Anniversary HOLO Pikachu Complete Set Exclusive</div>
+        <div class="pd-ctx">Mewtwo V / VMAX / VSTAR</div>
+        <div class="pd-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
         <div class="pd-price-row"><span class="pd-price-new">$19.99</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/176982432685?_skw=mew+vmax+alt+art&amp;hash=item2934f99bad:g:zSsAAeSw1sFozvym" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/zSsAAeSw1sFozvym/s-l225.jpg')">
-        <span class="pd-badge pd-badge-new">NEW</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Mew V / VMAX</div>
-        <div class="pd-title">Mew VMAX Alt Art | PSA TAG Beckett Display Case Extended Art for Pokemon Card</div>
-        <div class="pd-price-row"><span class="pd-price-new">$20.00</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156863616931?_skw=mewtwo+gym+heroes&amp;hash=item2485ccd7a3:g:uroAAOSwGV1n8iM6" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/uroAAOSwGV1n8iM6/s-l225.jpg')">
-        <span class="pd-badge pd-badge-new">NEW</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Vintage Holo Mewtwo</div>
-        <div class="pd-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC Holo</div>
-        <div class="pd-price-row"><span class="pd-price-new">$24.99</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/157722908878?_skw=pikachu+birthday+promo&amp;hash=item24b90498ce:g:CXIAAeSwFENppxG2&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGanYLUQm4VDbgBNOwtkOqlDEesr1mR1BJSqq9Hx0oFFQQn8kC2xpmpDOI2GIvsTdKDB43vrIz9%2Fw5HqbmZG0LlAQXFjgAAMFilnOmTyh9SvQzBim0ACJMNklwSgcqhpsNtZk%2FvcNZuHCF4Iznl%2Bh8Da1OWHFRzEFhEC5rVWosfJ7E1sxFfkGy1oHYmIID86GoBHTrJ%2BKKmqrDOdWcqvCuL31q1Idayfdn9%2FXa1pwy2EqjZvuCWTJlr7Hop76ubtqLpXdJWrrUbFrWaso7bWeyvA4O0TzxTVfBYhRMzYD4jXmg%3D%3D" target="_blank" rel="noopener">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/157722908878?_skw=pikachu+birthday+promo&amp;hash=item24b90498ce:g:CXIAAeSwFENppxG2" target="_blank" rel="noopener">
       <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/CXIAAeSwFENppxG2/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
@@ -2152,6 +2159,42 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
     </a>
     
 
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+vmax&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg')">
+        <span class="pd-badge pd-badge-new">NEW</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
+        <div class="pd-price-row"><span class="pd-price-new">$29.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156583235938?_skw=pikachu+v+full+art&amp;hash=item2475169162:g:IbEAAeSwpypoZmR7" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/IbEAAeSwpypoZmR7/s-l225.jpg')">
+        <span class="pd-badge pd-badge-new">NEW</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon TCG SWSH Lost Origin | Choose Your Card | Reverse Holo/Holo/Ultra Rare</div>
+        <div class="pd-price-row"><span class="pd-price-new">$34.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/134644629931?_skw=charizard+fossil&amp;hash=item1f597201ab:g:a2IAAOSwzKpkqFBC" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/a2IAAOSwzKpkqFBC/s-l225.jpg')">
+        <span class="pd-badge pd-badge-new">NEW</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Vintage Holo Charizard</div>
+        <div class="pd-title">Vintage Pokémon Gym Challenge Unlimited WOTC - Pick Your Card  Complete Your Set</div>
+        <div class="pd-price-row"><span class="pd-price-new">$41.00</span></div>
+      </div>
+    </a>
+    
+
     <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/326645503513?_skw=eevee+ex+special+illustration&amp;hash=item4c0d96d619:g:PgQAAOSwkwtoUe8L" target="_blank" rel="noopener">
       <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/PgQAAOSwkwtoUe8L/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
@@ -2159,31 +2202,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
       <div class="pd-meta">
         <div class="pd-ctx">Eevee ex / SIR</div>
         <div class="pd-title">Pokemon Special Illustration Rare - Scarlet &amp; Violet - Choose Your Card! NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$27.95</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/175298028517?_skw=mew+vmax+alt+art&amp;hash=item28d093a3e5:g:d7sAAOSw7h5i~BRR" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/d7sAAOSw7h5i~BRR/s-l225.jpg')">
-        <span class="pd-badge pd-badge-new">NEW</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Mew V / VMAX</div>
-        <div class="pd-title">Charizard V Espeon Umbreon Vaporeon Alt Art Custom Pokemon TCG Card Display Case</div>
-        <div class="pd-price-row"><span class="pd-price-new">$28.00</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/358311629161?_skw=charizard+ex+obsidian+flames&amp;hash=item536d099169:g:1zAAAeSwFAlpsMo9&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGZMwUmjPrwMuJDPxWnZ6s7gpuzvazVl71q80RZkK1eZ0PGwiPDHfrxyqlrQN6lbkR6G3%2FJWDfS6b4pfcSQH5kTQmKJaSZbCrhDnBwIxND6l4BsWbjjMb5UyZt32hNOQbS2SF5xF6mZfk%2FLvvgMDXGYm4cMc1RsTDDxQvamoZ%2BMMX9S%2BJs6wrEDguAwy2UUUMmEksV3KapwKYZmvqvNIwYpzPYVhLDkIO0fWdT4tpf3xydFzpg9ZnHrEgzrhSremh3mrTzrIrS14CoPU%2F9tAZwCvLvt9bg7tYM6XsTNh8cFhWXuLcjgt6zB0zxkGLnSkkFc%3D" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/1zAAAeSwFAlpsMo9/s-l225.jpg')">
-        <span class="pd-badge pd-badge-new">NEW</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Charizard ex / Special Illustration Rare</div>
-        <div class="pd-title">Charizard EX 223/197 Card Rug 24x36&quot; Pokemon Obsidian Flames Full Art Carpet</div>
-        <div class="pd-price-row"><span class="pd-price-new">$85.95</span></div>
+        <div class="pd-price-row"><span class="pd-price-new">$56.95</span></div>
       </div>
     </a>
     
@@ -2200,38 +2219,50 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/314901049324?_skw=charizard+fossil&amp;hash=item495190afec:g:RS8AAOSwQWJlMqR8" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/RS8AAOSwQWJlMqR8/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156731105968?_skw=pikachu+vstar&amp;hash=item247de6e2b0:g:ZnUAAOSwUwJoEzRD" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/ZnUAAOSwUwJoEzRD/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Vintage Holo Charizard</div>
-        <div class="pd-title">Pokemon Vintage WOTC Booster RE-Pack (Base Set 1-2, Jungle, Fossil) LP 50% Holo</div>
-        <div class="pd-price-row"><span class="pd-price-new">$119.95</span></div>
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon Trainer Gallery: Choose Your Card! Full Art Galarian Trainer Gallery SIR</div>
+        <div class="pd-price-row"><span class="pd-price-new">$139.99</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/394832193442?_skw=pikachu+ex+special+illustration&amp;hash=item5bedd527a2:g:SscAAOSw4ddk5XcM" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/SscAAOSw4ddk5XcM/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156863616931?_skw=mewtwo+gym+heroes&amp;hash=item2485ccd7a3:g:5ZYAAOSw3PFn8h9L" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/5ZYAAOSw3PFn8h9L/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Pikachu ex / Special Illustration Rare</div>
-        <div class="pd-title">Pokemon Special Illustration Rare - Choose Your Card Full Art Ultra Rare NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$350.00</span></div>
+        <div class="pd-ctx">Vintage Holo Mewtwo</div>
+        <div class="pd-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC Holo</div>
+        <div class="pd-price-row"><span class="pd-price-new">$219.99</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156780094465?_skw=charizard+team+rocket+dark+holo&amp;var=458169636286&amp;hash=item2480d26401:g:~DUAAOSwGVRnzT6U" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/~DUAAOSwGVRnzT6U/s-l225.jpg')">
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/157288055080?_skw=charizard+vmax+shiny&amp;hash=item249f194128:g:hXIAAeSweTdotWzF" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/hXIAAeSweTdotWzF/s-l225.jpg')">
         <span class="pd-badge pd-badge-new">NEW</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Vintage Holo Charizard</div>
-        <div class="pd-title">Charizard Charmander Charmeleon Pokemon Card! Holo/Reverse Holo Rare EX Cards!</div>
-        <div class="pd-price-row"><span class="pd-price-new">$549.99</span></div>
+        <div class="pd-ctx">Charizard V / VMAX / VSTAR</div>
+        <div class="pd-title">Shining Fates Pokemon Cards! Holo/Reverse Holo VMAX V Full Art Choose Your Card!</div>
+        <div class="pd-price-row"><span class="pd-price-new">$249.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-new" href="https://www.ebay.com/itm/156472416863?_skw=charizard+ex+special+illustration&amp;hash=item246e7b9a5f:g:9oUAAeSwMspoZJt5" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/9oUAAeSwMspoZJt5/s-l225.jpg')">
+        <span class="pd-badge pd-badge-new">NEW</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Charizard ex / Special Illustration Rare</div>
+        <div class="pd-title">Pokemon Paldean Fates: Choose Your Card! - Holos/Reverse Holos EX Baby Shiny NM</div>
+        <div class="pd-price-row"><span class="pd-price-new">$399.99</span></div>
       </div>
     </a>
     </div>
@@ -2245,38 +2276,26 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
         <p>Listings that disappeared since the prior run — sold, ended, or delisted.</p>
       </div>
       <div class="pd-grid">
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/157288055080?_skw=charizard+vmax+shiny&amp;hash=item249f194128:g:hXIAAeSweTdotWzF" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/hXIAAeSweTdotWzF/s-l225.jpg')">
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/297559392518?_skw=mew+trophy&amp;hash=item4547ec0106:g:8TYAAeSwtX9oqMy9" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/8TYAAeSwtX9oqMy9/s-l225.jpg')">
         <span class="pd-badge pd-badge-gone">GONE</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Charizard V / VMAX / VSTAR</div>
-        <div class="pd-title">Shining Fates Pokemon Cards! Holo/Reverse Holo VMAX V Full Art Choose Your Card!</div>
-        <div class="pd-price-row"><span class="pd-price-new">$249.99</span></div>
+        <div class="pd-ctx">Grail Watch</div>
+        <div class="pd-title">Pokémon TCG - Meta, Rogue, Single Prize Decks - Standard/Tournament Legal</div>
+        <div class="pd-price-row"><span class="pd-price-new">$1,000.00</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156241664107?_skw=eevee+ex+special+illustration&amp;hash=item2460ba986b:g:j9AAAOSwzJtoM6Ex" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/j9AAAOSwzJtoM6Ex/s-l225.jpg')">
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/314901049324?_skw=charizard+fossil&amp;hash=item495190afec:g:RS8AAOSwQWJlMqR8" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/RS8AAOSwQWJlMqR8/s-l225.jpg')">
         <span class="pd-badge pd-badge-gone">GONE</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Eevee ex / SIR</div>
-        <div class="pd-title">Pokemon 151 Cards! Holo/Reverse Holo Ex Illustration Ultra Double Rare Card!</div>
-        <div class="pd-price-row"><span class="pd-price-new">$229.99</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156863616931?_skw=mewtwo+gym+heroes&amp;hash=item2485ccd7a3:g:5ZYAAOSw3PFn8h9L" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/5ZYAAOSw3PFn8h9L/s-l225.jpg')">
-        <span class="pd-badge pd-badge-gone">GONE</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Vintage Holo Mewtwo</div>
-        <div class="pd-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC Holo</div>
-        <div class="pd-price-row"><span class="pd-price-new">$219.99</span></div>
+        <div class="pd-ctx">Vintage Holo Charizard</div>
+        <div class="pd-title">Pokemon Vintage WOTC Booster RE-Pack (Base Set 1-2, Jungle, Fossil) LP 50% Holo</div>
+        <div class="pd-price-row"><span class="pd-price-new">$119.95</span></div>
       </div>
     </a>
     
@@ -2293,14 +2312,50 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
     </a>
     
 
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/404838293831?_skw=mew+ex+full+art&amp;hash=item5e423e2147:g:Tm4AAOSw2EFmLrRM" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/Tm4AAOSw2EFmLrRM/s-l225.jpg')">
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156731105968?_skw=pikachu+vstar&amp;hash=item247de6e2b0:g:jGMAAOSwGy5oEzgC" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/jGMAAOSwGy5oEzgC/s-l225.jpg')">
         <span class="pd-badge pd-badge-gone">GONE</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Mew ex / SIR</div>
-        <div class="pd-title">Pokémon Scarlet &amp; Violet-151 Choose Your Card! All Ex, Holo&#x27;s, Full Art + in NM!</div>
-        <div class="pd-price-row"><span class="pd-price-new">$77.99</span></div>
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon Trainer Gallery: Choose Your Card! Full Art Galarian Trainer Gallery SIR</div>
+        <div class="pd-price-row"><span class="pd-price-new">$69.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/134644629931?_skw=charizard+fossil&amp;hash=item1f597201ab:g:a2IAAOSwzKpkqFBC" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/a2IAAOSwzKpkqFBC/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Vintage Holo Charizard</div>
+        <div class="pd-title">Vintage Pokémon Gym Challenge Unlimited WOTC - Pick Your Card  Complete Your Set</div>
+        <div class="pd-price-row"><span class="pd-price-new">$61.50</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156583235938?_skw=pikachu+v+full+art&amp;hash=item2475169162:g:PwIAAeSw6aZoZmRo" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/PwIAAeSw6aZoZmRo/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon TCG SWSH Lost Origin | Choose Your Card | Reverse Holo/Holo/Ultra Rare</div>
+        <div class="pd-price-row"><span class="pd-price-new">$49.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/306420675811?_skw=pikachu+v+full+art&amp;hash=item47581874e3:g:i7QAAeSwLYlo7HXt" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/i7QAAeSwLYlo7HXt/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon SWSH Full Art V &amp; Trainers : Choose Your Card Ultra Rare English NM FA</div>
+        <div class="pd-price-row"><span class="pd-price-new">$40.00</span></div>
       </div>
     </a>
     
@@ -2312,36 +2367,12 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
       <div class="pd-meta">
         <div class="pd-ctx">Eevee ex / SIR</div>
         <div class="pd-title">Pokemon Special Illustration Rare - Scarlet &amp; Violet - Choose Your Card! NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$56.95</span></div>
+        <div class="pd-price-row"><span class="pd-price-new">$27.95</span></div>
       </div>
     </a>
     
 
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156750664346?_skw=pikachu+evolutions+holo&amp;hash=item247f11529a:g:VhQAAOSwzdJoSUxg" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/VhQAAOSwzdJoSUxg/s-l225.jpg')">
-        <span class="pd-badge pd-badge-gone">GONE</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Vintage Holo</div>
-        <div class="pd-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$49.99</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/176982432685?_skw=mew+vmax+alt+art&amp;hash=item2934f99bad:g:zSsAAeSw1sFozvym" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/zSsAAeSw1sFozvym/s-l225.jpg')">
-        <span class="pd-badge pd-badge-gone">GONE</span>
-      </div>
-      <div class="pd-meta">
-        <div class="pd-ctx">Mew V / VMAX</div>
-        <div class="pd-title">Mew VMAX Alt Art | PSA TAG Beckett Display Case Extended Art for Pokemon Card</div>
-        <div class="pd-price-row"><span class="pd-price-new">$34.99</span></div>
-      </div>
-    </a>
-    
-
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/157722908878?_skw=pikachu+birthday+promo&amp;hash=item24b90498ce:g:CXIAAeSwFENppxG2" target="_blank" rel="noopener">
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/157722908878?_skw=pikachu+birthday+promo&amp;hash=item24b90498ce:g:CXIAAeSwFENppxG2&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGanYLUQm4VDbgBNOwtkOqlDEesr1mR1BJSqq9Hx0oFFQQn8kC2xpmpDOI2GIvsTdKDB43vrIz9%2Fw5HqbmZG0LlAQXFjgAAMFilnOmTyh9SvQzBim0ACJMNklwSgcqhpsNtZk%2FvcNZuHCF4Iznl%2Bh8Da1OWHFRzEFhEC5rVWosfJ7E1sxFfkGy1oHYmIID86GoBHTrJ%2BKKmqrDOdWcqvCuL31q1Idayfdn9%2FXa1pwy2EqjZvuCWTJlr7Hop76ubtqLpXdJWrrUbFrWaso7bWeyvA4O0TzxTVfBYhRMzYD4jXmg%3D%3D" target="_blank" rel="noopener">
       <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/CXIAAeSwFENppxG2/s-l225.jpg')">
         <span class="pd-badge pd-badge-gone">GONE</span>
       </div>
@@ -2353,14 +2384,62 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
     </a>
     
 
-    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156823479841?_skw=mewtwo+vmax&amp;hash=item2483686621:g:9jQAAOSwMpJoXMgS" target="_blank" rel="noopener">
-      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/9jQAAOSwMpJoXMgS/s-l225.jpg')">
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/156863616931?_skw=mewtwo+gym+heroes&amp;hash=item2485ccd7a3:g:uroAAOSwGV1n8iM6" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/uroAAOSwGV1n8iM6/s-l225.jpg')">
         <span class="pd-badge pd-badge-gone">GONE</span>
       </div>
       <div class="pd-meta">
-        <div class="pd-ctx">Mewtwo V / VMAX / VSTAR</div>
-        <div class="pd-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
-        <div class="pd-price-row"><span class="pd-price-new">$19.99</span></div>
+        <div class="pd-ctx">Vintage Holo Mewtwo</div>
+        <div class="pd-title">Pokémon Cards Gym Challenge &amp; Gym Heroes: Choose Your Card! LP/NM WOTC Holo</div>
+        <div class="pd-price-row"><span class="pd-price-new">$24.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/277727337188?_skw=mew+vmax+rainbow&amp;var=2560736802001&amp;hash=item40a9d6dae4:g:wU4AAeSw71Npm-gU" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/wU4AAeSw71Npm-gU/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Mew V / VMAX</div>
+        <div class="pd-title">🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥</div>
+        <div class="pd-price-row"><span class="pd-price-new">$15.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/157288055080?_skw=charizard+vmax+shiny&amp;hash=item249f194128:g:Q08AAeSwdiBotWSL" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/Q08AAeSwdiBotWSL/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Charizard V / VMAX / VSTAR</div>
+        <div class="pd-title">Shining Fates Pokemon Cards! Holo/Reverse Holo VMAX V Full Art Choose Your Card!</div>
+        <div class="pd-price-row"><span class="pd-price-new">$12.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/364502783318?_skw=mew+vmax+alt+art&amp;hash=item54de0f1556:g:AU4AAOSw28tlFG9H" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/AU4AAOSw28tlFG9H/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Mew V / VMAX</div>
+        <div class="pd-title">G GX V VMAX  151 Pokemon Cards YOU CHOOSE  Ultra Rares Alt Art ENGLISH</div>
+        <div class="pd-price-row"><span class="pd-price-new">$9.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+vmax&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Pikachu V / VMAX / VSTAR</div>
+        <div class="pd-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards | NM</div>
+        <div class="pd-price-row"><span class="pd-price-new">$8.99</span></div>
       </div>
     </a>
     
@@ -2372,7 +2451,31 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
       <div class="pd-meta">
         <div class="pd-ctx">Eevee ex / SIR</div>
         <div class="pd-title">Pokemon Scarlet &amp; Violet 151: Choose Your Card! Holo/Reverse Holo EX Cards NM</div>
-        <div class="pd-price-row"><span class="pd-price-new">$5.99</span></div>
+        <div class="pd-price-row"><span class="pd-price-new">$6.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/198367669241?_skw=eevee+ex+151&amp;hash=item2e2fa26bf9:g:R4YAAeSw0lVqDTgF" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/R4YAAeSw0lVqDTgF/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Eevee ex / SIR</div>
+        <div class="pd-title">Pokemon Scarlet &amp; Violet: 151 ENG Cards Holo/Reverse Holo Card for MASTER SET</div>
+        <div class="pd-price-row"><span class="pd-price-new">$6.99</span></div>
+      </div>
+    </a>
+    
+
+    <a class="pd-card pd-card-gone" href="https://www.ebay.com/itm/394409332066?_skw=mewtwo+vmax&amp;hash=item5bd4a0cd62:g:G4sAAOSw4TZj00ow" target="_blank" rel="noopener">
+      <div class="pd-img" style="background-image:url('https://i.ebayimg.com/images/g/G4sAAOSw4TZj00ow/s-l225.jpg')">
+        <span class="pd-badge pd-badge-gone">GONE</span>
+      </div>
+      <div class="pd-meta">
+        <div class="pd-ctx">Mewtwo V / VMAX / VSTAR</div>
+        <div class="pd-title">Sword &amp; Shield – TCG Pokemon VIVID VOLTAGE –Pick your Card– NM</div>
+        <div class="pd-price-row"><span class="pd-price-new">$6.26</span></div>
       </div>
     </a>
     </div>
@@ -2382,7 +2485,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 22:19 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 22:29 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

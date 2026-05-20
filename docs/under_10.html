@@ -591,11 +591,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* Prevent any child from growing wider than the viewport */
+  overflow: hidden;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -628,7 +632,30 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   - min-width: 0 is required on flex children to allow them to shrink below
+     their content size (without it, overflow never triggers).
+   - overflow-x: auto lets the nav scroll horizontally on tight viewports
+     rather than pushing the logo off-screen or creating overlap.
+   - justify-content: flex-end keeps links right-aligned (closest to the
+     action buttons on the right), which is the natural reading order. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
+     hamburger breakpoint at 880px should activate well before it's needed. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1869,6 +1896,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
           <div class="nav-dropdown-menu" role="menu"><a href="japanese_holo.html">JP Holo / Art Rare</a></div>
         </div></nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1888,6 +1918,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
@@ -1908,7 +1939,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Browse</div>
+<div class="drawer-group">Browse</div>
 <a href="browse.html">Browse</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
@@ -1938,7 +1969,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
 <a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
 <a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
-<div class="drawer-group" data-admin="1">For Us</div>
+<div class="drawer-group">For Us</div>
 <a href="collect.html" class="admin-only" data-admin="1">My Wants</a>
 <a href="under_10.html" class="active admin-only" data-admin="1">Under $10</a>
 <a href="top_sellers.html" class="admin-only" data-admin="1">Top Sellers</a>
@@ -1953,7 +1984,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html" class="admin-only" data-admin="1">Mewtwo</a>
 <a href="eevee.html" class="admin-only" data-admin="1">Eevee</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Pokemon</div>
+<div class="drawer-group">Pokemon</div>
 <a href="japanese_holo.html">JP Holo / Art Rare</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
@@ -2008,7 +2039,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="num">12</div><div class="lbl">Buckets scanned</div>
       </a>
       <a class="stat-card linked" href="#cheapest" title="Scroll to cheapest strip">
-        <div class="num">348</div><div class="lbl">Total live listings</div>
+        <div class="num">347</div><div class="lbl">Total live listings</div>
       </a>
       <a class="stat-card linked" href="https://www.ebay.com/itm/175314283446?_skw=1990s+basketball+holo+card&amp;hash=item28d18babb6:g:MpoAAOSwdpdio~Ab"
          target="_blank" rel="noopener" title="Open cheapest item on eBay">
@@ -2196,7 +2227,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </section>
         <section class="u10-bucket" id="b-modern-rookie-cards-sports">
           <div class="u10-bhead">
-            <h3>Modern Rookie Cards (sports) <span class="u10-count">45</span></h3>
+            <h3>Modern Rookie Cards (sports) <span class="u10-count">44</span></h3>
             <p class="u10-blurb">Current-year rookies — every $5 buy is a lottery ticket.</p>
             <span class="u10-stats">cheapest $1.00 · median $1.49 · range $1.00–$10.00</span>
           </div>
@@ -2553,7 +2584,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">LOOSE POKEMON TCG BOOSTER PACKS NEW SEALED (JAPANESE) US SELLER HURRAY H</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/206266871183?_skw=pokemon+booster+pack+loose&amp;hash=item300676ad8f:g:IXQAAeSwrWdqAXNn&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGblLKzio7Asu0xNydEQacbiu0GOwYECLikY7WbaflopupkUMRtnEDJZhvZF%2FUmrSxuSGN2ddszLmp8Be2QJIWm6bkoh2uYl5j2id3l%2BNUj2QOwDeQ6%2BXz30oAgB2pKye9R08qaF8WQ57mmVhtg5s5lemA6u8amljcn3sDiL4UvBjCKU8Nq9au1TBtE9yzCZgh5nP7XtSCdF9cW3hXaMaMgjtYSswP9CQUSx2nQ%2FSG59b0hbEE3KVg2ROAkg7gSBfU9ahmDInLDmrbS8x%2F9DRETdeplPKLbjiNxYkpoeSr42XguEZozOdZOnPspivqZSY9c%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/206266871183?_skw=pokemon+booster+pack+loose&amp;hash=item300676ad8f:g:IXQAAeSwrWdqAXNn&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGblLKzio7Asu0xNydEQacbiu0GOwYECLikY7WbaflopupkUMRtnEDJZhvZF%2FUmrSxuSGN2ddszLmp8Be2QJIWm6bkoh2uYl5j2id3l%2BNUj2QOwDeQ6%2BXz30oAgB2pKye9TTmsXo9TF%2B6PNEIZs7qmY%2FuRO9KSQZrg%2BqUFCmHkeWMK9gUWjS9zlikKMAD2rK7zfM9u3VaVfhuBhNPaAu%2FHADxwNzanvQJw4w1I%2F7HNWF7hgvCeNprrVv7jIM0nNl46G%2FHKLUdTD8ZQBlEj%2Fz0W36BvnwapxUEKAxtT4NEqVH4VkA6zgt9Q7FtCG9bLHVryE%3D" target="_blank" rel="noopener"
                data-price="6.75" data-search="journey together single loose booster pack">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/IXQAAeSwrWdqAXNn/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -2569,7 +2600,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Pokémon TCG Sealed Loose Booster Packs! Choose Your Set! XY-MEG Era!</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/397392375167?_skw=pokemon+booster+pack+scarlet+violet&amp;var=665781868233&amp;hash=item5c866e6d7f:g:5PYAAeSwYcNpLav0&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGaUVj2cZ7p32xBGPxPWs9IiJJbtom7t5Crr4qJdPO0jyUj0AOktfSDX1OggV5wr%2BJoZLJ5GwiiAc1%2Fr0PT5bJz0v6XTqbWWm3dom5lyVZwtgRiMvrD1VjBliyhC1Zrviu2GpctV1uxgZomRs2UMbHjY7CGIjEPFGSQyNWF9J46S3E%2FpHqSvTA%2BOybBEXCi87Dd0LQcZdunuiATFztUcl4NbSnPFChlYKK1Az0SWu2DOpS6JzSmnjXDzYP9nBfc9PGYH0VKi1%2BM9yDg2vIDLK8OvdQzOHI0bwOM4hrltZ4eu1737dpO6A6BpBGTn2sJ0gcY%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/397392375167?_skw=pokemon+booster+pack+scarlet+violet&amp;var=665781868233&amp;hash=item5c866e6d7f:g:5PYAAeSwYcNpLav0&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGaUVj2cZ7p32xBGPxPWs9IiJJbtom7t5Crr4qJdPO0jyUj0AOktfSDX1OggV5wr%2BJoZLJ5GwiiAc1%2Fr0PT5bJz0v6XTqbWWm3dom5lyVZwtgRiMvrD1VjBliyhC1Zrviu0vXKHkae2%2F43DZE1CfJpy17a4GqcWQqM49aKlZIJXYSWTdbDAxAtqds7FAgsaVdmq9hYJyHbNHVoqyVjKWylQgeXDGKO2m3XVxxsAaejL4zBlYSgDfN4p1OPoXWOjwDUz303s89uOSX3LeJCqpbc9dTU9UcmLuELyvuNghtKsz6cTypY%2F8hazKa31ih7e8kw0%3D" target="_blank" rel="noopener"
                data-price="8.45" data-search="pokemon tcg - choose your booster pack | sealed pokemon packs, wide selection">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/5PYAAeSwYcNpLav0/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -2604,7 +2635,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </section>
         <section class="u10-bucket" id="b-pokemon-singles-under-10">
           <div class="u10-bhead">
-            <h3>Pokemon Singles Under $10 <span class="u10-count">143</span></h3>
+            <h3>Pokemon Singles Under $10 <span class="u10-count">141</span></h3>
             <p class="u10-blurb">Anything Pokemon-shiny in the $1–$10 range.</p>
             <span class="u10-stats">cheapest $1.00 · median $2.50 · range $1.00–$9.99</span>
           </div>
@@ -2689,6 +2720,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Mega Evolution Pokemon Cards Reverse Holo Rare EX Master Set Singles You</div>
               </div>
             </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/366299451647?_skw=pokemon+holo+rare+card&amp;hash=item55492610ff:g:CAkAAeSwNiRpwj84" target="_blank" rel="noopener"
+               data-price="1.29" data-search="pokemon obsidian flames: pick your card - ex/reverse holo/holo near mint tcg">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/CAkAAeSwNiRpwj84/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.29</div>
+                <div class="u10-title">Pokemon Obsidian Flames: Pick Your Card - EX/Reverse Holo/Holo Near Mint</div>
+              </div>
+            </a>
             <a class="u10-card" href="https://www.ebay.com/itm/156797692263?_skw=pokemon+ex+card&amp;hash=item2481dee967:g:YEUAAOSwTg1n1QhD" target="_blank" rel="noopener"
                data-price="1.29" data-search="slowpoke slowbro slowking pokemon card! holo/reverse holo ex  v full art cards!">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/YEUAAOSwTg1n1QhD/s-l225.jpg');"></div>
@@ -2711,14 +2750,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$1.29</div>
                 <div class="u10-title">Black Bolt Pokemon Cards! Holo/Reverse Holo Rare Illustration Full Art S</div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/364198382892?_skw=pokemon+holo+rare+card&amp;hash=item54cbea4d2c:g:~FgAAOSwkl1kJPOY" target="_blank" rel="noopener"
-               data-price="1.37" data-search="pokemon scarlet and violet base holo to ultra rare single cards 1-198 you pick">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/~FgAAOSwkl1kJPOY/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$1.37</div>
-                <div class="u10-title">Pokemon Scarlet and Violet Base Holo to Ultra Rare Single Cards 1-198 YO</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/206279601551?_skw=pokemon+holo+rare+card&amp;hash=item300738ed8f:g:mbEAAeSwl6ZqDISX" target="_blank" rel="noopener"
@@ -2759,14 +2790,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$1.49</div>
                 <div class="u10-title">Pokemon TCG SWSH Lost Origin | Choose Your Card | Reverse Holo/Holo/Ultr</div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/157665724199?_skw=pokemon+holo+rare+card&amp;hash=item24b59c0727:g:DQ4AAeSweR9phlxl" target="_blank" rel="noopener"
-               data-price="1.49" data-search="yuka morii pokemon cards! rare reverse holo/non holo - choose your card!">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/DQ4AAeSweR9phlxl/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$1.49</div>
-                <div class="u10-title">Yuka Morii Pokemon Cards! Rare Reverse Holo/Non Holo - Choose Your Card!</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/157912322788?_skw=pokemon+holo+rare+card&amp;hash=item24c44ed2e4:g:tCUAAeSwuMVqBs2R" target="_blank" rel="noopener"
@@ -2881,6 +2904,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Gastly Haunter Gengar Pokemon Card! Holo/Reverse Holo EX VMAX V GX Rare </div>
               </div>
             </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/156482511744?_skw=pokemon+holo+rare+card&amp;hash=item246f15a380:g:0EcAAOSwxqFoUoJX" target="_blank" rel="noopener"
+               data-price="1.49" data-search="pokemon tcg - stellar crown: choose your card - all reverse holos/ex/ace spec">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/0EcAAOSwxqFoUoJX/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.49</div>
+                <div class="u10-title">Pokemon TCG - Stellar Crown: Choose Your Card - All Reverse Holos/ex/Ace</div>
+              </div>
+            </a>
             <a class="u10-card" href="https://www.ebay.com/itm/156468028147?_skw=pokemon+holo+rare+card&amp;hash=item246e38a2f3:g:G18AAOSwVc9oXQNZ" target="_blank" rel="noopener"
                data-price="1.49" data-search="pokemon shrouded fable: choose your card! holo/reverse holo/ex/ace spec promo nm">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/G18AAOSwVc9oXQNZ/s-l225.jpg');"></div>
@@ -2895,14 +2926,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$1.49</div>
                 <div class="u10-title">Pokemon TCG SWSH Vivid Voltage | Choose Your Card | Reverse Holo/Holo/Ul</div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/156472416863?_skw=pokemon+ex+card&amp;hash=item246e7b9a5f:g:DQ0AAeSwbvhoZJA1" target="_blank" rel="noopener"
-               data-price="1.49" data-search="pokemon paldean fates: choose your card! - holos/reverse holos ex baby shiny nm">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/DQ0AAeSwbvhoZJA1/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$1.49</div>
-                <div class="u10-title">Pokemon Paldean Fates: Choose Your Card! - Holos/Reverse Holos EX Baby S</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/156468028147?_skw=pokemon+ex+card&amp;hash=item246e38a2f3:g:EaAAAOSwctloXQQd" target="_blank" rel="noopener"
@@ -2927,6 +2950,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$1.49</div>
                 <div class="u10-title">Pokemon TCG - Stellar Crown: Choose Your Card - All Reverse Holos/ex/Ace</div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/156838152762?_skw=pokemon+ex+card&amp;hash=item2484484a3a:g:7xkAAOSw2uNn8m7c" target="_blank" rel="noopener"
+               data-price="1.49" data-search="gastly haunter gengar pokemon card! holo/reverse holo ex vmax v gx rare cards!">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/7xkAAOSw2uNn8m7c/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.49</div>
+                <div class="u10-title">Gastly Haunter Gengar Pokemon Card! Holo/Reverse Holo EX VMAX V GX Rare </div>
               </div>
             </a></div>
         </section>
@@ -2969,7 +3000,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">PSA Graded Guard Case Slab Rubber Shockproof Pokémon Protector Sleeve</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/197775190797?_skw=psa+graded+card&amp;hash=item2e0c51eb0d:g:FboAAeSwfH1o76QZ&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGY0U3EO94pN4lEZmSLGN9%2BNfm1xMimiLLznDDVxUnRCnHfPQR0iXJzidFz9HhNDrAnkSKvWed8Gewt12ULRnHJxl0lrybKQump3L4qAp%2BT2zhBqm7aBRHY8uSdmtA4qACGFttXTM62KEcdgBFcvRB8nD5og0iuMiN5AmwnX%2BKAIu8KWyNL8vpKLw%2FNNjoACUpK4rKzVUXECUIx%2BbONOcgci%2ByRvw0n6R3pQe6LyjRQKVA%2FL89dw4yKY7IMMI3XczBx3uYB6wUI%2B6su%2FWfTjg8URmLuZ689xjsaLZ50IhFG56A%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/197775190797?_skw=psa+graded+card&amp;hash=item2e0c51eb0d:g:FboAAeSwfH1o76QZ&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGY0U3EO94pN4lEZmSLGN9%2BNfm1xMimiLLznDDVxUnRCnHfPQR0iXJzidFz9HhNDrAnkSKvWed8Gewt12ULRnHJxl0lrybKQump3L4qAp%2BT2zhBqm7aBRHY8uSdmtA4qACGhAjzYvOkU3AqDJN2gNusJUCeStfPM0UJoOy%2BEzIsiokw%2BNTAw%2BIgISOSVExW6bTzzBtI300br6n7dKCM7VnirHXODgkuCJJd5%2BcJPSbht3S0Z5WVb204V10adoOclCTaA9EMo3xjfZZtWEYsrqBlyuEtxSJWmCDbiJOoMjI1CYw%3D%3D" target="_blank" rel="noopener"
                data-price="1.99" data-search="psa graded card display stand: black - fits standard psa slabs">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/FboAAeSwfH1o76QZ/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -2993,7 +3024,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Graded Card Bumper - Colorful Secure Grip Case - Fits PSA CGC PGS, Custo</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/147275655590?_skw=psa+graded+card&amp;hash=item224a5029a6:g:vxAAAeSwU5VpzMbW&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYPz4u2istvsd7PzM6arkX4Y92kC3mhxMPDELAjh20DORgJ%2B7j55sLwftxNqUUdQT90IqHY1pGUB6xOzKroXRY6VJ%2FCTEG%2BqFLyJVPnHoNZdqZ74a8sXRmrQAChfDPdtNVHK23nGFbBgAnP7dHeIyxF%2B3tApAKhvrVm%2BMdzX39F%2F6AYeDP5sKlNDMNvyGiFYwKtNYmlygFEiaRPgToiALOMfUq5RNPQGYS6C7d2FicMYMucZczkvrsf3GsfAJDGTf1H%2Bwi06pH5YL4SuP%2BsvZERMxFfb%2F%2BlvBe4eYFKKDLEEg%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/147275655590?_skw=psa+graded+card&amp;hash=item224a5029a6:g:vxAAAeSwU5VpzMbW&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYPz4u2istvsd7PzM6arkX4Y92kC3mhxMPDELAjh20DORgJ%2B7j55sLwftxNqUUdQT90IqHY1pGUB6xOzKroXRY6VJ%2FCTEG%2BqFLyJVPnHoNZdqZ74a8sXRmrQAChfDPdtNW0REhQF8%2FnEoatnwyzWnWAZlNlNRDyEy5YJEzgOl4XYNk0arU9BDrFkuoK1zyHj7l8ygCUIRfuw9P3851cqu1o%2B12cbdaUm0dPekZD2huiv1u%2BxXJTcIp%2FKzjmBcrq%2Br36Ovn5QVF1sIUg6UrbHv02%2F8BLXGdO68OXuXFeK%2F0jWw%3D%3D" target="_blank" rel="noopener"
                data-price="2.15" data-search="psa graded card slab silicone bumper pokémon guard protector case | 8 colors">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/vxAAAeSwU5VpzMbW/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3025,7 +3056,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">PSA Graded Card Slab Silicone Bumper Guard Protector Skin | 6 Colors | P</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/126028103896?_skw=psa+graded+card&amp;hash=item1d57dc40d8:g:D78AAOSwZJVlbpcb&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGZtvBg%2BdV1uGoDHT1Mfd0riyE2VXG9Q0ZXb0Hcz4HajBrnKgVyEwZM9uLe0zhHZ36q7uSUhHP%2Fp0djrVH4o25ecvg3xKxYq5XxvLaRJvF9KtKXNqmUo%2FXs7PNwTPyVa45sJJAxdXwRzjKMNkKhG1%2BclWPvs3YMq3P3XfE5Fj36XG3le2UxHDWvtKczifqFKFWoxKjn3LOkCM3p0zA7OFDzBPulmjpt26nXDbT87mvfBYIfChk5KI47%2FHveudMZZaTpU5TpLvic%2BQ9h9L8Oh9ncvQgyoEhn%2B2x28TlRDn0%2BUrg%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/126028103896?_skw=psa+graded+card&amp;hash=item1d57dc40d8:g:D78AAOSwZJVlbpcb&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGZtvBg%2BdV1uGoDHT1Mfd0riyE2VXG9Q0ZXb0Hcz4HajBrnKgVyEwZM9uLe0zhHZ36q7uSUhHP%2Fp0djrVH4o25ecvg3xKxYq5XxvLaRJvF9KtKXNqmUo%2FXs7PNwTPyVa45sFwhkt4xsvX4nuuGjaA8IUs0W4PSKGmyXO9sBI3O34vAfq10dhObh2o8227D8NSGTYBO7dvuDgmgoGAo80XFOwWFeWTRr08K0Vno1JJG4fV86Q6SQw%2Flic7poNaZnjnYQY9ikhDdonAqOjwpm4TCWTBccHDXGuXvjekPS5klbN2w%3D%3D" target="_blank" rel="noopener"
                data-price="3.19" data-search="psa graded card slab silicone bumper guard protector skin | 13 colors | pokemon">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/D78AAOSwZJVlbpcb/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3049,7 +3080,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">(25-50) Cardboard Gold Perfect Fit Loose Graded Sleeves PSA Slabs FREE S</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/147318246059?_skw=psa+graded+card&amp;hash=item224cda0aab:g:qrMAAeSw8fBqDBYv&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYxnd6t7nDJ12%2BFtPvNXYI7vmCGg1psp2B6EygMHZCCUz59f8FSDzC2OTzAX5e%2FfOVpdF6UYPwrx%2FUuqOl7xO7k0eQnLiusrHkLh5M1FPX0SjXeH%2BwH0%2BqH5SBouGdVSYFD8YGGIb9FEs%2FG3kuw0rb84nJBYytFcRgEY2FhsX9xwmOu9vrtUlHoIPOjMae7aEILigcnx2iqYKdd%2BljHPVU4E%2Br4cfWiTGDABAde6EfVp4Wm3OSPExmRjoO1xtI9X97AJEJHv5ZkJK2njXaZbOb7rQpFTR%2Bi0iDoPAhMPhuvAg%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/147318246059?_skw=psa+graded+card&amp;hash=item224cda0aab:g:qrMAAeSw8fBqDBYv&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYxnd6t7nDJ12%2BFtPvNXYI7vmCGg1psp2B6EygMHZCCUz59f8FSDzC2OTzAX5e%2FfOVpdF6UYPwrx%2FUuqOl7xO7k0eQnLiusrHkLh5M1FPX0SjXeH%2BwH0%2BqH5SBouGdVSYFKEzuhMkmdy6Xetg0cKK2bspfjPEkI3vhZOPGTOJS7qrNE5mVsfL0yJL9eV2QTdu8fB2GQLo26LdUY1F4YPH9ylqw75RxSt6AE8uuQSxuTFE%2F1wek0XtRCQrCXqazxXCtvXoGINOi79Y3S3fEcVn6EL%2FRnfTj4pMwL251aT75eeA%3D%3D" target="_blank" rel="noopener"
                data-price="3.90" data-search="gradient psa/ags bumper pro guard - graded card slab skin case pokemon">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/qrMAAeSw8fBqDBYv/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3105,7 +3136,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">PSA CGC CSG TAG Slab Protector Bumper Case Graded Card Display - Silicon</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/318031974180?_skw=psa+graded+card&amp;hash=item4a0c2ecf24:g:V~0AAeSwBf9pvMEi&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbBpl85kH0lO6pOtZkkT8lz3NlJNVTI8fmoYIf%2F5PDg8IiIYj4RD4pDlpR8MAmAozRBhCfvBLbPi1pUwVf9YL0CuVE0R6YRK7%2BqGaK4TAhS6Jl%2BF7cW0mRWhhgpzzspeubCPYx0s815o6srm3WJnKn%2FhkVHKf6gmCUrOm0Gi%2BAx1kz1InfHalrm%2FSkk7RSRTCYCxCsVGF0pQk9N7Wq%2FBr4H%2BzJbbaJPGHvYJecGXbeYHBQLGio%2BgIp%2Bpun32s4dxV%2BE8k8br0MTfZ4BxbaTHge3gFWtsAg40C3iYAVQtAugGQ%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/318031974180?_skw=psa+graded+card&amp;hash=item4a0c2ecf24:g:V~0AAeSwBf9pvMEi&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbBpl85kH0lO6pOtZkkT8lz3NlJNVTI8fmoYIf%2F5PDg8IiIYj4RD4pDlpR8MAmAozRBhCfvBLbPi1pUwVf9YL0CuVE0R6YRK7%2BqGaK4TAhS6Jl%2BF7cW0mRWhhgpzzspeuZhMmOl8p%2F6iVGd0t%2BOx97S%2BgQez5MOiUc8yjIOc43Rj%2Bzh6UI1jHGSdScc0CYG9YCSjEaeitgDCt4ILXXjsiSWCbHLewLj7Xvtkpx9%2FokHWBgg674F6EfNS1LwNdPlGz7kK83z8AGJYzTMGBcv%2FGbW4ntxPOFWNiXa7RkwuHCw7A%3D%3D" target="_blank" rel="noopener"
                data-price="4.90" data-search="💥gradient psa graded card slab bumper guard protector skin tpu pokemon 2 colors">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/V~0AAeSwBf9pvMEi/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3137,7 +3168,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">PSA Graded Card Slab Bumper Guard Protector Skin TPU - 15 Colors - STACK</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/306875026921?_skw=bgs+graded+card&amp;hash=item47732d4de9:g:IFYAAeSwLfxp2ofY&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYcCE5FFv9chNARaxCPxXdsAELoZGv%2BGoiAjPl4t1jOhaGOaDNgNMf6Q254HVt0tWME9N%2Bm5V%2FAVGDf6WFCkc%2B1YDqv%2BkBHarOCPOR6yWkP2d3w0pP59W%2BRFnuQv1x%2FKusuIByMYXrJ15%2FASrdB8ZEJjFh0H%2F32z0lhvPE4fhXqRNUDkXzj3C1MsPNaMAKNXxsfTjf2NRIiqBeaoQcQZVwvfV1sBs3oB9iHBr99be27SA2zZrFFrNRMUTrGuXiDgoGP0BDmqtFYRM8dhAX4V8Pn%2BZFd%2BlseLta0cx1gnkB7jQ%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/306875026921?_skw=bgs+graded+card&amp;hash=item47732d4de9:g:IFYAAeSwLfxp2ofY&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYcCE5FFv9chNARaxCPxXdsAELoZGv%2BGoiAjPl4t1jOhaGOaDNgNMf6Q254HVt0tWME9N%2Bm5V%2FAVGDf6WFCkc%2B1YDqv%2BkBHarOCPOR6yWkP2d3w0pP59W%2BRFnuQv1x%2FKuvPMqgbxKETogNvbUmJPdkej9JnzSuf53GWWm%2BeQFGnn7mfDB6efbJwGD5X0cHNhExu%2FRluLLp6D%2FDkoaLnswLpyRINzTIfrT3zaOHjlf1TIi0jnYkz5ssFh18zWp3%2B4dTPVYLOVsMQOzEItL11qYmvbd6yZ%2FHzr4omMUZJCwrGTg%3D%3D" target="_blank" rel="noopener"
                data-price="4.99" data-search="graded card display stand - interlocking angled holder - fits 15 psa cgc bgs sla">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/IFYAAeSwLfxp2ofY/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3153,7 +3184,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">1 Pack of Graded Card Sleeves, Fits Standard PSA Slabs (100 Per Pack)</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/365730932465?_skw=psa+graded+card&amp;hash=item55274326f1:g:CGQAAeSwtixodf2d&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbvazTLelkowvA%2FSiVZVP4nu2h2OaeAqpB6bruElOFr2OC9UyOM%2BIQVApERbX9JDANbfFFQRgUFYu84e6JJl%2F3caMQoRqP%2B6GE4uC3xfJ7G20YkghjAmz4AiTGCVVoHJEWF9Jh0Bl6CQxMPjkxkcxd%2B%2Bbx3O7qcYvXaA1ruRVBUhUUcuMjtsYq2sK19oWhciAvnSbjGuW1DeEgczRd4IeE0pGgSI1%2Be0NAKFUpHKCxUiAhBlqunvaXAD1L4pNdDDUcFdOhAkmiwxgoNaH%2Bsfpr%2B6R0DAztoHc9oPDgmjs4SCA%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/365730932465?_skw=psa+graded+card&amp;hash=item55274326f1:g:CGQAAeSwtixodf2d&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbvazTLelkowvA%2FSiVZVP4nu2h2OaeAqpB6bruElOFr2OC9UyOM%2BIQVApERbX9JDANbfFFQRgUFYu84e6JJl%2F3caMQoRqP%2B6GE4uC3xfJ7G20YkghjAmz4AiTGCVVoHJEUyiSjZIz%2BUBXdSQuvp4YlQIrMfv0VoY2wj0YjbDq3nUPBAIQZ3immc8HahP3NGFPAfxfY2Q%2Fmse3K8%2FFkbCXSzxMkn3uyXuirsHbB5y5HqX3rFX3PzC2m3TZCpZ9CUW%2FQVMu%2BIX4tuV%2BLGysiJ3S81aoijOMiuOOBkzyvql3WW3g%3D%3D" target="_blank" rel="noopener"
                data-price="5.00" data-search="psa graded card slab silicone bumper protector case | premium skin">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/CGQAAeSwtixodf2d/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3209,7 +3240,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Standard PSA Graded Card Bumper Guard Slab Protection - Alaris Design</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/126824203967?_skw=bgs+graded+card&amp;hash=item1d874fc6bf:g:IpcAAOSwz9hnWJXw&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYrQ04ShdohEwEwRgxF8B9R2Ctbh1Bo9F4d8gWVxOwhY9wBKB5q9PK4My8Mq43ZTINMz3McvWrSzMxwPQF6j3WNgAh7B8IK4%2FyIld683Vlv%2BJXTNSd1Fl%2FN8l3gFOwXgun%2BWeSvgItZpxWxTBsJbI9wDQcFCwbQwz1vZw%2FZNBP%2BdiQV1usuEg5TVnwcdJBLtr4k90zKvQlxp2Fq8mknD4Mlk%2FgvEnHwepOkAJSJTfCeaMhChbnu0NP0AcA5r%2FJ360Hd0ueuokgP5%2FvIQ%2FB3gFfiIq4DzgEfiZDKKl9k1i%2FIMA%3D%3D" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/126824203967?_skw=bgs+graded+card&amp;hash=item1d874fc6bf:g:IpcAAOSwz9hnWJXw&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYrQ04ShdohEwEwRgxF8B9R2Ctbh1Bo9F4d8gWVxOwhY9wBKB5q9PK4My8Mq43ZTINMz3McvWrSzMxwPQF6j3WNgAh7B8IK4%2FyIld683Vlv%2BJXTNSd1Fl%2FN8l3gFOwXguke5QPC4iXJVY1Ltal4fI5pmDslu0cdTlxZzOTRR0D%2BT3YSVNQStEjJtgXV4FERX%2BDUyMoLyZyGACl%2BNS58zANJ0MwcwPO%2Bd4xSt1wB6V6I%2B3JBL7ED16WHFpcGuOWR2wCE%2FzPil3%2FRdf3CcEspmWF9MwzDcozUmJJQmECiaOtqiA%3D%3D" target="_blank" rel="noopener"
                data-price="6.29" data-search="bgs pro guard | graded card slab silicone bumper protector case | beckett label">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/IpcAAOSwz9hnWJXw/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3300,12 +3331,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </section>
         <section class="u10-bucket" id="b-pikachu-under-10">
           <div class="u10-bhead">
-            <h3>Pikachu (under $10) <span class="u10-count">12</span></h3>
+            <h3>Pikachu (under $10) <span class="u10-count">14</span></h3>
             <p class="u10-blurb">Pikachu cards in the $1–$10 range.</p>
-            <span class="u10-stats">cheapest $1.25 · median $4.99 · range $1.25–$9.99</span>
+            <span class="u10-stats">cheapest $1.25 · median $3.49 · range $1.25–$9.99</span>
           </div>
           <div class="u10-grid">
-            <a class="u10-card" href="https://www.ebay.com/itm/168276472440?_skw=pikachu+card&amp;hash=item272e0f3278:g:vBgAAeSwSlNpy~L8" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/168276472440?_skw=pikachu+holo&amp;hash=item272e0f3278:g:vBgAAeSwSlNpy~L8" target="_blank" rel="noopener"
                data-price="1.25" data-search="pokemon choose your cards - pikachu">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/vBgAAeSwSlNpy~L8/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3321,14 +3352,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full A</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/156241664107?_skw=pikachu+card&amp;hash=item2460ba986b:g:SKMAAOSwYRJoM5Ue" target="_blank" rel="noopener"
-               data-price="1.49" data-search="pokemon 151 cards! holo/reverse holo ex illustration ultra double rare card!">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/SKMAAOSwYRJoM5Ue/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$1.49</div>
-                <div class="u10-title">Pokemon 151 Cards! Holo/Reverse Holo Ex Illustration Ultra Double Rare C</div>
-              </div>
-            </a>
             <a class="u10-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+holo&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
                data-price="1.49" data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/8fMAAOSwqxpn2-c~/s-l225.jpg');"></div>
@@ -3337,12 +3360,52 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full A</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+card&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
-               data-price="4.99" data-search="pokemon tcg - choose your pikachu | holo/reverse ex vmax full art cards | nm">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/6WYAAeSw2~NpAZ4W/s-l225.jpg');"></div>
+            <a class="u10-card" href="https://www.ebay.com/itm/318158620675?_skw=pikachu+card&amp;hash=item4a13bb4803:g:JNgAAeSwB9Zp4PnC" target="_blank" rel="noopener"
+               data-price="1.59" data-search="pikachu cosplay anime pokemon- select your card">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/JNgAAeSwB9Zp4PnC/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.59</div>
+                <div class="u10-title">Pikachu Cosplay Anime Pokemon- Select Your Card</div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/188396866972?_skw=pikachu+card&amp;hash=item2bdd540d9c:g:7fwAAeSweUZqC10Y" target="_blank" rel="noopener"
+               data-price="1.72" data-search="pikachu 025/165 sv: scarlet &amp; violet 151 reverse holo">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/7fwAAeSweUZqC10Y/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.72</div>
+                <div class="u10-title">Pikachu 025/165 Sv: Scarlet &amp; Violet 151 Reverse Holo</div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/327025848559?_skw=pikachu+card&amp;hash=item4c244270ef:g:stsAAeSwAnhpw8NM" target="_blank" rel="noopener"
+               data-price="1.95" data-search="2021 pokemon 25th anniversary celebrations mcdonalds pick a card!!">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/stsAAeSwAnhpw8NM/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.95</div>
+                <div class="u10-title">2021 Pokemon 25th Anniversary Celebrations McDonalds PICK A CARD!!</div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+card&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
+               data-price="2.99" data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/8fMAAOSwqxpn2-c~/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$2.99</div>
+                <div class="u10-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full A</div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/157152462685?_skw=pikachu+card&amp;hash=item249704475d:g:fXYAAeSwTmRobLaP" target="_blank" rel="noopener"
+               data-price="3.99" data-search="psyduck golduck pokemon card! holo/reverse holo gx rare - choose your cards!">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/fXYAAeSwTmRobLaP/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$3.99</div>
+                <div class="u10-title">Psyduck Golduck Pokemon Card! Holo/Reverse Holo GX Rare - Choose Your Ca</div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/396675404460?_skw=pikachu+card&amp;hash=item5c5bb252ac:g:7GAAAeSwrTlpL3Zx&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGaULGjAtb3ZdebB28wu3NLZldShyhjiDfDtnQ5d5kzNkj9qygiSWXNOHop%2B4li%2Fu7AGvlaAKfRzoAR%2Fkd7oYZZoHhqCXcEtRAAWEOSkfMYOz0Q5wqam0FU0QGDY9s18%2Bd%2FhApjZi0sXz6yZJCrsRWr4hmGdGBznngCm5hTozYGQAwAZpuZMZpxC%2FQOGZZtJ36ZczE2RDlhfd6tFxI%2F0fFHBJPomMjTbLWBhVtVAWAAx6gpkjQ6Qs7e9BPMhXL9EAK1A4fLKyf5OEwG8Mi6R4W%2FFk0ZH3q0XVBxtLbyZAO8WTQ%3D%3D" target="_blank" rel="noopener"
+               data-price="4.99" data-search="pokémon 10-card tcg lot | double rare + holo included | english &amp; japanese">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/7GAAAeSwrTlpL3Zx/s-l225.jpg');"></div>
               <div class="u10-meta">
                 <div class="u10-price">$4.99</div>
-                <div class="u10-title">Pokemon TCG - Choose Your Pikachu | Holo/Reverse EX VMAX Full Art Cards </div>
+                <div class="u10-title">Pokémon 10-Card TCG Lot | Double Rare + Holo Included | English &amp; Japane</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/156840249653?_skw=pikachu+holo&amp;hash=item2484684935:g:ljgAAOSwfNFme9Gl" target="_blank" rel="noopener"
@@ -3359,22 +3422,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$4.99</div>
                 <div class="u10-title">Pokémon Cosmos Holo Promo Card Singles YOU PICK - Scarlet &amp; Violet SWSH </div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/800042942385?_skw=pikachu+card&amp;hash=itemba46467fb1:g:td4AAeSwNIpqDUlY" target="_blank" rel="noopener"
-               data-price="7.24" data-search="pikachu vmax swsh286 swsh: sword &amp; shield promo cards holo">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/td4AAeSwNIpqDUlY/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$7.24</div>
-                <div class="u10-title">Pikachu VMAX SWSH286 SWSH: Sword &amp; Shield Promo Cards Holo</div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/156747546217?_skw=pikachu+card&amp;hash=item247ee1be69:g:8fMAAOSwqxpn2-c~" target="_blank" rel="noopener"
-               data-price="7.99" data-search="pikachu raichu pichu pokemon card! holo/reverse holo rare ex vmax full art cards">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/8fMAAOSwqxpn2-c~/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$7.99</div>
-                <div class="u10-title">Pikachu Raichu Pichu Pokemon Card! Holo/Reverse Holo Rare EX VMAX Full A</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/146948300954?_skw=pikachu+holo&amp;hash=item2236cd209a:g:6WYAAeSw2~NpAZ4W" target="_blank" rel="noopener"
@@ -3406,7 +3453,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="u10-bhead">
             <h3>Charizard (under $10) <span class="u10-count">30</span></h3>
             <p class="u10-blurb">Charizard cards in the $1–$10 range.</p>
-            <span class="u10-stats">cheapest $1.00 · median $2.00 · range $1.00–$9.99</span>
+            <span class="u10-stats">cheapest $1.00 · median $2.23 · range $1.00–$9.99</span>
           </div>
           <div class="u10-grid">
             <a class="u10-card" href="https://www.ebay.com/itm/225359716063?_skw=charizard+card&amp;hash=item34787c5edf:g:-SIAAOSwZIxjxigm" target="_blank" rel="noopener"
@@ -3418,19 +3465,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/127698176028?_skw=charizard+holo&amp;hash=item1dbb67881c:g:BkYAAeSwtNppmmUB" target="_blank" rel="noopener"
-               data-price="1.29" data-search="pokemon go tcg pick your card holo/reverse/v/vstar mewtwo charizard">
+               data-price="1.39" data-search="pokemon go tcg pick your card holo/reverse/v/vstar mewtwo charizard">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/BkYAAeSwtNppmmUB/s-l225.jpg');"></div>
               <div class="u10-meta">
-                <div class="u10-price">$1.29</div>
+                <div class="u10-price">$1.39</div>
                 <div class="u10-title">Pokemon GO TCG Pick Your Card Holo/Reverse/V/VSTAR Mewtwo Charizard</div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/397571716669?_skw=charizard+holo&amp;hash=item5c911ef63d:g:GRsAAeSwyXBp4o-y" target="_blank" rel="noopener"
-               data-price="1.29" data-search="pokemon 151 cards reverse holo rare ex master set singles you pick english nm">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/GRsAAeSwyXBp4o-y/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$1.29</div>
-                <div class="u10-title">Pokemon 151 Cards Reverse Holo Rare EX Master Set Singles You Pick Engli</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/156780094465?_skw=charizard+card&amp;hash=item2480d26401:g:4z8AAOSw6klnzRfL" target="_blank" rel="noopener"
@@ -3489,9 +3528,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Ful</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/156934652665?_skw=charizard+holo&amp;hash=item248a08c2f9:g:GwoAAOSwDGJoDrYV" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/156934652665?_skw=charizard+holo&amp;hash=item248a08c2f9:g:oMEAAOSwd8FoDra~" target="_blank" rel="noopener"
                data-price="1.50" data-search="pokemon cards obsidian flames! - holo/reverse holo ex full art illustration rare">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/GwoAAOSwDGJoDrYV/s-l225.jpg');"></div>
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/oMEAAOSwd8FoDra~/s-l225.jpg');"></div>
               <div class="u10-meta">
                 <div class="u10-price">$1.50</div>
                 <div class="u10-title">Pokemon Cards Obsidian Flames! - Holo/Reverse Holo Ex Full Art Illustrat</div>
@@ -3585,9 +3624,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">1999 Pokemon Base Set: Choose Your Card! All Cards Available - 100% Auth</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/156960591379?_skw=charizard+holo&amp;hash=item248b948e13:g:PAYAAOSwwcNoGXn8" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/156960591379?_skw=charizard+holo&amp;hash=item248b948e13:g:1VwAAOSwgvNoGXl8" target="_blank" rel="noopener"
                data-price="3.99" data-search="pokemon base set 2 cards! holo rare wotc vintage lp/nm choose your card!">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/PAYAAOSwwcNoGXn8/s-l225.jpg');"></div>
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/1VwAAOSwgvNoGXl8/s-l225.jpg');"></div>
               <div class="u10-meta">
                 <div class="u10-price">$3.99</div>
                 <div class="u10-title">Pokemon Base Set 2 Cards! Holo Rare WOTC Vintage LP/NM Choose Your Card!</div>
@@ -3648,6 +3687,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-price">$9.99</div>
                 <div class="u10-title">Pokemon TCG - Choose Your Mini Set | Charizard, Eevee, Mew &amp; More! | Nea</div>
               </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/156776820390?_skw=charizard+holo&amp;hash=item2480a06ea6:g:qY0AAOSwspNn8moI" target="_blank" rel="noopener"
+               data-price="9.99" data-search="pokemon crown zenith - choose your card! reverse holo/holos v vmax vstar radiant">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/qY0AAOSwspNn8moI/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$9.99</div>
+                <div class="u10-title">Pokemon Crown Zenith - Choose Your Card! Reverse Holo/Holos V VMAX VSTAR</div>
+              </div>
             </a></div>
         </section>
         <section class="u10-bucket" id="b-mew-under-10">
@@ -3657,7 +3704,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="u10-stats">cheapest $7.50 · median $9.99 · range $7.50–$9.99</span>
           </div>
           <div class="u10-grid">
-            <a class="u10-card" href="https://www.ebay.com/itm/236412580974?_skw=mew+card&amp;hash=item370b49b46e:g:F0EAAeSwFhRpJSKR&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGbFxHaNiiOgEhc9eMXq9dgZ1Pjrc305O5WCh9hRw5vVZMBl%2FDpXwJucIALrjFSfCPFeA7iABKrjYNnsCihSXFit8CFnB5kaS8BS2CxOAItmGhQl12qiGsLVihZs19IZZS0OEQFrXEv11rMECSRDW7CT2Qkq6kjv3rjgtgAENWORDTAncd9MBUumKavlqkNnHVlXSD5MoZzuKTWH4WPwPreV8aZCmV0CRdJvDsr0hG25YjvkoA2yAlF%2BM0l4esMHw8dl%2FCEwjaCfJ%2FAeWI24zY62" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/236412580974?_skw=mew+card&amp;hash=item370b49b46e:g:F0EAAeSwFhRpJSKR&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGbFxHaNiiOgEhc9eMXq9dgZ1Pjrc305O5WCh9hRw5vVZMBl%2FDpXwJucIALrjFSfCPFeA7iABKrjYNnsCihSXFit8CFnB5kaS8BS2CxOAItmGhQl12qiGsLVihZs19IZZS3SkLNMNJyfPCgXuSWO%2FkojdFe82A3ok3u9ugSZ95ok%2F0Wr235vzvjzRNKY%2BVhBlspAVGqQm%2Ba6SgiaXH%2B%2Fp593VDYGdd2vqNwASYyrM7euBGilbAMLGLxAa5mSVcprmNZh8PPPBeslbPuMWQ0ix0ml" target="_blank" rel="noopener"
                data-price="7.50" data-search="custom credit card skin">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/F0EAAeSwFhRpJSKR/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3798,7 +3845,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="u10-bhead">
             <h3>Eevee (under $10) <span class="u10-count">19</span></h3>
             <p class="u10-blurb">Eevee cards in the $1–$10 range.</p>
-            <span class="u10-stats">cheapest $1.00 · median $1.99 · range $1.00–$9.99</span>
+            <span class="u10-stats">cheapest $1.00 · median $1.75 · range $1.00–$9.99</span>
           </div>
           <div class="u10-grid">
             <a class="u10-card" href="https://www.ebay.com/itm/397897499643?_skw=eevee+card&amp;hash=item5ca48a03fb:g:~6MAAeSwX8Rp89bn" target="_blank" rel="noopener"
@@ -3823,6 +3870,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$1.49</div>
                 <div class="u10-title">Pokemon Shrouded Fable: Choose Your Card! Holo/Reverse Holo/EX/ACE SPEC </div>
+              </div>
+            </a>
+            <a class="u10-card" href="https://www.ebay.com/itm/145273089061?_skw=eevee+card&amp;hash=item21d2f36c25:g:3c8AAOSwbJ1jaukF" target="_blank" rel="noopener"
+               data-price="1.49" data-search="pokemon eeveelutions: choose your card! sylveon leafeon espeon umbreon &amp; more nm">
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/3c8AAOSwbJ1jaukF/s-l225.jpg');"></div>
+              <div class="u10-meta">
+                <div class="u10-price">$1.49</div>
+                <div class="u10-title">Pokemon Eeveelutions: Choose Your Card! Sylveon Leafeon Espeon Umbreon &amp;</div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/366125095038?_skw=eevee+holo&amp;hash=item553ec1987e:g:VZ0AAeSw61Bpht4Q" target="_blank" rel="noopener"
@@ -3913,7 +3968,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Pokemon TCG Cosmos Holo- SVP MEP Black Star Promo. Choose Your Card. Eng</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/394386645376?_skw=eevee+card&amp;hash=item5bd346a180:g:EvsAAeSwXVZpq5ob&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGYR%2FP5MX9gbWYptSl1NbYznvUpwT2FUpclNlXEKftsVXZiqoFV4d9806UzBI1I%2BMC9beZE%2FBb9BCC68TW4CICygNG--JFWve8QArZjJY5TUlxryVoh3CBzVy0xx%2BDzeVJIvqLH3dTEaLJwsf6BI086EO5CDzR6xMWdBLzek2VnbwwvHBUy9OXNSanELycuL74Rv9ph0rtg7VoxRQvYZhZT5fjE7Ebi%2FrwjGU0n%2FGIMKiyjGkabjHbOdMr65xWeLe%2FujSVkhAIVcn92M1t9daCmg" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/394386645376?_skw=eevee+card&amp;hash=item5bd346a180:g:EvsAAeSwXVZpq5ob&amp;amdata=enc%3AAQALAAAA4ACCtXRWQnOEpyOqnQQ8KGYR%2FP5MX9gbWYptSl1NbYznvUpwT2FUpclNlXEKftsVXZiqoFV4d9806UzBI1I%2BMC9beZE%2FBb9BCC68TW4CICygNG--JFWve8QArZjJY5TUlxryVoh3CBzVy0xx%2BDzeVJJz1%2BzYI%2F6XCfyJlvmnmIh3uJCzQOLcleEz2l%2BiSfdevIKVvs6wFzGZ5hj6EBAruTxVmnr27PL%2BbV0yZdg2MPdQE3FqOca3lZSHZs2k4XUHk8Hm4%2BFlN41%2BhrVfaJUli%2Bu3iV2AKiVUz8oPD6ziwI7p" target="_blank" rel="noopener"
                data-price="4.95" data-search="eeveelution v swsh promos - 9 card set or singles - black star promo">
               <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/EvsAAeSwXVZpq5ob/s-l225.jpg');"></div>
               <div class="u10-meta">
@@ -3921,9 +3976,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="u10-title">Eeveelution V SWSH Promos - 9 Card Set or Singles - Black Star Promo</div>
               </div>
             </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/157285345193?_skw=eevee+holo&amp;hash=item249eefe7a9:g:Nl8AAeSwpFVopSqW" target="_blank" rel="noopener"
+            <a class="u10-card" href="https://www.ebay.com/itm/157285345193?_skw=eevee+holo&amp;hash=item249eefe7a9:g:CW4AAeSwoIdopVy0" target="_blank" rel="noopener"
                data-price="4.99" data-search="eevee pokemon cards! holo/reverse holos rare full art lp/nm choose your card!">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/Nl8AAeSwpFVopSqW/s-l225.jpg');"></div>
+              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/CW4AAeSwoIdopVy0/s-l225.jpg');"></div>
               <div class="u10-meta">
                 <div class="u10-price">$4.99</div>
                 <div class="u10-title">Eevee Pokemon Cards! Holo/Reverse Holos Rare Full Art LP/NM Choose Your </div>
@@ -3935,14 +3990,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="u10-meta">
                 <div class="u10-price">$7.99</div>
                 <div class="u10-title">Pokemon TCG - Choose Your Mini Set | Charizard, Eevee, Mew &amp; More! | Nea</div>
-              </div>
-            </a>
-            <a class="u10-card" href="https://www.ebay.com/itm/157432671826?_skw=eevee+holo&amp;hash=item24a7b7ee52:g:toAAAeSwHtppK9gS" target="_blank" rel="noopener"
-               data-price="7.99" data-search="pokémon cosmos holo promo card singles you pick - scarlet &amp; violet swsh nm/lp">
-              <div class="u10-img" style="background-image:url('https://i.ebayimg.com/images/g/toAAAeSwHtppK9gS/s-l225.jpg');"></div>
-              <div class="u10-meta">
-                <div class="u10-price">$7.99</div>
-                <div class="u10-title">Pokémon Cosmos Holo Promo Card Singles YOU PICK - Scarlet &amp; Violet SWSH </div>
               </div>
             </a>
             <a class="u10-card" href="https://www.ebay.com/itm/157285345193?_skw=eevee+card&amp;hash=item249eefe7a9:g:SMcAAeSwBzFopSox" target="_blank" rel="noopener"
@@ -3958,7 +4005,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 22:18 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 22:28 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

@@ -591,11 +591,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* Prevent any child from growing wider than the viewport */
+  overflow: hidden;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -628,7 +632,30 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   - min-width: 0 is required on flex children to allow them to shrink below
+     their content size (without it, overflow never triggers).
+   - overflow-x: auto lets the nav scroll horizontally on tight viewports
+     rather than pushing the logo off-screen or creating overlap.
+   - justify-content: flex-end keeps links right-aligned (closest to the
+     action buttons on the right), which is the natural reading order. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
+     hamburger breakpoint at 880px should activate well before it's needed. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1922,6 +1949,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
           <div class="nav-dropdown-menu" role="menu"><a href="japanese_holo.html">JP Holo / Art Rare</a></div>
         </div></nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1941,6 +1971,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
@@ -1961,7 +1992,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Browse</div>
+<div class="drawer-group">Browse</div>
 <a href="browse.html">Browse</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
@@ -2005,7 +2036,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html" class="admin-only" data-admin="1">Mewtwo</a>
 <a href="eevee.html" class="admin-only" data-admin="1">Eevee</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Pokemon</div>
+<div class="drawer-group">Pokemon</div>
 <a href="japanese_holo.html">JP Holo / Art Rare</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
@@ -2058,9 +2089,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">6</div><div class="pk-l">Categories</div></div>
-      <div class="pk-kpi"><div class="pk-n">33</div><div class="pk-l">Live listings</div></div>
-      <div class="pk-kpi"><div class="pk-n">7</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">18:17</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">32</div><div class="pk-l">Live listings</div></div>
+      <div class="pk-kpi"><div class="pk-n">8</div><div class="pk-l">Deals &ge;25% below median</div></div>
+      <div class="pk-kpi"><div class="pk-n">18:27</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -2131,7 +2162,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/DMQAAOSwSqhilN7l/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.99</span>
-            <span class="pk-hero-disc">-73%</span>
+            <span class="pk-hero-disc">-82%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/396753769798?_skw=mew+vmax+rainbow&amp;var=665235413298&amp;hash=item5c605e1546:g:mwkAAOSwujpoUH8t" target="_blank" rel="noopener"
@@ -2139,7 +2170,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/mwkAAOSwujpoUH8t/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.00</span>
-            <span class="pk-hero-disc">-71%</span>
+            <span class="pk-hero-disc">-73%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/394783462591?_skw=mew+vmax+rainbow&amp;var=663353845336&amp;hash=item5beaed94bf:g:VFUAAOSwL6Jkyn8C" target="_blank" rel="noopener"
@@ -2147,15 +2178,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/VFUAAOSwL6Jkyn8C/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$5.50</span>
-            <span class="pk-hero-disc">-68%</span>
+            <span class="pk-hero-disc">-70%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/406940153434?_skw=mew+promo+black+star&amp;hash=item5ebf85f65a:g:UloAAeSwqqJqDg5h" target="_blank" rel="noopener"
-           title="Mew Black Star Promo #8 WOTC Promo – Vintage Pokémon Card NM/M">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/UloAAeSwqqJqDg5h/s-l225.jpg');"></div>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/296402060831?_skw=mew+skyridge&amp;hash=item4502f0861f:g:wHEAAOSwyDhmKGqq" target="_blank" rel="noopener"
+           title="Pokemon TCG - Special Energy Cards - Vintage Rare - Pick Your Card! NM/LP">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/wHEAAOSwyDhmKGqq/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
-            <span class="pk-hero-price">$8.99</span>
-            <span class="pk-hero-disc">-60%</span>
+            <span class="pk-hero-price">$14.99</span>
+            <span class="pk-hero-disc">-54%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/374245571826?_skw=mew+v+full+art&amp;hash=item5722c63cf2:g:y8MAAOSwOL5iloI8" target="_blank" rel="noopener"
@@ -2163,15 +2194,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/y8MAAOSwOL5iloI8/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$9.88</span>
-            <span class="pk-hero-disc">-42%</span>
+            <span class="pk-hero-disc">-47%</span>
           </div>
         </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/364502783318?_skw=mew+vmax+alt+art&amp;hash=item54de0f1556:g:AU4AAOSw28tlFG9H" target="_blank" rel="noopener"
-           title="G GX V VMAX  151 Pokemon Cards YOU CHOOSE  Ultra Rares Alt Art ENGLISH">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/AU4AAOSw28tlFG9H/s-l225.jpg');"></div>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/376064091938?_skw=mew+expedition+holo&amp;hash=item578f2aa722:g:LjkAAOSwmtxoOOEb" target="_blank" rel="noopener"
+           title="Pokemon Expedition E Series - Choose Your Card - LP/NM 2002 WoTC">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/LjkAAOSwmtxoOOEb/s-l225.jpg');"></div>
           <div class="pk-hero-meta">
-            <span class="pk-hero-price">$9.99</span>
-            <span class="pk-hero-disc">-41%</span>
+            <span class="pk-hero-price">$19.95</span>
+            <span class="pk-hero-disc">-39%</span>
           </div>
         </a></div>
     </section>
@@ -2182,7 +2213,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
-        <option value="Grail Watch">Grail Watch (2)</option><option value="Ancient Mew Promo">Ancient Mew Promo (2)</option><option value="Vintage Mew">Vintage Mew (12)</option><option value="Mew V / VMAX">Mew V / VMAX (13)</option><option value="Mew ex / SIR">Mew ex / SIR (3)</option><option value="Mew PSA 10">Mew PSA 10 (1)</option>
+        <option value="Grail Watch">Grail Watch (2)</option><option value="Ancient Mew Promo">Ancient Mew Promo (2)</option><option value="Vintage Mew">Vintage Mew (12)</option><option value="Mew V / VMAX">Mew V / VMAX (12)</option><option value="Mew ex / SIR">Mew ex / SIR (3)</option><option value="Mew PSA 10">Mew PSA 10 (1)</option>
       </select>
       <select id="pk-max">
         <option value="0">Any price</option>
@@ -2216,7 +2247,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
           </div>
           <div class="pk-grid">
-            <a class="pk-card" href="https://www.ebay.com/itm/357889156594?_skw=ancient+mew+promo&amp;hash=item5353db25f2:g:DjwAAeSwMRJpE8jP&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbG%2F0d6V75VW%2FgHmJ8nslrgadYeOL6xSMHRE0AbrgEFY48CqfbdfYtaOwgn9nvzmzSZlG%2B3qrdggo4Kk%2BnKHIrop1boPtk6KzLdHeVZILC72%2BJQbA9uXdeigANAUV61qCA2lFvhjh00td7PtGNKGV4dra5zB8wqaQ8mIFfNcYD1BCC5rMnZ4RArVVrAIJAv87sIysTgUB2bVcy25BdFyefWjNgt%2FrgjvQsTjO6ViOLab8etXYpGdulZuLa4xtMRgIozBSt8uAxS7GRY4ET998wdmX5agg4Ae1rl5of5CqJA1A%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/357889156594?_skw=ancient+mew+promo&amp;hash=item5353db25f2:g:DjwAAeSwMRJpE8jP&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbG%2F0d6V75VW%2FgHmJ8nslrgadYeOL6xSMHRE0AbrgEFY48CqfbdfYtaOwgn9nvzmzSZlG%2B3qrdggo4Kk%2BnKHIrop1boPtk6KzLdHeVZILC72%2BJQbA9uXdeigANAUV61qCArtIDjTr0zdaE5SEoWt6VaW9WAIecQAbFGKFP4CRFcTHZc8rLI7K8f3djkxXrvQMwvIS1vddTFUIud7%2BP9mzEfSr3rz5RQf4nLHBWcYXJIBdOL%2B8VRmU0hbi263Dn8N0SjwdzRLuvWNn8Xv4%2Bgpk97kngOJu90BDxubESQGYvoFQ%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="28.70"
                data-deal="0"
@@ -2257,15 +2288,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$6</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$22</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$32</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$500</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">3</div><div class="pk-stat-l">Deals / 12</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">5</div><div class="pk-stat-l">Deals / 12</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/394094077220?_skw=mew+expedition+holo&amp;hash=item5bc1d66524:g:DMQAAOSwSqhilN7l" target="_blank" rel="noopener"
                data-price="5.99"
-               data-discount="73.40"
+               data-discount="81.60"
                data-deal="1"
                data-bucket="Vintage Mew"
                data-search="pokémon promo cards - choose your card! all pokemon available!">
@@ -2273,31 +2304,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.99</span>
-                  <span class="pk-disc">-73%</span>
+                  <span class="pk-disc">-82%</span>
                 </div>
                 <div class="pk-title">Pokémon PROMO Cards - Choose Your Card! All Pokemon Available!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/406940153434?_skw=mew+promo+black+star&amp;hash=item5ebf85f65a:g:UloAAeSwqqJqDg5h" target="_blank" rel="noopener"
-               data-price="8.99"
-               data-discount="60.00"
-               data-deal="1"
-               data-bucket="Vintage Mew"
-               data-search="mew black star promo #8 wotc promo – vintage pokémon card nm/m">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/UloAAeSwqqJqDg5h/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$8.99</span>
-                  <span class="pk-disc">-60%</span>
-                </div>
-                <div class="pk-title">Mew Black Star Promo #8 WOTC Promo – Vintage Pokémon Card NM/M</div>
-                <div class="pk-buying">BIN . Best Offer</div>
-              </div>
-            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/296402060831?_skw=mew+skyridge&amp;hash=item4502f0861f:g:wHEAAOSwyDhmKGqq" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="33.30"
+               data-discount="53.90"
                data-deal="1"
                data-bucket="Vintage Mew"
                data-search="pokemon tcg - special energy cards - vintage rare - pick your card! nm/lp">
@@ -2305,55 +2320,55 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-33%</span>
+                  <span class="pk-disc">-54%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Special Energy Cards - Vintage Rare - Pick Your Card! NM/LP</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/376064091938?_skw=mew+expedition+holo&amp;hash=item578f2aa722:g:LjkAAOSwmtxoOOEb" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/376064091938?_skw=mew+expedition+holo&amp;hash=item578f2aa722:g:LjkAAOSwmtxoOOEb" target="_blank" rel="noopener"
                data-price="19.95"
-               data-discount="11.30"
-               data-deal="0"
+               data-discount="38.60"
+               data-deal="1"
                data-bucket="Vintage Mew"
                data-search="pokemon expedition e series - choose your card - lp/nm 2002 wotc">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/LjkAAOSwmtxoOOEb/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.95</span>
-                  <span class="pk-disc">-11%</span>
+                  <span class="pk-disc">-39%</span>
                 </div>
                 <div class="pk-title">Pokemon Expedition E Series - Choose Your Card - LP/NM 2002 WoTC</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/127629868172?_skw=mew+aquapolis&amp;hash=item1db7553c8c:g:00UAAeSwH85prLWp" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/127629868172?_skw=mew+aquapolis&amp;hash=item1db7553c8c:g:00UAAeSwH85prLWp" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="11.10"
-               data-deal="0"
+               data-discount="38.50"
+               data-deal="1"
                data-bucket="Vintage Mew"
                data-search="vintage pokemon theme deck inserts - card lists unpunched damage counters coins">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/00UAAeSwH85prLWp/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  <span class="pk-disc">-11%</span>
+                  <span class="pk-disc">-38%</span>
                 </div>
                 <div class="pk-title">Vintage Pokemon Theme Deck Inserts - Card Lists Unpunched Damage Counters Coins</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/296402060831?_skw=mew+aquapolis&amp;hash=item4502f0861f:g:wHEAAOSwyDhmKGqq" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/296402060831?_skw=mew+aquapolis&amp;hash=item4502f0861f:g:wHEAAOSwyDhmKGqq" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="11.10"
-               data-deal="0"
+               data-discount="38.50"
+               data-deal="1"
                data-bucket="Vintage Mew"
                data-search="pokemon tcg - special energy cards - vintage rare - pick your card! nm/lp">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/wHEAAOSwyDhmKGqq/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  <span class="pk-disc">-11%</span>
+                  <span class="pk-disc">-38%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Special Energy Cards - Vintage Rare - Pick Your Card! NM/LP</div>
                 <div class="pk-buying">BIN</div>
@@ -2361,7 +2376,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/286062910818?_skw=mew+aquapolis&amp;hash=item429aad9d62:g:uLsAAOSwe~Vm52n-" target="_blank" rel="noopener"
                data-price="24.99"
-               data-discount="-11.10"
+               data-discount="23.10"
                data-deal="0"
                data-bucket="Vintage Mew"
                data-search="pokemon tcg slabs pick your slab">
@@ -2369,7 +2384,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$24.99</span>
-                  
+                  <span class="pk-disc">-23%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG Slabs Pick Your Slab</div>
                 <div class="pk-buying">BIN</div>
@@ -2377,7 +2392,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/206129209971?_skw=mew+expedition+holo&amp;hash=item2ffe422273:g:iU0AAeSwo~lprx7H" target="_blank" rel="noopener"
                data-price="40.00"
-               data-discount="-77.90"
+               data-discount="-23.10"
                data-deal="0"
                data-bucket="Vintage Mew"
                data-search="2002 pokémon expedition set - non holo rare collection - variation">
@@ -2393,7 +2408,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/396170360717?_skw=mew+skyridge&amp;hash=item5c3d97f78d:g:SsoAAOSw5KtnoDYQ" target="_blank" rel="noopener"
                data-price="40.00"
-               data-discount="-77.90"
+               data-discount="-23.10"
                data-deal="0"
                data-bucket="Vintage Mew"
                data-search="pokemon tcg lot | tiers | only rare or better | plus base set to modern inserts!">
@@ -2407,9 +2422,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/377198805624?_skw=mew+promo+black+star&amp;hash=item57d2cd0278:g:lMIAAeSwhPFqDh8Z" target="_blank" rel="noopener"
+               data-price="100.00"
+               data-discount="-207.70"
+               data-deal="0"
+               data-bucket="Vintage Mew"
+               data-search="mew 9 wotc black star promo holo">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/lMIAAeSwhPFqDh8Z/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$100.00</span>
+                  
+                </div>
+                <div class="pk-title">Mew 9 WOTC Black Star Promo Holo</div>
+                <div class="pk-buying">BIN . Best Offer</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mew+expedition+holo&amp;hash=item2483686621:g:-kQAAeSwX8Rp4shW" target="_blank" rel="noopener"
                data-price="169.99"
-               data-discount="-655.80"
+               data-discount="-423.10"
                data-deal="0"
                data-bucket="Vintage Mew"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -2425,7 +2456,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157230837686?_skw=mew+skyridge&amp;hash=item249bb02fb6:g:dRwAAeSwpvFolwFn" target="_blank" rel="noopener"
                data-price="169.99"
-               data-discount="-655.80"
+               data-discount="-423.10"
                data-deal="0"
                data-bucket="Vintage Mew"
                data-search="vintage pokémon cards! holo rare heavy played/damaged e reader choose your card!">
@@ -2441,7 +2472,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/127628681222?_skw=mew+skyridge&amp;hash=item1db7432006:g:sm0AAeSwKhJprMAe" target="_blank" rel="noopener"
                data-price="499.99"
-               data-discount="-2123.20"
+               data-discount="-1438.70"
                data-deal="0"
                data-bucket="Vintage Mew"
                data-search="1999 - 2002 pokemon card game (tcg) vintage empty theme deck boxes wotc no cards">
@@ -2464,15 +2495,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$5</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$17</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$18</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$90</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">4</div><div class="pk-stat-l">Deals / 13</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">3</div><div class="pk-stat-l">Deals / 12</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/396753769798?_skw=mew+vmax+rainbow&amp;var=665235413298&amp;hash=item5c605e1546:g:mwkAAOSwujpoUH8t" target="_blank" rel="noopener"
                data-price="5.00"
-               data-discount="70.60"
+               data-discount="73.00"
                data-deal="1"
                data-bucket="Mew V / VMAX"
                data-search="pokemon tcg - choose your card - full art/vstar/vmax/v/rainbow rares pack fresh">
@@ -2480,7 +2511,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.00</span>
-                  <span class="pk-disc">-71%</span>
+                  <span class="pk-disc">-73%</span>
                 </div>
                 <div class="pk-title">Pokemon TCG - Choose Your Card - Full Art/Vstar/Vmax/V/Rainbow Rares PACK FRESH</div>
                 <div class="pk-buying">BIN</div>
@@ -2488,7 +2519,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/394783462591?_skw=mew+vmax+rainbow&amp;var=663353845336&amp;hash=item5beaed94bf:g:VFUAAOSwL6Jkyn8C" target="_blank" rel="noopener"
                data-price="5.50"
-               data-discount="67.60"
+               data-discount="70.30"
                data-deal="1"
                data-bucket="Mew V / VMAX"
                data-search="pokemon choose a card + get 5 random vintage cards">
@@ -2496,7 +2527,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.50</span>
-                  <span class="pk-disc">-68%</span>
+                  <span class="pk-disc">-70%</span>
                 </div>
                 <div class="pk-title">POKEMON Choose A Card + Get 5 Random Vintage Cards</div>
                 <div class="pk-buying">BIN</div>
@@ -2504,7 +2535,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/374245571826?_skw=mew+v+full+art&amp;hash=item5722c63cf2:g:y8MAAOSwOL5iloI8" target="_blank" rel="noopener"
                data-price="9.88"
-               data-discount="41.80"
+               data-discount="46.60"
                data-deal="1"
                data-bucket="Mew V / VMAX"
                data-search="mew v full art ultra rare card 069/189 swsh darkness ablaze 2020 pokemon tcg">
@@ -2512,31 +2543,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$9.88</span>
-                  <span class="pk-disc">-42%</span>
+                  <span class="pk-disc">-47%</span>
                 </div>
                 <div class="pk-title">Mew V FULL ART ULTRA RARE card 069/189 SWSH Darkness Ablaze 2020 Pokemon TCG</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/364502783318?_skw=mew+vmax+alt+art&amp;hash=item54de0f1556:g:AU4AAOSw28tlFG9H" target="_blank" rel="noopener"
-               data-price="9.99"
-               data-discount="41.20"
-               data-deal="1"
-               data-bucket="Mew V / VMAX"
-               data-search="g gx v vmax  151 pokemon cards you choose  ultra rares alt art english">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/AU4AAOSw28tlFG9H/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-41%</span>
-                </div>
-                <div class="pk-title">G GX V VMAX  151 Pokemon Cards YOU CHOOSE  Ultra Rares Alt Art ENGLISH</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/188394185115?_skw=mew+vmax&amp;hash=item2bdd2b219b:g:Pa0AAeSw3UtqClvL" target="_blank" rel="noopener"
                data-price="14.99"
-               data-discount="11.80"
+               data-discount="18.90"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="mew vmax 114/264 fusion strike vmax rare holo pokemon">
@@ -2544,23 +2559,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-12%</span>
+                  <span class="pk-disc">-19%</span>
                 </div>
                 <div class="pk-title">Mew VMAX 114/264 Fusion Strike VMAX Rare Holo Pokemon</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/277727337188?_skw=mew+vmax+rainbow&amp;var=2560736802001&amp;hash=item40a9d6dae4:g:wU4AAeSw71Npm-gU" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/277727337188?_skw=mew+vmax+rainbow&amp;var=2560736742498&amp;hash=item40a9d6dae4:g:d8wAAeSwVe5pm-fp" target="_blank" rel="noopener"
                data-price="15.99"
-               data-discount="5.90"
+               data-discount="13.50"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="🔥pokémon psa 10 mini slab holo-keychains🔥">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/wU4AAeSw71Npm-gU/s-l225.jpg');"></div>
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/d8wAAeSwVe5pm-fp/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.99</span>
-                  <span class="pk-disc">-6%</span>
+                  <span class="pk-disc">-14%</span>
                 </div>
                 <div class="pk-title">🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥</div>
                 <div class="pk-buying">BIN</div>
@@ -2568,7 +2583,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mew+vmax&amp;hash=item2483686621:g:YTQAAOSw1FFn325L" target="_blank" rel="noopener"
                data-price="16.99"
-               data-discount="0.00"
+               data-discount="8.10"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -2576,7 +2591,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$16.99</span>
-                  
+                  <span class="pk-disc">-8%</span>
                 </div>
                 <div class="pk-title">Mewtwo Mew Pokémon Card! Holo/Reverse Holo Ex Rare V Vmax GX Full Art Cards!</div>
                 <div class="pk-buying">BIN</div>
@@ -2584,7 +2599,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156937951391?_skw=mew+vmax+rainbow&amp;var=458396615345&amp;hash=item248a3b189f:g:2WoAAOSwBmBoEB5a" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="-17.70"
+               data-discount="-8.10"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="pokemon card vmax vstar - choose your card! full art ultra rare cards! nm">
@@ -2600,7 +2615,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/176982432685?_skw=mew+vmax+alt+art&amp;hash=item2934f99bad:g:zSsAAeSw1sFozvym" target="_blank" rel="noopener"
                data-price="20.00"
-               data-discount="-17.70"
+               data-discount="-8.20"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="mew vmax alt art | psa tag beckett display case extended art for pokemon card">
@@ -2616,7 +2631,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/175298028517?_skw=mew+vmax+alt+art&amp;hash=item28d093a3e5:g:d7sAAOSw7h5i~BRR" target="_blank" rel="noopener"
                data-price="28.00"
-               data-discount="-64.80"
+               data-discount="-51.40"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="charizard v espeon umbreon vaporeon alt art custom pokemon tcg card display case">
@@ -2632,7 +2647,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156823479841?_skw=mew+v+full+art&amp;hash=item2483686621:g:p0UAAOSwraZoE0K8" target="_blank" rel="noopener"
                data-price="29.99"
-               data-discount="-76.50"
+               data-discount="-62.20"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="mewtwo mew pokémon card! holo/reverse holo ex rare v vmax gx full art cards!">
@@ -2648,7 +2663,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157010023447?_skw=mew+v+full+art&amp;hash=item248e86d417:g:tA4AAeSwpqBoZlLA" target="_blank" rel="noopener"
                data-price="44.99"
-               data-discount="-164.80"
+               data-discount="-143.30"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="pokemon cards! fusion strike - holo/reverse holo ultrarare v vmax full art card">
@@ -2664,7 +2679,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/394687978619?_skw=mew+vmax+rainbow&amp;var=664079607406&amp;hash=item5be53c9c7b:g:iIYAAOSweH9mRY8P" target="_blank" rel="noopener"
                data-price="90.00"
-               data-discount="-429.70"
+               data-discount="-386.70"
                data-deal="0"
                data-bucket="Mew V / VMAX"
                data-search="pokemon rainbow secret rare - choose your card! english near mint 100% authentic">
@@ -2839,7 +2854,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 22:17 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 22:27 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

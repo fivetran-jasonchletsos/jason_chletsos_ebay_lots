@@ -591,11 +591,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* Prevent any child from growing wider than the viewport */
+  overflow: hidden;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -628,7 +632,30 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   - min-width: 0 is required on flex children to allow them to shrink below
+     their content size (without it, overflow never triggers).
+   - overflow-x: auto lets the nav scroll horizontally on tight viewports
+     rather than pushing the logo off-screen or creating overlap.
+   - justify-content: flex-end keeps links right-aligned (closest to the
+     action buttons on the right), which is the natural reading order. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
+     hamburger breakpoint at 880px should activate well before it's needed. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1854,6 +1881,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
           <div class="nav-dropdown-menu" role="menu"><a href="japanese_holo.html">JP Holo / Art Rare</a></div>
         </div></nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
@@ -1873,6 +1903,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         Sign out
       </button>
       <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
@@ -1893,7 +1924,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html">Listings</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Browse</div>
+<div class="drawer-group">Browse</div>
 <a href="browse.html">Browse</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
@@ -1937,7 +1968,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="mewtwo.html" class="admin-only" data-admin="1">Mewtwo</a>
 <a href="eevee.html" class="admin-only" data-admin="1">Eevee</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
-<div class="drawer-group" data-admin="1">Pokemon</div>
+<div class="drawer-group">Pokemon</div>
 <a href="japanese_holo.html">JP Holo / Art Rare</a>
     <div class="drawer-foot">
       <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
@@ -1994,9 +2025,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Pikachu</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">129</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">128</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">45</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">44</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The mascot. The icon. The card that built the hobby.</div>
           </div>
@@ -2006,9 +2037,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Charizard</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">39</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">40</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">9</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">13</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The chase card. The flame. Every collector&#x27;s white whale.</div>
           </div>
@@ -2018,9 +2049,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Mew</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">33</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">32</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">7</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">8</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The original mythical. Pink, psychic, and very, very rare.</div>
           </div>
@@ -2030,9 +2061,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Mewtwo</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">72</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">71</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">24</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">23</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The clone. The villain. The most powerful psychic card art in the game.</div>
           </div>
@@ -2042,9 +2073,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Eevee</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">95</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">94</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">38</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">35</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">Eight evolutions. Infinite cards. The cutest investment vehicle on the planet.</div>
           </div>
@@ -2054,7 +2085,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 22:17 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 22:27 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
