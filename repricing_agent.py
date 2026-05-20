@@ -201,6 +201,13 @@ def decide(listing: dict, market_row: dict, pricing_sources: dict,
             decision["reasons"].append(f"skip_keyword:{kw}")
             return decision
 
+    # eBay's Trading API rejects ReviseItem on auctions once bidding starts.
+    # Snapshot doesn't carry bid_count, so block all auctions to be safe.
+    if "auction" in (listing.get("listing_type") or "").lower():
+        decision["decision"] = "blocked"
+        decision["reasons"].append("auction-with-bids")
+        return decision
+
     if current <= 0:
         decision["decision"] = "blocked"
         decision["reasons"].append("no current price on listing")
