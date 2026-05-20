@@ -575,8 +575,8 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  /* Prevent any child from growing wider than the viewport */
-  overflow: hidden;
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -617,23 +617,13 @@ a:hover { color: var(--gold-bright); }
   .brand-tag { display: none; }
 }
 /* Nav rail: takes the remaining space between brand and action buttons.
-   - min-width: 0 is required on flex children to allow them to shrink below
-     their content size (without it, overflow never triggers).
-   - overflow-x: auto lets the nav scroll horizontally on tight viewports
-     rather than pushing the logo off-screen or creating overlap.
-   - justify-content: flex-end keeps links right-aligned (closest to the
-     action buttons on the right), which is the natural reading order. */
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
 .nav-links {
   display: flex; align-items: center; gap: 2px;
   margin-left: auto;
   min-width: 0;
-  overflow-x: auto;
-  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
-     hamburger breakpoint at 880px should activate well before it's needed. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.nav-links::-webkit-scrollbar { display: none; }
 /* Action-button cluster (theme picker, install, sign-in, refresh).
    flex-shrink: 0 ensures these never get compressed when the nav fills up. */
 .nav-actions {
@@ -2155,7 +2145,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </div>
     </div>
 
-    <div class="ai-strip"><strong>0</strong> listings &middot; <strong>73</strong> sold last 90 days &middot; <strong>8</strong> categories &middot; <strong>43</strong> Pikachu deals scanned</div>
+    <div class="ai-strip"><strong>0</strong> listings &middot; <strong>73</strong> sold last 90 days &middot; <strong>8</strong> categories &middot; <strong>42</strong> Pikachu deals scanned</div>
 
     <div class="ai-kpi-row">
       
@@ -2175,7 +2165,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="ai-kpi-src">from seller_hub_plan.json</div>
         </div>
         <div class="ai-kpi">
-          <div class="ai-kpi-num">43</div>
+          <div class="ai-kpi-num">42</div>
           <div class="ai-kpi-label">Pikachu deals</div>
           <div class="ai-kpi-src">from pokemon_pikachu_plan.json</div>
         </div>
@@ -2222,7 +2212,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       (function() {
         const ENDPOINT     = "https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/ai-chat";
         const SUGGESTIONS  = ["What's the market price for a 2024 Topps Chrome Cam Ward rookie PSA 10?", "Which of my listings should I reprice today?", "Find me Pikachu cards under $10", "What Pokemon sets are dropping next month?", "How do I value a 1994 Classic Pro Line autograph?", "What's my best-performing listing this month?"];
-        const KPIS         = {"listings_total": 0, "sold_recent": 73, "categories": 8, "pikachu_deals": 43};
+        const KPIS         = {"listings_total": 0, "sold_recent": 73, "categories": 8, "pikachu_deals": 42};
         const thread       = document.getElementById('ai-thread');
         const empty        = document.getElementById('ai-empty');
         const form         = document.getElementById('ai-form');
@@ -2361,7 +2351,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 23:14 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 23:24 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

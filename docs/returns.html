@@ -575,8 +575,8 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  /* Prevent any child from growing wider than the viewport */
-  overflow: hidden;
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
@@ -617,23 +617,13 @@ a:hover { color: var(--gold-bright); }
   .brand-tag { display: none; }
 }
 /* Nav rail: takes the remaining space between brand and action buttons.
-   - min-width: 0 is required on flex children to allow them to shrink below
-     their content size (without it, overflow never triggers).
-   - overflow-x: auto lets the nav scroll horizontally on tight viewports
-     rather than pushing the logo off-screen or creating overlap.
-   - justify-content: flex-end keeps links right-aligned (closest to the
-     action buttons on the right), which is the natural reading order. */
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
 .nav-links {
   display: flex; align-items: center; gap: 2px;
   margin-left: auto;
   min-width: 0;
-  overflow-x: auto;
-  /* Hide scrollbar visually — it's a fallback for very narrow viewports; the
-     hamburger breakpoint at 880px should activate well before it's needed. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.nav-links::-webkit-scrollbar { display: none; }
 /* Action-button cluster (theme picker, install, sign-in, refresh).
    flex-shrink: 0 ensures these never get compressed when the nav fills up. */
 .nav-actions {
@@ -1931,11 +1921,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-20 23:14 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
+    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-20 23:24 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 23:14 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 23:24 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
