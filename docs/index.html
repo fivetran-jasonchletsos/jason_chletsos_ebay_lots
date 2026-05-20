@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2428,7 +2434,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <div class="stat-grid">
       <!-- Public-facing buyer-trust signals (hidden when admin signed in — admin sees their own KPIs below) -->
       <button class="stat-card linked" data-public="1" type="button" onclick="filterByKPI('all', this)">
-        <div class="num">127</div>
+        <div class="num">129</div>
         <div class="lbl">Cards in Stock</div>
       </button>
       <div class="stat-card" data-public="1">
@@ -2441,11 +2447,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </div>
       <!-- Admin-only inventory KPIs (hidden from public — they're internal strategy data) -->
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('all', this)">
-        <div class="num">127</div>
+        <div class="num">129</div>
         <div class="lbl">Active Listings</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('value', this)">
-        <div class="num">$596</div>
+        <div class="num">$606</div>
         <div class="lbl">Inventory Value</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('underpriced', this)">
@@ -2453,7 +2459,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="lbl">Underpriced</div>
       </button>
       <button class="stat-card linked" type="button" data-admin="1" onclick="filterByKPI('overpriced', this)">
-        <div class="num warning">42</div>
+        <div class="num warning">36</div>
         <div class="lbl">Overpriced</div>
       </button>
     </div>
@@ -2501,10 +2507,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3 class="cat-sidebar-title">Categories</h3>
         </div>
         <nav class="cat-sidebar-list">
-          <button type="button" class="cat-nav-item active" data-cat="All" onclick="setCategory(this)"><span class="cat-nav-label">All</span><span class="cat-nav-count">127</span></button><button type="button" class="cat-nav-item" data-cat="Football Singles" onclick="setCategory(this)"><span class="cat-nav-label">Football Singles</span><span class="cat-nav-count">92</span></button><button type="button" class="cat-nav-item" data-cat="Football Lots" onclick="setCategory(this)"><span class="cat-nav-label">Football Lots</span><span class="cat-nav-count">17</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Lots</span><span class="cat-nav-count">6</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Singles</span><span class="cat-nav-count">5</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Singles</span><span class="cat-nav-count">3</span></button><button type="button" class="cat-nav-item" data-cat="Other" onclick="setCategory(this)"><span class="cat-nav-label">Other</span><span class="cat-nav-count">2</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Lots</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="Pokemon" onclick="setCategory(this)"><span class="cat-nav-label">Pokemon</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="__watch" onclick="setCategory(this)"><span class="cat-nav-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-right:6px;vertical-align:-1px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist</span><span class="cat-nav-count" id="watch-count-sidebar">0</span></button>
+          <button type="button" class="cat-nav-item active" data-cat="All" onclick="setCategory(this)"><span class="cat-nav-label">All</span><span class="cat-nav-count">129</span></button><button type="button" class="cat-nav-item" data-cat="Football Singles" onclick="setCategory(this)"><span class="cat-nav-label">Football Singles</span><span class="cat-nav-count">94</span></button><button type="button" class="cat-nav-item" data-cat="Football Lots" onclick="setCategory(this)"><span class="cat-nav-label">Football Lots</span><span class="cat-nav-count">17</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Lots</span><span class="cat-nav-count">6</span></button><button type="button" class="cat-nav-item" data-cat="Basketball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Basketball Singles</span><span class="cat-nav-count">5</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Singles" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Singles</span><span class="cat-nav-count">3</span></button><button type="button" class="cat-nav-item" data-cat="Other" onclick="setCategory(this)"><span class="cat-nav-label">Other</span><span class="cat-nav-count">2</span></button><button type="button" class="cat-nav-item" data-cat="Baseball Lots" onclick="setCategory(this)"><span class="cat-nav-label">Baseball Lots</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="Pokemon" onclick="setCategory(this)"><span class="cat-nav-label">Pokemon</span><span class="cat-nav-count">1</span></button><button type="button" class="cat-nav-item" data-cat="__watch" onclick="setCategory(this)"><span class="cat-nav-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-right:6px;vertical-align:-1px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist</span><span class="cat-nav-count" id="watch-count-sidebar">0</span></button>
         </nav>
         <div class="cat-sidebar-foot">
-          <span class="cat-sidebar-foot-num">127</span>
+          <span class="cat-sidebar-foot-num">129</span>
           <span class="cat-sidebar-foot-lbl">total listings</span>
         </div>
       </div>
@@ -2524,7 +2530,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </select>
       </div>
       <div class="filter-row">
-        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">127</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">92</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">17</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">6</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">5</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">3</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
+        <div class="filter-chips"><button type="button" class="chip active" data-cat="All" onclick="setCategory(this)">All <span class="count">129</span></button><button type="button" class="chip" data-cat="Football Singles" onclick="setCategory(this)">Football Singles <span class="count">94</span></button><button type="button" class="chip" data-cat="Football Lots" onclick="setCategory(this)">Football Lots <span class="count">17</span></button><button type="button" class="chip" data-cat="Basketball Lots" onclick="setCategory(this)">Basketball Lots <span class="count">6</span></button><button type="button" class="chip" data-cat="Basketball Singles" onclick="setCategory(this)">Basketball Singles <span class="count">5</span></button><button type="button" class="chip" data-cat="Baseball Singles" onclick="setCategory(this)">Baseball Singles <span class="count">3</span></button><button type="button" class="chip" data-cat="Other" onclick="setCategory(this)">Other <span class="count">2</span></button><button type="button" class="chip" data-cat="Baseball Lots" onclick="setCategory(this)">Baseball Lots <span class="count">1</span></button><button type="button" class="chip" data-cat="Pokemon" onclick="setCategory(this)">Pokemon <span class="count">1</span></button><button type="button" class="chip" data-cat="__watch" onclick="setCategory(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;"><path d="M12 21s-7-4.5-9.5-9C.86 8.4 2.7 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.64 4.4 4 8-2.5 4.5-9.5 9-9.5 9z"/></svg>Watchlist <span class="count" id="watch-count">0</span></button></div>
       </div>
       <div class="filter-row">
         <div class="slider-wrap">
@@ -2546,14 +2552,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </section>
 
     <div class="tab-bar" role="tablist">
-      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">127</span></button>
+      <button class="tab-btn active" data-tab="gallery" onclick="setTab('gallery')" role="tab">Gallery <span class="tab-count" id="cnt-gallery">129</span></button>
       <button class="tab-btn"        data-tab="hot"     onclick="setTab('hot')"     role="tab">🔥 Hot <span class="tab-count" id="cnt-hot">0</span></button>
       <button class="tab-btn"        data-tab="bin"     onclick="setTab('bin')"     role="tab">Buy It Now <span class="tab-count" id="cnt-bin">0</span></button>
       <button class="tab-btn"        data-tab="auction" onclick="setTab('auction')" role="tab">Auctions <span class="tab-count" id="cnt-auction">0</span></button>
     </div>
 
     <div id="results-meta" style="display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--text-muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;flex-wrap:wrap;">
-      <div>Showing <span id="visible-count">127</span> of 127 listings</div>
+      <div>Showing <span id="visible-count">129</span> of 129 listings</div>
       <button class="share-btn" onclick="shareFilters()" title="Copy a link with these filters applied">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
         Share filters
@@ -2572,8 +2578,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="empty-state-sub">Try widening the price range, switching tabs, or clearing the search box. The card catalog updates every 4 hours automatically.</div>
     </div>
 
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"Product","position":1,"name":"2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL","sku":"306937452121","url":"items/306937452121.html","image":"https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg","offers":{"@type":"Offer","price":"8.50","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937452121.html"}}},{"@type":"ListItem","position":2,"item":{"@type":"Product","position":2,"name":"2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen","sku":"306937463442","url":"items/306937463442.html","image":"https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg","offers":{"@type":"Offer","price":"7.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937463442.html"}}},{"@type":"ListItem","position":3,"item":{"@type":"Product","position":3,"name":"2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie","sku":"306937466251","url":"items/306937466251.html","image":"https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg","offers":{"@type":"Offer","price":"7.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937466251.html"}}},{"@type":"ListItem","position":4,"item":{"@type":"Product","position":4,"name":"2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm","sku":"306937601406","url":"items/306937601406.html","image":"https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg","offers":{"@type":"Offer","price":"15.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937601406.html"}}},{"@type":"ListItem","position":5,"item":{"@type":"Product","position":5,"name":"2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...","sku":"306937606464","url":"items/306937606464.html","image":"https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937606464.html"}}},{"@type":"ListItem","position":6,"item":{"@type":"Product","position":6,"name":"Deion Sanders Cards","sku":"306784122664","url":"items/306784122664.html","image":"https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l500.jpg","offers":{"@type":"Offer","price":"1.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306784122664.html"}}},{"@type":"ListItem","position":7,"item":{"@type":"Product","position":7,"name":"13 Junior Seau Cards Including Rookie Cards San Diego Chargers","sku":"306785163679","url":"items/306785163679.html","image":"https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l500.jpg","offers":{"@type":"Offer","price":"1.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306785163679.html"}}},{"@type":"ListItem","position":8,"item":{"@type":"Product","position":8,"name":"3 Marshall Faulk Cards San Diego State Indianapolis Colts","sku":"306785270903","url":"items/306785270903.html","image":"https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg","offers":{"@type":"Offer","price":"2.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306785270903.html"}}},{"@type":"ListItem","position":9,"item":{"@type":"Product","position":9,"name":"3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards","sku":"306948827365","url":"items/306948827365.html","image":"https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l500.jpg","offers":{"@type":"Offer","price":"0.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306948827365.html"}}},{"@type":"ListItem","position":10,"item":{"@type":"Product","position":10,"name":"Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus","sku":"306903937710","url":"items/306903937710.html","image":"https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903937710.html"}}},{"@type":"ListItem","position":11,"item":{"@type":"Product","position":11,"name":"Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver","sku":"306903941543","url":"items/306903941543.html","image":"https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg","offers":{"@type":"Offer","price":"4.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903941543.html"}}},{"@type":"ListItem","position":12,"item":{"@type":"Product","position":12,"name":"Carl Banks New York Giants Football Card Lot (8) Super Bowl LB","sku":"306903947932","url":"items/306903947932.html","image":"https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l500.jpg","offers":{"@type":"Offer","price":"1.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903947932.html"}}}]}</script>
-    <div class="grid" id="listing-grid" data-size="medium" data-total="127" data-inline="12">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"Product","position":1,"name":"2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL","sku":"306937452121","url":"items/306937452121.html","image":"https://i.ebayimg.com/images/g/sYgAAeSwXf5qBSJ3/s-l500.jpg","offers":{"@type":"Offer","price":"8.50","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937452121.html"}}},{"@type":"ListItem","position":2,"item":{"@type":"Product","position":2,"name":"2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen","sku":"306937463442","url":"items/306937463442.html","image":"https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg","offers":{"@type":"Offer","price":"7.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937463442.html"}}},{"@type":"ListItem","position":3,"item":{"@type":"Product","position":3,"name":"2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie","sku":"306937466251","url":"items/306937466251.html","image":"https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg","offers":{"@type":"Offer","price":"7.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937466251.html"}}},{"@type":"ListItem","position":4,"item":{"@type":"Product","position":4,"name":"2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm","sku":"306937601406","url":"items/306937601406.html","image":"https://i.ebayimg.com/images/g/KyAAAeSwRohqBUPT/s-l500.jpg","offers":{"@type":"Offer","price":"15.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937601406.html"}}},{"@type":"ListItem","position":5,"item":{"@type":"Product","position":5,"name":"2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...","sku":"306937606464","url":"items/306937606464.html","image":"https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306937606464.html"}}},{"@type":"ListItem","position":6,"item":{"@type":"Product","position":6,"name":"Deion Sanders Cards","sku":"306784122664","url":"items/306784122664.html","image":"https://i.ebayimg.com/images/g/WaQAAeSwVrFpmoj4/s-l500.jpg","offers":{"@type":"Offer","price":"1.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306784122664.html"}}},{"@type":"ListItem","position":7,"item":{"@type":"Product","position":7,"name":"13 Junior Seau Cards Including Rookie Cards San Diego Chargers","sku":"306785163679","url":"items/306785163679.html","image":"https://i.ebayimg.com/images/g/sOAAAeSwwQlpm1Un/s-l500.jpg","offers":{"@type":"Offer","price":"1.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306785163679.html"}}},{"@type":"ListItem","position":8,"item":{"@type":"Product","position":8,"name":"3 Marshall Faulk Cards San Diego State Indianapolis Colts","sku":"306785270903","url":"items/306785270903.html","image":"https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg","offers":{"@type":"Offer","price":"2.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306785270903.html"}}},{"@type":"ListItem","position":9,"item":{"@type":"Product","position":9,"name":"3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards","sku":"306948827365","url":"items/306948827365.html","image":"https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l500.jpg","offers":{"@type":"Offer","price":"0.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306948827365.html"}}},{"@type":"ListItem","position":10,"item":{"@type":"Product","position":10,"name":"Jerome Bettis Los Angeles Rams Notre Dame Football Card Lot (10) HOF The Bus","sku":"306903937710","url":"items/306903937710.html","image":"https://i.ebayimg.com/images/g/6lEAAeSwSihp7rsX/s-l500.jpg","offers":{"@type":"Offer","price":"5.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903937710.html"}}},{"@type":"ListItem","position":11,"item":{"@type":"Product","position":11,"name":"Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver","sku":"306903941543","url":"items/306903941543.html","image":"https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg","offers":{"@type":"Offer","price":"4.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903941543.html"}}},{"@type":"ListItem","position":12,"item":{"@type":"Product","position":12,"name":"Carl Banks New York Giants Football Card Lot (8) Super Bowl LB","sku":"306903947932","url":"items/306903947932.html","image":"https://i.ebayimg.com/images/g/5sgAAeSw3Hxp7sDj/s-l500.jpg","offers":{"@type":"Offer","price":"1.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"items/306903947932.html"}}}]}</script>
+    <div class="grid" id="listing-grid" data-size="medium" data-total="129" data-inline="12">
       
       <article class="listing-card"
         data-id="306937452121"
@@ -2599,7 +2605,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306937452121.html">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$8.50<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$8.50</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$8.00 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($7–$10)</span></div><div class="pp-note">3 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">PriceCharting</div><div class="pp-val">$6.49 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($6–$11)</span></div><div class="pp-note">loose · Joe Burrow #168 · <a href="https://www.pricecharting.com/game/8470295" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$7.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$8.50</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$8.00 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($7–$10)</span></div><div class="pp-note">3 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">PriceCharting</div><div class="pp-val">$6.50 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($6–$11)</span></div><div class="pp-note">loose · Joe Burrow #168 · <a href="https://www.pricecharting.com/game/8470295" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$7.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
           </div>
           <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
           <div class="meta"><span class="tag tag-gold">/1</span><span class="tag tag-gold">Football Singles</span></div>
@@ -2611,7 +2617,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </article>
       <article class="listing-card"
         data-id="306937463442"
-        data-title="2026 wild card 5 card draw garrett nussmeier rc 1/2 silver holo queen"
+        data-title="2026 garrett nussmeier 5 card draw wild card rc 1/2 silver holo queen"
         data-price="7.99"
         data-cat="Football Singles"
         data-flag="NO_COMPS"
@@ -2619,7 +2625,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data-hot="1"
         >
         <div class="thumb-wrap">
-          <a href="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen" data-description="$7.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg" alt="2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen" loading="lazy"></a>
+          <a href="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen" data-description="$7.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg" alt="2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen" loading="lazy"></a>
           <button class="zoom-btn" type="button"
             onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306937463442&quot;] .glightbox').click();"
             aria-label="Zoom image">
@@ -2630,7 +2636,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
         </div>
         <div class="info">
-          <h3><a href="items/306937463442.html">2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen</a></h3>
+          <h3><a href="items/306937463442.html">2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$7.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
             <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$7.99</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$8.00 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($7–$10)</span></div><div class="pp-note">3 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$7.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
@@ -2639,13 +2645,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="meta"><span class="tag tag-gold">Rookie</span><span class="tag tag-gold">/2</span><span class="tag tag-success">Holo</span><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
-          <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Garrett-Nussmeier-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
           <a href="items/306937463442.html" class="btn btn-ghost">Details</a>
         </div>
       </article>
       <article class="listing-card"
         data-id="306937466251"
-        data-title="2026 wild card 5 card draw stacked deck jeremiyah love rc 3/5 silver holo rookie"
+        data-title="2026 jeremiyah love 5 card draw stacked deck wild card rc 3/5 silver holo rookie"
         data-price="7.99"
         data-cat="Football Singles"
         data-flag="NO_COMPS"
@@ -2653,7 +2659,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data-hot="1"
         >
         <div class="thumb-wrap">
-          <a href="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie" data-description="$7.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg" alt="2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie" loading="lazy"></a>
+          <a href="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l1600.jpg" class="glightbox" data-gallery="store" data-title="2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie" data-description="$7.99 · Football Singles"><img src="https://i.ebayimg.com/images/g/XRAAAeSw37VqBSbc/s-l500.jpg" alt="2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie" loading="lazy"></a>
           <button class="zoom-btn" type="button"
             onclick="event.preventDefault();document.querySelector('article[data-id=&quot;306937466251&quot;] .glightbox').click();"
             aria-label="Zoom image">
@@ -2664,7 +2670,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
         </div>
         <div class="info">
-          <h3><a href="items/306937466251.html">2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie</a></h3>
+          <h3><a href="items/306937466251.html">2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$7.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
             <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$7.99</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$8.00 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($7–$10)</span></div><div class="pp-note">3 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">PriceCharting</div><div class="pp-val">$3.19 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($3–$95)</span></div><div class="pp-note">loose · Silver Sable and the Wild Pack #3 (1992) · <a href="https://www.pricecharting.com/game/3333116" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$7.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
@@ -2673,7 +2679,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="meta"><span class="tag tag-gold">Rookie</span><span class="tag tag-gold">/5</span><span class="tag tag-success">Holo</span><span class="tag tag-gold">Football Singles</span></div>
         </div>
         <div class="actions">
-          <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Stacked-Deck-Jeremiyah-Love-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
+          <a href="https://www.ebay.com/itm/2026-Jeremiyah-Love-5-Card-Draw-Stacked-Deck-Wild-Card-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
           <a href="items/306937466251.html" class="btn btn-ghost">Details</a>
         </div>
       </article>
@@ -2701,7 +2707,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306937601406.html">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$15.00<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$15.00</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$29.99 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($17–$100)</span></div><div class="pp-note">9 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($2–$180)</span></div><div class="pp-note">21 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-50.0%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$15.00</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$29.99 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($17–$100)</span></div><div class="pp-note">9 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$2.99 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($2–$180)</span></div><div class="pp-note">22 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--danger);font-weight:700;">-50.0%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
           </div>
           <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
           <div class="meta"><span class="tag tag-success">Prizm</span><span class="tag tag-gold">Football Singles</span><span class="tag tag-danger" data-admin="1">Underpriced</span></div>
@@ -2735,7 +2741,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306937606464.html">2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$5.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$5.99</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$5.88 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($2–$15)</span></div><div class="pp-note">5 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$5.67 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($3–$6)</span></div><div class="pp-note">2 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+1.9%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.99</b></div><div class="pp-note">based on eBay active (−5%)</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$5.99</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$5.88 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($2–$15)</span></div><div class="pp-note">5 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">Your past sales</div><div class="pp-val">$3.33 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($3–$6)</span></div><div class="pp-note">3 similar items sold (median) · <a href="sold.html" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+1.9%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$2.99</b></div><div class="pp-note">based on Your past sales</div></div></div></div>
           </div>
           <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
           <div class="meta"><span class="tag tag-gold">Baseball Singles</span></div>
@@ -2920,7 +2926,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         data-title="tim brown los angeles raiders football card lot (14) hof wide receiver"
         data-price="4.99"
         data-cat="Football Lots"
-        data-flag="OVERPRICED"
+        data-flag="OK"
         data-type="BIN"
         data-hot="0"
         >
@@ -2939,10 +2945,10 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <h3><a href="items/306903941543.html">Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver</a></h3>
           <div class="price-wrap">
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">$4.99<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
-            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$3.99</div><div class="pp-note">1 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">PriceCharting</div><div class="pp-val">$6.45 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($3–$78)</span></div><div class="pp-note">loose · Godzilla vs. America: Los Angeles #1 (2025) · <a href="https://www.pricecharting.com/game/9215417" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--warning);font-weight:700;">+25.1%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.99</b></div><div class="pp-note">based on PriceCharting</div></div></div></div>
+            <div data-admin="1" class="price-pop-wrap"><div class="price-pop" role="dialog" aria-label="Pricing details"><div class="pp-row"><div class="pp-lbl">Your price</div><div class="pp-val">$4.99</div><div class="pp-note">currently listed</div></div><div class="pp-row"><div class="pp-lbl">eBay Active</div><div class="pp-val">$4.99</div><div class="pp-note">1 live asking prices</div></div><div class="pp-row"><div class="pp-lbl">PriceCharting</div><div class="pp-val">$6.45 <span style="color:var(--text-muted);font-weight:400;font-size:11px;">($3–$78)</span></div><div class="pp-note">loose · Godzilla vs. America: Los Angeles #1 (2025) · <a href="https://www.pricecharting.com/game/9215417" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></div></div><div class="pp-row"><div class="pp-lbl">Gap vs eBay</div><div class="pp-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="pp-note">your price vs eBay median</div></div><div class="pp-row"><div class="pp-lbl">Suggested list</div><div class="pp-val"><b style="color:var(--gold);">$5.99</b></div><div class="pp-note">based on PriceCharting</div></div></div></div>
           </div>
           <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
-          <div class="meta"><span class="tag tag-gold">Football Lots</span><span class="tag tag-warn" data-admin="1">Overpriced</span></div>
+          <div class="meta"><span class="tag tag-gold">Football Lots</span></div>
         </div>
         <div class="actions">
           <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener" class="btn btn-gold">View on eBay</a>
@@ -3382,7 +3388,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:30 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:01 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

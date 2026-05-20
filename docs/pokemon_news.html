@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2074,7 +2080,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-kpi"><div class="pn-kpi-n">8</div><div class="pn-kpi-l">Sets tracked</div></div>
       <div class="pn-kpi"><div class="pn-kpi-n">28</div><div class="pn-kpi-l">Live listings</div></div>
       <div class="pn-kpi"><div class="pn-kpi-n">1</div><div class="pn-kpi-l">Pre-orders found</div></div>
-      <div class="pn-kpi"><div class="pn-kpi-n">20:32</div><div class="pn-kpi-l">Last refreshed</div></div>
+      <div class="pn-kpi"><div class="pn-kpi-n">07:02</div><div class="pn-kpi-l">Last refreshed</div></div>
     </div>
     
     
@@ -2300,7 +2306,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/U9AAAeSwZ19pFaBn/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$116.46</span>
+          <span class="pn-price">$116.41</span>
           
         </div>
         <div class="pn-title">Pokemon Scarlet &amp; Violet Surging Sparks Elite Trainer Box ETB Factory Sealed</div>
@@ -2592,7 +2598,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/fgQAAOSwjpZngVnE/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$3358.43</span>
+          <span class="pn-price">$3348.68</span>
           
         </div>
         <div class="pn-title">Pokémon TCG 151 EVOLVING SKIES BUILD BATTLE STADIUM KIT ETB UPC DISPLAY</div>
@@ -2654,6 +2660,21 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </div>
     </a>
+    <a class="pn-card" href="https://www.ebay.com/itm/287334446384?_skw=Umbreon+ex+SIR+Prismatic+Evolutions&amp;hash=item42e677b530:g:JWUAAeSwZoxqCUSx" target="_blank" rel="noopener"
+       title="Pokemon TCG – Prismatic Evolutions (2025) – Pick Your EX, IR, UR &amp; SIR Cards">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/JWUAAeSwZoxqCUSx/s-l225.jpg');"></div>
+      <div class="pn-meta">
+        <div class="pn-price-row">
+          <span class="pn-price">$6.00</span>
+          
+        </div>
+        <div class="pn-title">Pokemon TCG – Prismatic Evolutions (2025) – Pick Your EX, IR, UR &amp; SIR Cards</div>
+        <div class="pn-foot">
+          <span class="pn-chip pn-chip-type">Single Card</span>
+          <span class="pn-buy">BIN</span>
+        </div>
+      </div>
+    </a>
     <a class="pn-card" href="https://www.ebay.com/itm/178018002450?_skw=Umbreon+ex+SIR+Prismatic+Evolutions&amp;hash=item2972b32612:g:PAIAAeSw4TBpy0vJ" target="_blank" rel="noopener"
        title="Pokemon Code Cards-Prismatic Evolution UMBREON EX SIR with 5 extra Code Cards">
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/PAIAAeSw4TBpy0vJ/s-l225.jpg');"></div>
@@ -2666,21 +2687,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">Single Card</span>
           <span class="pn-buy">BIN · Best Offer</span>
-        </div>
-      </div>
-    </a>
-    <a class="pn-card" href="https://www.ebay.com/itm/277727337188?_skw=Umbreon+ex+SIR+Prismatic+Evolutions&amp;hash=item40a9d6dae4:g:sM4AAeSwv7VpkRyD" target="_blank" rel="noopener"
-       title="🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/sM4AAeSwv7VpkRyD/s-l225.jpg');"></div>
-      <div class="pn-meta">
-        <div class="pn-price-row">
-          <span class="pn-price">$14.99</span>
-          
-        </div>
-        <div class="pn-title">🔥Pokémon PSA 10 Mini Slab Holo-Keychains🔥</div>
-        <div class="pn-foot">
-          <span class="pn-chip pn-chip-type">Graded Single</span>
-          <span class="pn-buy">BIN</span>
         </div>
       </div>
     </a></div>
@@ -2773,18 +2779,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </div>
     </a>
-    <a class="pn-card" href="https://www.ebay.com/itm/188400854765?_skw=Espeon+ex+Prismatic+Evolutions&amp;hash=item2bdd90e6ed:g:oCkAAeSwnflqDO4a" target="_blank" rel="noopener"
-       title="Espeon ex 034/131 Holo Double Rare Prismatic Evolutions Pokemon Near Mint">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/oCkAAeSwnflqDO4a/s-l225.jpg');"></div>
+    <a class="pn-card" href="https://www.ebay.com/itm/286871356919?_skw=Espeon+ex+Prismatic+Evolutions&amp;hash=item42cadd85f7:g:YzQAAeSwGBBppzy-" target="_blank" rel="noopener"
+       title="Prismatic Evolutions premium figure collection code Umbreon ex Espeon ex promo">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/YzQAAeSwGBBppzy-/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$1.99</span>
+          <span class="pn-price">$2.49</span>
           
         </div>
-        <div class="pn-title">Espeon ex 034/131 Holo Double Rare Prismatic Evolutions Pokemon Near Mint</div>
+        <div class="pn-title">Prismatic Evolutions premium figure collection code Umbreon ex Espeon ex promo</div>
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">Single Card</span>
-          <span class="pn-buy">BIN</span>
+          <span class="pn-buy">BIN · Best Offer</span>
         </div>
       </div>
     </a></div>
@@ -2846,7 +2852,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/XvgAAOSweDFn3aQM/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$1.68</span>
+          <span class="pn-price">$1.67</span>
           
         </div>
         <div class="pn-title">JOURNEY TOGETHER LIVE CODES Pokemon Online Booster Code INSTANT QR EMAIL</div>
@@ -2861,7 +2867,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/kVYAAeSwzkRpO~e~/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$2.97</span>
+          <span class="pn-price">$2.96</span>
           
         </div>
         <div class="pn-title">Pokemon Journey Together Fun Pack Travel Companions Sealed Pokemon New</div>
@@ -2987,18 +2993,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pn-chase">
           <div class="pn-chase-head">
             <h4>Iono&#x27;s Bellibolt ex</h4>
-            <span class="pn-chase-sub">from $1.39</span>
+            <span class="pn-chase-sub">from $1.34</span>
           </div>
           <div class="pn-grid pn-grid-sm">
-    <a class="pn-card" href="https://www.ebay.com/itm/127762419287?_skw=Iono%27s+Bellibolt+ex+Journey+Together&amp;hash=item1dbf3bce57:g:4UAAAeSwYB1pvzgh" target="_blank" rel="noopener"
-       title="Iono’s Bellibolt EX 053/159 - Double Rare Holo - Journey Together - NM">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/4UAAAeSwYB1pvzgh/s-l225.jpg');"></div>
+    <a class="pn-card" href="https://www.ebay.com/itm/127786475984?_skw=Iono%27s+Bellibolt+ex+Journey+Together&amp;hash=item1dc0aae1d0:g:r30AAeSwb89pzedQ" target="_blank" rel="noopener"
+       title="Iono&#x27;s Bellibolt ex 053/159 Sv09: Journey Together Holo">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/r30AAeSwb89pzedQ/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$1.39</span>
+          <span class="pn-price">$1.34</span>
           
         </div>
-        <div class="pn-title">Iono’s Bellibolt EX 053/159 - Double Rare Holo - Journey Together - NM</div>
+        <div class="pn-title">Iono&#x27;s Bellibolt ex 053/159 Sv09: Journey Together Holo</div>
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">Single Card</span>
           <span class="pn-buy">BIN</span>
@@ -3118,18 +3124,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </div>
     </a>
-    <a class="pn-card" href="https://www.ebay.com/itm/198366520064?_skw=pokemon+destined+rivals+booster+box+ETB&amp;hash=item2e2f90e300:g:a40AAeSwgAxp4Qu2" target="_blank" rel="noopener"
-       title="Pokémon TCG Destined Rivals ETB Elite Trainer Box ">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/a40AAeSwgAxp4Qu2/s-l225.jpg');"></div>
+    <a class="pn-card" href="https://www.ebay.com/itm/406937428151?_skw=pokemon+destined+rivals+booster+box+ETB&amp;hash=item5ebf5c60b7:g:z0EAAeSw37VqDKvR" target="_blank" rel="noopener"
+       title="Pokemon Scarlet and Violet: Destined Rivals Elite Trainer Box ETB Sealed">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/z0EAAeSw37VqDKvR/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$205.00</span>
+          <span class="pn-price">$190.00</span>
           
         </div>
-        <div class="pn-title">Pokémon TCG Destined Rivals ETB Elite Trainer Box </div>
+        <div class="pn-title">Pokemon Scarlet and Violet: Destined Rivals Elite Trainer Box ETB Sealed</div>
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">ETB</span>
-          <span class="pn-buy">BIN · Auction</span>
+          <span class="pn-buy">BIN · Best Offer</span>
         </div>
       </div>
     </a></div>
@@ -3422,7 +3428,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/LWUAAeSwjuVolIlQ/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$470.12</span>
+          <span class="pn-price">$468.76</span>
           <span class="pn-chip pn-chip-pre">PRE-ORDER</span>
         </div>
         <div class="pn-title">Pokémon TCG Cards 151 | MINI TINS SEALED CASE DISPLAY PRISMATIC ETB PSA PRESALE</div>
@@ -3452,7 +3458,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/xLUAAeSwoiNoc9Do/s-l225.jpg');"></div>
       <div class="pn-meta">
         <div class="pn-price-row">
-          <span class="pn-price">$93.97</span>
+          <span class="pn-price">$93.70</span>
           
         </div>
         <div class="pn-title">Pokémon TCG Cards 151 | BLACK BOLT &amp; WHITE FLARE | ETB | BOOSTER BUNDLE PRE SALE</div>
@@ -3842,7 +3848,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:02 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

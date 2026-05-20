@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2130,12 +2136,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a class="buy-btn" href="https://www.ebay.com/itm/327164466112?_skw=1999+Pokemon+Base+Set+Nidoking+11%2F102&amp;hash=item4c2c8593c0:g:2kQAAeSwXf5qCpbF" target="_blank" rel="noopener">Find on eBay</a>
   </div>
   <div class="card-tile needed">
-    <img class="card-thumb" src="https://i.ebayimg.com/images/g/U8kAAeSw5zhqDFTE/s-l225.jpg" alt="Ninetales" loading="lazy">
+    <img class="card-thumb" src="https://i.ebayimg.com/images/g/CgcAAeSwn75qBRXV/s-l225.jpg" alt="Ninetales" loading="lazy">
     <div class="num">#12/102</div>
     <div class="name">Ninetales</div>
     <div class="rarity">Holo Rare</div>
-    <div class="price">$3.95+</div>
-    <a class="buy-btn" href="https://www.ebay.com/itm/137324229578?_skw=1999+Pokemon+Base+Set+Ninetales+12%2F102&amp;hash=item1ff92973ca:g:U8kAAeSw5zhqDFTE" target="_blank" rel="noopener">Find on eBay</a>
+    <div class="price">$4.99+</div>
+    <a class="buy-btn" href="https://www.ebay.com/itm/318298912377?_skw=1999+Pokemon+Base+Set+Ninetales+12%2F102&amp;hash=item4a1c17f679:g:CgcAAeSwn75qBRXV" target="_blank" rel="noopener">Find on eBay</a>
   </div>
   <div class="card-tile needed">
     <img class="card-thumb" src="https://i.ebayimg.com/images/g/qt4AAeSwJy5p8-VY/s-l225.jpg" alt="Raichu" loading="lazy">
@@ -2229,12 +2235,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a class="buy-btn" href="https://www.ebay.com/itm/297242948625?_skw=2021+Pokemon+Celebrations+Reshiram+2%2F25&amp;hash=item45350f7411:g:3JUAAOSwjFdoCF3C" target="_blank" rel="noopener">Find on eBay</a>
   </div>
   <div class="card-tile needed">
-    <img class="card-thumb" src="https://i.ebayimg.com/images/g/WxIAAeSw6IJpp3OI/s-l225.jpg" alt="Kyogre" loading="lazy">
+    <img class="card-thumb" src="https://i.ebayimg.com/images/g/qbIAAeSwWxpqDTne/s-l225.jpg" alt="Kyogre" loading="lazy">
     <div class="num">#3/25</div>
     <div class="name">Kyogre</div>
     <div class="rarity">Holo</div>
-    <div class="price">$1.00+</div>
-    <a class="buy-btn" href="https://www.ebay.com/itm/389695969222?_skw=2021+Pokemon+Celebrations+Kyogre+3%2F25&amp;hash=item5abbb097c6:g:WxIAAeSw6IJpp3OI" target="_blank" rel="noopener">Find on eBay</a>
+    <div class="price">$1.64+</div>
+    <a class="buy-btn" href="https://www.ebay.com/itm/157925423621?_skw=2021+Pokemon+Celebrations+Kyogre+3%2F25&amp;hash=item24c516ba05:g:qbIAAeSwWxpqDTne" target="_blank" rel="noopener">Find on eBay</a>
   </div>
   <div class="card-tile needed">
     <img class="card-thumb" src="https://i.ebayimg.com/images/g/beQAAOSwQxxoCFzh/s-l225.jpg" alt="Palkia" loading="lazy">
@@ -2551,7 +2557,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <div class="num">#151/165</div>
     <div class="name">Mew</div>
     <div class="rarity">Holo Rare</div>
-    <div class="price">$1.50+</div>
+    <div class="price">$1.27+</div>
     <a class="buy-btn" href="https://www.ebay.com/itm/127049339045?_skw=2023+Pokemon+Scarlet+%26+Violet+151+Mew+151%2F165&amp;hash=item1d94bb10a5:g:kJ4AAOSwJrdnKWCu" target="_blank" rel="noopener">Find on eBay</a>
   </div>
   <div class="card-tile needed">
@@ -3017,7 +3023,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:33 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

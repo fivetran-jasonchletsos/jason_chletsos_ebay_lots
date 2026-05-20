@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2020,7 +2026,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div>
         <div class="eyebrow">SEO optimization</div>
         <h1 class="section-title">Title <span class="accent">Review</span></h1>
-        <div class="section-sub">10 listings have suggested SEO improvements. Total +132 chars of search keywords.</div>
+        <div class="section-sub">12 listings have suggested SEO improvements. Total +153 chars of search keywords.</div>
       </div>
     </div>
 
@@ -2183,35 +2189,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="tr-card review-row" data-id="306945569731" >
-        <header class="tr-head">
-          <input type="checkbox" class="row-check" value="306945569731" checked aria-label="Select for revision">
-          <div class="tr-thumb"><img src="https://i.ebayimg.com/images/g/qgAAAeSwDgxqCntg/s-l500.jpg" alt="" loading="lazy"></div>
-          <div class="tr-id">
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731" target="_blank" rel="noopener" class="font-mono" style="font-size:11px;color:var(--text-muted);">#306945569731</a>
-            
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:6px 12px;font-size:11px;">View on eBay</a>
-          </div>
-        </header>
-        <div class="tr-bodies">
-          <div class="tr-version tr-before">
-            <div class="tr-lbl">Current</div>
-            <div class="title-before">2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</div>
-            <div class="tr-charcount">70 chars</div>
-          </div>
-          <div class="tr-arrow"><span>→</span></div>
-          <div class="tr-version tr-after">
-            <div class="tr-lbl">Optimized · tap to edit</div>
-            <div class="title-after" contenteditable="true" data-id="306945569731" spellcheck="false">2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC) Football</div>
-            <div class="tr-charcount">
-              <span style="color:var(--success);">79 chars</span>
-              <span style="color:var(--success);font-weight:700;">(+9)</span>
-              <span class="tr-progress"><span class="tr-progress-fill" style="width:99%;background:var(--success);"></span></span>
-            </div>
-          </div>
-        </div>
-      </article>
-
       <article class="tr-card review-row" data-id="306947419189" >
         <header class="tr-head">
           <input type="checkbox" class="row-check" value="306947419189" checked aria-label="Select for revision">
@@ -2327,6 +2304,93 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
         </div>
       </article>
+
+      <article class="tr-card review-row" data-id="306949800437" >
+        <header class="tr-head">
+          <input type="checkbox" class="row-check" value="306949800437" checked aria-label="Select for revision">
+          <div class="tr-thumb"><img src="https://i.ebayimg.com/images/g/AuUAAeSwkB5qDRpQ/s-l500.jpg" alt="" loading="lazy"></div>
+          <div class="tr-id">
+            <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener" class="font-mono" style="font-size:11px;color:var(--text-muted);">#306949800437</a>
+            
+            <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:6px 12px;font-size:11px;">View on eBay</a>
+          </div>
+        </header>
+        <div class="tr-bodies">
+          <div class="tr-version tr-before">
+            <div class="tr-lbl">Current</div>
+            <div class="title-before">2025 TOPPS CHROME FOOTBALL POWER PLAYERS JAHMYR GIBBS LIONS</div>
+            <div class="tr-charcount">59 chars</div>
+          </div>
+          <div class="tr-arrow"><span>→</span></div>
+          <div class="tr-version tr-after">
+            <div class="tr-lbl">Optimized · tap to edit</div>
+            <div class="title-after" contenteditable="true" data-id="306949800437" spellcheck="false">2025 Topps Chrome Football Power Players Jahmyr Gibbs Lions NFL</div>
+            <div class="tr-charcount">
+              <span style="color:var(--success);">63 chars</span>
+              <span style="color:var(--success);font-weight:700;">(+4)</span>
+              <span class="tr-progress"><span class="tr-progress-fill" style="width:79%;background:var(--success);"></span></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tr-card review-row" data-id="306949801383" >
+        <header class="tr-head">
+          <input type="checkbox" class="row-check" value="306949801383" checked aria-label="Select for revision">
+          <div class="tr-thumb"><img src="https://i.ebayimg.com/images/g/JMoAAeSweBdqDRqw/s-l500.jpg" alt="" loading="lazy"></div>
+          <div class="tr-id">
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener" class="font-mono" style="font-size:11px;color:var(--text-muted);">#306949801383</a>
+            
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:6px 12px;font-size:11px;">View on eBay</a>
+          </div>
+        </header>
+        <div class="tr-bodies">
+          <div class="tr-version tr-before">
+            <div class="tr-lbl">Current</div>
+            <div class="title-before">2025 Panini Phoenix - Trey Benson #27 Light Blue Pyramids /385</div>
+            <div class="tr-charcount">62 chars</div>
+          </div>
+          <div class="tr-arrow"><span>→</span></div>
+          <div class="tr-version tr-after">
+            <div class="tr-lbl">Optimized · tap to edit</div>
+            <div class="title-after" contenteditable="true" data-id="306949801383" spellcheck="false">2025 Panini Phoenix - Trey Benson #27 Light Blue Pyramids /385 NFL Football</div>
+            <div class="tr-charcount">
+              <span style="color:var(--success);">75 chars</span>
+              <span style="color:var(--success);font-weight:700;">(+13)</span>
+              <span class="tr-progress"><span class="tr-progress-fill" style="width:94%;background:var(--success);"></span></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="tr-card review-row" data-id="306949802296" >
+        <header class="tr-head">
+          <input type="checkbox" class="row-check" value="306949802296" checked aria-label="Select for revision">
+          <div class="tr-thumb"><img src="https://i.ebayimg.com/images/g/uIIAAeSwT05qDRtS/s-l500.jpg" alt="" loading="lazy"></div>
+          <div class="tr-id">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener" class="font-mono" style="font-size:11px;color:var(--text-muted);">#306949802296</a>
+            
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:6px 12px;font-size:11px;">View on eBay</a>
+          </div>
+        </header>
+        <div class="tr-bodies">
+          <div class="tr-version tr-before">
+            <div class="tr-lbl">Current</div>
+            <div class="title-before">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</div>
+            <div class="tr-charcount">48 chars</div>
+          </div>
+          <div class="tr-arrow"><span>→</span></div>
+          <div class="tr-version tr-after">
+            <div class="tr-lbl">Optimized · tap to edit</div>
+            <div class="title-after" contenteditable="true" data-id="306949802296" spellcheck="false">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm NFL Football</div>
+            <div class="tr-charcount">
+              <span style="color:var(--success);">61 chars</span>
+              <span style="color:var(--success);font-weight:700;">(+13)</span>
+              <span class="tr-progress"><span class="tr-progress-fill" style="width:76%;background:var(--success);"></span></span>
+            </div>
+          </div>
+        </div>
+      </article>
     </div>
 
     <script>
@@ -2411,7 +2475,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:30 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:01 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

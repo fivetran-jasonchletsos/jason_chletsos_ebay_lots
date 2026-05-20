@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2168,7 +2174,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </div>
     </div>
 
-    <div class="ai-strip"><strong>0</strong> listings &middot; <strong>70</strong> sold last 90 days &middot; <strong>0</strong> categories &middot; <strong>38</strong> Pikachu deals scanned</div>
+    <div class="ai-strip"><strong>0</strong> listings &middot; <strong>72</strong> sold last 90 days &middot; <strong>8</strong> categories &middot; <strong>39</strong> Pikachu deals scanned</div>
 
     <div class="ai-kpi-row">
       
@@ -2178,17 +2184,17 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="ai-kpi-src">from listings_snapshot.json</div>
         </div>
         <div class="ai-kpi">
-          <div class="ai-kpi-num">70</div>
+          <div class="ai-kpi-num">72</div>
           <div class="ai-kpi-label">Sold (recent)</div>
           <div class="ai-kpi-src">from sold_history.json</div>
         </div>
         <div class="ai-kpi">
-          <div class="ai-kpi-num">0</div>
+          <div class="ai-kpi-num">8</div>
           <div class="ai-kpi-label">Categories</div>
           <div class="ai-kpi-src">from seller_hub_plan.json</div>
         </div>
         <div class="ai-kpi">
-          <div class="ai-kpi-num">38</div>
+          <div class="ai-kpi-num">39</div>
           <div class="ai-kpi-label">Pikachu deals</div>
           <div class="ai-kpi-src">from pokemon_pikachu_plan.json</div>
         </div>
@@ -2235,7 +2241,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       (function() {
         const ENDPOINT     = "https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/ai-chat";
         const SUGGESTIONS  = ["What's the market price for a 2024 Topps Chrome Cam Ward rookie PSA 10?", "Which of my listings should I reprice today?", "Find me Pikachu cards under $10", "What Pokemon sets are dropping next month?", "How do I value a 1994 Classic Pro Line autograph?", "What's my best-performing listing this month?"];
-        const KPIS         = {"listings_total": 0, "sold_recent": 70, "categories": 0, "pikachu_deals": 38};
+        const KPIS         = {"listings_total": 0, "sold_recent": 72, "categories": 8, "pikachu_deals": 39};
         const thread       = document.getElementById('ai-thread');
         const empty        = document.getElementById('ai-empty');
         const form         = document.getElementById('ai-form');
@@ -2374,7 +2380,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

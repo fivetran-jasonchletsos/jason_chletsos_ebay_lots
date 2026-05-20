@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2099,13 +2105,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <button type="button" class="stat-card linked active" data-filter="all" onclick="filterReview('all', this)">
-        <div class="num">59</div><div class="lbl">All flagged</div>
+        <div class="num">53</div><div class="lbl">All flagged</div>
       </button>
       <button type="button" class="stat-card linked" data-filter="under" onclick="filterReview('under', this)">
         <div class="num danger">17</div><div class="lbl">Underpriced</div>
       </button>
       <button type="button" class="stat-card linked" data-filter="over" onclick="filterReview('over', this)">
-        <div class="num warning">42</div><div class="lbl">Overpriced</div>
+        <div class="num warning">36</div><div class="lbl">Overpriced</div>
       </button>
       <div class="stat-card"><div class="num danger">$95</div><div class="lbl">Revenue Gap</div></div>
     </div>
@@ -2190,12 +2196,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener" class="pr-title">Topps 2024 Chrome Checkerboard Jayden Daniels #74TF-2 Commanders NFL Card</a>
           <div class="pr-market">
-            <b>Market</b> <b>$25.00</b> · Range $6.99–$32.50 · 3 comps
+            <b>Market</b> <b>$25.00</b> · Range $7.99–$32.50 · 3 comps
           </div>
           <div class="pr-actual"><span title="Match confidence 58%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$5.00</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Jayden Daniels [Checkerboard Refractor] #67</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/8731837" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+60% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $25.00</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span> · <span class="pr-src"><b>PriceCharting</b> $8.00 · <a href="https://www.pricecharting.com/game/11239133" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $25.00</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span> · <span class="pr-src"><b>PriceCharting</b> $7.00 · <a href="https://www.pricecharting.com/game/11239133" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -2209,11 +2215,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306947440872" inputmode="decimal">7.99</span>
+              <span class="price-after" contenteditable="true" data-id="306947440872" inputmode="decimal">6.99</span>
             </div>
             <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
             <div class="pr-math">
-              -$1.06 fee · -$1.30 ship · <b style="color:var(--success);">$5.23 net</b>
+              -$0.93 fee · -$1.30 ship · <b style="color:var(--success);">$4.36 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -2346,48 +2352,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306945569731" data-flag="under" data-market-gap="-50.10" data-actual-gap=""  style="--stripe:var(--danger)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306945569731" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/qgAAAeSwDgxqCntg/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-danger">Underpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306945569731</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731" target="_blank" rel="noopener" class="pr-title">2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$10.00</b> · Range $4.99–$10.00 · 4 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (41%) — review manually</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $10.00</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $2.27 · <a href="https://www.pricecharting.com/game/12575877" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$4.99</div>
-            <div class="pr-gap">-50.1% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306945569731" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
       <article class="pr-card review-row" data-id="306937601406" data-flag="under" data-market-gap="-50.00" data-actual-gap=""  style="--stripe:var(--danger)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306937601406" checked  aria-label="Select for repricing">
@@ -2468,6 +2432,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Brock-Bowers-6-Silver-Prizm-NFL-Football-/306941730763" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306939316823" data-flag="under" data-market-gap="-45.10" data-actual-gap="422.07"  style="--stripe:var(--danger)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306939316823" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/prcAAeSweUZqBk0i/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-danger">Underpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306939316823</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome #286 Vita Vea Aqua Wave Refractor /199 Buccaneers</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$13.78</b> · Range $7.57–$19.99 · 2 comps
+          </div>
+          <div class="pr-actual"><span title="Match confidence 45%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.45</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Adou Thiero #286</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11486864" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+422% vs actual</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $13.78</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$7.57</div>
+            <div class="pr-gap">-45.1% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306939316823" inputmode="decimal">13.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: no comps">Multi-source · no comps</div>
+            <div class="pr-math">
+              -$1.85 fee · -$1.30 ship · <b style="color:var(--success);">$10.44 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -2640,48 +2646,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306931446668" data-flag="under" data-market-gap="-31.40" data-actual-gap="-4.43"  style="--stripe:var(--danger)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306931446668" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-danger">Underpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931446668</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="pr-title">2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$16.01</b> · Range $10.99–$50.00 · 6 comps
-          </div>
-          <div class="pr-actual"><span title="Match confidence 62%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$11.50</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· DK Metcalf [Purple Stars] #8</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11740205" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--success);">-4% vs actual</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $16.01</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $5.39 · <a href="https://www.pricecharting.com/game/8470274" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$10.99</div>
-            <div class="pr-gap">-31.4% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306931446668" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
       <article class="pr-card review-row" data-id="306914169081" data-flag="under" data-market-gap="-25.10" data-actual-gap="107.64"  style="--stripe:var(--danger)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306914169081" checked  aria-label="Select for repricing">
@@ -2766,6 +2730,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
+      <article class="pr-card review-row" data-id="306931446668" data-flag="under" data-market-gap="-24.20" data-actual-gap="-4.43"  style="--stripe:var(--danger)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931446668" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/70IAAeSwLFVqAU9n/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-danger">Underpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931446668</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="pr-title">2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$14.50</b> · Range $10.99–$50.00 · 7 comps
+          </div>
+          <div class="pr-actual"><span title="Match confidence 62%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$11.50</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· DK Metcalf [Purple Stars] #8</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11740205" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--success);">-4% vs actual</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $14.50</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $5.39 · <a href="https://www.pricecharting.com/game/8470274" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$10.99</div>
+            <div class="pr-gap">-24.2% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931446668" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-My-House-DK-Metcalf-8-Black-Pandora-Prizm-149-/306931446668" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
       <article class="pr-card review-row" data-id="306937663074" data-flag="under" data-market-gap="-19.20" data-actual-gap="0.00"  style="--stripe:var(--danger)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306937663074" checked  aria-label="Select for repricing">
@@ -2778,7 +2784,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/2025-Panini-Select-Rookie-Swatches-TreVeyon-Henderson-RSW-THN-Red-Prizm-MEM--/306937663074" target="_blank" rel="noopener" class="pr-title">2025 Panini Select - Rookie Swatches TreVeyon Henderson #RSW-THN Red Prizm (MEM,</a>
           <div class="pr-market">
-            <b>Market</b> <b>$4.94</b> · Range $3.99–$6.50 · 10 comps
+            <b>Market</b> <b>$4.94</b> · Range $3.99–$6.99 · 10 comps
           </div>
           <div class="pr-actual"><span title="Match confidence 67%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$3.99</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· TreVeyon Henderson [Red] #RSW-THN</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12080144" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--success);">+0% vs actual</span></div>
           <div class="pr-sources">
@@ -2892,7 +2898,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306758076966" data-flag="over" data-market-gap="726.40" data-actual-gap=""  style="--stripe:var(--warning)">
+      <article class="pr-card review-row" data-id="306758076966" data-flag="over" data-market-gap="665.50" data-actual-gap=""  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306758076966" checked  aria-label="Select for repricing">
         </div>
@@ -2904,19 +2910,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/Charcadet-022-Mega-Evolution-Promo-Holo-Pokemon-Card-NM-/306758076966" target="_blank" rel="noopener" class="pr-title">Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</a>
           <div class="pr-market">
-            <b>Market</b> <b>$3.15</b> · Range $2.98–$4.13 · 10 comps
+            <b>Market</b> <b>$3.40</b> · Range $2.50–$4.13 · 10 comps
           </div>
           <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (23%) — review manually</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.15</span> · <span class="pr-src"><b>Your past sales</b> $54.00</span> · <span class="pr-src"><b>PriceCharting</b> $4.97 · <a href="https://www.pricecharting.com/game/11196718" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span> · <span class="pr-src"><b>PokemonTCG.io</b> $0.25 · <a href="https://prices.pokemontcg.io/tcgplayer/me2-19" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.40</span> · <span class="pr-src"><b>Your past sales</b> $54.00</span> · <span class="pr-src"><b>PriceCharting</b> $4.97 · <a href="https://www.pricecharting.com/game/11196718" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span> · <span class="pr-src"><b>PokemonTCG.io</b> $0.25 · <a href="https://prices.pokemontcg.io/tcgplayer/me2-19" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
             <div class="current-price pr-current">$25.99</div>
-            <div class="pr-gap">+726.4% vs market</div>
+            <div class="pr-gap">+665.5% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
@@ -2946,7 +2952,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-Football-Card-Lot-11-HOF-/306904068997" target="_blank" rel="noopener" class="pr-title">Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF</a>
           <div class="pr-market">
-            <b>Market</b> <b>$8.48</b> · Range $2.25–$20.99 · 7 comps
+            <b>Market</b> <b>$8.48</b> · Range $2.25–$23.99 · 7 comps
           </div>
           <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
           <div class="pr-sources">
@@ -2993,7 +2999,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 42%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$2.08</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Justin Jefferson #ACT-6</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12550237" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+140% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.88</span> · <span class="pr-src"><b>Your past sales</b> $8.00</span> · <span class="pr-src"><b>PriceCharting</b> $9.39 · <a href="https://www.pricecharting.com/game/10852317" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.88</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span> · <span class="pr-src"><b>PriceCharting</b> $9.39 · <a href="https://www.pricecharting.com/game/10852317" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -3007,18 +3013,60 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306947434271" inputmode="decimal">8.99</span>
+              <span class="price-after" contenteditable="true" data-id="306947434271" inputmode="decimal">5.99</span>
             </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$1.19 fee · -$1.30 ship · <b style="color:var(--success);">$6.10 net</b>
+              -$0.79 fee · -$1.30 ship · <b style="color:var(--success);">$3.50 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306939352679" data-flag="over" data-market-gap="139.20" data-actual-gap="70.86"  style="--stripe:var(--warning)">
+      <article class="pr-card review-row" data-id="306949682127" data-flag="over" data-market-gap="154.50" data-actual-gap=""  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306949682127" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/jcQAAeSwpHRqDQLF/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306949682127</span>
+          </div>
+          <a href="https://www.ebay.com/itm/Bucky-Irving-2025-Topps-Chrome-Pulsar-Refractor-Tampa-Bay-Buccaneers-285-/306949682127" target="_blank" rel="noopener" class="pr-title">Bucky Irving 2025 Topps Chrome Pulsar Refractor Tampa Bay Buccaneers #285</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$1.18</b> · Range $0.99–$1.99 · 10 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — no SCP match</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.18</span> · <span class="pr-src"><b>Your past sales</b> $3.99</span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.99</div>
+            <div class="pr-gap">+154.5% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306949682127" inputmode="decimal">3.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/Bucky-Irving-2025-Topps-Chrome-Pulsar-Refractor-Tampa-Bay-Buccaneers-285-/306949682127" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306939352679" data-flag="over" data-market-gap="135.40" data-actual-gap="70.86"  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306939352679" checked  aria-label="Select for repricing">
         </div>
@@ -3030,19 +3078,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-Amon-Ra-St-Brown-x-Fractor-Detroit-Lions-/306939352679" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome Football Amon-Ra St Brown x Fractor Detroit Lions</a>
           <div class="pr-market">
-            <b>Market</b> <b>$1.25</b> · Range $0.99–$2.25 · 10 comps
+            <b>Market</b> <b>$1.27</b> · Range $0.99–$2.25 · 10 comps
           </div>
           <div class="pr-actual"><span title="Match confidence 52%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.75</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Amon-Ra St. Brown #98</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12522718" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+71% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.25</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.27</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
             <div class="current-price pr-current">$2.99</div>
-            <div class="pr-gap">+139.2% vs market</div>
+            <div class="pr-gap">+135.4% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
@@ -3203,7 +3251,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 79%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$0.85</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Khalil Mack #160</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12525590" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+605% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.75</span> · <span class="pr-src"><b>Your past sales</b> $4.99</span> · <span class="pr-src"><b>PriceCharting</b> $5.00 · <a href="https://www.pricecharting.com/game/8470241" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.75</span> · <span class="pr-src"><b>Your past sales</b> $3.99</span> · <span class="pr-src"><b>PriceCharting</b> $5.00 · <a href="https://www.pricecharting.com/game/8470241" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -3217,13 +3265,55 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306947421543" inputmode="decimal">4.99</span>
+              <span class="price-after" contenteditable="true" data-id="306947421543" inputmode="decimal">3.99</span>
             </div>
             <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$0.66 fee · -$1.30 ship · <b style="color:var(--success);">$2.63 net</b>
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Khalil-Mack-Lime-Green-X-Fractor-160-Chargers-Color-Match-/306947421543" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306949800437" data-flag="over" data-market-gap="116.30" data-actual-gap=""  style="--stripe:var(--warning)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306949800437" checked  aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/AuUAAeSwkB5qDRpQ/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-warning">Overpriced</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306949800437</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener" class="pr-title">2025 TOPPS CHROME FOOTBALL POWER PLAYERS JAHMYR GIBBS LIONS</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$1.84</b> · Range $0.99–$2.00 · 10 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — no SCP match</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.84</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.99</div>
+            <div class="pr-gap">+116.3% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306949800437" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3354,7 +3444,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306939345538" data-flag="over" data-market-gap="92.70" data-actual-gap="136.30"  style="--stripe:var(--warning)">
+      <article class="pr-card review-row" data-id="306939345538" data-flag="over" data-market-gap="97.70" data-actual-gap="136.30"  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306939345538" checked  aria-label="Select for repricing">
         </div>
@@ -3366,30 +3456,30 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
           <a href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints RC #398</a>
           <div class="pr-market">
-            <b>Market</b> <b>$1.79</b> · Range $0.99–$2.99 · 10 comps
+            <b>Market</b> <b>$1.75</b> · Range $0.99–$2.75 · 10 comps
           </div>
           <div class="pr-actual"><span title="Match confidence 78%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.46</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Tyler Shough #398</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12536684" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+136% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.79</span> · <span class="pr-src"><b>Your past sales</b> $13.99</span> · <span class="pr-src"><b>PriceCharting</b> $25.00 · <a href="https://www.pricecharting.com/game/12135547" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.75</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span> · <span class="pr-src"><b>PriceCharting</b> $25.00 · <a href="https://www.pricecharting.com/game/12135547" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
             <div class="current-price pr-current">$3.45</div>
-            <div class="pr-gap">+92.7% vs market</div>
+            <div class="pr-gap">+97.7% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306939345538" inputmode="decimal">24.99</span>
+              <span class="price-after" contenteditable="true" data-id="306939345538" inputmode="decimal">5.99</span>
             </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$3.31 fee · -$1.30 ship · <b style="color:var(--success);">$19.98 net</b>
+              -$0.79 fee · -$1.30 ship · <b style="color:var(--success);">$3.50 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -3413,7 +3503,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 62%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.99</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· CeeDee Lamb #F15-9</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12550797" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+50% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.75</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.75</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -3623,7 +3713,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 62%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.00</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Shedeur Sanders #19</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11243023" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+199% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.90</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $4.32 · <a href="https://www.pricecharting.com/game/18493" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.90</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $4.32 · <a href="https://www.pricecharting.com/game/18493" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -3728,48 +3818,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-RC-20-Silver-Prizm-Football-/306914915295" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306947427453" data-flag="over" data-market-gap="50.30" data-actual-gap="63.39"  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306947427453" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/IUQAAeSwCctqC7HL/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306947427453</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Ashton-Jeanty-Fortune-15-ROOKIE-F15-24-Raiders-/306947427453" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome - Ashton Jeanty Fortune 15 ROOKIE #F15-24 - Raiders</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$1.99</b> · Range $1.25–$2.99 · 10 comps
-          </div>
-          <div class="pr-actual"><span title="Match confidence 62%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.83</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Ashton Jeanty #F15-24</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12550799" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+63% vs actual</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.99</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $10.49 · <a href="https://www.pricecharting.com/game/156356" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$2.99</div>
-            <div class="pr-gap">+50.3% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306947427453" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Ashton-Jeanty-Fortune-15-ROOKIE-F15-24-Raiders-/306947427453" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -3900,48 +3948,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306913934898" data-flag="over" data-market-gap="39.90" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306913934898" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306913934898</span>
-          </div>
-          <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="pr-title">20 Warren Moon Cards Oilers Vikings</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$10.00</b> · Range $4.99–$79.99 · 5 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $10.00</span> · <span class="pr-src"><b>PriceCharting</b> $6.45 · <a href="https://www.pricecharting.com/game/2400298" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$13.99</div>
-            <div class="pr-gap">+39.9% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913934898" inputmode="decimal">5.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
-            <div class="pr-math">
-              -$0.79 fee · -$1.30 ship · <b style="color:var(--success);">$3.50 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
       <article class="pr-card review-row" data-id="306914174921" data-flag="over" data-market-gap="36.80" data-actual-gap=""  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306914174921" checked  aria-label="Select for repricing">
@@ -4068,48 +4074,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306930465261" data-flag="over" data-market-gap="33.10" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306930465261" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/tWMAAeSwnSNqAKc-/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930465261</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Brian-Thomas-Jr-30-Green-Yellow-Shock-Prizm-/306930465261" target="_blank" rel="noopener" class="pr-title">2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & Yellow Shock Prizm</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$1.50</b> · Range $0.99–$2.00 · 10 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (72%) — review manually</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.50</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$1.99</div>
-            <div class="pr-gap">+33.1% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306930465261" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Brian-Thomas-Jr-30-Green-Yellow-Shock-Prizm-/306930465261" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
       <article class="pr-card review-row" data-id="306930904430" data-flag="over" data-market-gap="31.40" data-actual-gap="87.74"  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306930904430" checked  aria-label="Select for repricing">
@@ -4194,90 +4158,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306904078786" data-flag="over" data-market-gap="29.90" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306904078786" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306904078786</span>
-          </div>
-          <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener" class="pr-title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$7.69</b> · Range $7.69–$7.69 · 1 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $7.69</span> · <span class="pr-src"><b>Your past sales</b> $1.99</span> · <span class="pr-src"><b>PriceCharting</b> $10.91 · <a href="https://www.pricecharting.com/game/10854600" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$9.99</div>
-            <div class="pr-gap">+29.9% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904078786" inputmode="decimal">10.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
-            <div class="pr-math">
-              -$1.46 fee · -$5.00 ship · <b style="color:var(--success);">$4.13 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306904203738" data-flag="over" data-market-gap="28.60" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306904203738" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306904203738</span>
-          </div>
-          <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="pr-title">1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts NFL Football</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$6.99</b> · Range $6.99–$6.99 · 1 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (36%) — review manually</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $6.99</span> · <span class="pr-src"><b>PriceCharting</b> $8.65 · <a href="https://www.pricecharting.com/game/44235" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$8.99</div>
-            <div class="pr-gap">+28.6% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306904203738" inputmode="decimal">8.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
-            <div class="pr-math">
-              -$1.19 fee · -$1.30 ship · <b style="color:var(--success);">$6.10 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
       <article class="pr-card review-row" data-id="306930807722" data-flag="over" data-market-gap="25.20" data-actual-gap="9.34"  style="--stripe:var(--warning)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306930807722" checked  aria-label="Select for repricing">
@@ -4316,48 +4196,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306903941543" data-flag="over" data-market-gap="25.10" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306903941543" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306903941543</span>
-          </div>
-          <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener" class="pr-title">Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$3.99</b> · Range $3.99–$3.99 · 1 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.99</span> · <span class="pr-src"><b>PriceCharting</b> $6.45 · <a href="https://www.pricecharting.com/game/9215417" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$4.99</div>
-            <div class="pr-gap">+25.1% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306903941543" inputmode="decimal">5.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
-            <div class="pr-math">
-              -$0.79 fee · -$5.00 ship · <b style="color:var(--success);">$-0.20 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -4446,30 +4284,30 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
-      <article class="pr-card review-row" data-id="306913790653" data-flag="over" data-market-gap="22.50" data-actual-gap=""  style="--stripe:var(--warning)">
+      <article class="pr-card review-row" data-id="306930465261" data-flag="over" data-market-gap="22.50" data-actual-gap=""  style="--stripe:var(--warning)">
         <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306913790653" checked  aria-label="Select for repricing">
+          <input type="checkbox" class="row-check" value="306930465261" checked  aria-label="Select for repricing">
         </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/tWMAAeSwnSNqAKc-/s-l500.jpg" alt="" loading="lazy"></div>
         <div class="pr-info">
           <div class="pr-meta-row">
             <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306913790653</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306930465261</span>
           </div>
-          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener" class="pr-title">11 Raghib And Quadry Ismail Cards Raiders Vikings</a>
+          <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Brian-Thomas-Jr-30-Green-Yellow-Shock-Prizm-/306930465261" target="_blank" rel="noopener" class="pr-title">2025 Panini Select - Concourse Brian Thomas Jr. #30 Green & Yellow Shock Prizm</a>
           <div class="pr-market">
-            <b>Market</b> <b>$14.69</b> · Range $14.69–$14.69 · 1 comps
+            <b>Market</b> <b>$1.62</b> · Range $0.99–$2.00 · 10 comps
           </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (72%) — review manually</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $14.69</span> · <span class="pr-src"><b>PriceCharting</b> $69.63 · <a href="https://www.pricecharting.com/game/38881" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.62</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
           </div>
         </div>
         <div class="pr-prices">
           <div class="pr-price-cell">
             <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$17.99</div>
+            <div class="current-price pr-current">$1.99</div>
             <div class="pr-gap">+22.5% vs market</div>
           </div>
           <div class="pr-arrow">→</div>
@@ -4477,97 +4315,13 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306913790653" inputmode="decimal">69.99</span>
+              <span class="price-after" contenteditable="true" data-id="306930465261" inputmode="decimal">2.99</span>
             </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$9.27 fee · -$1.30 ship · <b style="color:var(--success);">$59.02 net</b>
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
-            <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306914547105" data-flag="over" data-market-gap="21.40" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306914547105" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306914547105</span>
-          </div>
-          <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener" class="pr-title">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$13.99</b> · Range $13.99–$13.99 · 1 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $13.99</span> · <span class="pr-src"><b>Your past sales</b> $1.50</span> · <span class="pr-src"><b>PriceCharting</b> $20.86 · <a href="https://www.pricecharting.com/game/10678918" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$16.99</div>
-            <div class="pr-gap">+21.4% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306914547105" inputmode="decimal">20.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
-            <div class="pr-math">
-              -$2.78 fee · -$5.00 ship · <b style="color:var(--success);">$12.81 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306931303163" data-flag="over" data-market-gap="21.40" data-actual-gap=""  style="--stripe:var(--warning)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306931303163" checked  aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-warning">Overpriced</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931303163</span>
-          </div>
-          <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener" class="pr-title">4 1991 Playball U.S.A. - Darryl Strawberry NFL</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$13.99</b> · Range $13.99–$13.99 · 1 comps
-          </div>
-          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (32%) — review manually</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $13.99</span> · <span class="pr-src"><b>PriceCharting</b> $119.99 · <a href="https://www.pricecharting.com/game/8740524" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$16.99</div>
-            <div class="pr-gap">+21.4% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306931303163" inputmode="decimal">119.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
-            <div class="pr-math">
-              -$15.90 fee · -$1.30 ship · <b style="color:var(--success);">$102.39 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Brian-Thomas-Jr-30-Green-Yellow-Shock-Prizm-/306930465261" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -4757,7 +4511,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 46%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$6.65</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Ben Saraf #FS-BS</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11491290" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--danger);">-65% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.00</span> · <span class="pr-src"><b>Your past sales</b> $9.50</span> · <span class="pr-src"><b>PriceCharting</b> $1.57 · <a href="https://www.pricecharting.com/game/11827065" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.00</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span> · <span class="pr-src"><b>PriceCharting</b> $1.57 · <a href="https://www.pricecharting.com/game/11827065" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -4771,13 +4525,55 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306939367849" inputmode="decimal">1.99</span>
+              <span class="price-after" contenteditable="true" data-id="306939367849" inputmode="decimal">5.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.79 fee · -$1.30 ship · <b style="color:var(--success);">$3.50 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306913934898" data-flag="ok" data-market-gap="16.60" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306913934898"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/esEAAeSwCbZp9e9z/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306913934898</span>
+          </div>
+          <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="pr-title">20 Warren Moon Cards Oilers Vikings</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$12.00</b> · Range $4.99–$144.99 · 6 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $12.00</span> · <span class="pr-src"><b>PriceCharting</b> $6.45 · <a href="https://www.pricecharting.com/game/2400298" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$13.99</div>
+            <div class="pr-gap">+16.6% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306913934898" inputmode="decimal">5.99</span>
             </div>
             <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
             <div class="pr-math">
-              -$0.26 fee · -$1.30 ship · <b style="color:var(--success);">$0.03 net</b>
+              -$0.79 fee · -$1.30 ship · <b style="color:var(--success);">$3.50 net</b>
             </div>
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <a href="https://www.ebay.com/itm/20-Warren-Moon-Cards-Oilers-Vikings-/306913934898" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -4824,6 +4620,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
+      <article class="pr-card review-row" data-id="306949802296" data-flag="ok" data-market-gap="-14.70" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306949802296"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/uIIAAeSwT05qDRtS/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306949802296</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener" class="pr-title">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$8.79</b> · Range $7.50–$10.00 · 10 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — no SCP match</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $8.79</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $25.00 · <a href="https://www.pricecharting.com/game/11868183" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$7.50</div>
+            <div class="pr-gap">-14.7% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306949802296" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
       <article class="pr-card review-row" data-id="306930464091" data-flag="ok" data-market-gap="-14.40" data-actual-gap="107.64"  style="--stripe:var(--success)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306930464091"   aria-label="Select for repricing">
@@ -4862,48 +4700,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Abdul-Carter-10-RC-NFL-Football-/306930464091" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306939316823" data-flag="ok" data-market-gap="-13.80" data-actual-gap="422.07"  style="--stripe:var(--success)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306939316823"   aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/prcAAeSweUZqBk0i/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306939316823</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome #286 Vita Vea Aqua Wave Refractor /199 Buccaneers</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$8.79</b> · Range $7.57–$10.00 · 2 comps
-          </div>
-          <div class="pr-actual"><span title="Match confidence 45%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.45</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Adou Thiero #286</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11486864" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+422% vs actual</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $8.79</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$7.57</div>
-            <div class="pr-gap">-13.8% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306939316823" inputmode="decimal">8.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: no comps">Multi-source · no comps</div>
-            <div class="pr-math">
-              -$1.19 fee · -$1.30 ship · <b style="color:var(--success);">$6.10 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-286-Vita-Vea-Aqua-Wave-Refractor-199-Buccaneers-/306939316823" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -5072,48 +4868,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/6-Basketball-Cards-From-90s-/306931070594" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="pr-card review-row" data-id="306947419189" data-flag="ok" data-market-gap="-7.90" data-actual-gap="139.20"  style="--stripe:var(--success)">
-        <div class="pr-check">
-          <input type="checkbox" class="row-check" value="306947419189"   aria-label="Select for repricing">
-        </div>
-        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/J~4AAeSwrGRqC666/s-l500.jpg" alt="" loading="lazy"></div>
-        <div class="pr-info">
-          <div class="pr-meta-row">
-            <span class="badge badge-success">On Market</span>
-            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306947419189</span>
-          </div>
-          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome Micah Parsons Hot Pink X-Fractor Refractor #77</a>
-          <div class="pr-market">
-            <b>Market</b> <b>$3.25</b> · Range $0.99–$5.00 · 8 comps
-          </div>
-          <div class="pr-actual"><span title="Match confidence 82%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.25</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Micah Parsons #77</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12521827" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+139% vs actual</span></div>
-          <div class="pr-sources">
-            <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.25</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $8.00 · <a href="https://www.pricecharting.com/game/8470298" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
-          </div>
-        </div>
-        <div class="pr-prices">
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">Current</div>
-            <div class="current-price pr-current">$2.99</div>
-            <div class="pr-gap">-7.9% vs market</div>
-          </div>
-          <div class="pr-arrow">→</div>
-          <div class="pr-price-cell">
-            <div class="pr-cell-lbl">New price</div>
-            <div class="pr-new">
-              <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306947419189" inputmode="decimal">2.99</span>
-            </div>
-            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
-            <div class="pr-math">
-              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
-            </div>
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -5303,7 +5057,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (41%) — review manually</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $5.88</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $5.88</span> · <span class="pr-src"><b>Your past sales</b> $3.33</span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -5317,11 +5071,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306937606464" inputmode="decimal">5.99</span>
+              <span class="price-after" contenteditable="true" data-id="306937606464" inputmode="decimal">2.99</span>
             </div>
-            <div class="pr-strategy" title="Basis: eBay active (−5%)">Multi-source · eBay active (−5%)</div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$0.79 fee · -$1.30 ship · <b style="color:var(--success);">$3.50 net</b>
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Topps-Update-Series-1990-Topps-Baseball-Marcelo-Mayer-U90-9-Green--/306937606464" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -5471,7 +5225,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 57%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$2000.00</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Cam Ward [Gold] #SE-9</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12552490" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--danger);">-98% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $44.50</span> · <span class="pr-src"><b>Your past sales</b> $5.67</span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $44.50</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -5485,11 +5239,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306939333836" inputmode="decimal">41.99</span>
+              <span class="price-after" contenteditable="true" data-id="306939333836" inputmode="decimal">2.99</span>
             </div>
-            <div class="pr-strategy" title="Basis: eBay active (−5%)">Multi-source · eBay active (−5%)</div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$5.56 fee · -$1.30 ship · <b style="color:var(--success);">$34.73 net</b>
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -5513,7 +5267,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 58%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.35</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Barry Sanders #188</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11247760" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+47% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.98</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $1.98</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -5748,6 +5502,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
+      <article class="pr-card review-row" data-id="306903941543" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306903941543"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/A8QAAeSw6z9p7r5C/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306903941543</span>
+          </div>
+          <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener" class="pr-title">Tim Brown Los Angeles Raiders Football Card Lot (14) HOF Wide Receiver</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$4.99</b> · Range $4.99–$4.99 · 1 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $4.99</span> · <span class="pr-src"><b>PriceCharting</b> $6.45 · <a href="https://www.pricecharting.com/game/9215417" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$4.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306903941543" inputmode="decimal">5.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-math">
+              -$0.79 fee · -$5.00 ship · <b style="color:var(--success);">$-0.20 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
       <article class="pr-card review-row" data-id="306903947932" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306903947932"   aria-label="Select for repricing">
@@ -5790,6 +5586,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </article>
 
+      <article class="pr-card review-row" data-id="306904078786" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306904078786"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306904078786</span>
+          </div>
+          <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener" class="pr-title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$9.99</b> · Range $9.99–$9.99 · 1 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $9.99</span> · <span class="pr-src"><b>Your past sales</b> $1.99</span> · <span class="pr-src"><b>PriceCharting</b> $10.91 · <a href="https://www.pricecharting.com/game/10854600" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$9.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306904078786" inputmode="decimal">10.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-math">
+              -$1.46 fee · -$5.00 ship · <b style="color:var(--success);">$4.13 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
       <article class="pr-card review-row" data-id="306904189481" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
         <div class="pr-check">
           <input type="checkbox" class="row-check" value="306904189481"   aria-label="Select for repricing">
@@ -5828,6 +5666,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.53 fee · -$5.00 ship · <b style="color:var(--success);">$-1.94 net</b>
             </div>
             <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-Football-Card-Lot-NFL-/306904189481" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306904203738" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306904203738"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/gOkAAeSw6z9p7w3o/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306904203738</span>
+          </div>
+          <a href="https://www.ebay.com/itm/1994-Steve-Emtman-Classic-Pro-Line-Live-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="pr-title">1994 Steve Emtman Classic Pro Line Live AUTO Autograph Colts NFL Football</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$8.99</b> · Range $8.99–$8.99 · 1 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (36%) — review manually</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $8.99</span> · <span class="pr-src"><b>PriceCharting</b> $8.65 · <a href="https://www.pricecharting.com/game/44235" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$8.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306904203738" inputmode="decimal">8.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-math">
+              -$1.19 fee · -$1.30 ship · <b style="color:var(--success);">$6.10 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/1994-Steve-Emtman-Classic-Pro-Line-Live-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -5954,6 +5834,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$1.46 fee · -$5.00 ship · <b style="color:var(--success);">$4.13 net</b>
             </div>
             <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-Football-Card-Lot-NFL-/306913307606" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306913790653" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306913790653"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306913790653</span>
+          </div>
+          <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener" class="pr-title">11 Raghib And Quadry Ismail Cards Raiders Vikings</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$17.99</b> · Range $17.99–$17.99 · 1 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $17.99</span> · <span class="pr-src"><b>PriceCharting</b> $69.63 · <a href="https://www.pricecharting.com/game/38881" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$17.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306913790653" inputmode="decimal">69.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-math">
+              -$9.27 fee · -$1.30 ship · <b style="color:var(--success);">$59.02 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -6164,6 +6086,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$0.66 fee · -$5.00 ship · <b style="color:var(--success);">$-1.07 net</b>
             </div>
             <a href="https://www.ebay.com/itm/Eric-Metcalf-Cleveland-Browns-Football-Card-Lot-10-NFL-Wide-Receiver-/306914500757" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306914547105" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306914547105"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/4ysAAeSwWvdp9loJ/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306914547105</span>
+          </div>
+          <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener" class="pr-title">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$16.99</b> · Range $16.99–$16.99 · 1 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — multi-card lot</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $16.99</span> · <span class="pr-src"><b>Your past sales</b> $1.50</span> · <span class="pr-src"><b>PriceCharting</b> $20.86 · <a href="https://www.pricecharting.com/game/10678918" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$16.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306914547105" inputmode="decimal">20.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-math">
+              -$2.78 fee · -$5.00 ship · <b style="color:var(--success);">$12.81 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -6563,7 +6527,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 60%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$2.49</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Dan Marino [Neon Pink Pulsar] #192</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11248035" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+20% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.99</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $6.79 · <a href="https://www.pricecharting.com/game/8470204" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.99</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $6.79 · <a href="https://www.pricecharting.com/game/8470204" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -6808,7 +6772,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="badge badge-success">On Market</span>
             <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931283327</span>
           </div>
-          <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-NFL-/306931283327" target="_blank" rel="noopener" class="pr-title">1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158 NFL</a>
+          <a href="https://www.ebay.com/itm/1990-Ken-Griffey-Jr-Sports-Illustrated-for-Kids-Series-1-158-NFL-/306931283327" target="_blank" rel="noopener" class="pr-title">1990 Ken Griffey Jr Sports Illustrated for Kids Series 1 #158 NFL</a>
           <div class="pr-market">
             <b>Market</b> <b>$2.99</b> · Range $2.99–$2.99 · 1 comps
           </div>
@@ -6835,7 +6799,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-math">
               -$23.98 fee · -$1.30 ship · <b style="color:var(--success);">$155.31 net</b>
             </div>
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-NFL-/306931283327" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <a href="https://www.ebay.com/itm/1990-Ken-Griffey-Jr-Sports-Illustrated-for-Kids-Series-1-158-NFL-/306931283327" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -6878,6 +6842,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               -$79.50 fee · -$1.30 ship · <b style="color:var(--success);">$518.79 net</b>
             </div>
             <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-NFL-/306931285504" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306931303163" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306931303163"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931303163</span>
+          </div>
+          <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener" class="pr-title">4 1991 Playball U.S.A. - Darryl Strawberry NFL</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$16.99</b> · Range $16.99–$16.99 · 1 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual: low-confidence match (32%) — review manually</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $16.99</span> · <span class="pr-src"><b>PriceCharting</b> $119.99 · <a href="https://www.pricecharting.com/game/8740524" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$16.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306931303163" inputmode="decimal">119.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: PriceCharting">Multi-source · PriceCharting</div>
+            <div class="pr-math">
+              -$15.90 fee · -$1.30 ship · <b style="color:var(--success);">$102.39 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -6934,7 +6940,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="badge badge-success">On Market</span>
             <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306931339580</span>
           </div>
-          <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-NFL-/306931339580" target="_blank" rel="noopener" class="pr-title">1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112 NFL</a>
+          <a href="https://www.ebay.com/itm/1990-Kevin-Mitchell-Sports-Illustrated-for-Kids-Series-1-112-NFL-/306931339580" target="_blank" rel="noopener" class="pr-title">1990 Kevin Mitchell Sports Illustrated for Kids Series 1 #112 NFL</a>
           <div class="pr-market">
             <b>Market</b> <b>$3.45</b> · Range $3.45–$3.45 · 1 comps
           </div>
@@ -6961,7 +6967,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-math">
               -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
             </div>
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-NFL-/306931339580" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+            <a href="https://www.ebay.com/itm/1990-Kevin-Mitchell-Sports-Illustrated-for-Kids-Series-1-112-NFL-/306931339580" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
         </div>
       </article>
@@ -7067,7 +7073,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 55%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.25</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Shedeur Sanders #154</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11145599" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+139% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.99</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $4.32 · <a href="https://www.pricecharting.com/game/18493" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.99</span> · <span class="pr-src"><b>Your past sales</b> $3.00</span> · <span class="pr-src"><b>PriceCharting</b> $4.32 · <a href="https://www.pricecharting.com/game/18493" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -7109,7 +7115,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pr-actual"><span title="Match confidence 45%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.42</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Ben Saraf #276</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/11486185" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+251% vs actual</span></div>
           <div class="pr-sources">
             <div class="pr-sources-lbl">All sources</div>
-            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $4.99</span> · <span class="pr-src"><b>Your past sales</b> $4.99</span> · <span class="pr-src"><b>PriceCharting</b> $12.56 · <a href="https://www.pricecharting.com/game/10527695" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $4.99</span> · <span class="pr-src"><b>Your past sales</b> $3.99</span> · <span class="pr-src"><b>PriceCharting</b> $12.56 · <a href="https://www.pricecharting.com/game/10527695" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
           </div>
         </div>
         <div class="pr-prices">
@@ -7123,11 +7129,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="pr-cell-lbl">New price</div>
             <div class="pr-new">
               <span class="pr-dollar">$</span>
-              <span class="price-after" contenteditable="true" data-id="306939339030" inputmode="decimal">4.99</span>
+              <span class="price-after" contenteditable="true" data-id="306939339030" inputmode="decimal">3.99</span>
             </div>
             <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
             <div class="pr-math">
-              -$0.66 fee · -$1.30 ship · <b style="color:var(--success);">$2.63 net</b>
+              -$0.53 fee · -$1.30 ship · <b style="color:var(--success);">$1.76 net</b>
             </div>
             <a href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-NFL-/306939339030" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
           </div>
@@ -7301,6 +7307,90 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </div>
         </div>
       </article>
+
+      <article class="pr-card review-row" data-id="306947419189" data-flag="ok" data-market-gap="0.00" data-actual-gap="139.20"  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306947419189"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/J~4AAeSwrGRqC666/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306947419189</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189" target="_blank" rel="noopener" class="pr-title">2025 Topps Chrome Micah Parsons Hot Pink X-Fractor Refractor #77</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$2.99</b> · Range $1.75–$5.00 · 7 comps
+          </div>
+          <div class="pr-actual"><span title="Match confidence 82%" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:6px;vertical-align:middle;"></span><b>Actual</b> <span class="pr-actual-price">$1.25</span> <span class="pr-actual-grade">· RAW</span> <span class="pr-actual-match">· Micah Parsons #77</span> · <a href="https://www.sportscardspro.com/game/sportscardspro/12521827" target="_blank" rel="noopener" style="color:var(--gold);">↗</a><span class="pr-gap-actual" style="margin-left:8px;color:var(--warning);">+139% vs actual</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $2.99</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span> · <span class="pr-src"><b>PriceCharting</b> $8.00 · <a href="https://www.pricecharting.com/game/8470298" target="_blank" rel="noopener" style="color:var(--gold);">↗</a></span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$2.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306947419189" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pr-card review-row" data-id="306949801383" data-flag="ok" data-market-gap="0.00" data-actual-gap=""  style="--stripe:var(--success)">
+        <div class="pr-check">
+          <input type="checkbox" class="row-check" value="306949801383"   aria-label="Select for repricing">
+        </div>
+        <div class="pr-thumb"><img src="https://i.ebayimg.com/images/g/JMoAAeSweBdqDRqw/s-l500.jpg" alt="" loading="lazy"></div>
+        <div class="pr-info">
+          <div class="pr-meta-row">
+            <span class="badge badge-success">On Market</span>
+            <span class="font-mono" style="font-size:11px;color:var(--text-dim);">#306949801383</span>
+          </div>
+          <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener" class="pr-title">2025 Panini Phoenix - Trey Benson #27 Light Blue Pyramids /385</a>
+          <div class="pr-market">
+            <b>Market</b> <b>$3.99</b> · Range $2.00–$7.99 · 5 comps
+          </div>
+          <div class="pr-actual pr-actual-na"><span style="color:var(--text-dim);">Actual N/A — no SCP match</span></div>
+          <div class="pr-sources">
+            <div class="pr-sources-lbl">All sources</div>
+            <div class="pr-sources-list"><span class="pr-src"><b>eBay Active</b> $3.99</span> · <span class="pr-src"><b>Your past sales</b> $2.99</span></div>
+          </div>
+        </div>
+        <div class="pr-prices">
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">Current</div>
+            <div class="current-price pr-current">$3.99</div>
+            <div class="pr-gap">+0.0% vs market</div>
+          </div>
+          <div class="pr-arrow">→</div>
+          <div class="pr-price-cell">
+            <div class="pr-cell-lbl">New price</div>
+            <div class="pr-new">
+              <span class="pr-dollar">$</span>
+              <span class="price-after" contenteditable="true" data-id="306949801383" inputmode="decimal">2.99</span>
+            </div>
+            <div class="pr-strategy" title="Basis: Your past sales">Multi-source · Your past sales</div>
+            <div class="pr-math">
+              -$0.40 fee · -$1.30 ship · <b style="color:var(--success);">$0.89 net</b>
+            </div>
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener" class="pr-view-link">View on eBay →</a>
+          </div>
+        </div>
+      </article>
     </div>
 
     <script>
@@ -7335,7 +7425,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           labels: ['<-25%', '-25 to -10%', '-10 to +10%', '+10 to +25%', '>+25%'],
           datasets: [{
             label: 'Listings',
-            data: [15, 5, 55, 12, 36],
+            data: [14, 6, 62, 11, 32],
             backgroundColor: ['rgba(224,123,111,.7)','rgba(224,181,74,.6)','rgba(127,199,122,.6)','rgba(224,181,74,.5)','rgba(212,175,55,.6)'],
             borderColor:    ['#e07b6f','#e0b54a','#7fc77a','#e0b54a','#d4af37'],
             borderWidth: 1.5,
@@ -7467,7 +7557,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:30 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:01 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

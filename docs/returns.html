@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1944,11 +1950,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-20 00:32 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
+    <section class='hero'><h1>Returns</h1><p class='sub'>Last run: <code>2026-05-20 11:03 UTC</code></p><div class='ret-kpis'><div class='ret-kpi ok'><div class='n'>0</div><div class='l'>Open returns</div></div><div class='ret-kpi ok'><div class='n'>$0.00</div><div class='l'>Total refund liability</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Buyer-fault</div></div><div class='ret-kpi'><div class='n'>0</div><div class='l'>Seller-fault</div></div><div class='ret-kpi '><div class='n'>0</div><div class='l'>Unclear</div></div></div></section><section class='ret-note'><h3>How this works</h3><ul><li>Pulls all OPEN returns via the eBay Post-Order v2 API (Trading <code>GetUserReturns</code> fallback if Post-Order is unavailable).</li><li>Buckets each by reason: <b>buyer fault</b> (changed mind, ordered by mistake) → propose partial refund + buyer keeps; <b>seller fault</b> (not as described, damaged, wrong item) → accept + full refund; <b>unclear</b> → flag for review.</li><li>Drafts a polite response per case. Action buttons are stubs — actual accept/decline still happens manually on eBay (returns are too consequential for full auto).</li></ul></section><div class='empty'><span class='big'>Zero open returns</span>No active returns to handle right now — buyers are happy.<br>New returns from eBay will appear here automatically.</div>
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

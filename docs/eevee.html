@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -2042,9 +2048,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
     <div class="pk-kpis">
       <div class="pk-kpi"><div class="pk-n">6</div><div class="pk-l">Categories</div></div>
-      <div class="pk-kpi"><div class="pk-n">96</div><div class="pk-l">Live listings</div></div>
-      <div class="pk-kpi"><div class="pk-n">33</div><div class="pk-l">Deals &ge;25% below median</div></div>
-      <div class="pk-kpi"><div class="pk-n">20:31</div><div class="pk-l">Last refreshed (local)</div></div>
+      <div class="pk-kpi"><div class="pk-n">94</div><div class="pk-l">Live listings</div></div>
+      <div class="pk-kpi"><div class="pk-n">35</div><div class="pk-l">Deals &ge;25% below median</div></div>
+      <div class="pk-kpi"><div class="pk-n">07:02</div><div class="pk-l">Last refreshed (local)</div></div>
     </div>
     
     
@@ -2070,12 +2076,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-grail-title">Pokemon 151 - Choose Your Card - Scarlet &amp; Violet - US Seller - </div>
               </div>
             </a>
-            <a class="pk-grail-card" href="https://www.ebay.com/itm/156447979868?_skw=eevee+ex+special+illustration&amp;hash=item246d06b95c:g:a-4AAeSwbz1pS8C0" target="_blank" rel="noopener">
+            <a class="pk-grail-card" href="https://www.ebay.com/itm/156641391983?_skw=eevee+ex+special+illustration&amp;hash=item24788df56f:g:PEwAAeSw7H9oZ4BF" target="_blank" rel="noopener">
               <div class="pk-grail-badge">LEGENDARY</div>
-              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/a-4AAeSwbz1pS8C0/s-l225.jpg');"></div>
+              <div class="pk-grail-img" style="background-image:url('https://i.ebayimg.com/images/g/PEwAAeSw7H9oZ4BF/s-l225.jpg');"></div>
               <div class="pk-grail-meta">
                 <div class="pk-grail-price">$400</div>
-                <div class="pk-grail-title">Pokemon TCG - Twilight Masquerade: Choose Your Card! - All Holos</div>
+                <div class="pk-grail-title">Pokemon Surging Sparks: Choose Your Card! Holos/EX/Full Arts! NM</div>
               </div>
             </a>
             <a class="pk-grail-card" href="https://www.ebay.com/itm/156374517016?_skw=umbreon+vmax+alt+art&amp;hash=item2468a5c518:g:wSUAAeSwsA1pj-DU" target="_blank" rel="noopener">
@@ -2110,6 +2116,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <span class="pk-hero-sub">Biggest discounts vs. median across every bucket.</span>
       </div>
       <div class="pk-hero-grid">
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/397538706508?_skw=eevee+jungle+holo&amp;hash=item5c8f27444c:g:emsAAeSwYolpd6OU" target="_blank" rel="noopener"
+           title="🌴 1999 Pokemon Jungle Set 🌴 CHOOSE YOUR CARD 🃏 Holos Rares NM-MP WOTC 🍃">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/emsAAeSwYolpd6OU/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$5.44</span>
+            <span class="pk-hero-disc">-84%</span>
+          </div>
+        </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/176520056972?_skw=leafeon+vmax+alt+art&amp;hash=item29196a508c:g:5W8AAeSw6yBnujrr" target="_blank" rel="noopener"
            title="Leafeon VMAX Alt Art PSA CGC Beckett | Display Case Extended Art for Pokémon Car">
           <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/5W8AAeSw6yBnujrr/s-l225.jpg');"></div>
@@ -2124,22 +2138,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pk-hero-meta">
             <span class="pk-hero-price">$20.00</span>
             <span class="pk-hero-disc">-78%</span>
-          </div>
-        </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/397538706508?_skw=eevee+jungle+holo&amp;hash=item5c8f27444c:g:emsAAeSwYolpd6OU" target="_blank" rel="noopener"
-           title="🌴 1999 Pokemon Jungle Set 🌴 CHOOSE YOUR CARD 🃏 Holos Rares NM-MP WOTC 🍃">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/emsAAeSwYolpd6OU/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$5.44</span>
-            <span class="pk-hero-disc">-73%</span>
-          </div>
-        </a>
-        <a class="pk-hero-card" href="https://www.ebay.com/itm/188019472294?_skw=eevee+jungle+holo&amp;hash=item2bc6d577a6:g:0owAAeSwBWJpeVxR" target="_blank" rel="noopener"
-           title="Pokemon Jungle: Choose Your Card - 1st Edition &amp; Unlimited - LP/NM WOTC - 1999">
-          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/0owAAeSwBWJpeVxR/s-l225.jpg');"></div>
-          <div class="pk-hero-meta">
-            <span class="pk-hero-price">$5.49</span>
-            <span class="pk-hero-disc">-72%</span>
           </div>
         </a>
         <a class="pk-hero-card" href="https://www.ebay.com/itm/175298028517?_skw=leafeon+vmax+alt+art&amp;hash=item28d093a3e5:g:d7sAAOSw7h5i~BRR" target="_blank" rel="noopener"
@@ -2157,6 +2155,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="pk-hero-price">$28.00</span>
             <span class="pk-hero-disc">-69%</span>
           </div>
+        </a>
+        <a class="pk-hero-card" href="https://www.ebay.com/itm/357837163904?_skw=eevee+ex+151&amp;hash=item5350c1cd80:g:igcAAeSwx21pAS-k" target="_blank" rel="noopener"
+           title="Pokemon SV 151 Reverse Holos Choose Your Card ex Ultra Rares Near Mint">
+          <div class="pk-hero-img" style="background-image:url('https://i.ebayimg.com/images/g/igcAAeSwx21pAS-k/s-l225.jpg');"></div>
+          <div class="pk-hero-meta">
+            <span class="pk-hero-price">$5.00</span>
+            <span class="pk-hero-disc">-69%</span>
+          </div>
         </a></div>
     </section>
     
@@ -2166,7 +2172,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
              style="flex:1 1 240px; min-width:0;">
       <select id="pk-bucket">
         <option value="all">All categories</option>
-        <option value="Grail Watch">Grail Watch (1)</option><option value="Vintage Eevee">Vintage Eevee (17)</option><option value="Eeveelution V / VMAX Alt Arts">Eeveelution V / VMAX Alt Arts (18)</option><option value="Eevee ex / SIR">Eevee ex / SIR (57)</option><option value="Eevee Heroes / Japanese">Eevee Heroes / Japanese (2)</option><option value="Eevee PSA 10">Eevee PSA 10 (1)</option>
+        <option value="Grail Watch">Grail Watch (1)</option><option value="Vintage Eevee">Vintage Eevee (16)</option><option value="Eeveelution V / VMAX Alt Arts">Eeveelution V / VMAX Alt Arts (18)</option><option value="Eevee ex / SIR">Eevee ex / SIR (56)</option><option value="Eevee Heroes / Japanese">Eevee Heroes / Japanese (2)</option><option value="Eevee PSA 10">Eevee PSA 10 (1)</option>
       </select>
       <select id="pk-max">
         <option value="0">Any price</option>
@@ -2194,15 +2200,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </div>
             <div class="pk-bucket-stats">
               <div class="pk-stat"><div class="pk-stat-n">$5</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$20</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$35</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$500</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">4</div><div class="pk-stat-l">Deals / 17</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">6</div><div class="pk-stat-l">Deals / 16</div></div>
             </div>
           </div>
           <div class="pk-grid">
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/397538706508?_skw=eevee+jungle+holo&amp;hash=item5c8f27444c:g:emsAAeSwYolpd6OU" target="_blank" rel="noopener"
                data-price="5.44"
-               data-discount="72.80"
+               data-discount="84.50"
                data-deal="1"
                data-bucket="Vintage Eevee"
                data-search="🌴 1999 pokemon jungle set 🌴 choose your card 🃏 holos rares nm-mp wotc 🍃">
@@ -2210,143 +2216,111 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$5.44</span>
-                  <span class="pk-disc">-73%</span>
+                  <span class="pk-disc">-84%</span>
                 </div>
                 <div class="pk-title">🌴 1999 Pokemon Jungle Set 🌴 CHOOSE YOUR CARD 🃏 Holos Rares NM-MP WOTC 🍃</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/188019472294?_skw=eevee+jungle+holo&amp;hash=item2bc6d577a6:g:0owAAeSwBWJpeVxR" target="_blank" rel="noopener"
-               data-price="5.49"
-               data-discount="72.50"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/115941923825?_skw=eevee+jungle+holo&amp;hash=item1afead5bf1:g:pgIAAeSwOYppXdDR" target="_blank" rel="noopener"
+               data-price="12.99"
+               data-discount="62.90"
                data-deal="1"
                data-bucket="Vintage Eevee"
-               data-search="pokemon jungle: choose your card - 1st edition &amp; unlimited - lp/nm wotc - 1999">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/0owAAeSwBWJpeVxR/s-l225.jpg');"></div>
+               data-search="1999 pokémon jungle lp choose your cards! volume discounts! 💎">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/pgIAAeSwOYppXdDR/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$5.49</span>
-                  <span class="pk-disc">-72%</span>
+                  <span class="pk-price">$12.99</span>
+                  <span class="pk-disc">-63%</span>
                 </div>
-                <div class="pk-title">Pokemon Jungle: Choose Your Card - 1st Edition &amp; Unlimited - LP/NM WOTC - 1999</div>
+                <div class="pk-title">1999 Pokémon Jungle LP Choose Your Cards! Volume Discounts! 💎</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396170360717?_skw=eevee+skyridge&amp;hash=item5c3d97f78d:g:SsoAAOSw5KtnoDYQ" target="_blank" rel="noopener"
-               data-price="10.00"
-               data-discount="50.00"
-               data-deal="1"
-               data-bucket="Vintage Eevee"
-               data-search="pokemon tcg lot | tiers | only rare or better | plus base set to modern inserts!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/SsoAAOSw5KtnoDYQ/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$10.00</span>
-                  <span class="pk-disc">-50%</span>
-                </div>
-                <div class="pk-title">Pokemon TCG lot | Tiers | only Rare or better | Plus Base Set to Modern inserts!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/294428011625?_skw=eevee+aquapolis&amp;hash=item448d46ec69:g:CecAAOSw6BJhVNuc" target="_blank" rel="noopener"
-               data-price="14.99"
-               data-discount="25.00"
-               data-deal="1"
-               data-bucket="Vintage Eevee"
-               data-search="rainbow energy 144/147 rare aquapolis pokemon card 2002 wotc e reader">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/CecAAOSw6BJhVNuc/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$14.99</span>
-                  <span class="pk-disc">-25%</span>
-                </div>
-                <div class="pk-title">Rainbow Energy 144/147 Rare Aquapolis Pokemon Card 2002 WOTC E Reader</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/176135947954?_skw=eevee+aquapolis&amp;hash=item29028546b2:g:WIYAAOSwsKdn9wcx" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/176135947954?_skw=eevee+aquapolis&amp;hash=item29028546b2:g:WIYAAOSwsKdn9wcx" target="_blank" rel="noopener"
                data-price="15.00"
-               data-discount="25.00"
-               data-deal="0"
+               data-discount="57.10"
+               data-deal="1"
                data-bucket="Vintage Eevee"
                data-search="pokemon limited edition - mini slab keychains 1st edition shadowless and more!">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/WIYAAOSwsKdn9wcx/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$15.00</span>
-                  <span class="pk-disc">-25%</span>
+                  <span class="pk-disc">-57%</span>
                 </div>
                 <div class="pk-title">Pokemon Limited Edition - Mini Slab Keychains 1st EDITION shadowless and more!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/188393179780?_skw=eevee+jungle+holo&amp;hash=item2bdd1bca84:g:MAUAAeSwGTpqCfAc" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/188393179780?_skw=eevee+jungle+holo&amp;hash=item2bdd1bca84:g:MAUAAeSwGTpqCfAc" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="0.00"
-               data-deal="0"
+               data-discount="42.90"
+               data-deal="1"
                data-bucket="Vintage Eevee"
                data-search="pokemon jungle 1st edition eevee 51/64 non holo nm">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/MAUAAeSwGTpqCfAc/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  
+                  <span class="pk-disc">-43%</span>
                 </div>
                 <div class="pk-title">Pokemon Jungle 1st Edition Eevee 51/64 Non Holo NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/157285345193?_skw=eevee+jungle+holo&amp;hash=item249eefe7a9:g:AjUAAeSwxeVopXRZ" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/157285345193?_skw=eevee+jungle+holo&amp;hash=item249eefe7a9:g:AjUAAeSwxeVopXRZ" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="0.00"
-               data-deal="0"
+               data-discount="42.90"
+               data-deal="1"
                data-bucket="Vintage Eevee"
                data-search="eevee pokemon cards! holo/reverse holos rare full art lp/nm choose your card!">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/AjUAAeSwxeVopXRZ/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  
+                  <span class="pk-disc">-43%</span>
                 </div>
                 <div class="pk-title">Eevee Pokemon Cards! Holo/Reverse Holos Rare Full Art LP/NM Choose Your Card!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/127629868172?_skw=eevee+skyridge&amp;hash=item1db7553c8c:g:00UAAeSwH85prLWp" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/127629868172?_skw=eevee+skyridge&amp;hash=item1db7553c8c:g:00UAAeSwH85prLWp" target="_blank" rel="noopener"
                data-price="19.99"
-               data-discount="0.00"
-               data-deal="0"
+               data-discount="42.90"
+               data-deal="1"
                data-bucket="Vintage Eevee"
                data-search="vintage pokemon theme deck inserts - card lists unpunched damage counters coins">
               <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/00UAAeSwH85prLWp/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$19.99</span>
-                  
+                  <span class="pk-disc">-43%</span>
                 </div>
                 <div class="pk-title">Vintage Pokemon Theme Deck Inserts - Card Lists Unpunched Damage Counters Coins</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/127629868172?_skw=eevee+aquapolis&amp;hash=item1db7553c8c:g:00UAAeSwH85prLWp" target="_blank" rel="noopener"
-               data-price="19.99"
-               data-discount="0.00"
+            <a class="pk-card" href="https://www.ebay.com/itm/188019472294?_skw=eevee+jungle+holo&amp;hash=item2bc6d577a6:g:0owAAeSwBWJpeVxR" target="_blank" rel="noopener"
+               data-price="27.49"
+               data-discount="21.40"
                data-deal="0"
                data-bucket="Vintage Eevee"
-               data-search="vintage pokemon theme deck inserts - card lists unpunched damage counters coins">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/00UAAeSwH85prLWp/s-l225.jpg');"></div>
+               data-search="pokemon jungle: choose your card - 1st edition &amp; unlimited - lp/nm wotc - 1999">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/0owAAeSwBWJpeVxR/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$19.99</span>
-                  
+                  <span class="pk-price">$27.49</span>
+                  <span class="pk-disc">-21%</span>
                 </div>
-                <div class="pk-title">Vintage Pokemon Theme Deck Inserts - Card Lists Unpunched Damage Counters Coins</div>
+                <div class="pk-title">Pokemon Jungle: Choose Your Card - 1st Edition &amp; Unlimited - LP/NM WOTC - 1999</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/155705429889?_skw=eevee+skyridge&amp;hash=item2440c44f81:g:kB0AAOSwKXZkzzfp" target="_blank" rel="noopener"
                data-price="29.99"
-               data-discount="-50.00"
+               data-discount="14.30"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="lot of 15 - 30 vintage pokemon cards with vintage holo wotc + 1st edition cards">
@@ -2354,15 +2328,31 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$29.99</span>
-                  
+                  <span class="pk-disc">-14%</span>
                 </div>
                 <div class="pk-title">Lot of 15 - 30 VINTAGE Pokemon Cards with Vintage Holo WOTC + 1st edition cards</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/396170360717?_skw=eevee+skyridge&amp;hash=item5c3d97f78d:g:SsoAAOSw5KtnoDYQ" target="_blank" rel="noopener"
+               data-price="40.00"
+               data-discount="-14.30"
+               data-deal="0"
+               data-bucket="Vintage Eevee"
+               data-search="pokemon tcg lot | tiers | only rare or better | plus base set to modern inserts!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/SsoAAOSw5KtnoDYQ/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$40.00</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon TCG lot | Tiers | only Rare or better | Plus Base Set to Modern inserts!</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/236561319558?_skw=eevee+skyridge&amp;hash=item3714274686:g:Ti8AAeSwwTBpWA2m" target="_blank" rel="noopener"
                data-price="58.99"
-               data-discount="-195.10"
+               data-discount="-68.60"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="pokemon skyridge 2003 ereader eevee-flareon-jolteon great condition eeveelutions">
@@ -2376,25 +2366,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156702180321?_skw=eevee+jungle+holo&amp;hash=item247c2d83e1:g:N~0AAOSwbVhn-Kke" target="_blank" rel="noopener"
-               data-price="89.99"
-               data-discount="-350.20"
-               data-deal="0"
-               data-bucket="Vintage Eevee"
-               data-search="pokémon 1999 jungle set - choose your card! wizards of the coast - lp/nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/N~0AAOSwbVhn-Kke/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$89.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokémon 1999 Jungle Set - Choose Your Card! Wizards of the Coast - LP/NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/145273401652?_skw=eevee+jungle+holo&amp;hash=item21d2f83134:g:oMwAAOSw5OVh1~0K" target="_blank" rel="noopener"
                data-price="89.99"
-               data-discount="-350.20"
+               data-discount="-157.20"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="1999 pokemon jungle &amp; fossil: choose your card! all pokemon available">
@@ -2410,7 +2384,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/117131348328?_skw=eevee+skyridge&amp;hash=item1b45928968:g:CP8AAeSwYxxp1a-M" target="_blank" rel="noopener"
                data-price="99.99"
-               data-discount="-400.20"
+               data-discount="-185.70"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="1999 - 2005 wotc &amp; ex pokemon card game (tcg) theme deck case counter display +">
@@ -2426,7 +2400,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156804393182?_skw=eevee+jungle+holo&amp;hash=item24824528de:g:UasAAOSwYQxoAiIw" target="_blank" rel="noopener"
                data-price="139.99"
-               data-discount="-600.30"
+               data-discount="-300.00"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="snorlax munchlax pokemon card! holo/reverse holo rare ex v vmax full art cards!">
@@ -2440,9 +2414,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156702180321?_skw=eevee+jungle+holo&amp;hash=item247c2d83e1:g:N~0AAOSwbVhn-Kke" target="_blank" rel="noopener"
+               data-price="149.99"
+               data-discount="-328.60"
+               data-deal="0"
+               data-bucket="Vintage Eevee"
+               data-search="pokémon 1999 jungle set - choose your card! wizards of the coast - lp/nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/N~0AAOSwbVhn-Kke/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$149.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokémon 1999 Jungle Set - Choose Your Card! Wizards of the Coast - LP/NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/127629660972?_skw=eevee+skyridge&amp;hash=item1db752132c:g:pEAAAeSw7cFprL6q" target="_blank" rel="noopener"
                data-price="199.99"
-               data-discount="-900.50"
+               data-discount="-471.50"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="1999 - 2002 wotc &amp; topps pokemon card game (tcg) vintage empty booster box lot">
@@ -2458,7 +2448,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/127628681222?_skw=eevee+skyridge&amp;hash=item1db7432006:g:sm0AAeSwKhJprMAe" target="_blank" rel="noopener"
                data-price="499.99"
-               data-discount="-2401.20"
+               data-discount="-1328.70"
                data-deal="0"
                data-bucket="Vintage Eevee"
                data-search="1999 - 2002 pokemon card game (tcg) vintage empty theme deck boxes wotc no cards">
@@ -2786,7 +2776,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="pk-stat"><div class="pk-stat-n">$5</div><div class="pk-stat-l">Cheapest</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$16</div><div class="pk-stat-l">Median</div></div>
               <div class="pk-stat"><div class="pk-stat-n">$489</div><div class="pk-stat-l">Highest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">21</div><div class="pk-stat-l">Deals / 57</div></div>
+              <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">21</div><div class="pk-stat-l">Deals / 56</div></div>
             </div>
           </div>
           <div class="pk-grid">
@@ -2822,6 +2812,54 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYwnrdlZlw%2BWRYpzXFHiTGQls%2BaSBeacue%2Fdbso75wQQrE3aAuvei79aNVQ1Jh0nKEWS2NETBZs3Wh5K1TKcdoym6p%2FR33qcXM2hdX5bYfPCDjpOmpoFzTYRqeEabA6vcQmGnvhxaTW3w66IC14tiFPjcOkXq5cf2PgMhdiadQ053e3KlRPuhHRMJiHpayo90SjR0HmvPF%2BxLswDNI8GJz14pWhhs1%2BEMVPpXuNFvIgb7OUSkXBhkWnktLdcHxfecKLga7CjXAl%2BQJOPo4cfOor6bBfr6zRtKZqpgKk7WRhbT4OWPQsDjIQ2BlMFk%2FmYbs%3D" target="_blank" rel="noopener"
+               data-price="5.99"
+               data-discount="62.50"
+               data-deal="1"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon tcg, special illustration rare - choose your card, english ,full art,nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/tmAAAeSweG9pXb3R/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$5.99</span>
+                  <span class="pk-disc">-62%</span>
+                </div>
+                <div class="pk-title">Pokemon TCG, Special Illustration Rare - Choose Your Card, English ,Full Art,NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/198367669241?_skw=eevee+ex+151&amp;hash=item2e2fa26bf9:g:R4YAAeSw0lVqDTgF" target="_blank" rel="noopener"
+               data-price="5.99"
+               data-discount="62.50"
+               data-deal="1"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon scarlet &amp; violet: 151 eng cards holo/reverse holo card for master set">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/R4YAAeSw0lVqDTgF/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$5.99</span>
+                  <span class="pk-disc">-62%</span>
+                </div>
+                <div class="pk-title">Pokemon Scarlet &amp; Violet: 151 ENG Cards Holo/Reverse Holo Card for MASTER SET</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/327045803122?_skw=eevee+ex+151&amp;hash=item4c2572ec72:g:ECEAAeSwnQFptNO5" target="_blank" rel="noopener"
+               data-price="5.99"
+               data-discount="62.50"
+               data-deal="1"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon scarlet &amp; violet 151: choose your card! holo/reverse holo ex cards nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/ECEAAeSwnQFptNO5/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$5.99</span>
+                  <span class="pk-disc">-62%</span>
+                </div>
+                <div class="pk-title">Pokemon Scarlet &amp; Violet 151: Choose Your Card! Holo/Reverse Holo EX Cards NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/257362083738?_skw=umbreon+ex+sir&amp;hash=item3bebf9bf9a:g:T~oAAeSwYghpzwUH" target="_blank" rel="noopener"
                data-price="5.99"
                data-discount="62.50"
@@ -2838,6 +2876,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/287334446384?_skw=umbreon+ex+sir&amp;hash=item42e677b530:g:JWUAAeSwZoxqCUSx" target="_blank" rel="noopener"
+               data-price="6.00"
+               data-discount="62.50"
+               data-deal="1"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon tcg – prismatic evolutions (2025) – pick your ex, ir, ur &amp; sir cards">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/JWUAAeSwZoxqCUSx/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$6.00</span>
+                  <span class="pk-disc">-62%</span>
+                </div>
+                <div class="pk-title">Pokemon TCG – Prismatic Evolutions (2025) – Pick Your EX, IR, UR &amp; SIR Cards</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/167397293090?_skw=eevee+ex+151&amp;hash=item26f9a7fc22:g:4zoAAeSwp0JofBgx" target="_blank" rel="noopener"
                data-price="6.50"
                data-discount="59.30"
@@ -2851,38 +2905,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <span class="pk-disc">-59%</span>
                 </div>
                 <div class="pk-title">Pokemon Singles - Various - Japanese Art Rare, SAR, 151 Masterball, PokeBall, EX</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/327045803122?_skw=eevee+ex+151&amp;hash=item4c2572ec72:g:ECEAAeSwnQFptNO5" target="_blank" rel="noopener"
-               data-price="6.99"
-               data-discount="56.30"
-               data-deal="1"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon scarlet &amp; violet 151: choose your card! holo/reverse holo ex cards nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/ECEAAeSwnQFptNO5/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$6.99</span>
-                  <span class="pk-disc">-56%</span>
-                </div>
-                <div class="pk-title">Pokemon Scarlet &amp; Violet 151: Choose Your Card! Holo/Reverse Holo EX Cards NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/198360925491?_skw=eevee+ex+151&amp;hash=item2e2f3b8533:g:iD8AAeSwLSlqCUzc" target="_blank" rel="noopener"
-               data-price="6.99"
-               data-discount="56.30"
-               data-deal="1"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon scarlet &amp; violet: 151 cards! english holo/reverse holo card!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/iD8AAeSwLSlqCUzc/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$6.99</span>
-                  <span class="pk-disc">-56%</span>
-                </div>
-                <div class="pk-title">Pokemon Scarlet &amp; Violet: 151 Cards! English Holo/Reverse Holo Card!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -2931,22 +2953,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <span class="pk-disc">-56%</span>
                 </div>
                 <div class="pk-title">Pokemon Singles - Various - EX - Ascended Heroes AH, SV 151, PFL, MEGA, SWSH....</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156734270341?_skw=eevee+ex+151&amp;hash=item247e172b85:g:takAAOSw5pZn8md2" target="_blank" rel="noopener"
-               data-price="7.99"
-               data-discount="50.00"
-               data-deal="1"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon scarlet &amp; violet 151: choose your card! holo/reverse holo ex cards nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/takAAOSw5pZn8md2/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$7.99</span>
-                  <span class="pk-disc">-50%</span>
-                </div>
-                <div class="pk-title">Pokemon Scarlet &amp; Violet 151: Choose Your Card! Holo/Reverse Holo EX Cards NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3046,22 +3052,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/256928525327?_skw=eevee+ex+special+illustration&amp;hash=item3bd2222c0f:g:6toAAOSw1QdnjFBf" target="_blank" rel="noopener"
-               data-price="9.99"
-               data-discount="37.50"
-               data-deal="1"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon scarlet &amp; violet prismatic evolutions singles hits card ball ex sir nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/6toAAOSw1QdnjFBf/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$9.99</span>
-                  <span class="pk-disc">-38%</span>
-                </div>
-                <div class="pk-title">Pokemon Scarlet &amp; Violet Prismatic Evolutions Singles Hits Card Ball Ex SIR NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
             <a class="pk-card is-deal" href="https://www.ebay.com/itm/156657906052?_skw=eevee+ex+151&amp;hash=item247989f184:g:gH8AAOSwXkNoTR-Z" target="_blank" rel="noopener"
                data-price="9.99"
                data-discount="37.50"
@@ -3078,19 +3068,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card is-deal" href="https://www.ebay.com/itm/226553542906?_skw=eevee+ex+151&amp;hash=item34bfa4b8fa:g:aFUAAOSwwABnv0nO" target="_blank" rel="noopener"
+            <a class="pk-card is-deal" href="https://www.ebay.com/itm/156734270341?_skw=eevee+ex+151&amp;hash=item247e172b85:g:takAAOSw5pZn8md2" target="_blank" rel="noopener"
                data-price="9.99"
                data-discount="37.50"
                data-deal="1"
                data-bucket="Eevee ex / SIR"
-               data-search="flat ship! prismatic evolutions complete your set/pick your card h/rh/ex pokemon">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/aFUAAOSwwABnv0nO/s-l225.jpg');"></div>
+               data-search="pokemon scarlet &amp; violet 151: choose your card! holo/reverse holo ex cards nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/takAAOSw5pZn8md2/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$9.99</span>
                   <span class="pk-disc">-38%</span>
                 </div>
-                <div class="pk-title">Flat Ship! Prismatic Evolutions Complete Your Set/Pick Your Card H/RH/EX Pokemon</div>
+                <div class="pk-title">Pokemon Scarlet &amp; Violet 151: Choose Your Card! Holo/Reverse Holo EX Cards NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3158,6 +3148,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/167395909032?_skw=eevee+ex+151&amp;hash=item26f992dda8:g:AQIAAeSwx3FoexHt" target="_blank" rel="noopener"
+               data-price="14.00"
+               data-discount="12.40"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon singles - promos - mega, pfl, swsh, blk, wht, pre, sv151, dri, ah, etc">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/AQIAAeSwx3FoexHt/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$14.00</span>
+                  <span class="pk-disc">-12%</span>
+                </div>
+                <div class="pk-title">Pokemon Singles - PROMOS - MEGA, PFL, SWSH, BLK, WHT, PRE, SV151, DRI, AH, ETC</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/176135947954?_skw=eevee+ex+special+illustration&amp;hash=item29028546b2:g:WIYAAOSwsKdn9wcx" target="_blank" rel="noopener"
                data-price="15.00"
                data-discount="6.20"
@@ -3171,22 +3177,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   <span class="pk-disc">-6%</span>
                 </div>
                 <div class="pk-title">Pokemon Limited Edition - Mini Slab Keychains 1st EDITION shadowless and more!</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/167395909032?_skw=eevee+ex+151&amp;hash=item26f992dda8:g:AQIAAeSwx3FoexHt" target="_blank" rel="noopener"
-               data-price="15.00"
-               data-discount="6.20"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon singles - promos - mega, pfl, swsh, blk, wht, pre, sv151, dri, ah, etc">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/AQIAAeSwx3FoexHt/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$15.00</span>
-                  <span class="pk-disc">-6%</span>
-                </div>
-                <div class="pk-title">Pokemon Singles - PROMOS - MEGA, PFL, SWSH, BLK, WHT, PRE, SV151, DRI, AH, ETC</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3251,22 +3241,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   
                 </div>
                 <div class="pk-title">⚡️SLABBIES⚡️💎PREMIUM💎 ✨Pokémon PSA 10 Keychains✨ (Mini) 🔥THE ORIGINAL🔥</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/396394486927?_skw=eevee+ex+special+illustration&amp;hash=item5c4af3dc8f:g:tmAAAeSweG9pXb3R" target="_blank" rel="noopener"
-               data-price="16.99"
-               data-discount="-6.30"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon tcg, special illustration rare - choose your card, english ,full art,nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/tmAAAeSweG9pXb3R/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$16.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon TCG, Special Illustration Rare - Choose Your Card, English ,Full Art,NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3446,6 +3420,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:RhkAAeSwsQ5ojdlV" target="_blank" rel="noopener"
+               data-price="44.99"
+               data-discount="-181.40"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/RhkAAeSwsQ5ojdlV/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$44.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/326645503513?_skw=eevee+ex+special+illustration&amp;hash=item4c0d96d619:g:PgQAAOSwkwtoUe8L" target="_blank" rel="noopener"
                data-price="54.95"
                data-discount="-243.70"
@@ -3475,6 +3465,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                   
                 </div>
                 <div class="pk-title">Pokemon TCG - Stellar Crown: Choose Your Card - All Reverse Holos/ex/Ace Spec</div>
+                <div class="pk-buying">BIN</div>
+              </div>
+            </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/156447979868?_skw=eevee+ex+special+illustration&amp;hash=item246d06b95c:g:ttUAAeSwbdBoy9lT" target="_blank" rel="noopener"
+               data-price="69.99"
+               data-discount="-337.70"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="pokemon tcg - twilight masquerade: choose your card! - all holos/reverse holos!">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/ttUAAeSwbdBoy9lT/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$69.99</span>
+                  
+                </div>
+                <div class="pk-title">Pokemon TCG - Twilight Masquerade: Choose Your Card! - All Holos/Reverse Holos!</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3510,7 +3516,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/357878400066?_skw=umbreon+ex+sir&amp;hash=item5353370442:g:XIgAAeSwK0RpE8co&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGbWXTXNjldPRAoP7oo4qUCrEMbafPck31gfDtTpQEDxwcWxns8DxnRy5x97uPgR4vdtltKjGvuWtnl%2FjUsWZelKTwhjXhQw%2BmDCBX5nV4n4wI7uQFm%2F3X2hqsdtjsN9Fqgo3i0HKhfZ96Xb8BJtaRHfevgfz0UtwwZPHK6JB5hAYqjZWY6PBXidZf9rRgtO%2FliwvHzY%2FccahGcrX55J3Nsnq4YSuRvYEICkOHeaqvpaYwUVaU0%2F2JVg8xQTTRTyUAfeRzuqUk%2BpsRXkJ%2FCMPJPMTpkgpwr8ip9RDFXrZc9d3w%3D%3D" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/357878400066?_skw=umbreon+ex+sir&amp;hash=item5353370442:g:XIgAAeSwK0RpE8co" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="-437.50"
                data-deal="0"
@@ -3526,7 +3532,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/358311614958?_skw=sylveon+ex+sir&amp;hash=item536d0959ee:g:2BIAAeSwfbFpsMjw" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/358311614958?_skw=sylveon+ex+sir&amp;hash=item536d0959ee:g:2BIAAeSwfbFpsMjw&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGaetqznINlMfgSitaujsSneJz99YzO%2BjT5UYuRt%2Bei9TSETQPwKaJ%2Fc3vxZ0MEZ9q1ZbGXNvHp0H5FwkTvf%2F0YUaV%2BmiigDKoLqa9eg41XEd%2BtBOe56alRJovlf8YHJUVV5aTstIK%2FRtlN3th2if32qf%2FSvkbIxLmtumIsikQo%2BQ20hqvx5NCUP7EyxSEwMmCmIHTqZqkgAQLK1SyRagB8dMWKy5L4c5w%2F1wzzNcXu0NjBmV%2BPq5hX%2Ban1MOtuWUuXD6yiHuWbn%2ByxhSmiVDenVeJpEdmL%2B0AXa3guQ3bzQRQ%3D%3D" target="_blank" rel="noopener"
                data-price="85.95"
                data-discount="-437.50"
                data-deal="0"
@@ -3574,6 +3580,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
+            <a class="pk-card" href="https://www.ebay.com/itm/137325934886?_skw=eevee+ex+special+illustration&amp;hash=item1ff9437926:g:7s8AAeSws11qDQLu" target="_blank" rel="noopener"
+               data-price="169.00"
+               data-discount="-956.90"
+               data-deal="0"
+               data-bucket="Eevee ex / SIR"
+               data-search="eevee ex prismatic evolutions 167/131 special illustration rare">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/7s8AAeSws11qDQLu/s-l225.jpg');"></div>
+              <div class="pk-meta">
+                <div class="pk-price-row">
+                  <span class="pk-price">$169.00</span>
+                  
+                </div>
+                <div class="pk-title">Eevee EX Prismatic Evolutions 167/131 Special Illustration Rare</div>
+                <div class="pk-buying">BIN . Best Offer</div>
+              </div>
+            </a>
             <a class="pk-card" href="https://www.ebay.com/itm/157190541903?_skw=eevee+ex+special+illustration&amp;hash=item249949524f:g:C~EAAeSwNlFofv5k" target="_blank" rel="noopener"
                data-price="169.99"
                data-discount="-963.10"
@@ -3588,22 +3610,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 </div>
                 <div class="pk-title">Pokémon Card! Sealed Stamp Promo Pokémon Center EX Holo Choose Your Cards!</div>
                 <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/336550609410?_skw=eevee+ex+special+illustration&amp;hash=item4e5bfac202:g:j7cAAeSwI8dp67qQ" target="_blank" rel="noopener"
-               data-price="179.99"
-               data-discount="-1025.60"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="eevee ex 167/131 - prismatic evolutions - sir special illustration rare - nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/j7cAAeSwI8dp67qQ/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$179.99</span>
-                  
-                </div>
-                <div class="pk-title">Eevee ex 167/131 - Prismatic Evolutions - SIR Special Illustration Rare - NM</div>
-                <div class="pk-buying">BIN . Best Offer</div>
               </div>
             </a>
             <a class="pk-card" href="https://www.ebay.com/itm/156351363276?_skw=eevee+ex+special+illustration&amp;hash=item24674478cc:g:14sAAOSwE2Nn9lK1" target="_blank" rel="noopener"
@@ -3638,51 +3644,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156750664346?_skw=umbreon+ex+sir&amp;hash=item247f11529a:g:GcgAAeSw~wdoy7z6" target="_blank" rel="noopener"
-               data-price="199.99"
-               data-discount="-1150.70"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon prismatic evolutions: choose your card! reverse holo/holo ex full art nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/GcgAAeSw~wdoy7z6/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$199.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon Prismatic Evolutions: Choose Your Card! Reverse Holo/Holo EX Full Art NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156641391983?_skw=eevee+ex+special+illustration&amp;hash=item24788df56f:g:rMYAAeSwXfto0NwM" target="_blank" rel="noopener"
-               data-price="269.99"
-               data-discount="-1588.50"
-               data-deal="0"
-               data-bucket="Eevee ex / SIR"
-               data-search="pokemon surging sparks: choose your card! holos/ex/full arts! nm">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/rMYAAeSwXfto0NwM/s-l225.jpg');"></div>
-              <div class="pk-meta">
-                <div class="pk-price-row">
-                  <span class="pk-price">$269.99</span>
-                  
-                </div>
-                <div class="pk-title">Pokemon Surging Sparks: Choose Your Card! Holos/EX/Full Arts! NM</div>
-                <div class="pk-buying">BIN</div>
-              </div>
-            </a>
-            <a class="pk-card" href="https://www.ebay.com/itm/156447979868?_skw=eevee+ex+special+illustration&amp;hash=item246d06b95c:g:a-4AAeSwbz1pS8C0" target="_blank" rel="noopener"
+            <a class="pk-card" href="https://www.ebay.com/itm/156641391983?_skw=eevee+ex+special+illustration&amp;hash=item24788df56f:g:PEwAAeSw7H9oZ4BF" target="_blank" rel="noopener"
                data-price="399.99"
                data-discount="-2401.50"
                data-deal="0"
                data-bucket="Eevee ex / SIR"
-               data-search="pokemon tcg - twilight masquerade: choose your card! - all holos/reverse holos!">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/a-4AAeSwbz1pS8C0/s-l225.jpg');"></div>
+               data-search="pokemon surging sparks: choose your card! holos/ex/full arts! nm">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/PEwAAeSw7H9oZ4BF/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
                   <span class="pk-price">$399.99</span>
                   
                 </div>
-                <div class="pk-title">Pokemon TCG - Twilight Masquerade: Choose Your Card! - All Holos/Reverse Holos!</div>
+                <div class="pk-title">Pokemon Surging Sparks: Choose Your Card! Holos/EX/Full Arts! NM</div>
                 <div class="pk-buying">BIN</div>
               </div>
             </a>
@@ -3757,27 +3731,27 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <p class="pk-blurb">Graded gem-mint Eevees and Eeveelutions. Umbreon PSA 10 is a household name.</p>
             </div>
             <div class="pk-bucket-stats">
-              <div class="pk-stat"><div class="pk-stat-n">$139</div><div class="pk-stat-l">Cheapest</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$139</div><div class="pk-stat-l">Median</div></div>
-              <div class="pk-stat"><div class="pk-stat-n">$139</div><div class="pk-stat-l">Highest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$150</div><div class="pk-stat-l">Cheapest</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$150</div><div class="pk-stat-l">Median</div></div>
+              <div class="pk-stat"><div class="pk-stat-n">$150</div><div class="pk-stat-l">Highest</div></div>
               <div class="pk-stat"><div class="pk-stat-n" style="color:var(--success);">0</div><div class="pk-stat-l">Deals / 1</div></div>
             </div>
           </div>
           <div class="pk-grid">
-            <a class="pk-card" href="https://www.ebay.com/itm/198271517305?_skw=eevee+psa+10&amp;hash=item2e29e74279:g:sokAAeSwVJVp2Vi2" target="_blank" rel="noopener"
-               data-price="138.73"
+            <a class="pk-card" href="https://www.ebay.com/itm/397953478008?_skw=eevee+psa+10&amp;hash=item5ca7e02d78:g:qJsAAeSwJy5qB7xU" target="_blank" rel="noopener"
+               data-price="150.00"
                data-discount="0.00"
                data-deal="0"
                data-bucket="Eevee PSA 10"
-               data-search="eevee psa 10 2024 pokemon japanese sv5a crimson haze art rare #078">
-              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/sokAAeSwVJVp2Vi2/s-l225.jpg');"></div>
+               data-search="eevee 173 promo psa 10">
+              <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/qJsAAeSwJy5qB7xU/s-l225.jpg');"></div>
               <div class="pk-meta">
                 <div class="pk-price-row">
-                  <span class="pk-price">$138.73</span>
+                  <span class="pk-price">$150.00</span>
                   
                 </div>
-                <div class="pk-title">EEVEE PSA 10 2024 POKEMON JAPANESE SV5A CRIMSON HAZE ART RARE #078</div>
-                <div class="pk-buying">BIN</div>
+                <div class="pk-title">eevee 173 promo psa 10</div>
+                <div class="pk-buying">BIN . Best Offer</div>
               </div>
             </a></div>
         </section>
@@ -3847,7 +3821,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:31 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:02 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

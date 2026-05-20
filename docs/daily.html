@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1984,11 +1990,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='dd-hero'><div class='dateline'>Wednesday · May 20, 2026 &middot; morning briefing</div><h1>Yesterday at <span class='accent'>Harpua2001</span> &mdash; <span class='accent'>$8.24</span> in sales, <span class='accent'>3</span> orders</h1><p class='sub'>One scroll, then back to packing boxes.</p></section><div class='dd-kpis'><div class='dd-kpi'><div class='dd-kpi-n'>$8.24</div><div class='dd-kpi-l'>Yesterday</div><div class='dd-kpi-foot'>3 order(s) closed</div></div><div class='dd-kpi'><div class='dd-kpi-n'>$49.70</div><div class='dd-kpi-l'>7-day revenue</div><div class='dd-kpi-foot'>15 orders</div></div><div class='dd-kpi'><div class='dd-kpi-n'>$387.84</div><div class='dd-kpi-l'>30-day revenue</div><div class='dd-kpi-foot'>40 orders</div></div><div class='dd-kpi'><div class='dd-kpi-n'>0</div><div class='dd-kpi-l'>Active listings</div><div class='dd-kpi-foot'>0 total watchers</div></div></div><div class='dd-grid'><div><section class='dd-section'><h2>Today's TODO<span class='tag'>3 items</span></h2><ul class='dd-todo'><li><span class='box'></span><span>128 listings need reshoot (Cassini wants 8+ photos at 1600px+).</span></li><li><span class='box'></span><span>40 items dropped below market overnight — repricer already adjusted.</span></li><li><span class='box'></span><span>Active listings down to 0 — time to scan more inventory in scan_wizard.html.</span></li></ul></section><section class='dd-section' style='margin-top:24px'><h2>Needs your attention<span class='tag'>top 3</span></h2><ul class='dd-fix'><li><div class='rank'>1</div><div class='body'><div class='ttl'><a href='https://www.ebay.com/itm/2024-Panini-Prizm-Draft-Picks-Gold-Ice-Prizm-Lot-16-Cards--/306933928667' target='_blank' rel='noopener'>2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards)</a></div><div class='why'>photo fail · Reshoot: add at least 7 more photos (currently 1, Cassini wants 8+). Upload originals at &gt;</div></div></li><li><div class='rank'>2</div><div class='body'><div class='ttl'><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406' target='_blank' rel='noopener'>2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a></div><div class='why'>photo fail · Reshoot: add at least 7 more photos (currently 1, Cassini wants 8+). Upload originals at &gt;</div></div></li><li><div class='rank'>3</div><div class='body'><div class='ttl'><a href='https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903' target='_blank' rel='noopener'>3 Marshall Faulk Cards San Diego State Indianapolis Colts</a></div><div class='why'>photo fail · Reshoot: add at least 7 more photos (currently 1, Cassini wants 8+). Upload originals at &gt;</div></div></li></ul></section></div><div><section class='dd-section'><h2>Top earner<span class='tag'>last 24h</span></h2><div class='dd-top'><div class='thumb'><img src='https://i.ebayimg.com/images/g/wMMAAeSwx-Bp9fCx/s-l1600.jpg' alt='' onerror="this.parentNode.innerHTML='<div class=ph>no image</div>'"></div><div class='meta'><div class='ttl'><a href='https://www.ebay.com/itm/306913939866' target='_blank' rel='noopener'>15 Dan Marino Cards Miami Dolphins Football Card Lot NFL</a></div><div class='price'>$3.99</div><div class='order'>order #01-14675-30021</div></div></div></section></div></div><div class='dd-foot'>Generated 2026-05-20 00:32 UTC &mdash; run <code>python3 daily_digest_agent.py</code> to refresh.</div>
+    <section class='dd-hero'><div class='dateline'>Wednesday · May 20, 2026 &middot; morning briefing</div><h1>Yesterday at <span class='accent'>Harpua2001</span> &mdash; <span class='accent'>$13.97</span> in sales, <span class='accent'>4</span> orders</h1><p class='sub'>One scroll, then back to packing boxes.</p></section><div class='dd-kpis'><div class='dd-kpi'><div class='dd-kpi-n'>$13.97</div><div class='dd-kpi-l'>Yesterday</div><div class='dd-kpi-foot'>4 order(s) closed</div></div><div class='dd-kpi'><div class='dd-kpi-n'>$57.68</div><div class='dd-kpi-l'>7-day revenue</div><div class='dd-kpi-foot'>17 orders</div></div><div class='dd-kpi'><div class='dd-kpi-n'>$395.82</div><div class='dd-kpi-l'>30-day revenue</div><div class='dd-kpi-foot'>42 orders</div></div><div class='dd-kpi'><div class='dd-kpi-n'>0</div><div class='dd-kpi-l'>Active listings</div><div class='dd-kpi-foot'>0 total watchers</div></div></div><div class='dd-grid'><div><section class='dd-section'><h2>Today's TODO<span class='tag'>3 items</span></h2><ul class='dd-todo'><li><span class='box'></span><span>128 listings need reshoot (Cassini wants 8+ photos at 1600px+).</span></li><li><span class='box'></span><span>40 items dropped below market overnight — repricer already adjusted.</span></li><li><span class='box'></span><span>Active listings down to 0 — time to scan more inventory in scan_wizard.html.</span></li></ul></section><section class='dd-section' style='margin-top:24px'><h2>Needs your attention<span class='tag'>top 3</span></h2><ul class='dd-fix'><li><div class='rank'>1</div><div class='body'><div class='ttl'><a href='https://www.ebay.com/itm/2024-Panini-Prizm-Draft-Picks-Gold-Ice-Prizm-Lot-16-Cards--/306933928667' target='_blank' rel='noopener'>2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards)</a></div><div class='why'>photo fail · Reshoot: add at least 7 more photos (currently 1, Cassini wants 8+). Upload originals at &gt;</div></div></li><li><div class='rank'>2</div><div class='body'><div class='ttl'><a href='https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406' target='_blank' rel='noopener'>2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</a></div><div class='why'>photo fail · Reshoot: add at least 7 more photos (currently 1, Cassini wants 8+). Upload originals at &gt;</div></div></li><li><div class='rank'>3</div><div class='body'><div class='ttl'><a href='https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903' target='_blank' rel='noopener'>3 Marshall Faulk Cards San Diego State Indianapolis Colts</a></div><div class='why'>photo fail · Reshoot: add at least 7 more photos (currently 1, Cassini wants 8+). Upload originals at &gt;</div></div></li></ul></section></div><div><section class='dd-section'><h2>Top earner<span class='tag'>last 24h</span></h2><div class='dd-top'><div class='thumb'><img src='https://i.ebayimg.com/images/g/qgAAAeSwDgxqCntg/s-l1600.jpg' alt='' onerror="this.parentNode.innerHTML='<div class=ph>no image</div>'"></div><div class='meta'><div class='ttl'><a href='https://www.ebay.com/itm/306945569731' target='_blank' rel='noopener'>2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</a></div><div class='price'>$4.99</div><div class='order'>order #10-14660-32299</div></div></div></section></div></div><div class='dd-foot'>Generated 2026-05-20 11:03 UTC &mdash; run <code>python3 daily_digest_agent.py</code> to refresh.</div>
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1989,12 +1995,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 <section class="hero">
   <h1>Repricing Agent</h1>
-  <p class="sub">Last run: <code>2026-05-20 00:33 UTC</code></p>
+  <p class="sub">Last run: <code>2026-05-20 11:03 UTC</code></p>
   <div class="stat-grid">
-    <div class="stat"><div class="stat-n">17</div><div class="stat-l">to apply</div></div>
-    <div class="stat"><div class="stat-n">89</div><div class="stat-l">in dead zone</div></div>
-    <div class="stat"><div class="stat-n">21</div><div class="stat-l">blocked</div></div>
-    <div class="stat"><div class="stat-n">$14.09</div><div class="stat-l">listed Δ</div></div>
+    <div class="stat"><div class="stat-n">23</div><div class="stat-l">to apply</div></div>
+    <div class="stat"><div class="stat-n">82</div><div class="stat-l">in dead zone</div></div>
+    <div class="stat"><div class="stat-n">24</div><div class="stat-l">blocked</div></div>
+    <div class="stat"><div class="stat-n">$7.29</div><div class="stat-l">listed Δ</div></div>
   </div>
 </section>
 
@@ -2011,7 +2017,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </section>
 
 
-        <h3>🎯 Will apply <span class='count'>(17)</span></h3>
+        <h3>🎯 Will apply <span class='count'>(23)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -2025,40 +2031,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <th>Decision</th>
             </tr></thead>
             <tbody>
-        <tr class="row-apply">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121" target="_blank" rel="noopener">
-              <span class="title">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</span>
-              <span class="item-id">306937452121</span>
-            </a>
-          </td>
-          <td class="num">$8.50</td>
-          <td class="num target">$7.99</td>
-          <td class="num delta delta-drop">-6.0%</td>
-          <td class="num">$5.23</td>
-          <td class="basis">sold_history · n=3 · ref $8.00<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $8.00 (n=3, high) → target $7.99</td>
-          <td class="decision decision-apply">APPLY</td>
-        </tr>
-        
-
-        <tr class="row-apply">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</span>
-              <span class="item-id">306937601406</span>
-            </a>
-          </td>
-          <td class="num">$15.00</td>
-          <td class="num target">$12.99</td>
-          <td class="num delta delta-drop">-13.4%</td>
-          <td class="num">$9.57</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $2.99 (n=21, high) → target $12.99<br><em>capped to max_step_down_pct=15.0%</em></td>
-          <td class="decision decision-apply">APPLY</td>
-        </tr>
-        
-
         <tr class="row-apply">
           <td class="item">
             <a href="https://www.ebay.com/itm/Tim-Brown-Los-Angeles-Raiders-Football-Card-Lot-14-HOF-Wide-Receiver-/306903941543" target="_blank" rel="noopener">
@@ -2189,8 +2161,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$4.99</td>
           <td class="num delta delta-drop">-21.8%</td>
           <td class="num">$2.63</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $2.99 (n=22, high) → target $4.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=23, high) → target $4.99<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         
@@ -2223,8 +2195,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$8.99</td>
           <td class="num delta delta-drop">-18.2%</td>
           <td class="num">$6.10</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $2.99 (n=21, high) → target $8.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=22, high) → target $8.99<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         
@@ -2240,8 +2212,76 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-drop">-25.1%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $2.99 (n=21, high) → target $2.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=22, high) → target $2.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
+              <span class="title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</span>
+              <span class="item-id">306939333836</span>
+            </a>
+          </td>
+          <td class="num">$43.99</td>
+          <td class="num target">$36.99</td>
+          <td class="num delta delta-drop">-15.9%</td>
+          <td class="num">$30.39</td>
+          <td class="basis">sold_history · n=3 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=3, high) → target $36.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-NFL-/306939339030" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL</span>
+              <span class="item-id">306939339030</span>
+            </a>
+          </td>
+          <td class="num">$4.99</td>
+          <td class="num target">$3.99</td>
+          <td class="num delta delta-drop">-20.0%</td>
+          <td class="num">$1.76</td>
+          <td class="basis">sold_history · n=5 · ref $3.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $3.99 (n=5, high) → target $3.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints RC #398</span>
+              <span class="item-id">306939345538</span>
+            </a>
+          </td>
+          <td class="num">$3.45</td>
+          <td class="num target">$3.99</td>
+          <td class="num delta delta-rise">+15.7%</td>
+          <td class="num">$1.76</td>
+          <td class="basis">sold_history · n=3 · ref $5.67<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $5.67 (n=3, high) → target $3.99<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rookie Chargers WR</span>
+              <span class="item-id">306939367849</span>
+            </a>
+          </td>
+          <td class="num">$2.34</td>
+          <td class="num target">$2.99</td>
+          <td class="num delta delta-rise">+27.8%</td>
+          <td class="num">$0.89</td>
+          <td class="basis">sold_history · n=3 · ref $5.67<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $5.67 (n=3, high) → target $2.99<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         
@@ -2257,25 +2297,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-drop">-25.1%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $2.99 (n=6, high) → target $2.99<br><em>capped to max_step_down_pct=15.0%</em></td>
-          <td class="decision decision-apply">APPLY</td>
-        </tr>
-        
-
-        <tr class="row-apply">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Fuego-Signatures-Kurtis-Rourke-FUS-KRE-AU-RC--/306945569731" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</span>
-              <span class="item-id">306945569731</span>
-            </a>
-          </td>
-          <td class="num">$4.99</td>
-          <td class="num target">$3.99</td>
-          <td class="num delta delta-drop">-20.0%</td>
-          <td class="num">$1.76</td>
-          <td class="basis">sold_history · n=20 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $2.99 (n=20, high) → target $3.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="basis">sold_history · n=7 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=7, high) → target $2.99<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         
@@ -2291,8 +2314,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$4.99</td>
           <td class="num delta delta-drop">-16.7%</td>
           <td class="num">$2.63</td>
-          <td class="basis">sold_history · n=4 · ref $4.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $4.99 (n=4, high) → target $4.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="basis">sold_history · n=5 · ref $3.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $3.99 (n=5, high) → target $4.99<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         
@@ -2308,8 +2331,93 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$5.99</td>
           <td class="num delta delta-rise">+20.0%</td>
           <td class="num">$3.50</td>
-          <td class="basis">pricecharting · n=3 · ref $9.39<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">pricecharting median $9.39 (n=3, high) → target $5.99<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="basis">sold_history · n=3 · ref $5.67<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $5.67 (n=3, high) → target $5.99</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener">
+              <span class="title">Topps 2024 Chrome Checkerboard Jayden Daniels #74TF-2 Commanders NFL Card</span>
+              <span class="item-id">306947440872</span>
+            </a>
+          </td>
+          <td class="num">$7.99</td>
+          <td class="num target">$6.99</td>
+          <td class="num delta delta-drop">-12.5%</td>
+          <td class="num">$4.36</td>
+          <td class="basis">pricecharting · n=3 · ref $7.00<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">pricecharting median $7.00 (n=3, high) → target $6.99</td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/Bucky-Irving-2025-Topps-Chrome-Pulsar-Refractor-Tampa-Bay-Buccaneers-285-/306949682127" target="_blank" rel="noopener">
+              <span class="title">Bucky Irving 2025 Topps Chrome Pulsar Refractor Tampa Bay Buccaneers #285</span>
+              <span class="item-id">306949682127</span>
+            </a>
+          </td>
+          <td class="num">$2.99</td>
+          <td class="num target">$3.99</td>
+          <td class="num delta delta-rise">+33.4%</td>
+          <td class="num">$1.76</td>
+          <td class="basis">sold_history · n=3 · ref $3.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $3.99 (n=3, high) → target $3.99<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-TOPPS-CHROME-FOOTBALL-POWER-PLAYERS-JAHMYR-GIBBS-LIONS-/306949800437" target="_blank" rel="noopener">
+              <span class="title">2025 TOPPS CHROME FOOTBALL POWER PLAYERS JAHMYR GIBBS LIONS</span>
+              <span class="item-id">306949800437</span>
+            </a>
+          </td>
+          <td class="num">$3.99</td>
+          <td class="num target">$2.99</td>
+          <td class="num delta delta-drop">-25.1%</td>
+          <td class="num">$0.89</td>
+          <td class="basis">sold_history · n=7 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=7, high) → target $2.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Trey-Benson-27-Light-Blue-Pyramids-385-/306949801383" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Phoenix - Trey Benson #27 Light Blue Pyramids /385</span>
+              <span class="item-id">306949801383</span>
+            </a>
+          </td>
+          <td class="num">$3.99</td>
+          <td class="num target">$2.99</td>
+          <td class="num delta delta-drop">-25.1%</td>
+          <td class="num">$0.89</td>
+          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=21, high) → target $2.99<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Sean-Taylor-105-Lazer-Prizm-/306949802296" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</span>
+              <span class="item-id">306949802296</span>
+            </a>
+          </td>
+          <td class="num">$7.50</td>
+          <td class="num target">$5.99</td>
+          <td class="num delta delta-drop">-20.1%</td>
+          <td class="num">$3.50</td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $2.99 (n=22, high) → target $5.99<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         </tbody>
@@ -2317,7 +2425,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         
 
-        <h3>⊝ In dead zone (no-op) <span class='count'>(89)</span></h3>
+        <h3>⊝ In dead zone (no-op) <span class='count'>(82)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -2331,57 +2439,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <th>Decision</th>
             </tr></thead>
             <tbody>
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Garrett-Nussmeier-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener">
-              <span class="title">2026 Wild Card 5 Card Draw Garrett Nussmeier RC 1/2 Silver Holo Queen</span>
-              <span class="item-id">306937463442</span>
-            </a>
-          </td>
-          <td class="num">$7.99</td>
-          <td class="num target">$7.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$5.23</td>
-          <td class="basis">sold_history · n=3 · ref $8.00<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2026-Wild-Card-5-Card-Draw-Stacked-Deck-Jeremiyah-Love-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener">
-              <span class="title">2026 Wild Card 5 Card Draw Stacked Deck Jeremiyah Love RC 3/5 Silver Holo Rookie</span>
-              <span class="item-id">306937466251</span>
-            </a>
-          </td>
-          <td class="num">$7.99</td>
-          <td class="num target">$7.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$5.23</td>
-          <td class="basis">sold_history · n=3 · ref $8.00<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Update-Series-1990-Topps-Baseball-Marcelo-Mayer-U90-9-Green--/306937606464" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</span>
-              <span class="item-id">306937606464</span>
-            </a>
-          </td>
-          <td class="num">$5.99</td>
-          <td class="num target">$5.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$3.50</td>
-          <td class="basis">ebay_active · n=5 · ref $5.59<br><small class="conf-mid">mid confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
         <tr class="row-skip">
           <td class="item">
             <a href="https://www.ebay.com/itm/Deion-Sanders-Cards-/306784122664" target="_blank" rel="noopener">
@@ -2412,23 +2469,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$0.89</td>
           <td class="basis">ebay_active · n=10 · ref $2.84<br><small class="conf-mid">mid confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/3-Neon-Green-Pulsar-and-5-Purple-Wave-Prizm-2025-Cards-/306948827365" target="_blank" rel="noopener">
-              <span class="title">3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</span>
-              <span class="item-id">306948827365</span>
-            </a>
-          </td>
-          <td class="num">$0.99</td>
-          <td class="num target">$0.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$-0.84</td>
-          <td class="basis">sold_history · n=19 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
         
@@ -2469,8 +2509,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-skip">
           <td class="item">
-            <a href="https://www.ebay.com/itm/1994-Classic-Pro-Line-Live-Steve-Emtman-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener">
-              <span class="title">1994 Classic Pro Line Live Steve Emtman AUTO Autograph Colts NFL Football</span>
+            <a href="https://www.ebay.com/itm/1994-Steve-Emtman-Classic-Pro-Line-Live-AUTO-Autograph-Colts-NFL-Football-/306904203738" target="_blank" rel="noopener">
+              <span class="title">1994 Steve Emtman Classic Pro Line Live AUTO Autograph Colts NFL Football</span>
               <span class="item-id">306904203738</span>
             </a>
           </td>
@@ -2580,7 +2620,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2597,7 +2637,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=20 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2614,7 +2654,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2631,7 +2671,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2648,7 +2688,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2665,7 +2705,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2682,7 +2722,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=24 · ref $3.00<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2699,7 +2739,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2716,7 +2756,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2733,7 +2773,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-drop">-0.3%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta -0.3% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2750,7 +2790,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2767,7 +2807,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2784,7 +2824,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2801,7 +2841,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2818,7 +2858,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2835,7 +2875,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2852,7 +2892,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2869,7 +2909,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2886,7 +2926,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2903,7 +2943,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2920,7 +2960,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2937,7 +2977,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2954,7 +2994,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -2971,7 +3011,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3005,7 +3045,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3022,7 +3062,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3039,7 +3079,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3056,7 +3096,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3073,7 +3113,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3107,7 +3147,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3124,7 +3164,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=24 · ref $3.00<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3141,7 +3181,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3158,7 +3198,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3175,7 +3215,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3192,7 +3232,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=24 · ref $3.00<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3311,7 +3351,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3328,7 +3368,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3345,7 +3385,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3362,7 +3402,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3379,7 +3419,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=24 · ref $3.00<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3396,7 +3436,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=17 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=18 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3413,7 +3453,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=7 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3447,24 +3487,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-NFL-/306939339030" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL</span>
-              <span class="item-id">306939339030</span>
-            </a>
-          </td>
-          <td class="num">$4.99</td>
-          <td class="num target">$4.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$2.63</td>
-          <td class="basis">sold_history · n=4 · ref $4.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3481,7 +3504,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$3.99</td>
           <td class="num delta delta-drop">-4.8%</td>
           <td class="num">$1.76</td>
-          <td class="basis">sold_history · n=4 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta -4.8% inside dead_zone_pct=5.0%<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3498,7 +3521,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3515,7 +3538,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=7 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3532,7 +3555,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3549,7 +3572,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=4 · ref $3.00<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3566,7 +3589,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3600,7 +3623,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3617,7 +3640,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3634,7 +3657,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=21 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3651,7 +3674,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3668,7 +3691,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3685,7 +3708,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=23 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3702,7 +3725,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=22 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=24 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3719,7 +3742,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=16 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=17 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3753,7 +3776,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=4 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3770,25 +3793,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.03</td>
-          <td class="basis">sold_history · n=5 · ref $2.99<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Ashton-Jeanty-Fortune-15-ROOKIE-F15-24-Raiders-/306947427453" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome - Ashton Jeanty Fortune 15 ROOKIE #F15-24 - Raiders</span>
-              <span class="item-id">306947427453</span>
-            </a>
-          </td>
-          <td class="num">$2.99</td>
-          <td class="num target">$2.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=4 · ref $3.00<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
         
@@ -3804,24 +3810,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$2.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$0.89</td>
-          <td class="basis">sold_history · n=6 · ref $2.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener">
-              <span class="title">Topps 2024 Chrome Checkerboard Jayden Daniels #74TF-2 Commanders NFL Card</span>
-              <span class="item-id">306947440872</span>
-            </a>
-          </td>
-          <td class="num">$7.99</td>
-          <td class="num target">$7.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$5.23</td>
-          <td class="basis">pricecharting · n=3 · ref $8.00<br><small class="conf-high">high confidence</small></td>
+          <td class="basis">sold_history · n=7 · ref $2.99<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
@@ -3847,7 +3836,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         
 
-        <h3>⛔ Blocked <span class='count'>(21)</span></h3>
+        <h3>⛔ Blocked <span class='count'>(24)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -3863,6 +3852,91 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <tbody>
         <tr class="row-blocked">
           <td class="item">
+            <a href="https://www.ebay.com/itm/2026-Wild-Card-Joe-Burrow-Justin-Jefferson-Card-1-1-King-NFL-/306937452121" target="_blank" rel="noopener">
+              <span class="title">2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL</span>
+              <span class="item-id">306937452121</span>
+            </a>
+          </td>
+          <td class="num">$8.50</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">auction-with-bids</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306937463442" target="_blank" rel="noopener">
+              <span class="title">2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen</span>
+              <span class="item-id">306937463442</span>
+            </a>
+          </td>
+          <td class="num">$7.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">auction-with-bids</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2026-Jeremiyah-Love-5-Card-Draw-Stacked-Deck-Wild-Card-RC-3-5-Silver-Holo-Rookie-/306937466251" target="_blank" rel="noopener">
+              <span class="title">2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie</span>
+              <span class="item-id">306937466251</span>
+            </a>
+          </td>
+          <td class="num">$7.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">auction-with-bids</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Chuba-Hubbard-43-Zebra-Prizm-/306937601406" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</span>
+              <span class="item-id">306937601406</span>
+            </a>
+          </td>
+          <td class="num">$15.00</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">auction-with-bids</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Topps-Update-Series-1990-Topps-Baseball-Marcelo-Mayer-U90-9-Green--/306937606464" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</span>
+              <span class="item-id">306937606464</span>
+            </a>
+          </td>
+          <td class="num">$5.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">auction-with-bids</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
             <a href="https://www.ebay.com/itm/13-Junior-Seau-Cards-Including-Rookie-Cards-San-Diego-Chargers-/306785163679" target="_blank" rel="noopener">
               <span class="title">13 Junior Seau Cards Including Rookie Cards San Diego Chargers</span>
               <span class="item-id">306785163679</span>
@@ -3874,6 +3948,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$-0.84</td>
           <td class="basis">pricecharting · n=3 · ref $15.00<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">net $-0.84 would fall below min_net_after_fees $0.25<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/3-Neon-Green-Pulsar-and-5-Purple-Wave-Prizm-2025-Cards-/306948827365" target="_blank" rel="noopener">
+              <span class="title">3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</span>
+              <span class="item-id">306948827365</span>
+            </a>
+          </td>
+          <td class="num">$0.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">auction-with-bids</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -4033,8 +4124,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-blocked">
           <td class="item">
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Ken-Griffey-Jr-158-NFL-/306931283327" target="_blank" rel="noopener">
-              <span class="title">1990 Sports Illustrated for Kids Series 1 - Ken Griffey Jr #158 NFL</span>
+            <a href="https://www.ebay.com/itm/1990-Ken-Griffey-Jr-Sports-Illustrated-for-Kids-Series-1-158-NFL-/306931283327" target="_blank" rel="noopener">
+              <span class="title">1990 Ken Griffey Jr Sports Illustrated for Kids Series 1 #158 NFL</span>
               <span class="item-id">306931283327</span>
             </a>
           </td>
@@ -4084,8 +4175,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-blocked">
           <td class="item">
-            <a href="https://www.ebay.com/itm/1990-Sports-Illustrated-for-Kids-Series-1-Kevin-Mitchell-112-NFL-/306931339580" target="_blank" rel="noopener">
-              <span class="title">1990 Sports Illustrated for Kids Series 1 - Kevin Mitchell #112 NFL</span>
+            <a href="https://www.ebay.com/itm/1990-Kevin-Mitchell-Sports-Illustrated-for-Kids-Series-1-112-NFL-/306931339580" target="_blank" rel="noopener">
+              <span class="title">1990 Kevin Mitchell Sports Illustrated for Kids Series 1 #112 NFL</span>
               <span class="item-id">306931339580</span>
             </a>
           </td>
@@ -4145,58 +4236,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num delta delta-flat">—</td>
           <td class="num">—</td>
           <td class="basis">—<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">insufficient comps (need >=3, got 1 on sold_history)</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-        
-
-        <tr class="row-blocked">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
-              <span class="title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</span>
-              <span class="item-id">306939333836</span>
-            </a>
-          </td>
-          <td class="num">$43.99</td>
-          <td class="num target">$41.99</td>
-          <td class="num delta delta-drop">-4.5%</td>
-          <td class="num">$34.73</td>
-          <td class="basis">ebay_active · n=4 · ref $42.27<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">drop requires high-confidence source; current basis ebay_active is low</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-        
-
-        <tr class="row-blocked">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints RC #398</span>
-              <span class="item-id">306939345538</span>
-            </a>
-          </td>
-          <td class="num">$3.45</td>
-          <td class="num target">$2.99</td>
-          <td class="num delta delta-drop">-13.3%</td>
-          <td class="num">$0.89</td>
-          <td class="basis">ebay_active · n=10 · ref $1.70<br><small class="conf-mid">mid confidence</small></td>
-          <td class="reasons">drop requires high-confidence source; current basis ebay_active is mid<br><em>capped to max_step_down_pct=15.0%</em></td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-        
-
-        <tr class="row-blocked">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rookie Chargers WR</span>
-              <span class="item-id">306939367849</span>
-            </a>
-          </td>
-          <td class="num">$2.34</td>
-          <td class="num target">$1.99</td>
-          <td class="num delta delta-drop">-15.0%</td>
-          <td class="num">$0.03</td>
-          <td class="basis">ebay_active · n=7 · ref $1.90<br><small class="conf-mid">mid confidence</small></td>
-          <td class="reasons">net $0.03 would fall below min_net_after_fees $0.25</td>
+          <td class="reasons">insufficient comps (need >=3, got 2 on sold_history)</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -4278,7 +4318,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:33 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

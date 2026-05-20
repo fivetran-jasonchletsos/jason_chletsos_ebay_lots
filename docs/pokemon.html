@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1978,9 +1984,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Pikachu</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">122</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">127</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">38</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">39</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The mascot. The icon. The card that built the hobby.</div>
           </div>
@@ -1990,21 +1996,21 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Charizard</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">36</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">33</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">10</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">8</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The chase card. The flame. Every collector&#x27;s white whale.</div>
           </div>
         </a>
         <a class="pmon-tile" href="mew.html" style="--accent:#ff8fab;">
-          <div class="pmon-tile-img" style="background-image:url('https://i.ebayimg.com/images/g/8TYAAeSwtX9oqMy9/s-l225.jpg');"></div>
+          <div class="pmon-tile-img" style="background-image:url('https://i.ebayimg.com/images/g/U-AAAeSwkXBqDKRZ/s-l225.jpg');"></div>
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Mew</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">36</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">34</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">8</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">7</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">The original mythical. Pink, psychic, and very, very rare.</div>
           </div>
@@ -2026,9 +2032,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="pmon-tile-meta">
             <div class="pmon-tile-name">Eevee</div>
             <div class="pmon-tile-stats">
-              <span class="pmon-tile-n">96</span> <span class="pmon-tile-l">listings</span>
+              <span class="pmon-tile-n">94</span> <span class="pmon-tile-l">listings</span>
               &middot;
-              <span class="pmon-tile-n" style="color:var(--success);">33</span> <span class="pmon-tile-l">deals</span>
+              <span class="pmon-tile-n" style="color:var(--success);">35</span> <span class="pmon-tile-l">deals</span>
             </div>
             <div class="pmon-tile-tag">Eight evolutions. Infinite cards. The cutest investment vehicle on the planet.</div>
           </div>
@@ -2038,7 +2044,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:31 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:02 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

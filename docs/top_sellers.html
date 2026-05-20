@@ -595,7 +595,7 @@ a:hover { color: var(--gold-bright); }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 1; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -612,17 +612,23 @@ a:hover { color: var(--gold-bright); }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px; line-height: 1; letter-spacing: .04em;
   color: var(--text);
+  white-space: nowrap;
 }
 .brand-tag {
   font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); margin-top: 4px; font-weight: 600;
+  white-space: nowrap;
 }
-/* Below 1200px the nav links eat into the brand block — hide the tag so
-   the three-line "SPORTS / POKEMON / CARDS" doesn't overlap the nav. */
+/* Suppress the forced <br> line breaks in the tagline — they were producing a
+   three-line stack ("SPORTS & / POKEMON / CARDS") that made the brand block
+   tall enough to vertically collide with the nav row's hover backgrounds. */
+.brand-tag br { display: none; }
+/* Below 1200px the nav links eat into the brand block — hide the tag so the
+   tagline doesn't get truncated next to the nav. */
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -1994,7 +2000,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <div class="stat-card"><div class="num">7</div><div class="lbl">Sellers tracked</div></div>
-      <div class="stat-card"><div class="num">7</div><div class="lbl">Live listings indexed</div></div>
+      <div class="stat-card"><div class="num">11</div><div class="lbl">Live listings indexed</div></div>
     </div>
 
     
@@ -2021,11 +2027,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="ts-stats"><div class="ts-stat"><div class="ts-n">7.0M</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">6.1M</div><div class="ts-l">Lifetime sales</div></div><div class="ts-stat"><div class="ts-n">38K</div><div class="ts-l">Monthly feedback</div></div><div class="ts-stat"><div class="ts-n">1</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">$1.00</div><div class="ts-l">Cheapest now</div></div></div>
           </div>
           <div class="ts-grid">
-            <a class="ts-card" href="https://www.ebay.com/itm/236767338498?_skw=single+card&amp;hash=item37206ee002:g:k4sAAeSw7pFp5aIq" target="_blank" rel="noopener">
-              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/k4sAAeSw7pFp5aIq/s-l225.jpg');"></div>
+            <a class="ts-card" href="https://www.ebay.com/itm/236768359519?_skw=single+card&amp;hash=item37207e745f:g:jFcAAeSwEJpp5kYU" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/jFcAAeSwEJpp5kYU/s-l225.jpg');"></div>
               <div class="ts-meta">
                 <div class="ts-price">$1.00</div>
-                <div class="ts-title">2004 National Trading Card Day Dale Earnhardt Jr #PP4 HOF 1md</div>
+                <div class="ts-title">1991 Wild Card Mike Pritchard #69 d1f</div>
                 <div class="ts-buying">BIN</div>
               </div>
             </a></div>
@@ -2094,9 +2100,33 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <span class="ts-rank">#50 GLOBAL</span></h2>
               <p class="ts-tag">#50 worldwide. Vintage specialist.</p>
             </div>
-            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">5</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">$1.00</div><div class="ts-l">Cheapest now</div></div></div>
+            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">9</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">$1.00</div><div class="ts-l">Cheapest now</div></div></div>
           </div>
           <div class="ts-grid">
+            <a class="ts-card" href="https://www.ebay.com/itm/376418843273?_skw=vintage&amp;hash=item57a44fba89:g:XwAAAeSwN3RofOpi" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/XwAAAeSwN3RofOpi/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">💖 MASSIVE GARAGE SALE FOR CANCER RESEARCH 💖</div>
+                <div class="ts-buying">BIN · Best Offer</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/177212283563?_skw=vintage&amp;hash=item2942acdaab:g:MpwAAeSw3eFoVkvz" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/MpwAAeSw3eFoVkvz/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Vintage Shelcore Chunky Figures &amp; Animals Replacements-Pick!</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/287222407659?_skw=vintage&amp;hash=item42dfca21eb:g:QjcAAeSwyXJpvtSB" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/QjcAAeSwyXJpvtSB/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Weward Venus Williams Vintage Cards 2026</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
             <a class="ts-card" href="https://www.ebay.com/itm/264706800647?_skw=1960&amp;hash=item3da1c13c07:g:l9AAAOSwIgNXvRIT" target="_blank" rel="noopener">
               <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/l9AAAOSwIgNXvRIT/s-l225.jpg');"></div>
               <div class="ts-meta">
@@ -2129,12 +2159,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
                 <div class="ts-buying">BIN</div>
               </div>
             </a>
-            <a class="ts-card" href="https://www.ebay.com/itm/188366205990?_skw=vintage&amp;hash=item2bdb803426:g:Ik4AAeSwT-tplkpg" target="_blank" rel="noopener">
-              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/Ik4AAeSwT-tplkpg/s-l225.jpg');"></div>
+            <a class="ts-card" href="https://www.ebay.com/itm/375637899534?_skw=1970&amp;hash=item5775c3790e:g:L28AAOSwvzdm3Kn9" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/L28AAOSwvzdm3Kn9/s-l225.jpg');"></div>
               <div class="ts-meta">
-                <div class="ts-price">$5.12</div>
-                <div class="ts-title">Aladdin&#x27;s Topsall Thermos Pint Size Red/Black, 1970s Vintage, Nashville TN</div>
-                <div class="ts-buying">BIN · Auction</div>
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">1970 TOPPS FOOTBALL CARD SINGLES  *** 75¢ EACH w/DISCOUNT ***$2.50 MINIMUM***</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/177403279253?_skw=1970&amp;hash=item294e0f3795:g:IRMAAeSwdAVowdJb" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/IRMAAeSwdAVowdJb/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Barbie Doll Accessories &amp; Replacement Parts: Vintage to Modern-Pick!</div>
+                <div class="ts-buying">BIN</div>
               </div>
             </a></div>
         </section>
@@ -2142,7 +2180,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 00:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 20, 2026 · 11:03 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
