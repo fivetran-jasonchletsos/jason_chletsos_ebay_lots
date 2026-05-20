@@ -67,6 +67,85 @@ def _len_decisions(plan: Any, key: str = "decisions") -> int:
     return 0
 
 
+def _recompute_daily_todo_count() -> int:
+    """Mirror daily_digest_agent.build_todo() length when daily_digest_plan.json
+    is absent. daily_digest_agent.py only writes HTML, not JSON, so the hub
+    re-derives the TODO count from the same source files. Cheap (all reads are
+    small JSONs already on disk). Always returns >= 1 (fallback bucket)."""
+    try:
+        from datetime import datetime, timezone, timedelta
+        root = Path(__file__).parent
+        out = root / "output"
+
+        def _read(path: Path, default):
+            try:
+                return json.loads(path.read_text()) if path.exists() else default
+            except Exception:
+                return default
+
+        listings = _read(out / "listings_snapshot.json", [])
+        sold     = _read(root / "sold_history.json", [])
+        bo_hist  = _read(out / "best_offer_autorespond_history.json", [])
+        messages = _read(out / "messages_plan.json", {})
+        reprice  = _read(root / "repricing_history.json", [])
+        specifics = _read(out / "specifics_history.json", [])
+        photo_q  = _read(out / "photo_quality_plan.json", {})
+
+        now = datetime.now(timezone.utc)
+        cutoff_1d = now - timedelta(days=1)
+
+        def _parse(ts):
+            if not ts: return None
+            try:
+                return datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+            except Exception:
+                return None
+
+        yesterday_orders = sum(
+            1 for r in (sold if isinstance(sold, list) else [])
+            if isinstance(r, dict) and (_parse(r.get("sold_date")) or datetime.min.replace(tzinfo=timezone.utc)) >= cutoff_1d
+        )
+        active = len(listings) if isinstance(listings, list) else 0
+        msgs_pending = 0
+        try:
+            msgs_pending = int(float((messages or {}).get("count") or 0))
+        except Exception:
+            pass
+        offers_pending = sum(
+            1 for r in (bo_hist if isinstance(bo_hist, list) else [])
+            if isinstance(r, dict)
+            and (_parse(r.get("ts") or r.get("timestamp")) or datetime.min.replace(tzinfo=timezone.utc)) >= cutoff_1d
+            and r.get("action") in ("leave", "counter")
+        )
+        repriced = sum(
+            1 for r in (reprice if isinstance(reprice, list) else [])
+            if isinstance(r, dict)
+            and (_parse(r.get("ts") or r.get("timestamp") or r.get("applied_at")) or datetime.min.replace(tzinfo=timezone.utc)) >= cutoff_1d
+        )
+        spec_today = sum(
+            1 for r in (specifics if isinstance(specifics, list) else [])
+            if isinstance(r, dict)
+            and (_parse(r.get("ts") or r.get("timestamp")) or datetime.min.replace(tzinfo=timezone.utc)) >= cutoff_1d
+        )
+        pq_summary = (photo_q or {}).get("summary") or {}
+        try:
+            photo_fail = int(float(pq_summary.get("fail") or 0))
+        except Exception:
+            photo_fail = 0
+
+        count = 0
+        if photo_fail:     count += 1
+        if msgs_pending:   count += 1
+        if offers_pending: count += 1
+        if repriced:       count += 1
+        if spec_today:     count += 1
+        if yesterday_orders == 0: count += 1
+        if active < 100:   count += 1
+        return count or 1  # "Inbox is clean" bucket — still one TODO row
+    except Exception:
+        return 0
+
+
 # ---------------------------------------------------------------------------
 # Hub spec: (slug, title, eyebrow, subtitle, KPI strip, tiles)
 # Each "tile" = (href, label, icon, blurb)
@@ -118,13 +197,76 @@ def _analytics_hub_spec() -> dict:
     daily = _load_json("daily_digest_plan.json") or {}
     lperf = _load_json("listing_performance_plan.json") or {}
 
-    # P&L: prefer top-level "net_30d" / "revenue_30d" if present, fall back to len
+    # ---- Revenue (30d) ------------------------------------------------------
+    # Prefer pnl_plan.json (revenue_30d / totals.revenue_30d) if present.
+    # Neither pnl_agent.py nor daily_digest_agent.py currently persists a plan
+    # JSON — both render HTML only. Fall back to a tiny inline sum over
+    # sold_history.json so the tile reflects reality on every hub build.
     revenue_30d = 0.0
     if isinstance(pnl, dict):
-        revenue_30d = float(pnl.get("revenue_30d") or pnl.get("totals", {}).get("revenue_30d", 0) or 0)
-    cassini_actions = _len_decisions(cass)
-    daily_actions   = _len_decisions(daily, "actions") or _len_decisions(daily)
-    underperf       = _len_decisions(lperf, "underperformers") or _len_decisions(lperf)
+        revenue_30d = float(
+            pnl.get("revenue_30d")
+            or pnl.get("rev_30d")
+            or pnl.get("totals", {}).get("revenue_30d", 0)
+            or 0
+        )
+    if not revenue_30d:
+        try:
+            from datetime import datetime, timezone, timedelta
+            sold_path = Path(__file__).parent / "sold_history.json"
+            if sold_path.exists():
+                sold = json.loads(sold_path.read_text())
+                cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+                total = 0.0
+                for r in sold if isinstance(sold, list) else []:
+                    if not isinstance(r, dict):
+                        continue
+                    ts = r.get("sold_date") or ""
+                    try:
+                        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    except Exception:
+                        continue
+                    if dt < cutoff:
+                        continue
+                    try:
+                        total += float(r.get("sale_price") or 0)
+                    except (TypeError, ValueError):
+                        pass
+                revenue_30d = total
+        except Exception:
+            pass
+
+    # ---- Cassini actions: actionable = red + yellow listings ---------------
+    cassini_actions = 0
+    if isinstance(cass, dict):
+        summary = cass.get("summary") or {}
+        if isinstance(summary, dict) and ("red" in summary or "yellow" in summary):
+            cassini_actions = int(summary.get("red", 0) or 0) + int(summary.get("yellow", 0) or 0)
+        else:
+            rows = cass.get("rows")
+            if isinstance(rows, list):
+                cassini_actions = len(rows)
+            else:
+                cassini_actions = _len_decisions(cass)
+
+    # ---- Daily-digest items: prefer plan file; else recompute TODO count ---
+    daily_actions = _len_decisions(daily, "todo") or _len_decisions(daily, "actions") or _len_decisions(daily)
+    if not daily_actions:
+        daily_actions = _recompute_daily_todo_count()
+
+    # ---- Underperformers ---------------------------------------------------
+    underperf = 0
+    if isinstance(lperf, dict):
+        buckets = lperf.get("buckets") or {}
+        needs_help = buckets.get("needs_help") if isinstance(buckets, dict) else None
+        if isinstance(needs_help, list):
+            underperf = len(needs_help)
+        if not underperf:
+            rc = lperf.get("row_count")
+            if isinstance(rc, int):
+                underperf = rc
+        if not underperf:
+            underperf = _len_decisions(lperf, "underperformers") or _len_decisions(lperf)
 
     kpis = [
         ("Revenue (30d)",      f"${revenue_30d:,.0f}", "accent"),
