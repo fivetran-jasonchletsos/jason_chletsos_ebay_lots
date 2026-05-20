@@ -156,17 +156,47 @@ def _photo_hub_spec() -> dict:
     pq     = _load_json("photo_quality_plan.json") or {}
     upload = _load_json("photo_upload_queue.json") or {}
 
-    # photo_audit.json structure: typically {"results": [...]}, count flaggable
+    # photo_audit.json structure: {"audits": [...]}, each row has severity +
+    # reshoot_priority. Flagged = SEVERE/HIGH severity OR reshoot_priority set.
     audit_flagged = 0
     if isinstance(audit, dict):
-        results = audit.get("results") or audit.get("flagged") or []
-        if isinstance(results, list):
+        audits = audit.get("audits") or audit.get("results") or audit.get("flagged") or []
+        if isinstance(audits, list):
             audit_flagged = sum(
-                1 for r in results
-                if isinstance(r, dict) and (r.get("needs_reshoot") or r.get("score", 100) < 70)
+                1 for r in audits
+                if isinstance(r, dict) and (
+                    r.get("reshoot_priority")
+                    or str(r.get("severity", "")).upper() in ("SEVERE", "HIGH")
+                    or r.get("needs_reshoot")
+                )
             )
-    quality_issues = _len_decisions(pq, "decisions") or _len_decisions(pq, "issues")
-    upload_pending = _len_decisions(upload, "queue") or _len_decisions(upload, "decisions")
+            if not audit_flagged:
+                audit_flagged = len(audits)
+
+    # photo_quality_plan.json: {"listings": [...], "summary": {pass,warn,fail,...}}
+    quality_issues = 0
+    if isinstance(pq, dict):
+        summary = pq.get("summary") or {}
+        try:
+            quality_issues = int(summary.get("fail") or 0) + int(summary.get("warn") or 0)
+        except (TypeError, ValueError):
+            quality_issues = 0
+        if not quality_issues:
+            quality_issues = _len_decisions(pq, "listings") \
+                or _len_decisions(pq, "decisions") \
+                or _len_decisions(pq, "issues")
+
+    # photo_upload_queue.json: {"listings": [...], "total_fail": N}
+    upload_pending = 0
+    if isinstance(upload, dict):
+        try:
+            upload_pending = int(upload.get("total_fail") or 0)
+        except (TypeError, ValueError):
+            upload_pending = 0
+        if not upload_pending:
+            upload_pending = _len_decisions(upload, "listings") \
+                or _len_decisions(upload, "queue") \
+                or _len_decisions(upload, "decisions")
 
     kpis = [
         ("Reshoot priorities", audit_flagged, "warning"),
@@ -302,7 +332,7 @@ def _cx_hub_spec() -> dict:
     messages = _load_json("messages_plan.json") or {}
     returns  = _load_json("returns_plan.json") or {}
     buyers   = _load_json("repeat_buyers_plan.json") or {}
-    watchers = _load_json("watchers_offer_plan.json") or {}
+    watchers = _load_json("watcher_offers_plan.json") or {}
 
     msg_pending     = _len_decisions(messages, "pending") or _len_decisions(messages)
     open_returns    = _len_decisions(returns, "open") or _len_decisions(returns)
