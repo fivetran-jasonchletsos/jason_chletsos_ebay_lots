@@ -61,10 +61,21 @@ def _load_json(path: Path) -> dict | list | None:
 
 
 def _load_snapshot() -> list[dict]:
-    snap = _load_json(OUTPUT_DIR / "listings_snapshot.json") or []
-    if not isinstance(snap, list):
-        return []
-    return snap
+    """Return the active listings list from output/listings_snapshot.json.
+
+    The snapshot shape evolved: promote.py now writes a wrapped dict
+    {"saved_at", "listings": [...], "market", "pricing", "sold"} instead of a
+    bare list. Tolerate both so older snapshots still load and so a future
+    schema bump doesn't silently zero out the Seller Hub again.
+    """
+    snap = _load_json(OUTPUT_DIR / "listings_snapshot.json")
+    if isinstance(snap, list):
+        return snap
+    if isinstance(snap, dict):
+        listings = snap.get("listings")
+        if isinstance(listings, list):
+            return listings
+    return []
 
 
 # --------------------------------------------------------------------------- #

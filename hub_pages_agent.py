@@ -338,22 +338,69 @@ def _cx_hub_spec() -> dict:
 
 
 def _listings_hub_spec() -> dict:
-    specifics = _load_json("specifics_plan.json") or _load_json("specifics_cache.json") or {}
-    titles    = _load_json("title_review_plan.json") or {}
-    pricing   = _load_json("price_review_plan.json") or _load_json("pricing_cache.json") or {}
+    # Plan-file shapes vary: specifics_plan.json wraps a "plans" list, retitle_plan
+    # uses "candidates", repricing_plan has "decisions" each with a per-row "decision"
+    # field ("apply"|"skip"|"blocked"), and quality is derived from photo_quality_plan
+    # because there's no quality_plan.json (quality.html is rendered directly by
+    # promote.build_quality_report without a JSON sidecar).
+    specifics = _load_json("specifics_plan.json") or {}
+    titles    = _load_json("retitle_plan.json") or _load_json("title_review_plan.json") or {}
     repricing = _load_json("repricing_plan.json") or {}
-    quality   = _load_json("quality_plan.json") or {}
+    photo_q   = _load_json("photo_quality_plan.json") or {}
+    price_con = _load_json("price_consistency_report.json") or {}
 
-    specifics_gaps  = _len_decisions(specifics, "gaps") or _len_decisions(specifics)
-    title_changes   = _len_decisions(titles, "changes") or _len_decisions(titles)
-    price_changes   = _len_decisions(pricing, "changes") or _len_decisions(pricing)
-    repricing_moves = _len_decisions(repricing)
-    quality_red     = _len_decisions(quality, "red") or _len_decisions(quality)
+    # ---- Specifics gaps: items with at least one applicable gap --------------
+    specifics_gaps = 0
+    if isinstance(specifics, dict):
+        plans = specifics.get("plans") or []
+        if isinstance(plans, list):
+            specifics_gaps = sum(
+                1 for p in plans
+                if isinstance(p, dict) and (p.get("applicable_gaps") or p.get("gaps"))
+            )
+        if not specifics_gaps:
+            specifics_gaps = _len_decisions(specifics, "gaps")
+
+    # ---- Title fixes: candidate rewrites from retitle agent -----------------
+    title_changes = 0
+    if isinstance(titles, dict):
+        cands = titles.get("candidates") or titles.get("changes") or []
+        if isinstance(cands, list):
+            title_changes = len(cands)
+        if not title_changes:
+            title_changes = _len_decisions(titles)
+
+    # ---- Price moves: only repricing rows whose decision == "apply" ---------
+    repricing_moves = 0
+    if isinstance(repricing, dict):
+        decs = repricing.get("decisions") or []
+        if isinstance(decs, list):
+            repricing_moves = sum(
+                1 for d in decs
+                if isinstance(d, dict) and (d.get("decision") or "").lower() == "apply"
+            )
+            if not repricing_moves:
+                # Fall back to total rows so the tile isn't zero on a quiet day.
+                repricing_moves = len(decs)
+
+    # ---- Quality reds: failures from photo_quality + drift hits from price consistency
+    quality_red = 0
+    if isinstance(photo_q, dict):
+        summary = photo_q.get("summary") or {}
+        try:
+            quality_red += int(summary.get("fail") or 0)
+        except (TypeError, ValueError):
+            pass
+    if isinstance(price_con, dict):
+        try:
+            quality_red += int(price_con.get("drift_count") or 0)
+        except (TypeError, ValueError):
+            pass
 
     kpis = [
         ("Specifics gaps",   specifics_gaps,  "warning"),
         ("Title fixes",      title_changes,   "accent"),
-        ("Price moves",      repricing_moves or price_changes, ""),
+        ("Price moves",      repricing_moves, ""),
         ("Quality reds",     quality_red,     "danger"),
     ]
     tiles = [
