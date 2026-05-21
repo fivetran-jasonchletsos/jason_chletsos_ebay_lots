@@ -2942,7 +2942,7 @@ _NAV_ITEMS = [
     ("pokemon_news.html",     "Pokemon News",  False, "For Us"),
 
     # ── PUBLIC buyer-facing Pokemon search (no password) ──
-    ("japanese_holo.html",    "JP Holo / Art Rare", True, "Pokemon"),
+    ("japanese_holo.html",    "Art Rares", True, "Pokemon"),
 
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
