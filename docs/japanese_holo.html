@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0a0a0a">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>Pokemon Search · Harpua2001</title>
-  <meta property="og:title" content="Pokemon Search — rarity, gallery, color, year, team, theme, price">
-  <meta property="og:description" content="Filter Pokemon TCG by Trainer/Galarian Gallery, rarity, color, year, team, theme, and price.">
+  <title>Pokemon Art Rares · Harpua2001</title>
+  <meta property="og:title" content="Pokemon Art Rares — Trainer Gallery, Galarian Gallery, Illustration Rares">
+  <meta property="og:description" content="Browse English Pokemon TCG art rares: Trainer Gallery, Crown Zenith Galarian Gallery, Illustration Rares, and Special Illustration Rares.">
   <link rel="manifest" href="manifest.webmanifest">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -269,12 +269,16 @@
   <header class="hdr">
     <div class="hdr-inner">
       <p class="crumb">
-        <a href="index.html">Harpua2001</a> &middot; Pokemon Search
+        <a href="index.html">Harpua2001</a> &middot; Pokemon Art Rares
       </p>
-      <h1 class="title">Pokemon Search.</h1>
+      <h1 class="title">Pokemon Art Rares.</h1>
       <p class="sub">
-        Rarity, special set (Trainer Gallery, Galarian Gallery), Pokemon name, color, year, team, theme,
-        and price. Click any card for TCGplayer and eBay.
+        English Pokemon TCG art rares — Trainer Gallery, Crown Zenith Galarian Gallery,
+        Illustration Rares, and Special Illustration Rares. Filter by rarity, Pokemon, color,
+        year, team, theme, and price. Click any card for TCGplayer and eBay.
+        <span style="display:block;margin-top:.5rem;font-size:.82rem;color:rgba(245,241,234,0.45);">
+          Note: cards are from the English Pokemon TCG API. Japanese-language equivalents (VSTAR Universe, etc.) aren't in this dataset.
+        </span>
       </p>
     </div>
   </header>
@@ -446,7 +450,7 @@
       sort: "newest",
       cards: [],
       filtered: [],
-      visibleCount: 80
+      visibleCount: 40
     };
 
     // ─── Collapsible filter toggle (mobile only) ───────────────────────
@@ -745,7 +749,7 @@
       if (state.theme)  parts.push(`subtypes:"${state.theme}"`);
       if (state.series && !state.special) parts.push(`set.series:"${state.series}"`);
       const q = parts.join(" ");
-      const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=250`;
+      const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=120&select=id,name,number,types,subtypes,rarity,set,images,tcgplayer`;
 
       try {
         const res = await fetch(url);
