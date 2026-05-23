@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Mariano Rivera'
+AGENT_NAME = 'Mike Richter'
 AGENT_ROLE = 'Price Drops'
 #!/usr/bin/env python3
 """price_drops_agent.py
@@ -436,7 +436,7 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
 # ---------------------------------------------------------------------------
 
 def main(argv: Optional[List[str]] = None) -> int:
-    print(f"  Mariano Rivera (Price Drops) reporting in.")
+    print(f"  Mike Richter (Price Drops) reporting in.")
     parser = argparse.ArgumentParser(description="Daily price-drop diff agent.")
     parser.add_argument(
         "--reset",

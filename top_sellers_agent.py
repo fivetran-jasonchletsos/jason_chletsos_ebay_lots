@@ -16,7 +16,7 @@ Output:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Babe Ruth'
+AGENT_NAME = 'Wayne Gretzky'
 AGENT_ROLE = 'Top Sellers'
 
 import argparse
@@ -297,7 +297,7 @@ def ensure_nav_entry() -> None:
 
 
 def main():
-    print(f"  Babe Ruth (Top Sellers) reporting in.")
+    print(f"  Wayne Gretzky (Top Sellers) reporting in.")
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.parse_args()
     ensure_nav_entry()

@@ -25,7 +25,7 @@ Artifacts:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'DJ LeMahieu'
+AGENT_NAME = 'Keith Hernandez'
 AGENT_ROLE = 'Repricing'
 
 import argparse
@@ -666,7 +666,7 @@ def summarize(plan: list[dict]) -> None:
 
 
 def main() -> int:
-    print(f"  DJ LeMahieu (Repricing) reporting in.")
+    print(f"  Keith Hernandez (Repricing) reporting in.")
     ap = argparse.ArgumentParser(description="Guardrailed repricing agent for Harpua2001 eBay listings.")
     ap.add_argument("--apply", action="store_true", help="Actually push price changes to eBay (default: dry run)")
     ap.add_argument("--no-fetch", action="store_true", help="Reuse cached listings snapshot instead of refetching")

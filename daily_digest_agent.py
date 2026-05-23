@@ -26,30 +26,30 @@ Usage:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'John Sterling'
+AGENT_NAME = 'Bob Murphy'
 AGENT_ROLE = 'Daily Digest'
 
 # The starting lineup. Order matches the daily-pipeline call sequence
 # in harpua-daily. Each tuple is (athlete, role, source file).
 ROSTER: list[tuple[str, str, str]] = [
-    ("DJ LeMahieu",          "Repricing",          "repricing_agent.py"),
-    ("Joe Namath",           "Best Offer",         "best_offer_agent.py"),
+    ("Keith Hernandez",      "Repricing",          "repricing_agent.py"),
+    ("Phil Simms",           "Best Offer",         "best_offer_agent.py"),
     ("Patrick Ewing",        "Watchers Offer",     "watchers_offer_agent.py"),
-    ("Reggie Jackson",       "Promoted Listings",  "promoted_listings_agent.py"),
-    ("Lou Gehrig",           "Relist",             "relist_agent.py"),
+    ("Mike Piazza",          "Promoted Listings",  "promoted_listings_agent.py"),
+    ("Mookie Wilson",        "Relist",             "relist_agent.py"),
     ('Walt "Clyde" Frazier', "Photo Audit",        "photo_audit_agent.py"),
     ("Henrik Lundqvist",     "Cassini Score",      "cassini_score_agent.py"),
-    ("Mariano Rivera",       "Price Drops",        "price_drops_agent.py"),
-    ("Derek Jeter",          "Price Consistency",  "price_consistency_agent.py"),
+    ("Mike Richter",         "Price Drops",        "price_drops_agent.py"),
+    ("David Wright",         "Price Consistency",  "price_consistency_agent.py"),
     ("John Starks",          "Buyer Watchlist",    "buyer_watchlist_agent.py"),
-    ("Yogi Berra",           "Repeat Buyers",      "repeat_buyers_agent.py"),
+    ("Tug McGraw",           "Repeat Buyers",      "repeat_buyers_agent.py"),
     ("Tom Seaver",           "Email Campaign",     "email_campaign_agent.py"),
-    ("Saquon Barkley",       "Pokémon News",       "pokemon_news_agent.py"),
-    ("Babe Ruth",            "Top Sellers",        "top_sellers_agent.py"),
+    ("Tiki Barber",          "Pokémon News",       "pokemon_news_agent.py"),
+    ("Wayne Gretzky",        "Top Sellers",        "top_sellers_agent.py"),
     ("Jeremy Lin",           "Under $10",          "under_10_agent.py"),
     ("Eli Manning",          "Vault",              "vault_eligibility.py"),
     ("Mark Messier",         "Orders Watch",       "orders_watch_agent.py"),
-    ("John Sterling",        "Daily Digest",       "daily_digest_agent.py"),
+    ("Bob Murphy",           "Daily Digest",       "daily_digest_agent.py"),
 ]
 
 import json

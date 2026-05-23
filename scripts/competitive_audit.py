@@ -45,7 +45,7 @@ from pathlib import Path
 from typing import Any
 
 # --- Roster ---
-AGENT_NAME = "Casey Stengel"   # Yankees & Mets manager — both sides of NY, talent evaluator
+AGENT_NAME = "Bobby Valentine"   # Mets manager — meticulous tactician, the audit guy
 AGENT_ROLE = "Competitive Audit (Quarterly)"
 
 ROOT = Path(__file__).resolve().parent.parent

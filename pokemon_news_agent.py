@@ -18,7 +18,7 @@ CLI:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Saquon Barkley'
+AGENT_NAME = 'Tiki Barber'
 AGENT_ROLE = 'Pokémon News'
 
 import argparse
@@ -527,7 +527,7 @@ def ensure_nav_entry() -> None:
 # --------------------------------------------------------------------------- #
 
 def main() -> None:
-    print(f"  Saquon Barkley (Pokémon News) reporting in.")
+    print(f"  Tiki Barber (Pokémon News) reporting in.")
     ap = argparse.ArgumentParser(description=(__doc__ or "").strip())
     ap.add_argument("--set", dest="slug", help="Narrow to a single set by slug.")
     args = ap.parse_args()

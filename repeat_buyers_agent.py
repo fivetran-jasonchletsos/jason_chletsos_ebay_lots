@@ -27,7 +27,7 @@ Usage:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Yogi Berra'
+AGENT_NAME = 'Tug McGraw'
 AGENT_ROLE = 'Repeat Buyers'
 
 import argparse
@@ -577,7 +577,7 @@ def _print_summary(buyers_map: dict[str, dict]) -> None:
 
 
 def main() -> int:
-    print(f"  Yogi Berra (Repeat Buyers) reporting in.")
+    print(f"  Tug McGraw (Repeat Buyers) reporting in.")
     ap = argparse.ArgumentParser(
         description="Surface JC's repeat buyers & draft VIP thank-you messages.")
     ap.add_argument("--apply", action="store_true",

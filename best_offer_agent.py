@@ -31,7 +31,7 @@ Artifacts:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Joe Namath'
+AGENT_NAME = 'Phil Simms'
 AGENT_ROLE = 'Best Offer'
 
 import argparse
@@ -668,7 +668,7 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
 
 
 def main() -> int:
-    print(f"  Joe Namath (Best Offer) reporting in.")
+    print(f"  Phil Simms (Best Offer) reporting in.")
     ap = argparse.ArgumentParser(
         description="Enable & tune Best Offer on Harpua2001 fixed-price listings.")
     ap.add_argument("--apply",    action="store_true",

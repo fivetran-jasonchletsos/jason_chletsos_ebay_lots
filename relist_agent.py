@@ -16,7 +16,7 @@ Usage:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Lou Gehrig'
+AGENT_NAME = 'Mookie Wilson'
 AGENT_ROLE = 'Relist'
 
 import argparse
@@ -363,7 +363,7 @@ def build_report(plans: list[dict], window_days: int) -> Path:
     return REPORT_PATH
 
 def main() -> int:
-    print(f"  Lou Gehrig (Relist) reporting in.")
+    print(f"  Mookie Wilson (Relist) reporting in.")
     ap = argparse.ArgumentParser(
         description="Find unsold ended auctions and relist them as Fixed-Price.")
     ap.add_argument("--apply", action="store_true",

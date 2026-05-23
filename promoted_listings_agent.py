@@ -24,7 +24,7 @@ Artifacts:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Reggie Jackson'
+AGENT_NAME = 'Mike Piazza'
 AGENT_ROLE = 'Promoted Listings'
 
 import argparse
@@ -991,7 +991,7 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
 
 
 def main() -> int:
-    print(f"  Reggie Jackson (Promoted Listings) reporting in.")
+    print(f"  Mike Piazza (Promoted Listings) reporting in.")
     ap = argparse.ArgumentParser(
         description="Per-listing Promoted Listings ad rates for Harpua2001 eBay store."
     )

@@ -25,7 +25,7 @@ CLI:
 from __future__ import annotations
 
 # --- Roster ---
-AGENT_NAME = 'Derek Jeter'
+AGENT_NAME = 'David Wright'
 AGENT_ROLE = 'Price Consistency'
 
 import argparse
@@ -272,7 +272,7 @@ def _render_report(report: dict) -> Path:
 
 
 def main() -> int:
-    print(f"  Derek Jeter (Price Consistency) reporting in.")
+    print(f"  David Wright (Price Consistency) reporting in.")
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.add_argument("--strict", action="store_true",
                     help="Exit 1 if any drift detected (for build gating).")
