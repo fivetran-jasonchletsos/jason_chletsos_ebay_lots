@@ -12,7 +12,12 @@ Output:
   output/top_sellers_plan.json
   docs/top_sellers.html
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Babe Ruth'
+AGENT_ROLE = 'Top Sellers'
 
 import argparse
 import html
@@ -292,6 +297,7 @@ def ensure_nav_entry() -> None:
 
 
 def main():
+    print(f"  Babe Ruth (Top Sellers) reporting in.")
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.parse_args()
     ensure_nav_entry()

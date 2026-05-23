@@ -23,7 +23,12 @@ Usage:
     python3 repeat_buyers_agent.py --apply        # send to VIP+Repeat
     python3 repeat_buyers_agent.py --apply --tier vip   # VIP only
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Yogi Berra'
+AGENT_ROLE = 'Repeat Buyers'
 
 import argparse
 import json
@@ -572,6 +577,7 @@ def _print_summary(buyers_map: dict[str, dict]) -> None:
 
 
 def main() -> int:
+    print(f"  Yogi Berra (Repeat Buyers) reporting in.")
     ap = argparse.ArgumentParser(
         description="Surface JC's repeat buyers & draft VIP thank-you messages.")
     ap.add_argument("--apply", action="store_true",

@@ -12,7 +12,12 @@ Usage:
     python3 relist_agent.py --days 30      # widen lookback (1–60)
     python3 relist_agent.py --item 12345   # single item only
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Lou Gehrig'
+AGENT_ROLE = 'Relist'
 
 import argparse
 import json
@@ -358,6 +363,7 @@ def build_report(plans: list[dict], window_days: int) -> Path:
     return REPORT_PATH
 
 def main() -> int:
+    print(f"  Lou Gehrig (Relist) reporting in.")
     ap = argparse.ArgumentParser(
         description="Find unsold ended auctions and relist them as Fixed-Price.")
     ap.add_argument("--apply", action="store_true",

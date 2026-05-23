@@ -16,7 +16,12 @@ Eligibility (cards only — lots can't be vaulted):
 Run: python3 vault_eligibility.py
 Out: output/vault_plan.json, docs/vault.html
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Eli Manning'
+AGENT_ROLE = 'Vault'
 
 import argparse
 import json
@@ -273,6 +278,7 @@ def build_report(eligible: list[dict]) -> Path:
 
 
 def main():
+    print(f"  Eli Manning (Vault) reporting in.")
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.add_argument("--report-only", action="store_true",
                     help="Re-render docs/vault.html from the cached plan.")

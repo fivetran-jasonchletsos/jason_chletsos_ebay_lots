@@ -12,7 +12,12 @@ Pipeline:
 Usage:
     python3 orders_watch_agent.py
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Mark Messier'
+AGENT_ROLE = 'Orders Watch'
 
 import json
 import sys
@@ -444,6 +449,7 @@ def _print_summary(plan: dict[str, Any]) -> None:
 
 
 def main() -> int:
+    print(f"  Mark Messier (Orders Watch) reporting in.")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     orders: list[dict] = []

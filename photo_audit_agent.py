@@ -31,7 +31,12 @@ Artifacts:
     photo_audit_config.json            tunable thresholds (created on 1st run)
 """
 
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Walt "Clyde" Frazier'
+AGENT_ROLE = 'Photo Audit'
 
 import argparse
 import json
@@ -690,6 +695,7 @@ def build_report(audit_payload: dict, cfg: dict) -> Path:
 # --------------------------------------------------------------------------- #
 
 def main() -> int:
+    print(f'  {AGENT_NAME} ({AGENT_ROLE}) reporting in.')
     ap = argparse.ArgumentParser(description="Read-only photo-quality audit for Harpua2001.")
     ap.add_argument("--no-fetch", action="store_true",
                     help="Reuse cached output/photo_audit.json instead of re-probing.")

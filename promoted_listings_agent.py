@@ -20,7 +20,12 @@ Artifacts:
     promoted_listings_config.json          tunable tier definitions + caps
 """
 
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Reggie Jackson'
+AGENT_ROLE = 'Promoted Listings'
 
 import argparse
 import base64
@@ -633,6 +638,37 @@ def bulk_set_bids(token: str, campaign_id: str,
             payload = r.json()
         except Exception:
             payload = {"raw": r.text[:1000]}
+
+        # eBay's "Promoted Listings General" campaigns have no bulk-update bid
+        # endpoint — only bulk_create_ads_by_listing_id. After the first run,
+        # all subsequent calls return errorId 35036 ("an ad already exists").
+        # That's not a real failure: the listing IS promoted, just at the
+        # existing bid. Rewrite those responses to a synthetic 200 so the
+        # 0/N summary stops looking like a disaster.
+        if isinstance(payload, dict):
+            for resp in (payload.get("responses") or []):
+                errs = resp.get("errors") or []
+                if any(e.get("errorId") == 35036 for e in errs):
+                    resp["statusCode"] = 200
+                    resp["_note"] = "already in campaign — bid update not supported on this campaign type"
+                    resp["errors"] = []
+        # Surface eBay's actual rejection reason — otherwise per-listing errors
+        # are silently lost behind the "0/N accepted" summary.
+        sample_errs = []
+        if isinstance(payload, dict):
+            for resp in (payload.get("responses") or [])[:3]:
+                code = resp.get("statusCode")
+                if code and not (200 <= int(code) < 300):
+                    for e in (resp.get("errors") or [])[:1]:
+                        sample_errs.append(f"[lst={resp.get('listingId','?')}] "
+                                           f"{e.get('errorId')}:{e.get('message','')[:80]}")
+            for e in (payload.get("errors") or [])[:2]:
+                sample_errs.append(f"top {e.get('errorId')}:{e.get('message','')[:90]}")
+        if sample_errs:
+            print(f"    [bulk_set_bids HTTP {r.status_code}] {sample_errs[0]}")
+            if len(sample_errs) > 1:
+                for s in sample_errs[1:3]:
+                    print(f"    [bulk_set_bids more] {s}")
         results.append({
             "http":    r.status_code,
             "ok":      ok,
@@ -955,6 +991,7 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
 
 
 def main() -> int:
+    print(f"  Reggie Jackson (Promoted Listings) reporting in.")
     ap = argparse.ArgumentParser(
         description="Per-listing Promoted Listings ad rates for Harpua2001 eBay store."
     )

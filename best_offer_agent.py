@@ -27,7 +27,12 @@ Artifacts:
     output/best_offer_cache.json    cached GetItem responses (idempotency)
     docs/best_offer.html            admin-only report
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Joe Namath'
+AGENT_ROLE = 'Best Offer'
 
 import argparse
 import json
@@ -211,12 +216,20 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
     min_offer   = root.findtext(f".//{NS}ListingDetails/{NS}MinimumBestOfferPrice", "")
     listing_type   = root.findtext(f".//{NS}ListingType", "") or ""
     listing_status = root.findtext(f".//{NS}SellingStatus/{NS}ListingStatus", "") or ""
+    # The live BIN/current price. Used by the clamp to guard against snapshot
+    # drift: when the listing was repriced down after the snapshot saved, the
+    # snapshot's `price` is stale and the clamp must use the live BIN instead.
+    current_price = (root.findtext(f".//{NS}SellingStatus/{NS}CurrentPrice", "")
+                     or root.findtext(f".//{NS}StartPrice", "")
+                     or root.findtext(f".//{NS}BuyItNowPrice", "")
+                     or "")
     return {
         "ok":                 True,
         "errors":             [],
         "best_offer_enabled": bo_enabled,
         "auto_accept":        float(auto_accept) if auto_accept else None,
         "min_offer":          float(min_offer) if min_offer else None,
+        "current_price":      float(current_price) if current_price else None,
         "listing_type":       listing_type,
         "listing_status":     listing_status,
         "fetched_at":         datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -323,7 +336,14 @@ def propose_best_offer(listings: list[dict], market: dict, cfg: dict) -> list[di
 
 def filter_for_idempotency(plan: list[dict],
                            cache: dict[str, dict]) -> list[dict]:
-    """Strip 'apply' rows whose live state already matches our targets."""
+    """Strip 'apply' rows whose live state already matches our targets, AND
+    re-clamp accept/decline against the LIVE BIN from GetItem when available.
+
+    Without this re-clamp, accept/decline computed from a stale snapshot price
+    can exceed the live BIN after a same-day reprice-down, causing eBay to
+    reject ReviseItem with errorId 22003 ("Auto decline amount cannot be
+    greater than or equal to the Buy It Now price").
+    """
     out: list[dict] = []
     for d in plan:
         if d["decision"] != "apply":
@@ -338,6 +358,22 @@ def filter_for_idempotency(plan: list[dict],
             d["decision"] = "skip"
             d["reason"]   = f"listing_status={status} — ReviseItem requires Active"
             out.append(d); continue
+        # Re-clamp against live BIN if the snapshot price is stale (live < snapshot).
+        live_bin = state.get("current_price")
+        if live_bin and d.get("price") and live_bin < d["price"]:
+            d = dict(d)
+            accept_cap  = _round2(live_bin * ACCEPT_BIN_CAP_PCT)
+            decline_cap = _round2(live_bin * DECLINE_BIN_CAP_PCT)
+            d["auto_accept"]  = min(d["auto_accept"],  accept_cap)
+            d["auto_decline"] = min(d["auto_decline"], decline_cap)
+            if d["auto_accept"] - d["auto_decline"] < MIN_ACCEPT_DECLINE_GAP:
+                d["auto_decline"] = _round2(d["auto_accept"] - MIN_ACCEPT_DECLINE_GAP)
+            if d["auto_accept"] < 0.99 or d["auto_decline"] < 0.99:
+                d["decision"] = "skip"
+                d["reason"]   = f"clamp-collapsed against live BIN ${live_bin:.2f}"
+                out.append(d); continue
+            d["reason"] = (d.get("reason","") +
+                           f" [re-clamped to live BIN ${live_bin:.2f}]")
         cur_acc = state.get("auto_accept")
         cur_dec = state.get("min_offer")
         same = (
@@ -420,8 +456,13 @@ def apply_best_offer(token: str, plan: list[dict], ebay_cfg: dict,
             record["ack"]    = ack
             record["errors"] = errs
             record["ok"]     = ack in ("Success", "Warning")
-            print(f"  → {d['item_id']}: ack={ack}  "
-                  f"(accept ${d['auto_accept']:.2f} / min ${d['auto_decline']:.2f})")
+            line = (f"  → {d['item_id']}: ack={ack}  "
+                    f"(accept ${d['auto_accept']:.2f} / min ${d['auto_decline']:.2f})")
+            # Surface eBay's actual error reason on Failure so the operator can act.
+            if ack != "Success" and errs:
+                err_summary = "; ".join(f"{e['code']}:{e['msg']}" for e in errs[:2])
+                line += f"\n     errors: {err_summary}"
+            print(line)
         except Exception as exc:
             record["ok"]     = False
             record["errors"] = [{"code": "EXC", "severity": "Error", "msg": str(exc)}]
@@ -627,6 +668,7 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
 
 
 def main() -> int:
+    print(f"  Joe Namath (Best Offer) reporting in.")
     ap = argparse.ArgumentParser(
         description="Enable & tune Best Offer on Harpua2001 fixed-price listings.")
     ap.add_argument("--apply",    action="store_true",

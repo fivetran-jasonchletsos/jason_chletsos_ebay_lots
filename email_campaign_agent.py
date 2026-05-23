@@ -30,7 +30,12 @@ Token scope:
     https://api.ebay.com/oauth/api_scope/sell.marketing
 """
 
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Tom Seaver'
+AGENT_ROLE = 'Email Campaign'
 
 import argparse
 import json
@@ -100,6 +105,20 @@ def load_listings_snapshot() -> list[dict]:
     return []
 
 
+def load_market_data() -> dict:
+    """Return market comp data from the snapshot keyed by item_id.
+
+    Each entry has shape: {flag: OVERPRICED|OK|UNDERPRICED, market_median, gap_pct, ...}.
+    Used by pick_steals to filter out overpriced items (which buyers see as bad deals).
+    """
+    raw = _load_json(LISTINGS_SNAP, {})
+    if isinstance(raw, dict):
+        market = raw.get("market") or {}
+        if isinstance(market, dict):
+            return market
+    return {}
+
+
 def load_scp_prices() -> dict:
     return _load_json(SCP_PRICES, {})
 
@@ -122,34 +141,58 @@ def _big_pic(url: str) -> str:
 
 
 def pick_steals(seller_hub_plan: dict, snapshot: list[dict], scp: dict,
-                limit: int = 6) -> list[dict]:
+                market: dict | None = None, limit: int = 6) -> list[dict]:
     """Return up to `limit` items to feature, each annotated with a
     fake-but-honest "was" price for the email's strikethrough UX.
 
     Selection order (first non-empty source wins):
       1) Featured items from seller_hub_plan (curated, photo-vetted) - preferred.
-      2) Top-priced active listings from the snapshot (a proxy for "highest-
-         margin"). Falls back to price desc.
+      2) Market-validated UNDERPRICED items from the snapshot (genuine deals —
+         items priced below the eBay sold-comp median). Sorted by most-underpriced
+         first (most negative gap_pct).
+      3) "OK" items from the snapshot, sorted by price descending (margin proxy).
 
-    For each item we set a `was_price` that's 25% above current — this is the
-    standard "compare at" framing that's permissible because the volume
-    discount + markdowns described in the email together easily exceed 25%
-    off MSRP/market for cards we know are underpriced. If SCP has a guide
-    price for the item that exceeds current, we use that instead (truthful
-    market-vs-price comparison).
+    Overpriced items are explicitly **excluded** when market data is available —
+    featuring them as "steals" undermines buyer trust because they're priced
+    above current market comps. This was the pre-2026-05-22 bug: backfilling
+    by price desc surfaced the most overpriced lots as "deals" of the week.
+
+    For each item we set a `was_price` that's 25% above current — the standard
+    "compare at" framing. If SCP has a guide price that exceeds current we use
+    that instead (truthful market-vs-price comparison).
     """
+    market = market or {}
     candidates: list[dict] = []
 
     featured = seller_hub_plan.get("featured") or []
     if featured:
         candidates = list(featured)
+
     if len(candidates) < limit:
-        # backfill from snapshot by price descending
         seen = {c.get("item_id") for c in candidates}
-        ranked = sorted(
-            (l for l in snapshot if l.get("item_id") not in seen),
-            key=lambda l: -_coerce_price(l.get("price")),
-        )
+        # Filter snapshot listings by market flag: only OK and UNDERPRICED are
+        # eligible (NEVER feature OVERPRICED items as "steals"). If no market
+        # data exists for an item, we conservatively include it.
+        def _market_flag(item_id: str) -> str | None:
+            m = market.get(str(item_id))
+            return m.get("flag") if isinstance(m, dict) else None
+
+        def _gap_pct(item_id: str) -> float:
+            m = market.get(str(item_id))
+            if isinstance(m, dict) and m.get("gap_pct") is not None:
+                try:
+                    return float(m["gap_pct"])
+                except (TypeError, ValueError):
+                    pass
+            return 0.0
+
+        eligible = [l for l in snapshot
+                    if l.get("item_id") not in seen
+                    and _market_flag(l.get("item_id")) != "OVERPRICED"]
+        # Prefer most-underpriced (most negative gap_pct), then highest price.
+        ranked = sorted(eligible,
+                        key=lambda l: (_gap_pct(l.get("item_id")),
+                                       -_coerce_price(l.get("price"))))
         candidates.extend(ranked[: limit - len(candidates)])
 
     steals: list[dict] = []
@@ -300,24 +343,20 @@ def propose_weekly_campaign(seller_hub_plan: dict, steals: list[dict]) -> dict:
     # is fluid (API still in early-access for some sellers) — these fields are the
     # ones consistently documented. Adjust subscriberFilter once we know the
     # seller's available list IDs (from GET /email_campaign/subscriber_list).
+    # eBay STORE_CRM Email Campaign API field names and valid enum values:
+    #   emailCampaignType ∈ {NEWSLETTER, PROMOTION, EVENT, NEW_LISTING_ANNOUNCEMENT, RETURN_FROM_VACATION}
+    #   subscriberFilter.audience ∈ {ALL_STORE_FOLLOWERS, ...subscriberListId}
     api_payload = {
-        "campaignName":    campaign_name,
-        "marketplaceId":   "EBAY_US",
-        "template":        "PROMOTIONAL_OFFER",
+        "campaignName":      campaign_name,
+        "marketplaceId":     "EBAY_US",
+        "emailCampaignType": "PROMOTION",
         "subscriberFilter": {
-            # NOTE: real prod payload likely needs a `subscriberListId` from the
-            # seller's list. Until we read it via the API, "ALL_STORE_FOLLOWERS"
-            # is the conventional placeholder eBay docs use in samples.
             "audience": "ALL_STORE_FOLLOWERS",
         },
         "subjectLine":     subject,
         "emailContent": {
             "contentType": "HTML",
             "body":        body_html,
-        },
-        "targetCriteria": {
-            "includeStoreCategoryIds": [],   # empty = entire store
-            "promotionType":           "VOLUME_DISCOUNT_PLUS_STEALS",
         },
     }
 
@@ -363,9 +402,13 @@ def send_campaign(token: str, campaign: dict, dry_run: bool = True) -> dict:
 
     url = f"{MARKETING_BASE}/email_campaign"
     headers = {
-        "Authorization":    f"Bearer {token}",
-        "Content-Type":     "application/json",
-        "Content-Language": "en-US",
+        "Authorization":           f"Bearer {token}",
+        "Content-Type":            "application/json",
+        "Content-Language":        "en-US",
+        # eBay's current Marketing API expects the marketplace via header.
+        # Keep marketplaceId in the body too for backward compatibility, but
+        # without the header the API rejects with MARKETPLACE_ID_IS_INVALID.
+        "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
     }
     try:
         r = requests.post(url, headers=headers, json=campaign["api_payload"], timeout=45)
@@ -533,11 +576,12 @@ def run(args: argparse.Namespace) -> int:
 
     seller_hub_plan = load_seller_hub_plan()
     snapshot        = load_listings_snapshot()
+    market          = load_market_data()
     scp             = load_scp_prices()
     print(f"  Loaded seller_hub_plan ({len(seller_hub_plan.get('featured', []))} featured), "
-          f"{len(snapshot)} snapshot listings, {len(scp)} SCP entries")
+          f"{len(snapshot)} snapshot listings, {len(market)} market comps, {len(scp)} SCP entries")
 
-    steals = pick_steals(seller_hub_plan, snapshot, scp, limit=args.limit)
+    steals = pick_steals(seller_hub_plan, snapshot, scp, market=market, limit=args.limit)
     if not steals:
         print("  No steals available — refusing to build an empty campaign.")
         return 1
@@ -584,6 +628,7 @@ def run(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
+    print(f"  Tom Seaver (Email Campaign) reporting in.")
     ap = argparse.ArgumentParser(
         description="Weekly promotional email campaign to eBay store followers."
     )

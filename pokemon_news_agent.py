@@ -14,7 +14,12 @@ CLI:
   python3 pokemon_news_agent.py
   python3 pokemon_news_agent.py --set monochrome-bwr      # one set only
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Saquon Barkley'
+AGENT_ROLE = 'Pokémon News'
 
 import argparse
 import html
@@ -522,6 +527,7 @@ def ensure_nav_entry() -> None:
 # --------------------------------------------------------------------------- #
 
 def main() -> None:
+    print(f"  Saquon Barkley (Pokémon News) reporting in.")
     ap = argparse.ArgumentParser(description=(__doc__ or "").strip())
     ap.add_argument("--set", dest="slug", help="Narrow to a single set by slug.")
     args = ap.parse_args()

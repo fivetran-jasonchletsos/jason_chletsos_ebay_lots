@@ -22,7 +22,35 @@ Writes:
 Usage:
     python3 daily_digest_agent.py
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'John Sterling'
+AGENT_ROLE = 'Daily Digest'
+
+# The starting lineup. Order matches the daily-pipeline call sequence
+# in harpua-daily. Each tuple is (athlete, role, source file).
+ROSTER: list[tuple[str, str, str]] = [
+    ("DJ LeMahieu",          "Repricing",          "repricing_agent.py"),
+    ("Joe Namath",           "Best Offer",         "best_offer_agent.py"),
+    ("Patrick Ewing",        "Watchers Offer",     "watchers_offer_agent.py"),
+    ("Reggie Jackson",       "Promoted Listings",  "promoted_listings_agent.py"),
+    ("Lou Gehrig",           "Relist",             "relist_agent.py"),
+    ('Walt "Clyde" Frazier', "Photo Audit",        "photo_audit_agent.py"),
+    ("Henrik Lundqvist",     "Cassini Score",      "cassini_score_agent.py"),
+    ("Mariano Rivera",       "Price Drops",        "price_drops_agent.py"),
+    ("Derek Jeter",          "Price Consistency",  "price_consistency_agent.py"),
+    ("John Starks",          "Buyer Watchlist",    "buyer_watchlist_agent.py"),
+    ("Yogi Berra",           "Repeat Buyers",      "repeat_buyers_agent.py"),
+    ("Tom Seaver",           "Email Campaign",     "email_campaign_agent.py"),
+    ("Saquon Barkley",       "Pokémon News",       "pokemon_news_agent.py"),
+    ("Babe Ruth",            "Top Sellers",        "top_sellers_agent.py"),
+    ("Jeremy Lin",           "Under $10",          "under_10_agent.py"),
+    ("Eli Manning",          "Vault",              "vault_eligibility.py"),
+    ("Mark Messier",         "Orders Watch",       "orders_watch_agent.py"),
+    ("John Sterling",        "Daily Digest",       "daily_digest_agent.py"),
+]
 
 import json
 from datetime import datetime, timedelta, timezone
@@ -265,6 +293,14 @@ _CSS = """<style>
 .dd-empty{color:var(--text-muted);font-size:13px;padding:16px;background:var(--surface-2);border:1px dashed var(--border);border-radius:var(--r-sm);text-align:center}
 .dd-foot{margin:32px 0 16px;padding:18px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-align:center;letter-spacing:.06em}
 .dd-foot code{color:var(--gold);background:var(--surface);padding:2px 6px;border-radius:3px}
+.dd-roster{width:100%;border-collapse:collapse;font-size:13px}
+.dd-roster thead th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);padding:6px 8px;border-bottom:1px solid var(--border)}
+.dd-roster tbody td{padding:7px 8px;border-bottom:1px dashed var(--border)}
+.dd-roster tbody tr:last-child td{border-bottom:none}
+.dd-roster .dd-roster-name{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--gold);letter-spacing:.01em;white-space:nowrap}
+.dd-roster .dd-roster-role{color:var(--text)}
+.dd-roster .dd-roster-file{color:var(--text-dim)}
+.dd-roster .dd-roster-file code{background:var(--surface-2);padding:1px 5px;border-radius:3px;font-size:11px}
 </style>"""
 
 
@@ -389,11 +425,52 @@ def render(metrics: dict, todo: list[str], top_earner_html: str,
         f"<div>{top_section}</div>"
         "</div>"
     )
-    foot = (
-        f"<div class='dd-foot'>Generated {escape(ts)} &mdash; "
-        f"run <code>python3 daily_digest_agent.py</code> to refresh.</div>"
+    # Quarterly-tool callout — flag the competitive audit once a quarter
+    # so it doesn't get forgotten. Read the freshness off the file mtime.
+    audit_path = Path("output/competitive_audit.md")
+    if audit_path.exists():
+        age_days = int((now.timestamp() - audit_path.stat().st_mtime) / 86400)
+        if age_days >= 90:
+            audit_note = (f"Quarterly competitive audit is <strong>{age_days} days</strong> old. "
+                          f"Run <code>python3 scripts/competitive_audit.py</code> to refresh.")
+        else:
+            audit_note = (f"Quarterly competitive audit refreshed {age_days} day(s) ago — "
+                          f"see <code>output/competitive_audit.md</code>.")
+    else:
+        audit_note = ("Quarterly competitive audit has never been run. "
+                      "Run <code>python3 scripts/competitive_audit.py</code> when you have a moment.")
+    audit_section = (
+        "<section class='dd-section' style='margin-top:24px'>"
+        "<h2>Quarterly tools<span class='tag'>positioning</span></h2>"
+        f"<p style='color:var(--text);font-size:14px;margin:0'>{audit_note}</p>"
+        "</section>"
     )
-    body = hero + kpis_html + grid + foot
+
+    # Agent roster — every starter on the morning lineup card. Names
+    # match AGENT_NAME constants in each agent file.
+    roster_rows = "".join(
+        f"<tr><td class='dd-roster-name'>{escape(name)}</td>"
+        f"<td class='dd-roster-role'>{escape(role)}</td>"
+        f"<td class='dd-roster-file'><code>{escape(fname)}</code></td></tr>"
+        for name, role, fname in ROSTER
+    )
+    roster_section = (
+        "<section class='dd-section' style='margin-top:24px'>"
+        "<h2>Starting lineup<span class='tag'>daily pipeline</span></h2>"
+        "<table class='dd-roster'>"
+        "<thead><tr><th>Agent</th><th>Role</th><th>File</th></tr></thead>"
+        f"<tbody>{roster_rows}</tbody></table>"
+        "</section>"
+    )
+
+    foot = (
+        f"<div class='dd-foot'>"
+        f"Filed by <strong>{escape(AGENT_NAME)}</strong> ({escape(AGENT_ROLE)}) &middot; "
+        f"{escape(ts)} &middot; "
+        f"run <code>python3 daily_digest_agent.py</code> to refresh."
+        f"</div>"
+    )
+    body = hero + kpis_html + grid + audit_section + roster_section + foot
     return promote.html_shell(
         f"Daily Digest · {promote.SELLER_NAME}",
         body, extra_head=_CSS, active_page="daily.html",
@@ -401,12 +478,36 @@ def render(metrics: dict, todo: list[str], top_earner_html: str,
 
 
 # ---------- main ---------------------------------------------------------
+def _print_roster() -> int:
+    """Print the starting-lineup card to stdout. Quick reference: who's on this morning?"""
+    import sys as _sys
+    print()
+    print(f"  Harpua2001 starting lineup — {len(ROSTER)} agents")
+    print(f"  {'-' * 70}")
+    width_name = max(len(r[0]) for r in ROSTER)
+    width_role = max(len(r[1]) for r in ROSTER)
+    for name, role, fname in ROSTER:
+        print(f"  {name:<{width_name}}   {role:<{width_role}}   {fname}")
+    print(f"  {'-' * 70}")
+    return 0
+
+
 def main() -> int:
+    import sys as _sys
+    if "--roster" in _sys.argv[1:]:
+        return _print_roster()
+    print(f"  {AGENT_NAME} ({AGENT_ROLE}) reporting in.")
     now = datetime.now(timezone.utc)
     print(f"  Daily digest @ {now.strftime('%Y-%m-%d %H:%M UTC')}")
 
     sold = _load_json(SOLD_PATH, [])
-    listings = _load_json(LISTINGS_PATH, [])
+    listings_raw = _load_json(LISTINGS_PATH, [])
+    # Snapshot file became {"saved_at", "listings", "market", "pricing", "sold"};
+    # unwrap so the rest of the digest sees a flat list.
+    if isinstance(listings_raw, dict):
+        listings = listings_raw.get("listings", [])
+    else:
+        listings = listings_raw
     _load_json(SELLER_HUB_PATH, {})  # touch for graceful skip
     promoted = _load_json(PROMOTED_PATH, {})
     bo_hist = _load_json(BEST_OFFER_HIST_PATH, [])

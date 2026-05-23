@@ -1,3 +1,9 @@
+
+from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Mariano Rivera'
+AGENT_ROLE = 'Price Drops'
 #!/usr/bin/env python3
 """price_drops_agent.py
 
@@ -15,7 +21,6 @@ CLI:
   python3 price_drops_agent.py            run snapshot + diff + render
   python3 price_drops_agent.py --reset    clear the prior snapshot first
 """
-from __future__ import annotations
 
 import argparse
 import glob
@@ -431,6 +436,7 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
 # ---------------------------------------------------------------------------
 
 def main(argv: Optional[List[str]] = None) -> int:
+    print(f"  Mariano Rivera (Price Drops) reporting in.")
     parser = argparse.ArgumentParser(description="Daily price-drop diff agent.")
     parser.add_argument(
         "--reset",

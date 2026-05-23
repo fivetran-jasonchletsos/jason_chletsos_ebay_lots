@@ -13,7 +13,12 @@ Output:
   output/under_10_plan.json
   docs/under_10.html
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Jeremy Lin'
+AGENT_ROLE = 'Under $10'
 
 import argparse
 import html
@@ -365,6 +370,7 @@ def ensure_nav_entry() -> None:
 
 
 def main():
+    print(f"  Jeremy Lin (Under $10) reporting in.")
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.add_argument("--bucket", help="Narrow to a single bucket label.")
     args = ap.parse_args()

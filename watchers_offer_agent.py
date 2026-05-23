@@ -34,7 +34,12 @@ Artifacts:
     watcher_offers_config.json           tunable config (created on first run)
 """
 
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Patrick Ewing'
+AGENT_ROLE = 'Watchers Offer'
 
 import argparse
 import json
@@ -744,6 +749,7 @@ def summarize(plan: list[dict]) -> None:
 
 
 def main() -> int:
+    print(f"  Patrick Ewing (Watchers Offer) reporting in.")
     ap = argparse.ArgumentParser(description="Send-Offer-to-Watchers automation for Harpua2001.")
     ap.add_argument("--apply", action="store_true", help="Actually send offers via eBay (default: dry run)")
     ap.add_argument("--no-fetch", action="store_true", help="Reuse cached listings snapshot")

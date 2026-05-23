@@ -22,7 +22,12 @@ CLI:
   python3 buyer_watchlist_agent.py
   python3 buyer_watchlist_agent.py --player "Jaxson Dart"   # narrow
 """
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'John Starks'
+AGENT_ROLE = 'Buyer Watchlist'
 
 import argparse
 import html
@@ -448,6 +453,7 @@ def ensure_nav_entry() -> None:
 # --------------------------------------------------------------------------- #
 
 def main():
+    print(f"  John Starks (Buyer Watchlist) reporting in.")
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.add_argument("--player", help="Narrow to a single player by name.")
     args = ap.parse_args()

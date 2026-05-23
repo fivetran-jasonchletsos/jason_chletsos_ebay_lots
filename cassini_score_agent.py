@@ -17,7 +17,12 @@ Outputs: output/cassini_score_plan.json, output/cassini_score_snapshot.json,
 docs/cassini.html.  Run:  python3 cassini_score_agent.py
 """
 
+
 from __future__ import annotations
+
+# --- Roster ---
+AGENT_NAME = 'Henrik Lundqvist'
+AGENT_ROLE = 'Cassini Score'
 
 import argparse
 import html
@@ -492,6 +497,7 @@ def build_report(plan: dict) -> Path:
 # --- Entry point ---
 
 def main() -> int:
+    print(f"  Henrik Lundqvist (Cassini Score) reporting in.")
     ap = argparse.ArgumentParser(description="Synthesize a per-listing Cassini health score.")
     ap.add_argument("--report-only", action="store_true",
                     help="Rebuild docs/cassini.html from output/cassini_score_plan.json.")
