@@ -623,6 +623,20 @@ def main() -> int:
     print(f"  Plan:   {PLAN_PATH}")
 
     if args.apply:
+        # Kill switch — Jason disabled outbound promo messages on 2026-05-23
+        # after a buyer complained that the daily routine was hitting the
+        # same handful of buyers every single morning. The dashboard data
+        # is still useful, so the dry-run path stays alive; only the actual
+        # MemberMessage send is gagged. To re-enable, flip OUTBOUND_DISABLED
+        # to False below — but first add a cooldown_days >= 30 check against
+        # the existing _append_sent() history so this can't happen again.
+        OUTBOUND_DISABLED = True
+        if OUTBOUND_DISABLED:
+            print("\n  --apply IGNORED. Outbound buyer promo messages are "
+                  "disabled (user disabled 2026-05-23 after a spam complaint).")
+            print("  To re-enable, set OUTBOUND_DISABLED=False in main() "
+                  "AFTER adding a 30-day cooldown check on _append_sent() history.")
+            return 0
         if token is None:
             token = promote.get_access_token(ebay_cfg)
         targets: list[dict]
@@ -643,7 +657,7 @@ def main() -> int:
             print(f"  → {rec['buyer']}: ack={rec.get('ack')}")
         _append_sent(sent)
     else:
-        print("\n  Dry run only. Re-run with --apply to send messages.")
+        print("\n  Dry run only. (Apply path is disabled — see kill switch in source.)")
     return 0
 
 
