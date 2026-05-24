@@ -142,21 +142,33 @@ def _recent_offer_ids(history: list[dict], cooldown_days: int) -> set[str]:
 
 def get_marketing_token(cfg: dict) -> str:
     """
-    Refresh-token grant including sell.marketing scope (required for the
-    sell/negotiation endpoint). Falls back to promote.get_access_token if
-    the marketing scope isn't authorized on the refresh token.
+    Refresh-token grant scoped to sell.negotiation — the only scope the
+    send_offer_to_interested_buyers endpoint actually requires. The previous
+    version asked for six scopes at once and would 400 if ANY of them was
+    missing from the refresh token's allow-list. Falls back to
+    promote.get_access_token if negotiation isn't authorized either.
     """
     import base64
     credentials = base64.b64encode(
         f"{cfg['client_id']}:{cfg['client_secret']}".encode()
     ).decode()
+    # eBay's Negotiation API send_offer_to_interested_buyers needs the
+    # sell.marketing scope (granted on this keyset). HOWEVER, even with
+    # a valid sell.marketing token the endpoint returns HTTP 403
+    # "Access denied" — because the Negotiation feature itself is a
+    # license-gated capability on developer.ebay.com that this app
+    # has not been granted. The OAuth Scopes page notes: "Some
+    # Sandbox capabilities and OAuth scopes are only available with
+    # additional licenses or contracts in Production."
+    #
+    # To actually unblock send_offer_to_interested_buyers, jchletsos
+    # needs to apply for the Negotiation API license at:
+    #   https://developer.ebay.com → API License Agreement → Negotiation
+    # The scope below is the right one to request once the license is
+    # approved; until then this agent will dry-run only.
     scopes = " ".join([
         "https://api.ebay.com/oauth/api_scope",
         "https://api.ebay.com/oauth/api_scope/sell.marketing",
-        "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.negotiation",
     ])
     resp = requests.post(
         "https://api.ebay.com/identity/v1/oauth2/token",

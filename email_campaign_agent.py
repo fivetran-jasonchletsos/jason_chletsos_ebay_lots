@@ -339,17 +339,17 @@ def propose_weekly_campaign(seller_hub_plan: dict, steals: list[dict]) -> dict:
     week_tag = datetime.now(timezone.utc).strftime("%Y-W%V")
     campaign_name = f"Weekly Steals · {seller_name} · {week_tag}"
 
-    # Marketing API payload. The eBay docs spec for /sell/marketing/v1/email_campaign
-    # is fluid (API still in early-access for some sellers) — these fields are the
-    # ones consistently documented. Adjust subscriberFilter once we know the
-    # seller's available list IDs (from GET /email_campaign/subscriber_list).
-    # eBay STORE_CRM Email Campaign API field names and valid enum values:
-    #   emailCampaignType ∈ {NEWSLETTER, PROMOTION, EVENT, NEW_LISTING_ANNOUNCEMENT, RETURN_FROM_VACATION}
-    #   subscriberFilter.audience ∈ {ALL_STORE_FOLLOWERS, ...subscriberListId}
+    # Marketing API payload. eBay's STORE_CRM Email Campaign API enum values
+    # for emailCampaignType have been narrowing — as of 2026, PROMOTION
+    # returns 35202 CAMPAIGN_TYPE_IS_INVALID. The accepted values for
+    # subscriber-list-targeted store campaigns are:
+    #   NEW_LISTING   — best fit for "weekly steals" content (we link to new/featured listings)
+    #   STORE_NEWSLETTER
+    # Reference: https://developer.ebay.com/api-docs/sell/marketing/types/api:EmailCampaignTypeEnum
     api_payload = {
         "campaignName":      campaign_name,
         "marketplaceId":     "EBAY_US",
-        "emailCampaignType": "PROMOTION",
+        "emailCampaignType": "NEW_LISTING",
         "subscriberFilter": {
             "audience": "ALL_STORE_FOLLOWERS",
         },

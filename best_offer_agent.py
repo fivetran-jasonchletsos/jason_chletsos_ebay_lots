@@ -427,6 +427,23 @@ def apply_best_offer(token: str, plan: list[dict], ebay_cfg: dict,
     if only_item:
         to_apply = [d for d in to_apply if d["item_id"] == only_item]
 
+    # Respect locks.json — listings the user has explicitly protected.
+    # The repricing agent already honours this file; best_offer_agent
+    # was ignoring it, which let BO floors get set on locked lots and
+    # blocked subsequent price reverts (errors 22003/23004).
+    try:
+        locks = promote.load_locks() or {}
+        locked_ids = set((locks.get("items") or {}).keys())
+    except Exception:
+        locked_ids = set()
+    if locked_ids:
+        before = len(to_apply)
+        to_apply = [d for d in to_apply if d["item_id"] not in locked_ids]
+        skipped = before - len(to_apply)
+        if skipped:
+            print(f"  Skipping {skipped} locked listing(s): "
+                  f"{', '.join(sorted(locked_ids & {d['item_id'] for d in plan}))[:120]}")
+
     for d in to_apply:
         envelope = _xml_revise_best_offer(
             token if not dry_run else "<TOKEN>",
