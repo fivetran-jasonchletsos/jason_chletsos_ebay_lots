@@ -55,6 +55,10 @@ def _load_json(path: Path):
 
 def _load_snapshot() -> list[dict]:
     snap = _load_json(OUTPUT_DIR / "listings_snapshot.json") or []
+    if isinstance(snap, dict):
+        # Post-2026-05 snapshot is {"saved_at", "listings", ...}; falling
+        # through the old `isinstance list` check left vault.html empty.
+        return snap.get("listings") or []
     return snap if isinstance(snap, list) else []
 
 

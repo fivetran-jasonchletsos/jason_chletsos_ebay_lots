@@ -10134,7 +10134,10 @@ def _git_deploy():
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     subprocess.run(["git", "commit", "-m", f"Site refresh {ts}"],
                    cwd=repo, check=True)
-    subprocess.run(["git", "push", "--force", "origin", "main"], cwd=repo, check=True)
+    # Plain push (no --force). The CI workflow also pushes to main, so a
+    # force-push from a local run can silently overwrite a Site-refresh
+    # commit that finished while you were running promote.py locally.
+    subprocess.run(["git", "push", "origin", "main"], cwd=repo, check=True)
     print("  Pushed to GitHub. Pages will rebuild in ~60s.")
 
 
@@ -10216,8 +10219,22 @@ def main():
         try:
             import subprocess, sys as _sys
             print("  Refreshing SportsCardsPro 'actual' prices (rate-limited, may take a few min)...")
-            subprocess.run([_sys.executable, str(Path(__file__).parent / "card_price_agent.py")],
-                           check=False, timeout=900)
+            # Mirror the logged-loop pattern below so SCP failures land in
+            # output/logs/card_price_agent.py.log instead of getting buried
+            # in the main stdout stream.
+            _scp_logs = Path(__file__).parent / "output" / "logs"
+            _scp_logs.mkdir(parents=True, exist_ok=True)
+            _scp_log = _scp_logs / "card_price_agent.py.log"
+            with _scp_log.open("wb") as _logf:
+                rc = subprocess.run(
+                    [_sys.executable, str(Path(__file__).parent / "card_price_agent.py")],
+                    check=False, timeout=900,
+                    stdout=_logf, stderr=subprocess.STDOUT,
+                ).returncode
+            if rc != 0:
+                print(f"  SCP price agent exited RC={rc} — see {_scp_log}")
+        except subprocess.TimeoutExpired:
+            print(f"  SCP price agent timed out after 900s — see output/logs/card_price_agent.py.log")
         except Exception as e:
             print(f"  SCP price agent skipped: {e}")
     # Buyer storefront — replaces the old build_dashboard() seller view.
