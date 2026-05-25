@@ -310,9 +310,9 @@ def _section(title: str, blurb: str, cards_html: str, empty_msg: str) -> str:
 _CSS = """
 :root{--bg:#0a0a0a;--surface:#141414;--surface-2:#1a1a1a;--border:rgba(212,175,55,.1);--border-mid:rgba(212,175,55,.22);--gold:#d4af37;--gold-bright:#f4ce5d;--text:#f1efe9;--text-muted:#9a9388;--success:#3ad08a;--danger:#ff6b6b;--info:#7dc4ff;--r-md:10px}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Familjen Grotesk',system-ui,sans-serif;font-size:14px;line-height:1.5}
 main{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
-h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margin:0 0 6px;color:var(--gold-bright)}
+h1{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em;margin:0 0 6px;color:var(--gold-bright)}
 .pd-sub{color:var(--text-muted);font-size:13px;margin:0 0 22px}
 .pd-sub b{color:var(--text)}
 .pk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}
@@ -320,14 +320,14 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
 .pk-kpi.kpi-drop{border-left-color:var(--success)}
 .pk-kpi.kpi-new{border-left-color:var(--info)}
 .pk-kpi.kpi-gone{border-left-color:var(--danger)}
-.pk-n{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold-bright);line-height:1}
+.pk-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold-bright);line-height:1}
 .kpi-drop .pk-n{color:var(--success)}
 .kpi-new .pk-n{color:var(--info)}
 .kpi-gone .pk-n{color:var(--danger)}
 .pk-l{color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
 .pd-section{margin:36px 0}
 .pd-section-head{border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:16px}
-.pd-section-head h2{margin:0;font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.02em;color:var(--gold)}
+.pd-section-head h2{margin:0;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:36px;letter-spacing:.02em;color:var(--gold)}
 .pd-section-head p{margin:4px 0 0;color:var(--text-muted);font-size:13px}
 .pd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .pd-card{display:block;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
@@ -343,9 +343,9 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em;margi
 .pd-ctx{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;min-height:12px}
 .pd-title{font-size:12px;line-height:1.35;color:var(--text);margin-bottom:8px;min-height:32px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pd-price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.pd-price-old{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text-muted);text-decoration:line-through}
+.pd-price-old{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:20px;color:var(--text-muted);text-decoration:line-through}
 .pd-arrow{color:var(--text-muted)}
-.pd-price-new{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold-bright)}
+.pd-price-new{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:26px;color:var(--gold-bright)}
 .pd-card-drop .pd-price-new{color:var(--success)}
 .pd-delta{margin-top:6px;font-size:12px;font-weight:700;color:var(--success)}
 .pd-cta{margin-top:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-bright);font-weight:700}

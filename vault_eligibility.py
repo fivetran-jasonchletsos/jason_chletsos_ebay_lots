@@ -247,12 +247,12 @@ def build_report(eligible: list[dict]) -> Path:
   .vt-kpis { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin:22px 0 28px; }
   .vt-kpi { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); padding:18px 20px; position:relative; overflow:hidden; }
   .vt-kpi::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--gold); opacity:.7; }
-  .vt-kpi-n { font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--gold); line-height:1; }
+  .vt-kpi-n { font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em; font-size:44px; color:var(--gold); line-height:1; }
   .vt-kpi-l { color:var(--text-muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-top:6px; }
   .vt-kpi-foot { color:var(--text-dim); font-size:11px; margin-top:8px; border-top:1px dashed var(--border); padding-top:8px; }
   .vt-section { margin:36px 0; }
   .vt-section-head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
-  .vt-section-head h2 { margin:0; font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:.02em; }
+  .vt-section-head h2 { margin:0; font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em; font-size:28px; letter-spacing:.02em; }
   .vt-count { color:var(--text-muted); font-weight:400; font-size:18px; margin-left:6px; }
   .vt-hint  { color:var(--text-muted); font-size:13px; }
   .vt-tbl { width:100%; border-collapse:collapse; font-size:13px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; }

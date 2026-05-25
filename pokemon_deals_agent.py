@@ -477,14 +477,14 @@ def render_report(plan: dict) -> Path:
 <style>
   .pk-kpis {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 22px 0; }}
   .pk-kpi {{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px 18px; border-left: 3px solid {color}; }}
-  .pk-n {{ font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: {color}; line-height: 1; }}
+  .pk-n {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 40px; color: {color}; line-height: 1; }}
   .pk-l {{ color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }}
 
   /* GRAIL WATCH */
   .pk-grail {{ position: relative; background: linear-gradient(135deg, rgba(212,175,55,.12), rgba(255,140,0,.08), rgba(212,175,55,.12)); border: 1px solid rgba(212,175,55,.4); border-radius: var(--r-md); padding: 22px; margin: 22px 0 28px; overflow: hidden; }}
   .pk-grail::before {{ content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(212,175,55,.18), transparent 60%); pointer-events: none; }}
   .pk-grail-head {{ display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; position: relative; }}
-  .pk-grail-head h2 {{ margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: #d4af37; letter-spacing: .04em; text-shadow: 0 2px 8px rgba(212,175,55,.4); }}
+  .pk-grail-head h2 {{ margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 40px; color: #d4af37; letter-spacing: .04em; text-shadow: 0 2px 8px rgba(212,175,55,.4); }}
   .pk-grail-sub {{ color: #e0d8b5; font-size: 13px; font-style: italic; }}
   .pk-grail-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; position: relative; }}
   .pk-grail-card {{ display: block; position: relative; background: #14110a; border: 2px solid rgba(212,175,55,.5); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }}
@@ -492,20 +492,20 @@ def render_report(plan: dict) -> Path:
   .pk-grail-badge {{ position: absolute; top: 8px; left: 8px; background: #d4af37; color: #1a1500; font-size: 9px; font-weight: 900; letter-spacing: .15em; padding: 3px 8px; border-radius: 4px; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.4); }}
   .pk-grail-img {{ aspect-ratio: 3 / 4; background-size: cover; background-position: center; background-color: #0a0907; }}
   .pk-grail-meta {{ padding: 12px 14px; background: linear-gradient(180deg, transparent, rgba(212,175,55,.08)); }}
-  .pk-grail-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: #d4af37; line-height: 1; text-shadow: 0 1px 4px rgba(0,0,0,.5); }}
+  .pk-grail-price {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 26px; color: #d4af37; line-height: 1; text-shadow: 0 1px 4px rgba(0,0,0,.5); }}
   .pk-grail-title {{ font-size: 11px; line-height: 1.4; color: #c9c2a7; margin-top: 4px; min-height: 30px; }}
 
   /* Hero strip */
   .pk-hero {{ background: linear-gradient(180deg, rgba(0,0,0,.06), transparent); border: 1px solid {color}26; border-radius: var(--r-md); padding: 18px; margin: 18px 0 24px; }}
   .pk-hero-head {{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }}
-  .pk-hero-head h2 {{ margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: {color}; letter-spacing: .03em; }}
+  .pk-hero-head h2 {{ margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 32px; color: {color}; letter-spacing: .03em; }}
   .pk-hero-sub {{ color: var(--text-muted); font-size: 13px; }}
   .pk-hero-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }}
   .pk-hero-card {{ display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }}
   .pk-hero-card:hover {{ transform: translateY(-3px); border-color: {color}; box-shadow: 0 8px 26px {color}26; }}
   .pk-hero-img {{ aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }}
   .pk-hero-meta {{ padding: 8px 10px; display: flex; justify-content: space-between; align-items: baseline; }}
-  .pk-hero-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: {color}; }}
+  .pk-hero-price {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 18px; color: {color}; }}
   .pk-hero-disc {{ color: var(--success); font-size: 11px; font-weight: 700; }}
 
   /* Filter bar */
@@ -517,7 +517,7 @@ def render_report(plan: dict) -> Path:
   /* Per-bucket */
   .pk-bucket {{ margin: 36px 0; }}
   .pk-bucket-head {{ display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }}
-  .pk-bucket-title h3 {{ margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .02em; }}
+  .pk-bucket-title h3 {{ margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 32px; letter-spacing: .02em; }}
   .pk-tag {{ font-size: 10px; border-radius: 999px; padding: 3px 9px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }}
   .pk-tag-vintage       {{ color: #c98a4d; background: rgba(201,138,77,.12);  border: 1px solid rgba(201,138,77,.35); }}
   .pk-tag-promo         {{ color: #e07b6f; background: rgba(224,123,111,.12); border: 1px solid rgba(224,123,111,.35); }}
@@ -530,7 +530,7 @@ def render_report(plan: dict) -> Path:
 
   .pk-bucket-stats {{ display: grid; grid-template-columns: repeat(4, auto); gap: 14px; }}
   .pk-stat {{ text-align: center; min-width: 56px; }}
-  .pk-stat-n {{ font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); line-height: 1; }}
+  .pk-stat-n {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--text); line-height: 1; }}
   .pk-stat-l {{ font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }}
 
   /* Card grid */
@@ -543,7 +543,7 @@ def render_report(plan: dict) -> Path:
   .pk-card:hover .pk-img {{ transform: scale(1.05); }}
   .pk-meta {{ padding: 10px 12px; }}
   .pk-price-row {{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }}
-  .pk-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: {color}; }}
+  .pk-price {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 24px; color: {color}; }}
   .pk-disc {{ background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }}
   .pk-title {{ font-size: 12px; line-height: 1.4; color: var(--text); min-height: 32px; }}
   .pk-buying {{ font-size: 10px; color: var(--text-muted); margin-top: 6px; letter-spacing: .04em; }}
@@ -626,9 +626,9 @@ def render_landing(plans: list[dict]) -> Path:
   .pmon-tile-img { aspect-ratio: 4 / 3; background-size: cover; background-position: center; background-color: var(--surface-2); transition: transform .3s ease; }
   .pmon-tile:hover .pmon-tile-img { transform: scale(1.05); }
   .pmon-tile-meta { padding: 14px 16px 18px; }
-  .pmon-tile-name { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); letter-spacing: .03em; line-height: 1; }
+  .pmon-tile-name { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 36px; color: var(--accent); letter-spacing: .03em; line-height: 1; }
   .pmon-tile-stats { margin-top: 8px; color: var(--text-muted); font-size: 13px; }
-  .pmon-tile-n { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text); }
+  .pmon-tile-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 20px; color: var(--text); }
   .pmon-tile-l { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
   .pmon-tile-tag { margin-top: 10px; font-size: 12px; color: var(--text-muted); font-style: italic; line-height: 1.4; min-height: 32px; }
 </style>

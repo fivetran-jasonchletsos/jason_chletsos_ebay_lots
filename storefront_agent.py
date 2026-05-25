@@ -308,7 +308,10 @@ STOREFRONT_CSS = r"""
   /* ── CARD GRID ── */
   .sf-grid {
     display: grid; gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+  @media (min-width: 1400px) {
+    .sf-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.1rem; }
   }
   .sf-card {
     background: var(--sf-surface); border: 1px solid var(--sf-edge); border-radius: 4px;
@@ -316,11 +319,32 @@ STOREFRONT_CSS = r"""
     transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
     opacity: 0; transform: translateY(8px);
     animation: sf-fade-up 0.6s ease forwards;
+    position: relative;
+  }
+  /* Gold accent sweep on hover (top edge) */
+  .sf-card::after {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--sf-gold-bright), transparent);
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform 0.45s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
   }
   .sf-card:hover { transform: translateY(-3px); border-color: var(--sf-edge-strong); box-shadow: var(--sf-shadow); }
-  .sf-pic { position: relative; aspect-ratio: 1/1.1; background: #08080a; overflow: hidden; }
-  .sf-pic img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.55s ease; }
+  .sf-card:hover::after { transform: scaleX(1); }
+  /* Trading card aspect (~2.5:3.5) — fills the slot like the real object */
+  .sf-pic { position: relative; aspect-ratio: 5/7; background: #08080a; overflow: hidden; }
+  /* shimmer while the image decodes */
+  .sf-pic::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(201,165,66,0.045) 50%, transparent 70%);
+    background-size: 220% 100%;
+    animation: sf-shimmer 1.6s ease-in-out infinite;
+    pointer-events: none; z-index: 0;
+  }
+  .sf-pic img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; transition: transform 0.55s ease; }
+  .sf-pic img[src] { background: #08080a; }
   .sf-card:hover .sf-pic img { transform: scale(1.035); }
+  @keyframes sf-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   .sf-price {
     position: absolute; bottom: 8px; right: 8px;
     background: rgba(10,10,10,0.85); color: var(--sf-gold-bright);
@@ -329,7 +353,7 @@ STOREFRONT_CSS = r"""
     backdrop-filter: blur(4px);
   }
   .sf-meta { padding: 0.75rem 0.85rem 0.9rem; display: flex; flex-direction: column; gap: 0.45rem; }
-  .sf-title { font-size: 13px; line-height: 1.35; color: var(--sf-ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; }
+  .sf-title { font-size: 13px; line-height: 1.35; color: var(--sf-ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; word-break: break-word; overflow-wrap: anywhere; }
   .sf-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
   .sf-chip { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--sf-faint); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.15rem 0.4rem; border: 1px solid var(--sf-edge); border-radius: 2px; }
   .sf-cta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sf-gold); letter-spacing: 0.1em; text-transform: uppercase; margin-left: auto; }
@@ -377,6 +401,9 @@ STOREFRONT_CSS = r"""
   }
   @media (prefers-reduced-motion: reduce) {
     .sf-hero, .sf-card { animation: none; opacity: 1; transform: none; }
+    .sf-pic::before { animation: none; }
+    .sf-card:hover { transform: none; }
+    .sf-card:hover .sf-pic img { transform: none; }
   }
 
   /* ── MOBILE POLISH ── */
@@ -397,6 +424,33 @@ STOREFRONT_CSS = r"""
     .sf-section-sold { padding: 1rem; }
     .sf-sold-list li { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
     .sf-sold-title { white-space: normal; }
+  }
+
+  /* Tighter phones (sub-iPhone-SE) */
+  @media (max-width: 480px) {
+    main { padding: 0.7rem 0.6rem 2.4rem; }
+    .sf-hero { padding: 0.8rem 0 1.2rem; gap: 1rem; }
+    .sf-headline { font-size: clamp(32px, 12vw, 48px); margin-bottom: 0.7rem; }
+    .sf-eyebrow { margin-bottom: 0.6rem; }
+    .sf-lede { font-size: 14px; }
+    .sf-hero-trust { padding: 1rem; }
+    .sf-grid { gap: 0.5rem; }
+    .sf-meta { padding: 0.5rem 0.55rem 0.6rem; gap: 0.3rem; }
+    .sf-title { font-size: 11.5px; min-height: 2.5em; }
+    .sf-price { font-size: 12px; padding: 0.25rem 0.45rem; }
+    .sf-section-head h2 { font-size: 19px; }
+    .sf-section { margin-top: 1.8rem; }
+    .sf-tiles { gap: 0.4rem; }
+    .sf-tile { padding: 0.7rem 0.8rem; }
+  }
+
+  /* Print: clean sold history if buyers ever save the page */
+  @media print {
+    main::before, main::after { display: none; }
+    body { background: #fff; color: #000; }
+    .sf-card, .sf-hero-trust, .sf-section-sold { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+    .sf-headline, .sf-section-head h2, .sf-stat b, .sf-quick-name { color: #000; }
+    .sf-pic { display: none; }
   }
 </style>
 """

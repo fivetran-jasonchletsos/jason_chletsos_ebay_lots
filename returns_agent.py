@@ -313,12 +313,12 @@ def _esc(s: str) -> str:
 
 
 _PAGE_HEAD = "<style>" + (
-    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)} "
+    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)} "
     ".ret-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0 28px} "
     ".ret-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden} "
     ".ret-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7} "
     ".ret-kpi.bad::before{background:#ef4444} .ret-kpi.ok::before{background:#22c55e} .ret-kpi.warn::before{background:#facc15} "
-    ".ret-kpi .n{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);line-height:1} "
+    ".ret-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1} "
     ".ret-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px} "
     ".ret-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 24px} "
     ".ret-note h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)} "
@@ -347,7 +347,7 @@ _PAGE_HEAD = "<style>" + (
     ".btn.no{background:#ef4444;color:#fff;border-color:#ef4444} "
     ".btn.gold{background:var(--gold);color:#0a0a0a;border-color:var(--gold)} "
     ".empty{color:var(--text-muted);padding:36px 28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md);font-size:15px} "
-    ".empty .big{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);display:block;margin-bottom:6px}"
+    ".empty .big{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:36px;color:var(--gold);display:block;margin-bottom:6px}"
 ) + "</style><script>" + (
     "document.addEventListener('click',function(e){var b=e.target.closest('.btn[data-action]');if(!b)return;"
     "var act=b.getAttribute('data-action');var rid=b.getAttribute('data-return-id');"

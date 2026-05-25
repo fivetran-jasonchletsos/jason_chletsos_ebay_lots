@@ -124,7 +124,7 @@ def build_body() -> str:
   .wiz-main {{ padding: 16px 14px 120px; max-width: 480px; margin: 0 auto; }}
   .wiz-shell {{ display: flex; flex-direction: column; gap: 18px; }}
   .wiz-header {{ text-align: center; padding: 12px 0 4px; }}
-  .wiz-title {{ font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: .04em; color: var(--gold); margin: 0; }}
+  .wiz-title {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 38px; letter-spacing: .04em; color: var(--gold); margin: 0; }}
   .wiz-sub {{ color: var(--text-muted); margin: 4px 0 0; font-size: 14px; }}
   .wiz-step {{ background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 16px; }}
   .step-num {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-dim); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }}

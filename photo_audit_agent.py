@@ -650,11 +650,11 @@ def build_report(audit_payload: dict, cfg: dict) -> Path:
     extra_css = """
 <style>
   .hero { padding: 24px 0 12px; }
-  .hero h1 { margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 56px; letter-spacing: .02em; }
+  .hero h1 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 56px; letter-spacing: .02em; }
   .hero .sub { color: var(--text-muted); }
   .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 18px 0; }
   .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; }
-  .stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold); line-height: 1; }
+  .stat-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 36px; color: var(--gold); line-height: 1; }
   .stat-l { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
   .sev-severe-bg { border-color: var(--danger); box-shadow: inset 0 -2px 0 var(--danger); }
   .sev-poor-bg   { border-color: var(--warning); box-shadow: inset 0 -2px 0 var(--warning); }

@@ -229,12 +229,12 @@ def _build_body(rows: list[dict], full_count: int) -> str:
 
 _EXTRA_CSS = """
 .rs-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 96px; }
-.rs-hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px, 4vw, 44px); letter-spacing:.02em; margin:0 0 8px; }
+.rs-hero h1 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: clamp(28px, 4vw, 44px); letter-spacing:.02em; margin:0 0 8px; }
 .rs-killer { color: var(--accent, #d4af37); font-weight: 400; }
 .rs-lede { color: var(--text-dim, #999); max-width: 760px; margin: 0 0 20px; line-height: 1.5; }
 .rs-strip { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
 .rs-stat { background: var(--surface, #141414); border: 1px solid var(--border, #2a2a2a); border-radius: 12px; padding: 14px 16px; }
-.rs-stat-n { font-family:'Bebas Neue',sans-serif; font-size: 28px; color: var(--accent, #d4af37); }
+.rs-stat-n { font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em; font-size: 28px; color: var(--accent, #d4af37); }
 .rs-stat-l { font-size: 12px; color: var(--text-dim, #999); text-transform: uppercase; letter-spacing:.06em; }
 .rs-stat-link { text-decoration: none; color: inherit; transition: transform .15s; }
 .rs-stat-link:hover { transform: translateY(-2px); }
@@ -243,7 +243,7 @@ _EXTRA_CSS = """
 .rs-card { background: var(--surface, #141414); border: 1px solid var(--border, #2a2a2a); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .rs-card.is-done { opacity: .45; }
 .rs-card-head { display:grid; grid-template-columns: 40px 1fr 88px; gap: 12px; align-items: center; }
-.rs-rank { font-family:'Bebas Neue',sans-serif; font-size: 28px; color: var(--accent, #d4af37); text-align:center; }
+.rs-rank { font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em; font-size: 28px; color: var(--accent, #d4af37); text-align:center; }
 .rs-title { color: var(--text, #eee); font-weight: 600; text-decoration: none; display:block; line-height: 1.3; }
 .rs-title:hover { text-decoration: underline; }
 .rs-sub { display:flex; gap: 10px; align-items:center; font-size: 12px; color: var(--text-dim, #999); margin-top: 4px; flex-wrap: wrap; }
@@ -275,7 +275,7 @@ _EXTRA_CSS = """
 .rs-status.is-ok   { color: #4ade80; }
 .rs-status.is-err  { color: #f87171; }
 .rs-done-wrap { margin-top: 36px; }
-.rs-done-wrap h2 { font-family:'Bebas Neue',sans-serif; font-size: 24px; letter-spacing:.04em; }
+.rs-done-wrap h2 { font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em; font-size: 24px; letter-spacing:.04em; }
 .rs-done { display: flex; flex-direction: column; gap: 6px; }
 .rs-done .rs-empty { color: var(--text-dim, #999); font-style: italic; }
 .rs-done .rs-done-row { padding: 8px 12px; background: var(--surface, #141414); border: 1px solid var(--border, #2a2a2a); border-radius: 8px; font-size: 13px; }

@@ -286,8 +286,8 @@ def build_html_body(seller_name: str, store_url: str, steals: list[dict]) -> str
         'style="max-width:640px;background:#fff;border-radius:12px;overflow:hidden;">'
         # Header
         '<tr><td style="padding:32px 28px 12px;text-align:center;background:#0a0a0a;">'
-        f'<h1 style="margin:0;font-family:Bebas Neue,Impact,sans-serif;font-size:42px;'
-        f'letter-spacing:.04em;color:#d4af37;">{seller_name.upper()}</h1>'
+        f'<h1 style="margin:0;font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:500;font-size:42px;'
+        f'letter-spacing:-0.01em;color:#d4af37;">{seller_name.upper()}</h1>'
         '<p style="margin:6px 0 0;color:#bbb;font-size:14px;letter-spacing:.08em;'
         'text-transform:uppercase;">This Week\'s Steals</p></td></tr>'
         # Intro
@@ -302,8 +302,8 @@ def build_html_body(seller_name: str, store_url: str, steals: list[dict]) -> str
         '<table cellpadding="0" cellspacing="0" border="0" width="100%" '
         'style="background:linear-gradient(135deg,#0a0a0a,#1c1c1c);border-radius:10px;">'
         '<tr><td style="padding:18px 22px;text-align:center;color:#fff;">'
-        '<div style="font-family:Bebas Neue,Impact,sans-serif;font-size:24px;'
-        'color:#d4af37;letter-spacing:.04em;">VOLUME DISCOUNT &mdash; STACK IT</div>'
+        '<div style="font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:500;font-size:24px;'
+        'color:#d4af37;letter-spacing:-0.005em;">VOLUME DISCOUNT &mdash; STACK IT</div>'
         '<div style="font-size:14px;color:#ddd;margin-top:6px;line-height:1.6;">'
         'Buy 2 save 5% &nbsp;&middot;&nbsp; Buy 5 save 12% &nbsp;&middot;&nbsp; '
         'Buy 10 save 20%</div>'
@@ -513,11 +513,11 @@ def build_report(plan: dict, history: list[dict]) -> Path:
     extra_css = (
         "<style>"
         ".hero{padding:24px 0 12px}"
-        ".hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}"
+        ".hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}"
         ".hero .sub{color:var(--text-muted)}.hero .hint{color:var(--text-dim);font-size:12px;margin-top:10px}"
         ".stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}"
         ".stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}"
-        ".stat-n{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);line-height:1}"
+        ".stat-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:36px;color:var(--gold);line-height:1}"
         ".stat-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}"
         ".cfg{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:18px 0}"
         ".cfg h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}"

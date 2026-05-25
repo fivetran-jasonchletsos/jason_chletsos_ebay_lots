@@ -382,7 +382,7 @@ def render_report(plan: dict) -> Path:
 <style>
   .wl-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 22px 0; }
   .wl-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px 18px; }
-  .wl-kpi-n { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--gold); line-height: 1; }
+  .wl-kpi-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 40px; color: var(--gold); line-height: 1; }
   .wl-kpi-l { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }
   .wl-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; margin: 18px 0 24px; position: sticky; top: 64px; z-index: 5; backdrop-filter: blur(8px); }
   .wl-filters select { padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 13px; }
@@ -390,8 +390,8 @@ def render_report(plan: dict) -> Path:
   .wl-count { margin-left: auto; color: var(--text-muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
   .wl-section { margin: 32px 0; }
   .wl-section-head { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .wl-section-head h2 { margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: .02em; }
-  .wl-team { color: var(--text-muted); font-size: 13px; font-family: 'Inter', sans-serif; letter-spacing: .04em; font-weight: 400; margin-left: 10px; }
+  .wl-section-head h2 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 36px; letter-spacing: .02em; }
+  .wl-team { color: var(--text-muted); font-size: 13px; font-family: 'Familjen Grotesk', sans-serif; letter-spacing: .04em; font-weight: 400; margin-left: 10px; }
   .wl-notes { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
   .wl-bucket { margin: 22px 0; }
   .wl-bucket-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -408,7 +408,7 @@ def render_report(plan: dict) -> Path:
   .wl-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
   .wl-meta { padding: 10px 12px; }
   .wl-price-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .wl-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); }
+  .wl-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--gold); }
   .wl-disc { background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
   .wl-title { font-size: 12px; line-height: 1.4; color: var(--text); min-height: 32px; }
   .wl-buying { font-size: 10px; color: var(--text-muted); margin-top: 6px; letter-spacing: .04em; }

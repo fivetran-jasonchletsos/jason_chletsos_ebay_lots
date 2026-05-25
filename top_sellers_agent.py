@@ -243,7 +243,7 @@ def render_report(plan: dict) -> Path:
 <style>
   .ts-section { margin: 28px 0; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
   .ts-head { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 14px; }
-  .ts-head h2 { margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: .02em; }
+  .ts-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 30px; letter-spacing: .02em; }
   .ts-head h2 a { color: var(--text); text-decoration: none; }
   .ts-head h2 a:hover { color: var(--gold); }
   .ts-kind { font-size: 10px; padding: 3px 9px; border-radius: 999px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }
@@ -257,14 +257,14 @@ def render_report(plan: dict) -> Path:
   .ts-tag { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
   .ts-stats { display: grid; grid-template-columns: repeat(2, auto); gap: 18px; }
   .ts-stat { text-align: center; }
-  .ts-n { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--gold); line-height: 1; }
+  .ts-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 24px; color: var(--gold); line-height: 1; }
   .ts-l { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
   .ts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
   .ts-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
   .ts-card:hover { transform: translateY(-2px); border-color: var(--gold); }
   .ts-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
   .ts-meta { padding: 8px 10px; }
-  .ts-price { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); }
+  .ts-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 20px; color: var(--gold); }
   .ts-title { font-size: 11px; line-height: 1.35; color: var(--text); min-height: 28px; margin-top: 4px; }
   .ts-buying { font-size: 10px; color: var(--text-muted); margin-top: 4px; letter-spacing: .04em; }
   .ts-empty { padding: 16px; color: var(--text-muted); font-size: 13px; }

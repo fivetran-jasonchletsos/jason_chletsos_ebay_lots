@@ -118,10 +118,26 @@ def _to_float(n: Any) -> float:
 
 
 # ---------- metric computations ------------------------------------------
+# Eastern time (UTC-5 standard, UTC-4 DST). Use zoneinfo so DST is handled.
+try:
+    from zoneinfo import ZoneInfo
+    _EASTERN = ZoneInfo("America/New_York")
+except Exception:  # pragma: no cover — zoneinfo missing on very old Pythons
+    _EASTERN = timezone(timedelta(hours=-5))
+
+
 def revenue_windows(sold: list[dict], now: datetime) -> dict[str, Any]:
-    cut_1 = now - timedelta(days=1)
-    cut_7 = now - timedelta(days=7)
-    cut_30 = now - timedelta(days=30)
+    """Revenue rollups using **calendar-day** boundaries in US Eastern.
+
+    "Yesterday" means the previous calendar day in Eastern, not a 24-hour
+    rolling window. 7d and 30d are also anchored to start-of-today Eastern
+    so all three windows are consistent.
+    """
+    now_eastern = now.astimezone(_EASTERN)
+    start_today = now_eastern.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_yesterday = start_today - timedelta(days=1)
+    cut_7 = start_today - timedelta(days=7)
+    cut_30 = start_today - timedelta(days=30)
     rev_1 = rev_7 = rev_30 = 0.0
     cnt_1 = cnt_7 = cnt_30 = 0
     yesterday_items: list[dict] = []
@@ -129,16 +145,19 @@ def revenue_windows(sold: list[dict], now: datetime) -> dict[str, Any]:
         dt = _parse_dt(row.get("sold_date"))
         if not dt:
             continue
+        # Compare in Eastern so a 11pm-ET sale lands on the right calendar day.
+        dt_e = dt.astimezone(_EASTERN)
         price = _to_float(row.get("sale_price"))
         qty = _to_float(row.get("quantity")) or 1.0
         gross = price * qty
-        if dt >= cut_30:
+        if dt_e >= cut_30:
             rev_30 += gross
             cnt_30 += 1
-        if dt >= cut_7:
+        if dt_e >= cut_7:
             rev_7 += gross
             cnt_7 += 1
-        if dt >= cut_1:
+        # "Yesterday" = sales whose ET timestamp falls in [start_yesterday, start_today).
+        if start_yesterday <= dt_e < start_today:
             rev_1 += gross
             cnt_1 += 1
             yesterday_items.append(row)
@@ -257,19 +276,19 @@ def build_todo(*, photo_fail: int, msgs_pending: int,
 _CSS = """<style>
 .dd-hero{padding:32px 0 16px;border-bottom:1px solid var(--border);margin-bottom:24px}
 .dd-hero .dateline{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
-.dd-hero h1{margin:0;font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:.01em;line-height:1.02}
+.dd-hero h1{margin:0;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:64px;letter-spacing:.01em;line-height:1.02}
 .dd-hero h1 .accent{color:var(--gold)}
 .dd-hero .sub{color:var(--text-muted);margin-top:8px;font-size:15px}
 .dd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:0 0 32px}
 .dd-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}
 .dd-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}
-.dd-kpi-n{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);line-height:1}
+.dd-kpi-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:40px;color:var(--gold);line-height:1}
 .dd-kpi-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
 .dd-kpi-foot{color:var(--text-dim);font-size:11px;margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}
 .dd-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-bottom:32px}
 @media (max-width:900px){.dd-grid{grid-template-columns:1fr}}
 .dd-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:20px 22px}
-.dd-section h2{margin:0 0 14px;font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.02em;color:var(--text)}
+.dd-section h2{margin:0 0 14px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:28px;letter-spacing:.02em;color:var(--text)}
 .dd-section h2 .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;margin-left:10px;vertical-align:middle}
 .dd-todo{list-style:none;padding:0;margin:0}
 .dd-todo li{padding:10px 0;border-bottom:1px dashed var(--border);display:flex;align-items:flex-start;gap:10px;color:var(--text);font-size:14px}
@@ -281,13 +300,13 @@ _CSS = """<style>
 .dd-top .thumb .ph{color:var(--text-dim);font-size:11px;text-align:center;padding:8px}
 .dd-top .meta{flex:1;display:flex;flex-direction:column;justify-content:center}
 .dd-top .meta .ttl{font-size:15px;color:var(--text);line-height:1.35;margin-bottom:8px;font-weight:600}
-.dd-top .meta .price{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);line-height:1}
+.dd-top .meta .price{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1}
 .dd-top .meta .order{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:6px}
 .dd-top a{color:var(--text);text-decoration:none}.dd-top a:hover{color:var(--gold)}
 .dd-fix{list-style:none;padding:0;margin:0}
 .dd-fix li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start}
 .dd-fix li:last-child{border-bottom:none}
-.dd-fix .rank{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);width:28px;flex-shrink:0;line-height:1}
+.dd-fix .rank{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:26px;color:var(--gold);width:28px;flex-shrink:0;line-height:1}
 .dd-fix .body .ttl{font-size:13px;color:var(--text);line-height:1.35;margin-bottom:3px}
 .dd-fix .body .why{font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
 .dd-fix a{color:var(--text);text-decoration:none}.dd-fix a:hover{color:var(--gold)}
@@ -298,7 +317,7 @@ _CSS = """<style>
 .dd-roster thead th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);padding:6px 8px;border-bottom:1px solid var(--border)}
 .dd-roster tbody td{padding:7px 8px;border-bottom:1px dashed var(--border)}
 .dd-roster tbody tr:last-child td{border-bottom:none}
-.dd-roster .dd-roster-name{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--gold);letter-spacing:.01em;white-space:nowrap}
+.dd-roster .dd-roster-name{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:17px;color:var(--gold);letter-spacing:.01em;white-space:nowrap}
 .dd-roster .dd-roster-role{color:var(--text)}
 .dd-roster .dd-roster-file{color:var(--text-dim)}
 .dd-roster .dd-roster-file code{background:var(--surface-2);padding:1px 5px;border-radius:3px;font-size:11px}

@@ -387,11 +387,11 @@ def build_report(plan: dict) -> Path:
                        "No warning-band listings."))
 
     extra_css = """<style>
-.hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}
+.hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}
 .sh-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:22px 0 28px}
 .sh-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}
 .sh-kpi::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}
-.sh-kpi-n{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);line-height:1}
+.sh-kpi-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1}
 .sh-kpi-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
 .sh-kpi-foot{color:var(--text-dim);font-size:11px;margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}
 .pq-kpi-pass::before{background:var(--success)}.pq-kpi-warn::before{background:var(--warning)}
@@ -399,7 +399,7 @@ def build_report(plan: dict) -> Path:
 .pq-kpi-pass .sh-kpi-n{color:var(--success)}.pq-kpi-warn .sh-kpi-n{color:var(--warning)}
 .pq-kpi-fail .sh-kpi-n,.pq-kpi-none .sh-kpi-n{color:var(--danger)}
 .sh-section{margin:36px 0}.sh-section-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-.sh-section-head h2{margin:0;font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.02em}
+.sh-section-head h2{margin:0;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:28px;letter-spacing:.02em}
 .sh-count{color:var(--text-muted);font-weight:400;font-size:18px;margin-left:6px}.sh-hint{color:var(--text-muted);font-size:13px}
 .pq-tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)}
 .sh-tbl{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface)}

@@ -325,7 +325,7 @@ def render_html(lots: list[dict], descriptions: list[str],
         '.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0 24px;}'
         '.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;}'
         '.kpi-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;}'
-        '.kpi-val{font-family:"Bebas Neue",sans-serif;font-size:32px;color:var(--gold);line-height:1;}'
+        '.kpi-val{font-family:"Fraunces",Georgia,serif;font-size:32px;color:var(--gold);line-height:1;}'
         '</style>'
     )
     return promote.html_shell("Whatnot Prep", body,
