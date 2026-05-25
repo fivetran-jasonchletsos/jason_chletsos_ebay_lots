@@ -419,7 +419,7 @@ def render_report(plan: dict) -> Path:
   .inv-noimg { width: 64px; height: 64px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1px dashed var(--border); border-radius:6px; color:var(--text-dim); font-size:10px; }
   .inv-title { font-weight: 600; color: var(--text); }
   .inv-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-  .inv-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); }
+  .inv-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--gold); }
   .inv-pb { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
   .inv-spec { list-style: none; padding: 8px 0 0 12px; margin: 0; font-size: 12px; }
   .inv-spec li { padding: 2px 0; color: var(--text-muted); }

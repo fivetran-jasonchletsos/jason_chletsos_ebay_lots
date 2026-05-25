@@ -787,7 +787,7 @@ def build_deals_page(deals_data: dict) -> Path:
       position: absolute; top: 6px; right: 6px;
       background: linear-gradient(135deg, var(--gold), var(--gold-dim));
       color: var(--brand-fg);
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 16px; letter-spacing: .02em;
       padding: 3px 8px;
       border-radius: var(--r-sm);
@@ -802,7 +802,7 @@ def build_deals_page(deals_data: dict) -> Path:
     .deal-feedback { font-size: 11px; color: var(--text-dim); margin-left: auto; }
     .deal-price-block { text-align: right; flex-shrink: 0; align-self: center; }
     .deal-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 30px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -1649,12 +1649,12 @@ _BASE_CSS = """
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Familjen Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: var(--fs-base);
   line-height: var(--lh-body);
-  font-feature-settings: 'cv11','ss01','cv02';
+  font-feature-settings: 'ss01','ss02','kern';
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh;
@@ -1667,11 +1667,14 @@ body {
 
 /* Low-specificity heading defaults (Coyier :where) */
 :where(h1, h2, h3, h4, h5, h6) {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  font-style: italic;
+  font-variation-settings: "opsz" 96, "SOFT" 30, "WONK" 1;
   line-height: var(--lh-tight);
   color: var(--text);
   text-wrap: balance;
+  letter-spacing: -0.005em;
 }
 :where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
 :where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
@@ -1703,7 +1706,7 @@ a:hover { color: var(--gold-bright); }
   border-radius: var(--r-sm);
 }
 
-.font-display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .02em; font-weight: 400; line-height: var(--lh-display); }
+.font-display { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1; letter-spacing: -0.01em; line-height: var(--lh-display); }
 .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
@@ -1734,15 +1737,18 @@ a:hover { color: var(--gold-bright); }
   border-radius: var(--r-md);
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   display: grid; place-items: center;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; color: var(--brand-fg); font-weight: 700;
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1;
+  font-size: 24px; color: var(--brand-fg); font-weight: 700;
   box-shadow: var(--glow-gold);
   flex-shrink: 0;
 }
 .brand-text { display: flex; flex-direction: column; min-width: 0; }
 .brand-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; line-height: 1; letter-spacing: .04em;
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-weight: 500;
+  font-variation-settings: "opsz" 96, "SOFT" 30, "WONK" 1;
+  font-size: 22px; line-height: 1; letter-spacing: -0.01em;
   color: var(--text);
   white-space: nowrap;
 }
@@ -1873,7 +1879,7 @@ html.pre-is-admin .gate-overlay { display: none !important; }
   text-align: center;
 }
 .gate-card h2 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: 28px; letter-spacing: .04em;
   color: var(--text);
   margin-bottom: 8px;
@@ -2000,7 +2006,7 @@ main {
   gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: var(--fs-display);
   letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
@@ -2036,7 +2042,7 @@ main {
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
@@ -2078,7 +2084,7 @@ button.stat-card.active .num { filter: brightness(1.15); }
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
@@ -2316,7 +2322,7 @@ input[type="checkbox"]:checked::after {
 .listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
@@ -2327,7 +2333,7 @@ input[type="checkbox"]:checked::after {
 }
 .listing-card .price-info-ic {
   font-size: 12px; color: var(--text-muted);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Familjen Grotesk', sans-serif;
   transition: color var(--t-fast);
 }
 .listing-card .price:hover .price-info-ic,
@@ -2344,7 +2350,7 @@ input[type="checkbox"]:checked::after {
   box-shadow: var(--shadow-lg);
   padding: 12px 14px;
   z-index: 200;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Familjen Grotesk', sans-serif;
   text-align: left;
 }
 .listing-card .price-pop.open { display: block; }
@@ -2552,7 +2558,7 @@ tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
   border-radius: var(--r-lg);
 }
 #no-results .big {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
 }
 
@@ -2729,7 +2735,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   animation: h2k-fade-up 600ms both;
 }
 .empty-state-title {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
   font-size: 28px; letter-spacing: .03em;
   color: var(--text);
 }
@@ -2824,7 +2830,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 /* ============ GLIGHTBOX OVERRIDES ============ */
 .glightbox-clean .gslide-description { background: var(--surface) !important; }
 .glightbox-clean .gdesc-inner { color: var(--text); }
-.glightbox-clean .gslide-title { color: var(--gold) !important; font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.glightbox-clean .gslide-title { color: var(--gold) !important; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; }
 .gbtn { background: var(--surface-2) !important; }
 
 /* ============ RESPONSIVE ============ */
@@ -2876,7 +2882,7 @@ _CDN_HEAD = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Familjen+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -3101,7 +3107,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <aside class="drawer" id="drawer" aria-label="Mobile navigation">
     <div class="drawer-head">
       <div>
-        <div class="brand-name" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;">{SELLER_NAME}</div>
+        <div class="brand-name" style="font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;font-size:24px;letter-spacing:.04em;">{SELLER_NAME}</div>
         <div class="brand-tag" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:4px;">eBay Storefront</div>
       </div>
       <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
@@ -4228,7 +4234,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     }
     .cat-sidebar-head { padding: 0 6px 12px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
     .cat-sidebar-title {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px;
       letter-spacing: .04em;
       color: var(--text);
@@ -4271,7 +4277,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       flex: 1 1 auto; min-width: 0;
     }
     .cat-nav-count {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 15px;
       letter-spacing: .04em;
       color: var(--gold);
@@ -4285,7 +4291,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       display: flex; align-items: baseline; gap: 6px;
     }
     .cat-sidebar-foot-num {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px;
       color: var(--gold);
     }
@@ -4350,7 +4356,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     .topick-img { aspect-ratio: 1/1; background: #111; }
     .topick-img img { width: 100%; height: 100%; object-fit: cover; }
     .topick-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 20px; color: var(--gold);
       padding: 6px 10px;
       letter-spacing: .02em;
@@ -4387,7 +4393,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       color: var(--brand-fg);
     }
     .tab-btn .tab-count {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 15px;
       opacity: .8;
       margin-left: 4px;
@@ -4443,14 +4449,14 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       position: relative; z-index: 1;
     }
     .hero-title {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: clamp(28px, 3.5vw, 44px);
       line-height: 1.05; letter-spacing: .015em;
       color: var(--text);
       margin: 8px 0 14px;
     }
     .hero-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: clamp(36px, 5vw, 56px);
       color: var(--gold);
       line-height: 1;
@@ -4490,7 +4496,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       overflow: hidden;
     }
     .hero-runner-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px; color: var(--gold);
       margin-top: 4px;
       letter-spacing: .02em;
@@ -4534,7 +4540,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     .trust-block:last-child { border-right: none; }
     .trust-block:hover { background: rgba(212,175,55,.05); }
     .trust-num {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 36px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -4592,7 +4598,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       margin-bottom: 12px;
     }
     .recent-head h3 {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px; letter-spacing: .03em;
       color: var(--text);
     }
@@ -4631,7 +4637,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       margin-bottom: 4px;
     }
     .recent-card-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 18px; color: var(--gold); letter-spacing: .02em;
     }
 
@@ -5359,7 +5365,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
       position: absolute; top: 8px; right: 8px;
       background: linear-gradient(135deg, #e07b6f, #b54a3e);
       color: #fff;
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 17px; letter-spacing: .02em;
       padding: 4px 9px;
       border-radius: var(--r-sm);
@@ -5379,7 +5385,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
     .steal-sub { font-size: 13px; color: var(--text-muted); }
     .steal-price-block { text-align: right; flex-shrink: 0; }
     .steal-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 34px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -5669,7 +5675,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
     .mi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     .mi-grid.cols-1 { grid-template-columns: 1fr; }
     .mi-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .mi-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .mi-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
     .mi-panel .mi-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
     .mi-chart-wrap { position: relative; height: 280px; }
     .mi-rec-table { width: 100%; }
@@ -5684,7 +5690,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
     .mi-action.maintain          { background: rgba(108,176,255,.16); color: var(--link); }
     .mi-action.hold              { background: rgba(150,150,150,.18); color: var(--text-muted); }
     .mi-score {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px; color: var(--gold); letter-spacing: .02em;
     }
     .mi-verdict { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
@@ -5726,7 +5732,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       margin-bottom: 14px;
     }
     .mi-detail-title {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px; letter-spacing: .03em; color: var(--text);
     }
     .mi-detail-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
@@ -5751,13 +5757,13 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       position: absolute; top: 6px; right: 6px;
       background: linear-gradient(135deg, var(--gold), var(--gold-dim));
       color: var(--brand-fg);
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 14px; padding: 2px 7px;
       border-radius: var(--r-sm); line-height: 1;
     }
     .mi-deal-meta { padding: 8px 10px; }
     .mi-deal-title { font-size: 12px; color: var(--text); line-height: 1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom: 4px; }
-    .mi-deal-price { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); letter-spacing: .02em; }
+    .mi-deal-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; color: var(--gold); letter-spacing: .02em; }
 
     .mi-query-row {
       font-size: 11px; color: var(--text-muted);
@@ -5933,7 +5939,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       }};
 
       Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
-      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
       const histLabels = {history_labels!r};
       const histSeries = {history_series!r};
       const PALETTE = ['#d4af37','#7fc77a','#6cb0ff','#e0b54a','#e07b6f','#b388e0'];
@@ -6075,7 +6081,7 @@ def build_sold_page(sold: list[dict]) -> Path:
     .sold-title:hover { color: var(--gold); }
     .sold-price-block { text-align: right; flex-shrink: 0; }
     .sold-price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 28px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -6083,7 +6089,7 @@ def build_sold_page(sold: list[dict]) -> Path:
     .sold-ship { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
     .charts-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
     .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .chart-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
+    .chart-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
     .chart-wrap { position: relative; height: 240px; }
     @media (max-width: 540px) {
       .sold-card { grid-template-columns: 56px 1fr; padding: 14px; }
@@ -6126,7 +6132,7 @@ def build_sold_page(sold: list[dict]) -> Path:
 
     <script>
       Chart.defaults.color = '#9a9388';
-      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
       const lbls = {chart_labels!r};
       if (lbls.length && document.getElementById('chart-sold')) {{
         new Chart(document.getElementById('chart-sold'), {{
@@ -6345,7 +6351,7 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
     .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
     .a-grid.cols-1 { grid-template-columns: 1fr; }
     .a-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .a-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .a-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
     .a-panel .a-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; letter-spacing: .02em; }
     .a-chart-wrap { position: relative; height: 280px; }
     .a-chart-wrap.tall { height: 340px; }
@@ -6373,7 +6379,7 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
       color: var(--text-muted); font-weight: 600; line-height: 1.1;
     }
     .kpi-value {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 34px; line-height: 1; letter-spacing: .01em;
       color: var(--text); margin-top: 8px;
     }
@@ -6595,7 +6601,7 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
 
     <script>
       Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#9a9388';
-      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
       const GOLD = '#d4af37';
       const PALETTE = ['#d4af37','#7fc77a','#6cb0ff','#e0b54a','#e07b6f','#b388e0','#5fc7c7','#f4ce5d','#8a7521'];
 
@@ -6907,7 +6913,7 @@ def build_quality_report(listings: list[dict]) -> Path:
       min-height: 280px;
     }
     .chart-panel h3 {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 18px; letter-spacing: .03em;
       color: var(--text); margin-bottom: 14px;
     }
@@ -6931,11 +6937,11 @@ def build_quality_report(listings: list[dict]) -> Path:
     .q-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
     .q-title-wrap { min-width: 0; flex: 1; }
     .q-score-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .q-score { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--stripe); line-height: 1; letter-spacing: .02em; }
+    .q-score { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 24px; color: var(--stripe); line-height: 1; letter-spacing: .02em; }
     .q-score-of { font-size: 11px; color: var(--text-dim); margin-right: 4px; }
     .q-title { display: block; font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.35; text-decoration: none; }
     .q-title:hover { color: var(--gold); }
-    .q-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); line-height: 1; letter-spacing: .02em; flex-shrink: 0; }
+    .q-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; color: var(--gold); line-height: 1; letter-spacing: .02em; flex-shrink: 0; }
     .q-issues { list-style: none; padding: 0; margin: 6px 0 0; font-size: 12.5px; color: var(--text-muted); }
     .q-issues li { padding: 3px 0; padding-left: 14px; position: relative; }
     .q-issues li::before { content: '⚑'; position: absolute; left: 0; color: var(--stripe); font-size: 10px; }
@@ -7092,7 +7098,7 @@ def build_quality_report(listings: list[dict]) -> Path:
       }}
 
       Chart.defaults.color = '#9a9388';
-      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
       Chart.defaults.borderColor = 'rgba(212,175,55,0.10)';
 
       new Chart(document.getElementById('chart-quality'), {{
@@ -7264,7 +7270,7 @@ def build_craigslist(listings: list[dict]) -> Path:
     .cl-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .cl-info { min-width: 0; }
     .cl-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); margin-bottom: 6px; }
-    .cl-price { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--gold); line-height: 1; letter-spacing: .02em; }
+    .cl-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 24px; color: var(--gold); line-height: 1; letter-spacing: .02em; }
     .cl-view { padding: 8px 14px; font-size: 12px; }
     .cl-ad-wrap { padding: 14px 18px; }
     .cl-ad-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -7690,14 +7696,14 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     .product-detail {{ display: flex; flex-direction: column; }}
     .product-detail .eyebrow {{ margin-bottom: 12px; }}
     .product-title {{
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: clamp(28px, 3vw, 40px);
       line-height: 1.1; letter-spacing: .015em;
       color: var(--text);
       margin-bottom: 14px;
     }}
     .product-price {{
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: clamp(46px, 5.5vw, 68px);
       color: var(--gold);
       line-height: 1;
@@ -7725,7 +7731,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
       border-radius: var(--r-lg);
       padding: 22px;
     }}
-    .product-desc h3 {{ font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); margin-bottom: 12px; letter-spacing: .03em; }}
+    .product-desc h3 {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; color: var(--text); margin-bottom: 12px; letter-spacing: .03em; }}
     .product-desc p {{ color: var(--text-muted); line-height: 1.7; font-size: 14px; }}
     .item-pricing-panel {{
       background: linear-gradient(180deg, var(--surface), var(--surface-2));
@@ -7740,7 +7746,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
       color: var(--gold); font-weight: 700; margin-bottom: 4px;
     }}
     .item-pricing-panel h3 {{
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px; letter-spacing: .03em; color: var(--text);
     }}
     .item-pricing-panel .ip-row {{
@@ -7784,7 +7790,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     .rel-img img {{ width: 100%; height: 100%; object-fit: cover; }}
     .rel-meta {{ padding: 12px; }}
     .rel-title {{ font-size: 12px; line-height: 1.35; color: var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }}
-    .rel-price {{ font-family: 'Bebas Neue', sans-serif; color: var(--gold); font-size: 20px; margin-top: 6px; }}
+    .rel-price {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; color: var(--gold); font-size: 20px; margin-top: 6px; }}
     @media (max-width: 880px) {{
       .product {{ grid-template-columns: 1fr; gap: 22px; }}
     }}
@@ -8395,7 +8401,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
     }
     .pr-cell-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
     .pr-current {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 26px; line-height: 1; color: var(--text);
       letter-spacing: .02em;
     }
@@ -8403,7 +8409,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
     .pr-arrow { color: var(--gold); font-size: 24px; line-height: 1; }
     .pr-new {
       display: flex; align-items: baseline; gap: 2px;
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 26px; line-height: 1; color: var(--gold);
       letter-spacing: .02em;
     }
@@ -8434,7 +8440,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       margin-bottom: 24px;
     }
     .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .chart-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
+    .chart-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
     .chart-wrap { position: relative; height: 220px; }
     @media (max-width: 880px) {
       .pr-card { grid-template-columns: 32px 64px 1fr; gap: 12px; padding: 14px; }
@@ -8523,7 +8529,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       }}
 
       Chart.defaults.color = '#9a9388';
-      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
       new Chart(document.getElementById('chart-gap'), {{
         type: 'bar',
         data: {{
@@ -8788,7 +8794,7 @@ def build_reddit(listings: list[dict]) -> Path:
       overflow-y: auto;
       position: sticky; top: 90px;
     }
-    .rd-picker h3 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 12px; }
+    .rd-picker h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 12px; }
     .rd-search { margin-bottom: 12px; }
     .rd-tiles { display: grid; gap: 8px; }
     .rd-tile {
@@ -8810,7 +8816,7 @@ def build_reddit(listings: list[dict]) -> Path:
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
       margin-bottom: 2px;
     }
-    .rd-tile-price { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); }
+    .rd-tile-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 16px; color: var(--gold); }
 
     .rd-composer {
       background: var(--surface);
@@ -8824,7 +8830,7 @@ def build_reddit(listings: list[dict]) -> Path:
       border: 1px dashed var(--border-mid);
       border-radius: var(--r-md);
     }
-    .rd-empty .big { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold); margin-bottom: 6px; }
+    .rd-empty .big { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 32px; color: var(--gold); margin-bottom: 6px; }
     .rd-form { display: none; }
     .rd-form.show { display: block; }
     .rd-form-row { margin-bottom: 14px; }
@@ -9156,7 +9162,7 @@ def build_return_policy() -> Path:
       margin-bottom: 14px;
     }
     .policy-section h2 {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 22px;
       letter-spacing: .03em;
       color: var(--gold);
@@ -9504,7 +9510,7 @@ python3 promoted_listings_agent.py --apply
       color: var(--text-muted); font-weight: 600;
     }
     .mm-lift-value {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       font-size: 30px; line-height: 1;
       color: var(--card-accent, var(--gold));
       margin-top: 4px;
@@ -9517,7 +9523,7 @@ python3 promoted_listings_agent.py --apply
       border-radius: var(--r-lg);
       padding: 22px 24px;
     }
-    .mm-runbook h2 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .03em; margin-bottom: 8px; }
+    .mm-runbook h2 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; letter-spacing: .03em; margin-bottom: 8px; }
     .mm-runbook p { color: var(--text-muted); margin-bottom: 12px; font-size: 13px; }
     .mm-cmd {
       background: var(--surface-3);

@@ -359,7 +359,7 @@ _EXTRA_CSS = """
     display: inline-block;
     background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
     color: #fff;
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em;
     font-size: 11px;
     letter-spacing: .14em;
     padding: 2px 8px;
@@ -379,7 +379,7 @@ _EXTRA_CSS = """
     font-size: 13px;
     color: var(--text-muted);
   }
-  .ai-strip strong { color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: .03em; }
+  .ai-strip strong { color: var(--text); font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 17px; letter-spacing: .03em; }
 
   .ai-kpi-row {
     display: grid;
@@ -394,7 +394,7 @@ _EXTRA_CSS = """
     border-radius: var(--r-md, 8px);
     padding: 14px 16px;
   }
-  .ai-kpi-num { font-family: 'Bebas Neue', sans-serif; font-size: 34px; color: var(--text); line-height: 1; }
+  .ai-kpi-num { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 34px; color: var(--text); line-height: 1; }
   .ai-kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); margin-top: 6px; }
   .ai-kpi-src { font-size: 10px; color: var(--text-muted); opacity: .6; margin-top: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
@@ -446,7 +446,7 @@ _EXTRA_CSS = """
     padding: 28px 12px;
   }
   .ai-empty-emoji { font-size: 36px; }
-  .ai-empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); margin-top: 8px; letter-spacing: .04em; }
+  .ai-empty-title { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--text); margin-top: 8px; letter-spacing: .04em; }
   .ai-empty-sub { font-size: 13px; margin-top: 6px; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.5; }
 
   .ai-row { display: flex; }
@@ -529,7 +529,7 @@ _EXTRA_CSS = """
     border: none;
     border-radius: 12px;
     padding: 12px 18px;
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em;
     font-size: 15px;
     letter-spacing: .08em;
     cursor: pointer;

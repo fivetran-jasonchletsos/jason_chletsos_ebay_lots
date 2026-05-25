@@ -227,12 +227,19 @@ def load_snapshot() -> list[dict]:
     if not SNAPSHOT_PATH.exists():
         return []
     try:
-        return json.loads(SNAPSHOT_PATH.read_text())
+        data = json.loads(SNAPSHOT_PATH.read_text())
     except json.JSONDecodeError:
         return []
+    # Snapshot is now {"saved_at", "listings", "market", "pricing", "sold"} —
+    # unwrap so callers keep getting a flat list.
+    if isinstance(data, dict):
+        return data.get("listings", [])
+    return data
 
 
 def merge_with_snapshot(traffic: list[dict], listings: list[dict]) -> list[dict]:
+    if isinstance(listings, dict):
+        listings = listings.get("listings", [])
     by_id = {str(l.get("item_id")): l for l in listings if l.get("item_id")}
     merged: list[dict] = []
     for row in traffic:
@@ -308,13 +315,13 @@ def compute_kpis(merged: list[dict]) -> dict[str, Any]:
 
 CSS = (
     "body{font-family:-apple-system,BlinkMacSystemFont,Inter,sans-serif;background:#0a0a0a;color:#eaeaea;margin:0;padding:24px;}"
-    "h1{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px;margin:0 0 4px;color:#d4af37;}"
-    "h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1.5px;margin:32px 0 12px;color:#d4af37;border-bottom:1px solid #222;padding-bottom:6px;}"
+    "h1{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:42px;letter-spacing:2px;margin:0 0 4px;color:#d4af37;}"
+    "h2{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:26px;letter-spacing:1.5px;margin:32px 0 12px;color:#d4af37;border-bottom:1px solid #222;padding-bottom:6px;}"
     ".sub{color:#888;margin-bottom:24px;font-size:13px;}"
     ".kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;}"
     ".kpi{background:#141414;border:1px solid #222;border-radius:10px;padding:14px 16px;}"
     ".kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;}"
-    ".kpi .value{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#fff;margin-top:4px;}"
+    ".kpi .value{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:30px;color:#fff;margin-top:4px;}"
     "table{width:100%;border-collapse:collapse;background:#101010;border:1px solid #222;border-radius:10px;overflow:hidden;}"
     "th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #1c1c1c;font-size:13px;vertical-align:middle;}"
     "th{background:#161616;color:#d4af37;font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:1px;}"

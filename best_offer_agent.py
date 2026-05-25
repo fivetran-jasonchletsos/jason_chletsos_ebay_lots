@@ -604,12 +604,12 @@ def build_report(plan: list[dict], summary: dict) -> Path:
     extra_css = """
 <style>
   .hero { padding: 24px 0 12px; }
-  .hero h1 { margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 56px; letter-spacing: .02em; }
+  .hero h1 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 56px; letter-spacing: .02em; }
   .hero .sub { color: var(--text-muted); }
   .bo-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0 28px; }
   .bo-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px 20px; position: relative; overflow: hidden; }
   .bo-kpi::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background: var(--gold); opacity:.7; }
-  .bo-kpi-n { font-family: 'Bebas Neue', sans-serif; font-size: 44px; color: var(--gold); line-height: 1; }
+  .bo-kpi-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 44px; color: var(--gold); line-height: 1; }
   .bo-kpi-l { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-top: 6px; }
   .bo-kpi-foot { color: var(--text-dim); font-size: 11px; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px; }
   .bo-note { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 18px; margin: 0 0 24px; }

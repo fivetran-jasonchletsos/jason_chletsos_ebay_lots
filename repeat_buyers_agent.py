@@ -429,13 +429,13 @@ def send_promo_message(token: str, buyer: dict, body: str,
 # ---------------------------------------------------------------------------
 
 _PAGE_CSS = (
-    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
+    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
     ".bk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0 28px}"
     ".bk-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}"
     ".bk-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}"
-    ".bk-kpi .n{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);line-height:1}"
+    ".bk-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:40px;color:var(--gold);line-height:1}"
     ".bk-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
-    ".bk-section-title{font-family:'Bebas Neue',sans-serif;font-size:28px;margin:28px 0 10px;letter-spacing:.04em}"
+    ".bk-section-title{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:28px;margin:28px 0 10px;letter-spacing:.04em}"
     ".bk-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 18px;color:var(--text-muted);font-size:13px}"
     ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}"
     "table.bk-tbl{width:100%;border-collapse:collapse;font-size:13px}"

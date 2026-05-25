@@ -83,7 +83,12 @@ def load_sold_history(path: Path = SOLD_FILE) -> list[dict]:
 
 
 def load_listings(path: Path = LISTINGS_FILE) -> list[dict]:
-    return _read_json(path, [])
+    data = _read_json(path, [])
+    # Snapshot file shape became {"saved_at", "listings", "market", "pricing", "sold"};
+    # unwrap so callers keep getting a flat list.
+    if isinstance(data, dict):
+        return data.get("listings", [])
+    return data
 
 
 def load_inventory(path: Path = INVENTORY_CSV) -> list[dict]:
@@ -165,6 +170,8 @@ def match_acquired_cost(
 # ----------------------------- category lookup ----------------------------- #
 
 def _category_index(listings: list[dict]) -> dict[str, str]:
+    if isinstance(listings, dict):
+        listings = listings.get("listings", [])
     out: dict[str, str] = {}
     for l in listings:
         iid = str(l.get("item_id") or "")

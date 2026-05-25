@@ -501,12 +501,12 @@ def render_report(plan: dict) -> Path:
   .sh-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 22px 0 28px; }
   .sh-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px 20px; position: relative; overflow: hidden; }
   .sh-kpi::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background: var(--gold); opacity:.7; }
-  .sh-kpi-n { font-family: 'Bebas Neue', sans-serif; font-size: 44px; color: var(--gold); line-height: 1; }
+  .sh-kpi-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 44px; color: var(--gold); line-height: 1; }
   .sh-kpi-l { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-top: 6px; }
   .sh-kpi-foot { color: var(--text-dim); font-size: 11px; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px; }
   .sh-section { margin: 36px 0; }
   .sh-section-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
-  .sh-section-head h2 { margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: .02em; }
+  .sh-section-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 28px; letter-spacing: .02em; }
   .sh-count { color: var(--text-muted); font-weight: 400; font-size: 18px; margin-left: 6px; }
   .sh-hint  { color: var(--text-muted); font-size: 13px; }
   .sh-hint code { background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
@@ -526,7 +526,7 @@ def render_report(plan: dict) -> Path:
   .sh-feat-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
   .sh-feat-info { padding: 10px 12px; }
   .sh-feat-title { font-size: 12px; color: var(--text); line-height: 1.35; min-height: 32px; }
-  .sh-feat-price { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); margin-top: 6px; }
+  .sh-feat-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 20px; color: var(--gold); margin-top: 6px; }
   .sh-promo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
   .sh-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px 20px; }
   .sh-card h4 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); }

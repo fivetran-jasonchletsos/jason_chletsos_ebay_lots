@@ -49,7 +49,11 @@ SCOPES: list[str] = [
     "https://api.ebay.com/oauth/api_scope/sell.account",
     "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
     "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
-    "https://api.ebay.com/oauth/api_scope/sell.negotiation",
+    # sell.negotiation is required for Send Offer to Watchers but is an
+    # "additional license / contract" scope on developer.ebay.com — not
+    # granted to this app yet. Apply for it via the eBay API license
+    # request, then add it back here and re-mint.
+    # "https://api.ebay.com/oauth/api_scope/sell.negotiation",
     "https://api.ebay.com/oauth/api_scope/commerce.identity.readonly",
 ]
 

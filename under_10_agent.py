@@ -315,7 +315,7 @@ def render_report(plan: dict) -> Path:
 <style>
   .u10-hero {{ background: linear-gradient(180deg, rgba(127,199,122,.06), transparent); border: 1px solid rgba(127,199,122,.18); border-radius: var(--r-md); padding: 18px; margin: 18px 0 24px; }}
   .u10-hero-head {{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }}
-  .u10-hero-head h2 {{ margin: 0; font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--success); letter-spacing: .03em; }}
+  .u10-hero-head h2 {{ margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 32px; color: var(--success); letter-spacing: .03em; }}
   .u10-hero-sub {{ color: var(--text-muted); font-size: 13px; }}
   .u10-hero-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }}
   .u10-hero-card {{ display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s, box-shadow .15s; }}
@@ -324,7 +324,7 @@ def render_report(plan: dict) -> Path:
 
   .u10-bucket {{ margin: 28px 0; }}
   .u10-bhead {{ margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }}
-  .u10-bhead h3 {{ margin: 0 0 4px; font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .02em; }}
+  .u10-bhead h3 {{ margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 26px; letter-spacing: .02em; }}
   .u10-count {{ color: var(--text-muted); font-weight: 400; font-size: 14px; margin-left: 6px; }}
   .u10-blurb {{ color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }}
   .u10-stats {{ color: var(--text-muted); font-size: 12px; }}
@@ -334,7 +334,7 @@ def render_report(plan: dict) -> Path:
   .u10-card:hover {{ transform: translateY(-2px); border-color: var(--success); box-shadow: 0 6px 18px rgba(127,199,122,.18); }}
   .u10-img {{ aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }}
   .u10-meta {{ padding: 8px 10px; }}
-  .u10-price {{ font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--success); line-height: 1; }}
+  .u10-price {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--success); line-height: 1; }}
   .u10-title {{ font-size: 11px; line-height: 1.35; color: var(--text); min-height: 28px; margin-top: 4px; }}
   @media (max-width: 640px) {{
     .u10-grid {{ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }}
