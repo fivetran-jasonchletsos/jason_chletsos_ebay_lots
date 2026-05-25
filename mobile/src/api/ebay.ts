@@ -144,7 +144,7 @@ export function clearTokenCache() {
 // ---------------------------------------------------------------------------
 // Trading API helpers
 
-function tradingHeaders(callName: string, creds: EbayCredentials): Record<string, string> {
+export function tradingHeaders(callName: string, creds: EbayCredentials): Record<string, string> {
   return {
     'X-EBAY-API-SITEID':              SITE_ID_US,
     'X-EBAY-API-COMPATIBILITY-LEVEL': COMPAT_LEVEL,
@@ -157,7 +157,7 @@ function tradingHeaders(callName: string, creds: EbayCredentials): Record<string
 }
 
 // Minimal XML escaper for user-supplied text fields.
-function xmlEscape(s: string | null | undefined): string {
+export function xmlEscape(s: string | null | undefined): string {
   if (s == null) return '';
   return String(s)
     .replace(/&/g, '&amp;')
@@ -167,19 +167,20 @@ function xmlEscape(s: string | null | undefined): string {
     .replace(/'/g, '&apos;');
 }
 
-const NS = 'urn:ebay:apis:eBLBaseComponents';
+export const NS = 'urn:ebay:apis:eBLBaseComponents';
+export const TRADING_ENDPOINT = TRADING_URL;
 
 /**
  * Very small XML "find first tag" helper. The Trading API XML is shallow and
  * we only ever need a handful of fields, so we skip a real parser.
  */
-function findTag(xml: string, tag: string): string | null {
+export function findTag(xml: string, tag: string): string | null {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
   const m = xml.match(re);
   return m ? m[1].trim() : null;
 }
 
-function findAllTags(xml: string, tag: string): string[] {
+export function findAllTags(xml: string, tag: string): string[] {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi');
   const out: string[] = [];
   let m: RegExpExecArray | null;
@@ -187,14 +188,14 @@ function findAllTags(xml: string, tag: string): string[] {
   return out;
 }
 
-interface EbayErrorInfo {
+export interface EbayErrorInfo {
   code: string;
   short: string;
   long: string;
   severity: string;
 }
 
-function parseErrors(xml: string): EbayErrorInfo[] {
+export function parseErrors(xml: string): EbayErrorInfo[] {
   const blocks = findAllTags(xml, 'Errors');
   return blocks.map((b) => ({
     code:     findTag(b, 'ErrorCode') ?? '',

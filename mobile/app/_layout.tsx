@@ -52,6 +52,32 @@ export default function RootLayout() {
             headerTintColor: theme.gold,
           }}
         />
+        <Stack.Screen
+          name="listing/[itemId]/index"
+          options={{
+            title: '',
+            headerStyle: { backgroundColor: theme.bg },
+            headerTintColor: theme.gold,
+          }}
+        />
+        <Stack.Screen
+          name="listing/[itemId]/replace-photos"
+          options={{
+            title: 'Replace photos',
+            presentation: 'modal',
+            headerStyle: { backgroundColor: theme.bg },
+            headerTintColor: theme.gold,
+          }}
+        />
+        <Stack.Screen
+          name="quick-list"
+          options={{
+            title: 'Quick list',
+            presentation: 'modal',
+            headerStyle: { backgroundColor: theme.bg },
+            headerTintColor: theme.gold,
+          }}
+        />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>
