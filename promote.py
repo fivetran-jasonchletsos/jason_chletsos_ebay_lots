@@ -3019,12 +3019,12 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{SELLER_NAME}">
   <meta property="og:title" content="{title}">
-  <meta property="og:description" content="Sports &amp; Pokemon cards · live inventory from harpua2001's eBay store · auto-updated daily.">
+  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop running since 2003. Live inventory, real photos, ships next business day.">
   <meta property="og:image" content="{SITE_URL}/og-card.jpg">
   <meta property="og:url" content="{SITE_URL}/{active_page}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{title}">
-  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 · auto-updated daily.">
+  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — 20+ years on eBay, real photos, fast shipping.">
   <meta name="twitter:image" content="{SITE_URL}/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
@@ -6043,7 +6043,7 @@ def build_sold_page(sold: list[dict]) -> Path:
       </article>''')
 
     if not cards:
-        cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No sales found in the last 90 days. Check back after your next sale.</div>'
+        cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No sales to show yet. Once cards start moving, they show up here.</div>'
     else:
         cards_html = "\n".join(cards)
 
@@ -6106,8 +6106,8 @@ def build_sold_page(sold: list[dict]) -> Path:
     <div class="section-head">
       <div>
         <div class="eyebrow">{range_label}</div>
-        <h1 class="section-title">Sold <span class="accent">Items</span></h1>
-        <div class="section-sub">Completed sales accumulated from eBay (Trading API caps live queries at 90 days; full history persists to <code>sold_history.json</code> on every build, so the catalog grows over time).</div>
+        <h1 class="section-title">Recently <span class="accent">Sold</span></h1>
+        <div class="section-sub">Every card that's left the shop, newest first. Use this as a sanity check on condition and pricing — what we list, we ship; what we ship, real people buy.</div>
       </div>
     </div>
 
