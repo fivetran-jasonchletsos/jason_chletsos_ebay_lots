@@ -261,7 +261,7 @@ _PAGE_CSS = """
 .ow-wrap{max-width:920px;margin:0 auto;padding:16px 12px 64px}
 .ow-hero{padding:18px 18px 14px;border-radius:var(--r-md);background:var(--surface);
   border:1px solid var(--border);margin-bottom:14px;text-align:center}
-.ow-hero .big{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,16vw,120px);
+.ow-hero .big{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:clamp(56px,16vw,120px);
   line-height:.95;color:var(--gold);letter-spacing:.02em;margin:0}
 .ow-hero .sub{color:var(--text-muted);font-size:14px;margin-top:6px;letter-spacing:.04em}
 .ow-stamp{font-size:11px;color:var(--text-dim);margin-top:8px}
@@ -272,12 +272,12 @@ _PAGE_CSS = """
 .ow-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
 .ow-kpi{background:var(--surface);border:1px solid var(--border);
   border-radius:var(--r-md);padding:12px 10px;text-align:center}
-.ow-kpi .n{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,5vw,32px);
+.ow-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:clamp(22px,5vw,32px);
   color:var(--gold);line-height:1}
 .ow-kpi .l{color:var(--text-muted);font-size:10px;text-transform:uppercase;
   letter-spacing:.08em;margin-top:4px}
 @media (max-width:480px){.ow-kpis{grid-template-columns:repeat(2,1fr)}}
-.ow-section-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;
+.ow-section-title{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:22px;letter-spacing:.04em;
   margin:18px 0 10px;color:var(--text)}
 .ow-cards{display:flex;flex-direction:column;gap:10px}
 .ow-card{display:flex;gap:12px;align-items:flex-start;background:var(--surface);
@@ -297,12 +297,16 @@ _PAGE_CSS = """
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ow-row{display:flex;justify-content:space-between;align-items:baseline;
   margin-top:6px;gap:8px;flex-wrap:wrap}
-.ow-price{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);
+.ow-price{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:22px;color:var(--gold);
   letter-spacing:.02em}
 .ow-buyer{font-size:11px;color:var(--text-muted);letter-spacing:.04em}
 .ow-when{font-size:11px;color:var(--text-dim)}
 .ow-empty{padding:36px 18px;text-align:center;border:1px dashed var(--border);
   border-radius:var(--r-md);color:var(--text-muted);background:var(--surface)}
+@media (prefers-reduced-motion: reduce){
+  .ow-stamp .dot{animation:none;opacity:1}
+  .ow-card.fresh{animation:none}
+}
 """.strip()
 
 _PAGE_JS = r"""
@@ -420,13 +424,13 @@ def _daily_revenue_chart(plan: dict[str, Any]) -> str:
         by_day[key] = by_day.get(key, 0.0) + amt
 
     rows = []
-    today_idx = None
     for i in range(29, -1, -1):
         d = today - timedelta(days=i)
         key = d.isoformat()
-        rows.append((d.strftime("%-d"), by_day.get(key, 0.0)))
-        if i == 0:
-            today_idx = 29 - i
+        # 3-tuple: compact day-of-month tick on the axis, full date in the tooltip.
+        rows.append((d.strftime("%-d"), by_day.get(key, 0.0), d.strftime("%b %-d")))
+    # Today is always at the right edge (last row built), so it is always index 29.
+    today_idx = 29
     chart = chart_helpers.bar_chart_vertical(
         rows,
         height=180,

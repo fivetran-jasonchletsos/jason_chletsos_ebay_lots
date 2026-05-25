@@ -432,14 +432,21 @@ def build_report(plan: dict) -> Path:
         chart_helpers.stacked_proportion_bar(health_segments),
     )
 
-    # Score-band histogram: bucket scores into 10-point bands
-    bands = [(b, 0) for b in range(0, 110, 10)]
-    band_dict = {b: 0 for b in range(0, 110, 10)}
+    # Score-band histogram: bucket scores into 10-point bands.
+    # Score is capped at 100 (sum of fixed weights), so we fold a perfect 100
+    # into the 90–100 band instead of inventing a phantom 100–109 band.
+    band_dict = {b: 0 for b in range(0, 100, 10)}
     for r in rows:
         sc = max(0, min(100, int(r.get("score", 0))))
-        band = (sc // 10) * 10
+        band = min(90, (sc // 10) * 10)  # 100 → 90 bucket
         band_dict[band] = band_dict.get(band, 0) + 1
-    band_rows = [(f"{b}–{b+9}", v) for b, v in sorted(band_dict.items())]
+
+    def _band_label(b: int) -> str:
+        # Top band is inclusive of 100; lower bands are inclusive of both ends
+        # (eg. "30–39") to match how readers expect histogram bins to read.
+        return "90–100" if b == 90 else f"{b}–{b+9}"
+
+    band_rows = [(_band_label(b), v) for b, v in sorted(band_dict.items())]
     score_chart = chart_helpers.card_wrapper(
         "Score distribution",
         "Listings per 10-point band",
@@ -471,18 +478,18 @@ def build_report(plan: dict) -> Path:
     )
 
     extra_css = "<style>" + (
-        ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
+        ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
         ".sh-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0 28px}"
         ".sh-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}"
         ".sh-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}"
-        ".sh-kpi-n{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);line-height:1}"
+        ".sh-kpi-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1}"
         ".sh-kpi-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
         ".sh-kpi-foot{color:var(--text-dim);font-size:11px;margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}"
         ".cas-kpi-green::before{background:var(--success)}.cas-kpi-green .sh-kpi-n{color:var(--success)}"
         ".cas-kpi-yellow::before{background:var(--warning)}.cas-kpi-yellow .sh-kpi-n{color:var(--warning)}"
         ".cas-kpi-red::before{background:var(--danger)}.cas-kpi-red .sh-kpi-n{color:var(--danger)}"
         ".sh-section{margin:36px 0}.sh-section-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}"
-        ".sh-section-head h2{margin:0;font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.02em}"
+        ".sh-section-head h2{margin:0;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:28px;letter-spacing:.02em}"
         ".sh-count{color:var(--text-muted);font-weight:400;font-size:18px;margin-left:6px}.sh-hint{color:var(--text-muted);font-size:13px}"
         ".cas-tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)}"
         ".sh-tbl{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface)}"
