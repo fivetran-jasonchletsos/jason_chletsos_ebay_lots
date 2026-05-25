@@ -77,7 +77,14 @@ def gather_kpis() -> dict:
     if isinstance(snap, list):
         kpis["listings_total"] = len(snap)
     elif isinstance(snap, dict):
-        kpis["listings_total"] = int(snap.get("count") or snap.get("listings_total") or 0)
+        # Post-2026-05 snapshot is {"saved_at", "listings": [...], ...} —
+        # the legacy "count"/"listings_total" keys never exist, so this
+        # branch always reported 0. Pull from the listings array instead.
+        listings = snap.get("listings") or []
+        kpis["listings_total"] = (
+            len(listings) if isinstance(listings, list)
+            else int(snap.get("count") or snap.get("listings_total") or 0)
+        )
 
     sold = _safe_load_json(REPO_ROOT / "sold_history.json")
     if isinstance(sold, list):

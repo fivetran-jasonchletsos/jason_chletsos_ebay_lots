@@ -361,6 +361,11 @@ def main() -> None:
         random.seed(args.seed)
 
     inventory = _load_json(INV_PATH, [])
+    # Snapshot file became {"saved_at", "listings", ...} in 2026-05; without
+    # this unwrap the for-loops below iterate dict keys ("saved_at", ...)
+    # and crash on inventory[0]["item_id"].
+    if isinstance(inventory, dict):
+        inventory = inventory.get("listings") or []
     sold      = _load_json(SOLD_PATH, [])
     if not inventory:
         print(f"No inventory at {INV_PATH}; aborting.")

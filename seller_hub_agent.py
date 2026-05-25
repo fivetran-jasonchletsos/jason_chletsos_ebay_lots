@@ -332,7 +332,7 @@ def render_report(plan: dict) -> Path:
         <div class="sh-row"><span>Monthly ad spend</span><b>{_fmt_money(pl['ad_spend'])}</b></div>
         <div class="sh-row"><span>Projected 30d lift</span><b style="color:var(--success);">{_fmt_money(pl.get('projected_lift', 0))}</b></div>
         <div class="sh-row sh-tier-row"><span>Tier split</span><span class="sh-tier-chips">{tier_chips}</span></div>
-        <a class="sh-link" href="promoted_listings.html">Open Promoted Ads agent →</a>
+        <span class="sh-link sh-link-disabled" aria-disabled="true" title="Promoted Listings page is currently retired from the live nav">Promoted Ads agent (offline)</span>
         <div class="sh-card-actions">
           <button class="btn btn-outline btn-sm" onclick="sellerHubPromoSync('promoted', true)">Dry-run sync</button>
           <button class="btn btn-gold btn-sm"    onclick="sellerHubPromoSync('promoted', false)">Push bids live →</button>
@@ -360,7 +360,7 @@ def render_report(plan: dict) -> Path:
       <div class="sh-section-head">
         <h2>Store categories <span class="sh-count">{total_cats}</span></h2>
         <span class="sh-hint">Derived from <code>promote._categorize()</code> — identical to the buckets on
-        <a href="index.html">index.html</a>, <a href="steals.html">steals.html</a>, and the rest of the site.</span>
+        <a href="index.html">index.html</a>, <a href="price_drops.html">price_drops.html</a>, and the rest of the site.</span>
       </div>
       {cats_html}
     </section>
@@ -393,34 +393,22 @@ def render_report(plan: dict) -> Path:
             <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Auto-accept · auto-decline</div>
           </div>
         </a>
-        <a class="sh-feat" href="combined_shipping.html">
-          <div class="sh-feat-info">
-            <div class="sh-feat-title">Combined Shipping</div>
-            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">$0.50 ea additional · $5 cap</div>
-          </div>
-        </a>
         <a class="sh-feat" href="vault.html">
           <div class="sh-feat-info">
             <div class="sh-feat-title">eBay Vault</div>
             <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">$250+ singles · authenticated ship</div>
           </div>
         </a>
-        <a class="sh-feat" href="photo_quality.html">
+        <a class="sh-feat" href="photo_audit.html">
           <div class="sh-feat-info">
-            <div class="sh-feat-title">Photo Quality Audit</div>
+            <div class="sh-feat-title">Photo Audit</div>
             <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Cassini rank: 8+ photos required</div>
           </div>
         </a>
-        <a class="sh-feat" href="email_campaign.html">
+        <a class="sh-feat" href="cassini.html">
           <div class="sh-feat-info">
-            <div class="sh-feat-title">Email Campaign</div>
-            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Weekly Steals to followers</div>
-          </div>
-        </a>
-        <a class="sh-feat" href="promotions.html">
-          <div class="sh-feat-info">
-            <div class="sh-feat-title">Markdowns</div>
-            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Stale-inventory ladder + volume</div>
+            <div class="sh-feat-title">Cassini Score</div>
+            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Search-rank diagnostics per listing</div>
           </div>
         </a>
       </div>

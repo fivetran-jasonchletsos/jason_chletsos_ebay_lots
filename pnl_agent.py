@@ -83,7 +83,14 @@ def load_sold_history(path: Path = SOLD_FILE) -> list[dict]:
 
 
 def load_listings(path: Path = LISTINGS_FILE) -> list[dict]:
-    return _read_json(path, [])
+    # Snapshot file shape became {"saved_at", "listings", "market", "pricing",
+    # "sold"} in 2026-05; old code that iterated the top level got `str` keys
+    # instead of listing dicts and crashed on l["item_id"]. Unwrap here so
+    # ad-hoc runs of pnl_agent.py (not in the CI loop) still work.
+    raw = _read_json(path, [])
+    if isinstance(raw, dict):
+        return raw.get("listings") or []
+    return raw if isinstance(raw, list) else []
 
 
 def load_inventory(path: Path = INVENTORY_CSV) -> list[dict]:

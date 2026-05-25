@@ -227,9 +227,16 @@ def load_snapshot() -> list[dict]:
     if not SNAPSHOT_PATH.exists():
         return []
     try:
-        return json.loads(SNAPSHOT_PATH.read_text())
+        data = json.loads(SNAPSHOT_PATH.read_text())
     except json.JSONDecodeError:
         return []
+    # Snapshot file became {"saved_at", "listings", "market", "pricing", "sold"}
+    # in 2026-05; legacy callers (and unguarded list-iteration) crash without
+    # this. Keep the list-fallback so a manual run against an older snapshot
+    # still works.
+    if isinstance(data, dict):
+        return data.get("listings") or []
+    return data if isinstance(data, list) else []
 
 
 def merge_with_snapshot(traffic: list[dict], listings: list[dict]) -> list[dict]:
