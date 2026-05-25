@@ -385,8 +385,8 @@ def render_by_set(index: dict[str, dict[str, list[dict]]]) -> Path:
     page = _render_group_page(
         "Set", "Sets",
         index["by_set"], "by_set.html",
-        "Every listing in our store grouped by the set it came from. "
-        "Bigger sets float to the top.",
+        "Every card in the shop, grouped by the set it came from. "
+        "Sets with more inventory show up first.",
     )
     out = DOCS_DIR / "by_set.html"
     out.write_text(page, encoding="utf-8")
@@ -398,8 +398,8 @@ def render_by_player(index: dict[str, dict[str, list[dict]]]) -> Path:
     page = _render_group_page(
         "Player", "Players",
         index["by_player"], "by_player.html",
-        "Every listing in our store grouped by the player (or Pokemon) "
-        "named in the title. Most-listed names float to the top.",
+        "Every card in the shop, grouped by the player or Pokémon named "
+        "on the front. Names with the most cards show up first.",
     )
     out = DOCS_DIR / "by_player.html"
     out.write_text(page, encoding="utf-8")
@@ -434,21 +434,21 @@ def render_landing(index: dict[str, dict[str, list[dict]]],
       <a class="br-landing-card" href="by_set.html">
         <div class="br-landing-name">By Set</div>
         <div class="br-landing-sub">
-          Think "show me everything from 2024 Topps Chrome." Browse every product line in the store.
+          For "show me everything from 2024 Topps Chrome." Jump to any product line in the shop.
         </div>
         <div class="br-landing-stat"><strong>{len(index['by_set'])}</strong> sets</div>
       </a>
       <a class="br-landing-card" href="by_player.html">
         <div class="br-landing-name">By Player</div>
         <div class="br-landing-sub">
-          Think "all Mahomes cards." Names pulled straight from listing titles.
+          For "every Mahomes I can find." Names pulled straight from the listing titles.
         </div>
         <div class="br-landing-stat"><strong>{len(index['by_player'])}</strong> players</div>
       </a>
       <a class="br-landing-card" href="#by-year">
         <div class="br-landing-name">By Year</div>
         <div class="br-landing-sub">
-          Vintage vs. modern. Jump to any year that shows up in our titles.
+          Vintage or modern. Pick a year and see what we've got from that season.
         </div>
         <div class="br-landing-stat"><strong>{len(index['by_year'])}</strong> years</div>
       </a>
@@ -499,11 +499,11 @@ def render_landing(index: dict[str, dict[str, list[dict]]],
     body = f"""
     <div class="section-head">
       <div>
-        <div class="eyebrow">Browse &middot; buyer-friendly</div>
+        <div class="eyebrow">Browse the shop</div>
         <h1 class="section-title">Browse the <span class="accent">Store</span></h1>
         <div class="section-sub">
-          Pick a set, a player, or a year. The main storefront is one big grid &mdash;
-          this view lets you slice it the way buyers actually think.
+          Pick a set, a player, or a year — same inventory as the main page,
+          just sliced the way most collectors actually search.
           <br><a class="br-back" href="index.html">&larr; Back to Storefront</a>
         </div>
       </div>

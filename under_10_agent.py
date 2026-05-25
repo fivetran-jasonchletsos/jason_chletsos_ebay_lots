@@ -240,7 +240,7 @@ def render_report(plan: dict) -> Path:
     <section class="u10-hero">
       <div class="u10-hero-head">
         <h2>Cheapest Right Now</h2>
-        <span class="u10-hero-sub">Top 12 cheapest finds across every bucket.</span>
+        <span class="u10-hero-sub">The 12 lowest-priced cards in the shop. Click to buy on eBay.</span>
       </div>
       <div class="u10-hero-grid">{''.join(hero_cards)}</div>
     </section>"""
@@ -284,24 +284,25 @@ def render_report(plan: dict) -> Path:
     body = f"""
     <div class="section-head section-head--inline">
       <div class="sh-title">
-        <div class="eyebrow">eBay live · everything ${HARD_CAP:.0f} or less</div>
+        <div class="eyebrow">Live on eBay · nothing over ${HARD_CAP:.0f}</div>
         <h1 class="section-title">Under <span class="accent">${HARD_CAP:.0f}</span></h1>
       </div>
       <div class="section-sub sh-sub">
-        Cheapest live finds across the player + Pokemon lists plus a few "always-on" buckets
-        (vintage holos, modern rookies, loose packs, graded). Buy on dollar bills.
+        Every card in the store priced at ${HARD_CAP:.0f} or less — players, Pokémon,
+        vintage holos, modern rookies, loose packs, and graded slabs. Great for filling
+        out a set or just adding to the binder without breaking the bank.
       </div>
     </div>
 
     <div class="stat-grid">
-      <a class="stat-card linked" href="#cheapest" title="Scroll to cheapest strip">
-        <div class="num">{len(buckets)}</div><div class="lbl">Buckets scanned</div>
+      <a class="stat-card linked" href="#cheapest" title="Jump to the cheapest cards">
+        <div class="num">{len(buckets)}</div><div class="lbl">Categories</div>
       </a>
-      <a class="stat-card linked" href="#cheapest" title="Scroll to cheapest strip">
-        <div class="num">{total_items}</div><div class="lbl">Total live listings</div>
+      <a class="stat-card linked" href="#cheapest" title="Jump to the cheapest cards">
+        <div class="num">{total_items}</div><div class="lbl">Cards under ${HARD_CAP:.0f}</div>
       </a>
       <a class="stat-card linked" href="{_esc(cheapest_strip[0]['url']) if cheapest_strip else '#'}"
-         target="_blank" rel="noopener" title="Open cheapest item on eBay">
+         target="_blank" rel="noopener" title="Open cheapest card on eBay">
         <div class="num">${cheapest_strip[0]['price']:.2f}</div><div class="lbl">Cheapest right now</div>
       </a>
     </div>
@@ -343,7 +344,7 @@ def render_report(plan: dict) -> Path:
 </style>
 """
 
-    html_doc = promote.html_shell(f"Under ${HARD_CAP:.0f} Finds", body,
+    html_doc = promote.html_shell(f"Under ${HARD_CAP:.0f} · Cards You Can Snag for Pocket Change · Harpua2001", body,
                                   extra_head=extra_css,
                                   active_page="under_10.html")
     OUT_HTML.parent.mkdir(parents=True, exist_ok=True)

@@ -97,31 +97,32 @@ def _hero(active_count: int, set_count: int, player_count: int, min_price: float
     return f'''
     <section class="sf-hero">
       <div class="sf-hero-side">
-        <div class="sf-eyebrow">Independent Card Shop · Direct from harpua2001</div>
+        <div class="sf-eyebrow">One-person card shop · Selling on eBay since 2003</div>
         <h1 class="sf-headline">
           <span class="sf-headline-serif">Sports &amp; Pokémon</span><br>
           <span class="sf-headline-display">cards, hand-picked.</span>
         </h1>
         <p class="sf-lede">
-          Every card below is live on eBay right now. Tap a card to buy directly
-          from our store — same-day shipping, top-rated seller, no shenanigans.
+          Everything below is live on eBay right now. Tap a card to check it out,
+          bid, or buy — checkout happens on eBay, with buyer protection on every order.
+          Real photos, honest grades, ships the next business day.
         </p>
         <div class="sf-hero-stats">
-          <div class="sf-stat"><b>{active_count}</b><span>cards listed</span></div>
+          <div class="sf-stat"><b>{active_count}</b><span>cards in shop</span></div>
           <div class="sf-stat"><b>{set_count}</b><span>sets</span></div>
-          <div class="sf-stat"><b>{player_count}</b><span>players</span></div>
-          <div class="sf-stat"><b>from ${min_price:.2f}</b><span>entry price</span></div>
+          <div class="sf-stat"><b>{player_count}</b><span>players &amp; Pokémon</span></div>
+          <div class="sf-stat"><b>from ${min_price:.2f}</b><span>cheapest card</span></div>
         </div>
         <div class="sf-hero-ctas">
-          <a class="sf-btn sf-btn-primary" href="#featured">Browse Featured</a>
+          <a class="sf-btn sf-btn-primary" href="#featured">Shop the Cards</a>
           <a class="sf-btn" href="price_drops.html">See Today's Steals →</a>
         </div>
       </div>
       <aside class="sf-hero-trust">
-        <div class="sf-trust-row"><span>★★★★★</span><b>100% positive feedback</b></div>
-        <div class="sf-trust-row"><span>↻</span><b>30-day returns accepted</b></div>
-        <div class="sf-trust-row"><span>⚡︎</span><b>Ships within 1 business day</b></div>
-        <div class="sf-trust-row"><span>◈</span><b>Combined shipping on multi-card orders</b></div>
+        <div class="sf-trust-row"><span>★★★★★</span><b>100% positive feedback, 20+ years on eBay</b></div>
+        <div class="sf-trust-row"><span>↻</span><b>30-day returns, no questions asked</b></div>
+        <div class="sf-trust-row"><span>⚡︎</span><b>Ships next business day with tracking</b></div>
+        <div class="sf-trust-row"><span>◈</span><b>Buy more than one, pay shipping once</b></div>
       </aside>
     </section>'''
 
@@ -132,7 +133,7 @@ def _featured_section(listings: list[dict]) -> str:
     <section class="sf-section" id="featured">
       <div class="sf-section-head">
         <h2><span class="sf-num">01</span> Featured Right Now</h2>
-        <a class="sf-link" href="browse.html">All {FEATURED_COUNT}+ listings →</a>
+        <a class="sf-link" href="browse.html">See the full catalog →</a>
       </div>
       <div class="sf-grid">{cards}</div>
     </section>'''
@@ -154,15 +155,15 @@ def _browse_section(top_sets: list[tuple[str,int]], top_players: list[tuple[str,
       <div class="sf-quicklinks">
         <a class="sf-quick" href="under_10.html">
           <div class="sf-quick-name">Under $10</div>
-          <div class="sf-quick-sub">Budget-friendly starter cards</div>
+          <div class="sf-quick-sub">Cards for the cost of a sandwich</div>
         </a>
         <a class="sf-quick" href="price_drops.html">
           <div class="sf-quick-name">Today's Steals</div>
-          <div class="sf-quick-sub">Recent price drops &amp; new arrivals</div>
+          <div class="sf-quick-sub">Prices that dropped overnight</div>
         </a>
         <a class="sf-quick" href="sold.html">
           <div class="sf-quick-name">Recently Sold</div>
-          <div class="sf-quick-sub">See what other buyers grabbed</div>
+          <div class="sf-quick-sub">What other collectors picked up</div>
         </a>
       </div>
     </section>'''
@@ -181,8 +182,8 @@ def _sold_strip(sold: list[dict]) -> str:
     return f'''
     <section class="sf-section sf-section-sold">
       <div class="sf-section-head">
-        <h2><span class="sf-num">03</span> Recently Sold</h2>
-        <a class="sf-link" href="sold.html">All sold history →</a>
+        <h2><span class="sf-num">03</span> Just Sold</h2>
+        <a class="sf-link" href="sold.html">See everything that's sold →</a>
       </div>
       <ul class="sf-sold-list">{"".join(items)}</ul>
     </section>'''
@@ -193,16 +194,16 @@ def _trust_footer() -> str:
     <section class="sf-section sf-trust">
       <div class="sf-trust-grid">
         <div>
-          <div class="sf-trust-h">Who runs this</div>
-          <p>harpua2001 has been selling cards on eBay since 2003. Real human, real apartment, real cards. Every listing is photographed under the same lighting so you can compare condition card-to-card.</p>
+          <div class="sf-trust-h">Who you're buying from</div>
+          <p>harpua2001 — one person, selling cards on eBay since 2003. Every card is shot in the same lightbox so you can compare condition without guessing. If you ever have a question, message us on eBay and a human answers.</p>
         </div>
         <div>
-          <div class="sf-trust-h">How to buy</div>
-          <p>Click any card to land on the live eBay listing. Bid, Buy It Now, or send a Best Offer — eBay handles checkout. Buyer protection on every purchase.</p>
+          <div class="sf-trust-h">How buying works</div>
+          <p>Click any card to open its live eBay listing. Bid, hit Buy It Now, or send a Best Offer — eBay handles payment and protects every order. Multi-card orders combine automatically, so you only pay shipping once.</p>
         </div>
         <div>
           <div class="sf-trust-h">Shipping &amp; returns</div>
-          <p>Ships in a top-loader + team-bag, in a bubble mailer with tracking. Most U.S. orders arrive in 2-4 business days. Returns accepted within 30 days, no questions asked.</p>
+          <p>Every card ships in a penny sleeve, top-loader, and team-bag, inside a bubble mailer with tracking. Orders out the next business day. Most U.S. addresses see delivery in 2-4 days. If it shows up wrong, send it back within 30 days for a full refund.</p>
         </div>
       </div>
     </section>'''
@@ -438,7 +439,7 @@ def build_index() -> Path:
     # html_shell already includes <header>, <nav>, drawer, and footer.
     # Wrap body in a <main> so our atmospheric ::before/::after sit behind it.
     full = promote.html_shell(
-        title="Harpua2001 · Sports & Pokémon Cards",
+        title="Harpua2001 · Sports & Pokémon Cards, Hand-Picked on eBay",
         body=f'<main>{body}</main>',
         extra_head=STOREFRONT_CSS,
         active_page="index.html",

@@ -362,14 +362,13 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
 
     if first_run:
         hero_note = (
-            "First snapshot just captured — there is nothing to compare against yet. "
-            "Run this again tomorrow (or after the next scan) and prices that fell "
-            "will pop up here."
+            "Just turned this feature on — nothing to compare against yet. "
+            "Check back tomorrow; any card whose price dropped overnight will land here."
         )
     else:
         hero_note = (
-            "Diff between today's scan and the prior run. "
-            f"Drops trigger at &ge;{DROP_PCT_MIN:.0f}% AND &ge;${DROP_DOLLAR_MIN:.2f}."
+            "Cards whose price dropped since yesterday, plus brand-new listings. "
+            f"A card has to be at least {DROP_PCT_MIN:.0f}% off and ${DROP_DOLLAR_MIN:.2f} cheaper to make this page."
         )
 
     drops_html = "\n".join(_card_drop(r) for r in drops[:60])
@@ -378,8 +377,8 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
 
     os.makedirs(DOCS_DIR, exist_ok=True)
     body = f"""
-    <h1>Price Drops</h1>
-    <p class="pd-sub">Daily diff against the last scan · generated <b>{_esc(generated_at)}</b><br>{hero_note}</p>
+    <h1>Today's Steals</h1>
+    <p class="pd-sub">Prices that dropped overnight, fresh listings, and what just sold · updated <b>{_esc(generated_at)}</b><br>{hero_note}</p>
 
     <div class="pk-kpis">
       <div class="pk-kpi kpi-drop">
@@ -392,37 +391,37 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
       </div>
       <div class="pk-kpi kpi-gone">
         <div class="pk-n">{len(gone_today)}</div>
-        <div class="pk-l">Gone today</div>
+        <div class="pk-l">Just sold / pulled</div>
       </div>
       <div class="pk-kpi">
         <div class="pk-n">{len(drops) + len(new_today)}</div>
-        <div class="pk-l">Total actionable</div>
+        <div class="pk-l">Worth a look</div>
       </div>
     </div>
 
     {_section(
         "Biggest drops",
-        "Listings whose price fell since the last run. Sorted by dollars saved.",
+        "Cards that got cheaper overnight. Sorted by how much you'd save.",
         drops_html,
-        "No price drops since the prior run. Check back after the next scan.",
+        "No price drops today. Tomorrow's another day — check back in the morning.",
     )}
 
     {_section(
         "New today",
-        "Listings that didn't exist in the last snapshot. Fresh inventory the agents found.",
+        "Cards we just listed in the last 24 hours. Fresh from the shoebox.",
         new_html,
-        "No new listings since the prior run.",
+        "No new listings hit the store today.",
     )}
 
     {_section(
         "Gone today",
-        "Listings that disappeared since the prior run — sold, ended, or delisted.",
+        "Cards that just sold or were pulled. Hot ones move fast — peek here to see what got grabbed.",
         gone_html,
-        "Nothing has dropped off since the prior run.",
+        "Nothing's left the store today.",
     )}
 """
     page = promote.html_shell(
-        "Price Drops · Daily Watch",
+        "Today's Steals · Harpua2001",
         body,
         extra_head=f"<style>{_CSS}</style>",
         active_page="price_drops.html",
