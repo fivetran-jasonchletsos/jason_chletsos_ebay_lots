@@ -10214,19 +10214,25 @@ def main():
                            check=False, timeout=900)
         except Exception as e:
             print(f"  SCP price agent skipped: {e}")
-    build_dashboard(listings, market, seller=seller, pricing=pricing_by_id)
-    build_analytics_page(listings, market, sold)
-    build_steals_page(listings, market)
-    build_market_intel_page(listings, market, sold, deals)
-    build_quality_report(listings)
-    build_craigslist(listings)
-    build_reddit(listings)
+    # Buyer storefront — replaces the old build_dashboard() seller view.
+    # Lazy-import so older checkouts without storefront_agent still build.
+    try:
+        import storefront_agent
+        storefront_agent.build_index()
+        print(f"  Storefront: docs/index.html  ({len(listings)} listings)")
+    except Exception as _exc:
+        print(f"  Storefront skipped (falling back to build_dashboard): {_exc}")
+        build_dashboard(listings, market, seller=seller, pricing=pricing_by_id)
+
+    # Buyer-facing utility pages still in the live nav.
     build_google_feed(listings, market=market, sold_history=sold, pricing=pricing_by_id)
-    write_analysis_views()
     build_return_policy()
-    build_price_review(listings, market, pricing=pricing_by_id)
-    build_title_review(listings)
-    build_make_money(listings)
+
+    # NOTE: build_analytics_page, build_steals_page, build_market_intel_page,
+    # build_quality_report, build_craigslist, build_reddit, build_price_review,
+    # build_title_review, build_make_money, write_analysis_views — all removed
+    # from the standard refresh. Their pages are no longer linked in the nav
+    # (see _NAV_ITEMS). Call them by hand if you ever need to regenerate.
 
     # Sister agents — each is dry-run, idempotent, and produces a docs/*.html
     # admin page from the snapshot we just wrote. Lazy import so older
@@ -10249,41 +10255,59 @@ def main():
 
     # Sister agents that don't hit per-item Trading APIs — fast, safe to chain
     # into every build. Each is invoked as a subprocess so its own argparse
-    # doesn't conflict with promote.py's sys.argv. Failures don't abort the build.
+    # doesn't conflict with promote.py's sys.argv. Failures don't abort the
+    # build, but every run's stdout+stderr lands in output/logs/<script>.log
+    # so silent failures become diagnosable.
     import subprocess as _sp
-    _python = sys.executable
-    _here   = Path(__file__).parent
-    for label, script in [
-        ("Vault report: docs/vault.html",            "vault_eligibility.py"),
-        ("Email campaign: docs/email_campaign.html", "email_campaign_agent.py"),
-        ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py"),
-        ("Pokemon hunt (all chars): docs/pokemon.html", "pokemon_deals_agent.py"),
-        ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py"),
-        ("Listing perf: docs/listing_performance.html","listing_performance_agent.py"),
-        ("Under $10: docs/under_10.html",            "under_10_agent.py"),
-        ("Top Sellers: docs/top_sellers.html",       "top_sellers_agent.py"),
-        ("Inventory: docs/inventory.html",           "inventory_agent.py"),
-        ("AI Assistant: docs/assistant.html",        "ai_assistant_agent.py"),
-        ("Returns: docs/returns.html",               "returns_agent.py"),
-        ("Whatnot Prep: docs/whatnot.html",          "whatnot_prep_agent.py"),
-        ("Daily Digest: docs/daily.html",            "daily_digest_agent.py"),
-        ("Cassini Score: docs/cassini.html",         "cassini_score_agent.py"),
-        ("P&L: docs/pnl.html",                       "pnl_agent.py"),
-        ("Repeat Buyers: docs/buyers.html",          "repeat_buyers_agent.py"),
-        ("Browse index: docs/browse.html",           "browse_index_agent.py"),
-        ("Relist unsold: docs/relist.html",          "relist_agent.py"),
-        ("Set completion: docs/sets.html",           "set_completion_agent.py"),
-        ("Price Drops: docs/price_drops.html",       "price_drops_agent.py"),
+    import time as _time
+    _python   = sys.executable
+    _here     = Path(__file__).parent
+    _logs_dir = _here / "output" / "logs"
+    _logs_dir.mkdir(parents=True, exist_ok=True)
+    # Only agents that:
+    #   (a) produce a page still linked in the nav, OR
+    #   (b) refresh data other pages depend on (orders_watch_agent feeds
+    #       daily_digest's sparkline + revenue chart),
+    #   (c) and don't make outbound promotional pushes.
+    # Dead/promo agents (email_campaign, inventory, pnl, listing_performance,
+    # repeat_buyers, pokemon_deals, set_completion, ai_assistant) intentionally
+    # removed — they crash, push promos, or render orphan pages.
+    for label, script, timeout_s in [
+        ("Orders Watch: docs/orders_watch.html",     "orders_watch_agent.py",     180),
+        ("Vault report: docs/vault.html",            "vault_eligibility.py",      120),
+        ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py",  180),
+        ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py",     180),
+        ("Under $10: docs/under_10.html",            "under_10_agent.py",         120),
+        ("Top Sellers: docs/top_sellers.html",       "top_sellers_agent.py",      120),
+        ("Returns: docs/returns.html",               "returns_agent.py",          120),
+        ("Whatnot Prep: docs/whatnot.html",          "whatnot_prep_agent.py",     120),
+        ("Cassini Score: docs/cassini.html",         "cassini_score_agent.py",    180),
+        ("Photo Audit: docs/photo_audit.html",       "photo_audit_agent.py",      300),
+        ("Browse index: docs/browse.html",           "browse_index_agent.py",     120),
+        ("Relist unsold: docs/relist.html",          "relist_agent.py",           120),
+        ("Price Drops: docs/price_drops.html",       "price_drops_agent.py",      120),
+        ("Price consistency: docs/price_consistency.html", "price_consistency_agent.py", 180),
+        # Daily Digest MUST run last — it reads orders_watch_plan.json for
+        # its 30-day sparkline.
+        ("Daily Digest: docs/daily.html",            "daily_digest_agent.py",     120),
     ]:
         sp_path = _here / script
         if not sp_path.exists():
             print(f"  {label} skipped: agent file not present")
             continue
+        log_path = _logs_dir / f"{script}.log"
+        t0 = _time.monotonic()
         try:
-            _sp.run([_python, str(sp_path)], check=False, timeout=120,
-                    cwd=str(_here),
-                    stdout=_sp.DEVNULL, stderr=_sp.DEVNULL)
-            print(f"  {label}")
+            with log_path.open("wb") as logf:
+                rc = _sp.run([_python, str(sp_path)], check=False, timeout=timeout_s,
+                             cwd=str(_here),
+                             stdout=logf, stderr=_sp.STDOUT).returncode
+            elapsed = _time.monotonic() - t0
+            status = "OK " if rc == 0 else f"RC={rc}"
+            print(f"  {label}   [{status} · {elapsed:5.1f}s · log: {log_path.relative_to(_here)}]")
+        except _sp.TimeoutExpired:
+            elapsed = _time.monotonic() - t0
+            print(f"  {label}   [TIMEOUT after {elapsed:.1f}s · log: {log_path.relative_to(_here)}]")
         except Exception as _exc:
             print(f"  {label} skipped: {_exc}")
 

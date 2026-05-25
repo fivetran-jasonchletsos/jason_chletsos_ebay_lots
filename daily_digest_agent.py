@@ -533,6 +533,35 @@ def main() -> int:
     print(f"  Daily digest @ {now.strftime('%Y-%m-%d %H:%M UTC')}")
 
     sold = _load_json(SOLD_PATH, [])
+    if not isinstance(sold, list):
+        sold = []
+
+    # Merge in real-time orders from orders_watch_plan.json so daily metrics
+    # don't lag a sold_history.json refresh. orders_watch hits the Trading API
+    # GetOrders endpoint directly and sees today's sales immediately; sold
+    # history is rebuilt by promote.py which runs less often. Dedupe by order_id.
+    try:
+        ow = _load_json(REPO_ROOT / "output" / "orders_watch_plan.json", {}) or {}
+        known_order_ids = {str(r.get("order_id")) for r in sold if r.get("order_id")}
+        added = 0
+        for o in ow.get("orders", []):
+            oid = str(o.get("order_id") or "")
+            if not oid or oid in known_order_ids:
+                continue
+            sold.append({
+                "order_id":   oid,
+                "item_id":    o.get("item_id"),
+                "title":      o.get("item_title"),
+                "sale_price": o.get("sale_price"),
+                "quantity":   o.get("quantity") or 1,
+                "sold_date":  o.get("created_at"),
+                "_source":    "orders_watch",
+            })
+            added += 1
+        if added:
+            print(f"  Merged {added} real-time order(s) from orders_watch_plan.json")
+    except Exception as _e:
+        print(f"  Could not merge orders_watch_plan.json: {_e}")
     listings_raw = _load_json(LISTINGS_PATH, [])
     # Snapshot file became {"saved_at", "listings", "market", "pricing", "sold"};
     # unwrap so the rest of the digest sees a flat list.
@@ -549,7 +578,7 @@ def main() -> int:
     photo_q = _load_json(PHOTO_QUALITY_PATH, {})
     listing_perf = _load_json(LISTING_PERF_PATH, {})
 
-    rev = revenue_windows(sold if isinstance(sold, list) else [], now)
+    rev = revenue_windows(sold, now)
     active = len(listings) if isinstance(listings, list) else 0
     snapshot_by_id = {str(l.get("item_id")): l for l in listings
                       if isinstance(l, dict)}
