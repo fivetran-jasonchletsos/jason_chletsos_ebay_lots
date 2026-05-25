@@ -2891,59 +2891,26 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # - group="X"   → tucked under the "X ▾" dropdown
 # Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
-    # Public buyer-facing storefront — no group, top-level
-    ("index.html",            "Listings",      True,  None),
-    ("steals.html",           "Steals",        True,  None),
-    ("sold.html",             "Sold",          True,  None),
-    ("browse.html",           "Browse",        True,  "Browse"),
+    # ── Public buyer-facing storefront ──
+    ("index.html",            "Shop",          True,  None),
+    ("price_drops.html",      "Steals",        True,  None),
+    ("sold.html",             "Recently Sold", True,  None),
+    ("browse.html",           "All Sets & Players", True, "Browse"),
     ("by_set.html",           "By Set",        True,  "Browse"),
     ("by_player.html",        "By Player",     True,  "Browse"),
+    ("under_10.html",         "Under $10",     True,  "Browse"),
 
-    # ── ADMIN HUBS — four consolidated dropdowns replace the previous sprawl.
-    # Each hub links to its component pages (which remain reachable at their
-    # original URLs).  See hub_pages_agent.py.
-    ("analytics_hub.html",    "Analytics",     False, "Analytics"),
-    ("listings_hub.html",     "Listings",      False, "Listings"),
-    ("cx_hub.html",           "CX",            False, "CX"),
-    ("photo_hub.html",        "Photos",        False, "Photos"),
-
-    # ── MORE — admin orphans not part of any hub (kept lean) ──
-    ("inventory.html",        "Inventory",     False, "More"),
+    # ── Admin: hidden behind auth gate ──
+    ("daily.html",            "Daily",         False, None),
     ("seller_hub.html",       "Seller Hub",    False, "More"),
-    ("scan.html",             "Scanner",       False, "More"),
-    ("market_intel.html",     "Market Intel",  False, "More"),
-    ("deals.html",            "Deals",         False, "More"),
     ("price_consistency.html","Price Gate",    False, "More"),
-    ("promoted_listings.html","Promoted Ads",  False, "More"),
-    ("promotions.html",       "Promotions",    False, "More"),
     ("best_offer.html",       "Best Offer",    False, "More"),
-    ("combined_shipping.html","Combined Ship", False, "More"),
     ("vault.html",            "Vault",         False, "More"),
-    ("email_campaign.html",   "Email",         False, "More"),
     ("whatnot.html",          "Whatnot Prep",  False, "More"),
     ("relist.html",           "Relist Unsold", False, "More"),
-    ("reddit.html",           "Reddit",        False, "More"),
-    ("craigslist.html",       "Craigslist",    False, "More"),
-    ("google_feed.xml",       "Google Feed",   False, "More"),
-
-    # ── FOR US — public, buyer-side (son can bookmark) ──
-    ("collect.html",          "My Wants",      False, "For Us"),
-    ("under_10.html",         "Under $10",     False, "For Us"),
-    ("top_sellers.html",      "Top Sellers",   False, "For Us"),
-    ("price_drops.html",      "Price Drops",   False, "For Us"),
-    ("sets.html",             "Set Completion",False, "For Us"),
-    ("assistant.html",        "AI Assistant",  False, "For Us"),
-    ("pokemon.html",          "Pokemon",       False, "For Us"),
-    ("pikachu.html",          "Pikachu",       False, "For Us"),
-    ("charizard.html",        "Charizard",     False, "For Us"),
-    ("mew.html",              "Mew",           False, "For Us"),
-    ("mewtwo.html",           "Mewtwo",        False, "For Us"),
-    ("eevee.html",            "Eevee",         False, "For Us"),
-    ("pokemon_news.html",     "Pokemon News",  False, "For Us"),
-
-    # ── PUBLIC buyer-facing Pokemon search (no password) ──
-    ("japanese_holo.html",    "Art Rares", True, "Pokemon"),
-
+    ("collect.html",          "My Wants",      False, "More"),
+    ("top_sellers.html",      "Top Sellers",   False, "More"),
+    ("pokemon_news.html",     "Pokemon News",  False, "More"),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 

@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Any
 
 import promote
+import chart_helpers
 
 
 REPO_ROOT          = Path(__file__).parent
@@ -420,11 +421,40 @@ def build_report(plan: dict) -> Path:
         '<th class="cas-sortable" data-sort="delta">Delta</th>'
         '<th>Signals</th><th>Fix</th></tr></thead>')
 
+    health_segments = [
+        ("Green", s["green"], chart_helpers.GREEN),
+        ("Yellow", s["yellow"], chart_helpers.AMBER),
+        ("Red", s["red"], chart_helpers.RED),
+    ]
+    health_chart = chart_helpers.card_wrapper(
+        "Listing health mix",
+        f"{s['total']} listings · avg score {s['avg_score']}",
+        chart_helpers.stacked_proportion_bar(health_segments),
+    )
+
+    # Score-band histogram: bucket scores into 10-point bands
+    bands = [(b, 0) for b in range(0, 110, 10)]
+    band_dict = {b: 0 for b in range(0, 110, 10)}
+    for r in rows:
+        sc = max(0, min(100, int(r.get("score", 0))))
+        band = (sc // 10) * 10
+        band_dict[band] = band_dict.get(band, 0) + 1
+    band_rows = [(f"{b}–{b+9}", v) for b, v in sorted(band_dict.items())]
+    score_chart = chart_helpers.card_wrapper(
+        "Score distribution",
+        "Listings per 10-point band",
+        chart_helpers.bar_chart_vertical(
+            band_rows, height=170, value_fmt=chart_helpers._fmt_int, y_label="LISTINGS",
+        ),
+    )
+
     body = (
         f'<section class="hero"><h1>Cassini Health Score</h1>'
         f'<p class="sub">Last run: <code>{html.escape(run_ts)}</code> · '
         f'synthesized from 7 ranking signals across <strong>{s["total"]}</strong> active listings.</p>'
         f'<div class="sh-kpis">{kpis}</div>'
+        f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0 0.6rem;">'
+        f'{health_chart}{score_chart}</div>'
         f'<p class="sh-hint">No public "Cassini score" exists — this is a synthesis of '
         f'photos, item-specifics, title hygiene, impressions, CTR, recent sales, and '
         f'offer eligibility. Move RED &rarr; YELLOW first; YELLOW &rarr; GREEN compounds.</p></section>'

@@ -51,6 +51,7 @@ from pathlib import Path
 import requests
 
 import promote
+import chart_helpers
 
 
 REPO_ROOT          = Path(__file__).parent
@@ -590,6 +591,16 @@ def build_report(audit_payload: dict, cfg: dict) -> Path:
     <div class="stat sev-ok-bg"><div class="stat-n">{len(by_sev['OK'])}</div><div class="stat-l">ok (3 photos)</div></div>
     <div class="stat sev-good-bg"><div class="stat-n">{len(by_sev['GOOD'])}</div><div class="stat-l">good (4+ photos)</div></div>
   </div>
+  {chart_helpers.card_wrapper(
+      "Photo coverage across active listings",
+      f"{sum(len(v) for v in by_sev.values())} listings audited",
+      chart_helpers.stacked_proportion_bar([
+          ("Severe (1)", len(by_sev['SEVERE']), chart_helpers.RED),
+          ("Poor (2)",   len(by_sev['POOR']),   chart_helpers.AMBER),
+          ("OK (3)",     len(by_sev['OK']),     chart_helpers.GOLD),
+          ("Good (4+)",  len(by_sev['GOOD']),   chart_helpers.GREEN),
+      ]),
+  )}
   <div class="uplift">
     Reshooting the top 10 priority listings could lift conversion by an
     estimated <strong>${top_uplift:,.2f}/month</strong>

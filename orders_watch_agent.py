@@ -30,6 +30,7 @@ from typing import Any
 import requests
 
 import promote
+import chart_helpers
 
 REPO_ROOT      = Path(__file__).parent
 OUTPUT_DIR     = REPO_ROOT / "output"
@@ -401,8 +402,47 @@ _PAGE_JS = r"""
 """.strip()
 
 
+def _daily_revenue_chart(plan: dict[str, Any]) -> str:
+    """Build a 30-day daily-revenue bar chart from the orders list."""
+    today = datetime.now(timezone.utc).date()
+    by_day: dict[str, float] = {}
+    for o in plan.get("orders", []):
+        ts = o.get("created_at") or ""
+        try:
+            d = datetime.fromisoformat(ts.replace("Z", "+00:00")).date()
+        except Exception:
+            continue
+        try:
+            amt = float(o.get("sale_price") or 0)
+        except (TypeError, ValueError):
+            amt = 0.0
+        key = d.isoformat()
+        by_day[key] = by_day.get(key, 0.0) + amt
+
+    rows = []
+    today_idx = None
+    for i in range(29, -1, -1):
+        d = today - timedelta(days=i)
+        key = d.isoformat()
+        rows.append((d.strftime("%-d"), by_day.get(key, 0.0)))
+        if i == 0:
+            today_idx = 29 - i
+    chart = chart_helpers.bar_chart_vertical(
+        rows,
+        height=180,
+        accent_index=today_idx,
+        y_label="DAILY $",
+    )
+    return chart_helpers.card_wrapper(
+        f"Revenue · last 30 days",
+        f"30d ${plan.get('total_30d', 0):,.2f} · 7d ${plan.get('total_7d', 0):,.2f}",
+        chart,
+    )
+
+
 def render_html(plan: dict[str, Any]) -> Path:
     bootstrap = json.dumps(plan, default=str)
+    revenue_chart = _daily_revenue_chart(plan)
     body = f"""
 <main class="ow-wrap">
   <section class="ow-hero">
@@ -417,6 +457,8 @@ def render_html(plan: dict[str, Any]) -> Path:
     <div class="ow-kpi"><div class="n" id="ow-k-7d-amt">$0.00</div><div class="l">7-day $</div></div>
     <div class="ow-kpi"><div class="n" id="ow-k-30d-amt">$0.00</div><div class="l">30-day $</div></div>
   </section>
+
+  {revenue_chart}
 
   <h2 class="ow-section-title">Live orders</h2>
   <div id="ow-cards" class="ow-cards"></div>

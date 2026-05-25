@@ -33,7 +33,7 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["11358d05690fc40c7b86755a6a62af0de25a3acbe9ac424c3a9c5c8cf25ed4e8"];
+    window.__ADMIN_HASHES = ["2a00368e9da62201f07f7046c332713827b25ccbd815ff7e8cd6af1fcfa861f6"];
     window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
@@ -162,13 +162,11 @@
 }
 
 /* Cream-theme button overrides — primary becomes navy/cream, ghost+outline use navy */
-[data-theme="cream"] .btn-gold,
-[data-theme="cream"] .btn-refresh {
+[data-theme="cream"] .btn-gold {
   background: var(--text);
   color: var(--bg);
 }
-[data-theme="cream"] .btn-gold:hover,
-[data-theme="cream"] .btn-refresh:hover {
+[data-theme="cream"] .btn-gold:hover {
   filter: brightness(1.15);
   color: var(--bg);
 }
@@ -183,14 +181,6 @@
   background: var(--text);
   color: var(--bg);
   border-color: var(--text);
-}
-[data-theme="cream"] .btn-install {
-  border-color: var(--text);
-  color: var(--text);
-}
-[data-theme="cream"] .btn-install:hover {
-  background: var(--text);
-  color: var(--bg);
 }
 
 /* Cream-theme tag/badge — matches user spec exactly */
@@ -349,10 +339,8 @@
   --brand-fg:    #f4f0e6;
 }
 [data-theme="forest"] .tag { background: #dde8d5; color: #234018; border: 1px solid #3a6b2a; }
-[data-theme="forest"] .btn-gold,
-[data-theme="forest"] .btn-refresh { background: var(--text); color: var(--bg); }
-[data-theme="forest"] .btn-gold:hover,
-[data-theme="forest"] .btn-refresh:hover { filter: brightness(1.15); color: var(--bg); }
+[data-theme="forest"] .btn-gold { background: var(--text); color: var(--bg); }
+[data-theme="forest"] .btn-gold:hover { filter: brightness(1.15); color: var(--bg); }
 [data-theme="forest"] .btn-ghost,
 [data-theme="forest"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
 [data-theme="forest"] .btn-ghost:hover,
@@ -415,10 +403,8 @@
   --brand-fg:    #f5f3fb;
 }
 [data-theme="lavender"] .tag { background: #e2d8f5; color: #4a1f80; border: 1px solid #6b3fa0; }
-[data-theme="lavender"] .btn-gold,
-[data-theme="lavender"] .btn-refresh { background: var(--text); color: var(--bg); }
-[data-theme="lavender"] .btn-gold:hover,
-[data-theme="lavender"] .btn-refresh:hover { filter: brightness(1.15); color: var(--bg); }
+[data-theme="lavender"] .btn-gold { background: var(--text); color: var(--bg); }
+[data-theme="lavender"] .btn-gold:hover { filter: brightness(1.15); color: var(--bg); }
 [data-theme="lavender"] .btn-ghost,
 [data-theme="lavender"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
 [data-theme="lavender"] .btn-ghost:hover,
@@ -455,10 +441,8 @@
   --brand-fg:    #faf6ef;
 }
 [data-theme="terracotta"] .tag { background: #f0d8c8; color: #7a2e0a; border: 1px solid #b84c1a; }
-[data-theme="terracotta"] .btn-gold,
-[data-theme="terracotta"] .btn-refresh { background: var(--text); color: var(--bg); }
-[data-theme="terracotta"] .btn-gold:hover,
-[data-theme="terracotta"] .btn-refresh:hover { filter: brightness(1.15); color: var(--bg); }
+[data-theme="terracotta"] .btn-gold { background: var(--text); color: var(--bg); }
+[data-theme="terracotta"] .btn-gold:hover { filter: brightness(1.15); color: var(--bg); }
 [data-theme="terracotta"] .btn-ghost,
 [data-theme="terracotta"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
 [data-theme="terracotta"] .btn-ghost:hover,
@@ -591,11 +575,15 @@ a:hover { color: var(--gold-bright); }
   display: flex; align-items: center; gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
+  /* overflow: visible so absolutely-positioned dropdown menus aren't clipped */
+  overflow: visible;
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
   text-decoration: none;
-  flex: 0 1 auto; min-width: 0;
+  /* Brand is sacred — it must never shrink or allow the nav to overlap it.
+     flex: 0 0 auto means: don't grow, don't shrink, size to content. */
+  flex: 0 0 auto;
 }
 .brand-mark {
   width: 38px; height: 38px;
@@ -628,7 +616,20 @@ a:hover { color: var(--gold-bright); }
 @media (max-width: 1200px) {
   .brand-tag { display: none; }
 }
-.nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+/* Nav rail: takes the remaining space between brand and action buttons.
+   overflow stays visible so absolutely-positioned dropdown menus can
+   escape downward. The 880px hamburger breakpoint handles narrow viewports. */
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+}
+/* Action-button cluster (theme picker, install, sign-in, refresh).
+   flex-shrink: 0 ensures these never get compressed when the nav fills up. */
+.nav-actions {
+  display: flex; align-items: center; gap: var(--space-sm);
+  flex-shrink: 0;
+}
 .nav-links a,
 .nav-links .nav-dropdown-trigger {
   color: var(--text-muted);
@@ -685,43 +686,12 @@ a:hover { color: var(--gold-bright); }
   border-top: 1px solid var(--border);
 }
 .drawer-group:first-of-type { margin-top: 0; border-top: none; padding-top: 8px; }
-.btn-refresh {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: var(--brand-fg);
-  border: none;
-  padding: 10px 18px;
-  border-radius: var(--r-sm);
-  font-size: 12px; font-weight: 700;
-  letter-spacing: .08em; text-transform: uppercase;
-  cursor: pointer;
-  transition: all var(--t-fast);
-  box-shadow: var(--glow-gold);
-}
-.btn-refresh:hover { transform: translateY(-1px); filter: brightness(1.08); }
-.btn-refresh:disabled { opacity: .55; cursor: not-allowed; }
-.btn-install {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: transparent;
-  color: var(--gold);
-  border: 1px solid var(--border-mid);
-  padding: 9px 14px;
-  border-radius: var(--r-sm);
-  font-size: 12px; font-weight: 700;
-  letter-spacing: .08em; text-transform: uppercase;
-  cursor: pointer;
-  transition: all var(--t-fast);
-  font-family: inherit;
-}
-.btn-install:hover { border-color: var(--gold); background: rgba(212,175,55,.06); }
 
 /* ============ ADMIN GATE ============ */
-/* Admin nav links + Refresh button hidden unless html.pre-is-admin (set in head before body renders) */
+/* Admin nav links hidden unless html.pre-is-admin (set in head before body renders) */
 html:not(.pre-is-admin) [data-admin="1"],
 html:not(.pre-is-admin) .nav-links a.admin-only,
 html:not(.pre-is-admin) .drawer a.admin-only,
-html:not(.pre-is-admin) #install-app-btn,
-html:not(.pre-is-admin) #nav-refresh-btn,
-html:not(.pre-is-admin) .drawer .btn-refresh,
 html:not(.pre-is-admin) .btn-logout,
 html:not(.pre-is-admin) .drawer-signout { display: none !important; }
 html.pre-is-admin .btn-login,
@@ -873,7 +843,6 @@ html.pre-is-admin .gate-overlay { display: none !important; }
   content: '\2192'; color: var(--text-dim); font-size: 18px;
 }
 .drawer-foot { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
-.drawer .btn-refresh { width: 100%; padding: 14px; font-size: 13px; }
 
 /* ============ LAYOUT ============ */
 main {
@@ -1721,10 +1690,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   /* Header auxiliary buttons get tucked into the drawer at narrow widths so
      the brand block + hamburger don't collide. The drawer-foot below renders
      the same actions. */
-  .btn-install,
   .btn-login,
-  .btn-logout,
-  .btn-refresh { display: none !important; }
+  .btn-logout { display: none !important; }
   /* Tighten header padding so the brand text gets max horizontal room. */
   .app-header-inner { padding: 10px 12px; gap: 10px; }
   /* Force the brand tag onto a single line, ellipsized — the forced <br>
@@ -1816,75 +1783,35 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
         </div>
       </a>
-      <nav class="nav-links"><a href="index.html" class="nav-link">Listings</a>
-<a href="steals.html" class="nav-link">Steals</a>
-<a href="sold.html" class="nav-link">Sold</a>
+      <nav class="nav-links"><a href="index.html" class="nav-link">Shop</a>
+<a href="price_drops.html" class="nav-link">Steals</a>
+<a href="sold.html" class="nav-link">Recently Sold</a>
 
         <div class="nav-dropdown">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             Browse
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="browse.html">Browse</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="browse.html">All Sets & Players</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a><a href="under_10.html">Under $10</a></div>
         </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Analytics
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="analytics_hub.html" data-admin="1">Analytics</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Listings
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="listings_hub.html" data-admin="1">Listings</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            CX
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="cx_hub.html" data-admin="1">CX</a></div>
-        </div>
-
-        <div class="nav-dropdown" data-admin="1">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Photos
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="photo_hub.html" data-admin="1">Photos</a></div>
-        </div>
+<a href="daily.html" class="nav-link admin-only" data-admin="1">Daily</a>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             More
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="inventory.html" data-admin="1">Inventory</a><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="scan.html" data-admin="1">Scanner</a><a href="market_intel.html" data-admin="1">Market Intel</a><a href="deals.html" data-admin="1">Deals</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="promoted_listings.html" data-admin="1">Promoted Ads</a><a href="promotions.html" data-admin="1">Promotions</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="combined_shipping.html" data-admin="1">Combined Ship</a><a href="vault.html" data-admin="1">Vault</a><a href="email_campaign.html" data-admin="1">Email</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="reddit.html" data-admin="1">Reddit</a><a href="craigslist.html" data-admin="1">Craigslist</a><a href="google_feed.xml" data-admin="1" target="_blank" rel="noopener">Google Feed</a></div>
-        </div>
-
-        <div class="nav-dropdown">
-          <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            For Us
-            <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
-          </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="collect.html">My Wants</a><a href="under_10.html">Under $10</a><a href="top_sellers.html">Top Sellers</a><a href="price_drops.html">Price Drops</a><a href="sets.html">Set Completion</a><a href="assistant.html">AI Assistant</a><a href="pokemon.html">Pokemon</a><a href="pikachu.html">Pikachu</a><a href="charizard.html">Charizard</a><a href="mew.html">Mew</a><a href="mewtwo.html">Mewtwo</a><a href="eevee.html">Eevee</a><a href="pokemon_news.html">Pokemon News</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="vault.html" data-admin="1">Vault</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="collect.html" data-admin="1">My Wants</a><a href="top_sellers.html" data-admin="1">Top Sellers</a><a href="pokemon_news.html" data-admin="1">Pokemon News</a></div>
         </div></nav>
+      <!-- Action buttons are grouped in a flex container that never shrinks,
+           so they always remain visible alongside the brand. -->
+      <div class="nav-actions">
       <div style="position:relative;">
         <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
         </button>
         <div class="theme-popover" id="theme-popover" role="menu"></div>
       </div>
-      <button class="btn-install" id="install-app-btn" onclick="installApp()" style="display:none;" title="Install as app">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
-        Install
-      </button>
       <button class="btn-login"  onclick="openGate()" title="Sign in to manage listings">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Sign in
@@ -1893,7 +1820,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         Sign out
       </button>
-      <button class="btn-refresh" id="nav-refresh-btn" onclick="navRebuild()">Refresh</button>
+      </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
@@ -1911,65 +1838,32 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
       </button>
     </div>
-    <a href="index.html">Listings</a>
-<a href="steals.html">Steals</a>
-<a href="sold.html">Sold</a>
-<div class="drawer-group" data-admin="1">Browse</div>
-<a href="browse.html">Browse</a>
+    <a href="index.html">Shop</a>
+<a href="price_drops.html">Steals</a>
+<a href="sold.html">Recently Sold</a>
+<div class="drawer-group">Browse</div>
+<a href="browse.html">All Sets & Players</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
-<div class="drawer-group" data-admin="1">Analytics</div>
-<a href="analytics_hub.html" class="admin-only" data-admin="1">Analytics</a>
-<div class="drawer-group" data-admin="1">Listings</div>
-<a href="listings_hub.html" class="admin-only" data-admin="1">Listings</a>
-<div class="drawer-group" data-admin="1">CX</div>
-<a href="cx_hub.html" class="admin-only" data-admin="1">CX</a>
-<div class="drawer-group" data-admin="1">Photos</div>
-<a href="photo_hub.html" class="admin-only" data-admin="1">Photos</a>
+<a href="under_10.html">Under $10</a>
+<a href="daily.html" class="admin-only" data-admin="1">Daily</a>
 <div class="drawer-group" data-admin="1">More</div>
-<a href="inventory.html" class="admin-only" data-admin="1">Inventory</a>
 <a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
-<a href="scan.html" class="admin-only" data-admin="1">Scanner</a>
-<a href="market_intel.html" class="admin-only" data-admin="1">Market Intel</a>
-<a href="deals.html" class="admin-only" data-admin="1">Deals</a>
 <a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
-<a href="promoted_listings.html" class="admin-only" data-admin="1">Promoted Ads</a>
-<a href="promotions.html" class="admin-only" data-admin="1">Promotions</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
-<a href="combined_shipping.html" class="admin-only" data-admin="1">Combined Ship</a>
 <a href="vault.html" class="admin-only" data-admin="1">Vault</a>
-<a href="email_campaign.html" class="admin-only" data-admin="1">Email</a>
 <a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
 <a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
-<a href="reddit.html" class="admin-only" data-admin="1">Reddit</a>
-<a href="craigslist.html" class="admin-only" data-admin="1">Craigslist</a>
-<a href="google_feed.xml" class="admin-only" target="_blank" rel="noopener" data-admin="1">Google Feed</a>
-<div class="drawer-group" data-admin="1">For Us</div>
-<a href="collect.html">My Wants</a>
-<a href="under_10.html">Under $10</a>
-<a href="top_sellers.html">Top Sellers</a>
-<a href="price_drops.html">Price Drops</a>
-<a href="sets.html">Set Completion</a>
-<a href="assistant.html">AI Assistant</a>
-<a href="pokemon.html">Pokemon</a>
-<a href="pikachu.html">Pikachu</a>
-<a href="charizard.html">Charizard</a>
-<a href="mew.html">Mew</a>
-<a href="mewtwo.html">Mewtwo</a>
-<a href="eevee.html">Eevee</a>
-<a href="pokemon_news.html">Pokemon News</a>
+<a href="collect.html" class="admin-only" data-admin="1">My Wants</a>
+<a href="top_sellers.html" class="admin-only" data-admin="1">Top Sellers</a>
+<a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
     <div class="drawer-foot">
-      <button class="btn-refresh" id="drawer-install-btn" onclick="installApp()" style="display:none;width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:middle;margin-right:6px;"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
-        Install as app
-      </button>
-      <button class="btn-refresh drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+      <button class="drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
         Sign in
       </button>
-      <button class="btn-refresh drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
+      <button class="drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
         Sign out
       </button>
-      <button class="btn-refresh" onclick="navRebuild()">Refresh Site</button>
     </div>
   </aside>
 
@@ -2008,10 +1902,27 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <div class="ow-kpi"><div class="n" id="ow-k-30d-amt">$0.00</div><div class="l">30-day $</div></div>
   </section>
 
+  <figure class="ch-card" style="
+  background:#141414;border:1px solid rgba(201,165,66,0.18);border-radius:4px;
+  padding:1.1rem 1.3rem 1.2rem;margin:0 0 1.2rem;
+  box-shadow:0 14px 40px -22px rgba(0,0,0,0.8);">
+  <figcaption style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:0.85rem;border-bottom:1px solid rgba(201,165,66,0.18);padding-bottom:0.5rem;">
+    <span style="font-family:'Fraunces', Georgia, serif;font-style:italic;font-weight:500;font-size:18px;color:#f1efe9;">Revenue · last 30 days</span>
+    <span style="font-family:'JetBrains Mono', ui-monospace, Menlo, monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#f0d27a;">30d $473.17 · 7d $112.22</span>
+  </figcaption>
+  <svg viewBox="0 0 760 180" width="100%" height="auto" role="img" aria-label="DAILY $" style="display:block;max-width:100%">
+  <text x="14" y="10" fill="#5d5852" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9" letter-spacing="0.1em">DAILY $</text>
+  <line x1="44" y1="14.0" x2="746" y2="14.0" stroke="rgba(255,255,255,0.05)" stroke-width="1"/><line x1="44" y1="47.5" x2="746" y2="47.5" stroke="rgba(255,255,255,0.05)" stroke-width="1"/><line x1="44" y1="81.0" x2="746" y2="81.0" stroke="rgba(255,255,255,0.05)" stroke-width="1"/><line x1="44" y1="114.5" x2="746" y2="114.5" stroke="rgba(255,255,255,0.05)" stroke-width="1"/><line x1="44" y1="148.0" x2="746" y2="148.0" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <rect x="44.0" y="145.0" width="21.5" height="3.0" fill="#c9a542" opacity="0.85" rx="1"><title>26: $4.49</title></rect><rect x="67.5" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>27: $0.00</title></rect><rect x="90.9" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>28: $0.00</title></rect><rect x="114.4" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>29: $0.00</title></rect><rect x="137.9" y="146.7" width="21.5" height="1.3" fill="#c9a542" opacity="0.85" rx="1"><title>30: $1.99</title></rect><rect x="161.3" y="146.2" width="21.5" height="1.8" fill="#c9a542" opacity="0.85" rx="1"><title>1: $2.69</title></rect><rect x="184.8" y="141.6" width="21.5" height="6.4" fill="#c9a542" opacity="0.85" rx="1"><title>2: $9.50</title></rect><rect x="208.3" y="144.3" width="21.5" height="3.7" fill="#c9a542" opacity="0.85" rx="1"><title>3: $5.49</title></rect><rect x="231.7" y="143.0" width="21.5" height="5.0" fill="#c9a542" opacity="0.85" rx="1"><title>4: $7.49</title></rect><rect x="255.2" y="147.2" width="21.5" height="0.8" fill="#c9a542" opacity="0.85" rx="1"><title>5: $1.25</title></rect><rect x="278.7" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>6: $0.00</title></rect><rect x="302.1" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>7: $0.00</title></rect><rect x="325.6" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>8: $0.00</title></rect><rect x="349.1" y="138.6" width="21.5" height="9.4" fill="#c9a542" opacity="0.85" rx="1"><title>9: $13.99</title></rect><rect x="372.5" y="22.7" width="21.5" height="125.3" fill="#c9a542" opacity="0.85" rx="1"><title>10: $187</title></rect><rect x="396.0" y="118.6" width="21.5" height="29.4" fill="#c9a542" opacity="0.85" rx="1"><title>11: $43.95</title></rect><rect x="419.5" y="110.9" width="21.5" height="37.1" fill="#c9a542" opacity="0.85" rx="1"><title>12: $55.34</title></rect><rect x="442.9" y="144.7" width="21.5" height="3.4" fill="#c9a542" opacity="0.85" rx="1"><title>13: $5.00</title></rect><rect x="466.4" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>14: $0.00</title></rect><rect x="489.9" y="142.2" width="21.5" height="5.8" fill="#c9a542" opacity="0.85" rx="1"><title>15: $8.67</title></rect><rect x="513.3" y="145.8" width="21.5" height="2.2" fill="#c9a542" opacity="0.85" rx="1"><title>16: $3.33</title></rect><rect x="536.8" y="142.1" width="21.5" height="5.9" fill="#c9a542" opacity="0.85" rx="1"><title>17: $8.79</title></rect><rect x="560.3" y="137.5" width="21.5" height="10.5" fill="#c9a542" opacity="0.85" rx="1"><title>18: $15.67</title></rect><rect x="583.7" y="143.8" width="21.5" height="4.2" fill="#c9a542" opacity="0.85" rx="1"><title>19: $6.24</title></rect><rect x="607.2" y="138.6" width="21.5" height="9.4" fill="#c9a542" opacity="0.85" rx="1"><title>20: $13.97</title></rect><rect x="630.7" y="120.9" width="21.5" height="27.1" fill="#c9a542" opacity="0.85" rx="1"><title>21: $40.50</title></rect><rect x="654.1" y="138.6" width="21.5" height="9.4" fill="#c9a542" opacity="0.85" rx="1"><title>22: $13.99</title></rect><rect x="677.6" y="132.0" width="21.5" height="16.0" fill="#c9a542" opacity="0.85" rx="1"><title>23: $23.85</title></rect><rect x="701.1" y="148.0" width="21.5" height="0.0" fill="#c9a542" opacity="0.85" rx="1"><title>24: $0.00</title></rect><rect x="724.5" y="148.0" width="21.5" height="0.0" fill="#f0d27a" opacity="0.95" rx="1"><title>25: $0.00</title></rect>
+  <text x="38" y="17.5" text-anchor="end" fill="#5d5852" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9.5">$200</text><text x="38" y="51.0" text-anchor="end" fill="#5d5852" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9.5">$150</text><text x="38" y="84.5" text-anchor="end" fill="#5d5852" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9.5">$100</text><text x="38" y="118.0" text-anchor="end" fill="#5d5852" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9.5">$50.00</text><text x="38" y="151.5" text-anchor="end" fill="#5d5852" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9.5">$0.00</text>
+  <text x="54.7" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">26</text><text x="125.1" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">29</text><text x="195.5" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">2</text><text x="265.9" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">5</text><text x="336.3" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">8</text><text x="406.7" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">11</text><text x="477.1" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">14</text><text x="547.5" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">17</text><text x="617.9" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">20</text><text x="688.3" y="170" text-anchor="middle" fill="#9a9388" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="9">23</text>
+</svg>
+</figure>
+
   <h2 class="ow-section-title">Live orders</h2>
   <div id="ow-cards" class="ow-cards"></div>
 </main>
-<script>window.__OW_BOOTSTRAP = {"generated_at": "2026-05-20T13:46:43+00:00", "orders": [{"order_id": "10-14660-81921", "item_id": "306947427453", "item_title": "2025 Topps Chrome - Ashton Jeanty Fortune 15 ROOKIE #F15-24 - Raiders", "image_url": "", "sale_price": 2.99, "buyer": "jeffrom823", "created_at": "2026-05-20T03:56:52.000Z", "ship_state": "CA"}, {"order_id": "10-14660-32299", "item_id": "306945569731", "item_title": "2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)", "image_url": "", "sale_price": 4.99, "buyer": "ericjs81", "created_at": "2026-05-20T00:58:14.000Z", "ship_state": "MS"}, {"order_id": "18-14647-84768", "item_id": "306914280138", "item_title": "5 Sam Adams Rookie Cards Seattle Seahawks", "image_url": "", "sale_price": 2.0, "buyer": "curiousgoerge_926", "created_at": "2026-05-20T00:05:59.000Z", "ship_state": "GA"}, {"order_id": "01-14675-30021", "item_id": "306913939866", "item_title": "15 Dan Marino Cards Miami Dolphins Football Card Lot NFL", "image_url": "", "sale_price": 3.99, "buyer": "aliciamays74", "created_at": "2026-05-19T22:56:09.000Z", "ship_state": "VA"}, {"order_id": "24-14650-27745", "item_id": "306933928667", "item_title": "2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards) Football Card Lot", "image_url": "", "sale_price": 2.25, "buyer": "kus_6054", "created_at": "2026-05-19T09:43:24.000Z", "ship_state": "MA"}, {"order_id": "09-14656-73718", "item_id": "306937677187", "item_title": "2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyramids /299", "image_url": "", "sale_price": 7.69, "buyer": "jogr-4086", "created_at": "2026-05-18T20:38:13.000Z", "ship_state": "MA"}, {"order_id": "06-14661-28990", "item_id": "306937598270", "item_title": "2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm NFL Football", "image_url": "", "sale_price": 2.99, "buyer": "kk_sportscards9", "created_at": "2026-05-18T19:09:15.000Z", "ship_state": "FL"}, {"order_id": "09-14656-22448", "item_id": "306937599747", "item_title": "2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock Prizm (RC) Football", "image_url": "", "sale_price": 2.99, "buyer": "kk_sportscards9", "created_at": "2026-05-18T19:02:27.000Z", "ship_state": "FL"}, {"order_id": "19-14639-69440", "item_id": "306937664217", "item_title": "2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic Prizm (RC) Football", "image_url": "", "sale_price": 2.0, "buyer": "779kp_31", "created_at": "2026-05-18T15:10:25.000Z", "ship_state": "AZ"}, {"order_id": "10-14647-51105", "item_id": "306930560592", "item_title": "2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC) NFL Football", "image_url": "", "sale_price": 1.99, "buyer": "adw24", "created_at": "2026-05-17T07:17:01.000Z", "ship_state": "AR"}, {"order_id": "16-14638-27699", "item_id": "306913908225", "item_title": "9 Joe Montana Cards 49ers Chiefs Football Card Lot NFL", "image_url": "", "sale_price": 5.0, "buyer": "knottyhead1", "created_at": "2026-05-17T06:23:56.000Z", "ship_state": "NY"}, {"order_id": "27-14621-04918", "item_id": "306913787569", "item_title": "10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL", "image_url": "", "sale_price": 1.8, "buyer": "bobenso-75", "created_at": "2026-05-17T02:38:24.000Z", "ship_state": "TX"}, {"order_id": "20-14630-16949", "item_id": "306931291522", "item_title": "1990 Topps - Ken Griffey Jr #336", "image_url": "", "sale_price": 3.33, "buyer": "jaoli2839", "created_at": "2026-05-16T18:24:36.000Z", "ship_state": "NV"}, {"order_id": "15-14631-03499", "item_id": "306914912556", "item_title": "2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)", "image_url": "", "sale_price": 3.0, "buyer": "spear_core", "created_at": "2026-05-15T00:38:31.000Z", "ship_state": "CO"}, {"order_id": "15-14630-99614", "item_id": "306939330491", "item_title": "Topps Chrome Football 2025 Bhayshul Tuten Jaguars Geometric Rookie /99 #389", "image_url": "", "sale_price": 5.67, "buyer": "spear_core", "created_at": "2026-05-15T00:24:44.000Z", "ship_state": "CO"}, {"order_id": "06-14639-02211", "item_id": "306913311444", "item_title": "9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL", "image_url": "", "sale_price": 3.0, "buyer": "willcoxcowboy", "created_at": "2026-05-13T15:23:29.000Z", "ship_state": "NC"}, {"order_id": "13-14628-14816", "item_id": "306930466950", "item_title": "2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm /49 (RC)", "image_url": "", "sale_price": 2.0, "buyer": "rondman", "created_at": "2026-05-13T15:22:37.000Z", "ship_state": "TX"}, {"order_id": "26-14604-20843", "item_id": "306903933988", "item_title": "8 Cards Roger Craig San Francisco 49ers Minnesota Vikings", "image_url": "", "sale_price": 1.5, "buyer": "playhardcards", "created_at": "2026-05-12T18:56:57.000Z", "ship_state": "SC"}, {"order_id": "23-14608-89334", "item_id": "306931229229", "item_title": "1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)", "image_url": "", "sale_price": 12.34, "buyer": "playhardcards", "created_at": "2026-05-12T18:50:31.000Z", "ship_state": "SC"}, {"order_id": "18-14615-86469", "item_id": "306926030086", "item_title": "2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm", "image_url": "", "sale_price": 40.0, "buyer": "preciseclothing", "created_at": "2026-05-12T16:09:00.000Z", "ship_state": "CA"}, {"order_id": "27-14600-86793", "item_id": "306931052623", "item_title": "2025 Panini Prizm Draft Picks - Luther Burden #71 Red Ice Prizm (RC)", "image_url": "", "sale_price": 1.5, "buyer": "cryptic-36", "created_at": "2026-05-12T09:14:08.000Z", "ship_state": "CA"}, {"order_id": "10-14629-95109", "item_id": "306927040476", "item_title": "2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC", "image_url": "", "sale_price": 7.0, "buyer": "setspenc_9", "created_at": "2026-05-11T22:38:55.000Z", "ship_state": "TN"}, {"order_id": "16-14616-91054", "item_id": "306927035291", "item_title": "2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1", "image_url": "", "sale_price": 10.0, "buyer": "danny_webster", "created_at": "2026-05-11T22:35:19.000Z", "ship_state": "OK"}, {"order_id": "13-14620-73470", "item_id": "306927028439", "item_title": "2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2", "image_url": "", "sale_price": 8.0, "buyer": "mrgm77", "created_at": "2026-05-11T22:32:14.000Z", "ship_state": "TX"}, {"order_id": "12-14620-86074", "item_id": "306930929280", "item_title": "2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)", "image_url": "", "sale_price": 3.45, "buyer": "fastonbidding", "created_at": "2026-05-11T17:53:11.000Z", "ship_state": "CA"}, {"order_id": "17-14611-33837", "item_id": "306751048818", "item_title": "EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125", "image_url": "", "sale_price": 15.5, "buyer": "dam994851", "created_at": "2026-05-11T11:18:30.000Z", "ship_state": "CA"}, {"order_id": "26-14595-56885", "item_id": "306926059250", "item_title": "2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14", "image_url": "", "sale_price": 180.0, "buyer": "mon968698", "created_at": "2026-05-10T22:33:54.000Z", "ship_state": "OH"}, {"order_id": "02-14631-82215", "item_id": "306914916776", "item_title": "2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)", "image_url": "", "sale_price": 3.99, "buyer": "scculbe_14", "created_at": "2026-05-10T18:18:04.000Z", "ship_state": "IA"}, {"order_id": "27-14593-15051", "item_id": "306914908485", "item_title": "2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)", "image_url": "", "sale_price": 2.99, "buyer": "ibuycards1", "created_at": "2026-05-10T18:01:24.000Z", "ship_state": "TX"}, {"order_id": "17-14604-06093", "item_id": "306927289794", "item_title": "2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)", "image_url": "", "sale_price": 13.99, "buyer": "raven20cp", "created_at": "2026-05-09T17:25:14.000Z", "ship_state": "FL"}, {"order_id": "26-14571-76251", "item_id": "306913178483", "item_title": "6 Cards Darrell Green Washington Redskins", "image_url": "", "sale_price": 1.25, "buyer": "peppersherwood79", "created_at": "2026-05-05T12:27:39.000Z", "ship_state": "VA"}, {"order_id": "12-14590-51138", "item_id": "306914170613", "item_title": "2025 Panini Prizm Draft Picks - New Recruits Jeremiah Smith #25 Green Prizm (RC)", "image_url": "", "sale_price": 4.99, "buyer": "drockxdm", "created_at": "2026-05-04T21:08:20.000Z", "ship_state": "FL"}, {"order_id": "14-14585-52389", "item_id": "306914248275", "item_title": "2025 Panini Prizm Draft Picks - Carnell Tate #68 Gold Ice Prizm (RC)", "image_url": "", "sale_price": 2.5, "buyer": "brianbkls", "created_at": "2026-05-04T14:43:52.000Z", "ship_state": "CA"}, {"order_id": "14-14581-14390", "item_id": "306914175824", "item_title": "2025 Panini Prizm Draft Picks - Instant Impact Cam Ward #II-CWD Gold Ice Prizm", "image_url": "", "sale_price": 2.0, "buyer": "milo.cards", "created_at": "2026-05-03T16:51:03.000Z", "ship_state": "NJ"}, {"order_id": "08-14589-41289", "item_id": "306914195022", "item_title": "2025 Panini Prizm Draft Picks - Fearless Drew Allar #F-DAR Gold Ice Prizm (RC)", "image_url": "", "sale_price": 1.99, "buyer": "hazebr819", "created_at": "2026-05-03T14:21:50.000Z", "ship_state": "PA"}, {"order_id": "24-14579-75503", "item_id": "306914172219", "item_title": "2025 Panini Prizm Draft Picks - Caleb Downs #159 Green Prizm (RC)", "image_url": "", "sale_price": 1.5, "buyer": "4greenbay24", "created_at": "2026-05-03T11:45:04.000Z", "ship_state": "WV"}, {"order_id": "14-14577-16724", "item_id": "306914214448", "item_title": "2025 Panini Donruss Optic - Rated Rookie Shedeur Sanders #203 Stars Prizm (RC)", "image_url": "", "sale_price": 9.5, "buyer": "making_cardboard_memories", "created_at": "2026-05-02T16:57:17.000Z", "ship_state": "IN"}, {"order_id": "15-14571-29831", "item_id": "306783987628", "item_title": "Emmitt Smith - 15 x Different Cards, No Duplicates - Dallas Cowboys", "image_url": "", "sale_price": 2.69, "buyer": "stevejubilee", "created_at": "2026-05-01T16:09:15.000Z", "ship_state": "MI"}, {"order_id": "23-14556-38441", "item_id": "306904178257", "item_title": "10 Cards John Elway Denver Broncos", "image_url": "", "sale_price": 1.99, "buyer": "chief913", "created_at": "2026-04-30T21:27:09.000Z", "ship_state": "CO"}, {"order_id": "23-14536-73736", "item_id": "306844574522", "item_title": "Jerry Rice SF 49ers HOF Lot 15 Cards Topps Fleer Score Upper Deck Inserts 90s", "image_url": "", "sale_price": 4.49, "buyer": "fredswi_10", "created_at": "2026-04-26T15:41:08.000Z", "ship_state": "SC"}, {"order_id": "18-14534-22866", "item_id": "306844558345", "item_title": "Steve Young SF 49ers HOF Lot 18 Cards Topps Fleer Score Upper Deck Inserts 90s", "image_url": "", "sale_price": 2.99, "buyer": "sehar_1539", "created_at": "2026-04-24T01:53:29.000Z", "ship_state": "NM"}, {"order_id": "02-14552-20701", "item_id": "306844611599", "item_title": "Sterling Sharpe Green Bay Packers Football Card Lot (21 Cards) 1989\u20131994", "image_url": "", "sale_price": 1.99, "buyer": "cams7863", "created_at": "2026-04-22T16:40:41.000Z", "ship_state": "SC"}], "total_30d": 395.82, "total_7d": 57.68, "total_today": 9.98, "count_today": 3};</script>
+<script>window.__OW_BOOTSTRAP = {"generated_at": "2026-05-25T16:42:22+00:00", "orders": [{"order_id": "03-14687-39593", "item_id": "306914911040", "item_title": "2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)", "image_url": "", "sale_price": 2.99, "buyer": "dahami3968", "created_at": "2026-05-23T20:32:27.000Z", "ship_state": "IL"}, {"order_id": "05-14684-45415", "item_id": "306931283327", "item_title": "1990 Ken Griffey Jr Sports Illustrated for Kids Series 1 #158 NFL", "image_url": "", "sale_price": 2.11, "buyer": "jamiddl-49", "created_at": "2026-05-23T19:12:59.000Z", "ship_state": "VA"}, {"order_id": "17-14663-36273", "item_id": "306956963551", "item_title": "2025 Topps Chrome Base Matthew Stafford #169 Rams", "image_url": "", "sale_price": 14.56, "buyer": "sullivanssportscards", "created_at": "2026-05-23T11:54:08.000Z", "ship_state": "KS"}, {"order_id": "24-14666-52223", "item_id": "306939342209", "item_title": "2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL", "image_url": "", "sale_price": 4.19, "buyer": "jbea9154", "created_at": "2026-05-23T05:06:11.000Z", "ship_state": "WI"}, {"order_id": "10-14672-61314", "item_id": "306949802296", "item_title": "2025 Panini Prizm - Sean Taylor #105 Lazer Prizm", "image_url": "", "sale_price": 4.0, "buyer": "cencalcards", "created_at": "2026-05-22T21:59:23.000Z", "ship_state": "CA"}, {"order_id": "10-14672-56279", "item_id": "306953120922", "item_title": "2025 Panini Icon Collection Mahomes - Game Gear Patrick Mahomes II #GG-3 (MEM)", "image_url": "", "sale_price": 9.99, "buyer": "bill-484548", "created_at": "2026-05-22T21:42:42.000Z", "ship_state": "MI"}, {"order_id": "11-14663-80446", "item_id": "306937601406", "item_title": "2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm", "image_url": "", "sale_price": 15.5, "buyer": "wilkimb_25", "created_at": "2026-05-21T03:40:39.000Z", "ship_state": "NC"}, {"order_id": "19-14651-20817", "item_id": "306937466251", "item_title": "2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie", "image_url": "", "sale_price": 13.5, "buyer": "amf-11", "created_at": "2026-05-21T01:37:31.000Z", "ship_state": "GA"}, {"order_id": "10-14664-90318", "item_id": "306937452121", "item_title": "2026 Wild Card- Joe Burrow & Justin Jefferson Card 1/1 King NFL", "image_url": "", "sale_price": 11.5, "buyer": "skajs_gmm9wdlvvc", "created_at": "2026-05-21T01:23:20.000Z", "ship_state": "OH"}, {"order_id": "15-14655-03474", "item_id": "306931218531", "item_title": "Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press Box", "image_url": "", "sale_price": 3.99, "buyer": "westnyy24", "created_at": "2026-05-20T16:03:53.000Z", "ship_state": "MA"}, {"order_id": "10-14660-81921", "item_id": "306947427453", "item_title": "2025 Topps Chrome - Ashton Jeanty Fortune 15 ROOKIE #F15-24 - Raiders", "image_url": "", "sale_price": 2.99, "buyer": "jeffrom823", "created_at": "2026-05-20T03:56:52.000Z", "ship_state": "CA"}, {"order_id": "10-14660-32299", "item_id": "306945569731", "item_title": "2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)", "image_url": "", "sale_price": 4.99, "buyer": "ericjs81", "created_at": "2026-05-20T00:58:14.000Z", "ship_state": "MS"}, {"order_id": "18-14647-84768", "item_id": "306914280138", "item_title": "5 Sam Adams Rookie Cards Seattle Seahawks", "image_url": "", "sale_price": 2.0, "buyer": "curiousgoerge_926", "created_at": "2026-05-20T00:05:59.000Z", "ship_state": "GA"}, {"order_id": "01-14675-30021", "item_id": "306913939866", "item_title": "15 Dan Marino Cards Miami Dolphins Football Card Lot NFL", "image_url": "", "sale_price": 3.99, "buyer": "aliciamays74", "created_at": "2026-05-19T22:56:09.000Z", "ship_state": "VA"}, {"order_id": "24-14650-27745", "item_id": "306933928667", "item_title": "2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards) Football Card Lot", "image_url": "", "sale_price": 2.25, "buyer": "kus_6054", "created_at": "2026-05-19T09:43:24.000Z", "ship_state": "MA"}, {"order_id": "09-14656-73718", "item_id": "306937677187", "item_title": "2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyramids /299", "image_url": "", "sale_price": 7.69, "buyer": "jogr-4086", "created_at": "2026-05-18T20:38:13.000Z", "ship_state": "MA"}, {"order_id": "06-14661-28990", "item_id": "306937598270", "item_title": "2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm NFL Football", "image_url": "", "sale_price": 2.99, "buyer": "kk_sportscards9", "created_at": "2026-05-18T19:09:15.000Z", "ship_state": "FL"}, {"order_id": "09-14656-22448", "item_id": "306937599747", "item_title": "2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock Prizm (RC) Football", "image_url": "", "sale_price": 2.99, "buyer": "kk_sportscards9", "created_at": "2026-05-18T19:02:27.000Z", "ship_state": "FL"}, {"order_id": "19-14639-69440", "item_id": "306937664217", "item_title": "2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic Prizm (RC) Football", "image_url": "", "sale_price": 2.0, "buyer": "779kp_31", "created_at": "2026-05-18T15:10:25.000Z", "ship_state": "AZ"}, {"order_id": "10-14647-51105", "item_id": "306930560592", "item_title": "2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC) NFL Football", "image_url": "", "sale_price": 1.99, "buyer": "adw24", "created_at": "2026-05-17T07:17:01.000Z", "ship_state": "AR"}, {"order_id": "16-14638-27699", "item_id": "306913908225", "item_title": "9 Joe Montana Cards 49ers Chiefs Football Card Lot NFL", "image_url": "", "sale_price": 5.0, "buyer": "knottyhead1", "created_at": "2026-05-17T06:23:56.000Z", "ship_state": "NY"}, {"order_id": "27-14621-04918", "item_id": "306913787569", "item_title": "10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL", "image_url": "", "sale_price": 1.8, "buyer": "bobenso-75", "created_at": "2026-05-17T02:38:24.000Z", "ship_state": "TX"}, {"order_id": "20-14630-16949", "item_id": "306931291522", "item_title": "1990 Topps - Ken Griffey Jr #336", "image_url": "", "sale_price": 3.33, "buyer": "jaoli2839", "created_at": "2026-05-16T18:24:36.000Z", "ship_state": "NV"}, {"order_id": "15-14631-03499", "item_id": "306914912556", "item_title": "2025 Panini Select - Concourse Ashton Jeanty #4 Black & Red Shock Prizm (RC)", "image_url": "", "sale_price": 3.0, "buyer": "spear_core", "created_at": "2026-05-15T00:38:31.000Z", "ship_state": "CO"}, {"order_id": "15-14630-99614", "item_id": "306939330491", "item_title": "Topps Chrome Football 2025 Bhayshul Tuten Jaguars Geometric Rookie /99 #389", "image_url": "", "sale_price": 5.67, "buyer": "spear_core", "created_at": "2026-05-15T00:24:44.000Z", "ship_state": "CO"}, {"order_id": "06-14639-02211", "item_id": "306913311444", "item_title": "9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL", "image_url": "", "sale_price": 3.0, "buyer": "willcoxcowboy", "created_at": "2026-05-13T15:23:29.000Z", "ship_state": "NC"}, {"order_id": "13-14628-14816", "item_id": "306930466950", "item_title": "2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm /49 (RC)", "image_url": "", "sale_price": 2.0, "buyer": "rondman", "created_at": "2026-05-13T15:22:37.000Z", "ship_state": "TX"}, {"order_id": "26-14604-20843", "item_id": "306903933988", "item_title": "8 Cards Roger Craig San Francisco 49ers Minnesota Vikings", "image_url": "", "sale_price": 1.5, "buyer": "playhardcards", "created_at": "2026-05-12T18:56:57.000Z", "ship_state": "SC"}, {"order_id": "23-14608-89334", "item_id": "306931229229", "item_title": "1989 Topps Traded - Rickey Henderson #48T Collector's Edition (Tiffany)", "image_url": "", "sale_price": 12.34, "buyer": "playhardcards", "created_at": "2026-05-12T18:50:31.000Z", "ship_state": "SC"}, {"order_id": "18-14615-86469", "item_id": "306926030086", "item_title": "2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red & Yellow Prizm", "image_url": "", "sale_price": 40.0, "buyer": "preciseclothing", "created_at": "2026-05-12T16:09:00.000Z", "ship_state": "CA"}, {"order_id": "27-14600-86793", "item_id": "306931052623", "item_title": "2025 Panini Prizm Draft Picks - Luther Burden #71 Red Ice Prizm (RC)", "image_url": "", "sale_price": 1.5, "buyer": "cryptic-36", "created_at": "2026-05-12T09:14:08.000Z", "ship_state": "CA"}, {"order_id": "10-14629-95109", "item_id": "306927040476", "item_title": "2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC", "image_url": "", "sale_price": 7.0, "buyer": "setspenc_9", "created_at": "2026-05-11T22:38:55.000Z", "ship_state": "TN"}, {"order_id": "16-14616-91054", "item_id": "306927035291", "item_title": "2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1", "image_url": "", "sale_price": 10.0, "buyer": "danny_webster", "created_at": "2026-05-11T22:35:19.000Z", "ship_state": "OK"}, {"order_id": "13-14620-73470", "item_id": "306927028439", "item_title": "2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2", "image_url": "", "sale_price": 8.0, "buyer": "mrgm77", "created_at": "2026-05-11T22:32:14.000Z", "ship_state": "TX"}, {"order_id": "12-14620-86074", "item_id": "306930929280", "item_title": "2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)", "image_url": "", "sale_price": 3.45, "buyer": "fastonbidding", "created_at": "2026-05-11T17:53:11.000Z", "ship_state": "CA"}, {"order_id": "17-14611-33837", "item_id": "306751048818", "item_title": "EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125", "image_url": "", "sale_price": 15.5, "buyer": "dam994851", "created_at": "2026-05-11T11:18:30.000Z", "ship_state": "CA"}, {"order_id": "26-14595-56885", "item_id": "306926059250", "item_title": "2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14", "image_url": "", "sale_price": 180.0, "buyer": "mon968698", "created_at": "2026-05-10T22:33:54.000Z", "ship_state": "OH"}, {"order_id": "02-14631-82215", "item_id": "306914916776", "item_title": "2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)", "image_url": "", "sale_price": 3.99, "buyer": "scculbe_14", "created_at": "2026-05-10T18:18:04.000Z", "ship_state": "IA"}, {"order_id": "27-14593-15051", "item_id": "306914908485", "item_title": "2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)", "image_url": "", "sale_price": 2.99, "buyer": "ibuycards1", "created_at": "2026-05-10T18:01:24.000Z", "ship_state": "TX"}, {"order_id": "17-14604-06093", "item_id": "306927289794", "item_title": "2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)", "image_url": "", "sale_price": 13.99, "buyer": "raven20cp", "created_at": "2026-05-09T17:25:14.000Z", "ship_state": "FL"}, {"order_id": "26-14571-76251", "item_id": "306913178483", "item_title": "6 Cards Darrell Green Washington Redskins", "image_url": "", "sale_price": 1.25, "buyer": "peppersherwood79", "created_at": "2026-05-05T12:27:39.000Z", "ship_state": "VA"}, {"order_id": "12-14590-51138", "item_id": "306914170613", "item_title": "2025 Panini Prizm Draft Picks - New Recruits Jeremiah Smith #25 Green Prizm (RC)", "image_url": "", "sale_price": 4.99, "buyer": "drockxdm", "created_at": "2026-05-04T21:08:20.000Z", "ship_state": "FL"}, {"order_id": "14-14585-52389", "item_id": "306914248275", "item_title": "2025 Panini Prizm Draft Picks - Carnell Tate #68 Gold Ice Prizm (RC)", "image_url": "", "sale_price": 2.5, "buyer": "brianbkls", "created_at": "2026-05-04T14:43:52.000Z", "ship_state": "CA"}, {"order_id": "14-14581-14390", "item_id": "306914175824", "item_title": "2025 Panini Prizm Draft Picks - Instant Impact Cam Ward #II-CWD Gold Ice Prizm", "image_url": "", "sale_price": 2.0, "buyer": "milo.cards", "created_at": "2026-05-03T16:51:03.000Z", "ship_state": "NJ"}, {"order_id": "08-14589-41289", "item_id": "306914195022", "item_title": "2025 Panini Prizm Draft Picks - Fearless Drew Allar #F-DAR Gold Ice Prizm (RC)", "image_url": "", "sale_price": 1.99, "buyer": "hazebr819", "created_at": "2026-05-03T14:21:50.000Z", "ship_state": "PA"}, {"order_id": "24-14579-75503", "item_id": "306914172219", "item_title": "2025 Panini Prizm Draft Picks - Caleb Downs #159 Green Prizm (RC)", "image_url": "", "sale_price": 1.5, "buyer": "4greenbay24", "created_at": "2026-05-03T11:45:04.000Z", "ship_state": "WV"}, {"order_id": "14-14577-16724", "item_id": "306914214448", "item_title": "2025 Panini Donruss Optic - Rated Rookie Shedeur Sanders #203 Stars Prizm (RC)", "image_url": "", "sale_price": 9.5, "buyer": "making_cardboard_memories", "created_at": "2026-05-02T16:57:17.000Z", "ship_state": "IN"}, {"order_id": "15-14571-29831", "item_id": "306783987628", "item_title": "Emmitt Smith - 15 x Different Cards, No Duplicates - Dallas Cowboys", "image_url": "", "sale_price": 2.69, "buyer": "stevejubilee", "created_at": "2026-05-01T16:09:15.000Z", "ship_state": "MI"}, {"order_id": "23-14556-38441", "item_id": "306904178257", "item_title": "10 Cards John Elway Denver Broncos", "image_url": "", "sale_price": 1.99, "buyer": "chief913", "created_at": "2026-04-30T21:27:09.000Z", "ship_state": "CO"}, {"order_id": "23-14536-73736", "item_id": "306844574522", "item_title": "Jerry Rice SF 49ers HOF Lot 15 Cards Topps Fleer Score Upper Deck Inserts 90s", "image_url": "", "sale_price": 4.49, "buyer": "fredswi_10", "created_at": "2026-04-26T15:41:08.000Z", "ship_state": "SC"}], "total_30d": 473.17, "total_7d": 112.22, "total_today": 0.0, "count_today": 0};</script>
 <script>(function(){
   var PLAN_URL = 'orders_watch_plan.json';
   var POLL_MS  = 30000;
@@ -2108,7 +2019,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 20, 2026 · 13:46 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 25, 2026 · 16:42 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -2230,29 +2141,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       t.classList.add('show');
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
-    }
-
-    async function navRebuild() {
-      const btn = document.getElementById('nav-refresh-btn');
-      const original = btn.textContent;
-      btn.textContent = 'Refreshing…'; btn.disabled = true;
-      showToast('Refreshing inventory, prices, sold history, and deals from eBay…');
-      try {
-        const resp = await fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/rebuild', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
-        });
-        const data = await resp.json();
-        if (data.success) {
-          // Use Lambda's detailed message if present
-          const detail = data.message || 'Refresh started';
-          showToast(detail + ' · pull-to-refresh in ~2-3 min to see new prices');
-        } else {
-          showToast('Refresh failed: ' + (data.error || 'Unknown'));
-        }
-      } catch (e) {
-        showToast('Refresh request failed: ' + e.message);
-      }
-      btn.textContent = original; btn.disabled = false;
     }
 
     // Init GLightbox if present anywhere on page
@@ -2410,39 +2298,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       setTimeout(() => host.remove(), 2200);
     };
 
-    // ---- PWA: register service worker + handle install prompt ----
+    // ---- PWA: register service worker ----
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(() => {});
       });
     }
-
-    let __deferredInstall = null;
-    function __toggleInstallBtns(visible) {
-      const headerBtn = document.getElementById('install-app-btn');
-      const drawerBtn = document.getElementById('drawer-install-btn');
-      if (headerBtn) headerBtn.style.display = visible ? 'inline-flex' : 'none';
-      if (drawerBtn) drawerBtn.style.display = visible ? 'inline-flex' : 'none';
-    }
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      __deferredInstall = e;
-      __toggleInstallBtns(true);
-    });
-    window.addEventListener('appinstalled', () => {
-      __deferredInstall = null;
-      __toggleInstallBtns(false);
-      showToast('Installed. Find Harpua2001 on your home screen.');
-    });
-    window.installApp = async function() {
-      if (!__deferredInstall) return;
-      __deferredInstall.prompt();
-      const choice = await __deferredInstall.userChoice;
-      if (choice.outcome === 'accepted') {
-        __deferredInstall = null;
-        __toggleInstallBtns(false);
-      }
-    };
 
     // ---- Theme picker (8 themes) ----
     const THEMES = [

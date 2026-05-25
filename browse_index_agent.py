@@ -558,6 +558,8 @@ def main() -> None:
     if not SNAPSHOT.exists():
         raise SystemExit(f"missing snapshot: {SNAPSHOT}")
     listings: list[dict] = json.loads(SNAPSHOT.read_text())
+    if isinstance(listings, dict):
+        listings = listings.get("listings", [])
     index = build_index(listings)
 
     OUTPUT.mkdir(parents=True, exist_ok=True)

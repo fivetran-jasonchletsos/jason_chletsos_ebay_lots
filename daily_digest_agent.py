@@ -59,6 +59,7 @@ from pathlib import Path
 from typing import Any
 
 import promote
+import chart_helpers
 
 REPO_ROOT = Path(__file__).parent
 OUTPUT_DIR = REPO_ROOT / "output"
@@ -399,6 +400,37 @@ def render(metrics: dict, todo: list[str], top_earner_html: str,
              f"{metrics['watchers']} total watchers")
     )
     kpis_html = f"<div class='dd-kpis'>{kpis}</div>"
+
+    # 30-day revenue sparkline pulled from orders_watch_plan if available.
+    try:
+        ow = _load_json(Path("output/orders_watch_plan.json"), {}) or {}
+        by_day: dict[str, float] = {}
+        for o in ow.get("orders", []):
+            ts = (o.get("created_at") or "").replace("Z", "+00:00")
+            try:
+                d = datetime.fromisoformat(ts).date()
+            except Exception:
+                continue
+            try:
+                amt = float(o.get("sale_price") or 0)
+            except (TypeError, ValueError):
+                amt = 0.0
+            by_day[d.isoformat()] = by_day.get(d.isoformat(), 0.0) + amt
+        today = now.date()
+        series = [by_day.get((today - timedelta(days=29 - i)).isoformat(), 0.0) for i in range(30)]
+        if any(v > 0 for v in series):
+            spark = chart_helpers.sparkline(series, width=520, height=70)
+            kpis_html += (
+                f"<div style='margin:0.6rem 0 0.2rem;padding:0.9rem 1.1rem;"
+                f"background:#141414;border:1px solid rgba(201,165,66,0.18);border-radius:4px;'>"
+                f"<div style='display:flex;justify-content:space-between;align-items:baseline;"
+                f"margin-bottom:0.5rem;font-family:JetBrains Mono,monospace;font-size:10.5px;"
+                f"letter-spacing:0.16em;text-transform:uppercase;color:#9a9388;'>"
+                f"<span>30-day revenue trend</span><span style='color:#f0d27a;'>"
+                f"peak ${max(series):,.2f}</span></div>{spark}</div>"
+            )
+    except Exception:
+        pass
 
     todo_items = "".join(
         f"<li><span class='box'></span><span>{escape(t)}</span></li>"
