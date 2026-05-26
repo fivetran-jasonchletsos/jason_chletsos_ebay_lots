@@ -20,6 +20,7 @@ import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Linking,
   Pressable,
   ScrollView,
@@ -44,7 +45,7 @@ import {
 import { getEbayCredentials } from '@/src/settings';
 
 const MAX_PHOTOS = 12;
-const CASSINI_PHOTO_GATE = 8;
+const TOP_SELLER_PHOTO_TARGET = 8;
 const TARGET_LONG_EDGE_PX = 2400;
 
 const DURATIONS: { label: string; value: 'Days_7' | 'Days_10' | 'Days_30' | 'GTC' }[] = [
@@ -103,7 +104,10 @@ export default function QuickListScreen() {
     setBusyShutter(true);
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const photo = await cameraRef.current.takePictureAsync({ quality: 1, skipProcessing: false });
+      // quality 0.85 + skipProcessing=true: ImageManipulator downscales to
+      // 2400px anyway, and 12MP full-res JPEGs into memory before resize
+      // OOMs older devices.
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.85, skipProcessing: true });
       if (!photo?.uri) throw new Error('No photo');
       setPhotos((prev) => [...prev, photo.uri]);
     } catch (e: any) {
@@ -146,7 +150,7 @@ export default function QuickListScreen() {
     if (!title.trim()) { Alert.alert('Title required', 'eBay needs a title.'); return; }
 
     Alert.alert(
-      'Create LIVE eBay listing?',
+      'Publish to eBay?',
       `Publish "${title.slice(0, 60)}${title.length > 60 ? '…' : ''}" at $${price.toFixed(2)} (qty ${qty})?`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -366,9 +370,7 @@ export default function QuickListScreen() {
           </View>
 
           <View style={styles.section}>
-            <TouchableOpacity style={styles.btnGold} onPress={confirmAndSubmit}>
-              <Text style={styles.btnGoldText}>List it on eBay</Text>
-            </TouchableOpacity>
+            <GoldButton label="List it on eBay" onPress={confirmAndSubmit} />
             <TouchableOpacity style={styles.btnGhost} onPress={() => setPhase('capture')}>
               <Text style={styles.btnGhostText}>Back to photos</Text>
             </TouchableOpacity>
@@ -381,7 +383,7 @@ export default function QuickListScreen() {
   // -- capture phase --
   const cameraSize = Math.min(width, 480);
   const thumbW = (width - 18 * 2 - 8 * 3) / 4;
-  const photosLow = photos.length > 0 && photos.length < CASSINI_PHOTO_GATE;
+  const photosLow = photos.length > 0 && photos.length < TOP_SELLER_PHOTO_TARGET;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -390,10 +392,10 @@ export default function QuickListScreen() {
         <Text style={styles.headerTitle}>{photos.length}/{MAX_PHOTOS} photos</Text>
         <Text style={[styles.headerSub, photosLow && { color: theme.warning }]}>
           {photos.length === 0
-            ? 'Shoot at least one photo. Cassini wants 8+ at >=1600px.'
+            ? 'Shoot at least one photo. Top sellers post 8+ at 1600px or larger.'
             : photosLow
-              ? `Below Cassini gate. Aim for ${CASSINI_PHOTO_GATE}+.`
-              : 'Above Cassini gate — good to go.'}
+              ? `Below the top-seller recommendation. Aim for ${TOP_SELLER_PHOTO_TARGET}+.`
+              : 'Above the top-seller recommendation — good to go.'}
         </Text>
       </View>
 
@@ -426,6 +428,39 @@ export default function QuickListScreen() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+  );
+}
+
+/**
+ * Primary gold button — medium haptic + 120ms scale(0.97) on press. Adds
+ * tactile friction to the Publish step since the next call is a live
+ * AddFixedPriceItem.
+ */
+function GoldButton({
+  label,
+  onPress,
+  disabled,
+}: { label: string; onPress: () => void; disabled?: boolean }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  function handlePress() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => { /* noop */ });
+    Animated.sequence([
+      Animated.timing(scale, { toValue: 0.97, duration: 60, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 1, duration: 60, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  }
+  return (
+    <Animated.View style={{ transform: [{ scale }], opacity: disabled ? 0.6 : 1 }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={styles.btnGold}
+        onPress={handlePress}
+        disabled={disabled}
+      >
+        <Text style={styles.btnGoldText}>{label}</Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 

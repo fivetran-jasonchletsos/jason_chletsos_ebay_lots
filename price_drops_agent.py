@@ -359,6 +359,18 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
     new_today = plan.get("new_today", [])
     gone_today = plan.get("gone_today", [])
     generated_at = plan.get("generated_at", "")
+    # Render the ISO timestamp in friendly Eastern time, e.g. "4:06 PM ET, May 25".
+    try:
+        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+        _parsed = _dt.fromisoformat(generated_at.replace("Z", "+00:00")) if generated_at else None
+        if _parsed:
+            # Eastern Time without pulling in zoneinfo (US/EDT in May 2026 is UTC-4).
+            _et = _parsed.astimezone(_tz(_td(hours=-4)))
+            generated_at_human = _et.strftime("%-I:%M %p ET, %b %-d")
+        else:
+            generated_at_human = "just now"
+    except Exception:
+        generated_at_human = generated_at or "just now"
 
     if first_run:
         hero_note = (
@@ -378,7 +390,7 @@ def render_html(plan: Dict[str, Any], first_run: bool) -> None:
     os.makedirs(DOCS_DIR, exist_ok=True)
     body = f"""
     <h1>Today's Steals</h1>
-    <p class="pd-sub">Prices that dropped overnight, fresh listings, and what just sold · updated <b>{_esc(generated_at)}</b><br>{hero_note}</p>
+    <p class="pd-sub">Prices that dropped overnight, fresh listings, and what just sold · updated <b>{_esc(generated_at_human)}</b><br>{hero_note}</p>
 
     <div class="pk-kpis">
       <div class="pk-kpi kpi-drop">

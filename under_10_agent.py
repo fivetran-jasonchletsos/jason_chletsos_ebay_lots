@@ -303,7 +303,7 @@ def render_report(plan: dict) -> Path:
       </a>
       <a class="stat-card linked" href="{_esc(cheapest_strip[0]['url']) if cheapest_strip else '#'}"
          target="_blank" rel="noopener" title="Open cheapest card on eBay">
-        <div class="num">${cheapest_strip[0]['price']:.2f}</div><div class="lbl">Cheapest right now</div>
+        <div class="num">${(cheapest_strip[0]['price'] if cheapest_strip else 0.0):.2f}</div><div class="lbl">Cheapest right now</div>
       </a>
     </div>
 

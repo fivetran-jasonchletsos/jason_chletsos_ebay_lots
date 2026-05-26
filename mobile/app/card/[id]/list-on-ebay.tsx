@@ -155,8 +155,8 @@ export default function ListOnEbayScreen() {
     }
 
     Alert.alert(
-      'Create live eBay listing?',
-      `This will create a LIVE eBay listing for "${title.slice(0, 60)}${title.length > 60 ? '…' : ''}" at $${price.toFixed(2)}. Continue?`,
+      'Publish to eBay?',
+      `This will publish "${title.slice(0, 60)}${title.length > 60 ? '…' : ''}" to your eBay store at $${price.toFixed(2)}. Continue?`,
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'List it', style: 'destructive', onPress: () => submit(price, qty) },
@@ -448,7 +448,7 @@ export default function ListOnEbayScreen() {
         </View>
 
         <Text style={styles.fineprint}>
-          Tapping "List it" creates a LIVE eBay listing in your seller account. You'll get a confirmation prompt first.
+          Tapping "List it" publishes this listing to your eBay store. You'll get a confirmation prompt first.
         </Text>
       </ScrollView>
     </SafeAreaView>

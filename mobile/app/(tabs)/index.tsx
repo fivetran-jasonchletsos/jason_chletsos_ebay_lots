@@ -241,7 +241,7 @@ export default function ScanScreen() {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.eyebrow}>HARPUA SCANNER</Text>
+          <Text style={styles.eyebrow}>harpua2001 scanner</Text>
           <Text style={styles.headerTitle}>Scan</Text>
         </View>
         {hasKey === false ? (

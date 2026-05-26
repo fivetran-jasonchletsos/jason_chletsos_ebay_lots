@@ -700,7 +700,7 @@ def build_deals_page(deals_data: dict) -> Path:
         </div>
         <div class="deal-price-block">
           <div class="deal-price">${d['price']:.2f}</div>
-          <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
           <div class="deal-median">{price_label} · median ${d['median']:.2f}</div>
           <a href="{d['url']}" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
@@ -748,7 +748,7 @@ def build_deals_page(deals_data: dict) -> Path:
     deal_itemlist_ld_script = f'<script type="application/ld+json">{json.dumps(deal_itemlist_ld, separators=(",", ":"))}</script>'
 
     if not cards:
-        cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No deals matched the threshold today. Lower the bar in <code>deal_queries.json</code> (increase <code>discount_threshold_pct</code>) or add new queries.</div>'
+        cards_html = '<div class="panel" style="text-align:center;padding:48px;color:var(--text-muted);">No deals matched the threshold today — check back tomorrow.</div>'
     else:
         cards_html = "\n".join(inline_deal_cards)
 
@@ -761,7 +761,7 @@ def build_deals_page(deals_data: dict) -> Path:
         else:
             d_marker = f'<b style="color:var(--gold);">{d_count}</b>' if d_count else '0'
             summary_rows.append(f'<tr><td>{q["q"]}</td><td>{q["comps"]}</td><td>${q["min"]:.2f}</td><td>${q["median"]:.2f}</td><td>${q["max"]:.2f}</td><td>{d_marker}</td></tr>')
-    summary_html = "\n".join(summary_rows) or '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Add queries to <code>deal_queries.json</code>.</td></tr>'
+    summary_html = "\n".join(summary_rows) or '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No queries configured yet.</td></tr>'
 
     extra_css = """
     .deal-grid { display: grid; gap: 12px; margin-bottom: 28px; }
@@ -825,7 +825,7 @@ def build_deals_page(deals_data: dict) -> Path:
         <div class="eyebrow">Underpriced listings · &gt;{threshold:g}% below median</div>
         <h1 class="section-title">Deal <span class="accent">Hunter</span></h1>
       </div>
-      <div class="section-sub sh-sub">Live scans of eBay watchlist queries from <code>deal_queries.json</code>. Flagged when current asking price is at least {threshold:g}% below the median price for the same query.</div>
+      <div class="section-sub sh-sub">Live deals from across eBay — flagged when the asking price is at least {threshold:g}% below the median for the same search.</div>
     </div>
 
     <div class="stat-grid">
@@ -1222,7 +1222,7 @@ _BASE_CSS = """
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
-  --text-dim:    #5d574c;
+  --text-dim:    #7a7268;
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
@@ -2244,6 +2244,20 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover { transform: translateY(-3px); border-color: var(--border-mid); }
 .listing-card:hover::after { box-shadow: 0 0 0 1px var(--border-hi) inset, 0 24px 50px -10px rgba(0,0,0,.7); }
 
+/* Gold sweep on hover — translates a soft amber band across the card face. */
+.listing-card::before {
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(110deg, transparent 30%, rgba(201,165,66,.18) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 600ms ease;
+  pointer-events: none;
+}
+.listing-card:hover::before { transform: translateX(110%); }
+@media (prefers-reduced-motion: reduce) {
+  .listing-card::before { transition: none; }
+  .listing-card:hover::before { transform: translateX(-110%); }
+}
+
 .thumb-wrap {
   position: relative;
   width: 100%;
@@ -2257,8 +2271,8 @@ input[type="checkbox"]:checked::after {
     radial-gradient(circle at 30% 30%, rgba(212,175,55,.06), transparent 50%);
   pointer-events: none; z-index: 1;
 }
-.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 4/3; }
-.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 1/1; }
+.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 3/4; }
+.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 3/4; }
 .grid[data-size="small"]  .thumb-wrap { aspect-ratio: 1/1; }
 .listing-card img {
   width: 100%; height: 100%;
@@ -2872,6 +2886,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   .table-wrap { margin: 0 -16px; }
   th, td { padding: 12px 14px; font-size: 12.5px; }
 }
+@media (max-width: 480px) {
+  /* Android 412dp (and below) — tighten gutters so cards breathe */
+  main { padding: 18px 12px 60px; }
+  .panel { padding: 14px; }
+  .listing-card .info { padding: 10px 11px; }
+  .listing-card .price { font-size: 20px; }
+  .grid[data-size="large"]  { gap: 10px; }
+  .grid[data-size="medium"] { gap: 8px; }
+  .grid[data-size="small"]  { gap: 6px; }
+  /* Drop the third meta chip when present to avoid wrap-overflow */
+  .listing-card .meta > *:nth-child(n+3) { display: none; }
+}
 @media (max-width: 420px) {
   .grid[data-size="medium"] { grid-template-columns: 1fr; }
   .grid[data-size="list"] .listing-card .thumb-wrap { width: 96px; flex: 0 0 96px; }
@@ -3025,15 +3051,15 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{SELLER_NAME}">
   <meta property="og:title" content="{title}">
-  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop running since 2003. Live inventory, real photos, ships next business day.">
+  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop on eBay since 1998. Live inventory, real photos, ships next business day.">
   <meta property="og:image" content="{SITE_URL}/og-card.jpg">
   <meta property="og:url" content="{SITE_URL}/{active_page}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{title}">
-  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — 20+ years on eBay, real photos, fast shipping.">
+  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — on eBay since 1998, real photos, fast shipping.">
   <meta name="twitter:image" content="{SITE_URL}/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='128' font-family='Fraunces, Georgia, serif' font-style='italic' font-size='128' font-weight='500' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
@@ -3496,6 +3522,14 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       const s = getComputedStyle(document.documentElement);
       Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      // Match the site's typography + gold palette so charts feel native
+      Chart.defaults.font.family = "'Familjen Grotesk', -apple-system, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.scale = Chart.defaults.scale || {{}};
+      Chart.defaults.scale.ticks = Object.assign({{}}, Chart.defaults.scale.ticks || {{}}, {{ padding: 8 }});
+      // Default gold ramp for datasets that don't specify their own colors
+      Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      window.__H2K_CHART_PALETTE = ['#c9a542', '#e6c66a', '#8a7521', '#7fc77a', '#e07b6f', '#9a9388'];
     }}
   </script>
 </body>
@@ -4128,7 +4162,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
             <div class="price" tabindex="0" onclick="togglePricePop(this, event)">${e['price_f']:.2f}<span class="price-info-ic" data-admin="1" aria-hidden="true">ⓘ</span></div>
             <div data-admin="1" class="price-pop-wrap">{price_pop_html}</div>
           </div>
-          <span class="trust-chip" aria-label="Free shipping and 30-day returns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · 30-day returns</span>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
           <div class="meta">{grade_tags}{cat_tag}{cond_tag}{flag_tag}{lock_tag}</div>
         </div>
         <div class="actions">
@@ -4188,8 +4222,17 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     }
     itemlist_ld_script = f'<script type="application/ld+json">{json.dumps(itemlist_ld, separators=(",", ":"))}</script>'
 
+    # Storefront H1 hero — eye-catching headline above the topicks scroller.
+    # Sets the voice for the rest of the site (playful, hand-listed, since 1998).
+    home_headline_html = f'''
+    <section class="home-headline" aria-label="Welcome">
+      <h1 class="home-headline-h1">Sports &amp; Pokémon cards, <em>hand-listed since 1998.</em></h1>
+      <p class="home-headline-sub">{len(listings)}+ live listings, real photos, ships next business day from Ohio. Combined shipping free on 2+.</p>
+    </section>
+    '''
+
     # Compact "Top Picks" horizontal scroller — replaces the heavy hero carousel
-    hero_html = ""
+    hero_html = home_headline_html
     if top_picks:
         tiles = []
         for tp in top_picks:
@@ -4198,10 +4241,10 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
               <div class="topick-img"><img src="{tp['pic']}" alt="" loading="lazy"></div>
               <div class="topick-price">${tp['price_f']:.2f}</div>
             </a>''')
-        hero_html = f'''
+        hero_html = home_headline_html + f'''
     <section class="topicks">
       <div class="topicks-head">
-        <div class="eyebrow">Top of the showcase</div>
+        <div class="eyebrow">Top picks today</div>
         <a href="#listing-grid" class="topicks-more" onclick="setTab('hot')">See all hot cards →</a>
       </div>
       <div class="topicks-scroll">{''.join(tiles)}</div>
@@ -4209,6 +4252,38 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     '''
 
     extra_css = """
+    /* ============ STOREFRONT HERO HEADLINE ============ */
+    .home-headline {
+      padding: 18px 0 14px;
+      margin: 6px 0 18px;
+      max-width: 880px;
+    }
+    .home-headline-h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 500;
+      font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      letter-spacing: -0.015em;
+      line-height: 1.04;
+      font-size: clamp(38px, 5.5vw, 64px);
+      color: var(--text);
+      margin: 0 0 10px;
+    }
+    .home-headline-h1 em {
+      font-style: italic;
+      color: var(--gold);
+      font-weight: 500;
+    }
+    .home-headline-sub {
+      font-size: clamp(14px, 1.4vw, 17px);
+      color: var(--text-muted);
+      max-width: 60ch;
+      line-height: 1.55;
+      margin: 0;
+    }
+    @media (max-width: 640px) {
+      .home-headline { padding: 8px 0 10px; }
+      .home-headline-sub { font-size: 14px; }
+    }
     /* ============ STICKY CATEGORY SIDEBAR ============ */
     .showcase-layout {
       display: grid;
@@ -4729,8 +4804,8 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
 
     <section class="section-head">
       <div>
-        <div class="eyebrow">Browse the inventory</div>
-        <h2 class="section-title">The <span class="accent">Showcase</span></h2>
+        <div class="eyebrow">What's listed today</div>
+        <h2 class="section-title">{len(listings)} cards <span class="accent">live now</span></h2>
       </div>
       <div class="size-toggle">
         <span class="lbl-txt">View</span>
@@ -7796,6 +7871,22 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     }}
   </style>"""
 
+    # Hide meta cells / detail blocks when the underlying value is missing.
+    # (Was previously rendering "Condition: —" and "Item Details: <title>"
+    # verbatim — both read as broken templates to a buyer.)
+    condition_cell_html = (
+        f'<div class="meta-cell"><div class="meta-lbl">Condition</div>'
+        f'<div class="meta-val">{l["condition"]}</div></div>'
+        if l.get("condition") else ""
+    )
+    # Only show "Item Details" if there's a real description that isn't just the title.
+    _desc_clean = (l.get("desc") or "").strip()
+    _title_clean = (l.get("title") or "").strip()
+    if _desc_clean and _desc_clean.lower() != _title_clean.lower():
+        item_details_html = f'<div class="product-desc"><h3>Item Details</h3><p>{desc_html}</p></div>'
+    else:
+        item_details_html = ""
+
     body = f"""
     <a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:13px;margin-bottom:18px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -7821,10 +7912,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
           💬 Questions? Message {SELLER_NAME} on eBay — replies usually within a few hours.
         </div>
         <div class="product-meta-grid">
-          <div class="meta-cell">
-            <div class="meta-lbl">Condition</div>
-            <div class="meta-val">{l["condition"] or '—'}</div>
-          </div>
+          {condition_cell_html}
           <div class="meta-cell">
             <div class="meta-lbl">Category</div>
             <div class="meta-val">{category}</div>
@@ -7838,10 +7926,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
             <div class="meta-val">{SELLER_NAME}</div>
           </div>
         </div>
-        <div class="product-desc">
-          <h3>Item Details</h3>
-          <p>{desc_html}</p>
-        </div>
+        {item_details_html}
         {pricing_panel_html}
       </div>
     </article>
@@ -9183,8 +9268,9 @@ def build_return_policy() -> Path:
 
       <div class="policy-section">
         <h2>Returns</h2>
-        <p>This seller does not accept returns. All sales are final. Please review all photos, descriptions, and ask any questions before purchasing.</p>
-        <p>If an item arrives damaged or is significantly not as described, contact us through eBay messages and we will work to resolve the issue.</p>
+        <p>Every card is photographed front and back so you see exactly what you're buying. We don't accept returns — so please ask anything before you buy, and I'll respond same-day.</p>
+        <p>That said, if an item arrives damaged or is significantly not as described, contact us through eBay messages and we'll work to make it right.</p>
+        <p>The formal terms are spelled out below.</p>
       </div>
 
       <div class="policy-section">
@@ -10063,22 +10149,20 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
     HTML) carries the canonical admin hash. Returns a list of issue strings;
     empty list = passing."""
     issues: list[str] = []
-    # Only check pages that are still in the live nav (see _NAV_ITEMS) plus
-    # the static assets every build emits. Pages previously listed here
-    # (steals, market_intel, analytics, quality, deals, scan, price_review,
-    # title_review, reddit, craigslist, *_hub) have been removed from the
-    # navigation and are no longer regenerated by main().
-    expected = [
-        "index.html", "sold.html", "daily.html",
-        "browse.html", "by_set.html", "by_player.html",
-        "repricing.html", "best_offer.html", "vault.html", "whatnot.html",
-        "relist.html", "seller_hub.html", "price_consistency.html",
-        "returns.html", "orders_watch.html", "cassini.html", "photo_audit.html",
-        "price_drops.html", "under_10.html", "top_sellers.html",
-        "pokemon_news.html", "collect.html",
-        "return-policy.html",
-        "sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest",
+    # Derive the page list from _NAV_ITEMS so a future nav addition is
+    # automatically integrity-checked. We then add any specials that ship in
+    # every build but aren't in the nav (returns dashboard, return policy,
+    # repricing, cassini, photo_audit) plus the static assets.
+    _nav_pages = [h for (h, _l, _pub, _g) in _NAV_ITEMS if h.endswith(".html")]
+    _extra_specials = [
+        "returns.html",          # admin returns dashboard (not in nav)
+        "return-policy.html",    # public legal policy page (not in nav)
+        "repricing.html",        # admin repricing dashboard
+        "cassini.html",          # admin Cassini score dashboard
+        "photo_audit.html",      # admin photo audit dashboard
     ]
+    _static_assets = ["sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest"]
+    expected = sorted(set(_nav_pages + _extra_specials)) + _static_assets
     expected_hashes = set(load_admin_hashes())
     for f in expected:
         p = OUTPUT_DIR / f

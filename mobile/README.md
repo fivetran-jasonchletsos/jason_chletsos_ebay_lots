@@ -5,9 +5,9 @@ Local-first mobile app for the harpua2001 eBay store. Two halves:
 1. **Card scanner** — snap a Pokémon / sports card, get back Claude-vision
    identification + TCGplayer market price, store in on-device SQLite, list
    on eBay.
-2. **Store companion** — pull your live eBay listings, fix Cassini-failing
-   photo galleries from the phone, accept / counter / decline Best Offers,
-   and quick-list new (non-card) inventory.
+2. **Store companion** — pull your live eBay listings, fix thin photo
+   galleries from the phone, accept / counter / decline Best Offers, and
+   quick-list new (non-card) inventory.
 
 Runs on iPhone, iPad, and Android.
 
@@ -24,19 +24,24 @@ Runs on iPhone, iPad, and Android.
 
 **Store companion**
 - **Listings tab** — `GetMyeBaySelling`, sorted by time-left ascending so
-  about-to-expire items bubble up. Each row shows photo count vs the
-  Cassini 8-photo gate — fail rows are tinted red.
+  about-to-expire items bubble up. Pages in more rows as you scroll. Tap
+  any listing to see its photo gallery status against the top-seller 8+
+  recommendation.
 - **Listing detail** — current eBay photos, title, price, condition,
   watchers, view count, Best Offer status. Inline price edit via
-  `ReviseFixedPriceItem` (confirmation prompt before live write).
+  `ReviseFixedPriceItem` (confirmation prompt before live write). Photo
+  health readout shows current count vs the top-seller 8+ guideline.
 - **Replace photos flow** — camera multi-shot up to 12, tap-to-promote
   cover photo, long-press to remove, then upload via
   `UploadSiteHostedPictures` and replace the gallery via
-  `ReviseFixedPriceItem` `<PictureDetails>`. Each photo is downscaled to
-  2400px JPEG (Cassini gate is 1600+; this preserves crop headroom).
+  `ReviseFixedPriceItem` `<PictureDetails>`. Uploads run concurrently so
+  a full 12-photo gallery finishes in seconds, not minutes. Each photo
+  is downscaled to 2400px JPEG (top sellers tend to post 1600px+; the
+  extra headroom keeps cropping useful).
 - **Offers tab** — `GetBestOffers` across all listings, one-tap Accept /
-  Counter / Decline via `RespondToBestOffer`. Counter modal suggests a
-  midpoint default rounded to `$x.99`.
+  Counter / Decline via `RespondToBestOffer`. Counter modal pre-fills
+  the midpoint between offer and list, charm-priced to `$x.99` just
+  above the midpoint so the counter still feels like a real move.
 - **Quick list flow** — generic snap-to-list for non-card inventory
   (sealed product, video games, etc.) using the same camera UX as the
   photo-replace flow, with a curated category picker and the standard
@@ -90,9 +95,9 @@ mobile/
 ├── app/
 │   ├── _layout.tsx              # root: theme + DB init + Stack routes
 │   ├── (tabs)/
-│   │   ├── _layout.tsx          # bottom-tab nav (Scan / Listings / Offers / Inventory / Settings)
+│   │   ├── _layout.tsx          # bottom-tab nav, Scan, Listings, Offers, Inventory, Settings
 │   │   ├── index.tsx            # Scan (card-vision)
-│   │   ├── listings.tsx         # live eBay listings, Cassini photo-gate readout
+│   │   ├── listings.tsx         # live eBay listings, paginated, opens detail for photo health
 │   │   ├── offers.tsx           # pending Best Offers, Accept/Counter/Decline
 │   │   ├── inventory.tsx        # local card inventory
 │   │   └── settings.tsx
@@ -122,8 +127,10 @@ mobile/
 - `ReviseFixedPriceItem` `<PictureDetails>` replaces the entire gallery —
   the replace-photos flow always submits the full set the seller approved
   on that screen.
-- Photo downscale target is 2400px long-edge (Cassini gate is 1600px;
-  headroom keeps cropping useful without bloating uploads).
+- Photo downscale target is 2400px long-edge. Top sellers tend to post
+  at 1600px or larger, and the extra headroom keeps cropping useful
+  without bloating uploads. The 8-photo / 1600px target is a top-seller
+  heuristic, not a published eBay rule.
 - Best Offer counter validates against list price (counter must be lower)
   and rejects non-positive amounts on the client before the API call.
 - The card scanner's SQLite schema is intentionally a superset of the web

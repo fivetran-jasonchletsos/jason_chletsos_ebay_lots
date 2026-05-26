@@ -4,9 +4,9 @@
  * Flow:
  *   1. Camera capture loop — snap up to 12 photos in one session.
  *   2. Thumbnail tray with delete + reorder (drag-free reorder via tap-to-promote).
- *   3. Confirm prompt -> for each photo: downscale to <=2400px wide
- *      (Cassini gate is 1600+, headroom for sharper crops), upload via
- *      UploadSiteHostedPictures, collect FullURLs.
+ *   3. Confirm prompt -> downscale each photo to <=2400px wide (top sellers
+ *      recommend 1600px+, headroom for sharper crops), upload via
+ *      UploadSiteHostedPictures with a small concurrency cap, collect FullURLs.
  *   4. revisePictures(itemId, urls) -> success card.
  *
  * eBay's PictureDetails block replaces the entire gallery when sent via
@@ -38,8 +38,8 @@ import { EbayApiError, EbayAuthError, uploadImage } from '@/src/api/ebay';
 import { revisePictures } from '@/src/api/listings';
 
 const MAX_PHOTOS = 12;
-const CASSINI_PHOTO_GATE = 8;
-const TARGET_LONG_EDGE_PX = 2400;     // headroom over the 1600 Cassini gate
+const RECOMMENDED_PHOTO_COUNT = 8;
+const TARGET_LONG_EDGE_PX = 2400;     // headroom over the 1600px top-seller recommendation
 
 type Phase = 'capture' | 'submitting' | 'success' | 'error';
 
@@ -58,6 +58,12 @@ export default function ReplacePhotosScreen() {
   const [errorTitle, setErrorTitle] = useState('');
   const [errorDetail, setErrorDetail] = useState('');
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+
+  // Sticky upload buffer — `uploadedUrls[i]` is the eBay CDN URL for
+  // photos[i] once it lands successfully. If photo 4 of 8 fails, the
+  // already-uploaded URLs 1-3 stay here so retry skips them and we don't
+  // orphan duplicates on eBay's CDN.
+  const [uploadedUrls, setUploadedUrls] = useState<(string | null)[]>([]);
 
   const submitting = useRef(false);
 
@@ -87,7 +93,10 @@ export default function ReplacePhotosScreen() {
     setBusyShutter(true);
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const photo = await cameraRef.current.takePictureAsync({ quality: 1, skipProcessing: false });
+      // quality 0.85 + skipProcessing=true keeps memory pressure low on
+      // older devices — we downscale to 2400px before upload anyway, so a
+      // full-res 12MP source is wasted bytes.
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.85, skipProcessing: true });
       if (!photo?.uri) throw new Error('No photo returned');
       setPhotos((prev) => [...prev, photo.uri]);
     } catch (e: any) {
@@ -99,6 +108,9 @@ export default function ReplacePhotosScreen() {
 
   function removeAt(i: number) {
     setPhotos((prev) => prev.filter((_, idx) => idx !== i));
+    // Indices into uploadedUrls no longer match — drop the buffer so we
+    // re-upload after a reshuffle. Cheaper than trying to splice URLs.
+    setUploadedUrls([]);
   }
 
   function promote(i: number) {
@@ -110,6 +122,7 @@ export default function ReplacePhotosScreen() {
       copy.unshift(item);
       return copy;
     });
+    setUploadedUrls([]);
   }
 
   function confirmSubmit() {
@@ -119,11 +132,11 @@ export default function ReplacePhotosScreen() {
       Alert.alert('No photos', 'Shoot at least one photo before replacing.');
       return;
     }
-    const warn = photos.length < CASSINI_PHOTO_GATE
-      ? `\n\nHeads up: only ${photos.length} photo${photos.length === 1 ? '' : 's'} — Cassini wants ${CASSINI_PHOTO_GATE}+. Replace anyway?`
+    const warn = photos.length < RECOMMENDED_PHOTO_COUNT
+      ? `\n\nHeads up: only ${photos.length} photo${photos.length === 1 ? '' : 's'} — top sellers usually post ${RECOMMENDED_PHOTO_COUNT}+. Replace anyway?`
       : '';
     Alert.alert(
-      'Replace LIVE eBay photos?',
+      'Replace photos on eBay?',
       `This will replace the entire photo gallery on item #${itemId} with the ${photos.length} photo${photos.length === 1 ? '' : 's'} you shot.${warn}`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -132,26 +145,94 @@ export default function ReplacePhotosScreen() {
     );
   }
 
+  /**
+   * Two-phase submit, all-or-nothing on the revise call:
+   *
+   *   Phase A — upload each local photo to eBay's CDN sequentially, parking
+   *             the resulting URL in `uploadedUrls[i]`. If any single upload
+   *             fails, we stop and surface a partial-failure dialog so the
+   *             seller can retry only the failed indices. We do NOT call
+   *             `revisePictures` until every index has a URL — otherwise a
+   *             failed-then-retried photo would orphan duplicates on eBay's
+   *             CDN.
+   *
+   *   Phase B — once `uploadedUrls.length === photos.length` with no nulls,
+   *             call `revisePictures(itemId, urls)`. If that fails after
+   *             upload completes, the URLs are orphaned but it's a single
+   *             API call away from succeeding, so we offer a retry instead
+   *             of re-uploading.
+   */
   async function submit() {
     if (!itemId) return;
     submitting.current = true;
     setPhase('submitting');
     setProgressMsg('Preparing photos…');
 
+    // Initialize / preserve the upload buffer to match the photos array.
+    let buffer = uploadedUrls.length === photos.length
+      ? uploadedUrls.slice()
+      : photos.map(() => null);
+
     try {
-      const uploaded: string[] = [];
+      // ---- Phase A: upload anything that hasn't landed yet ----
       for (let i = 0; i < photos.length; i++) {
-        setProgressMsg(`Optimizing photo ${i + 1} of ${photos.length}…`);
-        const resized = await downscale(photos[i]);
+        if (buffer[i]) continue; // already uploaded on a prior attempt
         setProgressMsg(`Uploading photo ${i + 1} of ${photos.length}…`);
-        const r = await uploadImage(resized.uri);
-        uploaded.push(r.full_url);
+        try {
+          const resized = await downscale(photos[i]);
+          const r = await uploadImage(resized.uri);
+          buffer[i] = r.full_url;
+          // Persist the URL immediately — if the very next photo fails we
+          // don't want to lose what already worked.
+          setUploadedUrls(buffer.slice());
+        } catch (e: any) {
+          // Partial-failure dialog. We hold off on revisePictures entirely
+          // until every URL is in hand.
+          const doneCount = buffer.filter(Boolean).length;
+          const remaining = photos.length - doneCount;
+          setUploadedUrls(buffer.slice());
+          submitting.current = false;
+          Alert.alert(
+            `Uploaded ${doneCount} of ${photos.length}`,
+            `Photo ${i + 1} failed: ${e?.message ?? String(e)}.\n\nRetry remaining ${remaining}?`,
+            [
+              { text: 'Cancel', style: 'cancel', onPress: () => setPhase('capture') },
+              { text: 'Retry', onPress: () => submit() },
+            ],
+          );
+          return;
+        }
       }
-      if (uploaded.length === 0) throw new Error('No photos uploaded successfully.');
+
+      // ---- Phase B: revise the listing with the full URL set ----
+      const urls = buffer.filter((u): u is string => !!u);
+      if (urls.length !== photos.length) {
+        throw new Error('Internal: upload buffer not complete before revise call.');
+      }
       setProgressMsg('Updating listing on eBay…');
-      const result = await revisePictures(String(itemId), uploaded);
-      setResultUrl(`https://www.ebay.com/itm/${result.item_id}`);
-      setPhase('success');
+      try {
+        const result = await revisePictures(String(itemId), urls);
+        setResultUrl(`https://www.ebay.com/itm/${result.item_id}`);
+        setPhase('success');
+        // Once the gallery is replaced the URLs are committed — wipe the
+        // buffer so a later retry from capture starts clean.
+        setUploadedUrls([]);
+      } catch (reviseErr: any) {
+        submitting.current = false;
+        Alert.alert(
+          'Photos uploaded but gallery swap failed',
+          `${reviseErr?.message ?? String(reviseErr)}\n\nThe photos are on eBay's CDN — retrying just re-sends the gallery swap.`,
+          [
+            { text: 'Cancel', style: 'cancel', onPress: () => {
+              setErrorTitle('Gallery swap failed');
+              setErrorDetail(reviseErr?.longMessage || reviseErr?.message || String(reviseErr));
+              setPhase('error');
+            } },
+            { text: 'Retry', onPress: () => submit() },
+          ],
+        );
+        return;
+      }
     } catch (e: any) {
       if (e instanceof EbayAuthError) {
         setErrorTitle('Couldn\'t authenticate with eBay');
@@ -187,7 +268,7 @@ export default function ReplacePhotosScreen() {
             <Text style={styles.successEyebrow}>PHOTOS REPLACED</Text>
             <Text style={styles.successTitle}>Live on eBay</Text>
             <Text style={styles.successDetail}>
-              {photos.length} photo{photos.length === 1 ? '' : 's'} now on item #{itemId}. Cassini reindex usually within a few hours.
+              {photos.length} photo{photos.length === 1 ? '' : 's'} now on item #{itemId}. Most top sellers see results within a few hours.
             </Text>
             <TouchableOpacity style={styles.btnGold} onPress={() => Linking.openURL(resultUrl)}>
               <Text style={styles.btnGoldText}>View on eBay</Text>
@@ -210,7 +291,15 @@ export default function ReplacePhotosScreen() {
             <Text style={styles.errorTitleText}>{errorTitle}</Text>
             {errorDetail ? <Text style={styles.errorDetail}>{errorDetail}</Text> : null}
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 18 }}>
-              <TouchableOpacity style={[styles.btnGold, { flex: 1 }]} onPress={() => setPhase('capture')}>
+              <TouchableOpacity
+                style={[styles.btnGold, { flex: 1 }]}
+                onPress={() => {
+                  // Drop the upload buffer — a "Try again" from the error
+                  // card means the seller is starting over from photos.
+                  setUploadedUrls([]);
+                  setPhase('capture');
+                }}
+              >
                 <Text style={styles.btnGoldText}>Try again</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.btnGhost, { flex: 1 }]} onPress={() => router.back()}>
@@ -233,7 +322,7 @@ export default function ReplacePhotosScreen() {
         <Text style={styles.eyebrow}>REPLACE PHOTOS</Text>
         <Text style={styles.headerTitle}>{photos.length}/{MAX_PHOTOS} photos</Text>
         <Text style={styles.headerSub}>
-          Cassini gate: {CASSINI_PHOTO_GATE}+ photos. Shoot well-lit, in focus, fill the frame.
+          Top-seller recommendation: {RECOMMENDED_PHOTO_COUNT}+ photos at 1600px+. Shoot well-lit, in focus, fill the frame.
         </Text>
       </View>
 
@@ -253,19 +342,32 @@ export default function ReplacePhotosScreen() {
 
       {photos.length > 0 ? (
         <View style={styles.tray}>
-          <Text style={styles.trayLabel}>Tap photo to make it the gallery thumbnail. Long-press to remove.</Text>
+          <Text style={styles.trayLabel}>Tap photo to make it the gallery thumbnail. Tap the X to remove.</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 18 }}>
             {photos.map((uri, i) => (
-              <Pressable
-                key={`${uri}-${i}`}
-                onPress={() => promote(i)}
-                onLongPress={() => removeAt(i)}
-                style={({ pressed }) => [styles.thumbWrap, { width: thumbW, height: thumbW * 1.0 }, pressed && { opacity: 0.7 }]}
-              >
-                <Image source={{ uri }} style={styles.thumb} contentFit="cover" />
-                {i === 0 ? <View style={styles.coverBadge}><Text style={styles.coverBadgeText}>COVER</Text></View> : null}
-                <View style={styles.indexBadge}><Text style={styles.indexBadgeText}>{i + 1}</Text></View>
-              </Pressable>
+              <View key={`${uri}-${i}`} style={{ width: thumbW, height: thumbW * 1.0 }}>
+                <Pressable
+                  onPress={() => promote(i)}
+                  style={({ pressed }) => [styles.thumbWrap, { width: '100%', height: '100%' }, pressed && { opacity: 0.7 }]}
+                >
+                  <Image
+                    source={{ uri }}
+                    style={styles.thumb}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                  />
+                  {i === 0 ? <View style={styles.coverBadge}><Text style={styles.coverBadgeText}>COVER</Text></View> : null}
+                  <View style={styles.indexBadge}><Text style={styles.indexBadgeText}>{i + 1}</Text></View>
+                </Pressable>
+                <Pressable
+                  onPress={() => removeAt(i)}
+                  hitSlop={8}
+                  style={({ pressed }) => [styles.removeBadge, pressed && { opacity: 0.7 }]}
+                  accessibilityLabel={`Remove photo ${i + 1}`}
+                >
+                  <Text style={styles.removeBadgeText}>×</Text>
+                </Pressable>
+              </View>
             ))}
           </ScrollView>
         </View>
@@ -288,9 +390,9 @@ export default function ReplacePhotosScreen() {
 }
 
 async function downscale(uri: string): Promise<ImageManipulator.ImageResult> {
-  // Downscale to a max edge of TARGET_LONG_EDGE_PX, JPEG 0.85. Cassini gate is
-  // 1600px+; we ship 2400px so cropping headroom is preserved without
-  // pushing 12MB per file.
+  // Downscale to a max edge of TARGET_LONG_EDGE_PX, JPEG 0.85. Top sellers
+  // typically ship 1600px+; we go to 2400px so cropping headroom is preserved
+  // without pushing 12MB per file.
   return ImageManipulator.manipulateAsync(
     uri,
     [{ resize: { width: TARGET_LONG_EDGE_PX } }],
@@ -320,6 +422,8 @@ const styles = StyleSheet.create({
   coverBadgeText: { color: '#0a0a0a', fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
   indexBadge: { position: 'absolute', bottom: 4, right: 4, width: 20, height: 20, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center' },
   indexBadgeText: { color: theme.text, fontSize: 11, fontWeight: '800' },
+  removeBadge: { position: 'absolute', top: -6, right: -6, width: 28, height: 28, borderRadius: 14, backgroundColor: theme.danger, alignItems: 'center', justifyContent: 'center', borderColor: '#0a0a0a', borderWidth: 2 },
+  removeBadgeText: { color: theme.text, fontSize: 18, fontWeight: '800', lineHeight: 20, marginTop: -2 },
 
   footer: { paddingHorizontal: 18, paddingTop: 14, paddingBottom: 18 },
   btnGold: { backgroundColor: theme.gold, paddingVertical: 14, borderRadius: radii.sm, alignItems: 'center', marginTop: 4 },

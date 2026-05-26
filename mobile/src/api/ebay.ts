@@ -90,11 +90,21 @@ function b64encode(s: string): string {
   throw new Error('No base64 encoder available');
 }
 
-export async function getAccessToken(force = false): Promise<string> {
+/**
+ * Fetch (or refresh) a user OAuth access token.
+ *
+ * Pass `preloadedCreds` when the caller already read `getEbayCredentials()`
+ * — avoids a redundant AsyncStorage round-trip on the hot path. `force=true`
+ * bypasses the in-memory cache and runs the refresh-token grant unconditionally.
+ */
+export async function getAccessToken(
+  force = false,
+  preloadedCreds?: EbayCredentials,
+): Promise<string> {
   if (!force && _tokenCache && _tokenCache.expires_at > Date.now() + 60_000) {
     return _tokenCache.token;
   }
-  const creds = await getEbayCredentials();
+  const creds = preloadedCreds ?? await getEbayCredentials();
   if (!creds) {
     throw new EbayAuthError(
       'No eBay credentials configured. Add your App ID, Cert ID, and refresh token in Settings.',
@@ -144,8 +154,23 @@ export function clearTokenCache() {
 // ---------------------------------------------------------------------------
 // Trading API helpers
 
-export function tradingHeaders(callName: string, creds: EbayCredentials): Record<string, string> {
-  return {
+/**
+ * Build the Trading API request headers.
+ *
+ * eBay has signaled since 2024 that the legacy app-credentials triad
+ * (X-EBAY-API-APP-NAME / DEV-NAME / CERT-NAME) plus the SOAP-body
+ * `<RequesterCredentials><eBayAuthToken>` path is on a deprecation track in
+ * favor of the IAF (Identity Auth Framework) header: a single user OAuth
+ * access token sent in `X-EBAY-API-IAF-TOKEN`. We send both for now so the
+ * call works on any eBay-side rollout state — the legacy headers can be
+ * dropped once IAF is verified end-to-end in prod.
+ */
+export function tradingHeaders(
+  callName: string,
+  creds: EbayCredentials,
+  accessToken?: string,
+): Record<string, string> {
+  const headers: Record<string, string> = {
     'X-EBAY-API-SITEID':              SITE_ID_US,
     'X-EBAY-API-COMPATIBILITY-LEVEL': COMPAT_LEVEL,
     'X-EBAY-API-CALL-NAME':           callName,
@@ -154,6 +179,10 @@ export function tradingHeaders(callName: string, creds: EbayCredentials): Record
     'X-EBAY-API-CERT-NAME':           creds.client_secret,
     'Content-Type':                   'text/xml',
   };
+  if (accessToken) {
+    headers['X-EBAY-API-IAF-TOKEN'] = accessToken;
+  }
+  return headers;
 }
 
 // Minimal XML escaper for user-supplied text fields.
@@ -188,6 +217,63 @@ export function findAllTags(xml: string, tag: string): string[] {
   return out;
 }
 
+/**
+ * Depth-aware tag lookup. The default `findTag()` picks the *first*
+ * occurrence of a tag anywhere in the document, which breaks for
+ * multi-variation items (`<Quantity>` exists both inside `<Variation>` and at
+ * the item level — the variation copy wins and you read the wrong quantity).
+ *
+ * `findTagAtDepth(xml, tag, parentTag)` scopes the search to the first
+ * `<parentTag>...</parentTag>` block when supplied, or — if `parentTag` is
+ * `null` — strips out every `<excludeIn>...</excludeIn>` block first and then
+ * searches the remainder. Pass `excludeIn` to skip nested children, pass
+ * `parentTag` to anchor on a wrapper.
+ */
+export function findTagAtDepth(
+  xml: string,
+  tag: string,
+  opts: { parentTag?: string; excludeIn?: string } = {},
+): string | null {
+  let scope = xml;
+  if (opts.parentTag) {
+    const block = findTag(xml, opts.parentTag);
+    if (block == null) return null;
+    scope = block;
+  }
+  if (opts.excludeIn) {
+    const stripRe = new RegExp(
+      `<${opts.excludeIn}[^>]*>[\\s\\S]*?<\\/${opts.excludeIn}>`,
+      'gi',
+    );
+    scope = scope.replace(stripRe, '');
+  }
+  return findTag(scope, tag);
+}
+
+/**
+ * Parse the AddFixedPriceItem <Fees> block. eBay nests the amount inside the
+ * outer wrapper using the same tag name:
+ *   <Fees><Fee><Name>InsertionFee</Name><Fee currencyID="USD">0.30</Fee></Fee>...</Fees>
+ * The inner amount-bearing <Fee> always carries a currencyID attribute, so
+ * anchor on that to avoid summing wrapper bodies.
+ */
+export function parseFeesTotal(xml: string): number | null {
+  const feesBlocks = findAllTags(xml, 'Fees');
+  if (!feesBlocks.length) return null;
+  const re = /<Fee\s+[^>]*currencyID="[^"]*"[^>]*>([\s\S]*?)<\/Fee>/gi;
+  let total = 0;
+  let matched = false;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(feesBlocks[0])) !== null) {
+    const n = parseFloat(m[1].trim());
+    if (Number.isFinite(n)) {
+      total += n;
+      matched = true;
+    }
+  }
+  return matched ? total : 0;
+}
+
 export interface EbayErrorInfo {
   code: string;
   short: string;
@@ -203,6 +289,35 @@ export function parseErrors(xml: string): EbayErrorInfo[] {
     long:     findTag(b, 'LongMessage') ?? '',
     severity: findTag(b, 'SeverityCode') ?? '',
   }));
+}
+
+/**
+ * eBay returns `200 OK` + `<Ack>Failure</Ack>` for token-expiry errors — it
+ * does *not* surface HTTP 401. The error codes vary across endpoints (932,
+ * 16110, 21916984 are the most common); messaging isn't stable, so we stay
+ * conservative: a positive match also requires either a known code or
+ * `ErrorClassification=RequestError` with the long message mentioning
+ * "token". On a hit we drop the cached access token so the next call
+ * re-runs the refresh-token grant. Returns true when the cache was cleared.
+ */
+export function maybeClearStaleToken(rawXml: string, errs: EbayErrorInfo[]): boolean {
+  const tokenCodes = new Set(['932', '16110', '21916984']);
+  for (const e of errs) {
+    if (tokenCodes.has(e.code)) {
+      clearTokenCache();
+      return true;
+    }
+  }
+  const errorBlocks = findAllTags(rawXml, 'Errors');
+  for (const block of errorBlocks) {
+    const cls = (findTag(block, 'ErrorClassification') ?? '').toLowerCase();
+    const long = (findTag(block, 'LongMessage') ?? '').toLowerCase();
+    if (cls === 'requesterror' && long.includes('token')) {
+      clearTokenCache();
+      return true;
+    }
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -250,7 +365,7 @@ export async function uploadImage(localUri: string): Promise<UploadImageResult> 
 
   const res = await fetch(TRADING_URL, {
     method: 'POST',
-    headers: tradingHeaders('UploadSiteHostedPictures', creds),
+    headers: tradingHeaders('UploadSiteHostedPictures', creds, token),
     body: form as any,
   });
   const text = await res.text();
@@ -330,7 +445,7 @@ function buildDescription(card: Card, opts: ListingOptions): string {
 function buildAddFixedPriceItemXml(token: string, card: Card, opts: ListingOptions): string {
   const categoryId = opts.category_id ?? DEFAULT_CATEGORY_ID;
   const condId = conditionIdFor(opts.condition_label);
-  const desc = buildDescription(card, opts);
+  const desc = buildDescription(card, opts).replace(/]]>/g, ']]]]><![CDATA[>');
 
   const pictureBlock =
     opts.picture_urls.length > 0
@@ -362,6 +477,9 @@ function buildAddFixedPriceItemXml(token: string, card: Card, opts: ListingOptio
       <ShippingCostPaidByOption>Buyer</ShippingCostPaidByOption>
     </ReturnPolicy>`;
 
+  // The `<RequesterCredentials>` block duplicates what we now send in the
+  // `X-EBAY-API-IAF-TOKEN` header. Keep it for now as belt + suspenders;
+  // remove once IAF-only is verified end-to-end in prod.
   return `<?xml version="1.0" encoding="utf-8"?>
 <AddFixedPriceItemRequest xmlns="${NS}">
   <RequesterCredentials><eBayAuthToken>${xmlEscape(token)}</eBayAuthToken></RequesterCredentials>
@@ -394,7 +512,7 @@ export async function createListing(card: Card, opts: ListingOptions): Promise<C
   const xml = buildAddFixedPriceItemXml(token, card, opts);
   const res = await fetch(TRADING_URL, {
     method: 'POST',
-    headers: tradingHeaders('AddFixedPriceItem', creds),
+    headers: tradingHeaders('AddFixedPriceItem', creds, token),
     body: xml,
   });
   const text = await res.text();
@@ -419,13 +537,7 @@ export async function createListing(card: Card, opts: ListingOptions): Promise<C
   if (!itemId) {
     throw new EbayApiError('eBay accepted the call but returned no ItemID', undefined, text.slice(0, 600));
   }
-  const feesRaw = findAllTags(text, 'Fees');
-  let feesTotal: number | null = null;
-  if (feesRaw.length) {
-    // Sum all <Fee><Fee>NN.NN</Fee></Fee> entries (eBay nests an inner <Fee> with the amount).
-    const amounts = findAllTags(feesRaw[0], 'Fee').map((s) => parseFloat(s)).filter((n) => Number.isFinite(n));
-    if (amounts.length) feesTotal = amounts.reduce((a, b) => a + b, 0);
-  }
+  const feesTotal = parseFeesTotal(text);
   return {
     item_id: itemId,
     view_url: `https://www.ebay.com/itm/${itemId}`,

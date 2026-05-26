@@ -2,16 +2,17 @@
  * Listing detail — single eBay item.
  *
  *   - Photo gallery (current eBay-hosted images, horizontal pager).
- *   - Cassini photo gate readout (X / 8 photos at >=1600px).
+ *   - Photo health readout vs the top-seller 8+ at 1600px+ recommendation.
  *   - Inline price edit (confirmation required before live revise).
  *   - "Replace photos" routes to the camera flow.
  *   - "View on eBay" opens the public URL.
  */
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Linking,
   Pressable,
   ScrollView,
@@ -23,13 +24,15 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { radii, theme } from '@/src/theme';
+import { Price } from '@/components/Price';
+import { fonts, radii, theme } from '@/src/theme';
 import { getListing, revisePrice, type ListingDetail } from '@/src/api/listings';
 import { EbayApiError, EbayAuthError } from '@/src/api/ebay';
 
-const CASSINI_PHOTO_GATE = 8;
+const TOP_SELLER_PHOTO_TARGET = 8;
 
 export default function ListingDetailScreen() {
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
@@ -74,7 +77,7 @@ export default function ListingDetailScreen() {
       return;
     }
     Alert.alert(
-      'Update LIVE price?',
+      'Update price on eBay?',
       `Change "${listing.title.slice(0, 50)}${listing.title.length > 50 ? '…' : ''}" from $${listing.price?.toFixed(2) ?? '—'} to $${next.toFixed(2)}?`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -117,7 +120,7 @@ export default function ListingDetailScreen() {
   }
 
   const photoCount = listing.picture_urls.length;
-  const photosLow = photoCount < CASSINI_PHOTO_GATE;
+  const photosLow = photoCount < TOP_SELLER_PHOTO_TARGET;
   const photoW = Math.min(width - 36, 380);
 
   return (
@@ -138,18 +141,18 @@ export default function ListingDetailScreen() {
           )}
         </View>
 
-        {/* Cassini gate readout */}
+        {/* Photo health vs top-seller recommendation */}
         <View style={[styles.gateCard, photosLow ? styles.gateBad : styles.gateGood]}>
           <Text style={[styles.gateEyebrow, { color: photosLow ? theme.danger : theme.success }]}>
-            CASSINI PHOTO GATE
+            PHOTO HEALTH
           </Text>
           <Text style={[styles.gateBig, { color: photosLow ? theme.danger : theme.success }]}>
-            {photoCount} / {CASSINI_PHOTO_GATE}+
+            {photoCount} / {TOP_SELLER_PHOTO_TARGET}+
           </Text>
           <Text style={styles.gateExplain}>
             {photosLow
-              ? `Add ${CASSINI_PHOTO_GATE - photoCount} more photo${CASSINI_PHOTO_GATE - photoCount === 1 ? '' : 's'} (>=1600px). Listings under the gate get throttled by Cassini search.`
-              : 'Photo count clears the Cassini gate. Aim for >=1600px each.'}
+              ? `Add ${TOP_SELLER_PHOTO_TARGET - photoCount} more photo${TOP_SELLER_PHOTO_TARGET - photoCount === 1 ? '' : 's'} at 1600px or larger. Top sellers consistently post 8+ — listings below that tend to under-perform.`
+              : 'Hits the top-seller recommendation. Aim for 1600px or larger on each shot.'}
           </Text>
           <TouchableOpacity style={[styles.btnGold, { marginTop: 12 }]} onPress={() => router.push(`/listing/${listing.item_id}/replace-photos`)}>
             <Text style={styles.btnGoldText}>{photoCount === 0 ? 'Add photos' : 'Replace photos'}</Text>
@@ -180,15 +183,15 @@ export default function ListingDetailScreen() {
                 />
               </View>
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-                <TouchableOpacity
-                  style={[styles.btnGold, { flex: 1, opacity: savingPrice ? 0.6 : 1 }]}
-                  onPress={confirmPriceSave}
-                  disabled={savingPrice}
-                >
-                  {savingPrice
-                    ? <ActivityIndicator color="#0a0a0a" />
-                    : <Text style={styles.btnGoldText}>Save price</Text>}
-                </TouchableOpacity>
+                <View style={{ flex: 1 }}>
+                  <GoldButton
+                    label={savingPrice ? '' : 'Save price'}
+                    onPress={confirmPriceSave}
+                    disabled={savingPrice}
+                  >
+                    {savingPrice ? <ActivityIndicator color="#0a0a0a" /> : null}
+                  </GoldButton>
+                </View>
                 <TouchableOpacity
                   style={[styles.btnGhost, { flex: 1 }]}
                   onPress={() => { setEditingPrice(false); setPriceDraft(listing.price?.toFixed(2) ?? ''); }}
@@ -200,18 +203,34 @@ export default function ListingDetailScreen() {
             </View>
           ) : (
             <Pressable onPress={() => setEditingPrice(true)} style={({ pressed }) => [styles.priceDisplay, pressed && { opacity: 0.7 }]}>
-              <Text style={styles.priceText}>${listing.price?.toFixed(2) ?? '—'}</Text>
+              <Price value={listing.price ?? null} size="xl" />
               <Text style={styles.priceTapHint}>Tap to edit</Text>
             </Pressable>
           )}
         </View>
 
+        {/* Engagement stat panel — three cells with vertical dividers above
+            the condition/shipping grid. Stops the wall of identical-weight
+            gray cells. */}
+        <View style={styles.section}>
+          <View style={styles.statPanel}>
+            <StatCell
+              label="Watchers"
+              value={listing.watch_count != null ? String(listing.watch_count) : '—'}
+            />
+            <View style={styles.statDivider} />
+            <StatCell
+              label="Views"
+              value={listing.view_count != null ? String(listing.view_count) : '—'}
+            />
+            <View style={styles.statDivider} />
+            <StatCell label="Sold" value={String(listing.quantity_sold)} />
+          </View>
+        </View>
+
         {/* Meta */}
         <View style={styles.metaGrid}>
           <MetaCell label="Quantity" value={`${listing.quantity_available}/${listing.quantity}`} />
-          <MetaCell label="Sold" value={String(listing.quantity_sold)} />
-          <MetaCell label="Watchers" value={listing.watch_count != null ? String(listing.watch_count) : '—'} />
-          <MetaCell label="Views" value={listing.view_count != null ? String(listing.view_count) : '—'} />
           <MetaCell label="Condition" value={listing.condition_label ?? '—'} />
           <MetaCell label="Category" value={listing.category_name ?? listing.category_id ?? '—'} />
           <MetaCell label="Best Offer" value={listing.best_offer_enabled ? 'Yes' : 'No'} />
@@ -239,6 +258,49 @@ function MetaCell({ label, value }: { label: string; value: string }) {
   );
 }
 
+function StatCell({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.statCell}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+/**
+ * Primary gold button with medium haptic + 120ms scale-down on press. The
+ * extra friction is intentional — every push here is a write to a live eBay
+ * listing.
+ */
+function GoldButton({
+  label,
+  onPress,
+  disabled,
+  children,
+}: { label: string; onPress: () => void; disabled?: boolean; children?: React.ReactNode }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  function handlePress() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => { /* noop */ });
+    Animated.sequence([
+      Animated.timing(scale, { toValue: 0.97, duration: 60, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 1, duration: 60, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  }
+  return (
+    <Animated.View style={{ transform: [{ scale }], opacity: disabled ? 0.6 : 1 }}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={styles.btnGold}
+        onPress={handlePress}
+        disabled={disabled}
+      >
+        {children ?? <Text style={styles.btnGoldText}>{label}</Text>}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.bg },
   center: { alignItems: 'center', justifyContent: 'center', flex: 1 },
@@ -261,8 +323,21 @@ const styles = StyleSheet.create({
   titleText: { color: theme.text, fontSize: 17, fontWeight: '600', lineHeight: 23 },
 
   priceDisplay: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1, borderRadius: radii.sm, paddingHorizontal: 14, paddingVertical: 12 },
-  priceText: { color: theme.goldBright, fontSize: 28, fontWeight: '800' },
   priceTapHint: { color: theme.textDim, fontSize: 11 },
+
+  statPanel: {
+    flexDirection: 'row',
+    backgroundColor: theme.surface,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: radii.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+  },
+  statCell: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
+  statValue: { color: theme.goldBright, fontFamily: fonts.display, fontSize: 26, letterSpacing: 0 },
+  statLabel: { color: theme.textDim, fontFamily: fonts.bodyBold, fontSize: 10, marginTop: 4, letterSpacing: 1.4, textTransform: 'uppercase' },
+  statDivider: { width: StyleSheet.hairlineWidth, backgroundColor: theme.borderMid, marginVertical: 4 },
 
   priceRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1, borderRadius: radii.sm, paddingHorizontal: 12 },
   priceCurrency: { color: theme.gold, fontSize: 20, fontWeight: '800', marginRight: 6 },

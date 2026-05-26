@@ -12,15 +12,15 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Harpua2001">
   <meta property="og:title" content="Repricing Agent · Harpua2001">
-  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop running since 2003. Live inventory, real photos, ships next business day.">
+  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop on eBay since 1998. Live inventory, real photos, ships next business day.">
   <meta property="og:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
   <meta property="og:url" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/repricing.html">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Repricing Agent · Harpua2001">
-  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — 20+ years on eBay, real photos, fast shipping.">
+  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — on eBay since 1998, real photos, fast shipping.">
   <meta name="twitter:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='128' font-family='Fraunces, Georgia, serif' font-style='italic' font-size='128' font-weight='500' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
@@ -33,8 +33,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = [];
-    window.__ADMIN_SALT   = '2ef2e93a485beacd21470b5c4cb2722c';
+    window.__ADMIN_HASHES = ["2a00368e9da62201f07f7046c332713827b25ccbd815ff7e8cd6af1fcfa861f6"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -78,7 +78,7 @@
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
-  --text-dim:    #5d574c;
+  --text-dim:    #7a7268;
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
@@ -1100,6 +1100,20 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover { transform: translateY(-3px); border-color: var(--border-mid); }
 .listing-card:hover::after { box-shadow: 0 0 0 1px var(--border-hi) inset, 0 24px 50px -10px rgba(0,0,0,.7); }
 
+/* Gold sweep on hover — translates a soft amber band across the card face. */
+.listing-card::before {
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(110deg, transparent 30%, rgba(201,165,66,.18) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 600ms ease;
+  pointer-events: none;
+}
+.listing-card:hover::before { transform: translateX(110%); }
+@media (prefers-reduced-motion: reduce) {
+  .listing-card::before { transition: none; }
+  .listing-card:hover::before { transform: translateX(-110%); }
+}
+
 .thumb-wrap {
   position: relative;
   width: 100%;
@@ -1113,8 +1127,8 @@ input[type="checkbox"]:checked::after {
     radial-gradient(circle at 30% 30%, rgba(212,175,55,.06), transparent 50%);
   pointer-events: none; z-index: 1;
 }
-.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 4/3; }
-.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 1/1; }
+.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 3/4; }
+.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 3/4; }
 .grid[data-size="small"]  .thumb-wrap { aspect-ratio: 1/1; }
 .listing-card img {
   width: 100%; height: 100%;
@@ -1728,6 +1742,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   .table-wrap { margin: 0 -16px; }
   th, td { padding: 12px 14px; font-size: 12.5px; }
 }
+@media (max-width: 480px) {
+  /* Android 412dp (and below) — tighten gutters so cards breathe */
+  main { padding: 18px 12px 60px; }
+  .panel { padding: 14px; }
+  .listing-card .info { padding: 10px 11px; }
+  .listing-card .price { font-size: 20px; }
+  .grid[data-size="large"]  { gap: 10px; }
+  .grid[data-size="medium"] { gap: 8px; }
+  .grid[data-size="small"]  { gap: 6px; }
+  /* Drop the third meta chip when present to avoid wrap-overflow */
+  .listing-card .meta > *:nth-child(n+3) { display: none; }
+}
 @media (max-width: 420px) {
   .grid[data-size="medium"] { grid-template-columns: 1fr; }
   .grid[data-size="list"] .listing-card .thumb-wrap { width: 96px; flex: 0 0 96px; }
@@ -1895,12 +1921,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 <section class="hero">
   <h1>Repricing Agent</h1>
-  <p class="sub">Last run: <code>2026-05-25 22:39 UTC</code></p>
+  <p class="sub">Last run: <code>2026-05-26 01:37 UTC</code></p>
   <div class="stat-grid">
-    <div class="stat"><div class="stat-n">81</div><div class="stat-l">to apply</div></div>
-    <div class="stat"><div class="stat-n">105</div><div class="stat-l">in dead zone</div></div>
-    <div class="stat"><div class="stat-n">14</div><div class="stat-l">blocked</div></div>
-    <div class="stat"><div class="stat-n">$45.10</div><div class="stat-l">listed Δ</div></div>
+    <div class="stat"><div class="stat-n">82</div><div class="stat-l">to apply</div></div>
+    <div class="stat"><div class="stat-n">102</div><div class="stat-l">in dead zone</div></div>
+    <div class="stat"><div class="stat-n">16</div><div class="stat-l">blocked</div></div>
+    <div class="stat"><div class="stat-n">$44.97</div><div class="stat-l">listed Δ</div></div>
   </div>
 </section>
 
@@ -1917,7 +1943,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </section>
 
 
-        <h3>🎯 Will apply <span class='count'>(81)</span></h3>
+        <h3>🎯 Will apply <span class='count'>(82)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -2063,23 +2089,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$2.63</td>
           <td class="basis">sold_history · n=31 · ref $3.45<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">sold_history median $3.45 (n=31, high) → target $4.99<br><em>capped to max_step_down_pct=15.0%</em></td>
-          <td class="decision decision-apply">APPLY</td>
-        </tr>
-        
-
-        <tr class="row-apply">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Abdul-Carter-10-RC-NFL-Football-/306930464091" target="_blank" rel="noopener">
-              <span class="title">2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC) NFL Football</span>
-              <span class="item-id">306930464091</span>
-            </a>
-          </td>
-          <td class="num">$2.99</td>
-          <td class="num target">$3.99</td>
-          <td class="num delta delta-rise">+33.4%</td>
-          <td class="num">$1.76</td>
-          <td class="basis">sold_history · n=32 · ref $3.99<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $3.99 (n=32, high) → target $3.99<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
         
@@ -2885,23 +2894,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-apply">
           <td class="item">
-            <a href="https://www.ebay.com/itm/Topps-Chrome-X-Fractor-Abdul-Carter-New-York-Giants-350-NFL-Rookie-/306956115603" target="_blank" rel="noopener">
-              <span class="title">Topps Chrome X-Fractor Abdul Carter New York Giants #350 NFL Rookie</span>
-              <span class="item-id">306956115603</span>
-            </a>
-          </td>
-          <td class="num">$4.56</td>
-          <td class="num target">$5.99</td>
-          <td class="num delta delta-rise">+31.4%</td>
-          <td class="num">$3.50</td>
-          <td class="basis">sold_history · n=4 · ref $5.67<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">sold_history median $5.67 (n=4, high) → target $5.99<br><em>capped to max_step_up_pct=25.0%</em></td>
-          <td class="decision decision-apply">APPLY</td>
-        </tr>
-        
-
-        <tr class="row-apply">
-          <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Ashton-Jeanty-7-Silver-Prizm-RC--/306956129162" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Prizmatic Ashton Jeanty #7 Silver Prizm (RC)</span>
               <span class="item-id">306956129162</span>
@@ -3306,12 +3298,63 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="reasons">sold_history median $3.45 (n=29, high) → target $2.99<br><em>capped to max_step_up_pct=25.0%</em></td>
           <td class="decision decision-apply">APPLY</td>
         </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Mosaic-Caleb-Williams-22-Silver-Prizm-/306956801627" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Mosaic - Caleb Williams #22 Silver Prizm</span>
+              <span class="item-id">306956801627</span>
+            </a>
+          </td>
+          <td class="num">$2.34</td>
+          <td class="num target">$2.99</td>
+          <td class="num delta delta-rise">+27.8%</td>
+          <td class="num">$0.89</td>
+          <td class="basis">sold_history · n=30 · ref $3.45<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $3.45 (n=30, high) → target $2.99<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Bhayshul-Tuten-66-Silver-Prizm-RC--/306956810085" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Prizm Draft Picks - Bhayshul Tuten #66 Silver Prizm (RC)</span>
+              <span class="item-id">306956810085</span>
+            </a>
+          </td>
+          <td class="num">$2.99</td>
+          <td class="num target">$3.99</td>
+          <td class="num delta delta-rise">+33.4%</td>
+          <td class="num">$1.76</td>
+          <td class="basis">sold_history · n=32 · ref $3.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $3.99 (n=32, high) → target $3.99<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
+        
+
+        <tr class="row-apply">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Rookies-Quinn-Ewers-159-Silver-RC--/306956852682" target="_blank" rel="noopener">
+              <span class="title">2025 Panini Phoenix - Rookies Quinn Ewers #159 Silver (RC)</span>
+              <span class="item-id">306956852682</span>
+            </a>
+          </td>
+          <td class="num">$2.34</td>
+          <td class="num target">$2.99</td>
+          <td class="num delta delta-rise">+27.8%</td>
+          <td class="num">$0.89</td>
+          <td class="basis">sold_history · n=30 · ref $3.99<br><small class="conf-high">high confidence</small></td>
+          <td class="reasons">sold_history median $3.99 (n=30, high) → target $2.99<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-apply">APPLY</td>
+        </tr>
         </tbody>
           </table>
         </div>
         
 
-        <h3>⊝ In dead zone (no-op) <span class='count'>(105)</span></h3>
+        <h3>⊝ In dead zone (no-op) <span class='count'>(102)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -3440,23 +3483,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$-3.67</td>
           <td class="basis">pricecharting · n=3 · ref $10.91<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-Football-Card-Lot-NFL-/306913845449" target="_blank" rel="noopener">
-              <span class="title">3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL</span>
-              <span class="item-id">306913845449</span>
-            </a>
-          </td>
-          <td class="num">$1.95</td>
-          <td class="num target">$1.99</td>
-          <td class="num delta delta-rise">+2.0%</td>
-          <td class="num">$-3.67</td>
-          <td class="basis">ebay_active · n=10 · ref $1.76<br><small class="conf-mid">mid confidence</small></td>
-          <td class="reasons">delta 2.1% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
         
@@ -3797,23 +3823,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$0.89</td>
           <td class="basis">sold_history · n=31 · ref $3.45<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722" target="_blank" rel="noopener">
-              <span class="title">1991-92 Fleer - Pro Vision Magic Johnson #6</span>
-              <span class="item-id">306930807722</span>
-            </a>
-          </td>
-          <td class="num">$1.99</td>
-          <td class="num target">$1.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$0.03</td>
-          <td class="basis">ebay_active · n=10 · ref $1.39<br><small class="conf-mid">mid confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_down_pct=15.0%</em></td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
         
@@ -4313,8 +4322,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-skip">
           <td class="item">
-            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jacory-Croskey-Merritt-Refractor-387-RC-NFL-/306942007235" target="_blank" rel="noopener">
-              <span class="title">2025 Topps Chrome Jacory Croskey-Merritt Refractor #387 (RC) NFL</span>
+            <a href="https://www.ebay.com/itm/2025-Topps-Chrome-Jacory-Croskey-Merritt-387-RC-NFL-/306942007235" target="_blank" rel="noopener">
+              <span class="title">2025 Topps Chrome Jacory Croskey-Merritt #387 (RC) NFL</span>
               <span class="item-id">306942007235</span>
             </a>
           </td>
@@ -4891,23 +4900,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-skip">
           <td class="item">
-            <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" rel="noopener">
-              <span class="title">3 Marshall Faulk Cards San Diego State Indianapolis Colts</span>
-              <span class="item-id">306785270903</span>
-            </a>
-          </td>
-          <td class="num">$2.99</td>
-          <td class="num target">$2.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$0.89</td>
-          <td class="basis">ebay_active · n=10 · ref $2.84<br><small class="conf-mid">mid confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Phoenix-Bo-Nix-83-/306955926204" target="_blank" rel="noopener">
               <span class="title">2025 Panini Phoenix - Bo Nix #83</span>
               <span class="item-id">306955926204</span>
@@ -5113,7 +5105,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         
 
-        <h3>⛔ Blocked <span class='count'>(14)</span></h3>
+        <h3>⛔ Blocked <span class='count'>(16)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -5156,7 +5148,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num delta delta-flat">—</td>
           <td class="num">—</td>
           <td class="basis">—<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">insufficient comps (need >=3, got 1 on ebay_active)</td>
+          <td class="reasons">no pricing sources</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -5173,7 +5165,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num delta delta-flat">—</td>
           <td class="num">—</td>
           <td class="basis">—<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">insufficient comps (need >=3, got 1 on ebay_active)</td>
+          <td class="reasons">no pricing sources</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -5231,6 +5223,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-blocked">
           <td class="item">
+            <a href="https://www.ebay.com/itm/3-Steve-Largent-Cards-Seattle-Seahawks-Football-Card-Lot-NFL-/306913845449" target="_blank" rel="noopener">
+              <span class="title">3 Steve Largent Cards Seattle Seahawks Football Card Lot NFL</span>
+              <span class="item-id">306913845449</span>
+            </a>
+          </td>
+          <td class="num">$1.95</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 2 on sold_history)</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
             <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-Football-Card-Lot-NFL-/306913853080" target="_blank" rel="noopener">
               <span class="title">9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL</span>
               <span class="item-id">306913853080</span>
@@ -5282,6 +5291,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-blocked">
           <td class="item">
+            <a href="https://www.ebay.com/itm/1991-92-Fleer-Pro-Vision-Magic-Johnson-6-/306930807722" target="_blank" rel="noopener">
+              <span class="title">1991-92 Fleer - Pro Vision Magic Johnson #6</span>
+              <span class="item-id">306930807722</span>
+            </a>
+          </td>
+          <td class="num">$1.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 1 on pricecharting)</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
             <a href="https://www.ebay.com/itm/1993-94-Fleer-Ultra-Bobby-Hurley-161-RC-NFL-/306930920326" target="_blank" rel="noopener">
               <span class="title">1993-94 Fleer Ultra - Bobby Hurley #161 (RC) NFL</span>
               <span class="item-id">306930920326</span>
@@ -5292,24 +5318,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num delta delta-flat">—</td>
           <td class="num">—</td>
           <td class="basis">—<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">insufficient comps (need >=3, got 1 on ebay_active)</td>
-          <td class="decision decision-blocked">BLOCKED</td>
-        </tr>
-        
-
-        <tr class="row-blocked">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/1991-Fleer-Ken-Griffey-Jr-Barry-Bonds-710-NFL-/306931285504" target="_blank" rel="noopener">
-              <span class="title">1991 Fleer - Ken Griffey Jr, Barry Bonds #710 NFL</span>
-              <span class="item-id">306931285504</span>
-            </a>
-          </td>
-          <td class="num">$2.22</td>
-          <td class="num target">—</td>
-          <td class="num delta delta-flat">—</td>
-          <td class="num">—</td>
-          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">insufficient comps (need >=3, got 2 on pricecharting)</td>
+          <td class="reasons">no pricing sources</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -5326,7 +5335,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num delta delta-flat">—</td>
           <td class="num">—</td>
           <td class="basis">—<br><small class="conf-low">low confidence</small></td>
-          <td class="reasons">insufficient comps (need >=3, got 1 on ebay_active)</td>
+          <td class="reasons">no pricing sources</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -5361,6 +5370,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$-0.84</td>
           <td class="basis">pricecharting · n=3 · ref $15.00<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">net $-0.84 would fall below min_net_after_fees $0.25<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" rel="noopener">
+              <span class="title">3 Marshall Faulk Cards San Diego State Indianapolis Colts</span>
+              <span class="item-id">306785270903</span>
+            </a>
+          </td>
+          <td class="num">$2.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">no pricing sources</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         </tbody>
@@ -5425,7 +5451,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 25, 2026 · 22:39 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 26, 2026 · 01:37 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -5771,6 +5797,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       const s = getComputedStyle(document.documentElement);
       Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      // Match the site's typography + gold palette so charts feel native
+      Chart.defaults.font.family = "'Familjen Grotesk', -apple-system, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.scale = Chart.defaults.scale || {};
+      Chart.defaults.scale.ticks = Object.assign({}, Chart.defaults.scale.ticks || {}, { padding: 8 });
+      // Default gold ramp for datasets that don't specify their own colors
+      Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      window.__H2K_CHART_PALETTE = ['#c9a542', '#e6c66a', '#8a7521', '#7fc77a', '#e07b6f', '#9a9388'];
     }
   </script>
 </body>

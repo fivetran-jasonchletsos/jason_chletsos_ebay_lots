@@ -60,8 +60,10 @@ REPLY_COMBINED = ("Yes — I offer combined shipping at $0.50 per additional ite
                   "combined invoice, or buy now and I'll refund any overage.")
 REPLY_FALLBACK = ("Thanks for your message! I'll review and get back to you "
                   "shortly with details. — JC")
-REPLY_RETURNS  = ("30-day returns accepted, buyer pays return shipping. Cards "
-                  "ship in penny sleeves + top loaders inside a rigid mailer.")
+REPLY_RETURNS  = ("All sales are final — every card is photographed front and back "
+                  "before listing, so please ask anything before you buy and I'll "
+                  "respond same-day. Cards ship in penny sleeves + top loaders "
+                  "inside a rigid mailer.")
 REPLY_PAYMENT  = ("Payment is handled by eBay's managed payments — all standard "
                   "methods work. I ship as soon as payment clears.")
 

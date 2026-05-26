@@ -146,7 +146,7 @@ export default function SettingsScreen() {
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>HARPUA SCANNER</Text>
+          <Text style={styles.eyebrow}>harpua2001 scanner</Text>
           <Text style={styles.headerTitle}>Settings</Text>
         </View>
 

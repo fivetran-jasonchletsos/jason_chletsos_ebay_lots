@@ -12,15 +12,15 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Harpua2001">
   <meta property="og:title" content="5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL">
-  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop running since 2003. Live inventory, real photos, ships next business day.">
+  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop on eBay since 1998. Live inventory, real photos, ships next business day.">
   <meta property="og:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
   <meta property="og:url" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/../index.html">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL">
-  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — 20+ years on eBay, real photos, fast shipping.">
+  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — on eBay since 1998, real photos, fast shipping.">
   <meta name="twitter:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='128' font-family='Fraunces, Georgia, serif' font-style='italic' font-size='128' font-weight='500' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
@@ -33,8 +33,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = [];
-    window.__ADMIN_SALT   = '581ee3b2c54b2cae9677b3b45f48e87d';
+    window.__ADMIN_HASHES = ["2a00368e9da62201f07f7046c332713827b25ccbd815ff7e8cd6af1fcfa861f6"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = false;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -78,7 +78,7 @@
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
-  --text-dim:    #5d574c;
+  --text-dim:    #7a7268;
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
@@ -1100,6 +1100,20 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover { transform: translateY(-3px); border-color: var(--border-mid); }
 .listing-card:hover::after { box-shadow: 0 0 0 1px var(--border-hi) inset, 0 24px 50px -10px rgba(0,0,0,.7); }
 
+/* Gold sweep on hover — translates a soft amber band across the card face. */
+.listing-card::before {
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(110deg, transparent 30%, rgba(201,165,66,.18) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 600ms ease;
+  pointer-events: none;
+}
+.listing-card:hover::before { transform: translateX(110%); }
+@media (prefers-reduced-motion: reduce) {
+  .listing-card::before { transition: none; }
+  .listing-card:hover::before { transform: translateX(-110%); }
+}
+
 .thumb-wrap {
   position: relative;
   width: 100%;
@@ -1113,8 +1127,8 @@ input[type="checkbox"]:checked::after {
     radial-gradient(circle at 30% 30%, rgba(212,175,55,.06), transparent 50%);
   pointer-events: none; z-index: 1;
 }
-.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 4/3; }
-.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 1/1; }
+.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 3/4; }
+.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 3/4; }
 .grid[data-size="small"]  .thumb-wrap { aspect-ratio: 1/1; }
 .listing-card img {
   width: 100%; height: 100%;
@@ -1728,6 +1742,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   .table-wrap { margin: 0 -16px; }
   th, td { padding: 12px 14px; font-size: 12.5px; }
 }
+@media (max-width: 480px) {
+  /* Android 412dp (and below) — tighten gutters so cards breathe */
+  main { padding: 18px 12px 60px; }
+  .panel { padding: 14px; }
+  .listing-card .info { padding: 10px 11px; }
+  .listing-card .price { font-size: 20px; }
+  .grid[data-size="large"]  { gap: 10px; }
+  .grid[data-size="medium"] { gap: 8px; }
+  .grid[data-size="small"]  { gap: 6px; }
+  /* Drop the third meta chip when present to avoid wrap-overflow */
+  .listing-card .meta > *:nth-child(n+3) { display: none; }
+}
 @media (max-width: 420px) {
   .grid[data-size="medium"] { grid-template-columns: 1fr; }
   .grid[data-size="list"] .listing-card .thumb-wrap { width: 96px; flex: 0 0 96px; }
@@ -2028,10 +2054,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           💬 Questions? Message Harpua2001 on eBay — replies usually within a few hours.
         </div>
         <div class="product-meta-grid">
-          <div class="meta-cell">
-            <div class="meta-lbl">Condition</div>
-            <div class="meta-val">—</div>
-          </div>
+          
           <div class="meta-cell">
             <div class="meta-lbl">Category</div>
             <div class="meta-val">Football Lots</div>
@@ -2045,17 +2068,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="meta-val">Harpua2001</div>
           </div>
         </div>
-        <div class="product-desc">
-          <h3>Item Details</h3>
-          <p>5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL</p>
-        </div>
+        
         
         <section class="item-pricing-panel" data-admin="1">
           <div class="ip-head">
             <div class="ip-eyebrow">Pricing intelligence · admin only</div>
             <h3>Where this price sits</h3>
           </div>
-          <div class="ip-row"><div class="ip-lbl">Your price</div><div class="ip-val">$1.99</div><div class="ip-note">currently listed on eBay</div></div><div class="ip-row"><div class="ip-lbl">eBay Active</div><div class="ip-val">$1.99 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($0.99–$19.99)</span></div><div class="ip-note">3 live asking prices</div></div><div class="ip-row"><div class="ip-lbl">Your past sales</div><div class="ip-val">$1.99</div><div class="ip-note">1 similar items sold (median)</div></div><div class="ip-row"><div class="ip-lbl">PriceCharting</div><div class="ip-val">$10.91 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($10.91–$18.19)</span></div><div class="ip-note">loose · John Elway #332 · <a href="https://www.pricecharting.com/game/10854600" target="_blank" rel="noopener" style="color:var(--gold);">view ↗</a></div></div><div class="ip-row"><div class="ip-lbl">Gap vs eBay</div><div class="ip-val"><span style="color:var(--success);font-weight:700;">+0.0%</span></div><div class="ip-note">your price vs eBay active median</div></div><div class="ip-row"><div class="ip-lbl">Suggested list</div><div class="ip-val"><b style="color:var(--gold);">$10.99</b></div><div class="ip-note">based on PriceCharting</div></div>
+          <div class="ip-row"><div class="ip-lbl">Your price</div><div class="ip-val">$1.99</div><div class="ip-note">currently listed on eBay</div></div><div class="ip-row"><div class="ip-lbl">Your past sales</div><div class="ip-val">$1.99</div><div class="ip-note">1 similar items sold (median)</div></div><div class="ip-row"><div class="ip-lbl">PriceCharting</div><div class="ip-val">$10.91 <span style="color:var(--text-muted);font-weight:400;font-size:13px;">($10.91–$18.19)</span></div><div class="ip-note">loose · John Elway #332 · <a href="https://www.pricecharting.com/game/10854600" target="_blank" rel="noopener" style="color:var(--gold);">view ↗</a></div></div><div class="ip-row"><div class="ip-lbl">Suggested list</div><div class="ip-val"><b style="color:var(--gold);">$10.99</b></div><div class="ip-note">based on PriceCharting</div></div>
         </section>
       </div>
     </article>
@@ -2108,7 +2128,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 25, 2026 · 22:38 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 26, 2026 · 01:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -2454,6 +2474,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       const s = getComputedStyle(document.documentElement);
       Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      // Match the site's typography + gold palette so charts feel native
+      Chart.defaults.font.family = "'Familjen Grotesk', -apple-system, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.scale = Chart.defaults.scale || {};
+      Chart.defaults.scale.ticks = Object.assign({}, Chart.defaults.scale.ticks || {}, { padding: 8 });
+      // Default gold ramp for datasets that don't specify their own colors
+      Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      window.__H2K_CHART_PALETTE = ['#c9a542', '#e6c66a', '#8a7521', '#7fc77a', '#e07b6f', '#9a9388'];
     }
   </script>
 </body>

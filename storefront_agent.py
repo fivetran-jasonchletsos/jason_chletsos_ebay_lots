@@ -70,6 +70,7 @@ def _render_card(l: dict, idx: int) -> str:
         </div>
         <div class="sf-meta">
           <div class="sf-title">{title}</div>
+          <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row">{cond_chip}<span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>'''
@@ -97,15 +98,15 @@ def _hero(active_count: int, set_count: int, player_count: int, min_price: float
     return f'''
     <section class="sf-hero">
       <div class="sf-hero-side">
-        <div class="sf-eyebrow">One-person card shop · Selling on eBay since 2003</div>
+        <div class="sf-eyebrow">One-person card shop · Selling on eBay since 1998</div>
         <h1 class="sf-headline">
           <span class="sf-headline-serif">Sports &amp; Pokémon</span><br>
-          <span class="sf-headline-display">cards, hand-picked.</span>
+          <span class="sf-headline-display">cards, hand-listed since 1998.</span>
         </h1>
         <p class="sf-lede">
-          Everything below is live on eBay right now. Tap a card to check it out,
-          bid, or buy — checkout happens on eBay, with buyer protection on every order.
-          Real photos, honest grades, ships the next business day.
+          {active_count}+ live listings, real photos, ships next business day from Ohio.
+          Combined shipping free on 2+. Checkout happens on eBay with buyer protection
+          on every order — tap any card to bid or buy.
         </p>
         <div class="sf-hero-stats">
           <div class="sf-stat"><b>{active_count}</b><span>cards in shop</span></div>
@@ -119,8 +120,8 @@ def _hero(active_count: int, set_count: int, player_count: int, min_price: float
         </div>
       </div>
       <aside class="sf-hero-trust">
-        <div class="sf-trust-row"><span>★★★★★</span><b>100% positive feedback, 20+ years on eBay</b></div>
-        <div class="sf-trust-row"><span>↻</span><b>30-day returns, no questions asked</b></div>
+        <div class="sf-trust-row"><span>★★★★★</span><b>100% positive feedback, on eBay since 1998</b></div>
+        <div class="sf-trust-row"><span>◆</span><b>Every card photographed front and back before listing</b></div>
         <div class="sf-trust-row"><span>⚡︎</span><b>Ships next business day with tracking</b></div>
         <div class="sf-trust-row"><span>◈</span><b>Buy more than one, pay shipping once</b></div>
       </aside>
@@ -195,7 +196,7 @@ def _trust_footer() -> str:
       <div class="sf-trust-grid">
         <div>
           <div class="sf-trust-h">Who you're buying from</div>
-          <p>harpua2001 — one person, selling cards on eBay since 2003. Every card is shot in the same lightbox so you can compare condition without guessing. If you ever have a question, message us on eBay and a human answers.</p>
+          <p>harpua2001 — one person, selling cards on eBay since 1998. Every card is shot in the same lightbox so you can compare condition without guessing. If you ever have a question, message us on eBay and a human answers.</p>
         </div>
         <div>
           <div class="sf-trust-h">How buying works</div>
@@ -357,6 +358,7 @@ STOREFRONT_CSS = r"""
   .sf-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
   .sf-chip { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--sf-faint); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.15rem 0.4rem; border: 1px solid var(--sf-edge); border-radius: 2px; }
   .sf-cta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sf-gold); letter-spacing: 0.1em; text-transform: uppercase; margin-left: auto; }
+  .sf-ship { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--sf-gold); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
 
   /* ── BROWSE TILES ── */
   .sf-tiles { display: grid; gap: 0.55rem; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-bottom: 0.5rem; }

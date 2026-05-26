@@ -84,10 +84,36 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 -u promote.py --no-deploy
 
-      - name: Commit and push docs/
+      - name: Commit docs/
         run: |
           git config user.email "jchletsos@gmail.com"
           git config user.name "Jason Chletsos"
           git add docs/ sold_history.json 2>/dev/null || true
           git diff --cached --quiet && echo "No changes" || git commit -m "Site refresh $(date -u '+%Y-%m-%d %H:%M UTC')"
-          git push
+
+      - name: Push regenerated docs (with rebase + retry)
+        run: |
+          set -e
+          # Nothing to push if HEAD matches the remote already (e.g., "No changes" above)
+          git fetch origin "${GITHUB_REF_NAME}"
+          if git diff --quiet "origin/${GITHUB_REF_NAME}" HEAD; then
+            echo "No new commits to push"
+            exit 0
+          fi
+          for i in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            # If the remote moved, rebase our single commit on top of it.
+            git rebase "origin/${GITHUB_REF_NAME}" || {
+              echo "Rebase failed, aborting." >&2
+              git rebase --abort || true
+              exit 1
+            }
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              echo "Pushed on attempt $i"
+              exit 0
+            fi
+            echo "Push attempt $i failed (likely non-fast-forward) — retrying after sleep"
+            sleep $((i * 5))
+          done
+          echo "Push failed after 3 attempts" >&2
+          exit 1

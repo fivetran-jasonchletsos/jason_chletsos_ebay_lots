@@ -12,15 +12,15 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Harpua2001">
   <meta property="og:title" content="Relist Unsold · Harpua2001">
-  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop running since 2003. Live inventory, real photos, ships next business day.">
+  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop on eBay since 1998. Live inventory, real photos, ships next business day.">
   <meta property="og:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
   <meta property="og:url" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/relist.html">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Relist Unsold · Harpua2001">
-  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — 20+ years on eBay, real photos, fast shipping.">
+  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — on eBay since 1998, real photos, fast shipping.">
   <meta name="twitter:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='124' font-family='Bebas Neue, sans-serif' font-size='120' font-weight='700' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='128' font-family='Fraunces, Georgia, serif' font-style='italic' font-size='128' font-weight='500' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
@@ -33,8 +33,8 @@
       } catch(e) {}
     })();
     // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = [];
-    window.__ADMIN_SALT   = '739b189fec5fc1de315d9e34c1893b39';
+    window.__ADMIN_HASHES = ["2a00368e9da62201f07f7046c332713827b25ccbd815ff7e8cd6af1fcfa861f6"];
+    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
     window.__IS_ADMIN_PAGE = true;
     // Early body class: if a stored token matches any embedded hash, mark body admin
     (function() {
@@ -78,7 +78,7 @@
   --gold-dim:    #8a7521;
   --text:        #f1efe9;
   --text-muted:  #9a9388;
-  --text-dim:    #5d574c;
+  --text-dim:    #7a7268;
   --success:     #7fc77a;
   --warning:     #e0b54a;
   --danger:      #e07b6f;
@@ -1100,6 +1100,20 @@ input[type="checkbox"]:checked::after {
 .listing-card:hover { transform: translateY(-3px); border-color: var(--border-mid); }
 .listing-card:hover::after { box-shadow: 0 0 0 1px var(--border-hi) inset, 0 24px 50px -10px rgba(0,0,0,.7); }
 
+/* Gold sweep on hover — translates a soft amber band across the card face. */
+.listing-card::before {
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(110deg, transparent 30%, rgba(201,165,66,.18) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 600ms ease;
+  pointer-events: none;
+}
+.listing-card:hover::before { transform: translateX(110%); }
+@media (prefers-reduced-motion: reduce) {
+  .listing-card::before { transition: none; }
+  .listing-card:hover::before { transform: translateX(-110%); }
+}
+
 .thumb-wrap {
   position: relative;
   width: 100%;
@@ -1113,8 +1127,8 @@ input[type="checkbox"]:checked::after {
     radial-gradient(circle at 30% 30%, rgba(212,175,55,.06), transparent 50%);
   pointer-events: none; z-index: 1;
 }
-.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 4/3; }
-.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 1/1; }
+.grid[data-size="large"]  .thumb-wrap { aspect-ratio: 3/4; }
+.grid[data-size="medium"] .thumb-wrap { aspect-ratio: 3/4; }
 .grid[data-size="small"]  .thumb-wrap { aspect-ratio: 1/1; }
 .listing-card img {
   width: 100%; height: 100%;
@@ -1728,6 +1742,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   .table-wrap { margin: 0 -16px; }
   th, td { padding: 12px 14px; font-size: 12.5px; }
 }
+@media (max-width: 480px) {
+  /* Android 412dp (and below) — tighten gutters so cards breathe */
+  main { padding: 18px 12px 60px; }
+  .panel { padding: 14px; }
+  .listing-card .info { padding: 10px 11px; }
+  .listing-card .price { font-size: 20px; }
+  .grid[data-size="large"]  { gap: 10px; }
+  .grid[data-size="medium"] { gap: 8px; }
+  .grid[data-size="small"]  { gap: 6px; }
+  /* Drop the third meta chip when present to avoid wrap-overflow */
+  .listing-card .meta > *:nth-child(n+3) { display: none; }
+}
 @media (max-width: 420px) {
   .grid[data-size="medium"] { grid-template-columns: 1fr; }
   .grid[data-size="list"] .listing-card .thumb-wrap { width: 96px; flex: 0 0 96px; }
@@ -1850,11 +1876,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   
 
   <main>
-    <section class='hero'><h1>Relist Unsold</h1><p class='sub'>Last run: <code>2026-05-25 22:39 UTC</code> · window: <code>14d</code></p><div class='rl-kpis'><div class='rl-kpi warn'><div class='n'>6</div><div class='l'>Unsold listings</div></div><div class='rl-kpi'><div class='n'>$25.41</div><div class='l'>Total unsold value</div></div><div class='rl-kpi bad'><div class='n'>10d</div><div class='l'>Oldest unsold</div></div><div class='rl-kpi'><div class='n'>4d</div><div class='l'>Average days unsold</div></div></div></section><section class='rl-note'><h3>How this works</h3><ul><li>Pulls all ended-without-bid auctions via Trading <code>GetMyeBaySelling</code> (<code>UnsoldList.Include=true</code>) for the past 14 days.</li><li>Suggests a Fixed-Price relist price: original BIN if set, else 2× the starting bid (auctions usually open very low), else market median × 0.95.</li><li><b>Relist as FP</b> calls Trading <code>RelistFixedPriceItem</code>, which takes the previous auction's ItemID and re-publishes it as a GTC Fixed-Price item — photos, store category, item specifics, condition, shipping & returns carry over.</li><li>Run <code>python3 relist_agent.py --apply</code> to actually relist; otherwise everything is dry-run.</li></ul></section><div class='tbl-wrap'><table class='rl-tbl'><thead><tr><th>Item</th><th>Original</th><th>Ended</th><th>Days ago</th><th>Suggested FP</th><th>Action</th></tr></thead><tbody><tr><td class='item'><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l140.jpg" alt="" loading="lazy"><div class='title'>Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</div><div class='iid'>item 306758076966 · FixedPriceItem</div></td><td class='price'>$3.99</td><td class='age'>2026-05-25</td><td class='age '>0d</td><td class='suggest'>$4.00</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306758076966">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306758076966">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306758076966">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306758076966' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/IxQAAeSwQIpqE0Tj/s-l140.jpg" alt="" loading="lazy"><div class='title'>3 for $3.33 – Elic Ayomanor RC Lot | Prizm + Score | Tennessee Titans</div><div class='iid'>item 306959730559 · FixedPriceItem</div></td><td class='price'>$3.00</td><td class='age'>2026-05-25</td><td class='age '>0d</td><td class='suggest'>$3.01</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306959730559">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306959730559">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306959730559">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306959730559' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l140.jpg" alt="" loading="lazy"><div class='title'>2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</div><div class='iid'>item 306937606464 · Chinese</div></td><td class='price'>$5.99</td><td class='age'>2026-05-21</td><td class='age '>4d</td><td class='suggest'>$11.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306937606464">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306937606464">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306937606464">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306937606464' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l140.jpg" alt="" loading="lazy"><div class='title'>2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen</div><div class='iid'>item 306937463442 · Chinese</div></td><td class='price'>$7.99</td><td class='age'>2026-05-21</td><td class='age '>4d</td><td class='suggest'>$15.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306937463442">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306937463442">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306937463442">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306937463442' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l140.jpg" alt="" loading="lazy"><div class='title'>3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</div><div class='iid'>item 306934532731 · Chinese</div></td><td class='price'>$0.99</td><td class='age'>2026-05-19</td><td class='age '>6d</td><td class='suggest'>$1.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306934532731">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306934532731">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306934532731">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306934532731' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l140.jpg" alt="" loading="lazy"><div class='title'>1990-91 Skybox - Michael Jordan #41</div><div class='iid'>item 306930914782 · FixedPriceItem</div></td><td class='price'>$3.45</td><td class='age'>2026-05-15</td><td class='age old'>10d</td><td class='suggest'>$3.46</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930914782">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930914782">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930914782">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930914782' target='_blank' rel='noopener'>View</a></div></td></tr></tbody></table></div>
+    <section class='hero'><h1>Relist Unsold</h1><p class='sub'>Last run: <code>2026-05-26 01:37 UTC</code> · window: <code>14d</code></p><div class='rl-kpis'><div class='rl-kpi warn'><div class='n'>8</div><div class='l'>Unsold listings</div></div><div class='rl-kpi'><div class='n'>$32.96</div><div class='l'>Total unsold value</div></div><div class='rl-kpi bad'><div class='n'>10d</div><div class='l'>Oldest unsold</div></div><div class='rl-kpi'><div class='n'>3.2d</div><div class='l'>Average days unsold</div></div></div></section><section class='rl-note'><h3>How this works</h3><ul><li>Pulls all ended-without-bid auctions via Trading <code>GetMyeBaySelling</code> (<code>UnsoldList.Include=true</code>) for the past 14 days.</li><li>Suggests a Fixed-Price relist price: original BIN if set, else 2× the starting bid (auctions usually open very low), else market median × 0.95.</li><li><b>Relist as FP</b> calls Trading <code>RelistFixedPriceItem</code>, which takes the previous auction's ItemID and re-publishes it as a GTC Fixed-Price item — photos, store category, item specifics, condition, shipping & returns carry over.</li><li>Run <code>python3 relist_agent.py --apply</code> to actually relist; otherwise everything is dry-run.</li></ul></section><div class='tbl-wrap'><table class='rl-tbl'><thead><tr><th>Item</th><th>Original</th><th>Ended</th><th>Days ago</th><th>Suggested FP</th><th>Action</th></tr></thead><tbody><tr><td class='item'><img src="https://i.ebayimg.com/images/g/oAMAAeSw16pqAKb0/s-l140.jpg" alt="" loading="lazy"><div class='title'>2025 Panini Prizm - Prizmatic Abdul Carter #10 (RC) NFL Football</div><div class='iid'>item 306930464091 · FixedPriceItem</div></td><td class='price'>$2.99</td><td class='age'>2026-05-26</td><td class='age '>0d</td><td class='suggest'>$3.00</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930464091">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930464091">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930464091">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930464091' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/1lcAAeSwXBNqEPn8/s-l140.jpg" alt="" loading="lazy"><div class='title'>Topps Chrome X-Fractor Abdul Carter New York Giants #350 NFL Rookie</div><div class='iid'>item 306956115603 · FixedPriceItem</div></td><td class='price'>$4.56</td><td class='age'>2026-05-26</td><td class='age '>0d</td><td class='suggest'>$4.57</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306956115603">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306956115603">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306956115603">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306956115603' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/kfcAAeSw2BtpiKdV/s-l140.jpg" alt="" loading="lazy"><div class='title'>Charcadet 022 Mega Evolution Promo Holo Pokemon Card NM</div><div class='iid'>item 306758076966 · FixedPriceItem</div></td><td class='price'>$3.99</td><td class='age'>2026-05-25</td><td class='age '>0d</td><td class='suggest'>$4.00</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306758076966">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306758076966">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306758076966">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306758076966' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/IxQAAeSwQIpqE0Tj/s-l140.jpg" alt="" loading="lazy"><div class='title'>3 for $3.33 – Elic Ayomanor RC Lot | Prizm + Score | Tennessee Titans</div><div class='iid'>item 306959730559 · FixedPriceItem</div></td><td class='price'>$3.00</td><td class='age'>2026-05-25</td><td class='age '>1d</td><td class='suggest'>$3.01</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306959730559">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306959730559">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306959730559">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306959730559' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l140.jpg" alt="" loading="lazy"><div class='title'>2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</div><div class='iid'>item 306937606464 · Chinese</div></td><td class='price'>$5.99</td><td class='age'>2026-05-21</td><td class='age '>4d</td><td class='suggest'>$11.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306937606464">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306937606464">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306937606464">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306937606464' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l140.jpg" alt="" loading="lazy"><div class='title'>2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen</div><div class='iid'>item 306937463442 · Chinese</div></td><td class='price'>$7.99</td><td class='age'>2026-05-21</td><td class='age '>5d</td><td class='suggest'>$15.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306937463442">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306937463442">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306937463442">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306937463442' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/EGoAAeSwKRRqA1Ap/s-l140.jpg" alt="" loading="lazy"><div class='title'>3 Neon Green Pulsar and 5 Purple Wave Prizm 2025 Cards</div><div class='iid'>item 306934532731 · Chinese</div></td><td class='price'>$0.99</td><td class='age'>2026-05-19</td><td class='age '>6d</td><td class='suggest'>$1.99</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306934532731">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306934532731">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306934532731">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306934532731' target='_blank' rel='noopener'>View</a></div></td></tr><tr><td class='item'><img src="https://i.ebayimg.com/images/g/MLYAAeSwhPFqAPNG/s-l140.jpg" alt="" loading="lazy"><div class='title'>1990-91 Skybox - Michael Jordan #41</div><div class='iid'>item 306930914782 · FixedPriceItem</div></td><td class='price'>$3.45</td><td class='age'>2026-05-15</td><td class='age old'>10d</td><td class='suggest'>$3.46</td><td><div class='row-actions'><button class='btn ok' data-action='relist' data-item-id="306930914782">Relist as FP</button><button class='btn gold' data-action='edit_relist' data-item-id="306930914782">Edit then relist</button><button class='btn no' data-action='skip_permanent' data-item-id="306930914782">Skip (delist)</button><a class='btn' href='https://www.ebay.com/itm/306930914782' target='_blank' rel='noopener'>View</a></div></td></tr></tbody></table></div>
   </main>
 
   <footer class="app-footer">
-    Updated May 25, 2026 · 22:39 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 26, 2026 · 01:37 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -2200,6 +2226,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       const s = getComputedStyle(document.documentElement);
       Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';
       Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      // Match the site's typography + gold palette so charts feel native
+      Chart.defaults.font.family = "'Familjen Grotesk', -apple-system, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.scale = Chart.defaults.scale || {};
+      Chart.defaults.scale.ticks = Object.assign({}, Chart.defaults.scale.ticks || {}, { padding: 8 });
+      // Default gold ramp for datasets that don't specify their own colors
+      Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
+      window.__H2K_CHART_PALETTE = ['#c9a542', '#e6c66a', '#8a7521', '#7fc77a', '#e07b6f', '#9a9388'];
     }
   </script>
 </body>
