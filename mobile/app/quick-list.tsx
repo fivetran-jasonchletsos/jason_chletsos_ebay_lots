@@ -35,7 +35,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { radii, theme } from '@/src/theme';
-import { EbayApiError, EbayAuthError, uploadImage } from '@/src/api/ebay';
+import { EbayApiError, EbayAuthError, uploadImage, xmlEscape } from '@/src/api/ebay';
 import {
   createQuickListing,
   GENERIC_CONDITIONS,
@@ -465,14 +465,10 @@ function GoldButton({
 }
 
 function buildAutoDescription(title: string, condition: string): string {
-  return `<h2>${escapeHtml(title)}</h2>
-<p>Condition: ${escapeHtml(condition)}</p>
-<p>Ships fast, packaged with care. Combined shipping available on multiple purchases.</p>
-<p>30-day returns accepted.</p>`;
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return `<h2>${xmlEscape(title)}</h2>
+<p>Condition: ${xmlEscape(condition)}</p>
+<p>Ships fast, packaged with care. Combined shipping free on 2+ items.</p>
+<p>All sales are final — please ask any questions before buying and I'll respond same-day.</p>`;
 }
 
 const styles = StyleSheet.create({

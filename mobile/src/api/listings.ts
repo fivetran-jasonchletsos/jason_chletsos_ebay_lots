@@ -465,12 +465,11 @@ export const QUICK_LIST_CATEGORIES: { id: string; name: string; warn?: string }[
   { id: '4189',   name: 'Pokémon TCG Sealed Booster Boxes' },
   { id: '218',    name: 'Sports Trading Cards — Singles' },
   { id: '215',    name: 'Sports Trading Cards — Sealed' },
-  // TODO: confirm leaf category id — 139973 is the L1 "Video Games & Consoles"
-  // parent; eBay may reject AddFixedPriceItem against it. Swap to a verified
-  // leaf id (e.g. 139976 "Video Games", or whatever matches harpua2001
-  // inventory) once we can call GetCategories against prod.
-  { id: '139973', name: 'Video Games', warn: 'May be a parent category — verify before publishing.' },
   { id: '171228', name: 'Video Game Consoles' },
+  // Video Games chip removed: 139973 is the L1 "Video Games & Consoles" parent
+  // and eBay rejects AddFixedPriceItem against parent nodes. Add a verified
+  // leaf id back here when video-game inventory is on the table — confirm via
+  // GetCategories or by reading PrimaryCategory off a live listing.
 ];
 
 /**

@@ -7577,6 +7577,18 @@ def build_google_feed(listings: list[dict], market: dict | None = None,
     xmlstr = minidom.parseString(ET.tostring(rss, encoding="unicode")).toprettyxml(indent="  ")
     out.write_text(xmlstr, encoding="utf-8")
     print(f"  Google feed: {out}  ({len(listings) - skipped} items, {skipped} skipped)")
+
+    # Prune stale per-item HTML for listings that are no longer active. Anything
+    # whose item_id isn't in the live snapshot is from an expired/sold listing
+    # and would otherwise sit in docs/items/ forever with stale price/condition.
+    active_ids = {l["item_id"] for l in listings if l.get("item_id")}
+    pruned = 0
+    for stale in items_dir.glob("*.html"):
+        if stale.stem not in active_ids:
+            stale.unlink()
+            pruned += 1
+    if pruned:
+        print(f"  Pruned {pruned} stale item page(s) from {items_dir}")
     return out
 
 
