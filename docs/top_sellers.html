@@ -1761,36 +1761,45 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </style>
   
 <style>
-  .ts-section { margin: 28px 0; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
-  .ts-head { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 14px; }
-  .ts-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 30px; letter-spacing: .02em; }
+  /* Compact seller tiles — fits 2-3 sellers per row on desktop instead of one
+     full-width section each. Listings strip horizontally rather than wrapping. */
+  .ts-sellers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 14px; margin-top: 18px; }
+  .ts-section { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); margin: 0; }
+  .ts-section:hover { border-color: rgba(212,175,55,.35); }
+  .ts-head { display: flex; flex-direction: column; gap: 6px; }
+  .ts-head-main { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .ts-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 19px; display: inline; }
   .ts-head h2 a { color: var(--text); text-decoration: none; }
   .ts-head h2 a:hover { color: var(--gold); }
-  .ts-kind { font-size: 10px; padding: 3px 9px; border-radius: 999px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }
+  .ts-kind { font-size: 9px; padding: 2px 7px; border-radius: 999px; margin-left: 4px; letter-spacing: .12em; font-weight: 700; vertical-align: 2px; }
   .ts-kind-consignment { color: #d4af37; background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.4); }
   .ts-kind-volume      { color: #6cb0ff; background: rgba(108,176,255,.12); border: 1px solid rgba(108,176,255,.35); }
   .ts-kind-vintage     { color: #c98a4d; background: rgba(201,138,77,.12); border: 1px solid rgba(201,138,77,.35); }
   .ts-kind-pokemon     { color: #ffcc00; background: rgba(255,204,0,.1);   border: 1px solid rgba(255,204,0,.3); }
-  .ts-rank { display: inline-block; font-size: 10px; color: #fff; background: linear-gradient(135deg, #d4af37, #b8860b); padding: 3px 9px; border-radius: 999px; margin-left: 8px; letter-spacing: .12em; font-weight: 800; }
+  .ts-rank { display: inline-block; font-size: 9px; color: #fff; background: linear-gradient(135deg, #d4af37, #b8860b); padding: 2px 7px; border-radius: 999px; margin-left: 4px; letter-spacing: .12em; font-weight: 800; vertical-align: 2px; }
   .ts-rank-sports { background: linear-gradient(135deg, #6cb0ff, #4a8fd6); }
-  .ts-stats { display: flex; gap: 14px; flex-wrap: wrap; }
-  .ts-tag { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
-  .ts-stats { display: grid; grid-template-columns: repeat(2, auto); gap: 18px; }
-  .ts-stat { text-align: center; }
-  .ts-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 24px; color: var(--gold); line-height: 1; }
-  .ts-l { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
-  .ts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-  .ts-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
+  .ts-tag { color: var(--text-muted); font-size: 11.5px; margin: 0; line-height: 1.4; max-height: 1.4em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ts-stats { display: flex; gap: 14px; flex-wrap: wrap; padding-top: 4px; border-top: 1px dashed var(--border); padding-bottom: 2px; }
+  .ts-stat { flex: 0 1 auto; }
+  .ts-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--gold); line-height: 1; }
+  .ts-l { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 3px; }
+  /* Horizontal-scrolling listings strip — keeps each seller card a fixed height */
+  .ts-strip { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+  .ts-strip::-webkit-scrollbar { height: 6px; }
+  .ts-strip::-webkit-scrollbar-track { background: transparent; }
+  .ts-strip::-webkit-scrollbar-thumb { background: rgba(212,175,55,.25); border-radius: 999px; }
+  .ts-card { flex: 0 0 124px; scroll-snap-align: start; display: block; background: var(--surface-2, rgba(255,255,255,.02)); border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
   .ts-card:hover { transform: translateY(-2px); border-color: var(--gold); }
-  .ts-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
-  .ts-meta { padding: 8px 10px; }
-  .ts-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 20px; color: var(--gold); }
-  .ts-title { font-size: 11px; line-height: 1.35; color: var(--text); min-height: 28px; margin-top: 4px; }
-  .ts-buying { font-size: 10px; color: var(--text-muted); margin-top: 4px; letter-spacing: .04em; }
-  .ts-empty { padding: 16px; color: var(--text-muted); font-size: 13px; }
+  .ts-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2, rgba(255,255,255,.04)); }
+  .ts-meta { padding: 6px 8px 8px; }
+  .ts-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--gold); }
+  .ts-title { font-size: 10.5px; line-height: 1.3; color: var(--text); max-height: 27px; overflow: hidden; margin-top: 2px; }
+  .ts-buying { font-size: 9px; color: var(--text-muted); margin-top: 3px; letter-spacing: .04em; }
+  .ts-empty { padding: 16px; color: var(--text-muted); font-size: 12px; }
+  .ts-more { display: inline-block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); text-decoration: none; margin-top: 2px; font-weight: 700; }
+  .ts-more:hover { text-decoration: underline; }
   @media (max-width: 640px) {
-    .ts-head { grid-template-columns: 1fr; }
-    .ts-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .ts-sellers-grid { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -1806,8 +1815,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
       <nav class="nav-links"><a href="index.html" class="nav-link">Shop</a>
-<a href="price_drops.html" class="nav-link">Steals</a>
+<a href="steals.html" class="nav-link">Steals</a>
 <a href="sold.html" class="nav-link">Recently Sold</a>
+<a href="harpua_ai_overview.pdf" class="nav-link">AI Overview</a>
 
         <div class="nav-dropdown">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
@@ -1825,13 +1835,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <div class="nav-dropdown-menu" role="menu"><a href="top_sellers.html" class="active">Top Sellers</a></div>
         </div>
 <a href="daily.html" class="nav-link admin-only" data-admin="1">Daily</a>
+<a href="collx_vs_ebay.html" class="nav-link admin-only" data-admin="1">CollX vs eBay</a>
 
         <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger active" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
             More
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="vault.html" data-admin="1">Vault</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="collect.html" data-admin="1">My Wants</a><a href="top_sellers.html" class="active" data-admin="1">Top Sellers</a><a href="pokemon_news.html" data-admin="1">Pokemon News</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="vault.html" data-admin="1">Vault</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="collect.html" data-admin="1">My Wants</a><a href="top_sellers.html" class="active" data-admin="1">Top Sellers</a><a href="pokemon_news.html" data-admin="1">Pokemon News</a><a href="price_drops.html" data-admin="1">Price Drops</a></div>
         </div></nav>
       <!-- Action buttons are grouped in a flex container that never shrinks,
            so they always remain visible alongside the brand. -->
@@ -1869,8 +1880,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </button>
     </div>
     <a href="index.html">Shop</a>
-<a href="price_drops.html">Steals</a>
+<a href="steals.html">Steals</a>
 <a href="sold.html">Recently Sold</a>
+<a href="harpua_ai_overview.pdf">AI Overview</a>
 <div class="drawer-group">Browse</div>
 <a href="browse.html">All Sets & Players</a>
 <a href="by_set.html">By Set</a>
@@ -1879,6 +1891,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <div class="drawer-group">For Us</div>
 <a href="top_sellers.html" class="active">Top Sellers</a>
 <a href="daily.html" class="admin-only" data-admin="1">Daily</a>
+<a href="collx_vs_ebay.html" class="admin-only" data-admin="1">CollX vs eBay</a>
 <div class="drawer-group" data-admin="1">More</div>
 <a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
@@ -1889,6 +1902,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="collect.html" class="admin-only" data-admin="1">My Wants</a>
 <a href="top_sellers.html" class="active admin-only" data-admin="1">Top Sellers</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
+<a href="price_drops.html" class="admin-only" data-admin="1">Price Drops</a>
     <div class="drawer-foot">
       <button class="drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
         Sign in
@@ -1936,99 +1950,242 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     <div class="stat-grid">
       <div class="stat-card"><div class="num">7</div><div class="lbl">Sellers tracked</div></div>
-      <div class="stat-card"><div class="num">0</div><div class="lbl">Live listings indexed</div></div>
+      <div class="stat-card"><div class="num">17</div><div class="lbl">Live listings indexed</div></div>
     </div>
 
-    
+    <div class="ts-sellers-grid">
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/dcsports87" target="_blank" rel="noopener">DCSports87</a>
                 <span class="ts-kind ts-kind-consignment">CONSIGNMENT</span>
                 <span class="ts-rank">#6 GLOBAL</span></h2>
               <p class="ts-tag">#6 worldwide eBay seller. Top sports-card account by feedback volume.</p>
             </div>
             <div class="ts-stats"><div class="ts-stat"><div class="ts-n">23K</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">40K</div><div class="ts-l">Monthly feedback</div></div><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          </header>
+          <div class="ts-strip"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/dcsports87" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/comc_consignment" target="_blank" rel="noopener">COMC</a>
                 <span class="ts-kind ts-kind-consignment">CONSIGNMENT</span>
                 <span class="ts-rank">#7 GLOBAL</span></h2>
               <p class="ts-tag">#7 worldwide. Check Out My Collectibles — 6.1M cross-listed from consignors.</p>
             </div>
-            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">7.0M</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">6.1M</div><div class="ts-l">Lifetime sales</div></div><div class="ts-stat"><div class="ts-n">38K</div><div class="ts-l">Monthly feedback</div></div><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
+            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">7.0M</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">6.1M</div><div class="ts-l">Lifetime sales</div></div><div class="ts-stat"><div class="ts-n">38K</div><div class="ts-l">Monthly feedback</div></div><div class="ts-stat"><div class="ts-n">1</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">$1.00</div><div class="ts-l">Cheapest now</div></div></div>
+          </header>
+          <div class="ts-strip">
+            <a class="ts-card" href="https://www.ebay.com/itm/257478316680?_skw=single+card&amp;hash=item3bf2e75288:g:QhMAAeSwrHRp7-NQ" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/QhMAAeSwrHRp7-NQ/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">1991 Wild Card Herschel Walker #112 READ 1u0</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/comc_consignment" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/gregmorriscards" target="_blank" rel="noopener">Greg Morris Cards</a>
                 <span class="ts-kind ts-kind-vintage">VINTAGE</span>
                 <span class="ts-rank">#12 GLOBAL</span></h2>
               <p class="ts-tag">#12 worldwide. 2.9M lifetime feedback — most of any sports-card seller. 7.5M lifetime sales.</p>
             </div>
             <div class="ts-stats"><div class="ts-stat"><div class="ts-n">33K</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">7.5M</div><div class="ts-l">Lifetime sales</div></div><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          </header>
+          <div class="ts-strip"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/gregmorriscards" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/burbanksportscards" target="_blank" rel="noopener">Burbank Sports Cards</a>
                 <span class="ts-kind ts-kind-volume">VOLUME</span>
                 <span class="ts-rank">#17 GLOBAL</span></h2>
               <p class="ts-tag">#17 worldwide. 6.7M lifetime sales · 2.4M active listings · since 2005.</p>
             </div>
-            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">2.4M</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">6.7M</div><div class="ts-l">Lifetime sales</div></div><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
+            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">2.4M</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">6.7M</div><div class="ts-l">Lifetime sales</div></div><div class="ts-stat"><div class="ts-n">1</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">$100.00</div><div class="ts-l">Cheapest now</div></div></div>
+          </header>
+          <div class="ts-strip">
+            <a class="ts-card" href="https://www.ebay.com/itm/318118870631?_skw=football+single&amp;hash=item4a115cbe67:g:0HsAAeSwkxNp8FWg" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/0HsAAeSwkxNp8FWg/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$100.00</div>
+                <div class="ts-title">2003 SP Game Used SP Patches Single #PC1-ES Emmitt Smith /99</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/burbanksportscards" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/probstein123" target="_blank" rel="noopener">Probstein123</a>
                 <span class="ts-kind ts-kind-consignment">CONSIGNMENT</span>
                 <span class="ts-rank ts-rank-sports">#5 SPORTS</span></h2>
               <p class="ts-tag">5th largest sports-collectible seller. Famous for penny-start no-reserve auctions.</p>
             </div>
             <div class="ts-stats"><div class="ts-stat"><div class="ts-n">15K</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          </header>
+          <div class="ts-strip"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/probstein123" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/4sharpcorners" target="_blank" rel="noopener">4 Sharp Corners</a>
                 <span class="ts-kind ts-kind-consignment">CONSIGNMENT</span>
                 <span class="ts-rank">#44 GLOBAL</span></h2>
               <p class="ts-tag">#44 worldwide. Modern + vintage consignment.</p>
             </div>
             <div class="ts-stats"><div class="ts-stat"><div class="ts-n">28K</div><div class="ts-l">Active listings</div></div><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          </header>
+          <div class="ts-strip"><div class="ts-empty">No live listings matched the search filter.</div></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/4sharpcorners" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="https://www.ebay.com/usr/rememberwhensportscards" target="_blank" rel="noopener">Remember When Sports Cards</a>
                 <span class="ts-kind ts-kind-vintage">VINTAGE</span>
                 <span class="ts-rank">#50 GLOBAL</span></h2>
               <p class="ts-tag">#50 worldwide. Vintage specialist.</p>
             </div>
-            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">0</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">—</div><div class="ts-l">Cheapest now</div></div></div>
-          </div>
-          <div class="ts-grid"><div class="ts-empty">No live listings matched the search filter.</div></div>
-        </section>
+            <div class="ts-stats"><div class="ts-stat"><div class="ts-n">15</div><div class="ts-l">Indexed today</div></div><div class="ts-stat"><div class="ts-n">$1.00</div><div class="ts-l">Cheapest now</div></div></div>
+          </header>
+          <div class="ts-strip">
+            <a class="ts-card" href="https://www.ebay.com/itm/376654001901?_skw=vintage&amp;hash=item57b253f6ed:g:kysAAeSwagNo~9hO" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/kysAAeSwagNo~9hO/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Vintage 1996 Sea-Doo GTI Seat Yellow 269000142 (READ DESCRIPTION FOR DETAILS)</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/127588151387?_skw=vintage&amp;hash=item1db4d8b05b:g:ZeEAAeSwoO5pUH4S" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/ZeEAAeSwoO5pUH4S/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">$1.00 Pokemon TCG Assorted Card Lot - Vintage Fossil Set - Pick Your WOTC Cards</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/127588167160?_skw=vintage&amp;hash=item1db4d8edf8:g:kaEAAeSwKuppUH~q" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/kaEAAeSwKuppUH~q/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">$1.00 Pokemon TCG Assorted Card Lot - Vintage Jungle Set - Pick Your WOTC Cards</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/176600039401?_skw=vintage&amp;hash=item291e2ebfe9:g:bHEAAeSwrWhpoUOL" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/bHEAAeSwrWhpoUOL/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Fisher Price Vintage Construx Replacement Figures &amp; Parts-Pick!</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/176600073351?_skw=vintage&amp;hash=item291e2f4487:g:AUQAAOSwvt5m96tm" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/AUQAAOSwvt5m96tm/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Hot Wheels Cars Various Years and Models -Modern and Vintage-Pick Your Favorite!</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/306521513268?_skw=vintage&amp;hash=item475e1b1d34:g:olsAAeSw6wpo2WyW" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/olsAAeSw6wpo2WyW/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Animal Jam Play Wild AJPW AJ Mobile Cheap Items $1-5 - PICK AND CHOOSE</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/206033525260?_skw=vintage&amp;hash=item2ff88e1a0c:g:wRMAAeSw~5lpennF" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/wRMAAeSw~5lpennF/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">2001 Upper Deck Vintage NFL Football Complete Your Set You Pick</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/297263020530?_skw=1960&amp;hash=item453641b9f2:g:l88AAOSwCBJoD8ix" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/l88AAOSwCBJoD8ix/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">2017 TOPPS ARCHIVES BASEBALL YOU PICK #1 - #150 NMMT **** FREE SHIPPING ****</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/354813040144?_skw=1970&amp;hash=item529c815610:g:ZbcAAeSwHCBpASYd" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/ZbcAAeSwHCBpASYd/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">1970 TOPPS FOOTBALL #1-265  EX/EXNM COMPLETE YOUR SET    FREE SHIPPING</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/167281267390?_skw=1970&amp;hash=item26f2bd92be:g:02AAAOSwHNxnmbJD" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/02AAAOSwHNxnmbJD/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">2024 Topps Archives Base Set &amp; Inserts You Pick</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/127459920964?_skw=1970&amp;hash=item1dad340c44:g:HS0AAeSw7YVppjQf" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/HS0AAeSw7YVppjQf/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">1970 TOPPS Football ***YOU PICK***</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/326323966977?_skw=1970&amp;hash=item4bfa6c9401:g:gc8AAOSwNtlnJSny" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/gc8AAOSwNtlnJSny/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Masterpiece 1970 edition Markers and Dice</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/375637899534?_skw=1970&amp;hash=item5775c3790e:g:L28AAOSwvzdm3Kn9" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/L28AAOSwvzdm3Kn9/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">1970 TOPPS FOOTBALL CARD SINGLES  *** 75¢ EACH w/DISCOUNT ***$2.50 MINIMUM***</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/177403279253?_skw=1970&amp;hash=item294e0f3795:g:IRMAAeSwdAVowdJb" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/IRMAAeSwdAVowdJb/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">Barbie Doll Accessories &amp; Replacement Parts: Vintage to Modern-Pick!</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a>
+            <a class="ts-card" href="https://www.ebay.com/itm/167309538397?_skw=1970&amp;hash=item26f46cf45d:g:1i0AAOSwqTdnq2iK" target="_blank" rel="noopener">
+              <div class="ts-img" style="background-image:url('https://i.ebayimg.com/images/g/1i0AAOSwqTdnq2iK/s-l225.jpg');"></div>
+              <div class="ts-meta">
+                <div class="ts-price">$1.00</div>
+                <div class="ts-title">1991 Upper Deck Baseball Trading Cards  / Choose #s 601 - 800 + inserts / mb36</div>
+                <div class="ts-buying">BIN</div>
+              </div>
+            </a></div>
+          <a class="ts-more" href="https://www.ebay.com/usr/rememberwhensportscards" target="_blank" rel="noopener">More from this seller &rarr;</a>
+        </section></div>
     
   </main>
 
   <footer class="app-footer">
-    Updated May 26, 2026 · 01:34 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated May 27, 2026 · 20:15 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 

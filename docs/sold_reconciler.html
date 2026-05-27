@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sold Reconciler &middot; Harpua2001</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=Familjen+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0a0a0a;
+      --surface:   #141414;
+      --surface-2: #1a1a1a;
+      --border:    rgba(201,165,66,0.10);
+      --border-mid:rgba(201,165,66,0.22);
+      --gold:      #c9a542;
+      --gold-bright:#e6c66a;
+      --text:      #f1efe9;
+      --text-muted:#9a9388;
+      --text-dim:  #7a7268;
+      --success:   #7fc77a;
+      --warning:   #e0b54a;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: "Familjen Grotesk", system-ui, sans-serif;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: 56px 24px 96px; }
+    .eyebrow {
+      color: var(--gold);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+    }
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      margin: 0 0 8px;
+      color: var(--text);
+    }
+    h1 em { color: var(--gold); font-style: italic; }
+    .lede { color: var(--text-muted); max-width: 64ch; margin: 0 0 32px; }
+    .mode {
+      display: inline-block;
+      padding: 4px 10px;
+      border: 1px solid var(--border-mid);
+      border-radius: 999px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .mode.applied { color: var(--success); border-color: rgba(127,199,122,0.32); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 24px 0 40px;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .stat .label {
+      color: var(--text-dim);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .stat .value {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 2rem;
+      font-weight: 500;
+      color: var(--gold);
+      line-height: 1.1;
+      margin-top: 6px;
+    }
+    section { margin-top: 40px; }
+    h2 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 500;
+      font-size: 1.5rem;
+      margin: 0 0 4px;
+    }
+    .section-note { color: var(--text-muted); margin: 0 0 16px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 11px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+    th {
+      background: var(--surface-2);
+      color: var(--text-dim);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    tr:last-child td { border-bottom: none; }
+    td.mono { font-family: "JetBrains Mono", monospace; font-size: 0.85rem; color: var(--text-muted); }
+    td.num  { font-variant-numeric: tabular-nums; color: var(--gold-bright); font-weight: 600; }
+    td.empty { text-align: center; color: var(--text-dim); padding: 22px; }
+    .footer {
+      margin-top: 56px;
+      color: var(--text-dim);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+    a { color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--border-mid); }
+    a:hover { color: var(--gold-bright); border-color: var(--gold); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Sold Reconciler</p>
+    <h1>Close the loop on <em>recent sales</em><span class="mode ">Dry run only</span></h1>
+    <p class="lede">
+      eBay sold these cards in the last 30 days. CollX has no inbound API,
+      so this report is the manual to-do list of cards to mark sold in CollX.
+      Linked rows are also flipped to <strong>sold</strong> in the linkage DB when
+      this agent runs with <code>--apply</code>.
+    </p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Sold in Window</div>
+        <div class="value">59</div>
+      </div>
+      <div class="stat">
+        <div class="label">Linked to CollX</div>
+        <div class="value">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">eBay Only</div>
+        <div class="value">59</div>
+      </div>
+      <div class="stat">
+        <div class="label">Gross Sold</div>
+        <div class="value">$554.38</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Mark these sold in CollX</h2>
+      <p class="section-note">
+        Each row maps an eBay sale to a CollX card. Open CollX, find the
+        <code>collx_id</code>, and mark the card sold there.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>CollX ID</th>
+            <th>Title</th>
+            <th>Sold</th>
+            <th>Sold At</th>
+            <th>Buyer</th>
+            <th>eBay Item</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" class="empty">No CollX-linked sales in this window. All matched cards are already reconciled.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>eBay-only sales</h2>
+      <p class="section-note">
+        These sold listings predate the CollX linkage (or were listed outside
+        the push-to-ebay flow). Surfaced for awareness, no CollX action needed.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>eBay Item</th>
+            <th>Title</th>
+            <th>Sold</th>
+            <th>Sold At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">306930807722</td><td>1991-92 Fleer - Pro Vision Magic Johnson #6</td><td class="num">$1.99</td><td></td></tr><tr><td class="mono">306950542310</td><td>2025 Panini Donruss Optic - Caleb Williams #8 Stars Prizm</td><td class="num">$4.99</td><td></td></tr><tr><td class="mono">306931285504</td><td>1991 Fleer - Ken Griffey Jr, Barry Bonds #710 NFL</td><td class="num">$2.22</td><td></td></tr><tr><td class="mono">306956577061</td><td>2025 Panini Prizm - Rookies Shedeur Sanders #302 Lazer Prizm (RC)</td><td class="num">$11.84</td><td></td></tr><tr><td class="mono">306958364587</td><td>2025 Bowman University Chrome - Fernando Mendoza #109 (RC)</td><td class="num">$12.49</td><td></td></tr><tr><td class="mono">306937669968</td><td>2025 Panini Select - Club Level Jayden Daniels #289 Pink Shock Prizm Football</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306956571892</td><td>2025 Panini Prizm - Patrick Mahomes II #26 Silver Prizm</td><td class="num">$6.78</td><td></td></tr><tr><td class="mono">306953884593</td><td>2025 Score - Robert Spillane #280 Gold Zone /50</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306937663074</td><td>2025 Panini Select - Rookie Swatches TreVeyon Henderson #RSW-THN Red Prizm (MEM,</td><td class="num">$3.99</td><td></td></tr><tr><td class="mono">306904203738</td><td>1994 Steve Emtman Classic Pro Line Live AUTO Autograph Colts NFL Football</td><td class="num">$8.99</td><td></td></tr><tr><td class="mono">306914911040</td><td>2025 Panini Select - Concourse Tetairoa McMillan #44 Pink Shock Prizm (RC)</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306931283327</td><td>1990 Ken Griffey Jr Sports Illustrated for Kids Series 1 #158 NFL</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306956963551</td><td>2025 Topps Chrome Base Matthew Stafford #169 Rams</td><td class="num">$14.56</td><td></td></tr><tr><td class="mono">306939342209</td><td>2025 Topps Chrome Matthew Golden Pink X-fractor. Packers NFL</td><td class="num">$4.19</td><td></td></tr><tr><td class="mono">306949802296</td><td>2025 Panini Prizm - Sean Taylor #105 Lazer Prizm</td><td class="num">$4.99</td><td></td></tr><tr><td class="mono">306953120922</td><td>2025 Panini Icon Collection Mahomes - Game Gear Patrick Mahomes II #GG-3 (MEM)</td><td class="num">$9.99</td><td></td></tr><tr><td class="mono">306937601406</td><td>2025 Panini Select - Concourse Chuba Hubbard #43 Zebra Prizm</td><td class="num">$15.50</td><td></td></tr><tr><td class="mono">306937466251</td><td>2026 Jeremiyah Love 5 Card Draw Stacked Deck Wild Card RC 3/5 Silver Holo Rookie</td><td class="num">$13.50</td><td></td></tr><tr><td class="mono">306937452121</td><td>2026 Wild Card- Joe Burrow &amp;amp; Justin Jefferson Card 1/1 King NFL</td><td class="num">$11.50</td><td></td></tr><tr><td class="mono">306931218531</td><td>Rickey Henderson New York Yankees 1987 3 Of 7 Card The Press Box</td><td class="num">$3.99</td><td></td></tr><tr><td class="mono">306947427453</td><td>2025 Topps Chrome - Ashton Jeanty Fortune 15 ROOKIE #F15-24 - Raiders</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306945569731</td><td>2025 Panini Phoenix - Fuego Signatures Kurtis Rourke #FUS-KRE (AU, RC)</td><td class="num">$4.99</td><td></td></tr><tr><td class="mono">306914280138</td><td>5 Sam Adams Rookie Cards Seattle Seahawks</td><td class="num">$2.50</td><td></td></tr><tr><td class="mono">306913939866</td><td>15 Dan Marino Cards Miami Dolphins Football Card Lot NFL</td><td class="num">$5.99</td><td></td></tr><tr><td class="mono">306933928667</td><td>2024 Panini Prizm Draft Picks - Gold Ice Prizm Lot (16 Cards) Football Card Lot</td><td class="num">$2.25</td><td></td></tr><tr><td class="mono">306937677187</td><td>2025 Panini Phoenix - Thunderbirds Drake Maye #35 Silver Pyramids /299</td><td class="num">$7.69</td><td></td></tr><tr><td class="mono">306937598270</td><td>2025 Panini Select - Concourse Josh Allen #86 Pink Shock Prizm NFL Football</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306937599747</td><td>2025 Panini Select - Concourse Ashton Jeanty #4 Pink Shock Prizm (RC) Football</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306937664217</td><td>2025 Panini Mosaic - Rookies Cam Ward #382 Camo Pink Mosaic Prizm (RC) Football</td><td class="num">$2.91</td><td></td></tr><tr><td class="mono">306930560592</td><td>2025 Panini Prizm - Rookies Isaac Teslaa #316 (RC) NFL Football</td><td class="num">$1.99</td><td></td></tr><tr><td class="mono">306913908225</td><td>9 Joe Montana Cards 49ers Chiefs Football Card Lot NFL</td><td class="num">$6.99</td><td></td></tr><tr><td class="mono">306913787569</td><td>10 Jim Kelly Cards Buffalo Bills Football Card Lot NFL</td><td class="num">$4.99</td><td></td></tr><tr><td class="mono">306931291522</td><td>1990 Topps - Ken Griffey Jr #336</td><td class="num">$3.33</td><td></td></tr><tr><td class="mono">306914912556</td><td>2025 Panini Select - Concourse Ashton Jeanty #4 Black &amp;amp; Red Shock Prizm (RC)</td><td class="num">$3.00</td><td></td></tr><tr><td class="mono">306939330491</td><td>Topps Chrome Football 2025 Bhayshul Tuten Jaguars Geometric Rookie /99 #389</td><td class="num">$5.67</td><td></td></tr><tr><td class="mono">306913311444</td><td>9 Michael Irvin Cards Dallas Cowboys Football Card Lot NFL</td><td class="num">$4.99</td><td></td></tr><tr><td class="mono">306930466950</td><td>2025 Panini Prizm - Rookies Trey Amos #400 Red Shimmer Prizm /49 (RC)</td><td class="num">$3.25</td><td></td></tr><tr><td class="mono">306927040476</td><td>2026 Wild Card 5 Card Draw Germie Bernard Black Tie Kings #4/4 Steelers RC</td><td class="num">$7.00</td><td></td></tr><tr><td class="mono">306903933988</td><td>8 Cards Roger Craig San Francisco 49ers Minnesota Vikings</td><td class="num">$1.50</td><td></td></tr><tr><td class="mono">306931229229</td><td>1989 Topps Traded - Rickey Henderson #48T Collector&#x27;s Edition (Tiffany)</td><td class="num">$12.34</td><td></td></tr><tr><td class="mono">306926030086</td><td>2025 Panini Mosaic - Showtime Signatures Aaron Donald SOS-AAD Red &amp;amp; Yellow Prizm</td><td class="num">$49.99</td><td></td></tr><tr><td class="mono">306931052623</td><td>2025 Panini Prizm Draft Picks - Luther Burden #71 Red Ice Prizm (RC)</td><td class="num">$2.22</td><td></td></tr><tr><td class="mono">306927035291</td><td>2026 Wild Card 5 Card Draw Baker Mayfield Stacked Deck Black Tie King #1/1</td><td class="num">$10.00</td><td></td></tr><tr><td class="mono">306927028439</td><td>2026 Wild Card 5 Card Draw Justin Jefferson Stacked Deck Black Tie Aces #2/2</td><td class="num">$8.00</td><td></td></tr><tr><td class="mono">306930929280</td><td>2025 Panini Prizm Draft Picks - Carnell Tate #68 Red Ice Prizm (RC)</td><td class="num">$3.45</td><td></td></tr><tr><td class="mono">306751048818</td><td>EEVEE - Poke Ball Reverse Holo - PSA 9 - 2024 Japanese Terastal Fest ex - #125</td><td class="num">$15.50</td><td></td></tr><tr><td class="mono">306926059250</td><td>2025 Panini Prizm Draft Picks - On Campus Joe Burrow #OC-14</td><td class="num">$180.00</td><td></td></tr><tr><td class="mono">306914916776</td><td>2025 Panini Prizm - Rookies Jalen Milroe #317 Neon Green Pulsar Prizm (RC)</td><td class="num">$3.99</td><td></td></tr><tr><td class="mono">306914908485</td><td>2025 Panini Prizm Draft Picks - Ashton Jeanty #13 Gold Ice Prizm (RC)</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306927289794</td><td>2025 Panini Prizm - Rookies Tyler Shough #327 White Disco Prizm (RC)</td><td class="num">$13.99</td><td></td></tr><tr><td class="mono">306913178483</td><td>6 Cards Darrell Green Washington Redskins</td><td class="num">$1.99</td><td></td></tr><tr><td class="mono">306914170613</td><td>2025 Panini Prizm Draft Picks - New Recruits Jeremiah Smith #25 Green Prizm (RC)</td><td class="num">$4.99</td><td></td></tr><tr><td class="mono">306914248275</td><td>2025 Panini Prizm Draft Picks - Carnell Tate #68 Gold Ice Prizm (RC)</td><td class="num">$2.50</td><td></td></tr><tr><td class="mono">306914175824</td><td>2025 Panini Prizm Draft Picks - Instant Impact Cam Ward #II-CWD Gold Ice Prizm</td><td class="num">$2.00</td><td></td></tr><tr><td class="mono">306914195022</td><td>2025 Panini Prizm Draft Picks - Fearless Drew Allar #F-DAR Gold Ice Prizm (RC)</td><td class="num">$1.99</td><td></td></tr><tr><td class="mono">306914172219</td><td>2025 Panini Prizm Draft Picks - Caleb Downs #159 Green Prizm (RC)</td><td class="num">$1.99</td><td></td></tr><tr><td class="mono">306914214448</td><td>2025 Panini Donruss Optic - Rated Rookie Shedeur Sanders #203 Stars Prizm (RC)</td><td class="num">$9.99</td><td></td></tr><tr><td class="mono">306783987628</td><td>Emmitt Smith - 15 x Different Cards, No Duplicates - Dallas Cowboys</td><td class="num">$2.99</td><td></td></tr><tr><td class="mono">306904178257</td><td>10 Cards John Elway Denver Broncos</td><td class="num">$1.99</td><td></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p class="footer">Generated 2026-05-27 08:32 UTC &middot; sold_reconciler_agent.py</p>
+  </main>
+</body>
+</html>

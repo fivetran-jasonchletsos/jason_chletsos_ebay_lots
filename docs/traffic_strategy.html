@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>harpua2001 — Traffic Strategy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.55in 0.5in 0.5in 0.5in; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-size: 10pt; line-height: 1.45;
+    color: #1a1814; background: #faf7f1;
+  }
+  .wrap { padding: 0 0 22pt 0; }
+  header { border-bottom: 2px solid #c9a44a; padding-bottom: 11pt; margin-bottom: 12pt; }
+  .eyebrow {
+    font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #8a6d2e;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    font-weight: 600; font-style: italic;
+    font-size: 24pt; line-height: 1.05; letter-spacing: -0.01em;
+    margin: 4pt 0 4pt 0; color: #1a1814;
+  }
+  h1 em { color: #8a6d2e; font-style: italic; }
+  .deck { font-size: 10pt; color: #4a4438; max-width: 540pt; margin: 0; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-style: italic; font-size: 13pt; letter-spacing: -0.005em;
+    margin: 12pt 0 5pt 0; color: #1a1814;
+    border-top: 1px solid #d8cfb8; padding-top: 9pt;
+  }
+  h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 2pt; }
+  h2 em { color: #8a6d2e; font-style: italic; }
+  h3 {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 10pt; margin: 8pt 0 3pt 0;
+  }
+  p { margin: 0 0 6pt 0; }
+  ul, ol { margin: 4pt 0 6pt 16pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  code, .mono {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 8.5pt; background: #f1ead7; padding: 1pt 4pt; border-radius: 2pt;
+    color: #4a3a14;
+  }
+  .tldr {
+    background: #fff; border: 1px solid #d8cfb8;
+    border-left: 3pt solid #c9a44a;
+    padding: 9pt 14pt; margin: 6pt 0 10pt 0; border-radius: 2pt;
+  }
+  .tldr p { margin: 0; }
+  .tier {
+    background: #fff; border: 1px solid #d8cfb8;
+    border-left: 4pt solid #c9a44a;
+    padding: 10pt 14pt 8pt 14pt; margin: 8pt 0 4pt 0; border-radius: 2pt;
+  }
+  .tier-head {
+    display: flex; align-items: baseline; gap: 10pt;
+    margin-bottom: 4pt;
+  }
+  .tier-num {
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-weight: 600; font-style: italic; font-size: 18pt; color: #8a6d2e; line-height: 1;
+  }
+  .tier-title {
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-style: italic; font-size: 13pt; color: #1a1814;
+  }
+  .tier-when {
+    font-size: 8pt; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #6c5a2e;
+    background: #f1ead7; padding: 2pt 8pt; border-radius: 999pt;
+  }
+  .placement {
+    margin: 6pt 0 4pt 0;
+    padding: 5pt 0 4pt 0;
+    border-top: 1px dashed #d8cfb8;
+  }
+  .placement:first-child { border-top: 0; }
+  .placement-name {
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10pt;
+    color: #1a1814;
+  }
+  .placement-meta {
+    display: inline-block; font-size: 8pt; color: #6c5a2e;
+    margin-left: 6pt; font-variant-numeric: tabular-nums;
+  }
+  .placement-body { font-size: 9.5pt; color: #2c2820; margin-top: 2pt; line-height: 1.4; }
+  .pull {
+    background: #1a1814; color: #ecdfb8;
+    border-radius: 3pt; padding: 10pt 14pt;
+    margin: 8pt 0 4pt 0;
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-style: italic; font-size: 12pt; line-height: 1.4;
+  }
+  .pull .b { color: #c9a44a; font-weight: 700; }
+  table.calendar {
+    width: 100%; border-collapse: collapse;
+    margin: 4pt 0 4pt 0;
+    font-size: 9.5pt;
+  }
+  table.calendar th, table.calendar td {
+    text-align: left; padding: 5pt 9pt 5pt 0;
+    vertical-align: top; border-bottom: 1px solid #e6ddc4;
+  }
+  table.calendar th {
+    font-size: 7.5pt; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #6c5a2e;
+    border-bottom: 1px solid #8a6d2e;
+  }
+  table.calendar td.when {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    color: #8a6d2e; font-size: 8.5pt; letter-spacing: 0.06em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .footnote {
+    font-size: 8pt; color: #6c5a2e; margin-top: 14pt;
+    border-top: 1px solid #d8cfb8; padding-top: 6pt;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">harpua2001 &middot; Traffic strategy</div>
+  <h1>Driving traffic to the store <em>without social media</em>.</h1>
+  <p class="deck">Three agents (SEO, card community, earned media) reviewed the harpua2001 buyer site and store independently. They converged on the same plan: own your URL, fix the schema gap, embed in card communities, and use your Fivetran SE credibility to cross-pollinate technical audiences. No Twitter, no Instagram, no TikTok required.</p>
+</header>
+
+<div class="tldr">
+<p><b>The North Star.</b> The bare <code>ebay.com/str/harpua2001</code> URL belongs in profile bios and signatures. In conversation, drop your own GitHub Pages anchor links like <code>by_player.html#caleb-williams</code> or <code>by_set.html#panini-prizm</code>. Your indexed pages read as service; the eBay URL reads as spam. That single distinction is what separates community engagement from getting banned.</p>
+</div>
+
+<div class="pull">
+"You are a paying Fivetran customer running a real revenue-generating side-hustle on Anthropic, Fivetran, and dbt stacks. That is <span class="b">a customer-story team's dream</span> — and a content angle that no other card seller has."
+</div>
+
+<h2>Tier 1 &mdash; <em>Durable community placements</em> (this week)</h2>
+
+<div class="tier">
+  <div class="tier-head">
+    <div class="tier-num">1</div>
+    <div class="tier-title">Community profile links that compound for months</div>
+    <div class="tier-when">90 min total setup</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">/r/sportscards</span>
+    <span class="placement-meta">~540K members &middot; bio link permanent</span>
+    <div class="placement-body">Highest-leverage surface. Rules ban link drops outside designated threads, but the Saturday Mail Day megathread, the weekly Show and Tell, and the pinned FS/FT thread all permit eBay links once you have post karma (~30 days / ~100 comment karma). Store link goes in profile bio. Comment helpfully on 10 posts before your first post.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Blowout Cards Forums B/S/T</span>
+    <span class="placement-meta">~60K registered &middot; signature line</span>
+    <div class="placement-body">Old-school but the serious vintage and prospector crowd lives here. 25-post gate before you can list. Signature allows eBay store URL permanently. Format: per-sport FS thread bumped weekly with new adds. Best fit for the Caleb Williams rookie run — Bears prospectors trawl this forum.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Trading Card Database (TCDB)</span>
+    <span class="placement-meta">~200K accounts &middot; high domain authority</span>
+    <div class="placement-body">Lower traffic than Blowout but the SEO juice is real. Signature line, profile, and marketplace all support a permanent eBay link. Google indexes TCDB profile pages — slow burn but durable.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">eBay Community seller-profile signature</span>
+    <span class="placement-meta">Free &middot; high trust &middot; indexed</span>
+    <div class="placement-body">One thoughtful post per week in the Selling forum with the store URL in your signature compounds over months. Free.</div>
+  </div>
+</div>
+
+<h2>Tier 2 &mdash; <em>SEO unforced errors</em> (this weekend, ~2 hours)</h2>
+
+<div class="tier">
+  <div class="tier-head">
+    <div class="tier-num">2</div>
+    <div class="tier-title">Fix the structured data gap and own the domain</div>
+    <div class="tier-when">Single biggest leverage</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Add schema.org JSON-LD across the site</span>
+    <div class="placement-body">Verified by the SEO agent: <code>index.html</code> and <code>by_set.html</code> have <b>zero</b> schema.org markup despite Google Search Console being set up + sitemap + robots.txt valid. Add <code>Product</code> JSON-LD to every <code>docs/items/*.html</code> (name, image, sku, offers.price, brand) and <code>Store</code> JSON-LD to <code>index.html</code> with <code>sameAs</code> pointing to the eBay store. Unlocks Google rich-result eligibility.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Register harpua2001.com and CNAME to GitHub Pages</span>
+    <span class="placement-meta">$10-15/year &middot; ~15 min setup</span>
+    <div class="placement-body">Brand-match domain ranks for branded queries immediately. GitHub Pages serves it free with HTTPS. Single CNAME file in <code>docs/</code> + DNS A record at the registrar. Owned brand surface for the next decade.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Internal linking + breadcrumb JSON-LD</span>
+    <div class="placement-body">Every <code>items/*.html</code> should link back to its by_set and by_player parent. PageRank flows up. Add Breadcrumb JSON-LD to set + player pages for richer SERP appearance.</div>
+  </div>
+</div>
+
+<h2>Tier 3 &mdash; <em>Cross-pollination (your Fivetran SE credibility is the wedge)</em></h2>
+
+<div class="tier">
+  <div class="tier-head">
+    <div class="tier-num">3</div>
+    <div class="tier-title">Earned-media placements that link back</div>
+    <div class="tier-when">First month + recurring</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Medium / Substack technical post</span>
+    <span class="placement-meta">~3 hours to write &middot; multi-channel</span>
+    <div class="placement-body"><i>"I built an AI-driven eBay store with Anthropic Claude and Fivetran — here's the architecture."</i> You already wrote half this content in the AI Overview PDFs. Substack doubles as your newsletter home so the post earns email subscribers, not one-time reads. Data engineers genuinely collect cards — the overlap is real.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">LinkedIn Newsletter ("Side-Hustle Stack")</span>
+    <span class="placement-meta">Broadcast, NOT feed-scrolling</span>
+    <div class="placement-body">LinkedIn newsletters push to subscribers' inboxes and notification center. No public feed posting required. Monthly cadence. Topics: "What an AI inventory agent does on a Sunday morning," "Pricing 4,000 cards with Claude," "The dbt model behind my eBay store." Each post ends with a store link.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Customer-story pitches: dbt Labs &middot; Fivetran &middot; Anthropic</span>
+    <span class="placement-meta">One per quarter, rotate</span>
+    <div class="placement-body">You're a paying Pro on all three running a real side-hustle on their stacks. Customer-stories teams want this story. One quarterly pitch email rotating vendors. Two landings per year would meaningfully change inbound.</div>
+  </div>
+
+  <div class="placement">
+    <span class="placement-name">Hacker News Show post</span>
+    <span class="placement-meta">When you ship the next big architecture piece</span>
+    <div class="placement-body">The AI Lot Generator was a Show HN candidate already. Next major architecture piece (the lot-listing pipeline, the sold-event reconciler at scale) earns front-page traffic if pitched right. 1-line title + 2-paragraph comment, link to the GitHub Pages build page.</div>
+  </div>
+</div>
+
+<h2>Build the email list with zero social</h2>
+<p>Your existing <code>email_campaign_agent.py</code> can fire a weekly "Steals" email today — there's just no list yet. Two capture mechanisms ranked:</p>
+<ol>
+  <li><b>On-site "Steals Alerts" signup.</b> Slim dismissable footer bar + single modal on <code>index.html</code>, <code>deals.html</code>, and item pages. "Get the weekly Steals list. New under-$10 finds, real photos, no fluff." Store in Buttondown (free under 100 subs). One afternoon of work.</li>
+  <li><b>Post-purchase capture via Order Watch.</b> When <code>orders_watch_plan.json</code> shows a new sale, auto-send a branded thank-you with a P.S. opt-in. eBay buyers who paid are the warmest list you'll ever own.</li>
+</ol>
+
+<h2>30-day action calendar</h2>
+
+<table class="calendar">
+<thead><tr><th>When</th><th>Action</th><th>Why</th></tr></thead>
+<tbody>
+  <tr><td class="when">This weekend</td><td>Add schema.org JSON-LD to <code>index.html</code> + <code>items/*.html</code>; register harpua2001.com + CNAME</td><td>Single highest leverage. Google rich results unlock.</td></tr>
+  <tr><td class="when">Next week</td><td>Reddit profile setup (bio link), Blowout signature, TCDB profile, eBay Community signature</td><td>Four durable profile links that compound for years.</td></tr>
+  <tr><td class="when">Week 2-3</td><td>First Medium / Substack post: the AI architecture. Cross-post to LinkedIn Newsletter.</td><td>Cross-pollinate the data engineering audience. Earns subs + links.</td></tr>
+  <tr><td class="when">Week 3</td><td>Ship on-site email signup. Tie into <code>email_campaign_agent.py</code>.</td><td>The first 50 subs are the hardest. After that, weekly Steals = recurring traffic.</td></tr>
+  <tr><td class="when">Week 4</td><td>First quarterly customer-story pitch (start with dbt Labs)</td><td>Two of these landings per year would change inbound.</td></tr>
+  <tr><td class="when">Ongoing</td><td>15 min/week on Reddit Mail Day participation. Weekly Steals newsletter (Sundays 8am ET).</td><td>Sustainable cadence for a side-hustler with a day job.</td></tr>
+</tbody>
+</table>
+
+<div class="footnote">
+Synthesized from a 3-agent fan-out on 2026-05-27. Source agents: SEO/discoverability, sports-card community placement, earned/owned media. All three converged on Tier 1 + Tier 2 + Tier 3 structure independently &mdash; high-consensus plan.
+</div>
+
+</div>
+</body>
+</html>

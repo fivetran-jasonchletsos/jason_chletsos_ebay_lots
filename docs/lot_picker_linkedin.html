@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>harpua2001 — AI Lot Picker agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.55in 0.5in 0.5in 0.5in; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-size: 10.5pt; line-height: 1.5;
+    color: #1a1814; background: #faf7f1;
+  }
+  .wrap { padding: 0 0 20pt 0; }
+  header { border-bottom: 2px solid #c9a44a; padding-bottom: 12pt; margin-bottom: 14pt; }
+  .eyebrow {
+    font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #8a6d2e;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    font-weight: 600; font-style: italic;
+    font-size: 26pt; line-height: 1.05; letter-spacing: -0.01em;
+    margin: 5pt 0 5pt 0; color: #1a1814;
+  }
+  h1 em { color: #8a6d2e; font-style: italic; }
+  .deck { font-size: 11pt; color: #4a4438; max-width: 540pt; margin: 0; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-style: italic; font-size: 14pt; letter-spacing: -0.005em;
+    margin: 16pt 0 7pt 0; color: #1a1814;
+    border-top: 1px solid #d8cfb8; padding-top: 12pt;
+  }
+  h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 4pt; }
+  h2 em { color: #8a6d2e; font-style: italic; }
+  p { margin: 0 0 8pt 0; }
+  ul { margin: 4pt 0 8pt 16pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  code, .mono {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 9pt; background: #f1ead7; padding: 1pt 4pt; border-radius: 2pt;
+    color: #4a3a14;
+  }
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8pt;
+    margin: 10pt 0 14pt 0;
+  }
+  .stat {
+    background: #1a1814; color: #faf7f1;
+    padding: 10pt 13pt; border-radius: 3pt;
+  }
+  .stat .n {
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-weight: 600; font-style: italic; font-size: 22pt; line-height: 1;
+    color: #c9a44a;
+  }
+  .stat .l {
+    font-size: 7.5pt; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; margin-top: 4pt; opacity: 0.85;
+  }
+  .pull {
+    background: #1a1814; color: #ecdfb8;
+    border-radius: 4pt; padding: 16pt 22pt;
+    margin: 8pt 0 14pt 0;
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-style: italic; font-size: 14pt; line-height: 1.35;
+  }
+  .pull .b { color: #c9a44a; font-weight: 700; }
+  .collx-callout {
+    background: #fff;
+    border: 1px solid #d8cfb8;
+    border-left: 4pt solid #c9a44a;
+    padding: 14pt 18pt;
+    border-radius: 3pt;
+    margin: 6pt 0 12pt 0;
+  }
+  .collx-callout .label {
+    font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #8a6d2e;
+    margin-bottom: 4pt;
+  }
+  .collx-callout h3 {
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-style: italic; font-weight: 700; font-size: 14pt;
+    margin: 0 0 6pt 0; color: #1a1814;
+  }
+  .collx-callout p { margin: 0; color: #2c2820; font-size: 10.5pt; line-height: 1.5; }
+  .cta {
+    margin-top: 20pt;
+    background: #1a1814; color: #faf7f1;
+    padding: 16pt 22pt; border-radius: 4pt;
+    display: flex; flex-direction: column; gap: 6pt;
+  }
+  .cta .cta-eyebrow {
+    font-size: 8.5pt; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: #c9a44a;
+  }
+  .cta .cta-head {
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-weight: 600; font-style: italic; font-size: 18pt; line-height: 1.15;
+    margin: 2pt 0 8pt 0;
+  }
+  .cta .cta-head em { color: #c9a44a; font-style: italic; }
+  .cta .cta-deck { color: #ecdfb8; font-size: 10.5pt; margin-bottom: 10pt; }
+  .cta .cta-link {
+    display: inline-block;
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11pt;
+    font-weight: 600; color: #c9a44a; text-decoration: none;
+    background: rgba(201, 164, 74, 0.12);
+    padding: 8pt 14pt; border: 1pt solid #c9a44a; border-radius: 3pt;
+    align-self: flex-start;
+  }
+  .footnote {
+    font-size: 8pt; color: #6c5a2e; margin-top: 12pt;
+    border-top: 1px solid #d8cfb8; padding-top: 8pt;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Builder notes &middot; harpua2001</div>
+  <h1>The AI feature that turns my <em>cheap singles</em> into sellable lots.</h1>
+  <p class="deck">I run an eBay sports-card store solo. Half the cards in my inventory are worth more in eBay fees than they earn at the listed price. So I built an AI agent that finds those sub-economic cards and proposes themed bundles that DO sell. Built on top of CollX (Philadelphia neighbors of mine) for the identification and pricing layer.</p>
+</header>
+
+<div class="stat-strip">
+  <div class="stat"><div class="n">93</div><div class="l">Cards too cheap as singles</div></div>
+  <div class="stat"><div class="n">33</div><div class="l">Lots proposed</div></div>
+  <div class="stat"><div class="n">258</div><div class="l">Cards bundled</div></div>
+  <div class="stat"><div class="n">$405</div><div class="l">Total lot value</div></div>
+</div>
+
+<div class="pull">
+"The economics break on a $1 card with free shipping. eBay fees eat the margin before the buyer hits checkout. Bundle 10 of them into <span class="b">one Detroit Lions lot at $14.99</span> and the same cards finally move."
+</div>
+
+<h2>How it actually works</h2>
+<p>The Lot Picker is a Python agent that runs against my unlisted CollX inventory. Three steps, all heuristic — no LLM required in v1.</p>
+<ul>
+  <li><b>Candidate selection.</b> Pull every card from my CollX collection where the market value is empty or below $3.00 AND the card is not already live on eBay. Tonight: 93 cards out of a 100-ish unlisted pool.</li>
+  <li><b>Five grouping passes.</b> Cards run through five themed groupings in order — by NFL team, by player (multiple parallels of one star), by set / year (set-builders), by entire rookie class, and by parallel type (shiny / Prizm / Refractor). Same card can only land in one lot.</li>
+  <li><b>Pricing.</b> Bulk lots price at the max of 60% of the sum of CollX market values, $1.50 per card, or a $9.99 floor. Focused lots (one player, one parallel type) price tighter at 75% of sum, because the theme adds value beyond the raw sum.</li>
+</ul>
+
+<h2>The CollX layer &mdash; <em>why this works at all</em></h2>
+
+<div class="collx-callout">
+  <div class="label">Built on CollX &middot; Philadelphia</div>
+  <h3>CollX is the identification and pricing engine I rely on every day.</h3>
+  <p>I scan a card in the CollX app on my phone. CollX identifies the card, returns the market value, stores the photo, tracks it in my collection. My pipeline imports the CollX export and layers on the sell-side logic — eBay listing automation, sold-state reconciliation, and the Lot Picker. CollX is the moat I'm not trying to rebuild. They're a Philadelphia-local company doing the hard problem of card identification at scale.</p>
+</div>
+
+<h2>The safety pattern</h2>
+<p>The Lot Picker never pushes to eBay on its own. It runs in dry-run mode by default, writes a proposal JSON, renders a printable PDF picking list (A-Z by player last name, so I can walk my binder in order), and waits for me to physically pull each card and approve the lot. Only then does <code>push_lots_to_ebay.py</code> fire — and only with an explicit typed confirmation. Three gates between the agent and a real eBay listing.</p>
+
+<h2>Tonight's run</h2>
+<p>33 lots proposed across the five themes. Largest: a 25-card 2025 NFL Rookie Class Lot at $37.50 (collectors speculate on the whole draft class — clean bundle). Smallest: a handful of 3-card team lots and one-player rookie runs at $9.99. Total combined potential: <b>$405.15 in revenue from cards that mostly weren't going to move as singles.</b></p>
+
+<div class="cta">
+  <div class="cta-eyebrow">See the store</div>
+  <div class="cta-head">If you want to see this <em>actually running</em>.</div>
+  <div class="cta-deck">Sports cards (mostly football and Pokemon), aggressively priced, free combined shipping on multi-card orders. The lots from this agent will start landing here in the next few days.</div>
+  <a class="cta-link" href="https://www.ebay.com/str/harpua2001">https://www.ebay.com/str/harpua2001</a>
+</div>
+
+<div class="footnote">
+Built with Anthropic Claude (Opus 4.7, Sonnet 4) and Claude Code &middot; CollX Pro &middot; eBay Developer APIs &middot; SQLite linkage ledger &middot; Python heuristic agents. CollX is Philadelphia-based — tag them in the post if you found this useful. &middot; 2026-05-27 &middot; Jason Chletsos
+</div>
+
+</div>
+</body>
+</html>

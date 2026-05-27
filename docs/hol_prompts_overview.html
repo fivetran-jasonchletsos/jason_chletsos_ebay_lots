@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>dbt Wizard HOL — Prompts overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.55in 0.5in 0.5in 0.5in; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-size: 10pt; line-height: 1.45;
+    color: #1a1814; background: #faf7f1;
+  }
+  .wrap { padding: 0 0 22pt 0; }
+  header { border-bottom: 2px solid #c9a44a; padding-bottom: 12pt; margin-bottom: 14pt; }
+  .eyebrow {
+    font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #8a6d2e;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    font-weight: 600; font-style: italic;
+    font-size: 23pt; line-height: 1.1; letter-spacing: -0.01em;
+    margin: 5pt 0 5pt 0; color: #1a1814;
+  }
+  .deck { font-size: 10.5pt; color: #4a4438; max-width: 540pt; margin: 0; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-size: 14pt; letter-spacing: -0.005em;
+    margin: 14pt 0 6pt 0; color: #1a1814;
+    border-top: 1px solid #d8cfb8; padding-top: 10pt;
+  }
+  h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 4pt; }
+  p { margin: 0 0 7pt 0; }
+  code, .mono {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 9pt; background: #f1ead7; padding: 1pt 4pt; border-radius: 2pt;
+    color: #4a3a14;
+  }
+  .key {
+    display: inline-block;
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 10pt; font-weight: 600;
+    padding: 2pt 8pt; border-radius: 4pt;
+    background: #1a1814; color: #c9a44a;
+    border: 1px solid #c9a44a;
+  }
+  .footnote {
+    font-size: 8pt; color: #6c5a2e; margin-top: 12pt;
+    border-top: 1px solid #d8cfb8; padding-top: 6pt;
+  }
+
+  .how {
+    background: #fff;
+    border: 1px solid #d8cfb8;
+    border-left: 3pt solid #c9a44a;
+    padding: 10pt 14pt;
+    margin: 8pt 0 14pt 0;
+    border-radius: 2pt;
+  }
+  .scenario {
+    margin-top: 12pt;
+    page-break-inside: avoid;
+  }
+  .scenario-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid #c9a44a;
+    padding-bottom: 4pt;
+    margin-bottom: 8pt;
+  }
+  .scenario-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-style: italic; font-size: 14pt; color: #1a1814;
+  }
+  .scenario-meta {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 8pt; color: #8a6d2e;
+  }
+  .prompt-row {
+    display: grid;
+    grid-template-columns: 28pt 1fr;
+    gap: 8pt;
+    margin-bottom: 6pt;
+    padding-bottom: 6pt;
+    border-bottom: 1px dashed #e6ddc4;
+  }
+  .prompt-row:last-child { border-bottom: 0; }
+  .prompt-num {
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-style: italic; font-size: 14pt; color: #8a6d2e;
+    line-height: 1;
+  }
+  .prompt-body {
+    font-size: 9pt; line-height: 1.45;
+  }
+  .prompt-head {
+    font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase; color: #6c5a2e;
+    margin-bottom: 2pt;
+  }
+  .prompt-text {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 8.5pt; color: #2c2820;
+    background: #f8f1de; padding: 4pt 8pt; border-radius: 2pt;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">dbt Wizard HOL &middot; Prompts overview</div>
+  <h1>Every prompt participants will run &mdash; at a glance.</h1>
+  <p class="deck">Five skills, 32 canonical prompts. Under the new advancement pattern, dbt Wizard runs each one automatically when the participant types <span class="key">next</span>. This sheet is the instructor reference (and a printable cheat sheet) for what's actually being executed under the hood.</p>
+</header>
+
+<div class="how">
+<p style="margin:0;"><b>How participants advance.</b> They invoke the skill once (e.g., natural-language phrasing that matches the skill description). The skill auto-runs prompt 1. After each step Wizard prints a footer like <span class="mono">Step N complete. Press enter to continue.</span> The only input that advances is pressing <span class="key">enter</span> (sending an empty message). <b>Anything else is refused</b> with a single redirect line — Wizard will not run off-script queries. The instructor pauses the lab if a participant has a real question.</p>
+</div>
+
+
+    <div class="scenario">
+      <div class="scenario-head">
+        <div class="scenario-name">Onboarding</div>
+        <div class="scenario-meta">7 prompts</div>
+      </div>
+      <p style="font-size:9pt; color:#4a4438; margin:0 0 6pt 0;">New analytics engineer onboarding — get oriented in the dbt project.</p>
+      <div class="prompt-row">
+        <div class="prompt-num">1</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Project summary</div>
+          <div class="prompt-text">I'm a new analytics engineer onboarding to this project. Give me a one-paragraph summary of what this dbt project does.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">2</div>
+        <div class="prompt-body">
+          <div class="prompt-head">By-domain inventory</div>
+          <div class="prompt-text">List the staging, intermediate, and mart models broken out by domain so I know what's where.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">3</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Mart lineage and grain</div>
+          <div class="prompt-text">Show me the lineage, grain, and key columns of the orders mart.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">4</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Sample + distinct values</div>
+          <div class="prompt-text">Show me a 10-row sample of the orders mart and the distinct values for status and channel.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">5</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Tests and contracts</div>
+          <div class="prompt-text">What tests and contracts are defined on the orders model? Any currently failing tests?</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">6</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Create new mart</div>
+          <div class="prompt-text">Create a new mart model called orders_by_week that rolls orders up to weekly grain by store.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">7</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Compile and preview</div>
+          <div class="prompt-text">Compile and preview orders_by_week. Don't materialize it.</div>
+        </div>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-head">
+        <div class="scenario-name">Scenario 1 — Inventory misallocation</div>
+        <div class="scenario-meta">6 prompts</div>
+      </div>
+      <p style="font-size:9pt; color:#4a4438; margin:0 0 6pt 0;">Investigate why stores received the wrong inventory before a sale.</p>
+      <div class="prompt-row">
+        <div class="prompt-num">1</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Discovery</div>
+          <div class="prompt-text">Operations thinks inventory was misallocated across stores before a sale. Find the models in this project related to inventory, stores, items, and shipments.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">2</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Grain + joins</div>
+          <div class="prompt-text">For those models, show the grain, key columns, and how they join together.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">3</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Item-specific check</div>
+          <div class="prompt-text">Check the shipment plan versus on-hand inventory for our top SKUs and surface the stores where actual deviates most from plan.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">4</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Create variance model</div>
+          <div class="prompt-text">Create a dbt model named inventory_shipment_variance that compares planned versus actual at the store-item grain and labels each row over, under, or on-target.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">5</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Compile + preview</div>
+          <div class="prompt-text">Compile the model and preview the first 20 rows ordered deterministically by variance magnitude.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">6</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Materialize safely</div>
+          <div class="prompt-text">Before materializing, confirm the active dbt target is my dev schema. Then materialize inventory_shipment_variance.</div>
+        </div>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-head">
+        <div class="scenario-name">Scenario 2 — Extend orders with tickets</div>
+        <div class="scenario-meta">7 prompts</div>
+      </div>
+      <p style="font-size:9pt; color:#4a4438; margin:0 0 6pt 0;">Wire support tickets into int_orders_enriched without breaking downstream.</p>
+      <div class="prompt-row">
+        <div class="prompt-num">1</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Locate target model</div>
+          <div class="prompt-text">I need to add support-ticket context to enriched orders without breaking downstream consumers. Find int_orders_enriched in this project. Show me what it currently produces, its grain, and which models depend on it downstream.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">2</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Discover unused source</div>
+          <div class="prompt-text">Find every support-ticket source or model in this project that int_orders_enriched does NOT currently reference.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">3</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Describe stg_tickets</div>
+          <div class="prompt-text">Describe stg_tickets. Show me the columns, their types, the grain, and how order_id joins back to int_orders_enriched.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">4</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Validate the join</div>
+          <div class="prompt-text">Run a quick check: count rows in stg_tickets with a non-null order_id, count distinct ticket order_ids, and count how many match int_orders_enriched. One-to-one or one-to-many?</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">5</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Modify the model</div>
+          <div class="prompt-text">Update int_orders_enriched to add ticket_count, has_open_ticket_flag, last_ticket_status from stg_tickets. Aggregate to one row per order_id first. LEFT JOIN. Preserve every existing column.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">6</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Compile + preview</div>
+          <div class="prompt-text">Compile int_orders_enriched and every downstream model that depends on it. Then preview 20 rows ordered by order_id. Do not materialize anything.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">7</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Materialize</div>
+          <div class="prompt-text">Materialize int_orders_enriched into my dev schema.</div>
+        </div>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-head">
+        <div class="scenario-name">Scenario 3 — Schema breakage repair</div>
+        <div class="scenario-meta">5 prompts</div>
+      </div>
+      <p style="font-size:9pt; color:#4a4438; margin:0 0 6pt 0;">Upstream source column renamed; fix the staging model and validate blast radius.</p>
+      <div class="prompt-row">
+        <div class="prompt-num">1</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Explain the failure</div>
+          <div class="prompt-text">My dbt run just failed after a product source schema change. Explain the failure and tell me which column changed.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">2</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Describe current source</div>
+          <div class="prompt-text">Describe the current schema of retail.RET_PRODUCTS, including column names and types.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">3</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Blast radius</div>
+          <div class="prompt-text">Show me every model, source definition, test, and YAML file that references the old column name.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">4</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Apply the fix</div>
+          <div class="prompt-text">Update stg_products to read brand_name (the new column) instead of the old name. Preserve every other column the model emits.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">5</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Compile + preview</div>
+          <div class="prompt-text">Compile stg_products and every downstream product model. Preview 20 rows of stg_products.</div>
+        </div>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-head">
+        <div class="scenario-name">Scenario 4 — Customer segmentation</div>
+        <div class="scenario-meta">7 prompts</div>
+      </div>
+      <p style="font-size:9pt; color:#4a4438; margin:0 0 6pt 0;">Marketing-driven segmentation model built fresh on top of order activity.</p>
+      <div class="prompt-row">
+        <div class="prompt-num">1</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Discovery</div>
+          <div class="prompt-text">Marketing needs a targeted customer segment based on recent purchase behavior by store. Find the models related to customers, stores, orders, order lines, products, and categories.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">2</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Grain + joins</div>
+          <div class="prompt-text">Show the grain and joins for those models.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">3</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Data inspection</div>
+          <div class="prompt-text">Check recent order dates and category values needed for a 180-day segmentation model.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">4</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Activity model</div>
+          <div class="prompt-text">Create a 180-day customer activity model by store.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">5</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Segment model</div>
+          <div class="prompt-text">Create a segment model for VIPs, big spenders, and category-loyal customers, built on top of the activity model.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">6</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Compile + preview</div>
+          <div class="prompt-text">Compile and preview the segment model. Exclude customers with no segment.</div>
+        </div>
+      </div>
+      <div class="prompt-row">
+        <div class="prompt-num">7</div>
+        <div class="prompt-body">
+          <div class="prompt-head">Materialize</div>
+          <div class="prompt-text">Materialize the segment model into my dev schema. Skip the verification pass — the preview already confirmed the output.</div>
+        </div>
+      </div>
+    </div>
+
+<div class="footnote">
+Source: <code>skills/&lt;name&gt;/SKILL.md</code> in <code>fivetran-jacklowery/dbt_wizard_hol</code>. SKILL.md files updated locally with the advancement pattern; not yet pushed. Generated 2026-05-26.
+</div>
+
+</div>
+</body>
+</html>
