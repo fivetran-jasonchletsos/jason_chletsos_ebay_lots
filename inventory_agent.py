@@ -37,14 +37,18 @@ PLAN_PATH = REPO_ROOT / "output" / "inventory_plan.json"
 REPORT    = REPO_ROOT / "docs"   / "inventory.html"
 SCP_CACHE = REPO_ROOT / "sportscardspro_prices.json"
 
-# eBay primary category IDs — single-card categories
+# eBay primary category IDs — modernized to the post-2024 trading-card taxonomy.
+# Sports trading card singles all live under 261328 ("Trading Card Singles"
+# inside Sports Mem > Sports Trading Cards). The old per-sport parent nodes
+# (215/214/213/216) were deprecated; eBay auto-migrates but rejects ConditionID
+# 1000 against them. Pokemon retains its TCG-specific category.
 EBAY_CATEGORY = {
-    "Football":   "215",   # Sports Mem, Cards & Fan Shop > Sports Trading Cards > Football
-    "Basketball": "214",
-    "Baseball":   "213",
-    "Hockey":     "216",
+    "Football":   "261328",
+    "Basketball": "261328",
+    "Baseball":   "261328",
+    "Hockey":     "261328",
     "Pokemon":    "183454",  # Toys & Hobbies > Collectible Card Games > Pokemon TCG
-    "Other":      "212",
+    "Other":      "261328",
 }
 
 
@@ -122,8 +126,12 @@ def _suggest_title(row: dict) -> str:
     """eBay best-practices title: year + set + player + parallel + sport.
     Caps at 80 chars (eBay max)."""
     parts: list[str] = []
-    if row.get("year"):       parts.append(row["year"])
-    if row.get("set"):        parts.append(row["set"])
+    year = (row.get("year") or "").strip()
+    set_ = (row.get("set") or "").strip()
+    # Skip year if `set` already leads with it (CollX exports are shaped that way).
+    if year and not set_.startswith(year):
+        parts.append(year)
+    if set_:                  parts.append(set_)
     if row.get("player"):     parts.append(row["player"])
     if row.get("card_number") and not row.get("card_number").startswith("#"):
         parts.append(f"#{row['card_number']}")
@@ -140,27 +148,48 @@ def _suggest_title(row: dict) -> str:
     return title[:80]
 
 
-def _suggest_price(row: dict, scp: dict | None) -> dict:
-    """Return {price, basis, low, high}."""
-    # 1. SCP cache hit (best signal)
-    if scp:
-        grade_key = (row.get("grade") or "ungraded").lower()
-        for key in ("psa10_price", "psa9_price", "psa8_price",
-                    "graded_price", "ungraded_price", "loose_price"):
-            v = scp.get(key)
-            if v and float(v) > 0:
-                price = float(v) * 0.92  # list 8% below market for fast move
-                return {"price": round(price, 2), "basis": f"SCP {key}",
-                        "low": round(price * 0.85, 2), "high": round(price * 1.15, 2)}
-    # 2. Acquired-price 2x fallback
+def _as_float(v) -> float | None:
     try:
-        ap = float(row.get("acquired_price") or 0)
-        if ap > 0:
-            return {"price": round(ap * 2, 2), "basis": "2x acquired",
-                    "low": round(ap * 1.5, 2), "high": round(ap * 3, 2)}
-    except ValueError:
-        pass
-    # 3. Default $4.99
+        f = float(v)
+        return f if f > 0 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _scp_best_price(scp: dict | None) -> tuple[float, str] | None:
+    if not scp:
+        return None
+    for key in ("psa10_price", "psa9_price", "psa8_price",
+                "graded_price", "ungraded_price", "loose_price"):
+        v = _as_float(scp.get(key))
+        if v:
+            return (v, key)
+    return None
+
+
+def _suggest_price(row: dict, scp: dict | None) -> dict:
+    """Return {price, basis, low, high}. Prefer CollX market_value when present
+    (it's the live signal from Jason's CollX Pro subscription); fall back to
+    SCP guide price; then 2x acquired; then default."""
+    # 1. CollX market value (preferred — live signal)
+    collx_mv = _as_float(row.get("collx_market_value"))
+    if collx_mv:
+        price = round(collx_mv * 0.92, 2)
+        return {"price": price, "basis": "CollX market",
+                "low": round(price * 0.85, 2), "high": round(price * 1.15, 2)}
+    # 2. SCP cache hit
+    scp_best = _scp_best_price(scp)
+    if scp_best:
+        scp_v, scp_key = scp_best
+        price = round(scp_v * 0.92, 2)
+        return {"price": price, "basis": f"SCP {scp_key}",
+                "low": round(price * 0.85, 2), "high": round(price * 1.15, 2)}
+    # 3. Acquired-price 2x fallback
+    ap = _as_float(row.get("acquired_price"))
+    if ap:
+        return {"price": round(ap * 2, 2), "basis": "2x acquired",
+                "low": round(ap * 1.5, 2), "high": round(ap * 3, 2)}
+    # 4. Default $4.99
     return {"price": 4.99, "basis": "default", "low": 3.99, "high": 6.99}
 
 
@@ -183,6 +212,10 @@ def _suggest_specifics(row: dict, category: str) -> dict[str, str]:
         out["Grade"] = row["grade"]
     else:
         out["Graded"] = "No"
+        # Note: the "Card Condition" sub-grade (Near mint or better / Excellent
+        # / Very good / Poor) lives in <ConditionDescriptors>, NOT ItemSpecifics
+        # — push_to_ebay.py emits it as descriptor 40001 with value 400010 by
+        # default. See CARD_CONDITION_DESCRIPTOR_VALUE in push_to_ebay.py.
     sport = (row.get("sport") or "").title()
     if sport and category != "Pokemon":
         out["Sport"] = sport
@@ -203,19 +236,24 @@ def build_plan() -> dict:
         price_rec = _suggest_price(r, scp_match)
         title     = _suggest_title(r) or r.get("name", "")
         specifics = _suggest_specifics(r, cat_name)
+        scp_best = _scp_best_price(scp_match)
         enriched.append({
-            "raw":            r,
-            "title":          title,
-            "ebay_category":  cat_name,
-            "category_id":    cat_id,
-            "store_category": cat_name,  # matches our 8-bucket store sidebar
-            "price":          price_rec["price"],
-            "price_basis":    price_rec["basis"],
-            "price_low":      price_rec["low"],
-            "price_high":     price_rec["high"],
-            "specifics":      specifics,
-            "scp_match":      bool(scp_match),
-            "image_url":      r.get("image_url", ""),
+            "raw":              r,
+            "title":            title,
+            "ebay_category":    cat_name,
+            "category_id":      cat_id,
+            "store_category":   cat_name,  # matches our 8-bucket store sidebar
+            "price":            price_rec["price"],
+            "price_basis":      price_rec["basis"],
+            "price_low":        price_rec["low"],
+            "price_high":       price_rec["high"],
+            "collx_market":     _as_float(r.get("collx_market_value")),
+            "collx_asking":     _as_float(r.get("collx_asking_price")),
+            "scp_value":        scp_best[0] if scp_best else None,
+            "scp_basis":        scp_best[1] if scp_best else None,
+            "specifics":        specifics,
+            "scp_match":        bool(scp_match),
+            "image_url":        r.get("image_url", ""),
         })
     return {
         "generated_at":  datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -236,12 +274,30 @@ def _esc(s: Any) -> str:
     return html.escape(str(s or ""))
 
 
+def _sources_line(e: dict) -> str:
+    parts: list[str] = []
+    if e.get("collx_market") is not None:
+        parts.append(f"<span>CollX <b>${e['collx_market']:.2f}</b></span>")
+    if e.get("scp_value") is not None:
+        parts.append(f"<span>SCP <b>${e['scp_value']:.2f}</b></span>")
+    if e.get("collx_asking") is not None:
+        parts.append(f"<span>Asking <b>${e['collx_asking']:.2f}</b></span>")
+    return " &middot; ".join(parts) if parts else "<span class=\"inv-pb\">no live comps</span>"
+
+
 def render_report(plan: dict) -> Path:
     items = plan["items"]
     total_value = sum(e["price"] for e in items)
 
     # KPI strip
     kpis = f"""
+    <div class="ai-overview-bar">
+      <a class="ai-overview-link" href="harpua_ai_overview.pdf" target="_blank" rel="noopener">
+        <span class="ai-eyebrow">For stakeholders</span>
+        <span class="ai-title">AI Overview &mdash; one-page PDF</span>
+        <span class="ai-arrow">&rarr;</span>
+      </a>
+    </div>
     <div class="stat-grid">
       <a class="stat-card linked" href="#inventory-table" title="Scroll to inventory">
         <div class="num">{plan['count']}</div><div class="lbl">Cards in inventory</div>
@@ -281,6 +337,7 @@ def render_report(plan: dict) -> Path:
                 <div class="inv-price">${e['price']:.2f}</div>
                 <div class="inv-pb">{_esc(e['price_basis'])}</div>
                 <div class="inv-pb">range ${e['price_low']:.2f}–${e['price_high']:.2f}</div>
+                <div class="inv-sources">{_sources_line(e)}</div>
               </td>
               <td>
                 <details><summary>{len(e['specifics'])} specifics</summary>
@@ -421,6 +478,15 @@ def render_report(plan: dict) -> Path:
   .inv-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
   .inv-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--gold); }
   .inv-pb { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .ai-overview-bar { margin: 0 0 16px 0; }
+  .ai-overview-link { display: inline-flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--gold); border-radius: 8px; text-decoration: none; color: var(--gold); transition: background 0.15s; }
+  .ai-overview-link:hover { background: var(--gold); color: #0a0a0a; }
+  .ai-overview-link .ai-eyebrow { font-size: 9px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85; }
+  .ai-overview-link .ai-title { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+  .ai-overview-link .ai-arrow { font-size: 16px; }
+  .inv-sources { font-size: 11px; color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+  .inv-sources b { color: var(--text); font-weight: 600; }
+  .inv-sources span { white-space: nowrap; }
   .inv-spec { list-style: none; padding: 8px 0 0 12px; margin: 0; font-size: 12px; }
   .inv-spec li { padding: 2px 0; color: var(--text-muted); }
   .inv-spec li b { color: var(--text); }

@@ -393,12 +393,6 @@ def render_report(plan: dict) -> Path:
             <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">Auto-accept · auto-decline</div>
           </div>
         </a>
-        <a class="sh-feat" href="vault.html">
-          <div class="sh-feat-info">
-            <div class="sh-feat-title">eBay Vault</div>
-            <div class="sh-feat-price" style="font-size:13px;color:var(--text-muted);">$250+ singles · authenticated ship</div>
-          </div>
-        </a>
         <a class="sh-feat" href="photo_audit.html">
           <div class="sh-feat-info">
             <div class="sh-feat-title">Photo Audit</div>

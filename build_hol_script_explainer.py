@@ -1,0 +1,215 @@
+"""
+build_hol_script_explainer.py — one-page PDF explaining what
+install_skills_from_branch.py does in the dbt_wizard_hol lab.
+
+Renders an HTML one-pager with brand styling (Fraunces display + Inter body,
+light theme) and converts to PDF via headless Chrome. Drops the PDF in
+~/Downloads for sharing with the SE team.
+
+Run:
+    python3 build_hol_script_explainer.py
+"""
+from __future__ import annotations
+
+import subprocess
+import sys
+from datetime import date
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).parent
+DOCS_DIR  = REPO_ROOT / "docs"
+DOWNLOADS = Path.home() / "Downloads"
+
+HTML_OUT  = DOCS_DIR / "hol_install_skills_explainer.html"
+PDF_OUT   = DOWNLOADS / "dbt_wizard_hol_install_skills_explainer.pdf"
+
+SOURCE_URL = "https://github.com/fivetran-jacklowery/dbt_wizard_hol/blob/main/lab_reference/lab_scripts/install_skills_from_branch.py"
+
+CHROME_CANDIDATES = [
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+]
+
+
+def find_chrome() -> str:
+    for p in CHROME_CANDIDATES:
+        if Path(p).is_file():
+            return p
+    raise SystemExit("No Chrome/Chromium/Edge/Brave found.")
+
+
+HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>install_skills_from_branch.py — dbt Wizard HOL lab tooling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.55in 0.5in 0.5in 0.5in; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-size: 10.5pt; line-height: 1.5;
+    color: #1a1814; background: #faf7f1;
+  }
+  .wrap { padding: 0 0 22pt 0; }
+  header { border-bottom: 2px solid #c9a44a; padding-bottom: 12pt; margin-bottom: 14pt; }
+  .eyebrow {
+    font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #8a6d2e;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    font-weight: 600; font-style: italic;
+    font-size: 24pt; line-height: 1.1; letter-spacing: -0.01em;
+    margin: 5pt 0 5pt 0; color: #1a1814;
+  }
+  h1 .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-style: normal; font-weight: 500; font-size: 17pt; color: #4a3a14; }
+  .deck { font-size: 10.5pt; color: #4a4438; max-width: 540pt; margin: 0; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 700; font-size: 14pt; letter-spacing: -0.005em;
+    margin: 14pt 0 6pt 0; color: #1a1814;
+    border-top: 1px solid #d8cfb8; padding-top: 10pt;
+  }
+  h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 4pt; }
+  p { margin: 0 0 7pt 0; }
+  ol, ul { margin: 4pt 0 6pt 18pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  code, .mono {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 9pt; background: #f1ead7; padding: 1pt 4pt; border-radius: 2pt;
+    color: #4a3a14;
+  }
+  .tldr {
+    background: #fff;
+    border: 1px solid #d8cfb8;
+    border-left: 3pt solid #c9a44a;
+    padding: 10pt 14pt;
+    margin: 8pt 0 12pt 0;
+    border-radius: 2pt;
+  }
+  .tldr p { margin: 0; }
+  .twocol { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 14pt; }
+  .step-num {
+    display: inline-block;
+    font-family: 'Fraunces', Georgia, serif; font-variation-settings: 'opsz' 144;
+    font-weight: 600; font-style: italic; color: #8a6d2e;
+    margin-right: 4pt;
+  }
+  .caveat {
+    background: #fff; border: 1px solid #d8cfb8;
+    padding: 9pt 12pt; border-radius: 2pt;
+  }
+  .caveat ul { margin: 0 0 0 16pt; }
+  .caveat li { font-size: 9.5pt; line-height: 1.4; }
+  .footnote {
+    font-size: 8pt; color: #6c5a2e; margin-top: 14pt;
+    border-top: 1px solid #d8cfb8; padding-top: 8pt;
+  }
+  .footnote a { color: #8a6d2e; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">dbt Wizard HOL &middot; Lab tooling explainer</div>
+  <h1><span class="mono">install_skills_from_branch.py</span></h1>
+  <p class="deck">The one-command "sync me to whatever the instructor just pushed" button for HOL participants. Pulls a chosen remote branch and refreshes every dbt Wizard skill on the participant's machine — without needing them to touch git.</p>
+</header>
+
+<div class="tldr">
+<p><b>TL;DR.</b> The script fetches the latest branches from origin, prompts the participant to pick one (with <code>main</code> as default), checks it out, fast-forward pulls, then copies every entry from <code>./skills/</code> into <code>~/.dbt/wizard/skills/</code> — overwriting anything with the same name. dbt Wizard picks up the refreshed skills on its next invocation. No PyPI publishing, no manual file shuffling — instructors can ship a new skill set mid-lab and participants are one command away from running it.</p>
+</div>
+
+<h2>What it does, in five steps</h2>
+<ol>
+  <li><b>Safety check.</b> Confirms the script is running inside a git repo and that the working tree is clean. Refuses to switch branches if the participant has uncommitted local changes — so their lab progress isn't silently lost. Bypassable with <code>--skip-clean-check</code> if a participant knows what they're doing.</li>
+  <li><b><code>git fetch origin</code>.</b> Refreshes the local view of every remote branch.</li>
+  <li><b>Interactive branch picker.</b> Lists all <code>origin/*</code> branches with <code>main</code> pinned at the top and marked as default. The participant types a number, a branch name, or just hits Enter for <code>main</code>.</li>
+  <li><b>Checkout + fast-forward pull.</b> If the local branch exists, <code>git checkout &lt;branch&gt;</code> then <code>git pull --ff-only origin &lt;branch&gt;</code>. If the branch is new locally, creates it via <code>git checkout --track origin/&lt;branch&gt;</code>. The <code>--ff-only</code> refuses non-clean merges — the right call for a lab.</li>
+  <li><b>Install skills.</b> Walks <code>./skills/</code> and copies every entry (file or directory) into <code>~/.dbt/wizard/skills/</code>, overwriting same-named entries. Filters out <code>.DS_Store</code> and <code>__pycache__</code> noise. Prints the list of installed skills so the participant sees what just landed.</li>
+</ol>
+
+<h2>Why it exists in HOL context</h2>
+<p>dbt Wizard reads custom "skills" from <code>~/.dbt/wizard/skills/</code>. During a hands-on lab the instructor iterates — new skills, fixes, additions — and pushes branches as they go. This script is the equivalent of "pip install -U lab-content": one command, latest content, no git knowledge required. The <code>lab_reference/lab_scripts/</code> path signals it's pre-staged tooling rather than part of the lab exercises themselves, so participants find it but don't trip over it.</p>
+
+<div class="twocol">
+<div>
+<h2>What it doesn't do</h2>
+<div class="caveat">
+<ul>
+  <li>Doesn't validate skill structure — bulk-copies whatever lives in <code>./skills/</code>. Bad skills will fail at Wizard runtime, not install time.</li>
+  <li>Doesn't back up the destination. Hand-edits to <code>~/.dbt/wizard/skills/</code> get clobbered without warning.</li>
+  <li>One-way only — no upload, no sync back to the repo.</li>
+  <li>Doesn't update dbt Wizard itself. Just the skills directory.</li>
+  <li>Doesn't dry-run preview — it copies on the first invocation.</li>
+</ul>
+</div>
+</div>
+<div>
+<h2>Operationally useful</h2>
+<ul>
+  <li>Tell participants to <code>cd</code> into the cloned <code>dbt_wizard_hol</code> repo and run <code>python3 lab_reference/lab_scripts/install_skills_from_branch.py</code>.</li>
+  <li>If you're publishing a hotfix mid-lab, push to a branch (or to <code>main</code>) and tell the room which branch to type. Sixty seconds and everyone's synced.</li>
+  <li>For instructors: keep <code>./skills/</code> at the repo root tidy — every file/dir under it ships verbatim.</li>
+  <li>Exits clean on Ctrl+C (returns 130). Errors go to stderr with a one-line user-facing message; no Python tracebacks shown to participants.</li>
+</ul>
+</div>
+</div>
+
+<h2>Worth adding (small, high-leverage)</h2>
+<p>The current script is tight — 98% of what's in it is load-bearing for the workflow. The 2% that could go (custom exception class, symlink branch in the copy helper, Ctrl+C exit-code polish) isn't worth touching. The more useful angle is what's <i>missing</i>:</p>
+<ol>
+  <li><b><code>--dry-run</code> flag.</b> Print the list of skills that would be installed, exit without copying. Saves the "wait, what's about to land?" support question. About five lines to add.</li>
+  <li><b>Backup overwritten skills.</b> If a participant hand-edited a skill, the current script silently clobbers it. Rename existing destinations to <code>&lt;name&gt;.bak</code> instead of <code>rmtree</code> — one-line change with real downside protection.</li>
+  <li><b>Sanity-check dbt Wizard is installed.</b> The script creates <code>~/.dbt/wizard/skills/</code> from scratch if missing, which means a participant who hasn't installed Wizard can run it, see "success," and then have nothing work. Warn (or fail) when the Wizard binary / marker file is absent.</li>
+  <li><b><code>--branch &lt;name&gt;</code> flag.</b> Skip the interactive picker. Lets instructors paste a one-liner into chat — <code>python3 install_skills_from_branch.py --branch lab-3-hotfix</code> — instead of walking the room through the prompt.</li>
+  <li><b>Surface what actually changed.</b> Today's output is "Installed N skills." Distinguish <i>new</i> versus <i>updated</i> versus <i>unchanged</i> so participants can see whether the pull was meaningful.</li>
+</ol>
+
+<div class="footnote">
+Source: <a href="{SOURCE_URL}">{SOURCE_URL}</a> &middot; Explainer generated {DATE_STAMP} for the Fivetran SE team
+</div>
+
+</div>
+</body>
+</html>
+"""
+
+
+def main() -> int:
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    html = HTML.replace("{DATE_STAMP}", date.today().isoformat()).replace("{SOURCE_URL}", SOURCE_URL)
+    HTML_OUT.write_text(html, encoding="utf-8")
+    chrome = find_chrome()
+    proc = subprocess.run(
+        [
+            chrome,
+            "--headless=new",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--no-pdf-header-footer",
+            "--virtual-time-budget=8000",
+            f"--print-to-pdf={PDF_OUT}",
+            f"file://{HTML_OUT.resolve()}",
+        ],
+        capture_output=True, text=True, timeout=60,
+    )
+    if proc.returncode != 0 or not PDF_OUT.is_file():
+        print("Chrome stderr:", proc.stderr[:400])
+        raise SystemExit("PDF generation failed")
+    size_kb = PDF_OUT.stat().st_size // 1024
+    print(f"Wrote {PDF_OUT} ({size_kb} KB)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

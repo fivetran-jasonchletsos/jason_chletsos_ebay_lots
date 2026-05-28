@@ -205,16 +205,17 @@ def render_report(plan: dict) -> Path:
 
         sections.append(f"""
         <section class="ts-section">
-          <div class="ts-head">
-            <div>
+          <header class="ts-head">
+            <div class="ts-head-main">
               <h2><a href="{_esc(s['url'])}" target="_blank" rel="noopener">{_esc(s['name'])}</a>
                 <span class="ts-kind ts-kind-{s['kind']}">{_esc(s['kind'].upper())}</span>
                 {rank_html}</h2>
               <p class="ts-tag">{_esc(s['tag'])}</p>
             </div>
             <div class="ts-stats">{''.join(stat_tiles)}</div>
-          </div>
-          <div class="ts-grid">{''.join(cards) or '<div class="ts-empty">No live listings matched the search filter.</div>'}</div>
+          </header>
+          <div class="ts-strip">{''.join(cards) or '<div class="ts-empty">No live listings matched the search filter.</div>'}</div>
+          <a class="ts-more" href="{_esc(s['url'])}" target="_blank" rel="noopener">More from this seller &rarr;</a>
         </section>""")
 
     body = f"""
@@ -236,41 +237,50 @@ def render_report(plan: dict) -> Path:
       <div class="stat-card"><div class="num">{total_items}</div><div class="lbl">Live listings indexed</div></div>
     </div>
 
-    {''.join(sections)}
+    <div class="ts-sellers-grid">{''.join(sections)}</div>
     """
 
     extra_css = """
 <style>
-  .ts-section { margin: 28px 0; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
-  .ts-head { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin-bottom: 14px; }
-  .ts-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 30px; letter-spacing: .02em; }
+  /* Compact seller tiles — fits 2-3 sellers per row on desktop instead of one
+     full-width section each. Listings strip horizontally rather than wrapping. */
+  .ts-sellers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 14px; margin-top: 18px; }
+  .ts-section { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); margin: 0; }
+  .ts-section:hover { border-color: rgba(212,175,55,.35); }
+  .ts-head { display: flex; flex-direction: column; gap: 6px; }
+  .ts-head-main { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .ts-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 19px; display: inline; }
   .ts-head h2 a { color: var(--text); text-decoration: none; }
   .ts-head h2 a:hover { color: var(--gold); }
-  .ts-kind { font-size: 10px; padding: 3px 9px; border-radius: 999px; margin-left: 10px; letter-spacing: .12em; font-weight: 700; }
+  .ts-kind { font-size: 9px; padding: 2px 7px; border-radius: 999px; margin-left: 4px; letter-spacing: .12em; font-weight: 700; vertical-align: 2px; }
   .ts-kind-consignment { color: #d4af37; background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.4); }
   .ts-kind-volume      { color: #6cb0ff; background: rgba(108,176,255,.12); border: 1px solid rgba(108,176,255,.35); }
   .ts-kind-vintage     { color: #c98a4d; background: rgba(201,138,77,.12); border: 1px solid rgba(201,138,77,.35); }
   .ts-kind-pokemon     { color: #ffcc00; background: rgba(255,204,0,.1);   border: 1px solid rgba(255,204,0,.3); }
-  .ts-rank { display: inline-block; font-size: 10px; color: #fff; background: linear-gradient(135deg, #d4af37, #b8860b); padding: 3px 9px; border-radius: 999px; margin-left: 8px; letter-spacing: .12em; font-weight: 800; }
+  .ts-rank { display: inline-block; font-size: 9px; color: #fff; background: linear-gradient(135deg, #d4af37, #b8860b); padding: 2px 7px; border-radius: 999px; margin-left: 4px; letter-spacing: .12em; font-weight: 800; vertical-align: 2px; }
   .ts-rank-sports { background: linear-gradient(135deg, #6cb0ff, #4a8fd6); }
-  .ts-stats { display: flex; gap: 14px; flex-wrap: wrap; }
-  .ts-tag { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
-  .ts-stats { display: grid; grid-template-columns: repeat(2, auto); gap: 18px; }
-  .ts-stat { text-align: center; }
-  .ts-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 24px; color: var(--gold); line-height: 1; }
-  .ts-l { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
-  .ts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-  .ts-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
+  .ts-tag { color: var(--text-muted); font-size: 11.5px; margin: 0; line-height: 1.4; max-height: 1.4em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ts-stats { display: flex; gap: 14px; flex-wrap: wrap; padding-top: 4px; border-top: 1px dashed var(--border); padding-bottom: 2px; }
+  .ts-stat { flex: 0 1 auto; }
+  .ts-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--gold); line-height: 1; }
+  .ts-l { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 3px; }
+  /* Horizontal-scrolling listings strip — keeps each seller card a fixed height */
+  .ts-strip { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+  .ts-strip::-webkit-scrollbar { height: 6px; }
+  .ts-strip::-webkit-scrollbar-track { background: transparent; }
+  .ts-strip::-webkit-scrollbar-thumb { background: rgba(212,175,55,.25); border-radius: 999px; }
+  .ts-card { flex: 0 0 124px; scroll-snap-align: start; display: block; background: var(--surface-2, rgba(255,255,255,.02)); border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
   .ts-card:hover { transform: translateY(-2px); border-color: var(--gold); }
-  .ts-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
-  .ts-meta { padding: 8px 10px; }
-  .ts-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 20px; color: var(--gold); }
-  .ts-title { font-size: 11px; line-height: 1.35; color: var(--text); min-height: 28px; margin-top: 4px; }
-  .ts-buying { font-size: 10px; color: var(--text-muted); margin-top: 4px; letter-spacing: .04em; }
-  .ts-empty { padding: 16px; color: var(--text-muted); font-size: 13px; }
+  .ts-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2, rgba(255,255,255,.04)); }
+  .ts-meta { padding: 6px 8px 8px; }
+  .ts-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--gold); }
+  .ts-title { font-size: 10.5px; line-height: 1.3; color: var(--text); max-height: 27px; overflow: hidden; margin-top: 2px; }
+  .ts-buying { font-size: 9px; color: var(--text-muted); margin-top: 3px; letter-spacing: .04em; }
+  .ts-empty { padding: 16px; color: var(--text-muted); font-size: 12px; }
+  .ts-more { display: inline-block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); text-decoration: none; margin-top: 2px; font-weight: 700; }
+  .ts-more:hover { text-decoration: underline; }
   @media (max-width: 640px) {
-    .ts-head { grid-template-columns: 1fr; }
-    .ts-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .ts-sellers-grid { grid-template-columns: 1fr; }
   }
 </style>
 """

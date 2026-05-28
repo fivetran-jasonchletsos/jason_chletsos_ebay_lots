@@ -47,7 +47,6 @@ ROSTER: list[tuple[str, str, str]] = [
     ("Tiki Barber",          "Pokémon News",       "pokemon_news_agent.py"),
     ("Wayne Gretzky",        "Top Sellers",        "top_sellers_agent.py"),
     ("Jeremy Lin",           "Under $10",          "under_10_agent.py"),
-    ("Eli Manning",          "Vault",              "vault_eligibility.py"),
     ("Mark Messier",         "Orders Watch",       "orders_watch_agent.py"),
     ("Bob Murphy",           "Daily Digest",       "daily_digest_agent.py"),
 ]

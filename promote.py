@@ -2925,8 +2925,9 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 _NAV_ITEMS = [
     # ── Public buyer-facing storefront ──
     ("index.html",            "Shop",          True,  None),
-    ("price_drops.html",      "Steals",        True,  None),
+    ("steals.html",           "Steals",        True,  None),
     ("sold.html",             "Recently Sold", True,  None),
+    ("harpua_ai_overview.pdf","AI Overview",   True,  None),
     ("browse.html",           "All Sets & Players", True, "Browse"),
     ("by_set.html",           "By Set",        True,  "Browse"),
     ("by_player.html",        "By Player",     True,  "Browse"),
@@ -2934,15 +2935,17 @@ _NAV_ITEMS = [
 
     # ── Admin: hidden behind auth gate ──
     ("daily.html",            "Daily",         False, None),
+    ("collx_vs_ebay.html",    "CollX vs eBay", False, None),
     ("seller_hub.html",       "Seller Hub",    False, "More"),
     ("price_consistency.html","Price Gate",    False, "More"),
     ("best_offer.html",       "Best Offer",    False, "More"),
-    ("vault.html",            "Vault",         False, "More"),
-    ("whatnot.html",          "Whatnot Prep",  False, "More"),
+    ("lots.html",             "Lots",          False, "More"),
     ("relist.html",           "Relist Unsold", False, "More"),
     ("collect.html",          "My Wants",      False, "More"),
     ("top_sellers.html",      "Top Sellers",   False, "More"),
     ("pokemon_news.html",     "Pokemon News",  False, "More"),
+    ("price_drops.html",      "Price Drops",   False, "More"),
+    ("deals.html",            "Deal Hunter",   False, "More"),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
@@ -10353,7 +10356,15 @@ def main():
     build_google_feed(listings, market=market, sold_history=sold, pricing=pricing_by_id)
     build_return_policy()
 
-    # NOTE: build_analytics_page, build_steals_page, build_market_intel_page,
+    # Buyer-facing Steals page — JC flagged 2026-05-27 that the nav link to
+    # "Steals" was pointing at price_drops.html (internal tracker) and the real
+    # Steals page wasn't being generated. Rewired the nav and re-enabled the build.
+    try:
+        build_steals_page(listings, market)
+    except Exception as _exc:
+        print(f"  build_steals_page skipped: {_exc}")
+
+    # NOTE: build_analytics_page, build_market_intel_page,
     # build_quality_report, build_craigslist, build_reddit, build_price_review,
     # build_title_review, build_make_money, write_analysis_views — all removed
     # from the standard refresh. Their pages are no longer linked in the nav
@@ -10399,13 +10410,12 @@ def main():
     # removed — they crash, push promos, or render orphan pages.
     for label, script, timeout_s in [
         ("Orders Watch: docs/orders_watch.html",     "orders_watch_agent.py",     180),
-        ("Vault report: docs/vault.html",            "vault_eligibility.py",      120),
         ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py",  180),
         ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py",     180),
         ("Under $10: docs/under_10.html",            "under_10_agent.py",         120),
         ("Top Sellers: docs/top_sellers.html",       "top_sellers_agent.py",      120),
         ("Returns: docs/returns.html",               "returns_agent.py",          120),
-        ("Whatnot Prep: docs/whatnot.html",          "whatnot_prep_agent.py",     120),
+        ("Lots: docs/lots.html",                     "lot_generator_agent.py",    120),
         ("Cassini Score: docs/cassini.html",         "cassini_score_agent.py",    180),
         ("Photo Audit: docs/photo_audit.html",       "photo_audit_agent.py",      300),
         ("Browse index: docs/browse.html",           "browse_index_agent.py",     120),
