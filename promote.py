@@ -28,6 +28,8 @@ from xml.dom import minidom
 
 import requests
 
+import deal_panel
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
@@ -817,7 +819,9 @@ def build_deals_page(deals_data: dict) -> Path:
       .deal-price-block { grid-column: 1 / -1; text-align: left; }
       .deal-feedback { margin-left: 0; }
     }
-    """
+    """ + deal_panel.panel_css()
+
+    panel_html = deal_panel.render_panel(all_deals[:10])
 
     body = f"""
     <div class="section-head section-head--inline">
@@ -845,6 +849,8 @@ def build_deals_page(deals_data: dict) -> Path:
         <div class="num">${total_savings:,.0f}</div><div class="lbl">Potential Savings</div>
       </a>
     </div>
+
+    {panel_html}
 
     <div class="filter-bar">
       <div class="filter-row">

@@ -107,9 +107,23 @@ def _make_matched_row(row: dict, listing: dict, collx_title: str,
     }
 
 
+def _load_inferred_prices() -> dict:
+    """Load output/inferred_prices.json if present. Returns map keyed by
+    collx_id -> {recommended, confidence, basis, kept, dropped}. Missing file
+    just means rows render without a smart-price column — graceful degrade."""
+    p = REPO_ROOT / "output" / "inferred_prices.json"
+    if not p.is_file():
+        return {}
+    try:
+        return (json.loads(p.read_text()) or {}).get("prices", {})
+    except Exception:
+        return {}
+
+
 def build_comparison() -> dict:
     inv = load_inventory()
     listings = load_listings()
+    inferred = _load_inferred_prices()
     listing_titles = [l.get("title", "") for l in listings]
     listing_used = [False] * len(listings)
 
@@ -182,10 +196,13 @@ def build_comparison() -> dict:
                 asking = float(row.get("collx_asking_price") or 0)
             except ValueError:
                 asking = 0.0
+            cid_for_infer = (row.get("collx_id") or "").strip()
+            infer_row = inferred.get(cid_for_infer) or {}
             collx_only.append({
                 "title":         collx_title,
                 "collx_id":      row.get("collx_id", ""),
                 "player":        row.get("player", ""),
+                "sport":         row.get("sport", ""),
                 "year":          row.get("year", ""),
                 "card_number":   row.get("card_number", ""),
                 "parallel":      row.get("parallel", ""),
@@ -194,6 +211,11 @@ def build_comparison() -> dict:
                 "asking":        asking,
                 "best_guess":    listing_titles[idx][:80] if idx >= 0 else "",
                 "best_ratio":    round(ratio, 3),
+                "smart_price":      infer_row.get("recommended"),
+                "smart_confidence": infer_row.get("confidence"),
+                "smart_basis":      infer_row.get("basis"),
+                "smart_kept":       infer_row.get("kept") or [],
+                "smart_dropped":    infer_row.get("dropped") or [],
             })
 
     ebay_only: list[dict] = []
@@ -338,6 +360,65 @@ PAGE_CSS = """
   .cve-wrap td.check-cell input[type=checkbox] { width: 16px; height: 16px; cursor: pointer;
                                                  accent-color: var(--cve-gold); }
   .cve-wrap tr.cve-collx-row.is-selected { background: rgba(201,164,74,0.06); }
+  .cve-wrap tr.cve-collx-row.is-hidden { display: none; }
+
+  /* Filter inputs in the push-bar */
+  .cve-wrap .push-bar .pb-search,
+  .cve-wrap .push-bar .pb-sport,
+  .cve-wrap .push-bar .pb-sort,
+  .cve-wrap .push-bar .pb-min,
+  .cve-wrap .push-bar .pb-max {
+      background: rgba(0,0,0,0.35); border: 1px solid var(--cve-border);
+      color: var(--cve-text); font-family: 'Inter', system-ui, sans-serif;
+      font-size: 12px; padding: 6px 9px; border-radius: 5px;
+  }
+  .cve-wrap .push-bar .pb-search { min-width: 190px; }
+  .cve-wrap .push-bar .pb-sport,
+  .cve-wrap .push-bar .pb-sort  { min-width: 130px; }
+  .cve-wrap .push-bar .pb-min,
+  .cve-wrap .push-bar .pb-max   { width: 70px; }
+  .cve-wrap .push-bar .pb-price-range {
+      display: inline-flex; align-items: center; gap: 4px;
+  }
+  .cve-wrap .push-bar .pb-dash { color: var(--cve-text-dim); }
+  .cve-wrap .push-bar .pb-search:focus,
+  .cve-wrap .push-bar .pb-sport:focus,
+  .cve-wrap .push-bar .pb-sort:focus,
+  .cve-wrap .push-bar .pb-min:focus,
+  .cve-wrap .push-bar .pb-max:focus {
+      outline: none; border-color: var(--cve-gold);
+  }
+  .cve-wrap .pb-hint-row {
+      display: flex; flex-wrap: wrap; gap: 18px;
+      margin: -4px 0 18px 0; padding: 0 4px;
+      color: var(--cve-text-dim); font-size: 11px;
+  }
+  .cve-wrap .pb-hint-row .pb-hint { font-family: inherit; }
+  .cve-wrap .pb-hint-row em { color: var(--cve-text-muted); font-style: italic; }
+  .cve-wrap .pb-hint-row code {
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* Smart-price pill with confidence color */
+  .cve-wrap .smart-pill {
+      display: inline-flex; align-items: baseline; gap: 4px;
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      font-size: 12px; font-weight: 600;
+      padding: 3px 8px; border-radius: 4px;
+      cursor: help; white-space: nowrap;
+  }
+  .cve-wrap .smart-pill em {
+      font-style: normal; font-size: 9.5px; letter-spacing: 0.08em;
+      text-transform: uppercase; font-weight: 700;
+  }
+  .cve-wrap .smart-pill.conf-high   { background: rgba(143,185,95,0.14); color: #c1dc8e; border: 1px solid rgba(143,185,95,0.32); }
+  .cve-wrap .smart-pill.conf-high em   { color: #8fb95f; }
+  .cve-wrap .smart-pill.conf-medium { background: rgba(201,164,74,0.12); color: #e1c47a; border: 1px solid rgba(201,164,74,0.32); }
+  .cve-wrap .smart-pill.conf-medium em { color: #c9a44a; }
+  .cve-wrap .smart-pill.conf-low    { background: rgba(255,255,255,0.04); color: var(--cve-text-muted); border: 1px solid var(--cve-border); }
+  .cve-wrap .smart-pill.conf-low em    { color: var(--cve-text-dim); }
+  .cve-wrap .smart-pill.conf-none   { background: transparent; color: var(--cve-text-dim); border: 1px dashed var(--cve-border); }
 """
 
 
@@ -350,6 +431,9 @@ PAGE_JS = """
     if (!s) return [];
     return Array.prototype.slice.call(s.querySelectorAll('tr.cve-collx-row'));
   }
+  function visibleRows() {
+    return rows().filter(function(r) { return !r.classList.contains('is-hidden'); });
+  }
   function checked() {
     return rows().filter(function(r) {
       var cb = r.querySelector('input.cve-collx-check');
@@ -358,8 +442,11 @@ PAGE_JS = """
   }
   function updateCount() {
     var n = checked().length;
+    var v = visibleRows().length;
     var el = document.querySelector('#' + SECTION_ID + ' .pb-n');
     if (el) el.textContent = String(n);
+    var elv = document.querySelector('#' + SECTION_ID + ' .pb-visible');
+    if (elv) elv.textContent = String(v);
     var btn = document.querySelector('#' + SECTION_ID + ' .pb-copy');
     if (btn) btn.disabled = (n === 0);
     rows().forEach(function(r) {
@@ -369,11 +456,72 @@ PAGE_JS = """
     });
   }
   function selectAll(val) {
-    rows().forEach(function(r) {
+    // Only act on visible rows so a filter is respected.
+    visibleRows().forEach(function(r) {
       var cb = r.querySelector('input.cve-collx-check');
       if (cb) cb.checked = val;
     });
+    if (!val) {
+      // Clear also unchecks hidden rows so user gets a clean state.
+      rows().forEach(function(r) {
+        var cb = r.querySelector('input.cve-collx-check');
+        if (cb) cb.checked = false;
+      });
+    }
     updateCount();
+  }
+  function applyFilter() {
+    var sec = document.getElementById(SECTION_ID);
+    if (!sec) return;
+    var q   = (sec.querySelector('.pb-search') || {}).value || '';
+    var sp  = (sec.querySelector('.pb-sport')  || {}).value || '';
+    var mn  = parseFloat((sec.querySelector('.pb-min') || {}).value);
+    var mx  = parseFloat((sec.querySelector('.pb-max') || {}).value);
+    q = q.trim().toLowerCase();
+    rows().forEach(function(r) {
+      var hide = false;
+      if (q) {
+        var hay = (r.getAttribute('data-title') || '') + ' ' + (r.getAttribute('data-player') || '');
+        if (hay.indexOf(q) === -1) hide = true;
+      }
+      if (!hide && sp) {
+        if ((r.getAttribute('data-sport') || '') !== sp) hide = true;
+      }
+      if (!hide && !isNaN(mn)) {
+        var p1 = parseFloat(r.getAttribute('data-sort-price') || '0');
+        if (p1 < mn) hide = true;
+      }
+      if (!hide && !isNaN(mx)) {
+        var p2 = parseFloat(r.getAttribute('data-sort-price') || '0');
+        if (p2 > mx) hide = true;
+      }
+      r.classList.toggle('is-hidden', hide);
+    });
+    updateCount();
+  }
+  function applySort() {
+    var sec = document.getElementById(SECTION_ID);
+    if (!sec) return;
+    var mode = (sec.querySelector('.pb-sort') || {}).value || 'default';
+    if (mode === 'default') return;
+    var tbody = sec.querySelector('tbody');
+    if (!tbody) return;
+    var rs = rows();
+    var keyer = {
+      'price-desc':  function(r) { return -parseFloat(r.getAttribute('data-sort-price')   || '0'); },
+      'price-asc':   function(r) { return  parseFloat(r.getAttribute('data-sort-price')   || '0'); },
+      'collx-desc':  function(r) { return -parseFloat(r.getAttribute('data-collx-market') || '0'); },
+      'collx-asc':   function(r) { return  parseFloat(r.getAttribute('data-collx-market') || '0'); },
+      'player-asc':  function(r) { return  (r.getAttribute('data-player') || 'zzz'); }
+    }[mode];
+    if (!keyer) return;
+    rs.sort(function(a, b) {
+      var ka = keyer(a), kb = keyer(b);
+      if (ka < kb) return -1;
+      if (ka > kb) return 1;
+      return 0;
+    });
+    rs.forEach(function(r) { tbody.appendChild(r); });
   }
   function buildCmd() {
     var ids = checked().map(function(r) {
@@ -426,6 +574,19 @@ PAGE_JS = """
     if (btnAll) btnAll.addEventListener('click', function() { selectAll(true); });
     if (btnClr) btnClr.addEventListener('click', function() { selectAll(false); });
     if (btnCpy) btnCpy.addEventListener('click', function() { copyCmd(btnCpy); });
+
+    var search = sec.querySelector('.pb-search');
+    var sport  = sec.querySelector('.pb-sport');
+    var min_   = sec.querySelector('.pb-min');
+    var max_   = sec.querySelector('.pb-max');
+    var sort   = sec.querySelector('.pb-sort');
+    if (search) search.addEventListener('input',  applyFilter);
+    if (sport)  sport.addEventListener('change', applyFilter);
+    if (min_)   min_.addEventListener('input',  applyFilter);
+    if (max_)   max_.addEventListener('input',  applyFilter);
+    if (sort)   sort.addEventListener('change', applySort);
+
+    applyFilter();
     updateCount();
   });
 })();
@@ -478,16 +639,46 @@ def render_body(data: dict) -> str:
         cid = esc(r["collx_id"])
         checkbox = (f'<input type="checkbox" class="cve-collx-check" '
                     f'aria-label="Select {cid} for push to eBay">') if r["collx_id"] else ""
+        # Smart price column: blended cross-source recommendation with hover detail
+        sp_val = r.get("smart_price")
+        sp_conf = r.get("smart_confidence") or "none"
+        sp_basis = (r.get("smart_basis") or "").replace('"', '&quot;')
+        if sp_val:
+            kept_lines = []
+            for k in (r.get("smart_kept") or []):
+                kept_lines.append(f"{k.get('label','?')}: ${float(k.get('median') or 0):.2f}")
+            for k in (r.get("smart_dropped") or []):
+                kept_lines.append(f"DROPPED {k.get('label','?')}: ${float(k.get('median') or 0):.2f}")
+            tip = " | ".join(kept_lines).replace('"', '&quot;') or sp_basis
+            smart_cell = (
+                f'<span class="smart-pill conf-{sp_conf}" title="{tip}">'
+                f'${sp_val:.2f} <em>{sp_conf}</em></span>'
+            )
+        else:
+            smart_cell = '<span class="smart-pill conf-none">—</span>'
+        # Filterable/sortable data attributes
+        player_lc = (r.get("player") or "").lower().replace('"', '')
+        sport_lc  = (r.get("sport")  or "").lower().replace('"', '')
+        title_lc  = (r.get("title")  or "").lower().replace('"', '')
+        price_sort = sp_val if sp_val else (r["collx_market"] or 0)
         return f"""
-        <tr class="cve-collx-row" data-collx-id="{cid}">
+        <tr class="cve-collx-row"
+            data-collx-id="{cid}"
+            data-player="{player_lc}"
+            data-sport="{sport_lc}"
+            data-title="{title_lc}"
+            data-collx-market="{r['collx_market'] or 0}"
+            data-smart-price="{sp_val or 0}"
+            data-sort-price="{price_sort or 0}">
           <td class="check-cell">{checkbox}</td>
           <td class="img-cell">{img}</td>
           <td>
             <div class="title-line">{esc(r["title"][:90])}</div>
-            <div class="sub">CollX {cid} &middot; {esc(r["parallel"]) or "&mdash;"}</div>
+            <div class="sub">CollX {cid} &middot; {esc(r["parallel"]) or "&mdash;"}{' &middot; ' + esc(r['sport']) if r.get('sport') else ''}</div>
             {hint}
           </td>
           <td class="num">{price}</td>
+          <td class="num">{smart_cell}</td>
           <td class="num">{asking}</td>
         </tr>"""
 
@@ -507,15 +698,38 @@ def render_body(data: dict) -> str:
     collx_rows     = "".join(row_collx_only(r) for r in co)
     ebay_rows      = "".join(row_ebay_only(r) for r in eo)
 
+    # Derive sport options from data for the filter dropdown
+    _sport_options = sorted({(r.get("sport") or "").strip() for r in co if (r.get("sport") or "").strip()})
+    _sport_select = '<option value="">All sports</option>' + "".join(
+        f'<option value="{esc(s.lower())}">{esc(s)}</option>' for s in _sport_options
+    )
     push_bar = f"""
 <div class="push-bar">
-  <span class="pb-label">Push to eBay</span>
-  <span class="pb-count"><span class="pb-n">0</span> selected</span>
+  <span class="pb-label">Filter &amp; push</span>
+  <input type="search" class="pb-search" placeholder="filter player / title…" aria-label="Filter rows by keyword">
+  <select class="pb-sport" aria-label="Filter by sport">{_sport_select}</select>
+  <span class="pb-price-range">
+    <input type="number" class="pb-min" placeholder="$min" min="0" step="0.5" aria-label="Minimum price">
+    <span class="pb-dash">–</span>
+    <input type="number" class="pb-max" placeholder="$max" min="0" step="0.5" aria-label="Maximum price">
+  </span>
+  <select class="pb-sort" aria-label="Sort rows">
+    <option value="default">Sort: default</option>
+    <option value="price-desc">Smart price · high → low</option>
+    <option value="price-asc">Smart price · low → high</option>
+    <option value="collx-desc">CollX market · high → low</option>
+    <option value="collx-asc">CollX market · low → high</option>
+    <option value="player-asc">Player A → Z</option>
+  </select>
+  <span class="pb-spacer"></span>
+  <span class="pb-count"><span class="pb-n">0</span> selected / <span class="pb-visible">0</span> shown</span>
   <button type="button" class="pb-select-all">Select all visible</button>
   <button type="button" class="pb-clear">Clear</button>
   <button type="button" class="pb-copy" disabled>Copy push command</button>
-  <span class="pb-spacer"></span>
-  <span class="pb-hint">Paste into terminal &middot; runs <code>push_to_ebay.py --collx-id $CID --apply</code> per card</span>
+</div>
+<div class="pb-hint-row">
+  <span class="pb-hint">Smart price blends every available comp (CollX, SCP, eBay active, sold history) and drops outliers via log-space MAD. <em>conf high</em> = 4+ sources agree. Hover the pill for the breakdown.</span>
+  <span class="pb-hint">Copy button runs <code>push_to_ebay.py --collx-id $CID --apply</code> per selected card.</span>
 </div>"""
 
     asking_html = ''
@@ -544,8 +758,8 @@ def render_body(data: dict) -> str:
 <p class="section-sub">{len(co)} cards in CollX with no matching live eBay listing. Total CollX market value: <b style="color: var(--cve-gold);">${total_collx_market:,.2f}</b>{asking_html}.</p>
 {push_bar}
 <table>
-  <thead><tr><th></th><th></th><th>Card</th><th class="num">CollX market</th><th class="num">Asking</th></tr></thead>
-  <tbody>{collx_rows or '<tr><td colspan="5" style="padding:24px; text-align:center; color: var(--cve-text-dim);">Every CollX card has a live eBay listing.</td></tr>'}</tbody>
+  <thead><tr><th></th><th></th><th>Card</th><th class="num">CollX market</th><th class="num">Smart price</th><th class="num">Asking</th></tr></thead>
+  <tbody>{collx_rows or '<tr><td colspan="6" style="padding:24px; text-align:center; color: var(--cve-text-dim);">Every CollX card has a live eBay listing.</td></tr>'}</tbody>
 </table>
 </section>
 
