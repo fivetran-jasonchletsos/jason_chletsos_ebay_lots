@@ -2952,6 +2952,8 @@ _NAV_ITEMS = [
     ("pokemon_news.html",     "Pokemon News",  False, "More"),
     ("price_drops.html",      "Price Drops",   False, "More"),
     ("deals.html",            "Deal Hunter",   False, "More"),
+    ("resale_flips.html",     "Resale Flips",  False, "More"),
+    ("jack_pokemon.html",     "Jack's Pokemon",False, "More"),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
@@ -5302,26 +5304,35 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
 # ---------------------------------------------------------------------------
 
 def _steals_filter_bar(steals: list[dict]) -> str:
-    """Search + category + sort controls for the Steals page.
-    Buyer-conversion fix: the audit flagged that Steals had no way to filter,
-    which hurts long-list pages once you go past ~20 cards.
+    """Search + category + price-range + sort controls for the Steals page.
+    Uses the same pb-* class names as collx_vs_ebay so the styling pattern
+    carries over, scoped to .steals-wrap to avoid colliding with other pages.
     """
     cats = sorted({s["category"] for s in steals if s.get("category")})
-    cat_options = '<option value="All">All categories</option>' + "".join(
+    cat_options = '<option value="">All categories</option>' + "".join(
         f'<option value="{c}">{c}</option>' for c in cats
     )
+    total = len(steals)
     return f"""
-    <div class="filter-bar" style="margin:18px 0 14px;">
-      <div class="filter-row">
-        <input type="search" id="steal-search" class="search-input"
-               placeholder="Filter by player, set, brand…" autocomplete="off"
-               style="flex:1 1 280px; min-width:0;">
-        <select id="steal-cat" style="max-width:220px;">{cat_options}</select>
-        <select id="steal-sort" style="max-width:200px;">
-          <option value="save-desc">Biggest steal first</option>
-          <option value="save-asc">Smallest steal first</option>
+    <div class="steals-wrap" id="steals-filter-wrap">
+      <div class="push-bar">
+        <span class="pb-label">Filter and sort</span>
+        <input type="search" class="pb-search" placeholder="filter player, set, brand…" aria-label="Filter cards by keyword">
+        <select class="pb-sport" aria-label="Filter by category">{cat_options}</select>
+        <span class="pb-price-range">
+          <input type="number" class="pb-min" placeholder="$min" min="0" step="1" aria-label="Minimum price">
+          <span class="pb-dash">–</span>
+          <input type="number" class="pb-max" placeholder="$max" min="0" step="1" aria-label="Maximum price">
+        </span>
+        <select class="pb-sort" aria-label="Sort cards">
+          <option value="save-desc">Biggest discount</option>
+          <option value="dollars-desc">Biggest savings</option>
+          <option value="price-asc">Price low to high</option>
+          <option value="price-desc">Price high to low</option>
+          <option value="save-asc">Smallest discount</option>
         </select>
-        <span id="steal-count" class="filter-count" style="margin-left:auto;color:var(--text-muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;"></span>
+        <span class="pb-spacer"></span>
+        <span class="pb-count"><span class="pb-visible">{total}</span> of <span class="pb-total">{total}</span> shown</span>
       </div>
     </div>
     """
@@ -5387,7 +5398,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
         )
 
         cards.append(f'''
-      <article class="steal-card" data-cat="{s["category"]}" data-save="{save_pct:.0f}" data-search="{(s['title'] + ' ' + s['category']).lower().replace('"', '&quot;')}">
+      <article class="steal-card" data-cat="{s["category"]}" data-save="{save_pct:.0f}" data-price="{s["price_f"]:.2f}" data-dollars="{s["save_dollars"]:.2f}" data-search="{(s['title'] + ' ' + s['category']).lower().replace('"', '&quot;')}">
         <div class="steal-thumb">
           {thumb_html}
           <div class="steal-discount">-{save_pct:.0f}%</div>
@@ -5485,6 +5496,45 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
       .steal-price-block { grid-column: 1 / -1; text-align: left; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
       .steal-price { font-size: 28px; }
     }
+    .steal-card.is-hidden { display: none; }
+
+    /* Filter + sort bar (scoped to .steals-wrap so styles don't leak to other pages) */
+    .steals-wrap .push-bar {
+        display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--r-md); padding: 12px 14px; margin: 8px 0 18px;
+    }
+    .steals-wrap .push-bar .pb-label {
+        font-size: 10px; font-weight: 700; letter-spacing: .12em;
+        text-transform: uppercase; color: var(--gold);
+    }
+    .steals-wrap .push-bar .pb-search,
+    .steals-wrap .push-bar .pb-sport,
+    .steals-wrap .push-bar .pb-sort,
+    .steals-wrap .push-bar .pb-min,
+    .steals-wrap .push-bar .pb-max {
+        background: rgba(0,0,0,.25); border: 1px solid var(--border);
+        color: var(--text); font-family: inherit;
+        font-size: 12px; padding: 6px 9px; border-radius: 5px;
+    }
+    .steals-wrap .push-bar .pb-search { min-width: 200px; flex: 1 1 200px; }
+    .steals-wrap .push-bar .pb-sport,
+    .steals-wrap .push-bar .pb-sort  { min-width: 150px; }
+    .steals-wrap .push-bar .pb-min,
+    .steals-wrap .push-bar .pb-max   { width: 76px; }
+    .steals-wrap .push-bar .pb-price-range { display: inline-flex; align-items: center; gap: 4px; }
+    .steals-wrap .push-bar .pb-dash { color: var(--text-dim); }
+    .steals-wrap .push-bar .pb-search:focus,
+    .steals-wrap .push-bar .pb-sport:focus,
+    .steals-wrap .push-bar .pb-sort:focus,
+    .steals-wrap .push-bar .pb-min:focus,
+    .steals-wrap .push-bar .pb-max:focus { outline: none; border-color: var(--gold); }
+    .steals-wrap .push-bar .pb-spacer { flex: 1; }
+    .steals-wrap .push-bar .pb-count {
+        font-family: 'Fraunces', Georgia, serif; font-style: italic;
+        font-weight: 600; font-size: 16px; color: var(--text);
+    }
+    .steals-wrap .push-bar .pb-count .pb-visible { color: var(--gold); }
     """
 
     body = f"""
@@ -5525,44 +5575,59 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
 
     <script>
       (function() {{
+        const wrap   = document.getElementById('steals-filter-wrap');
         const grid   = document.getElementById('steal-grid');
         const empty  = document.getElementById('steal-empty');
+        if (!grid || !wrap) return;
         const cards  = Array.from(grid.querySelectorAll('.steal-card'));
-        const q      = document.getElementById('steal-search');
-        const catSel = document.getElementById('steal-cat');
-        const sortSel= document.getElementById('steal-sort');
-        const count  = document.getElementById('steal-count');
+        const search = wrap.querySelector('.pb-search');
+        const catSel = wrap.querySelector('.pb-sport');
+        const minIn  = wrap.querySelector('.pb-min');
+        const maxIn  = wrap.querySelector('.pb-max');
+        const sortSel= wrap.querySelector('.pb-sort');
+        const visEl  = wrap.querySelector('.pb-visible');
+
+        function num(c, attr) {{ return parseFloat(c.getAttribute(attr)) || 0; }}
 
         function apply() {{
-          const qv = (q.value || '').toLowerCase().trim();
+          const qv = (search.value || '').toLowerCase().trim();
           const cv = catSel.value;
+          const mn = parseFloat(minIn.value);
+          const mx = parseFloat(maxIn.value);
           let shown = 0;
           cards.forEach(c => {{
             const hay   = c.getAttribute('data-search') || '';
             const cat   = c.getAttribute('data-cat')    || '';
+            const price = num(c, 'data-price');
             const okQ   = !qv || hay.includes(qv);
-            const okCat = cv === 'All' || cv === cat;
-            const show  = okQ && okCat;
-            c.style.display = show ? '' : 'none';
+            const okCat = !cv || cv === cat;
+            const okMin = isNaN(mn) || price >= mn;
+            const okMax = isNaN(mx) || price <= mx;
+            const show  = okQ && okCat && okMin && okMax;
+            c.classList.toggle('is-hidden', !show);
             if (show) shown++;
           }});
-          empty.style.display = shown ? 'none' : 'block';
-          count.textContent = shown + ' of ' + cards.length;
+          if (empty) empty.style.display = shown ? 'none' : 'block';
+          if (visEl) visEl.textContent = String(shown);
 
-          // Sort visible cards.
           const sv = sortSel.value;
-          const visible = cards.filter(c => c.style.display !== 'none');
-          visible.sort((a, b) => {{
-            const av = parseFloat(a.getAttribute('data-save')) || 0;
-            const bv = parseFloat(b.getAttribute('data-save')) || 0;
-            return sv === 'save-asc' ? av - bv : bv - av;
-          }});
+          const keyer = {{
+            'save-desc':    c => -num(c, 'data-save'),
+            'save-asc':     c =>  num(c, 'data-save'),
+            'dollars-desc': c => -num(c, 'data-dollars'),
+            'price-asc':    c =>  num(c, 'data-price'),
+            'price-desc':   c => -num(c, 'data-price'),
+          }}[sv] || (c => -num(c, 'data-save'));
+          const visible = cards.filter(c => !c.classList.contains('is-hidden'));
+          visible.sort((a, b) => keyer(a) - keyer(b));
           visible.forEach(c => grid.appendChild(c));
         }}
 
-        q.addEventListener('input', apply);
-        catSel.addEventListener('change', apply);
-        sortSel.addEventListener('change', apply);
+        if (search) search.addEventListener('input',  apply);
+        if (catSel) catSel.addEventListener('change', apply);
+        if (minIn)  minIn.addEventListener('input',   apply);
+        if (maxIn)  maxIn.addEventListener('input',   apply);
+        if (sortSel) sortSel.addEventListener('change', apply);
         apply();
       }})();
     </script>

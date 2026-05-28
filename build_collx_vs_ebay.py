@@ -361,6 +361,85 @@ PAGE_CSS = """
                                                  accent-color: var(--cve-gold); }
   .cve-wrap tr.cve-collx-row.is-selected { background: rgba(201,164,74,0.06); }
   .cve-wrap tr.cve-collx-row.is-hidden { display: none; }
+  .cve-wrap tr.cve-collx-row { cursor: pointer; }
+  .cve-wrap tr.cve-collx-row td.check-cell { cursor: default; }
+
+  /* Card-detail modal */
+  .cve-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+    display: none; align-items: center; justify-content: center;
+    z-index: 999; padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+  .cve-modal-backdrop.is-open { display: flex; }
+  .cve-modal {
+    background: var(--cve-surface, #161616);
+    border: 1px solid rgba(201,164,74,0.5);
+    border-radius: 12px;
+    max-width: 720px; width: 100%; max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    color: var(--cve-text, #f1eadd);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+    position: relative;
+  }
+  .cve-modal .cve-modal-close {
+    position: absolute; top: 12px; right: 14px;
+    background: none; border: none; color: var(--cve-text-muted, #b8a98d);
+    font-size: 26px; line-height: 1; cursor: pointer; padding: 4px 8px;
+  }
+  .cve-modal .cve-modal-close:hover { color: var(--cve-gold, #c9a44a); }
+  .cve-modal .cm-img {
+    width: 100%; max-height: 380px; object-fit: contain;
+    background: rgba(0,0,0,0.4); border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .cve-modal .cm-title {
+    font-family: 'Fraunces', Georgia, serif; font-style: italic;
+    font-weight: 600; font-size: 22px; line-height: 1.2; margin: 0 0 8px;
+    color: var(--cve-text, #f1eadd);
+  }
+  .cve-modal .cm-sub {
+    color: var(--cve-text-muted, #b8a98d); font-size: 13px; margin: 0 0 18px;
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+  }
+  .cve-modal .cm-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 18px;
+    margin-bottom: 18px;
+  }
+  .cve-modal .cm-cell { display: flex; flex-direction: column; gap: 2px; }
+  .cve-modal .cm-label {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--cve-text-dim, #6c5a2e); font-weight: 700;
+  }
+  .cve-modal .cm-val {
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+    font-size: 14px; color: var(--cve-text, #f1eadd);
+  }
+  .cve-modal .cm-val.cm-gold { color: var(--cve-gold, #c9a44a); font-weight: 600; }
+  .cve-modal .cm-sources {
+    border-top: 1px solid var(--cve-border, rgba(255,255,255,0.08));
+    padding-top: 14px; margin-top: 8px;
+  }
+  .cve-modal .cm-sources h4 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--cve-text-muted, #b8a98d); margin: 0 0 8px; font-weight: 700;
+  }
+  .cve-modal .cm-source-row {
+    display: flex; justify-content: space-between; padding: 4px 0;
+    font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px;
+    border-bottom: 1px dotted rgba(255,255,255,0.06);
+  }
+  .cve-modal .cm-source-row.cm-dropped { color: var(--cve-text-dim, #6c5a2e); text-decoration: line-through; }
+  .cve-modal .cm-links {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;
+  }
+  .cve-modal .cm-links a {
+    color: var(--cve-text, #f1eadd); text-decoration: none;
+    border: 1px solid var(--cve-border, rgba(255,255,255,0.08));
+    padding: 7px 12px; border-radius: 6px; font-size: 12px;
+  }
+  .cve-modal .cm-links a:hover { border-color: var(--cve-gold, #c9a44a); color: var(--cve-gold, #c9a44a); }
 
   /* Filter inputs in the push-bar */
   .cve-wrap .push-bar .pb-search,
@@ -588,6 +667,73 @@ PAGE_JS = """
 
     applyFilter();
     updateCount();
+
+    // ---- Card-detail modal ----
+    var modal = document.getElementById('cve-card-modal');
+    function fmtMoney(v) {
+      var n = parseFloat(v);
+      return (isFinite(n) && n > 0) ? ('$' + n.toFixed(2)) : '—';
+    }
+    function openModal(row) {
+      if (!row || !modal) return;
+      var title = row.querySelector('.title-line') ? row.querySelector('.title-line').textContent.trim() : '';
+      var sub   = row.querySelector('.sub')        ? row.querySelector('.sub').textContent.trim() : '';
+      var img   = row.querySelector('.img-cell img') ? row.querySelector('.img-cell img').getAttribute('src') : '';
+      var cid   = row.getAttribute('data-collx-id') || '';
+      var player = row.getAttribute('data-player') || '';
+      var sport  = row.getAttribute('data-sport')  || '';
+      var collxMarket = parseFloat(row.getAttribute('data-collx-market') || '0');
+      var smartPrice  = parseFloat(row.getAttribute('data-smart-price')  || '0');
+
+      modal.querySelector('.cm-title').textContent = title;
+      modal.querySelector('.cm-sub').textContent   = sub;
+      var imgEl = modal.querySelector('.cm-img');
+      if (img) { imgEl.src = img; imgEl.style.display = ''; }
+      else     { imgEl.removeAttribute('src'); imgEl.style.display = 'none'; }
+      modal.querySelector('[data-fill="player"]').textContent = player || '—';
+      modal.querySelector('[data-fill="sport"]').textContent  = sport  || '—';
+      modal.querySelector('[data-fill="collx"]').textContent  = fmtMoney(collxMarket);
+      modal.querySelector('[data-fill="smart"]').textContent  = fmtMoney(smartPrice);
+      modal.querySelector('[data-fill="collxid"]').textContent = cid || '—';
+
+      // Links
+      var linksDiv = modal.querySelector('.cm-links');
+      linksDiv.innerHTML = '';
+      if (cid) {
+        var a = document.createElement('a');
+        a.href = 'https://app.collx.com/cards/' + cid;
+        a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = 'Open in CollX';
+        linksDiv.appendChild(a);
+      }
+      var ebayLink = document.createElement('a');
+      ebayLink.href = 'https://www.ebay.com/sch/i.html?_nkw=' + encodeURIComponent(title);
+      ebayLink.target = '_blank'; ebayLink.rel = 'noopener';
+      ebayLink.textContent = 'Search this card on eBay';
+      linksDiv.appendChild(ebayLink);
+
+      modal.classList.add('is-open');
+    }
+    function closeModal() { if (modal) modal.classList.remove('is-open'); }
+    if (modal) {
+      var closeBtn = modal.querySelector('.cve-modal-close');
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function(ev) {
+        if (ev.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Escape') closeModal();
+      });
+    }
+    sec.addEventListener('click', function(ev) {
+      // Don't open modal when clicking the checkbox cell or a link.
+      var t = ev.target;
+      if (!t) return;
+      if (t.tagName === 'A' || t.tagName === 'INPUT' || t.tagName === 'BUTTON') return;
+      if (t.closest && t.closest('.check-cell')) return;
+      var row = t.closest && t.closest('tr.cve-collx-row');
+      if (row) openModal(row);
+    });
   });
 })();
 </script>
@@ -737,6 +883,24 @@ def render_body(data: dict) -> str:
         asking_html = f' &middot; total asking-priced: <b style="color: var(--cve-gold);">${total_collx_asking:,.2f}</b>'
 
     return f"""<div class="cve-wrap">
+
+<div class="cve-modal-backdrop" id="cve-card-modal" role="dialog" aria-modal="true" aria-label="Card detail">
+  <div class="cve-modal">
+    <button class="cve-modal-close" type="button" aria-label="Close">×</button>
+    <img class="cm-img" alt="" />
+    <h3 class="cm-title"></h3>
+    <p class="cm-sub"></p>
+    <div class="cm-grid">
+      <div class="cm-cell"><span class="cm-label">Player</span><span class="cm-val" data-fill="player"></span></div>
+      <div class="cm-cell"><span class="cm-label">Sport</span><span class="cm-val" data-fill="sport"></span></div>
+      <div class="cm-cell"><span class="cm-label">CollX market</span><span class="cm-val" data-fill="collx"></span></div>
+      <div class="cm-cell"><span class="cm-label">Smart price</span><span class="cm-val cm-gold" data-fill="smart"></span></div>
+      <div class="cm-cell" style="grid-column: 1 / -1;"><span class="cm-label">CollX ID</span><span class="cm-val" data-fill="collxid"></span></div>
+    </div>
+    <div class="cm-links"></div>
+  </div>
+</div>
+
 
 <header class="cve-head">
   <div class="eyebrow">Harpua2001 &middot; Inventory comparison</div>

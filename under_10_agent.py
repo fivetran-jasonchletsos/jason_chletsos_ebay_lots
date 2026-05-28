@@ -252,7 +252,7 @@ def render_report(plan: dict) -> Path:
         slug = re.sub(r"[^a-z0-9]+", "-", b["label"].lower()).strip("-")
         if not b["items"]:
             sections.append(f"""
-            <section class="u10-bucket" id="b-{slug}">
+            <section class="u10-bucket u10-bucket-section" id="b-{slug}" data-bucket="{_esc(b['label'])}">
               <div class="u10-bhead">
                 <h3>{_esc(b['label'])}</h3>
                 <p class="u10-blurb">{_esc(b.get('blurb',''))}</p>
@@ -262,9 +262,14 @@ def render_report(plan: dict) -> Path:
             continue
         cards = []
         for it in b["items"]:
+            disc = it.get("discount_pct") or 0
+            # Listing date isn't returned by the search call; fall back to price ordering for "newest"
             cards.append(f"""
-            <a class="u10-card" href="{_esc(it['url'])}" target="_blank" rel="noopener"
-               data-price="{it['price']:.2f}" data-search="{_esc(it['title'].lower())}">
+            <a class="u10-card u10-row" href="{_esc(it['url'])}" target="_blank" rel="noopener"
+               data-price="{it['price']:.2f}"
+               data-discount="{disc:.1f}"
+               data-bucket="{_esc(b['label'])}"
+               data-search="{_esc(it['title'].lower())}">
               <div class="u10-img" style="background-image:url('{_esc(it['image'])}');"></div>
               <div class="u10-meta">
                 <div class="u10-price">${it['price']:.2f}</div>
@@ -272,7 +277,7 @@ def render_report(plan: dict) -> Path:
               </div>
             </a>""")
         sections.append(f"""
-        <section class="u10-bucket" id="b-{slug}">
+        <section class="u10-bucket u10-bucket-section" id="b-{slug}" data-bucket="{_esc(b['label'])}">
           <div class="u10-bhead">
             <h3>{_esc(b['label'])} <span class="u10-count">{b['n']}</span></h3>
             <p class="u10-blurb">{_esc(b.get('blurb',''))}</p>
@@ -280,6 +285,34 @@ def render_report(plan: dict) -> Path:
           </div>
           <div class="u10-grid">{''.join(cards)}</div>
         </section>""")
+
+    # Bucket dropdown options (derived from existing buckets)
+    bucket_options = '<option value="">All categories</option>' + "".join(
+        f'<option value="{_esc(b["label"])}">{_esc(b["label"])}</option>' for b in buckets
+    )
+
+    push_bar = f"""
+    <div class="u10-wrap" id="u10-filter-wrap">
+      <div class="push-bar">
+        <span class="pb-label">Filter and sort</span>
+        <input type="search" class="pb-search" placeholder="filter player or title…" aria-label="Filter rows by keyword">
+        <select class="pb-sport" aria-label="Filter by bucket">{bucket_options}</select>
+        <span class="pb-price-range">
+          <input type="number" class="pb-min" placeholder="$min" min="0" step="0.5" aria-label="Minimum price">
+          <span class="pb-dash">–</span>
+          <input type="number" class="pb-max" placeholder="$max" min="0" step="0.5" aria-label="Maximum price">
+        </span>
+        <select class="pb-sort" aria-label="Sort rows">
+          <option value="price-asc">Price low to high</option>
+          <option value="price-desc">Price high to low</option>
+          <option value="discount-desc">Biggest discount</option>
+          <option value="default">Default (bucket order)</option>
+        </select>
+        <span class="pb-spacer"></span>
+        <span class="pb-count"><span class="pb-visible">0</span> of <span class="pb-total">{total_items}</span> shown</span>
+      </div>
+    </div>
+    """
 
     body = f"""
     <div class="section-head section-head--inline">
@@ -309,7 +342,10 @@ def render_report(plan: dict) -> Path:
 
     <div id="cheapest"></div>
     {hero_html}
+    {push_bar}
+    <div id="u10-sections">
     {''.join(sections)}
+    </div>
     """
 
     extra_css = f"""
@@ -341,7 +377,135 @@ def render_report(plan: dict) -> Path:
     .u10-grid {{ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }}
     .u10-hero-grid {{ grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }}
   }}
+
+  /* Filter + sort bar (scoped to .u10-wrap so it doesn't collide with other pages) */
+  .u10-wrap .push-bar {{
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 12px 14px; margin: 8px 0 18px;
+  }}
+  .u10-wrap .push-bar .pb-label {{
+      font-size: 10px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--success);
+  }}
+  .u10-wrap .push-bar .pb-search,
+  .u10-wrap .push-bar .pb-sport,
+  .u10-wrap .push-bar .pb-sort,
+  .u10-wrap .push-bar .pb-min,
+  .u10-wrap .push-bar .pb-max {{
+      background: rgba(0,0,0,.25); border: 1px solid var(--border);
+      color: var(--text); font-family: inherit;
+      font-size: 12px; padding: 6px 9px; border-radius: 5px;
+  }}
+  .u10-wrap .push-bar .pb-search {{ min-width: 200px; flex: 1 1 200px; }}
+  .u10-wrap .push-bar .pb-sport,
+  .u10-wrap .push-bar .pb-sort  {{ min-width: 140px; }}
+  .u10-wrap .push-bar .pb-min,
+  .u10-wrap .push-bar .pb-max   {{ width: 70px; }}
+  .u10-wrap .push-bar .pb-price-range {{ display: inline-flex; align-items: center; gap: 4px; }}
+  .u10-wrap .push-bar .pb-dash {{ color: var(--text-dim); }}
+  .u10-wrap .push-bar .pb-search:focus,
+  .u10-wrap .push-bar .pb-sport:focus,
+  .u10-wrap .push-bar .pb-sort:focus,
+  .u10-wrap .push-bar .pb-min:focus,
+  .u10-wrap .push-bar .pb-max:focus {{ outline: none; border-color: var(--success); }}
+  .u10-wrap .push-bar .pb-spacer {{ flex: 1; }}
+  .u10-wrap .push-bar .pb-count {{
+      font-family: 'Fraunces', Georgia, serif; font-style: italic;
+      font-weight: 600; font-size: 16px; color: var(--text);
+  }}
+  .u10-wrap .push-bar .pb-count .pb-visible {{ color: var(--success); }}
+
+  .u10-row.is-hidden {{ display: none; }}
+  .u10-bucket-section.is-empty {{ display: none; }}
 </style>
+<script>
+(function() {{
+  function $$(sel, root) {{ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }}
+  function ready(fn) {{
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }}
+  ready(function() {{
+    var wrap = document.getElementById('u10-filter-wrap');
+    var container = document.getElementById('u10-sections');
+    if (!wrap || !container) return;
+    var search = wrap.querySelector('.pb-search');
+    var bucket = wrap.querySelector('.pb-sport');
+    var minIn  = wrap.querySelector('.pb-min');
+    var maxIn  = wrap.querySelector('.pb-max');
+    var sortIn = wrap.querySelector('.pb-sort');
+    var visEl  = wrap.querySelector('.pb-visible');
+    var rows     = $$('.u10-row', container);
+    var sections = $$('.u10-bucket-section', container);
+
+    function applyFilter() {{
+      var q  = (search.value || '').trim().toLowerCase();
+      var b  = bucket.value || '';
+      var mn = parseFloat(minIn.value);
+      var mx = parseFloat(maxIn.value);
+      var shown = 0;
+      rows.forEach(function(r) {{
+        var hide = false;
+        if (q) {{
+          var hay = r.getAttribute('data-search') || '';
+          if (hay.indexOf(q) === -1) hide = true;
+        }}
+        if (!hide && b) {{
+          if ((r.getAttribute('data-bucket') || '') !== b) hide = true;
+        }}
+        var p = parseFloat(r.getAttribute('data-price') || '0');
+        if (!hide && !isNaN(mn) && p < mn) hide = true;
+        if (!hide && !isNaN(mx) && p > mx) hide = true;
+        r.classList.toggle('is-hidden', hide);
+        if (!hide) shown++;
+      }});
+      sections.forEach(function(sec) {{
+        var anyVisible = $$('.u10-row', sec).some(function(r) {{ return !r.classList.contains('is-hidden'); }});
+        var hasRows = $$('.u10-row', sec).length > 0;
+        sec.classList.toggle('is-empty', hasRows && !anyVisible);
+      }});
+      if (visEl) visEl.textContent = String(shown);
+    }}
+
+    function applySort() {{
+      var mode = sortIn.value || 'price-asc';
+      var keyer = ({{
+        'price-asc':     function(r) {{ return  parseFloat(r.getAttribute('data-price')    || '0'); }},
+        'price-desc':    function(r) {{ return -parseFloat(r.getAttribute('data-price')    || '0'); }},
+        'discount-desc': function(r) {{ return -parseFloat(r.getAttribute('data-discount') || '0'); }},
+        'default':       function(r) {{ return  parseInt(r.dataset.origIdx || '0', 10); }}
+      }})[mode];
+      if (!keyer) return;
+      sections.forEach(function(sec) {{
+        var grid = sec.querySelector('.u10-grid');
+        if (!grid) return;
+        var children = $$('.u10-row', grid);
+        children.sort(function(a, b) {{
+          var ka = keyer(a), kb = keyer(b);
+          if (ka < kb) return -1;
+          if (ka > kb) return 1;
+          return 0;
+        }});
+        children.forEach(function(c) {{ grid.appendChild(c); }});
+      }});
+    }}
+
+    sections.forEach(function(sec) {{
+      $$('.u10-row', sec).forEach(function(r, i) {{ r.dataset.origIdx = String(i); }});
+    }});
+
+    if (search) search.addEventListener('input',  applyFilter);
+    if (bucket) bucket.addEventListener('change', applyFilter);
+    if (minIn)  minIn.addEventListener('input',   applyFilter);
+    if (maxIn)  maxIn.addEventListener('input',   applyFilter);
+    if (sortIn) sortIn.addEventListener('change', function() {{ applySort(); applyFilter(); }});
+
+    applySort();
+    applyFilter();
+  }});
+}})();
+</script>
 """
 
     html_doc = promote.html_shell(f"Under ${HARD_CAP:.0f} · Cards You Can Snag for Pocket Change · Harpua2001", body,

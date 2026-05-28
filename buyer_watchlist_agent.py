@@ -217,14 +217,27 @@ def render_report(plan: dict) -> Path:
     """
 
     # Filter bar (client-side)
-    filter_bar = """
+    _player_opts = "".join(
+        f'<option value="{_slugify(p["name"])}">{_esc(p["name"])}</option>'
+        for p in players
+    )
+    filter_bar = f"""
     <div class="wl-filters">
-      <input type="search" id="wl-q" placeholder="Filter cards by keyword (set, parallel, year…)" class="search-input" autocomplete="off" style="flex:1 1 260px;min-width:0;">
+      <input type="search" id="wl-q" placeholder="Filter cards by keyword (set, parallel, year…)" class="search-input" autocomplete="off" style="flex:1 1 220px;min-width:0;">
+      <select id="wl-player">
+        <option value="all">All players</option>
+        {_player_opts}
+      </select>
       <select id="wl-grade">
         <option value="all">All grades</option>
         <option value="psa">PSA 10 only</option>
         <option value="raw">Raw only</option>
       </select>
+      <span class="wl-price-range">
+        <input type="number" id="wl-min" placeholder="$min" min="0" step="1" class="wl-price-in">
+        <span class="wl-dash">–</span>
+        <input type="number" id="wl-max" placeholder="$max" min="0" step="1" class="wl-price-in">
+      </span>
       <select id="wl-sort">
         <option value="discount">Biggest discount first</option>
         <option value="price-asc">Lowest price first</option>
@@ -309,27 +322,44 @@ def render_report(plan: dict) -> Path:
     <script>
       (function () {
         const q       = document.getElementById('wl-q');
+        const player  = document.getElementById('wl-player');
         const grade   = document.getElementById('wl-grade');
+        const minP    = document.getElementById('wl-min');
+        const maxP    = document.getElementById('wl-max');
         const sort    = document.getElementById('wl-sort');
         const dealsCB = document.getElementById('wl-deals-only');
         const count   = document.getElementById('wl-count');
         const cards   = Array.from(document.querySelectorAll('.wl-card'));
+        const sections = Array.from(document.querySelectorAll('.wl-section'));
 
         function apply() {
           const qv = (q.value || '').toLowerCase().trim();
+          const pv = player.value;
           const gv = grade.value;
+          const mn = parseFloat(minP.value);
+          const mx = parseFloat(maxP.value);
           const dealsOnly = dealsCB.checked;
           let shown = 0;
           cards.forEach(c => {
             const hay   = c.dataset.search || '';
             const cg    = c.dataset.grade  || '';
             const isDeal = c.dataset.deal === '1';
+            const price = parseFloat(c.dataset.price) || 0;
             const okQ   = !qv || hay.includes(qv);
             const okG   = gv === 'all' || cg === gv;
             const okD   = !dealsOnly || isDeal;
-            const show  = okQ && okG && okD;
+            const okMn  = isNaN(mn) || price >= mn;
+            const okMx  = isNaN(mx) || price <= mx;
+            const show  = okQ && okG && okD && okMn && okMx;
             c.style.display = show ? '' : 'none';
             if (show) shown++;
+          });
+          // Hide whole player sections when filtered out
+          sections.forEach(s => {
+            const slug = s.id.replace(/^player-/, '');
+            const playerMatch = pv === 'all' || slug === pv;
+            const anyVisible = !!s.querySelector('.wl-card:not([style*="display: none"])');
+            s.style.display = (playerMatch && anyVisible) ? '' : 'none';
           });
           count.textContent = shown + ' / ' + cards.length + ' shown';
 
@@ -350,8 +380,8 @@ def render_report(plan: dict) -> Path:
             items.forEach(c => grid.appendChild(c));
           });
         }
-        [q, grade, sort, dealsCB].forEach(el => el && el.addEventListener('input', apply));
-        [q, grade, sort, dealsCB].forEach(el => el && el.addEventListener('change', apply));
+        [q, player, grade, minP, maxP, sort, dealsCB].forEach(el => el && el.addEventListener('input', apply));
+        [q, player, grade, minP, maxP, sort, dealsCB].forEach(el => el && el.addEventListener('change', apply));
         apply();
       })();
     </script>
@@ -386,6 +416,10 @@ def render_report(plan: dict) -> Path:
   .wl-kpi-l { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }
   .wl-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; margin: 18px 0 24px; position: sticky; top: 64px; z-index: 5; backdrop-filter: blur(8px); }
   .wl-filters select { padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 13px; }
+  .wl-filters .wl-price-range { display: inline-flex; align-items: center; gap: 4px; }
+  .wl-filters .wl-price-in { width: 70px; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 13px; -moz-appearance: textfield; }
+  .wl-filters .wl-price-in::-webkit-outer-spin-button, .wl-filters .wl-price-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .wl-filters .wl-dash { color: var(--text-muted); }
   .wl-chk { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; cursor: pointer; }
   .wl-count { margin-left: auto; color: var(--text-muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
   .wl-section { margin: 32px 0; }
