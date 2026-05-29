@@ -80,14 +80,20 @@ def _mad(values: list[float], center: float) -> float:
 
 def _round_to_dot99(p: float) -> float:
     """Round to a charm-price ending. $X.99 below $100, $XX.95 between
-    $100-$500, integer dollars above $500."""
+    $100-$500, integer dollars above $500. Output is always >= $0.99 — never
+    negative (was bug: p=0.30 used to round to -0.01)."""
     if p <= 0:
-        return 0.0
+        return 0.99
+    if p < 1:
+        # Below a dollar, charm-rounding to floor-1+0.99 would go negative.
+        # Floor at $0.99, the eBay minimum listing price.
+        return 0.99
     if p < 100:
         floor_d = int(p)
         # If we're close to the integer below, use that .99; otherwise this
         # integer + .99 (e.g. 8.40 -> 7.99; 8.60 -> 8.99).
-        return floor_d - 0.01 if (p - floor_d) < 0.50 else floor_d + 0.99
+        candidate = floor_d - 0.01 if (p - floor_d) < 0.50 else floor_d + 0.99
+        return max(candidate, 0.99)
     if p < 500:
         floor_d = int(p)
         return floor_d - 0.05 if (p - floor_d) < 0.50 else floor_d + 0.95

@@ -116,6 +116,9 @@ CASCADE_AFTER_SOLD = [
 ]
 
 # Agents that hit eBay APIs (live fetches). Parallelizable but bounded.
+# IMPORTANT: refresh_snapshot.py is in its OWN wave (Wave 0) — every reader
+# below depends on a fresh listings_snapshot.json. Running it serially first
+# avoids the race where readers see a half-written snapshot or yesterday's data.
 EBAY_FETCHERS = [
     Step("photo_audit_agent.py",          desc="photo audit (Cassini photo signals)",  timeout=180),
     Step("cassini_score_agent.py",        desc="Cassini health scores",                timeout=180),
@@ -141,30 +144,49 @@ DEAL_FETCHERS = [
     Step("jack_pokemon_agent.py",  desc="Jack's Pokemon buyer's guide",           timeout=180),
 ]
 
-# Local-only generators (no eBay API). Run alongside.
-LOCAL_GENERATORS = [
-    Step("inventory_agent.py",     desc="inventory plan + multi-source pricing"),
-    Step("lot_generator_agent.py", desc="lot generator (auction-block proposals)"),
-]
+# LOCAL_GENERATORS used to be a separate group; now folded into CASCADE_FULL's
+# Wave 1 directly. Kept as an empty list for backwards-compat with any caller
+# that still references it.
+LOCAL_GENERATORS = []
 
 
 # Full DAG — waves run sequentially, steps within a wave run in parallel.
 CASCADE_FULL = [
-    # Wave 1: kick off everything that doesn't depend on another generator's
-    # output. Local generators + all eBay fetchers run concurrently. This is
-    # where most of the wall clock goes.
-    LOCAL_GENERATORS + EBAY_FETCHERS,
+    # Wave 0: refresh listings_snapshot.json from eBay's GetMyeBaySelling.
+    # This is the canonical "what's live on eBay right now" file. Every
+    # downstream reader (cassini, photo_audit, repricing, best_offer,
+    # promoted_listings, build_collx_vs_ebay) joins against it. Without this
+    # step, --full ran against the snapshot from the last manual promote.py
+    # — which is exactly the staleness the script was supposed to eliminate.
+    [
+        Step("refresh_snapshot.py", desc="snapshot listings from eBay GetMyeBaySelling", timeout=120),
+    ],
 
-    # Wave 2: anything that reads an output from Wave 1.
+    # Wave 1: write-once local generators. Hoisted out of Wave 2 so the
+    # snapshot readers don't race against inventory_agent.py's non-atomic
+    # write to inventory_plan.json.
+    [
+        Step("inventory_agent.py",     desc="inventory plan + multi-source pricing"),
+        Step("lot_generator_agent.py", desc="lot generator (auction-block proposals)"),
+    ],
+
+    # Wave 2: every eBay-reading agent. They all join against the snapshot
+    # (written in wave 0) and most also read inventory_plan (written in
+    # wave 1). Run them in parallel for wall-clock; cap concurrency to keep
+    # eBay rate limits sane.
+    EBAY_FETCHERS,
+
+    # Wave 3: infer_prices reads inventory_plan + the just-fetched
+    # photo/cassini outputs.
     [
         Step("infer_prices_agent.py",  desc="smart-price blend (reads inventory_plan)"),
     ],
-    # Wave 3: anything that reads from Wave 2 + Wave 1.
+    # Wave 4: anything that reads from Wave 2/3 outputs.
     [
         Step("build_collx_vs_ebay.py", desc="CollX vs eBay (joins everything)"),
     ] + DEAL_FETCHERS,
 
-    # Wave 4: daily digest reads from many plan files.
+    # Wave 5: daily digest reads from many plan files.
     [
         Step("daily_digest_agent.py",  desc="daily digest (rollup)",  allow_failure=True),
     ],
@@ -206,7 +228,10 @@ def _run_one(step: Step) -> tuple[Step, bool, float, str]:
         return step, False, time.time() - t0, f"TIMEOUT after {step.timeout}s"
     dt = time.time() - t0
     if r.returncode != 0:
-        return step, False, dt, (r.stderr or "")[-300:].strip().splitlines()[-1:][0] if r.stderr else "non-zero exit"
+        # Safer extraction: strip first, then splitlines, then guard the index.
+        # Old one-liner crashed with IndexError when stderr was whitespace-only.
+        err_lines = (r.stderr or "").strip().splitlines()
+        return step, False, dt, err_lines[-1][:140] if err_lines else "non-zero exit, no stderr"
     tail = (r.stdout or "").strip().splitlines()
     summary = tail[-1].strip() if tail else "ok"
     return step, True, dt, summary[:140]
@@ -245,9 +270,13 @@ def run_cascade(name: str, cascade: list[list[Step]], *, quiet: bool, max_parall
                 print(f"  [skip]  {s.script:34s}        {SKIP_REASONS[s.script]}")
             results.append((s, True, 0.0, SKIP_REASONS[s.script]))
 
-        # Run this wave with bounded parallelism.
+        # Run this wave with bounded parallelism. LPT scheduling: sort by
+        # estimated runtime (timeout proxy) descending so the longest jobs
+        # start first — this minimizes makespan when waves have skewed
+        # durations (photo_audit is 165s, others <30s).
+        runnable_sorted = sorted(runnable, key=lambda s: -s.timeout)
         with ThreadPoolExecutor(max_workers=max(1, max_parallel)) as pool:
-            futures = {pool.submit(_run_one, s): s for s in runnable}
+            futures = {pool.submit(_run_one, s): s for s in runnable_sorted}
             for fut in as_completed(futures):
                 step, ok, dt, summary = fut.result()
                 results.append((step, ok, dt, summary))
@@ -255,11 +284,13 @@ def run_cascade(name: str, cascade: list[list[Step]], *, quiet: bool, max_parall
                 if not ok and not step.allow_failure:
                     failed_blocking.append(step.script)
 
-        if failed_blocking:
-            if not quiet:
-                print(f"  blocking failure(s): {', '.join(failed_blocking)}")
-                print(f"  stopping cascade (subsequent waves would be wrong-data)")
-            break
+        # Previously: any blocking failure aborted the entire cascade. That
+        # left dashboards half-rebuilt even when later waves did not actually
+        # depend on the failed step. Fail-soft now — continue running waves,
+        # report failures at the end. Steps that genuinely depend on a failed
+        # upstream output will fail loudly themselves and be in the summary.
+        if failed_blocking and not quiet:
+            print(f"  failure(s) so far: {', '.join(failed_blocking)} — continuing")
 
     total = time.time() - t_total
     n_ok       = sum(1 for _, ok, _, _ in results if ok)

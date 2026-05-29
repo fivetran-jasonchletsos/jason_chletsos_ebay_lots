@@ -45,32 +45,39 @@ CACHE_DIR.mkdir(exist_ok=True)
 
 def gather_batch_pushes():
     """Pull every successful push from output/push_to_ebay_batch_log.json plus
-    single-card pushes from push_to_ebay_log.json. Returns list of dicts."""
+    single-card pushes from push_to_ebay_log.json. Returns list of dicts.
+    Missing log files are NOT an error — fresh checkout, or before the first
+    push has ever run. Just skip the absent file."""
     rows = []
-    batch = json.loads((REPO / "output/push_to_ebay_batch_log.json").read_text())
-    for b in batch:
-        for r in b.get("results", []):
-            if r.get("status") == "success" and r.get("item_id"):
-                rows.append({
-                    "ebay_item_id": str(r["item_id"]),
-                    "collx_id":     r.get("collx_id", ""),
-                    "title":        r.get("title", ""),
-                    "price":        float(r.get("price") or 0),
-                    "listed_at":    b.get("started_at", ""),
-                    "source":       f"batch {b.get('started_at','')[:10]}",
-                })
-    single = json.loads((REPO / "output/push_to_ebay_log.json").read_text())
-    if isinstance(single, list):
-        for s in single:
-            if s.get("ack") == "Success" and s.get("item_id"):
-                rows.append({
-                    "ebay_item_id": str(s["item_id"]),
-                    "collx_id":     s.get("collx_id", ""),
-                    "title":        s.get("title", ""),
-                    "price":        float(s.get("price") or 0),
-                    "listed_at":    s.get("started_at") or s.get("timestamp", ""),
-                    "source":       "single push",
-                })
+    batch_path = REPO / "output/push_to_ebay_batch_log.json"
+    if batch_path.is_file():
+        batch = json.loads(batch_path.read_text())
+        for b in batch:
+            for r in b.get("results", []):
+                if r.get("status") == "success" and r.get("item_id"):
+                    rows.append({
+                        "ebay_item_id": str(r["item_id"]),
+                        "collx_id":     r.get("collx_id", ""),
+                        "title":        r.get("title", ""),
+                        "price":        float(r.get("price") or 0),
+                        "listed_at":    b.get("started_at", ""),
+                        "source":       f"batch {b.get('started_at','')[:10]}",
+                    })
+
+    single_path = REPO / "output/push_to_ebay_log.json"
+    if single_path.is_file():
+        single = json.loads(single_path.read_text())
+        if isinstance(single, list):
+            for s in single:
+                if s.get("ack") == "Success" and s.get("item_id"):
+                    rows.append({
+                        "ebay_item_id": str(s["item_id"]),
+                        "collx_id":     s.get("collx_id", ""),
+                        "title":        s.get("title", ""),
+                        "price":        float(s.get("price") or 0),
+                        "listed_at":    s.get("started_at") or s.get("timestamp", ""),
+                        "source":       "single push",
+                    })
     # Dedupe by item_id
     seen, uniq = set(), []
     for r in rows:
@@ -122,6 +129,10 @@ def gate(rows, inv_by_cid, links_by_ebay, snapshot_listings):
         r["collx_market"] = inv_row.get("collx_market_value", "")
 
         # ---- GATE 3: duplicate detection in live snapshot ----
+        # Match heuristic: player name appears as a whole word in the eBay title
+        # AND the FULL card number appears (e.g. "#BDC-50", not just "#50"). The
+        # old short-suffix fallback over-matched: card "BDC-50" used to collide
+        # with any "#50" in the same player's other parallels.
         player_lc = player_token_from_inv(inv_row)
         card_num  = (inv_row.get("card_number") or "").strip()
         if not card_num:
@@ -129,11 +140,13 @@ def gate(rows, inv_by_cid, links_by_ebay, snapshot_listings):
         dupes = []
         if player_lc and card_num:
             needle_num = f"#{card_num}".lower()
+            # \b player_lc \b — whole-word match prevents "Drake" matching "Drake London".
+            player_re = re.compile(rf"\b{re.escape(player_lc)}\b")
             for l in snapshot_listings:
                 if str(l.get("item_id")) == item_id:
                     continue  # don't match against self
                 t = (l.get("title") or "").lower()
-                if player_lc in t and (needle_num in t or f"#{card_num.split('-')[-1]}" in t):
+                if player_re.search(t) and needle_num in t:
                     dupes.append({
                         "item_id": str(l.get("item_id")),
                         "title":   l.get("title", ""),
@@ -308,10 +321,34 @@ def render_review_row(c, y, idx, card):
 
 def main() -> int:
     rows = gather_batch_pushes()
-    inv  = {r["collx_id"]: r for r in csv.DictReader(open(REPO / "inventory.csv")) if r.get("collx_id")}
-    links = {l["ebay_item_id"]: l for l in linkage_db.all_links() if l.get("ebay_item_id")}
-    snap = json.loads((REPO / "output/listings_snapshot.json").read_text())
-    snapshot_listings = snap["listings"] if isinstance(snap, dict) else snap
+    # Use a `with` block so the file handle closes deterministically.
+    inv_csv_path = REPO / "inventory.csv"
+    if not inv_csv_path.is_file():
+        print(f"NOTE: {inv_csv_path} missing; pull-aside cannot enrich rows.")
+        inv = {}
+    else:
+        with inv_csv_path.open(newline="", encoding="utf-8") as f:
+            inv = {r["collx_id"]: r for r in csv.DictReader(f) if r.get("collx_id")}
+
+    # If multiple linkage rows share an ebay_item_id (no UNIQUE constraint),
+    # keep the NEWEST (latest updated_at) so Gate 1 reads current status, not
+    # a stale row.
+    links = {}
+    for l in linkage_db.all_links():
+        eid = l.get("ebay_item_id")
+        if not eid:
+            continue
+        cur = links.get(eid)
+        if cur is None or (l.get("updated_at") or "") > (cur.get("updated_at") or ""):
+            links[eid] = l
+
+    snap_path = REPO / "output/listings_snapshot.json"
+    if not snap_path.is_file():
+        print(f"NOTE: {snap_path} missing; duplicate-gate cannot run.")
+        snapshot_listings = []
+    else:
+        snap = json.loads(snap_path.read_text())
+        snapshot_listings = snap.get("listings", []) if isinstance(snap, dict) else (snap or [])
 
     pull_now, review = gate(rows, inv, links, snapshot_listings)
 

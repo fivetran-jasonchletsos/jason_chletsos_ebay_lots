@@ -93,12 +93,23 @@ def main() -> int:
         print(f"  ERROR: {msg}")
         return 1
 
-    # Flip linkage_db.
+    # Flip linkage_db. Failure here is NOT "non-fatal" — if eBay says ended
+    # and linkage says live, every downstream dashboard (pull-aside Gate 1,
+    # cassini, repricing, best_offer) will keep treating the dead listing as
+    # alive indefinitely. Surface a non-zero exit so the caller knows the
+    # reconcile is incomplete and a manual rerun is needed.
+    linkage_ok = False
     try:
         n = _mark_ended_in_linkage(args.item_id, args.reason)
         print(f"  linkage_db: {n} row(s) marked ended")
+        linkage_ok = True
     except Exception as exc:
-        print(f"  linkage_db update FAILED (non-fatal): {exc}")
+        print(f"  linkage_db update FAILED: {exc}")
+        print(f"  WARNING: eBay listing is ended but linkage_db still says live.")
+        print(f"  Re-run when sqlite is unlocked:")
+        print(f"      python3 -c \"import linkage_db; linkage_db.connect()."
+              f"__enter__().execute(\\\"UPDATE listings SET status='ended', "
+              f"updated_at=datetime('now') WHERE ebay_item_id={args.item_id}\\\")\"")
 
     # Also drop the listing from listings_snapshot.json so dashboards stop showing it.
     try:
@@ -119,7 +130,9 @@ def main() -> int:
         print(f"  snapshot update FAILED (non-fatal): {exc}")
 
     print(f"Done. Item {args.item_id} is no longer live.")
-    return 0
+    # Return non-zero if any reconcile step failed so callers (and humans)
+    # know the dashboards may show stale state until manually fixed.
+    return 0 if linkage_ok else 3
 
 
 if __name__ == "__main__":

@@ -233,39 +233,75 @@ def build_add_xml(item: dict, token: str, price: float, condition: str, duration
 
 
 def _detect_duplicates(item: dict) -> list[dict]:
-    """Scan output/listings_snapshot.json for any live listing that looks like
-    the same physical card. Match heuristic: same player name AND same card
-    number both present in the existing eBay title. Returns the matching
-    listings (empty list = no duplicates found = safe to push)."""
+    """Two-stage duplicate detection.
+
+    1. AUTHORITATIVE: linkage_db.get_link(collx_id). If linkage already maps
+       this card to a 'live' eBay item, we definitely have it on eBay; no
+       fuzzy heuristic needed.
+    2. BELT-AND-SUSPENDERS: fuzzy title scan against listings_snapshot for
+       cards that predate linkage_db (or where linkage drifted). Match
+       requires the player name as a WHOLE WORD plus the FULL card number
+       (#NNN or #A-NNN) — substring on either alone produced false-positives
+       like 'Drake' substring-matching 'Drake London #25'.
+
+    Returns the matching listings (empty list = no duplicates found = safe
+    to push).
+    """
     import re
+    raw = item.get("raw") or {}
+    collx_id = (raw.get("collx_id") or "").strip()
+
+    hits = []
+
+    # ---- Stage 1: linkage_db is the authoritative answer ----
+    if collx_id:
+        try:
+            import linkage_db
+            existing = linkage_db.get_link(collx_id)
+            if existing and existing.get("status") == "live":
+                hits.append({
+                    "item_id": str(existing.get("ebay_item_id") or ""),
+                    "title":   existing.get("title") or "(linkage_db record)",
+                    "price":   existing.get("listed_price"),
+                    "source":  "linkage_db (authoritative)",
+                })
+        except Exception:
+            # Linkage check is opportunistic — fall through to fuzzy on error.
+            pass
+
+    # ---- Stage 2: fuzzy title scan as backup ----
     snap_path = REPO_ROOT / "output" / "listings_snapshot.json"
     if not snap_path.is_file():
-        return []
+        return hits
     try:
         snap = json.loads(snap_path.read_text())
     except Exception:
-        return []
-    listings = snap["listings"] if isinstance(snap, dict) else snap
+        return hits
+    listings = snap.get("listings", []) if isinstance(snap, dict) else (snap or [])
 
-    raw = item.get("raw") or {}
     player = (raw.get("player") or "").strip().lower()
     card_num = (raw.get("card_number") or "").strip()
     if not player or not card_num:
-        return []  # not enough signal to compare safely
+        return hits  # not enough signal — keep whatever stage 1 found
 
     needle_num = f"#{card_num}".lower()
-    short_num  = card_num.split("-")[-1]
-    short_needle = f"#{short_num}".lower()
+    # \b player \b — whole-word match. "Drake" no longer hits "Drake London".
+    player_re = re.compile(rf"\b{re.escape(player)}\b")
 
-    hits = []
+    seen_ids = {h["item_id"] for h in hits}
     for l in listings:
+        item_id = str(l.get("item_id") or "")
+        if item_id in seen_ids:
+            continue
         t = (l.get("title") or "").lower()
-        if player in t and (needle_num in t or short_needle in t):
+        if player_re.search(t) and needle_num in t:
             hits.append({
-                "item_id": str(l.get("item_id")),
+                "item_id": item_id,
                 "title":   l.get("title", ""),
                 "price":   l.get("price"),
+                "source":  "fuzzy title match",
             })
+            seen_ids.add(item_id)
     return hits
 
 
