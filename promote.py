@@ -1021,17 +1021,12 @@ def build_deals_page(deals_data: dict) -> Path:
 # ---------------------------------------------------------------------------
 
 def fetch_listings(token: str, cfg: dict) -> list[dict]:
-    xml_body = """<?xml version="1.0" encoding="utf-8"?>
-<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
-  <ActiveList>
-    <Include>true</Include>
-    <Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>1</PageNumber></Pagination>
-  </ActiveList>
-  <ErrorLanguage>en_US</ErrorLanguage>
-  <WarningLevel>High</WarningLevel>
-</GetMyeBaySellingRequest>""".format(token=token)
-
+    """Paginated GetMyeBaySelling — fetches ALL active listings, not just
+    page 1. Previously bug: pagination hard-coded to PageNumber=1, so any
+    listing past index 200 (or any listing that didn't make page 1 in eBay's
+    chosen sort) silently disappeared from the snapshot. The consistency
+    check caught this on 2026-05-29: 5 'linkage live' listings missing from
+    the snapshot were actually still on eBay, just on page 2."""
     headers = {
         "X-EBAY-API-SITEID":               "0",
         "X-EBAY-API-COMPATIBILITY-LEVEL":  "967",
@@ -1041,15 +1036,44 @@ def fetch_listings(token: str, cfg: dict) -> list[dict]:
         "X-EBAY-API-CERT-NAME":            cfg["client_secret"],
         "Content-Type":                    "text/xml",
     }
-    r = requests.post("https://api.ebay.com/ws/api.dll", headers=headers, data=xml_body.encode())
-    if r.status_code != 200:
-        print(f"  Trading API error: {r.status_code}")
-        return []
-
     ns = {"e": "urn:ebay:apis:eBLBaseComponents"}
-    root = ET.fromstring(r.text)
     items = []
-    for item in root.findall(".//e:ActiveList/e:ItemArray/e:Item", ns):
+    page_no = 1
+    while True:
+        xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <ActiveList>
+    <Include>true</Include>
+    <Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>{page_no}</PageNumber></Pagination>
+  </ActiveList>
+  <ErrorLanguage>en_US</ErrorLanguage>
+  <WarningLevel>High</WarningLevel>
+</GetMyeBaySellingRequest>"""
+        r = requests.post("https://api.ebay.com/ws/api.dll", headers=headers, data=xml_body.encode())
+        if r.status_code != 200:
+            print(f"  Trading API error on page {page_no}: {r.status_code}")
+            break
+        root = ET.fromstring(r.text)
+        page_items_xml = root.findall(".//e:ActiveList/e:ItemArray/e:Item", ns)
+        page_items = list(_parse_listings(page_items_xml, ns))
+        items.extend(page_items)
+
+        # Check pagination metadata. eBay returns TotalNumberOfPages.
+        total_pages_el = root.find(".//e:ActiveList/e:PaginationResult/e:TotalNumberOfPages", ns)
+        total_pages = int(total_pages_el.text) if total_pages_el is not None and total_pages_el.text else 1
+        if page_no >= total_pages or not page_items:
+            break
+        page_no += 1
+
+    print(f"  Fetched {len(items)} listings across {page_no} page(s)")
+    return items
+
+
+def _parse_listings(xml_items, ns):
+    """Generator: yields one listing dict per <Item> in the XML."""
+    import re as _re
+    for item in xml_items:
         def t(tag):
             el = item.find(f"e:{tag}", ns)
             return (el.text or "").strip() if el is not None else ""
@@ -1061,18 +1085,16 @@ def fetch_listings(token: str, cfg: dict) -> list[dict]:
         item_id = t("ItemID")
         # Upgrade eBay thumbnail URL from s-l140 to s-l500 for sharp images
         raw_pic = pic.text.strip() if pic is not None else ""
-        import re as _re
         sharp_pic = _re.sub(r's-l\d+\.jpg', 's-l500.jpg', raw_pic) if raw_pic else ""
         listing_type_raw = t("ListingType")
-        # eBay ListingType values: FixedPriceItem, StoresFixedPrice → BIN
-        # Chinese, Dutch → Auction. AdType → not a real listing.
         if listing_type_raw in ("FixedPriceItem", "StoresFixedPrice"):
             ltype = "BIN"
         elif listing_type_raw in ("Chinese", "Dutch"):
             ltype = "Auction"
         else:
-            ltype = "BIN"  # default
-        items.append({
+            ltype = "BIN"
+
+        yield {
             "item_id":      item_id,
             "title":        t("Title"),
             "price":        price_el.text.strip() if price_el is not None else "0",
@@ -1083,10 +1105,7 @@ def fetch_listings(token: str, cfg: dict) -> list[dict]:
             "quantity":     t("QuantityAvailable") or t("Quantity") or "1",
             "desc":         t("Description"),
             "listing_type": ltype,
-        })
-
-    print(f"  Fetched {len(items)} listings")
-    return items
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -2938,6 +2957,7 @@ _NAV_ITEMS = [
     ("by_set.html",           "By Set",        True,  "Browse"),
     ("by_player.html",        "By Player",     True,  "Browse"),
     ("under_10.html",         "Under $10",     True,  "Browse"),
+    ("pokemon.html",          "Pokemon",       True,  "Browse"),
 
     # ── Admin: hidden behind auth gate ──
     ("daily.html",            "Daily",         False, None),
