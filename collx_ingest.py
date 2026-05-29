@@ -217,6 +217,9 @@ def ingest(src: Path, dst: Path = INV_PATH) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("path", nargs="?", help="Path to CollX CSV. Defaults to the newest download_user*.csv in ~/Downloads.")
+    ap.add_argument("--no-refresh", action="store_true",
+                    help="Skip the downstream cascade (inventory_agent + infer_prices + build_collx_vs_ebay). "
+                         "By default the cascade runs so the dashboard reflects the new data immediately.")
     args = ap.parse_args()
 
     src = Path(args.path) if args.path else _find_latest_export()
@@ -245,8 +248,19 @@ def main() -> int:
     print(f"Linkage DB: {summary['linkage_new']} new card(s) auto-created as unlisted")
     print(f"Linkage DB: {summary['linkage_removed']} card(s) marked removed_from_collx (no longer in export)")
     print()
-    print("Next: python inventory_agent.py   to refresh docs/inventory.html with multi-source pricing.")
-    return 0
+
+    if args.no_refresh:
+        print("Next: python refresh_pipeline.py --after-ingest   "
+              "(or run inventory_agent + infer_prices_agent + build_collx_vs_ebay yourself)")
+        return 0
+
+    print("Cascading downstream refresh so the dashboard isn't stale...")
+    import subprocess
+    r = subprocess.run(
+        ["python3", "refresh_pipeline.py", "--after-ingest"],
+        cwd=str(REPO_ROOT),
+    )
+    return r.returncode
 
 
 if __name__ == "__main__":

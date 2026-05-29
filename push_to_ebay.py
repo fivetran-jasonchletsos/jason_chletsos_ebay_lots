@@ -409,6 +409,39 @@ def main() -> int:
         except Exception as exc:
             print(f"  Linkage WRITE FAILED (non-fatal): {exc}")
 
+        # Append to listings_snapshot.json so dashboards built from the cached
+        # snapshot pick up the new listing immediately, without waiting for the
+        # next full promote.py refresh. Prevents the "I just listed it but the
+        # CollX vs eBay page shows it as unlisted" stale-data problem.
+        try:
+            import json
+            from pathlib import Path
+            snap_path = Path(__file__).parent / "output" / "listings_snapshot.json"
+            if snap_path.is_file():
+                snap = json.loads(snap_path.read_text())
+                listings = snap["listings"] if isinstance(snap, dict) else snap
+                if not any(str(l.get("item_id")) == str(item_id) for l in listings):
+                    listings.append({
+                        "item_id":      str(item_id),
+                        "title":        item["title"],
+                        "price":        float(price),
+                        "pic":          item.get("image_url") or item["raw"].get("image_url", ""),
+                        "url":          url,
+                        "category":     "Trading Card Singles",
+                        "condition":    condition,
+                        "quantity":     1,
+                        "desc":         "",
+                        "listing_type": "BIN",
+                    })
+                    if isinstance(snap, dict):
+                        snap["listings"] = listings
+                        snap_path.write_text(json.dumps(snap, separators=(",", ":")))
+                    else:
+                        snap_path.write_text(json.dumps(listings, separators=(",", ":")))
+                    print(f"  Snapshot:   appended to listings_snapshot.json ({len(listings)} listings)")
+        except Exception as exc:
+            print(f"  Snapshot append FAILED (non-fatal): {exc}")
+
     append_log({
         "row":         idx + 1,
         "collx_id":    item["raw"].get("collx_id"),
