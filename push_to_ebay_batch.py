@@ -1,4 +1,23 @@
 """
+[DEPRECATED — see feedback_no_batch_push in memory]
+
+This batch pusher was retired on 2026-05-29 after the May 27 batch created
+ghost/duplicate listings (Cam Ward Pink Refractor, Micah Parsons Pink
+Refractor) that Jason had to manually clean up. The batch agent did not
+cross-reference output/listings_snapshot.json before pushing, so cards
+already live on eBay under hand-edited titles got pushed a second time.
+
+Jason's standing rule: every eBay push must be a single-card decision he
+explicitly approves card-by-card via push_to_ebay.py.
+
+This file is preserved for archaeology only. The main() refuses to run.
+
+If you genuinely need batch behavior in the future, copy the candidate-
+selection logic into a NEW script that ALSO runs the duplicate-detection
+gate (_detect_duplicates in push_to_ebay.py).
+
+----- original docstring below for reference -----
+
 push_to_ebay_batch.py — push many CollX-only (unlisted) cards to eBay in a
 single command. Replaces the manual per-card `push_to_ebay.py --row N --apply`
 loop with a safety-filtered bulk pass.
@@ -269,6 +288,22 @@ def push_one(cand: dict, cfg: dict, token: str, duration: str,
 
 
 def main() -> int:
+    print("=" * 72)
+    print("push_to_ebay_batch.py is DEPRECATED as of 2026-05-29.")
+    print()
+    print("Why: the May 27 batch created duplicate/ghost listings (Cam Ward Pink")
+    print("Refractor, Micah Parsons Pink Refractor) that had to be manually ended.")
+    print("The batch agent never cross-referenced live eBay listings before pushing.")
+    print()
+    print("Use the single-card path instead. It now has duplicate detection built in:")
+    print("    python3 push_to_ebay.py --collx-id <ID> --price <PRICE> --apply")
+    print()
+    print("If you genuinely need batch behavior again, the dedupe gate is at")
+    print("_detect_duplicates() in push_to_ebay.py. Copy that into a fresh script.")
+    print("=" * 72)
+    return 1
+
+    # ----- DEPRECATED main() preserved for reference, never reached -----
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--max",   type=int,   default=DEFAULT_MAX,
                     help=f"Cap batch size (default {DEFAULT_MAX}, hard ceiling {HARD_CEILING}).")

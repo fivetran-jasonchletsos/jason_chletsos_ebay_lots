@@ -232,6 +232,43 @@ def build_add_xml(item: dict, token: str, price: float, condition: str, duration
 </AddItemRequest>"""
 
 
+def _detect_duplicates(item: dict) -> list[dict]:
+    """Scan output/listings_snapshot.json for any live listing that looks like
+    the same physical card. Match heuristic: same player name AND same card
+    number both present in the existing eBay title. Returns the matching
+    listings (empty list = no duplicates found = safe to push)."""
+    import re
+    snap_path = REPO_ROOT / "output" / "listings_snapshot.json"
+    if not snap_path.is_file():
+        return []
+    try:
+        snap = json.loads(snap_path.read_text())
+    except Exception:
+        return []
+    listings = snap["listings"] if isinstance(snap, dict) else snap
+
+    raw = item.get("raw") or {}
+    player = (raw.get("player") or "").strip().lower()
+    card_num = (raw.get("card_number") or "").strip()
+    if not player or not card_num:
+        return []  # not enough signal to compare safely
+
+    needle_num = f"#{card_num}".lower()
+    short_num  = card_num.split("-")[-1]
+    short_needle = f"#{short_num}".lower()
+
+    hits = []
+    for l in listings:
+        t = (l.get("title") or "").lower()
+        if player in t and (needle_num in t or short_needle in t):
+            hits.append({
+                "item_id": str(l.get("item_id")),
+                "title":   l.get("title", ""),
+                "price":   l.get("price"),
+            })
+    return hits
+
+
 def find_item(plan: dict, args) -> tuple[int, dict]:
     items = plan["items"]
     if args.row is not None:
@@ -318,6 +355,9 @@ def main() -> int:
                     help="Charge $4.99 flat. Default is free shipping.")
     ap.add_argument("--apply",      action="store_true",
                     help="Actually push to eBay. Without this, dry-run only.")
+    ap.add_argument("--skip-dedupe", action="store_true",
+                    help="Skip the duplicate-detection gate (use when you genuinely "
+                         "have a second copy of a card already on eBay).")
     ap.add_argument("--show-xml",   action="store_true",
                     help="Print the full AddFixedPriceItem XML in dry-run mode.")
     args = ap.parse_args()
@@ -339,6 +379,29 @@ def main() -> int:
     free_shipping = not args.paid_shipping
 
     print_plan(idx, item, price, condition, args.duration, free_shipping)
+
+    # ---- DUPLICATE GATE ----------------------------------------------------
+    # Before any --apply, scan listings_snapshot.json for another live listing
+    # that looks like the same physical card (same player + same card number).
+    # Two confirmed duplicates from the May 27 batch (Cam Ward Pink Refractor,
+    # Micah Parsons Pink Refractor) would have been caught by this check.
+    # See feedback_no_batch_push + project_cam_ward_pink_refractor_one_only.
+    if args.apply and not getattr(args, "skip_dedupe", False):
+        dupes = _detect_duplicates(item)
+        if dupes:
+            print()
+            print("=" * 72)
+            print("DUPLICATE CHECK: this card may already be live on eBay.")
+            print("=" * 72)
+            for d in dupes[:5]:
+                p = d.get("price")
+                pstr = f"${float(p):.2f}" if p is not None else "?"
+                print(f"  item {d['item_id']}  {pstr}  {d['title'][:80]}")
+            print()
+            print("If this push is genuinely a SECOND copy of the card, re-run with --skip-dedupe.")
+            print("Otherwise the safe move is to NOT push — you'll create a duplicate listing.")
+            print("Aborting.")
+            return 2
 
     if not args.apply:
         print()
