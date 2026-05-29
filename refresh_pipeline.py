@@ -189,7 +189,14 @@ CASCADE_FULL = [
         Step("build_collx_vs_ebay.py", desc="CollX vs eBay (joins everything)"),
     ] + DEAL_FETCHERS,
 
-    # Wave 5: daily digest reads from many plan files.
+    # Wave 5: cross-store drift report. Surfaces ghost / dupe / ended-but-
+    # still-in-snapshot situations like the Cam Ward and Micah Parsons
+    # incidents earlier this week. Always runs (cheap, no eBay API).
+    [
+        Step("consistency_check.py",   desc="linkage vs snapshot drift report",  allow_failure=True),
+    ],
+
+    # Wave 6: daily digest reads from many plan files.
     [
         Step("daily_digest_agent.py",  desc="daily digest (rollup)",  allow_failure=True),
     ],
