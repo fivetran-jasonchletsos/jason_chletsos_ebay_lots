@@ -43,12 +43,9 @@ def main() -> int:
         print(f"  WARNING: 0 listings returned. Not overwriting existing snapshot.")
         return 1
 
-    # Atomic write: temp file + rename. Prevents half-written reads in the
-    # same wave where concurrent agents read the snapshot.
-    SNAP.parent.mkdir(parents=True, exist_ok=True)
-    tmp = SNAP.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(listings, indent=2, default=str), encoding="utf-8")
-    os.replace(tmp, SNAP)
+    # Single atomic write through snapshot_store.
+    import snapshot_store
+    snapshot_store.replace_all(listings)
     print(f"  Wrote {SNAP} ({len(listings)} listings)")
     return 0
 

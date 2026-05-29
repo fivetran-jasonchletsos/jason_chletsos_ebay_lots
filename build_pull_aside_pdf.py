@@ -128,30 +128,16 @@ def gate(rows, inv_by_cid, links_by_ebay, snapshot_listings):
         r["image_url"]    = inv_row.get("image_url", "")
         r["collx_market"] = inv_row.get("collx_market_value", "")
 
-        # ---- GATE 3: duplicate detection in live snapshot ----
-        # Match heuristic: player name appears as a whole word in the eBay title
-        # AND the FULL card number appears (e.g. "#BDC-50", not just "#50"). The
-        # old short-suffix fallback over-matched: card "BDC-50" used to collide
-        # with any "#50" in the same player's other parallels.
+        # ---- GATE 3: duplicate detection — single source via card_identity ----
+        import card_identity
         player_lc = player_token_from_inv(inv_row)
         card_num  = (inv_row.get("card_number") or "").strip()
         if not card_num:
-            card_num = card_number_from_title(r["title"]) or ""
-        dupes = []
-        if player_lc and card_num:
-            needle_num = f"#{card_num}".lower()
-            # \b player_lc \b — whole-word match prevents "Drake" matching "Drake London".
-            player_re = re.compile(rf"\b{re.escape(player_lc)}\b")
-            for l in snapshot_listings:
-                if str(l.get("item_id")) == item_id:
-                    continue  # don't match against self
-                t = (l.get("title") or "").lower()
-                if player_re.search(t) and needle_num in t:
-                    dupes.append({
-                        "item_id": str(l.get("item_id")),
-                        "title":   l.get("title", ""),
-                        "price":   l.get("price"),
-                    })
+            card_num = card_identity.card_number_from_title(r["title"]) or ""
+        dupes = card_identity.find_via_title(
+            player_lc, card_num, snapshot_listings,
+            exclude_item_id=item_id,
+        )
         if dupes:
             r["dupes"] = dupes
             r["filter_reason"] = f"possible duplicate of existing live listing(s)"

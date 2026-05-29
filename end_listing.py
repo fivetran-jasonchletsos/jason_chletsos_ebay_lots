@@ -111,21 +111,12 @@ def main() -> int:
               f"__enter__().execute(\\\"UPDATE listings SET status='ended', "
               f"updated_at=datetime('now') WHERE ebay_item_id={args.item_id}\\\")\"")
 
-    # Also drop the listing from listings_snapshot.json so dashboards stop showing it.
+    # Drop the listing from listings_snapshot via snapshot_store so dashboards
+    # stop showing it. Single atomic API for all snapshot writers.
     try:
-        snap_path = Path(__file__).parent / "output" / "listings_snapshot.json"
-        if snap_path.is_file():
-            snap = json.loads(snap_path.read_text())
-            listings = snap["listings"] if isinstance(snap, dict) else snap
-            before = len(listings)
-            listings = [l for l in listings if str(l.get("item_id")) != str(args.item_id)]
-            if len(listings) < before:
-                if isinstance(snap, dict):
-                    snap["listings"] = listings
-                    snap_path.write_text(json.dumps(snap, separators=(",", ":")))
-                else:
-                    snap_path.write_text(json.dumps(listings, separators=(",", ":")))
-                print(f"  snapshot: removed item {args.item_id} ({before} -> {len(listings)})")
+        import snapshot_store
+        if snapshot_store.remove_listing(str(args.item_id)):
+            print(f"  snapshot: removed item {args.item_id}")
     except Exception as exc:
         print(f"  snapshot update FAILED (non-fatal): {exc}")
 

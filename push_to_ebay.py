@@ -233,76 +233,16 @@ def build_add_xml(item: dict, token: str, price: float, condition: str, duration
 
 
 def _detect_duplicates(item: dict) -> list[dict]:
-    """Two-stage duplicate detection.
-
-    1. AUTHORITATIVE: linkage_db.get_link(collx_id). If linkage already maps
-       this card to a 'live' eBay item, we definitely have it on eBay; no
-       fuzzy heuristic needed.
-    2. BELT-AND-SUSPENDERS: fuzzy title scan against listings_snapshot for
-       cards that predate linkage_db (or where linkage drifted). Match
-       requires the player name as a WHOLE WORD plus the FULL card number
-       (#NNN or #A-NNN) — substring on either alone produced false-positives
-       like 'Drake' substring-matching 'Drake London #25'.
-
-    Returns the matching listings (empty list = no duplicates found = safe
-    to push).
-    """
-    import re
+    """Two-stage duplicate detection — delegates to card_identity and
+    snapshot_store so the matching rule lives in one place."""
+    import card_identity, snapshot_store
     raw = item.get("raw") or {}
-    collx_id = (raw.get("collx_id") or "").strip()
-
-    hits = []
-
-    # ---- Stage 1: linkage_db is the authoritative answer ----
-    if collx_id:
-        try:
-            import linkage_db
-            existing = linkage_db.get_link(collx_id)
-            if existing and existing.get("status") == "live":
-                hits.append({
-                    "item_id": str(existing.get("ebay_item_id") or ""),
-                    "title":   existing.get("title") or "(linkage_db record)",
-                    "price":   existing.get("listed_price"),
-                    "source":  "linkage_db (authoritative)",
-                })
-        except Exception:
-            # Linkage check is opportunistic — fall through to fuzzy on error.
-            pass
-
-    # ---- Stage 2: fuzzy title scan as backup ----
-    snap_path = REPO_ROOT / "output" / "listings_snapshot.json"
-    if not snap_path.is_file():
-        return hits
-    try:
-        snap = json.loads(snap_path.read_text())
-    except Exception:
-        return hits
-    listings = snap.get("listings", []) if isinstance(snap, dict) else (snap or [])
-
-    player = (raw.get("player") or "").strip().lower()
-    card_num = (raw.get("card_number") or "").strip()
-    if not player or not card_num:
-        return hits  # not enough signal — keep whatever stage 1 found
-
-    needle_num = f"#{card_num}".lower()
-    # \b player \b — whole-word match. "Drake" no longer hits "Drake London".
-    player_re = re.compile(rf"\b{re.escape(player)}\b")
-
-    seen_ids = {h["item_id"] for h in hits}
-    for l in listings:
-        item_id = str(l.get("item_id") or "")
-        if item_id in seen_ids:
-            continue
-        t = (l.get("title") or "").lower()
-        if player_re.search(t) and needle_num in t:
-            hits.append({
-                "item_id": item_id,
-                "title":   l.get("title", ""),
-                "price":   l.get("price"),
-                "source":  "fuzzy title match",
-            })
-            seen_ids.add(item_id)
-    return hits
+    return card_identity.find_live_duplicates(
+        collx_id=(raw.get("collx_id") or "").strip(),
+        player=(raw.get("player") or "").strip().lower(),
+        card_number=(raw.get("card_number") or "").strip(),
+        listings=snapshot_store.load(),
+    )
 
 
 def find_item(plan: dict, args) -> tuple[int, dict]:
@@ -508,36 +448,21 @@ def main() -> int:
         except Exception as exc:
             print(f"  Linkage WRITE FAILED (non-fatal): {exc}")
 
-        # Append to listings_snapshot.json so dashboards built from the cached
-        # snapshot pick up the new listing immediately, without waiting for the
-        # next full promote.py refresh. Prevents the "I just listed it but the
-        # CollX vs eBay page shows it as unlisted" stale-data problem.
+        # Append to listings_snapshot.json so dashboards see the new listing
+        # before the next full eBay refetch. Single API via snapshot_store.
         try:
-            import json
-            from pathlib import Path
-            snap_path = Path(__file__).parent / "output" / "listings_snapshot.json"
-            if snap_path.is_file():
-                snap = json.loads(snap_path.read_text())
-                listings = snap["listings"] if isinstance(snap, dict) else snap
-                if not any(str(l.get("item_id")) == str(item_id) for l in listings):
-                    listings.append({
-                        "item_id":      str(item_id),
-                        "title":        item["title"],
-                        "price":        float(price),
-                        "pic":          item.get("image_url") or item["raw"].get("image_url", ""),
-                        "url":          url,
-                        "category":     "Trading Card Singles",
-                        "condition":    condition,
-                        "quantity":     1,
-                        "desc":         "",
-                        "listing_type": "BIN",
-                    })
-                    if isinstance(snap, dict):
-                        snap["listings"] = listings
-                        snap_path.write_text(json.dumps(snap, separators=(",", ":")))
-                    else:
-                        snap_path.write_text(json.dumps(listings, separators=(",", ":")))
-                    print(f"  Snapshot:   appended to listings_snapshot.json ({len(listings)} listings)")
+            import snapshot_store
+            appended = snapshot_store.append_listing(
+                str(item_id),
+                title=item["title"],
+                price=float(price),
+                pic=item.get("image_url") or item["raw"].get("image_url", ""),
+                url=url,
+                category="Trading Card Singles",
+                condition=condition,
+            )
+            if appended:
+                print(f"  Snapshot:   appended item {item_id}")
         except Exception as exc:
             print(f"  Snapshot append FAILED (non-fatal): {exc}")
 
