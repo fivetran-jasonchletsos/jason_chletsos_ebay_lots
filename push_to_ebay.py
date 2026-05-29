@@ -33,27 +33,16 @@ from pathlib import Path
 import requests
 
 import linkage_db
+import paths
+from ebay_client import (
+    CONFIG, TRADING_URL, OAUTH_URL, NS, COMPAT_LEVEL, SITE_ID_US, WRITE_SCOPES,
+    xml_escape, find_tag, find_all,
+    get_write_token, trading_headers,
+)
 
-REPO_ROOT  = Path(__file__).parent
-PLAN_PATH  = REPO_ROOT / "output" / "inventory_plan.json"
-CONFIG     = REPO_ROOT / "configuration.json"
-PUSH_LOG   = REPO_ROOT / "output" / "push_to_ebay_log.json"
-
-TRADING_URL  = "https://api.ebay.com/ws/api.dll"
-OAUTH_URL    = "https://api.ebay.com/identity/v1/oauth2/token"
-COMPAT_LEVEL = "967"
-SITE_ID_US   = "0"
-NS           = "urn:ebay:apis:eBLBaseComponents"
-
-# Write scopes (broader than promote.py's read-only set). Mirrors the working
-# mobile-app scope list at mobile/src/api/ebay.ts:28.
-WRITE_SCOPES = " ".join([
-    "https://api.ebay.com/oauth/api_scope",
-    "https://api.ebay.com/oauth/api_scope/sell.inventory",
-    "https://api.ebay.com/oauth/api_scope/sell.account",
-    "https://api.ebay.com/oauth/api_scope/sell.fulfillment",
-    "https://api.ebay.com/oauth/api_scope/sell.marketing",
-])
+REPO_ROOT  = paths.REPO
+PLAN_PATH  = paths.INVENTORY_PLAN
+PUSH_LOG   = paths.PUSH_SINGLE_LOG
 
 # Condition IDs. The 2024+ trading-card-single categories (261328 etc.) accept
 # only 4000 (Ungraded) for raw cards and 1000 for graded — the older numeric
@@ -87,51 +76,10 @@ CARD_CONDITION_DESCRIPTOR_VALUE = {
 }
 
 
-def xml_escape(s) -> str:
-    if s is None:
-        return ""
-    return (str(s)
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace('"', "&quot;")
-            .replace("'", "&apos;"))
-
-
-def find_tag(xml: str, tag: str) -> str | None:
-    m = re.search(rf"<{tag}[^>]*>([\s\S]*?)</{tag}>", xml, re.IGNORECASE)
-    return m.group(1).strip() if m else None
-
-
-def find_all(xml: str, tag: str) -> list[str]:
-    return [m.group(1).strip()
-            for m in re.finditer(rf"<{tag}[^>]*>([\s\S]*?)</{tag}>", xml, re.IGNORECASE)]
-
-
-def get_write_token(cfg: dict) -> str:
-    """OAuth refresh-token grant with write scopes."""
-    basic = base64.b64encode(f"{cfg['client_id']}:{cfg['client_secret']}".encode()).decode()
-    r = requests.post(OAUTH_URL,
-        headers={"Authorization": f"Basic {basic}", "Content-Type": "application/x-www-form-urlencoded"},
-        data={"grant_type": "refresh_token", "refresh_token": cfg["refresh_token"], "scope": WRITE_SCOPES},
-        timeout=30,
-    )
-    if not r.ok:
-        raise SystemExit(f"OAuth failed ({r.status_code}): {r.text[:400]}")
-    return r.json()["access_token"]
-
-
-def trading_headers(call_name: str, cfg: dict, access_token: str) -> dict:
-    return {
-        "X-EBAY-API-SITEID":              SITE_ID_US,
-        "X-EBAY-API-COMPATIBILITY-LEVEL": COMPAT_LEVEL,
-        "X-EBAY-API-CALL-NAME":           call_name,
-        "X-EBAY-API-APP-NAME":            cfg["client_id"],
-        "X-EBAY-API-DEV-NAME":            cfg.get("dev_id", ""),
-        "X-EBAY-API-CERT-NAME":           cfg["client_secret"],
-        "X-EBAY-API-IAF-TOKEN":           access_token,
-        "Content-Type":                   "text/xml",
-    }
+# xml_escape, find_tag, find_all, get_write_token, trading_headers are now
+# imported from ebay_client at the top of this file. Kept the symbols in this
+# module's namespace so existing callers (end_listing, push_to_ebay_batch via
+# `from push_to_ebay import ...`) continue to work.
 
 
 def build_description(item: dict, condition: str) -> str:

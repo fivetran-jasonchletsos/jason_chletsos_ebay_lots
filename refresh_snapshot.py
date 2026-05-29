@@ -22,6 +22,14 @@ REPO   = Path(__file__).parent
 CONFIG = REPO / "configuration.json"
 SNAP   = REPO / "output" / "listings_snapshot.json"
 
+# I/O metadata for refresh_pipeline freshness check. Note: this is a special
+# case — the *real* input is "live eBay listings via the API", not a local
+# file. So we declare the OAuth config as the input. In practice, the
+# freshness check will mark this fresh once the snapshot exists and is newer
+# than configuration.json. To force a refetch, use refresh_pipeline --force.
+INPUTS  = ["configuration.json"]
+OUTPUTS = ["output/listings_snapshot.json"]
+
 
 def main() -> int:
     if not CONFIG.is_file():
@@ -29,9 +37,9 @@ def main() -> int:
         return 1
     cfg = json.loads(CONFIG.read_text())
 
-    # Reuse push_to_ebay's OAuth helper (Trading API scope works for both
-    # AddItem and GetMyeBaySelling).
-    from push_to_ebay import get_write_token
+    # OAuth via ebay_client (Trading API scope works for both AddItem and
+    # GetMyeBaySelling).
+    from ebay_client import get_write_token
     print("  Fetching eBay access token...")
     token = get_write_token(cfg)
 

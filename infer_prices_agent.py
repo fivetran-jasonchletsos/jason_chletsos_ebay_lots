@@ -29,6 +29,12 @@ PLAN_PATH = REPO / "output" / "inventory_plan.json"
 SNAP_PATH = REPO / "output" / "listings_snapshot.json"
 OUT_PATH  = REPO / "output" / "inferred_prices.json"
 
+# refresh_pipeline freshness check reads these to decide when to skip this
+# agent. All paths are relative to the repo root.
+INPUTS  = ["inventory.csv", "output/inventory_plan.json",
+           "sportscardspro_prices.json"]
+OUTPUTS = ["output/inferred_prices.json"]
+
 import linkage_db
 
 

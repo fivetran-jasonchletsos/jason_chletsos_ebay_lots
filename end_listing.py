@@ -19,7 +19,7 @@ from pathlib import Path
 import requests
 
 import linkage_db
-from push_to_ebay import (
+from ebay_client import (
     CONFIG, TRADING_URL,
     get_write_token, trading_headers,
     xml_escape, find_tag,

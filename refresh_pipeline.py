@@ -62,7 +62,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import NamedTuple
 
-REPO = Path(__file__).parent
+import paths
+import freshness
+
+REPO = paths.REPO
 
 
 class Step(NamedTuple):
@@ -252,23 +255,47 @@ def _print_step_result(step: Step, ok: bool, dt: float, summary: str, quiet: boo
         print(f"          {summary}")
 
 
-def run_cascade(name: str, cascade: list[list[Step]], *, quiet: bool, max_parallel: int) -> dict:
-    """Execute a cascade. Returns a summary dict."""
+def run_cascade(name: str, cascade: list[list[Step]], *,
+                quiet: bool, max_parallel: int, force: bool = False) -> dict:
+    """Execute a cascade. Returns a summary dict.
+
+    If force=False (the default), each step is checked against freshness.is_stale
+    and skipped when its declared OUTPUTS are newer than every INPUT. This is
+    the content-addressed staleness check — same pattern as Make/dbt/Snakemake.
+    """
     t_total = time.time()
     results = []   # (step, ok, dt, summary)
     failed_blocking = []
     if not quiet:
-        print(f"refresh_pipeline · trigger={name} · {len(cascade)} wave(s)")
+        suffix = " (force=on)" if force else ""
+        print(f"refresh_pipeline · trigger={name} · {len(cascade)} wave(s){suffix}")
 
     for wave_idx, wave in enumerate(cascade):
-        # Filter out skipped steps for transparency.
-        runnable = [s for s in wave if s.script not in SKIP_REASONS]
+        # Filter out unconditionally-skipped steps (buyer comms, broken agents).
+        all_runnable = [s for s in wave if s.script not in SKIP_REASONS]
         skipped  = [s for s in wave if s.script in SKIP_REASONS]
+
+        # Apply the freshness check on the runnable set unless force=True.
+        runnable, fresh_skipped = [], []
+        for s in all_runnable:
+            if force:
+                runnable.append(s)
+                continue
+            stale, reason = freshness.is_stale(s.script)
+            if stale:
+                runnable.append(s)
+            else:
+                fresh_skipped.append((s, reason))
+
         _print_wave_header(wave_idx, len(cascade), runnable, quiet)
         for s in skipped:
             if not quiet:
                 print(f"  [skip]  {s.script:34s}        {SKIP_REASONS[s.script]}")
             results.append((s, True, 0.0, SKIP_REASONS[s.script]))
+        for s, reason in fresh_skipped:
+            if not quiet:
+                print(f"  [fresh] {s.script:34s}        {reason}")
+            results.append((s, True, 0.0, f"fresh — {reason}"))
 
         # Run this wave with bounded parallelism. LPT scheduling: sort by
         # estimated runtime (timeout proxy) descending so the longest jobs
@@ -349,6 +376,9 @@ def main() -> int:
     ap.add_argument("--max-parallel", type=int, default=4,
                     help="Max concurrent generators (default 4). Lower if you "
                          "hit eBay API throttling.")
+    ap.add_argument("--force",       action="store_true",
+                    help="Ignore freshness; re-run every step even if outputs "
+                         "are newer than inputs.")
     args = ap.parse_args()
 
     if args.manifest:
@@ -362,7 +392,8 @@ def main() -> int:
 
     summary = run_cascade(trigger, CASCADES[trigger],
                           quiet=args.quiet,
-                          max_parallel=args.max_parallel)
+                          max_parallel=args.max_parallel,
+                          force=args.force)
     return 1 if summary["failed_blocking"] else 0
 
 
