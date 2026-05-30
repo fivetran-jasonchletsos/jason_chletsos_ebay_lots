@@ -45,11 +45,19 @@ CONFIG_FILE    = ROOT / "configuration.json"
 # Cost model — tunable, but these are conservative for raw / mid-tier flips.
 EBAY_FVF_PCT       = 0.13     # 13% final-value fee (incl. ad-valorem)
 FIXED_FEE          = 0.30     # per-order fixed fee
-INBOUND_SHIP       = 4.00     # avg shipping IN for a single mid-price card
-OUTBOUND_SHIP      = 4.00     # what Jason pays to ship the resale out
+INBOUND_SHIP_DEFAULT = 4.00   # avg shipping IN when the listing doesn't show free
+INBOUND_SHIP_FREE    = 0.00   # buyer pays nothing when seller offers free shipping
+OUTBOUND_SHIP_ENVELOPE = 1.32 # USPS Ground Advantage envelope (most mid-tier raw)
+OUTBOUND_SHIP_BUBBLE   = 5.00 # bubble mailer for $50+ cards (signature etc.)
+OUTBOUND_BUBBLE_THRESHOLD = 50.0  # switch from envelope to bubble above this
 INBOUND_HANDLING   = 0.50     # toploader + sleeve + label time at $.50/unit
+RESALE_REALISM_MULT = 0.92    # treat comp-median ASK as ~8% above sold-median
+GRADING_COST_PSA_BULK = 19.0  # PSA Bulk pricing as of 2026; was $25 last year
 AUCTION_SOON_HRS   = 2.0
 THIN_COMPS_LIMIT   = 8
+# Legacy aliases kept for any external consumer that imported them.
+INBOUND_SHIP = INBOUND_SHIP_DEFAULT
+OUTBOUND_SHIP = OUTBOUND_SHIP_ENVELOPE
 
 # Titles with structural centering / quality issues — known landmines.
 CENTERING_RISK_NEEDLES = [
@@ -116,10 +124,25 @@ def get_source_listings(cfg: dict) -> dict:
 # Scoring
 # ---------------------------------------------------------------------------
 
-def _net_profit(asking: float, resale: float) -> float:
-    """Net profit after fees and shipping, both directions."""
-    proceeds = resale * (1 - EBAY_FVF_PCT) - FIXED_FEE - OUTBOUND_SHIP
-    cost     = asking + INBOUND_SHIP + INBOUND_HANDLING
+def _net_profit(asking: float, resale: float, *, free_shipping_in: bool = False,
+                grade_to_flip: bool = False) -> float:
+    """Net profit after fees and shipping, both directions.
+
+    Realism adjustments per the 2026-05-30 Procurement review:
+      - Comp median is ASK median, not SOLD median. Multiply resale by 0.92
+        to approximate the typical sold-vs-ask gap.
+      - Outbound ship is $1.32 for envelope-eligible cards (<$50) and $5 for
+        bubble mailers above the threshold.
+      - Inbound ship is $0 when the listing offers free shipping.
+      - Grade-to-flip rows must subtract PSA Bulk ($19) — was missing.
+    """
+    sold_estimate = resale * RESALE_REALISM_MULT
+    outbound_ship = OUTBOUND_SHIP_BUBBLE if sold_estimate > OUTBOUND_BUBBLE_THRESHOLD else OUTBOUND_SHIP_ENVELOPE
+    inbound_ship  = INBOUND_SHIP_FREE if free_shipping_in else INBOUND_SHIP_DEFAULT
+    proceeds = sold_estimate * (1 - EBAY_FVF_PCT) - FIXED_FEE - outbound_ship
+    cost     = asking + inbound_ship + INBOUND_HANDLING
+    if grade_to_flip:
+        cost += GRADING_COST_PSA_BULK
     return round(proceeds - cost, 2)
 
 
@@ -214,11 +237,36 @@ def score_listing(d: dict, all_deals: list[dict], sold_history: list[dict]) -> d
     if median <= 0 or asking <= 0:
         return None
 
-    # Resale target: lean on the comp median itself. Most flips clear at ~comp
-    # median; assume 0% upside over median for conservative net-profit math.
+    # Resale target: lean on the comp median itself. _net_profit applies the
+    # RESALE_REALISM_MULT (0.92) inside, so this is the comp-ask median; the
+    # math models a typical sold-vs-ask haircut so the page isn't optimistic.
     resale = median
 
-    net      = _net_profit(asking, resale)
+    # Free-shipping detection — Browse API may surface this as a flag or
+    # zero-cost first option. Default conservative when unknown.
+    ship_info = d.get("shippingOptions") or d.get("shipping_options") or []
+    free_ship_in = False
+    if isinstance(ship_info, list) and ship_info:
+        first = ship_info[0] if isinstance(ship_info[0], dict) else {}
+        ship_cost = (first.get("shippingCost") or {}).get("value") if isinstance(first.get("shippingCost"), dict) else first.get("shippingCost")
+        try:
+            free_ship_in = float(ship_cost) == 0.0
+        except (TypeError, ValueError):
+            free_ship_in = False
+    elif isinstance(ship_info, dict):
+        try:
+            free_ship_in = float(ship_info.get("cost") or 0) == 0.0
+        except (TypeError, ValueError):
+            free_ship_in = False
+
+    # Grade-to-flip detection: title has no PSA/BGS/CGC token and the query
+    # category includes "PSA 10" — that means we'd buy raw + grade. Subtract
+    # PSA Bulk on those rows.
+    title_l = (title or "").lower()
+    cat_l   = (d.get("from_category") or "").lower()
+    grade_flip = ("psa 10" in cat_l) and not any(g in title_l for g in (" psa ", " bgs ", " cgc ", " sgc "))
+
+    net      = _net_profit(asking, resale, free_shipping_in=free_ship_in, grade_to_flip=grade_flip)
     pct_below = round((1 - asking / median) * 100, 1)
     velocity = _sold_velocity_30d(title, sold_history)
 

@@ -561,14 +561,47 @@ def build_report(plan: list[dict], history: list[dict], cfg: dict) -> Path:
 # Orchestration                                                               #
 # --------------------------------------------------------------------------- #
 
+CACHE_TTL_SECONDS = 6 * 60 * 60  # 6 hours — fresh enough for daily repricing,
+                                 # avoids the 200+ second eBay Browse fan-out.
+
+
+def _snapshot_is_fresh() -> bool:
+    """True if the snapshot exists, parses cleanly with the market+pricing
+    wrapper this agent needs, and is younger than CACHE_TTL_SECONDS."""
+    if not LISTINGS_SNAPSHOT.exists():
+        return False
+    try:
+        snap = json.loads(LISTINGS_SNAPSHOT.read_text())
+    except Exception:
+        return False
+    if not isinstance(snap, dict) or "market" not in snap or "pricing" not in snap:
+        return False  # Wave 0's lean snapshot — needs the heavy refetch
+    age = time.time() - LISTINGS_SNAPSHOT.stat().st_mtime
+    return age < CACHE_TTL_SECONDS
+
+
 def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[dict]]:
     """Returns (ebay_cfg, listings, market, pricing_by_id, sold_history)."""
     ebay_cfg = json.loads(promote.CONFIG_FILE.read_text())
 
+    # Auto-promote use_cache when the snapshot is recent + complete. The DE
+    # review on 2026-05-30 flagged the per-listing Browse fan-out as the
+    # cause of the 180s wave timeout. With a 6h cache, daily refresh stays
+    # under 30s on the second run of the day.
+    if not use_cache and _snapshot_is_fresh():
+        print(f"  Snapshot at {LISTINGS_SNAPSHOT.relative_to(REPO_ROOT)} is fresh (<6h); reusing.")
+        use_cache = True
+
     if use_cache and LISTINGS_SNAPSHOT.exists():
-        print(f"  Using cached snapshot at {LISTINGS_SNAPSHOT.relative_to(REPO_ROOT)}")
-        snap = json.loads(LISTINGS_SNAPSHOT.read_text())
-        return ebay_cfg, snap["listings"], snap["market"], snap["pricing"], snap.get("sold", [])
+        try:
+            snap = json.loads(LISTINGS_SNAPSHOT.read_text())
+        except Exception as exc:
+            print(f"  Cache read failed ({exc}); falling through to live fetch.")
+        else:
+            if isinstance(snap, dict) and "market" in snap and "pricing" in snap:
+                print(f"  Using cached snapshot at {LISTINGS_SNAPSHOT.relative_to(REPO_ROOT)}")
+                return ebay_cfg, snap["listings"], snap["market"], snap["pricing"], snap.get("sold", [])
+            print(f"  Cache lacks market/pricing wrapper; falling through to live fetch.")
 
     print("  Getting eBay access token...")
     token = promote.get_access_token(ebay_cfg)

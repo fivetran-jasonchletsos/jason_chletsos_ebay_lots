@@ -478,7 +478,8 @@ def _search(token: str, q: str, own: str) -> list[dict]:
     items = r.json().get("itemSummaries", []) or []
     out: list[dict] = []
     for it in items:
-        seller = ((it.get("seller") or {}).get("username") or "").lower()
+        seller_obj = it.get("seller") or {}
+        seller = (seller_obj.get("username") or "").lower()
         if own and seller == own.lower():
             continue
         try:
@@ -488,16 +489,43 @@ def _search(token: str, q: str, own: str) -> list[dict]:
         if price <= 0:
             continue
         iid = (it.get("itemId") or "").split("|")[-1]
+        # Seller trust signals — Procurement review flagged these as the
+        # single biggest gap for protecting Jason from a bad raw-card buy.
+        try:
+            feedback_pct = float(seller_obj.get("feedbackPercentage") or 0)
+        except (TypeError, ValueError):
+            feedback_pct = 0.0
+        try:
+            feedback_score = int(seller_obj.get("feedbackScore") or 0)
+        except (TypeError, ValueError):
+            feedback_score = 0
+        # eBay Browse API exposes additional images — proxy for "did the
+        # seller take real photos?" Single stock photo = high risk for raw.
+        photo_count = 1 + len(it.get("additionalImages") or [])
+        # Return policy — eBay Browse API only returns this when fieldgroups
+        # includes EXTENDED. Today's call doesn't, so we treat the absence as
+        # unknown (not as "no returns") to avoid scaring Jason off every row.
+        returns_obj = it.get("returnPolicies") or it.get("returnTerms")
+        if isinstance(returns_obj, list):
+            returns_obj = returns_obj[0] if returns_obj else None
+        if returns_obj is None:
+            returns_accepted = None  # unknown — chip will render "?"
+        else:
+            returns_accepted = bool(returns_obj.get("returnsAccepted"))
         out.append({
-            "item_id":   iid,
-            "title":     it.get("title") or "",
-            "price":     price,
-            "url":       promote._epn_wrap(it.get("itemWebUrl") or ""),
-            "image":     ((it.get("image") or {}).get("imageUrl")) or "",
-            "buying":    it.get("buyingOptions", []) or [],
-            "seller":    seller,
-            "condition": it.get("condition") or "",
-            "query":     q,
+            "item_id":         iid,
+            "title":           it.get("title") or "",
+            "price":           price,
+            "url":             promote._epn_wrap(it.get("itemWebUrl") or ""),
+            "image":           ((it.get("image") or {}).get("imageUrl")) or "",
+            "buying":          it.get("buyingOptions", []) or [],
+            "seller":          seller,
+            "feedback_pct":    feedback_pct,
+            "feedback_score":  feedback_score,
+            "photo_count":     photo_count,
+            "returns_accepted": returns_accepted,
+            "condition":       it.get("condition") or "",
+            "query":           q,
         })
     return out
 
@@ -705,12 +733,40 @@ def render_report(plan: dict) -> Path:
                             f'TCGplayer market ${it["tcgplayer_median"]:,.2f}</a></div>') if tcg_url else (
                             f'<div class="jp-tcg">TCGplayer market ${it["tcgplayer_median"]:,.2f}</div>')
 
+            # Seller-trust signals — surfaced for Jack-buying confidence.
+            fb_pct   = float(it.get("feedback_pct") or 0)
+            fb_score = int(it.get("feedback_score") or 0)
+            photos   = int(it.get("photo_count") or 0)
+            returns_ok = bool(it.get("returns_accepted"))
+            # Compose a chip strip: feedback (green/yellow/red), photos, returns.
+            fb_cls = "jp-trust-good" if fb_pct >= 99.0 else ("jp-trust-ok" if fb_pct >= 97.0 else "jp-trust-risk")
+            if fb_pct <= 0:
+                fb_chip = '<span class="jp-trust jp-trust-unknown" title="Seller feedback unknown">feedback ?</span>'
+            else:
+                fb_chip = f'<span class="jp-trust {fb_cls}" title="{fb_score} feedback received">{fb_pct:.1f}% &middot; {fb_score:,}</span>'
+            photo_cls = "jp-trust-good" if photos >= 4 else ("jp-trust-ok" if photos >= 2 else "jp-trust-risk")
+            if photos == 1:
+                photo_chip = f'<span class="jp-trust jp-trust-risk" title="Single photo — possible stock photo">1 photo</span>'
+            else:
+                photo_chip = f'<span class="jp-trust {photo_cls}" title="{photos} listing photos">{photos} photos</span>'
+            returns_raw = it.get("returns_accepted")
+            if returns_raw is None:
+                returns_chip = '<span class="jp-trust jp-trust-unknown" title="Return policy not surfaced by Browse API; check listing">returns ?</span>'
+            elif returns_raw:
+                returns_chip = '<span class="jp-trust jp-trust-good" title="Returns accepted">returns ok</span>'
+            else:
+                returns_chip = '<span class="jp-trust jp-trust-risk" title="No returns — bad for raw cards">no returns</span>'
+            trust_strip = f'<div class="jp-trust-row">{fb_chip}{photo_chip}{returns_chip}</div>'
+
             cards.append(f"""
             <article class="jp-card" data-cat="{_esc(c['key'])}"
                      data-price="{it['price']:.2f}"
                      data-discount="{disc_pct:.1f}"
                      data-verdict="{_esc(verdict)}"
                      data-star="{'1' if it.get('jack_star') else '0'}"
+                     data-fb-pct="{fb_pct:.1f}"
+                     data-photos="{photos}"
+                     data-returns="{'1' if returns_ok else '0'}"
                      data-search="{_esc((it.get('title') or '').lower())}">
               <a class="jp-img-link" href="{_esc(it.get('url',''))}" target="_blank" rel="noopener">
                 <div class="jp-img" style="background-image:url('{_esc(it.get('image',''))}');"></div>
@@ -726,6 +782,7 @@ def render_report(plan: dict) -> Path:
                   <span class="jp-typ">Typical raw ${typ_for_card:,.2f}</span>
                 </div>
                 {tcg_line}
+                {trust_strip}
                 <p class="jp-why">{_esc(it.get('explanation',''))}</p>
                 <div class="jp-tags">{tags_html}</div>
               </div>
@@ -865,6 +922,12 @@ def render_report(plan: dict) -> Path:
   .jp-ask strong { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 20px; color: var(--text); margin-left: 2px; }
   .jp-typ { color: var(--text-dim, var(--text-muted)); }
 
+  .jp-trust-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+  .jp-trust { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; line-height: 1.6; }
+  .jp-trust-good { background: rgba(127,199,122,.14); color: #7fc77a; border-color: rgba(127,199,122,.3); }
+  .jp-trust-ok   { background: rgba(212,175,55,.14); color: #d4af37; border-color: rgba(212,175,55,.3); }
+  .jp-trust-risk { background: rgba(215,122,90,.16); color: #d77a5a; border-color: rgba(215,122,90,.35); }
+  .jp-trust-unknown { background: rgba(255,255,255,.04); color: var(--text-muted); border-color: var(--border, rgba(255,255,255,.12)); }
   .jp-tcg { font-size: 11px; color: var(--text-muted); }
   .jp-tcg a { color: var(--text-muted); text-decoration: underline; }
   .jp-tcg a:hover { color: var(--gold, #d4af37); }

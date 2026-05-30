@@ -72,15 +72,30 @@ def main() -> int:
                 "hypothesis":   "listing may have ended on eBay since last snapshot",
             })
 
-    # B. snapshot has item but linkage_db doesn't
+    # B. snapshot has item but linkage_db doesn't.
+    #
+    # The DE review on 2026-05-30 noted this case is dominated by the
+    # known hand-listed legacy backlog (~170 of 172 cases — items hand-
+    # entered into eBay before linkage_db existed). They are NOT actionable
+    # drift. Keep them in the report but bucket them separately so the
+    # actionable count is visible.
+    HAND_LISTED_AT_OR_BEFORE = "306913999999"  # all item_ids <= this are
+                                                # pre-linkage_db hand-listings;
+                                                # bump when a new batch arrives
+    drift["hand_listed_legacy"] = []
     for iid, listing in snap_by_id.items():
         if iid not in links_by_item:
-            drift["snapshot_not_in_linkage"].append({
+            row = {
                 "ebay_item_id": iid,
                 "title":        (listing.get("title") or "")[:80],
                 "price":        listing.get("price"),
-                "hypothesis":   "predates linkage_db, or hand-listed without push",
-            })
+            }
+            if iid <= HAND_LISTED_AT_OR_BEFORE:
+                row["hypothesis"] = "pre-linkage hand-listed (allowlisted as noise)"
+                drift["hand_listed_legacy"].append(row)
+            else:
+                row["hypothesis"] = "hand-listed without push, OR push failed to stamp linkage"
+                drift["snapshot_not_in_linkage"].append(row)
 
     # C, D. linkage ended/sold but still in snapshot
     for iid, l in links_by_item.items():
@@ -101,7 +116,9 @@ def main() -> int:
                 "hypothesis":   "sold reconciler stamped linkage but snapshot stale",
             })
 
-    total_drift = sum(len(v) for v in drift.values())
+    # Actionable drift excludes the hand-listed legacy bucket.
+    total_drift = sum(len(v) for k, v in drift.items() if k != "hand_listed_legacy")
+    legacy_noise = len(drift.get("hand_listed_legacy", []))
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "snapshot_count": len(snap_by_id),
@@ -117,9 +134,11 @@ def main() -> int:
     # Print a compact human summary
     print(f"consistency_check · {len(snap_by_id)} in snapshot · {len(links_by_item)} in linkage")
     print(f"  linkage live but not in snapshot: {len(drift['linkage_live_not_in_snapshot'])}")
-    print(f"  snapshot but not in linkage:      {len(drift['snapshot_not_in_linkage'])}")
+    print(f"  snapshot but not in linkage:      {len(drift['snapshot_not_in_linkage'])} actionable")
+    print(f"    (+ {legacy_noise} pre-linkage hand-listed — known noise, allowlisted)")
     print(f"  linkage ended still in snapshot:  {len(drift['linkage_ended_in_snapshot'])}")
     print(f"  linkage sold still in snapshot:   {len(drift['linkage_sold_in_snapshot'])}")
+    print(f"  Actionable drift total: {total_drift}")
     print(f"  Report: {out_path}")
 
     # Show up to 5 of each drift case for visibility
