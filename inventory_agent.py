@@ -193,8 +193,76 @@ def _suggest_price(row: dict, scp: dict | None) -> dict:
     return {"price": 4.99, "basis": "default", "low": 3.99, "high": 6.99}
 
 
+def _extract_manufacturer(set_str: str) -> str:
+    """Pull the manufacturer name out of a CollX set string like
+    '2025 Panini Phoenix - Pyramids Prizm' -> 'Panini'."""
+    s = (set_str or "").strip()
+    for needle in ("Panini", "Topps", "Bowman", "Upper Deck", "Donruss",
+                   "Score", "Leaf", "Wizards of the Coast", "Pokemon"):
+        if needle.lower() in s.lower():
+            return needle
+    return ""
+
+
+def _features_from_row(row: dict) -> list[str]:
+    """eBay Features specific — accepts a comma-separated list. Detect from
+    the parallel/flags and the set/title text."""
+    feats = []
+    parallel = (row.get("parallel") or "").upper()
+    name     = (row.get("name") or "").lower()
+    if "RC" in parallel or "(rc)" in name or "rookie" in name:
+        feats.append("Rookie")
+    if "AU" in parallel or " auto" in name or "autograph" in name:
+        feats.append("Autograph")
+    if "MEM" in parallel or "patch" in name or "memorabilia" in name or "jersey" in name:
+        feats.append("Memorabilia")
+    if "SN" in parallel or "/" in (row.get("parallel") or "") or "numbered" in name:
+        feats.append("Serial Numbered")
+    if "refractor" in name or "prizm" in name or "shimmer" in name or "holo" in name or "shine" in name:
+        feats.append("Parallel/Variation")
+    return feats
+
+
+def _print_run_from_parallel(parallel: str) -> str:
+    """CollX flags like 'RC, SN85' or 'SN10' encode the print run as the
+    trailing number after 'SN'. Return the bare number for the Print Run
+    specific. Empty if not numbered."""
+    import re as _re
+    m = _re.search(r'SN\s*(\d+)', (parallel or "").upper())
+    return m.group(1) if m else ""
+
+
+# Common-team lookup for sport leagues. Extend as needed.
+NFL_TEAMS = {
+    "raiders", "vikings", "chiefs", "bills", "ravens", "cowboys", "eagles",
+    "giants", "jets", "patriots", "dolphins", "bengals", "browns", "steelers",
+    "texans", "colts", "jaguars", "titans", "broncos", "chargers", "lions",
+    "packers", "bears", "buccaneers", "falcons", "panthers", "saints",
+    "cardinals", "rams", "49ers", "seahawks", "commanders",
+}
+
+
+def _team_from_text(*texts: str) -> str:
+    """Guess team from any of the provided strings. Picks the first match."""
+    hay = " ".join(t for t in texts if t).lower()
+    for team in NFL_TEAMS:
+        if team in hay:
+            return team.capitalize()
+    return ""
+
+
+def _league_for(sport: str) -> str:
+    """Map sport to its primary league name eBay uses in specifics."""
+    s = (sport or "").lower()
+    return {"football":"NFL", "basketball":"NBA", "baseball":"MLB",
+            "hockey":"NHL", "soccer":"MLS"}.get(s, "")
+
+
 def _suggest_specifics(row: dict, category: str) -> dict[str, str]:
-    """Item Specifics eBay wants. Different per category but a common core applies."""
+    """Item Specifics eBay wants. eBay's Trading Card Singles category 261328
+    mandates 12+ fields for full Cassini placement. Top-sellers review on
+    2026-05-30 flagged that we were emitting only 7 — missing Manufacturer,
+    League, Team, Features, Print Run despite the data being available."""
     out: dict[str, str] = {}
     if row.get("year"):           out["Year"] = row["year"]
     if row.get("set"):            out["Set"] = row["set"]
@@ -219,6 +287,27 @@ def _suggest_specifics(row: dict, category: str) -> dict[str, str]:
     sport = (row.get("sport") or "").title()
     if sport and category != "Pokemon":
         out["Sport"] = sport
+    # --- Cassini-completeness fields (added 2026-05-30 per top-seller review)
+    mfr = _extract_manufacturer(row.get("set", ""))
+    if mfr:
+        out["Manufacturer"] = mfr
+    league = _league_for(row.get("sport", ""))
+    if league:
+        out["League"] = league
+    team = _team_from_text(row.get("set", ""), row.get("name", ""))
+    if team:
+        out["Team"] = team
+    feats = _features_from_row(row)
+    if feats:
+        out["Features"] = ", ".join(feats)
+    print_run = _print_run_from_parallel(row.get("parallel", ""))
+    if print_run:
+        out["Print Run"] = print_run
+    # Language defaults — eBay wants this for international visibility
+    if category == "Pokemon" and "japan" in (row.get("name","") + row.get("set","")).lower():
+        out["Language"] = "Japanese"
+    else:
+        out["Language"] = "English"
     return out
 
 

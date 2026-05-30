@@ -62,7 +62,11 @@ COMPAT      = "967"
 SITE_ID     = "0"
 
 # Thresholds
-MIN_PRICE_FOR_BEST_OFFER = 5.00     # below this, fees eat the upside
+MIN_PRICE_FOR_BEST_OFFER = 2.99     # 2026-05-30 selling-expert review: $5
+                                    # floor left ~200 long-tail listings with
+                                    # no negotiation channel. $2.99 keeps the
+                                    # fee math positive on a $2.50 offer while
+                                    # opening BO across the whole catalog.
 VAULT_THRESHOLD          = 250.00   # eBay Authenticity Vault eligibility floor
 ACCEPT_PCT_OF_MARKET     = 0.95
 DECLINE_PCT_OF_MARKET    = 0.75
