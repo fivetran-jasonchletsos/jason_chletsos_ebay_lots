@@ -103,7 +103,9 @@ jobs:
           for i in 1 2 3; do
             git fetch origin "${GITHUB_REF_NAME}"
             # If the remote moved, rebase our single commit on top of it.
-            git rebase "origin/${GITHUB_REF_NAME}" || {
+            # --autostash tolerates the dirty working tree left by promote.py and
+            # the secret-written configuration.json (which we never commit).
+            git rebase --autostash "origin/${GITHUB_REF_NAME}" || {
               echo "Rebase failed, aborting." >&2
               git rebase --abort || true
               exit 1
