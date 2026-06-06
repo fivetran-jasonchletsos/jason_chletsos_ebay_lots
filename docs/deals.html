@@ -32,15 +32,14 @@
         if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
       } catch(e) {}
     })();
-    // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = [];
-    window.__ADMIN_SALT   = 'b2ca3ea3d5961235360347adb11c8da4';
+    // Admin gate — Google OAuth (jchletsos@gmail.com only)
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
     window.__IS_ADMIN_PAGE = true;
-    // Early body class: if a stored token matches any embedded hash, mark body admin
+    // Early body class: restore admin session from stored email
     (function() {
       try {
-        var stored = localStorage.getItem('h2k_admin_token');
-        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
         document.documentElement.classList.toggle('pre-is-admin', !!ok);
       } catch(e) {}
     })();
@@ -61,6 +60,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
 :root {
@@ -2045,16 +2045,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
     <div class="gate-card">
       <h2 id="gate-title">Owner Access</h2>
-      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
-      <form onsubmit="event.preventDefault(); adminAttempt();">
-        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
-        <div class="gate-error" id="gate-error">&nbsp;</div>
-        <div class="gate-actions">
-          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
-          <button type="submit" class="btn btn-gold">Unlock</button>
-        </div>
-      </form>
-      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+      <div class="gate-sub">Sign in with your Google account to access management tools.</div>
+      <div id="g_id_onload"
+           data-client_id="926594287569-f447rslcm2j1db0ul47o2n1mcgogmg13.apps.googleusercontent.com"
+           data-callback="handleGoogleCredential"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-theme="outline"
+           data-size="large"
+           data-text="sign_in_with"
+           data-shape="rectangular"
+           style="margin: 16px auto 0; display: flex; justify-content: center;">
+      </div>
+      <div class="gate-error" id="gate-error">&nbsp;</div>
+      <div class="gate-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+      </div>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no sign-in needed.</div>
     </div>
   </div>
 
@@ -2071,12 +2080,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     </div>
 
     <div class="stat-grid">
-      <a class="stat-card linked" href="#deal-grid" title="Scroll to all 686 deals">
-        <div class="num">686</div><div class="lbl">Deals Right Now</div>
+      <a class="stat-card linked" href="#deal-grid" title="Scroll to all 707 deals">
+        <div class="num">707</div><div class="lbl">Deals Right Now</div>
       </a>
-      <a class="stat-card linked" href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL3x5Smyhfs2c2dhB9Z%2FTYqMGqJy6H5EHMdKoS1V3dj96%2FuB5H%2Bjf5X%2F9OV8%2B3VB8k7bDQMtP5I80m5qpxhG33FDHwXGuThtzUEZN%2Fmhru6qXdoEzqI8grUfatLWt6ur%2FJdfp77sSMoJg%2B7IaOUg5%2FMCSZtHqV8tXZawvWV31V8buw%3D%3D" target="_blank" rel="noopener"
+      <a class="stat-card linked" href="https://www.ebay.com/itm/298347129294?_skw=shohei+ohtani+rookie+topps+chrome&hash=item4576dfe9ce:g:F8gAAeSwhYVqEiqS" target="_blank" rel="noopener"
          title="Open best-discount item on eBay">
-        <div class="num">89<span style="font-size:24px;">%</span></div><div class="lbl">Best Discount</div>
+        <div class="num">91<span style="font-size:24px;">%</span></div><div class="lbl">Best Discount</div>
       </a>
       <a class="stat-card linked" href="https://www.ebay.com/itm/306984852678?_skw=pokemon+mega+evolution+promo+near+mint&hash=item4779b91cc6:g:PrcAAeSwmFJqIvsQ" target="_blank" rel="noopener"
          title="Open cheapest deal on eBay">
@@ -2084,7 +2093,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </a>
       <a class="stat-card linked" href="https://www.ebay.com/itm/800123941383?_skw=wemby+prizm+rookie+psa+10&hash=itemba4b1a7207:g:BPsAAeSwmnBqIdqh" target="_blank" rel="noopener"
          title="Open biggest-dollar-savings item on eBay">
-        <div class="num">$51,363</div><div class="lbl">Potential Savings</div>
+        <div class="num">$55,743</div><div class="lbl">Potential Savings</div>
       </a>
     </div>
 
@@ -2104,7 +2113,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <div class="dp-name">Volume Vince</div>
             <div class="dp-role">Modern Rookie Flipper</div>
             <div class="dp-tone">Fast turn. BIN, RC, modern, $5-$50.</div>
-            <div class="dp-line"><b>9 strong picks.</b> Top: "This one prints. Modern liquid stock, $35 in, list Sunday night, gone by Wednesday."</div>
+            <div class="dp-line"><b>10 strong picks.</b> Top: "This one prints. Modern liquid stock, $25 in, list Sunday night, gone by Wednesday."</div>
           </div>
         </div>
         <div class="dp-persona">
@@ -2129,7 +2138,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
       <div class="dp-verdict dp-verdict--mixed">
         <span class="dp-verdict-label">Mixed — act on the strong picks, search further on the rest</span>
-        <span class="dp-verdict-summary">9 deals have at least one persona enthusiastic, but consensus is thin. Buy the 9 highlighted picks, then re-query deal_queries.json for the categories that came up short.</span>
+        <span class="dp-verdict-summary">10 deals have at least one persona enthusiastic, but consensus is thin. Buy the 10 highlighted picks, then re-query deal_queries.json for the categories that came up short.</span>
       </div>
 
       <ol class="dp-rows">
@@ -2137,33 +2146,45 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <li class="dp-row dp-row--hot">
           <span class="dp-rank">1</span>
           <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&amp;hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL3x5Smyhfs2c2dhB9Z%2FTYqMGqJy6H5EHMdKoS1V3dj96%2FuB5H%2Bjf5X%2F9OV8%2B3VB8k7bDQMtP5I80m5qpxhG33FDHwXGuThtzUEZN%2Fmhru6qXdoEzqI8grUfatLWt6ur%2FJdfp77sSMoJg%2B7IaOUg5%2FMCSZtHqV8tXZawvWV31V8buw%3D%3D" target="_blank" rel="noopener">Luka Doncic RARE PINK ICE REFRACTOR PRIZM INVESTMENT CARD SSP PANINI MVP MINT</a>
+          <a class="dp-title" href="https://www.ebay.com/itm/298347129294?_skw=shohei+ohtani+rookie+topps+chrome&amp;hash=item4576dfe9ce:g:F8gAAeSwhYVqEiqS" target="_blank" rel="noopener">Shohei Ohtani RARE REFRACTOR INVESTMENT CARD SSP TOPPS CHROME DODGERS MVP</a>
           <span class="dp-money">
-            <b>$35.09</b><span class="dp-median"> · median $325.00</span>
+            <b>$25.49</b><span class="dp-median"> · median $295.00</span>
           </span>
           <span class="dp-take">
             <i class="dp-take-by">Volume Vince (4/5):</i>
-            This one prints. Modern liquid stock, $35 in, list Sunday night, gone by Wednesday.
+            This one prints. Modern liquid stock, $25 in, list Sunday night, gone by Wednesday.
           </span>
         </li>
         <li class="dp-row dp-row--hot">
           <span class="dp-rank">2</span>
-          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 5/5 — strong">+5</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&amp;hash=item57d494a094:g:ufMAAeSw779qHtw5&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiK0C8LFGBOIzpkFyDUKL1IhvVTE8P6uwvBiq2XeV54xWYMMOkqvM9dHViyAMXLQJBt%2BgiXr41T4sv28DShpzIJJjErobsjATZyHEbtxgzZnCBVZACYPWjsGx2lo1rjUXwmZNy3hdC80be3grVDKQik%2FFBQGKT8duxA1ija%2FVdC4jyRM4FBMWxKy%2BOuhcRBa8Bg%3D" target="_blank" rel="noopener">READ DESCRIPTION - 2018 Topps Chrome - Shohei Ohtani #150 (RC) - Chaser Pack🔥</a>
+          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
+          <a class="dp-title" href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&amp;hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amp;amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL2OCD1gXUod5vi274BQ30d2ZFXJoBICGvEUIFDseP6zC1RjqN8kLepo5qRDQHQuTuQ5mHNF2eLgYd718xcN4BlgVpj6UVma%2Bv%2FkbHxSawxXuJhzJfyD%2Bcmwd6s3UB%2FLjjHbcKZ%2B6t4E4AlV%2B0F%2FCFuR5TPGxpoGUD4p9%2BXis5HNOg%3D%3D" target="_blank" rel="noopener">Luka Doncic RARE PINK ICE REFRACTOR PRIZM INVESTMENT CARD SSP PANINI MVP MINT</a>
           <span class="dp-money">
-            <b>$34.99</b><span class="dp-median"> · median $299.99</span>
+            <b>$35.09</b><span class="dp-median"> · median $350.00</span>
           </span>
           <span class="dp-take">
-            <i class="dp-take-by">Volume Vince (5/5):</i>
+            <i class="dp-take-by">Volume Vince (4/5):</i>
             This one prints. Modern liquid stock, $35 in, list Sunday night, gone by Wednesday.
           </span>
         </li>
         <li class="dp-row dp-row--hot">
           <span class="dp-rank">3</span>
           <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 5/5 — strong">+5</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
+          <a class="dp-title" href="https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&amp;hash=item57d494a094:g:ufMAAeSw779qHtw5&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiLJJVqXQXMbwkN2Pi9wgZyBOGej6bAfi5HYtrYlGBV5%2Fe%2FlsX8ESmRWkx9hFoOO4QP%2F0JMTjamlaZbdMYMHSN0Z9umbd1UWQntCE6s74u5TtRDeZizalttuJ%2FR%2Bh6Ksr0pGPiKFoYzZfADPJMs9d1H0IbnnVxJvWAlxt9mS0hGzg5rNtWw%2BQBRF1Bp3Qeeo6FM%3D" target="_blank" rel="noopener">READ DESCRIPTION - 2018 Topps Chrome - Shohei Ohtani #150 (RC) - Chaser Pack🔥</a>
+          <span class="dp-money">
+            <b>$34.99</b><span class="dp-median"> · median $295.00</span>
+          </span>
+          <span class="dp-take">
+            <i class="dp-take-by">Volume Vince (5/5):</i>
+            This one prints. Modern liquid stock, $35 in, list Sunday night, gone by Wednesday.
+          </span>
+        </li>
+        <li class="dp-row dp-row--hot">
+          <span class="dp-rank">4</span>
+          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 5/5 — strong">+5</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
           <a class="dp-title" href="https://www.ebay.com/itm/327191475500?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item4c2e21b52c:g:h84AAeSwqP5pxsB4" target="_blank" rel="noopener">Patrick Mahomes II 2025 Panini Prizm No Huddle Disco Flashback</a>
           <span class="dp-money">
-            <b>$20.00</b><span class="dp-median"> · median $162.50</span>
+            <b>$20.00</b><span class="dp-median"> · median $165.00</span>
           </span>
           <span class="dp-take">
             <i class="dp-take-by">Volume Vince (5/5):</i>
@@ -2171,11 +2192,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </span>
         </li>
         <li class="dp-row dp-row--hot">
-          <span class="dp-rank">4</span>
+          <span class="dp-rank">5</span>
+          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 5/5 — strong">+5</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
+          <a class="dp-title" href="https://www.ebay.com/itm/318411094966?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item4a22c7bbb6:g:LEMAAeSwidpqIjf7" target="_blank" rel="noopener">Panini 2025 Rookies &amp; Stars Patrick Mahomes II Crusade Prizm #1 074/149</a>
+          <span class="dp-money">
+            <b>$20.00</b><span class="dp-median"> · median $165.00</span>
+          </span>
+          <span class="dp-take">
+            <i class="dp-take-by">Volume Vince (5/5):</i>
+            This one prints. Modern liquid stock, $20 in, list Sunday night, gone by Wednesday.
+          </span>
+        </li>
+        <li class="dp-row dp-row--hot">
+          <span class="dp-rank">6</span>
           <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
           <a class="dp-title" href="https://www.ebay.com/itm/187941589043?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item2bc2311033:g:hQsAAeSwCqBpDWT5" target="_blank" rel="noopener">PATRICK MAHOMES Panini GREEN PRIZM REFRACTOR College Rookie SP Parallel</a>
           <span class="dp-money">
-            <b>$20.00</b><span class="dp-median"> · median $162.50</span>
+            <b>$20.00</b><span class="dp-median"> · median $165.00</span>
           </span>
           <span class="dp-take">
             <i class="dp-take-by">Volume Vince (4/5):</i>
@@ -2183,11 +2216,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </span>
         </li>
         <li class="dp-row dp-row--hot">
-          <span class="dp-rank">5</span>
+          <span class="dp-rank">7</span>
           <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
           <a class="dp-title" href="https://www.ebay.com/itm/389922149741?_skw=shohei+ohtani+rookie+topps+chrome&amp;hash=item5ac92bd56d:g:o~kAAeSwFCdp6EtF" target="_blank" rel="noopener">Shohei Ohtani RARE VARIANT REFRACTOR INVESTMENT CARD TOPPS CHROME MVP MINT</a>
           <span class="dp-money">
-            <b>$39.59</b><span class="dp-median"> · median $299.99</span>
+            <b>$39.59</b><span class="dp-median"> · median $295.00</span>
           </span>
           <span class="dp-take">
             <i class="dp-take-by">Volume Vince (4/5):</i>
@@ -2195,63 +2228,39 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </span>
         </li>
         <li class="dp-row dp-row--hot">
-          <span class="dp-rank">6</span>
-          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iBYvq219WZGJsjOE%2FUYzB5%2BUvgqmIEmQ8%2F00ALMhZ8BMvGa1lW%2Frqn%2FTl%2F2tUbrhvEJHFuBqouug42tbH7y76fGIaARr0d79KyxhlGmhnbbeHMpecbdW3Wb56n2WnlnJ4f3pAkErubDC5AE0YbgdIYqT7kAXRC1cYHuaaAanqfIGIoYJTmWDfN7NyXg2oQ7S80%3D" target="_blank" rel="noopener">Patrick Mahomes RARE HOLO Gold Trim DISCO FOIL SP | INVESTMENT CARD | KC CHIEFS</a>
-          <span class="dp-money">
-            <b>$23.95</b><span class="dp-median"> · median $162.50</span>
-          </span>
-          <span class="dp-take">
-            <i class="dp-take-by">Volume Vince (4/5):</i>
-            This one prints. Modern liquid stock, $24 in, list Sunday night, gone by Wednesday.
-          </span>
-        </li>
-        <li class="dp-row dp-row--hot">
-          <span class="dp-rank">7</span>
-          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih0fclXIwqzC5SWfUirBAUa1Z%2FwBz6r3cqCEWQK%2F1Cve%2FEKX9%2B%2Fc6OIpWCSvAycnSCTmYQKG4Ex%2FgoYOepyBObk8hCS77zIJqqwqusYQ7VVk4GErudFia8MuAGnipp8ZJ282ZYEx5AzqVMidvqnN2R%2FvKcKzoD7b3ZyuzWuIBrkF8d%2By0E2ovKMaeXAZTbhuR2o%3D" target="_blank" rel="noopener">Patrick Mahomes II RARE REFRACTOR PRIZM INVESTMENT CARD Kansas City Chiefs SP</a>
-          <span class="dp-money">
-            <b>$24.49</b><span class="dp-median"> · median $162.50</span>
-          </span>
-          <span class="dp-take">
-            <i class="dp-take-by">Volume Vince (4/5):</i>
-            This one prints. Modern liquid stock, $24 in, list Sunday night, gone by Wednesday.
-          </span>
-        </li>
-        <li class="dp-row">
           <span class="dp-rank">8</span>
-          <span class="dp-pips"><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 1/5 — skip">·1</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/398028060060?_skw=charizard+holo+psa&amp;hash=item5cac52359c:g:nZEAAeSwK-9qIhOe" target="_blank" rel="noopener">Title: 2025 PSA 9 Pokémon Mega Charizard X ex #023 UPC Promo Phantasmal Flames</a>
+          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 1/5 — skip">·1</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
+          <a class="dp-title" href="https://www.ebay.com/itm/318415728265?_skw=luka+doncic+prizm+rookie&amp;hash=item4a230e6e89:g:ZTAAAeSwYJNqI40G" target="_blank" rel="noopener">Luka Doncic 2019-20 Panini Prizm Red White Blue Prizm PSA 10 Dallas Mavericks</a>
           <span class="dp-money">
-            <b>$59.99</b><span class="dp-median"> · median $366.99</span>
+            <b>$49.99</b><span class="dp-median"> · median $350.00</span>
           </span>
           <span class="dp-take">
-            <i class="dp-take-by">Volume Vince (2/5):</i>
-            Lukewarm. Margin&#x27;s there but turn time is the question. Pass unless you&#x27;re slow this week.
+            <i class="dp-take-by">Volume Vince (4/5):</i>
+            This one prints. Modern liquid stock, $50 in, list Sunday night, gone by Wednesday.
           </span>
         </li>
         <li class="dp-row dp-row--hot">
           <span class="dp-rank">9</span>
-          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 5/5 — strong">+5</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/206315725326?_skw=paul+skenes+rookie+bowman+chrome&amp;hash=item300960220e:g:~m0AAeSw2ItqHkb3" target="_blank" rel="noopener">Paul Skenes 2024 Bowman Chrome AI Insert Refractor Rookie RC Pirates #BAI-15</a>
+          <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
+          <a class="dp-title" href="https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iAq59j6%2BInjL7%2FeWpkwVArvpKoNz1Loxgez0QpiNV5mls6MgqiSXvvLGca4xryERYpW4y7d8eB4LdwE4o3A%2BO0YaJJ9XZPBjlqkZ8ciL9WT%2F%2BZBeoJ9TfiJ0ttBOQgMQsn6MzvFssO0pRaqKvWxD7PHAHc5KhTexHAjt%2BU5ZINmicmXcg%2B3wrPcknSSv%2BHm9RI%3D" target="_blank" rel="noopener">Patrick Mahomes RARE HOLO Gold Trim DISCO FOIL SP | INVESTMENT CARD | KC CHIEFS</a>
           <span class="dp-money">
-            <b>$15.00</b><span class="dp-median"> · median $89.99</span>
+            <b>$23.95</b><span class="dp-median"> · median $165.00</span>
           </span>
           <span class="dp-take">
-            <i class="dp-take-by">Volume Vince (5/5):</i>
-            This one prints. Modern liquid stock, $15 in, list Sunday night, gone by Wednesday.
+            <i class="dp-take-by">Volume Vince (4/5):</i>
+            This one prints. Modern liquid stock, $24 in, list Sunday night, gone by Wednesday.
           </span>
         </li>
         <li class="dp-row dp-row--hot">
           <span class="dp-rank">10</span>
           <span class="dp-pips"><span class="dp-pip dp-pip--hot" title="Score 4/5 — strong">+4</span><span class="dp-pip dp-pip--cold" title="Score 2/5 — skip">·2</span><span class="dp-pip dp-pip--cold" title="Score 0/5 — skip">·0</span></span>
-          <a class="dp-title" href="https://www.ebay.com/itm/226610637738?_skw=paul+skenes+rookie+bowman+chrome&amp;var=525786537568&amp;hash=item34c30bebaa:g:VRYAAOSwssJnt~k4" target="_blank" rel="noopener">Paul Skenes Ultimate Pick your Card, 1st Bowman, Topps Now, Topps Chrome Rookie</a>
+          <a class="dp-title" href="https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&amp;hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amp;amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih3Q6qNF82lQ59z%2FHOA7D8gHg8S%2BxZYKoWNEFfaSjBctAeb%2Bvt%2FMoUlZ6ZWzgSl1v8Ptz%2Bl8z1NP9fL1D085FccYvCatnzVZB2FaGn1AUpBrg1tQlVyDvVyJwXum0JPvnhJtW0HdPkIpUysjt%2FPBXkmBtS7walmzkld%2FYt1tZ640O3uquxNn6qclaiCQ%2FPVpCyQ%3D" target="_blank" rel="noopener">Patrick Mahomes II RARE REFRACTOR PRIZM INVESTMENT CARD Kansas City Chiefs SP</a>
           <span class="dp-money">
-            <b>$15.00</b><span class="dp-median"> · median $89.99</span>
+            <b>$24.49</b><span class="dp-median"> · median $165.00</span>
           </span>
           <span class="dp-take">
             <i class="dp-take-by">Volume Vince (4/5):</i>
-            This one prints. Modern liquid stock, $15 in, list Sunday night, gone by Wednesday.
+            This one prints. Modern liquid stock, $24 in, list Sunday night, gone by Wednesday.
           </span>
         </li>
       </ol>
@@ -2304,17 +2313,46 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       Showing <span id="deal-visible-count">200</span> of 200 deals
     </div>
 
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"Product","position":1,"name":"Luka Doncic RARE PINK ICE REFRACTOR PRIZM INVESTMENT CARD SSP PANINI MVP MINT","image":"https://i.ebayimg.com/images/g/n3YAAeSwveRn3OlH/s-l225.jpg","offers":{"@type":"Offer","price":"35.09","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL3x5Smyhfs2c2dhB9Z%2FTYqMGqJy6H5EHMdKoS1V3dj96%2FuB5H%2Bjf5X%2F9OV8%2B3VB8k7bDQMtP5I80m5qpxhG33FDHwXGuThtzUEZN%2Fmhru6qXdoEzqI8grUfatLWt6ur%2FJdfp77sSMoJg%2B7IaOUg5%2FMCSZtHqV8tXZawvWV31V8buw%3D%3D"}}},{"@type":"ListItem","position":2,"item":{"@type":"Product","position":2,"name":"READ DESCRIPTION - 2018 Topps Chrome - Shohei Ohtani #150 (RC) - Chaser Pack\ud83d\udd25","image":"https://i.ebayimg.com/images/g/ufMAAeSw779qHtw5/s-l225.jpg","offers":{"@type":"Offer","price":"34.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&hash=item57d494a094:g:ufMAAeSw779qHtw5&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiK0C8LFGBOIzpkFyDUKL1IhvVTE8P6uwvBiq2XeV54xWYMMOkqvM9dHViyAMXLQJBt%2BgiXr41T4sv28DShpzIJJjErobsjATZyHEbtxgzZnCBVZACYPWjsGx2lo1rjUXwmZNy3hdC80be3grVDKQik%2FFBQGKT8duxA1ija%2FVdC4jyRM4FBMWxKy%2BOuhcRBa8Bg%3D"}}},{"@type":"ListItem","position":3,"item":{"@type":"Product","position":3,"name":"Patrick Mahomes II 2025 Panini Prizm No Huddle Disco Flashback","image":"https://i.ebayimg.com/images/g/h84AAeSwqP5pxsB4/s-l225.jpg","offers":{"@type":"Offer","price":"20.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/327191475500?_skw=patrick+mahomes+rookie+card+prizm&hash=item4c2e21b52c:g:h84AAeSwqP5pxsB4"}}},{"@type":"ListItem","position":4,"item":{"@type":"Product","position":4,"name":"PATRICK MAHOMES Panini GREEN PRIZM REFRACTOR College Rookie SP Parallel","image":"https://i.ebayimg.com/images/g/hQsAAeSwCqBpDWT5/s-l225.jpg","offers":{"@type":"Offer","price":"20.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/187941589043?_skw=patrick+mahomes+rookie+card+prizm&hash=item2bc2311033:g:hQsAAeSwCqBpDWT5"}}},{"@type":"ListItem","position":5,"item":{"@type":"Product","position":5,"name":"Shohei Ohtani RARE VARIANT REFRACTOR INVESTMENT CARD TOPPS CHROME MVP MINT","image":"https://i.ebayimg.com/images/g/o~kAAeSwFCdp6EtF/s-l225.jpg","offers":{"@type":"Offer","price":"39.59","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/389922149741?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5ac92bd56d:g:o~kAAeSwFCdp6EtF"}}},{"@type":"ListItem","position":6,"item":{"@type":"Product","position":6,"name":"Patrick Mahomes RARE HOLO Gold Trim DISCO FOIL SP | INVESTMENT CARD | KC CHIEFS","image":"https://i.ebayimg.com/images/g/lHAAAeSwV3Rpw0xe/s-l225.jpg","offers":{"@type":"Offer","price":"23.95","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iBYvq219WZGJsjOE%2FUYzB5%2BUvgqmIEmQ8%2F00ALMhZ8BMvGa1lW%2Frqn%2FTl%2F2tUbrhvEJHFuBqouug42tbH7y76fGIaARr0d79KyxhlGmhnbbeHMpecbdW3Wb56n2WnlnJ4f3pAkErubDC5AE0YbgdIYqT7kAXRC1cYHuaaAanqfIGIoYJTmWDfN7NyXg2oQ7S80%3D"}}},{"@type":"ListItem","position":7,"item":{"@type":"Product","position":7,"name":"Patrick Mahomes II RARE REFRACTOR PRIZM INVESTMENT CARD Kansas City Chiefs SP","image":"https://i.ebayimg.com/images/g/sokAAeSwEWdp2v81/s-l225.jpg","offers":{"@type":"Offer","price":"24.49","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih0fclXIwqzC5SWfUirBAUa1Z%2FwBz6r3cqCEWQK%2F1Cve%2FEKX9%2B%2Fc6OIpWCSvAycnSCTmYQKG4Ex%2FgoYOepyBObk8hCS77zIJqqwqusYQ7VVk4GErudFia8MuAGnipp8ZJ282ZYEx5AzqVMidvqnN2R%2FvKcKzoD7b3ZyuzWuIBrkF8d%2By0E2ovKMaeXAZTbhuR2o%3D"}}},{"@type":"ListItem","position":8,"item":{"@type":"Product","position":8,"name":"Title: 2025 PSA 9 Pok\u00e9mon Mega Charizard X ex #023 UPC Promo Phantasmal Flames","image":"https://i.ebayimg.com/images/g/nZEAAeSwK-9qIhOe/s-l225.jpg","offers":{"@type":"Offer","price":"59.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/398028060060?_skw=charizard+holo+psa&hash=item5cac52359c:g:nZEAAeSwK-9qIhOe"}}},{"@type":"ListItem","position":9,"item":{"@type":"Product","position":9,"name":"Paul Skenes 2024 Bowman Chrome AI Insert Refractor Rookie RC Pirates #BAI-15","image":"https://i.ebayimg.com/images/g/~m0AAeSw2ItqHkb3/s-l225.jpg","offers":{"@type":"Offer","price":"15.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/206315725326?_skw=paul+skenes+rookie+bowman+chrome&hash=item300960220e:g:~m0AAeSw2ItqHkb3"}}},{"@type":"ListItem","position":10,"item":{"@type":"Product","position":10,"name":"Paul Skenes Ultimate Pick your Card, 1st Bowman, Topps Now, Topps Chrome Rookie","image":"https://i.ebayimg.com/images/g/VRYAAOSwssJnt~k4/s-l225.jpg","offers":{"@type":"Offer","price":"15.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/226610637738?_skw=paul+skenes+rookie+bowman+chrome&var=525786537568&hash=item34c30bebaa:g:VRYAAOSwssJnt~k4"}}},{"@type":"ListItem","position":11,"item":{"@type":"Product","position":11,"name":"Chase The $1,400 2018 Topps Chrome Update HTM32 Shohei Ohtani PSA 10 ROOKIE MVP","image":"https://i.ebayimg.com/images/g/bTAAAeSw-wlqH~DU/s-l225.jpg","offers":{"@type":"Offer","price":"50.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/257543776329?_skw=shohei+ohtani+rookie+topps+chrome&hash=item3bf6ce2849:g:bTAAAeSw-wlqH~DU"}}},{"@type":"ListItem","position":12,"item":{"@type":"Product","position":12,"name":"2024 Panini Rookies & Stars -Thrillers Patrick Mahomes II #T-PMS Red Prizm /99","image":"https://i.ebayimg.com/images/g/lfEAAeSwH1RprP33/s-l225.jpg","offers":{"@type":"Offer","price":"27.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/397688017375?_skw=patrick+mahomes+rookie+card+prizm&hash=item5c980d91df:g:lfEAAeSwH1RprP33"}}}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"Product","position":1,"name":"Shohei Ohtani RARE REFRACTOR INVESTMENT CARD SSP TOPPS CHROME DODGERS MVP","image":"https://i.ebayimg.com/images/g/F8gAAeSwhYVqEiqS/s-l225.jpg","offers":{"@type":"Offer","price":"25.49","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/298347129294?_skw=shohei+ohtani+rookie+topps+chrome&hash=item4576dfe9ce:g:F8gAAeSwhYVqEiqS"}}},{"@type":"ListItem","position":2,"item":{"@type":"Product","position":2,"name":"Luka Doncic RARE PINK ICE REFRACTOR PRIZM INVESTMENT CARD SSP PANINI MVP MINT","image":"https://i.ebayimg.com/images/g/n3YAAeSwveRn3OlH/s-l225.jpg","offers":{"@type":"Offer","price":"35.09","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL2OCD1gXUod5vi274BQ30d2ZFXJoBICGvEUIFDseP6zC1RjqN8kLepo5qRDQHQuTuQ5mHNF2eLgYd718xcN4BlgVpj6UVma%2Bv%2FkbHxSawxXuJhzJfyD%2Bcmwd6s3UB%2FLjjHbcKZ%2B6t4E4AlV%2B0F%2FCFuR5TPGxpoGUD4p9%2BXis5HNOg%3D%3D"}}},{"@type":"ListItem","position":3,"item":{"@type":"Product","position":3,"name":"READ DESCRIPTION - 2018 Topps Chrome - Shohei Ohtani #150 (RC) - Chaser Pack\ud83d\udd25","image":"https://i.ebayimg.com/images/g/ufMAAeSw779qHtw5/s-l225.jpg","offers":{"@type":"Offer","price":"34.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&hash=item57d494a094:g:ufMAAeSw779qHtw5&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiLJJVqXQXMbwkN2Pi9wgZyBOGej6bAfi5HYtrYlGBV5%2Fe%2FlsX8ESmRWkx9hFoOO4QP%2F0JMTjamlaZbdMYMHSN0Z9umbd1UWQntCE6s74u5TtRDeZizalttuJ%2FR%2Bh6Ksr0pGPiKFoYzZfADPJMs9d1H0IbnnVxJvWAlxt9mS0hGzg5rNtWw%2BQBRF1Bp3Qeeo6FM%3D"}}},{"@type":"ListItem","position":4,"item":{"@type":"Product","position":4,"name":"Patrick Mahomes II 2025 Panini Prizm No Huddle Disco Flashback","image":"https://i.ebayimg.com/images/g/h84AAeSwqP5pxsB4/s-l225.jpg","offers":{"@type":"Offer","price":"20.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/327191475500?_skw=patrick+mahomes+rookie+card+prizm&hash=item4c2e21b52c:g:h84AAeSwqP5pxsB4"}}},{"@type":"ListItem","position":5,"item":{"@type":"Product","position":5,"name":"Panini 2025 Rookies & Stars Patrick Mahomes II Crusade Prizm #1 074/149","image":"https://i.ebayimg.com/images/g/LEMAAeSwidpqIjf7/s-l225.jpg","offers":{"@type":"Offer","price":"20.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/318411094966?_skw=patrick+mahomes+rookie+card+prizm&hash=item4a22c7bbb6:g:LEMAAeSwidpqIjf7"}}},{"@type":"ListItem","position":6,"item":{"@type":"Product","position":6,"name":"PATRICK MAHOMES Panini GREEN PRIZM REFRACTOR College Rookie SP Parallel","image":"https://i.ebayimg.com/images/g/hQsAAeSwCqBpDWT5/s-l225.jpg","offers":{"@type":"Offer","price":"20.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/187941589043?_skw=patrick+mahomes+rookie+card+prizm&hash=item2bc2311033:g:hQsAAeSwCqBpDWT5"}}},{"@type":"ListItem","position":7,"item":{"@type":"Product","position":7,"name":"Shohei Ohtani RARE VARIANT REFRACTOR INVESTMENT CARD TOPPS CHROME MVP MINT","image":"https://i.ebayimg.com/images/g/o~kAAeSwFCdp6EtF/s-l225.jpg","offers":{"@type":"Offer","price":"39.59","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/389922149741?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5ac92bd56d:g:o~kAAeSwFCdp6EtF"}}},{"@type":"ListItem","position":8,"item":{"@type":"Product","position":8,"name":"Luka Doncic 2019-20 Panini Prizm Red White Blue Prizm PSA 10 Dallas Mavericks","image":"https://i.ebayimg.com/images/g/ZTAAAeSwYJNqI40G/s-l225.jpg","offers":{"@type":"Offer","price":"49.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/318415728265?_skw=luka+doncic+prizm+rookie&hash=item4a230e6e89:g:ZTAAAeSwYJNqI40G"}}},{"@type":"ListItem","position":9,"item":{"@type":"Product","position":9,"name":"Patrick Mahomes RARE HOLO Gold Trim DISCO FOIL SP | INVESTMENT CARD | KC CHIEFS","image":"https://i.ebayimg.com/images/g/lHAAAeSwV3Rpw0xe/s-l225.jpg","offers":{"@type":"Offer","price":"23.95","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iAq59j6%2BInjL7%2FeWpkwVArvpKoNz1Loxgez0QpiNV5mls6MgqiSXvvLGca4xryERYpW4y7d8eB4LdwE4o3A%2BO0YaJJ9XZPBjlqkZ8ciL9WT%2F%2BZBeoJ9TfiJ0ttBOQgMQsn6MzvFssO0pRaqKvWxD7PHAHc5KhTexHAjt%2BU5ZINmicmXcg%2B3wrPcknSSv%2BHm9RI%3D"}}},{"@type":"ListItem","position":10,"item":{"@type":"Product","position":10,"name":"Patrick Mahomes II RARE REFRACTOR PRIZM INVESTMENT CARD Kansas City Chiefs SP","image":"https://i.ebayimg.com/images/g/sokAAeSwEWdp2v81/s-l225.jpg","offers":{"@type":"Offer","price":"24.49","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih3Q6qNF82lQ59z%2FHOA7D8gHg8S%2BxZYKoWNEFfaSjBctAeb%2Bvt%2FMoUlZ6ZWzgSl1v8Ptz%2Bl8z1NP9fL1D085FccYvCatnzVZB2FaGn1AUpBrg1tQlVyDvVyJwXum0JPvnhJtW0HdPkIpUysjt%2FPBXkmBtS7walmzkld%2FYt1tZ640O3uquxNn6qclaiCQ%2FPVpCyQ%3D"}}},{"@type":"ListItem","position":11,"item":{"@type":"Product","position":11,"name":"2018 Panini Hoops Luka Doncic #268 Rookie Card PSA 9 MINT","image":"https://i.ebayimg.com/images/g/rzAAAeSwh5lqGNg2/s-l225.jpg","offers":{"@type":"Offer","price":"52.00","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/127890944060?_skw=luka+doncic+prizm+rookie&hash=item1dc6e4f03c:g:rzAAAeSwh5lqGNg2&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGa9heKjaFs5SaEF5W8OJU2la7Vk0mq%2FqSvYnCC0ZzZE9HUp6Zg71uDoWAT0L0Raf0ygGRTIRgRlr6H%2B4W9kz8AfYM4VFSLReu6hwfuY4jLoszWt54grTBLONeT3Fan9MLfnbTzWEmLNcsAazZIvW4aMi%2F9IPpkf3MtH2FeBMgBx7X5FII%2Bc%2F6R%2B3rJ--IrQ%2B6Pl%2BSHq7JEea%2FneiTyJea77HR9eaWCkEyGhXWVfF%2Fq8%2FLIUs3GGzz4vhr5lo07mpE3pFOOCq24prOfHTOJRh%2BXhD%2BJW97xuqibJnFD2aumKXQ%3D%3D"}}},{"@type":"ListItem","position":12,"item":{"@type":"Product","position":12,"name":"Title: 2025 PSA 9 Pok\u00e9mon Mega Charizard X ex #023 UPC Promo Phantasmal Flames","image":"https://i.ebayimg.com/images/g/nZEAAeSwK-9qIhOe/s-l225.jpg","offers":{"@type":"Offer","price":"59.99","priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://www.ebay.com/itm/398028060060?_skw=charizard+holo+psa&hash=item5cac52359c:g:nZEAAeSwK-9qIhOe"}}}]}</script>
     <div class="deal-grid" id="deal-grid" data-total="200" data-inline="12">
       
       <article class="deal-card"
+        data-price="25.49"
+        data-discount="91.4"
+        data-savings="269.51"
+        data-cat="Baseball Singles"
+        data-type="BIN"
+        data-title="shohei ohtani rare refractor investment card ssp topps chrome dodgers mvp">
+        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/F8gAAeSwhYVqEiqS/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-91%</div></div>
+        <div class="deal-body">
+          <div class="deal-meta-row">
+            <span class="badge badge-danger">🔥 HOT</span>
+            <span class="tag">BIN</span>
+            <span class="tag tag-gold">Baseball Singles</span>
+            <span class="tag">Ungraded</span>
+          </div>
+          <a href="https://www.ebay.com/itm/298347129294?_skw=shohei+ohtani+rookie+topps+chrome&hash=item4576dfe9ce:g:F8gAAeSwhYVqEiqS" target="_blank" rel="noopener" class="deal-title">Shohei Ohtani RARE REFRACTOR INVESTMENT CARD SSP TOPPS CHROME DODGERS MVP</a>
+          <div class="deal-meta-row" style="margin-top:6px;">
+            <span class="deal-from">Seen via <em>“shohei ohtani rookie topps chrome”</em></span>
+            <span class="deal-feedback" title="Seller">kandn_sales 100.0%</span>
+          </div>
+        </div>
+        <div class="deal-price-block">
+          <div class="deal-price">$25.49</div>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
+          <div class="deal-median">asking · median $295.00</div>
+          <a href="https://www.ebay.com/itm/298347129294?_skw=shohei+ohtani+rookie+topps+chrome&hash=item4576dfe9ce:g:F8gAAeSwhYVqEiqS" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+        </div>
+      </article>
+
+      <article class="deal-card"
         data-price="35.09"
-        data-discount="89.2"
-        data-savings="289.91"
+        data-discount="90.0"
+        data-savings="314.91"
         data-cat="Basketball Singles"
         data-type="Best Offer"
         data-title="luka doncic rare pink ice refractor prizm investment card ssp panini mvp mint">
-        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/n3YAAeSwveRn3OlH/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-89%</div></div>
+        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/n3YAAeSwveRn3OlH/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-90%</div></div>
         <div class="deal-body">
           <div class="deal-meta-row">
             <span class="badge badge-danger">🔥 HOT</span>
@@ -2322,7 +2360,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="tag tag-gold">Basketball Singles</span>
             <span class="tag">Ungraded</span>
           </div>
-          <a href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL3x5Smyhfs2c2dhB9Z%2FTYqMGqJy6H5EHMdKoS1V3dj96%2FuB5H%2Bjf5X%2F9OV8%2B3VB8k7bDQMtP5I80m5qpxhG33FDHwXGuThtzUEZN%2Fmhru6qXdoEzqI8grUfatLWt6ur%2FJdfp77sSMoJg%2B7IaOUg5%2FMCSZtHqV8tXZawvWV31V8buw%3D%3D" target="_blank" rel="noopener" class="deal-title">Luka Doncic RARE PINK ICE REFRACTOR PRIZM INVESTMENT CARD SSP PANINI MVP MINT</a>
+          <a href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL2OCD1gXUod5vi274BQ30d2ZFXJoBICGvEUIFDseP6zC1RjqN8kLepo5qRDQHQuTuQ5mHNF2eLgYd718xcN4BlgVpj6UVma%2Bv%2FkbHxSawxXuJhzJfyD%2Bcmwd6s3UB%2FLjjHbcKZ%2B6t4E4AlV%2B0F%2FCFuR5TPGxpoGUD4p9%2BXis5HNOg%3D%3D" target="_blank" rel="noopener" class="deal-title">Luka Doncic RARE PINK ICE REFRACTOR PRIZM INVESTMENT CARD SSP PANINI MVP MINT</a>
           <div class="deal-meta-row" style="margin-top:6px;">
             <span class="deal-from">Seen via <em>“luka doncic prizm rookie”</em></span>
             <span class="deal-feedback" title="Seller">rko_sportscards 99.9%</span>
@@ -2331,15 +2369,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$35.09</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $325.00</div>
-          <a href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL3x5Smyhfs2c2dhB9Z%2FTYqMGqJy6H5EHMdKoS1V3dj96%2FuB5H%2Bjf5X%2F9OV8%2B3VB8k7bDQMtP5I80m5qpxhG33FDHwXGuThtzUEZN%2Fmhru6qXdoEzqI8grUfatLWt6ur%2FJdfp77sSMoJg%2B7IaOUg5%2FMCSZtHqV8tXZawvWV31V8buw%3D%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+          <div class="deal-median">asking · median $350.00</div>
+          <a href="https://www.ebay.com/itm/388121696500?_skw=luka+doncic+prizm+rookie&hash=item5a5ddb18f4:g:n3YAAeSwveRn3OlH&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGYc2q5Qai%2BM%2FaueFcDTBaxgZ6%2FWxBIy7vUwi1xzfNMHQEmolJojLDArm%2B3XSVCLQkNvhF0Rqu2EePXSI%2FYrGx9z%2FUiIygUDQAZFn%2Bq%2BWVXVnH6NiPNPVM6O4kpegg8iFL2OCD1gXUod5vi274BQ30d2ZFXJoBICGvEUIFDseP6zC1RjqN8kLepo5qRDQHQuTuQ5mHNF2eLgYd718xcN4BlgVpj6UVma%2Bv%2FkbHxSawxXuJhzJfyD%2Bcmwd6s3UB%2FLjjHbcKZ%2B6t4E4AlV%2B0F%2FCFuR5TPGxpoGUD4p9%2BXis5HNOg%3D%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
       <article class="deal-card"
         data-price="34.99"
-        data-discount="88.3"
-        data-savings="265.00"
+        data-discount="88.1"
+        data-savings="260.01"
         data-cat="Baseball Singles"
         data-type="BIN"
         data-title="read description - 2018 topps chrome - shohei ohtani #150 (rc) - chaser pack🔥">
@@ -2351,7 +2389,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="tag tag-gold">Baseball Singles</span>
             <span class="tag">Graded</span>
           </div>
-          <a href="https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&hash=item57d494a094:g:ufMAAeSw779qHtw5&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiK0C8LFGBOIzpkFyDUKL1IhvVTE8P6uwvBiq2XeV54xWYMMOkqvM9dHViyAMXLQJBt%2BgiXr41T4sv28DShpzIJJjErobsjATZyHEbtxgzZnCBVZACYPWjsGx2lo1rjUXwmZNy3hdC80be3grVDKQik%2FFBQGKT8duxA1ija%2FVdC4jyRM4FBMWxKy%2BOuhcRBa8Bg%3D" target="_blank" rel="noopener" class="deal-title">READ DESCRIPTION - 2018 Topps Chrome - Shohei Ohtani #150 (RC) - Chaser Pack🔥</a>
+          <a href="https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&hash=item57d494a094:g:ufMAAeSw779qHtw5&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiLJJVqXQXMbwkN2Pi9wgZyBOGej6bAfi5HYtrYlGBV5%2Fe%2FlsX8ESmRWkx9hFoOO4QP%2F0JMTjamlaZbdMYMHSN0Z9umbd1UWQntCE6s74u5TtRDeZizalttuJ%2FR%2Bh6Ksr0pGPiKFoYzZfADPJMs9d1H0IbnnVxJvWAlxt9mS0hGzg5rNtWw%2BQBRF1Bp3Qeeo6FM%3D" target="_blank" rel="noopener" class="deal-title">READ DESCRIPTION - 2018 Topps Chrome - Shohei Ohtani #150 (RC) - Chaser Pack🔥</a>
           <div class="deal-meta-row" style="margin-top:6px;">
             <span class="deal-from">Seen via <em>“shohei ohtani rookie topps chrome”</em></span>
             <span class="deal-feedback" title="Seller">cist-22 70.0%</span>
@@ -2360,15 +2398,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$34.99</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $299.99</div>
-          <a href="https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&hash=item57d494a094:g:ufMAAeSw779qHtw5&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiK0C8LFGBOIzpkFyDUKL1IhvVTE8P6uwvBiq2XeV54xWYMMOkqvM9dHViyAMXLQJBt%2BgiXr41T4sv28DShpzIJJjErobsjATZyHEbtxgzZnCBVZACYPWjsGx2lo1rjUXwmZNy3hdC80be3grVDKQik%2FFBQGKT8duxA1ija%2FVdC4jyRM4FBMWxKy%2BOuhcRBa8Bg%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+          <div class="deal-median">asking · median $295.00</div>
+          <a href="https://www.ebay.com/itm/377228664980?_skw=shohei+ohtani+rookie+topps+chrome&hash=item57d494a094:g:ufMAAeSw779qHtw5&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbeRXLxRrSA%2FmLu4rV4opI1e6%2BJUIyJZ0xsvHfwtZemd9YFTBdMv7zElwiF4tvpWGTaJqUu59ZjEwqJPbDyV4T6hw8TsOyXvoH9jEpIqZFxXtD8oVbZ6xp8IU02VRdGjiLJJVqXQXMbwkN2Pi9wgZyBOGej6bAfi5HYtrYlGBV5%2Fe%2FlsX8ESmRWkx9hFoOO4QP%2F0JMTjamlaZbdMYMHSN0Z9umbd1UWQntCE6s74u5TtRDeZizalttuJ%2FR%2Bh6Ksr0pGPiKFoYzZfADPJMs9d1H0IbnnVxJvWAlxt9mS0hGzg5rNtWw%2BQBRF1Bp3Qeeo6FM%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
       <article class="deal-card"
         data-price="20.00"
-        data-discount="87.7"
-        data-savings="142.50"
+        data-discount="87.9"
+        data-savings="145.00"
         data-cat="Football Singles"
         data-type="BIN"
         data-title="patrick mahomes ii 2025 panini prizm no huddle disco flashback">
@@ -2389,15 +2427,44 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$20.00</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $162.50</div>
+          <div class="deal-median">asking · median $165.00</div>
           <a href="https://www.ebay.com/itm/327191475500?_skw=patrick+mahomes+rookie+card+prizm&hash=item4c2e21b52c:g:h84AAeSwqP5pxsB4" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
       <article class="deal-card"
         data-price="20.00"
-        data-discount="87.7"
-        data-savings="142.50"
+        data-discount="87.9"
+        data-savings="145.00"
+        data-cat="Football Singles"
+        data-type="Best Offer"
+        data-title="panini 2025 rookies & stars patrick mahomes ii crusade prizm #1 074/149">
+        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/LEMAAeSwidpqIjf7/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-88%</div></div>
+        <div class="deal-body">
+          <div class="deal-meta-row">
+            <span class="badge badge-danger">🔥 HOT</span>
+            <span class="tag tag-gold">BIN + Offer</span>
+            <span class="tag tag-gold">Football Singles</span>
+            <span class="tag">Ungraded</span>
+          </div>
+          <a href="https://www.ebay.com/itm/318411094966?_skw=patrick+mahomes+rookie+card+prizm&hash=item4a22c7bbb6:g:LEMAAeSwidpqIjf7" target="_blank" rel="noopener" class="deal-title">Panini 2025 Rookies & Stars Patrick Mahomes II Crusade Prizm #1 074/149</a>
+          <div class="deal-meta-row" style="margin-top:6px;">
+            <span class="deal-from">Seen via <em>“patrick mahomes rookie card prizm”</em></span>
+            <span class="deal-feedback" title="Seller">chan-873758 100.0%</span>
+          </div>
+        </div>
+        <div class="deal-price-block">
+          <div class="deal-price">$20.00</div>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
+          <div class="deal-median">asking · median $165.00</div>
+          <a href="https://www.ebay.com/itm/318411094966?_skw=patrick+mahomes+rookie+card+prizm&hash=item4a22c7bbb6:g:LEMAAeSwidpqIjf7" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+        </div>
+      </article>
+
+      <article class="deal-card"
+        data-price="20.00"
+        data-discount="87.9"
+        data-savings="145.00"
         data-cat="Football Singles"
         data-type="Best Offer"
         data-title="patrick mahomes panini green prizm refractor college rookie sp parallel">
@@ -2418,15 +2485,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$20.00</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $162.50</div>
+          <div class="deal-median">asking · median $165.00</div>
           <a href="https://www.ebay.com/itm/187941589043?_skw=patrick+mahomes+rookie+card+prizm&hash=item2bc2311033:g:hQsAAeSwCqBpDWT5" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
       <article class="deal-card"
         data-price="39.59"
-        data-discount="86.8"
-        data-savings="260.40"
+        data-discount="86.6"
+        data-savings="255.41"
         data-cat="Baseball Singles"
         data-type="Best Offer"
         data-title="shohei ohtani rare variant refractor investment card topps chrome mvp mint">
@@ -2447,19 +2514,48 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$39.59</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $299.99</div>
+          <div class="deal-median">asking · median $295.00</div>
           <a href="https://www.ebay.com/itm/389922149741?_skw=shohei+ohtani+rookie+topps+chrome&hash=item5ac92bd56d:g:o~kAAeSwFCdp6EtF" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
       <article class="deal-card"
+        data-price="49.99"
+        data-discount="85.7"
+        data-savings="300.01"
+        data-cat="Basketball Singles"
+        data-type="BIN"
+        data-title="luka doncic 2019-20 panini prizm red white blue prizm psa 10 dallas mavericks">
+        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/ZTAAAeSwYJNqI40G/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-86%</div></div>
+        <div class="deal-body">
+          <div class="deal-meta-row">
+            <span class="badge badge-danger">🔥 HOT</span>
+            <span class="tag">BIN</span>
+            <span class="tag tag-gold">Basketball Singles</span>
+            <span class="tag">Graded</span>
+          </div>
+          <a href="https://www.ebay.com/itm/318415728265?_skw=luka+doncic+prizm+rookie&hash=item4a230e6e89:g:ZTAAAeSwYJNqI40G" target="_blank" rel="noopener" class="deal-title">Luka Doncic 2019-20 Panini Prizm Red White Blue Prizm PSA 10 Dallas Mavericks</a>
+          <div class="deal-meta-row" style="margin-top:6px;">
+            <span class="deal-from">Seen via <em>“luka doncic prizm rookie”</em></span>
+            <span class="deal-feedback" title="Seller">bones1022 100.0%</span>
+          </div>
+        </div>
+        <div class="deal-price-block">
+          <div class="deal-price">$49.99</div>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
+          <div class="deal-median">asking · median $350.00</div>
+          <a href="https://www.ebay.com/itm/318415728265?_skw=luka+doncic+prizm+rookie&hash=item4a230e6e89:g:ZTAAAeSwYJNqI40G" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+        </div>
+      </article>
+
+      <article class="deal-card"
         data-price="23.95"
-        data-discount="85.3"
-        data-savings="138.55"
+        data-discount="85.5"
+        data-savings="141.05"
         data-cat="Football Singles"
         data-type="Best Offer"
         data-title="patrick mahomes rare holo gold trim disco foil sp | investment card | kc chiefs">
-        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/lHAAAeSwV3Rpw0xe/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-85%</div></div>
+        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/lHAAAeSwV3Rpw0xe/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-86%</div></div>
         <div class="deal-body">
           <div class="deal-meta-row">
             <span class="badge badge-danger">🔥 HOT</span>
@@ -2467,7 +2563,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="tag tag-gold">Football Singles</span>
             <span class="tag">Used</span>
           </div>
-          <a href="https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iBYvq219WZGJsjOE%2FUYzB5%2BUvgqmIEmQ8%2F00ALMhZ8BMvGa1lW%2Frqn%2FTl%2F2tUbrhvEJHFuBqouug42tbH7y76fGIaARr0d79KyxhlGmhnbbeHMpecbdW3Wb56n2WnlnJ4f3pAkErubDC5AE0YbgdIYqT7kAXRC1cYHuaaAanqfIGIoYJTmWDfN7NyXg2oQ7S80%3D" target="_blank" rel="noopener" class="deal-title">Patrick Mahomes RARE HOLO Gold Trim DISCO FOIL SP | INVESTMENT CARD | KC CHIEFS</a>
+          <a href="https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iAq59j6%2BInjL7%2FeWpkwVArvpKoNz1Loxgez0QpiNV5mls6MgqiSXvvLGca4xryERYpW4y7d8eB4LdwE4o3A%2BO0YaJJ9XZPBjlqkZ8ciL9WT%2F%2BZBeoJ9TfiJ0ttBOQgMQsn6MzvFssO0pRaqKvWxD7PHAHc5KhTexHAjt%2BU5ZINmicmXcg%2B3wrPcknSSv%2BHm9RI%3D" target="_blank" rel="noopener" class="deal-title">Patrick Mahomes RARE HOLO Gold Trim DISCO FOIL SP | INVESTMENT CARD | KC CHIEFS</a>
           <div class="deal-meta-row" style="margin-top:6px;">
             <span class="deal-from">Seen via <em>“patrick mahomes rookie card prizm”</em></span>
             <span class="deal-feedback" title="Seller">arrowoodshobbyshop 100.0%</span>
@@ -2476,15 +2572,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$23.95</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $162.50</div>
-          <a href="https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iBYvq219WZGJsjOE%2FUYzB5%2BUvgqmIEmQ8%2F00ALMhZ8BMvGa1lW%2Frqn%2FTl%2F2tUbrhvEJHFuBqouug42tbH7y76fGIaARr0d79KyxhlGmhnbbeHMpecbdW3Wb56n2WnlnJ4f3pAkErubDC5AE0YbgdIYqT7kAXRC1cYHuaaAanqfIGIoYJTmWDfN7NyXg2oQ7S80%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+          <div class="deal-median">asking · median $165.00</div>
+          <a href="https://www.ebay.com/itm/157922686631?_skw=patrick+mahomes+rookie+card+prizm&hash=item24c4ecf6a7:g:lHAAAeSwV3Rpw0xe&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGYBbRtH036VJyF98eVvfTYi0EMlsylEpD0smlOqgbY%2F1W3gA5P62rwqg2qbv36DtEBNUQ11BPWGCOSK9Losicz3Q1qXO79%2FfM2flZuKWTdwYfu%2BvyaKFkT%2BLxlXIX3H4iAq59j6%2BInjL7%2FeWpkwVArvpKoNz1Loxgez0QpiNV5mls6MgqiSXvvLGca4xryERYpW4y7d8eB4LdwE4o3A%2BO0YaJJ9XZPBjlqkZ8ciL9WT%2F%2BZBeoJ9TfiJ0ttBOQgMQsn6MzvFssO0pRaqKvWxD7PHAHc5KhTexHAjt%2BU5ZINmicmXcg%2B3wrPcknSSv%2BHm9RI%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
       <article class="deal-card"
         data-price="24.49"
-        data-discount="84.9"
-        data-savings="138.01"
+        data-discount="85.2"
+        data-savings="140.51"
         data-cat="Football Singles"
         data-type="Best Offer"
         data-title="patrick mahomes ii rare refractor prizm investment card kansas city chiefs sp">
@@ -2496,7 +2592,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="tag tag-gold">Football Singles</span>
             <span class="tag">Ungraded</span>
           </div>
-          <a href="https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih0fclXIwqzC5SWfUirBAUa1Z%2FwBz6r3cqCEWQK%2F1Cve%2FEKX9%2B%2Fc6OIpWCSvAycnSCTmYQKG4Ex%2FgoYOepyBObk8hCS77zIJqqwqusYQ7VVk4GErudFia8MuAGnipp8ZJ282ZYEx5AzqVMidvqnN2R%2FvKcKzoD7b3ZyuzWuIBrkF8d%2By0E2ovKMaeXAZTbhuR2o%3D" target="_blank" rel="noopener" class="deal-title">Patrick Mahomes II RARE REFRACTOR PRIZM INVESTMENT CARD Kansas City Chiefs SP</a>
+          <a href="https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih3Q6qNF82lQ59z%2FHOA7D8gHg8S%2BxZYKoWNEFfaSjBctAeb%2Bvt%2FMoUlZ6ZWzgSl1v8Ptz%2Bl8z1NP9fL1D085FccYvCatnzVZB2FaGn1AUpBrg1tQlVyDvVyJwXum0JPvnhJtW0HdPkIpUysjt%2FPBXkmBtS7walmzkld%2FYt1tZ640O3uquxNn6qclaiCQ%2FPVpCyQ%3D" target="_blank" rel="noopener" class="deal-title">Patrick Mahomes II RARE REFRACTOR PRIZM INVESTMENT CARD Kansas City Chiefs SP</a>
           <div class="deal-meta-row" style="margin-top:6px;">
             <span class="deal-from">Seen via <em>“patrick mahomes rookie card prizm”</em></span>
             <span class="deal-feedback" title="Seller">ibuy.cards 99.7%</span>
@@ -2505,8 +2601,37 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="deal-price-block">
           <div class="deal-price">$24.49</div>
           <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $162.50</div>
-          <a href="https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih0fclXIwqzC5SWfUirBAUa1Z%2FwBz6r3cqCEWQK%2F1Cve%2FEKX9%2B%2Fc6OIpWCSvAycnSCTmYQKG4Ex%2FgoYOepyBObk8hCS77zIJqqwqusYQ7VVk4GErudFia8MuAGnipp8ZJ282ZYEx5AzqVMidvqnN2R%2FvKcKzoD7b3ZyuzWuIBrkF8d%2By0E2ovKMaeXAZTbhuR2o%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+          <div class="deal-median">asking · median $165.00</div>
+          <a href="https://www.ebay.com/itm/137218863786?_skw=patrick+mahomes+rookie+card+prizm&hash=item1ff2e1b2aa:g:sokAAeSwEWdp2v81&amdata=enc%3AAQALAAABAACCtXRWQnOEpyOqnQQ8KGbkMeio4oTQIJ7mxZMfdl9wfJvrYDLc1grgt%2Fu3YBVBMwwCxXg69iztgwyEJGwcVWcy5FSlQSkzdHozBxGx44ztxuOsT1kkzhCyTFImQw2IgeQzJ%2FF3k2%2FN4fgQbZKmih3Q6qNF82lQ59z%2FHOA7D8gHg8S%2BxZYKoWNEFfaSjBctAeb%2Bvt%2FMoUlZ6ZWzgSl1v8Ptz%2Bl8z1NP9fL1D085FccYvCatnzVZB2FaGn1AUpBrg1tQlVyDvVyJwXum0JPvnhJtW0HdPkIpUysjt%2FPBXkmBtS7walmzkld%2FYt1tZ640O3uquxNn6qclaiCQ%2FPVpCyQ%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
+        </div>
+      </article>
+
+      <article class="deal-card"
+        data-price="52.00"
+        data-discount="85.1"
+        data-savings="298.00"
+        data-cat="Basketball Singles"
+        data-type="Best Offer"
+        data-title="2018 panini hoops luka doncic #268 rookie card psa 9 mint">
+        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/rzAAAeSwh5lqGNg2/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-85%</div></div>
+        <div class="deal-body">
+          <div class="deal-meta-row">
+            <span class="badge badge-danger">🔥 HOT</span>
+            <span class="tag tag-gold">BIN + Offer</span>
+            <span class="tag tag-gold">Basketball Singles</span>
+            <span class="tag">Graded</span>
+          </div>
+          <a href="https://www.ebay.com/itm/127890944060?_skw=luka+doncic+prizm+rookie&hash=item1dc6e4f03c:g:rzAAAeSwh5lqGNg2&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGa9heKjaFs5SaEF5W8OJU2la7Vk0mq%2FqSvYnCC0ZzZE9HUp6Zg71uDoWAT0L0Raf0ygGRTIRgRlr6H%2B4W9kz8AfYM4VFSLReu6hwfuY4jLoszWt54grTBLONeT3Fan9MLfnbTzWEmLNcsAazZIvW4aMi%2F9IPpkf3MtH2FeBMgBx7X5FII%2Bc%2F6R%2B3rJ--IrQ%2B6Pl%2BSHq7JEea%2FneiTyJea77HR9eaWCkEyGhXWVfF%2Fq8%2FLIUs3GGzz4vhr5lo07mpE3pFOOCq24prOfHTOJRh%2BXhD%2BJW97xuqibJnFD2aumKXQ%3D%3D" target="_blank" rel="noopener" class="deal-title">2018 Panini Hoops Luka Doncic #268 Rookie Card PSA 9 MINT</a>
+          <div class="deal-meta-row" style="margin-top:6px;">
+            <span class="deal-from">Seen via <em>“luka doncic prizm rookie”</em></span>
+            <span class="deal-feedback" title="Seller">dryfor_41 100.0%</span>
+          </div>
+        </div>
+        <div class="deal-price-block">
+          <div class="deal-price">$52.00</div>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
+          <div class="deal-median">asking · median $350.00</div>
+          <a href="https://www.ebay.com/itm/127890944060?_skw=luka+doncic+prizm+rookie&hash=item1dc6e4f03c:g:rzAAAeSwh5lqGNg2&amdata=enc%3AAQALAAAA8ACCtXRWQnOEpyOqnQQ8KGa9heKjaFs5SaEF5W8OJU2la7Vk0mq%2FqSvYnCC0ZzZE9HUp6Zg71uDoWAT0L0Raf0ygGRTIRgRlr6H%2B4W9kz8AfYM4VFSLReu6hwfuY4jLoszWt54grTBLONeT3Fan9MLfnbTzWEmLNcsAazZIvW4aMi%2F9IPpkf3MtH2FeBMgBx7X5FII%2Bc%2F6R%2B3rJ--IrQ%2B6Pl%2BSHq7JEea%2FneiTyJea77HR9eaWCkEyGhXWVfF%2Fq8%2FLIUs3GGzz4vhr5lo07mpE3pFOOCq24prOfHTOJRh%2BXhD%2BJW97xuqibJnFD2aumKXQ%3D%3D" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
 
@@ -2538,122 +2663,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <a href="https://www.ebay.com/itm/398028060060?_skw=charizard+holo+psa&hash=item5cac52359c:g:nZEAAeSwK-9qIhOe" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
       </article>
-
-      <article class="deal-card"
-        data-price="15.00"
-        data-discount="83.3"
-        data-savings="74.99"
-        data-cat="Baseball Singles"
-        data-type="Best Offer"
-        data-title="paul skenes 2024 bowman chrome ai insert refractor rookie rc pirates #bai-15">
-        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/~m0AAeSw2ItqHkb3/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-83%</div></div>
-        <div class="deal-body">
-          <div class="deal-meta-row">
-            <span class="badge badge-danger">🔥 HOT</span>
-            <span class="tag tag-gold">BIN + Offer</span>
-            <span class="tag tag-gold">Baseball Singles</span>
-            <span class="tag">Ungraded</span>
-          </div>
-          <a href="https://www.ebay.com/itm/206315725326?_skw=paul+skenes+rookie+bowman+chrome&hash=item300960220e:g:~m0AAeSw2ItqHkb3" target="_blank" rel="noopener" class="deal-title">Paul Skenes 2024 Bowman Chrome AI Insert Refractor Rookie RC Pirates #BAI-15</a>
-          <div class="deal-meta-row" style="margin-top:6px;">
-            <span class="deal-from">Seen via <em>“paul skenes rookie bowman chrome”</em></span>
-            <span class="deal-feedback" title="Seller">cardsurfers 100.0%</span>
-          </div>
-        </div>
-        <div class="deal-price-block">
-          <div class="deal-price">$15.00</div>
-          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $89.99</div>
-          <a href="https://www.ebay.com/itm/206315725326?_skw=paul+skenes+rookie+bowman+chrome&hash=item300960220e:g:~m0AAeSw2ItqHkb3" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
-        </div>
-      </article>
-
-      <article class="deal-card"
-        data-price="15.00"
-        data-discount="83.3"
-        data-savings="74.99"
-        data-cat="Baseball Singles"
-        data-type="BIN"
-        data-title="paul skenes ultimate pick your card, 1st bowman, topps now, topps chrome rookie">
-        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/VRYAAOSwssJnt~k4/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-83%</div></div>
-        <div class="deal-body">
-          <div class="deal-meta-row">
-            <span class="badge badge-danger">🔥 HOT</span>
-            <span class="tag">BIN</span>
-            <span class="tag tag-gold">Baseball Singles</span>
-            <span class="tag">Ungraded</span>
-          </div>
-          <a href="https://www.ebay.com/itm/226610637738?_skw=paul+skenes+rookie+bowman+chrome&var=525786537568&hash=item34c30bebaa:g:VRYAAOSwssJnt~k4" target="_blank" rel="noopener" class="deal-title">Paul Skenes Ultimate Pick your Card, 1st Bowman, Topps Now, Topps Chrome Rookie</a>
-          <div class="deal-meta-row" style="margin-top:6px;">
-            <span class="deal-from">Seen via <em>“paul skenes rookie bowman chrome”</em></span>
-            <span class="deal-feedback" title="Seller">4ticketsonline 100.0%</span>
-          </div>
-        </div>
-        <div class="deal-price-block">
-          <div class="deal-price">$15.00</div>
-          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $89.99</div>
-          <a href="https://www.ebay.com/itm/226610637738?_skw=paul+skenes+rookie+bowman+chrome&var=525786537568&hash=item34c30bebaa:g:VRYAAOSwssJnt~k4" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
-        </div>
-      </article>
-
-      <article class="deal-card"
-        data-price="50.00"
-        data-discount="83.3"
-        data-savings="249.99"
-        data-cat="Baseball Singles"
-        data-type="BIN"
-        data-title="chase the $1,400 2018 topps chrome update htm32 shohei ohtani psa 10 rookie mvp">
-        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/bTAAAeSw-wlqH~DU/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-83%</div></div>
-        <div class="deal-body">
-          <div class="deal-meta-row">
-            <span class="badge badge-danger">🔥 HOT</span>
-            <span class="tag">BIN</span>
-            <span class="tag tag-gold">Baseball Singles</span>
-            <span class="tag">Graded</span>
-          </div>
-          <a href="https://www.ebay.com/itm/257543776329?_skw=shohei+ohtani+rookie+topps+chrome&hash=item3bf6ce2849:g:bTAAAeSw-wlqH~DU" target="_blank" rel="noopener" class="deal-title">Chase The $1,400 2018 Topps Chrome Update HTM32 Shohei Ohtani PSA 10 ROOKIE MVP</a>
-          <div class="deal-meta-row" style="margin-top:6px;">
-            <span class="deal-from">Seen via <em>“shohei ohtani rookie topps chrome”</em></span>
-            <span class="deal-feedback" title="Seller">djbriggs2013 98.9%</span>
-          </div>
-        </div>
-        <div class="deal-price-block">
-          <div class="deal-price">$50.00</div>
-          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $299.99</div>
-          <a href="https://www.ebay.com/itm/257543776329?_skw=shohei+ohtani+rookie+topps+chrome&hash=item3bf6ce2849:g:bTAAAeSw-wlqH~DU" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
-        </div>
-      </article>
-
-      <article class="deal-card"
-        data-price="27.99"
-        data-discount="82.8"
-        data-savings="134.51"
-        data-cat="Football Singles"
-        data-type="Best Offer"
-        data-title="2024 panini rookies & stars -thrillers patrick mahomes ii #t-pms red prizm /99">
-        <div class="deal-thumb"><img src="https://i.ebayimg.com/images/g/lfEAAeSwH1RprP33/s-l225.jpg" alt="" loading="lazy"><div class="deal-discount">-83%</div></div>
-        <div class="deal-body">
-          <div class="deal-meta-row">
-            <span class="badge badge-danger">🔥 HOT</span>
-            <span class="tag tag-gold">BIN + Offer</span>
-            <span class="tag tag-gold">Football Singles</span>
-            <span class="tag">Ungraded</span>
-          </div>
-          <a href="https://www.ebay.com/itm/397688017375?_skw=patrick+mahomes+rookie+card+prizm&hash=item5c980d91df:g:lfEAAeSwH1RprP33" target="_blank" rel="noopener" class="deal-title">2024 Panini Rookies & Stars -Thrillers Patrick Mahomes II #T-PMS Red Prizm /99</a>
-          <div class="deal-meta-row" style="margin-top:6px;">
-            <span class="deal-from">Seen via <em>“patrick mahomes rookie card prizm”</em></span>
-            <span class="deal-feedback" title="Seller">ryanmn16 100.0%</span>
-          </div>
-        </div>
-        <div class="deal-price-block">
-          <div class="deal-price">$27.99</div>
-          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
-          <div class="deal-median">asking · median $162.50</div>
-          <a href="https://www.ebay.com/itm/397688017375?_skw=patrick+mahomes+rookie+card+prizm&hash=item5c980d91df:g:lfEAAeSwH1RprP33" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
-        </div>
-      </article>
     </div>
 
     <div class="panel">
@@ -2663,38 +2672,38 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </div>
       <table class="summary-table">
         <thead><tr><th>Query</th><th>Comps</th><th>Min</th><th>Median</th><th>Max</th><th>Deals</th></tr></thead>
-        <tbody><tr><td>patrick mahomes rookie card prizm</td><td>93</td><td>$20.00</td><td>$162.50</td><td>$550.00</td><td><b style="color:var(--gold);">38</b></td></tr>
-<tr><td>ja'marr chase rookie prizm</td><td>88</td><td>$15.00</td><td>$35.15</td><td>$300.00</td><td><b style="color:var(--gold);">28</b></td></tr>
-<tr><td>justin jefferson rookie prizm</td><td>91</td><td>$15.99</td><td>$39.99</td><td>$299.90</td><td><b style="color:var(--gold);">32</b></td></tr>
-<tr><td>caleb williams rookie prizm</td><td>91</td><td>$15.00</td><td>$49.99</td><td>$199.99</td><td><b style="color:var(--gold);">27</b></td></tr>
-<tr><td>jayden daniels rookie prizm</td><td>92</td><td>$15.00</td><td>$50.00</td><td>$250.00</td><td><b style="color:var(--gold);">32</b></td></tr>
-<tr><td>2024 panini prizm rookie psa 10</td><td>83</td><td>$32.54</td><td>$149.99</td><td>$500.00</td><td><b style="color:var(--gold);">29</b></td></tr>
-<tr><td>victor wembanyama prizm rookie</td><td>83</td><td>$32.97</td><td>$135.00</td><td>$600.00</td><td><b style="color:var(--gold);">26</b></td></tr>
-<tr><td>luka doncic prizm rookie</td><td>81</td><td>$35.09</td><td>$325.00</td><td>$799.99</td><td><b style="color:var(--gold);">34</b></td></tr>
+        <tbody><tr><td>patrick mahomes rookie card prizm</td><td>91</td><td>$20.00</td><td>$165.00</td><td>$550.00</td><td><b style="color:var(--gold);">36</b></td></tr>
+<tr><td>ja'marr chase rookie prizm</td><td>89</td><td>$15.00</td><td>$38.49</td><td>$300.00</td><td><b style="color:var(--gold);">30</b></td></tr>
+<tr><td>justin jefferson rookie prizm</td><td>91</td><td>$15.99</td><td>$39.99</td><td>$299.90</td><td><b style="color:var(--gold);">31</b></td></tr>
+<tr><td>caleb williams rookie prizm</td><td>90</td><td>$15.00</td><td>$49.99</td><td>$199.99</td><td><b style="color:var(--gold);">29</b></td></tr>
+<tr><td>jayden daniels rookie prizm</td><td>92</td><td>$15.00</td><td>$50.00</td><td>$250.00</td><td><b style="color:var(--gold);">33</b></td></tr>
+<tr><td>2024 panini prizm rookie psa 10</td><td>84</td><td>$35.00</td><td>$195.00</td><td>$500.00</td><td><b style="color:var(--gold);">35</b></td></tr>
+<tr><td>victor wembanyama prizm rookie</td><td>97</td><td>$25.00</td><td>$120.00</td><td>$600.00</td><td><b style="color:var(--gold);">19</b></td></tr>
+<tr><td>luka doncic prizm rookie</td><td>85</td><td>$35.09</td><td>$350.00</td><td>$799.99</td><td><b style="color:var(--gold);">35</b></td></tr>
 <tr><td>wemby prizm rookie psa 10</td><td>28</td><td>$220.00</td><td>$599.99</td><td>$800.00</td><td><b style="color:var(--gold);">6</b></td></tr>
-<tr><td>paul skenes rookie bowman chrome</td><td>98</td><td>$15.00</td><td>$89.99</td><td>$385.00</td><td><b style="color:var(--gold);">38</b></td></tr>
-<tr><td>elly de la cruz bowman chrome rookie</td><td>96</td><td>$12.00</td><td>$30.00</td><td>$179.99</td><td><b style="color:var(--gold);">29</b></td></tr>
-<tr><td>shohei ohtani rookie topps chrome</td><td>82</td><td>$34.99</td><td>$299.99</td><td>$600.00</td><td><b style="color:var(--gold);">10</b></td></tr>
-<tr><td>charizard holo psa</td><td>91</td><td>$59.99</td><td>$366.99</td><td>$1400.00</td><td><b style="color:var(--gold);">31</b></td></tr>
-<tr><td>pokemon base set holo near mint</td><td>99</td><td>$20.95</td><td>$55.00</td><td>$499.99</td><td><b style="color:var(--gold);">35</b></td></tr>
-<tr><td>pokemon mega evolution promo near mint</td><td>99</td><td>$8.00</td><td>$11.99</td><td>$99.99</td><td><b style="color:var(--gold);">12</b></td></tr>
-<tr><td>wolverine psa 10</td><td>90</td><td>$42.99</td><td>$148.60</td><td>$724.00</td><td><b style="color:var(--gold);">27</b></td></tr>
+<tr><td>paul skenes rookie bowman chrome</td><td>97</td><td>$15.00</td><td>$89.99</td><td>$385.00</td><td><b style="color:var(--gold);">36</b></td></tr>
+<tr><td>elly de la cruz bowman chrome rookie</td><td>94</td><td>$12.00</td><td>$30.00</td><td>$179.99</td><td><b style="color:var(--gold);">30</b></td></tr>
+<tr><td>shohei ohtani rookie topps chrome</td><td>79</td><td>$25.49</td><td>$295.00</td><td>$600.00</td><td><b style="color:var(--gold);">13</b></td></tr>
+<tr><td>charizard holo psa</td><td>92</td><td>$59.99</td><td>$366.99</td><td>$1400.00</td><td><b style="color:var(--gold);">31</b></td></tr>
+<tr><td>pokemon base set holo near mint</td><td>99</td><td>$20.95</td><td>$59.99</td><td>$400.00</td><td><b style="color:var(--gold);">39</b></td></tr>
+<tr><td>pokemon mega evolution promo near mint</td><td>99</td><td>$8.00</td><td>$12.99</td><td>$99.99</td><td><b style="color:var(--gold);">17</b></td></tr>
+<tr><td>wolverine psa 10</td><td>90</td><td>$42.99</td><td>$149.00</td><td>$724.00</td><td><b style="color:var(--gold);">28</b></td></tr>
 <tr><td>weapon x psa 10</td><td>11</td><td>$60.00</td><td>$99.99</td><td>$279.99</td><td><b style="color:var(--gold);">3</b></td></tr>
 <tr><td>elektra psa 10</td><td>85</td><td>$29.99</td><td>$125.00</td><td>$580.00</td><td><b style="color:var(--gold);">23</b></td></tr>
-<tr><td>spider-man psa 10</td><td>79</td><td>$28.00</td><td>$150.00</td><td>$999.22</td><td><b style="color:var(--gold);">29</b></td></tr>
-<tr><td>punisher psa 10</td><td>49</td><td>$49.99</td><td>$132.00</td><td>$499.99</td><td><b style="color:var(--gold);">13</b></td></tr>
-<tr><td>deadpool psa 10</td><td>95</td><td>$39.99</td><td>$200.00</td><td>$700.00</td><td><b style="color:var(--gold);">31</b></td></tr>
-<tr><td>daredevil psa 10</td><td>88</td><td>$38.99</td><td>$150.00</td><td>$500.00</td><td><b style="color:var(--gold);">33</b></td></tr>
-<tr><td>x-men psa 10</td><td>95</td><td>$29.99</td><td>$99.99</td><td>$500.00</td><td><b style="color:var(--gold);">20</b></td></tr>
+<tr><td>spider-man psa 10</td><td>78</td><td>$29.99</td><td>$159.99</td><td>$999.22</td><td><b style="color:var(--gold);">29</b></td></tr>
+<tr><td>punisher psa 10</td><td>53</td><td>$49.99</td><td>$131.00</td><td>$499.99</td><td><b style="color:var(--gold);">16</b></td></tr>
+<tr><td>deadpool psa 10</td><td>95</td><td>$39.99</td><td>$199.99</td><td>$700.00</td><td><b style="color:var(--gold);">30</b></td></tr>
+<tr><td>daredevil psa 10</td><td>88</td><td>$38.99</td><td>$150.00</td><td>$500.00</td><td><b style="color:var(--gold);">35</b></td></tr>
+<tr><td>x-men psa 10</td><td>95</td><td>$29.99</td><td>$99.99</td><td>$500.00</td><td><b style="color:var(--gold);">23</b></td></tr>
 <tr><td>marvel masterpieces psa 10</td><td>91</td><td>$34.99</td><td>$199.99</td><td>$600.00</td><td><b style="color:var(--gold);">36</b></td></tr>
 <tr><td>1990 marvel universe psa 10</td><td>73</td><td>$59.99</td><td>$149.95</td><td>$350.00</td><td><b style="color:var(--gold);">29</b></td></tr>
-<tr><td>marvel metal psa 10</td><td>96</td><td>$25.99</td><td>$149.99</td><td>$750.00</td><td><b style="color:var(--gold);">35</b></td></tr></tbody>
+<tr><td>marvel metal psa 10</td><td>96</td><td>$25.99</td><td>$150.00</td><td>$750.00</td><td><b style="color:var(--gold);">35</b></td></tr></tbody>
       </table>
     </div>
     
     <script>
       const DP_MIN = 8, DP_MAX = 400;
-      const DD_MIN = 25, DD_MAX = 90;
+      const DD_MIN = 25, DD_MAX = 92;
       let dealPriceRange = [DP_MIN, DP_MAX];
       let dealDiscMin    = DD_MIN;
       // dealApply MUST be defined before slider creation — noUiSlider fires
@@ -2792,7 +2801,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated Jun 06, 2026 · 02:30 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated Jun 06, 2026 · 04:32 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -2813,61 +2822,49 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       }
     })();
 
-    async function _sha256Hex(s) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    function _parseJwt(token) {
+      try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+      catch(e) { return null; }
     }
+    window.handleGoogleCredential = function(response) {
+      const payload = _parseJwt(response.credential);
+      if (!payload) {
+        document.getElementById('gate-error').textContent = 'Sign-in failed. Try again.';
+        return;
+      }
+      const email = (payload.email || '').toLowerCase();
+      if (email === window.__ADMIN_EMAIL) {
+        try {
+          localStorage.setItem('h2k_admin_email', email);
+          localStorage.setItem('h2k_admin_token', response.credential);
+        } catch(e) {}
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+        document.getElementById('gate-overlay').classList.remove('open');
+        showToast('Welcome back, Jason. Management tools unlocked.');
+      } else {
+        document.getElementById('gate-error').textContent = 'That Google account is not authorized.';
+      }
+    };
     window.openGate = function() {
       const o = document.getElementById('gate-overlay');
       if (o) o.classList.add('open');
-      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
     };
     window.closeGate = function() {
-      // On admin pages, can't close without authing — bounce to home instead
       if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
         const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
         location.href = home;
         return;
       }
       document.getElementById('gate-overlay')?.classList.remove('open');
-      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
-      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
-    };
-    window.adminAttempt = async function() {
-      const inp = document.getElementById('gate-input');
-      const err = document.getElementById('gate-error');
-      const v = (inp.value || '').trim();
-      if (!v) return;
-      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
-      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {
-        try { localStorage.setItem('h2k_admin_token', hash); } catch(e) {}
-        document.body.classList.add('is-admin');
-        document.documentElement.classList.add('pre-is-admin');
-        document.getElementById('gate-overlay').classList.remove('open');
-        showToast('Welcome back. Management tools unlocked.');
-
-        // Fire-and-forget alert ping (server decides if email is sent)
-        try {
-          let did = localStorage.getItem('h2k_device_id');
-          if (!did) {
-            did = (crypto.randomUUID && crypto.randomUUID()) ||
-                  (Date.now() + '-' + Math.random().toString(36).slice(2));
-            localStorage.setItem('h2k_device_id', did);
-          }
-          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
-          }).catch(() => {});
-        } catch(e) {}
-      } else {
-        err.textContent = 'Wrong passcode. Try again.';
-        inp.value = '';
-        inp.focus();
-      }
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
     };
     window.adminLogout = function() {
-      try { localStorage.removeItem('h2k_admin_token'); } catch(e) {}
+      try {
+        localStorage.removeItem('h2k_admin_email');
+        localStorage.removeItem('h2k_admin_token');
+      } catch(e) {}
+      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
       document.body.classList.remove('is-admin');
       document.documentElement.classList.remove('pre-is-admin');
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';

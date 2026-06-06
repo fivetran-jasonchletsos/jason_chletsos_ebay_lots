@@ -32,15 +32,14 @@
         if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
       } catch(e) {}
     })();
-    // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = [];
-    window.__ADMIN_SALT   = 'fae99533375f34d1ebebddca1b35d756';
+    // Admin gate — Google OAuth (jchletsos@gmail.com only)
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
     window.__IS_ADMIN_PAGE = true;
-    // Early body class: if a stored token matches any embedded hash, mark body admin
+    // Early body class: restore admin session from stored email
     (function() {
       try {
-        var stored = localStorage.getItem('h2k_admin_token');
-        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
         document.documentElement.classList.toggle('pre-is-admin', !!ok);
       } catch(e) {}
     })();
@@ -61,6 +60,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
 :root {
@@ -1979,16 +1979,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
     <div class="gate-card">
       <h2 id="gate-title">Owner Access</h2>
-      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
-      <form onsubmit="event.preventDefault(); adminAttempt();">
-        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
-        <div class="gate-error" id="gate-error">&nbsp;</div>
-        <div class="gate-actions">
-          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
-          <button type="submit" class="btn btn-gold">Unlock</button>
-        </div>
-      </form>
-      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+      <div class="gate-sub">Sign in with your Google account to access management tools.</div>
+      <div id="g_id_onload"
+           data-client_id="926594287569-f447rslcm2j1db0ul47o2n1mcgogmg13.apps.googleusercontent.com"
+           data-callback="handleGoogleCredential"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-theme="outline"
+           data-size="large"
+           data-text="sign_in_with"
+           data-shape="rectangular"
+           style="margin: 16px auto 0; display: flex; justify-content: center;">
+      </div>
+      <div class="gate-error" id="gate-error">&nbsp;</div>
+      <div class="gate-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+      </div>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no sign-in needed.</div>
     </div>
   </div>
 
@@ -2013,7 +2022,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pn-kpi"><div class="pn-kpi-n">8</div><div class="pn-kpi-l">Sets tracked</div></div>
       <div class="pn-kpi"><div class="pn-kpi-n">27</div><div class="pn-kpi-l">Live listings</div></div>
       <div class="pn-kpi"><div class="pn-kpi-n">2</div><div class="pn-kpi-l">Pre-orders found</div></div>
-      <div class="pn-kpi"><div class="pn-kpi-n">02:37</div><div class="pn-kpi-l">Last refreshed</div></div>
+      <div class="pn-kpi"><div class="pn-kpi-n">00:35</div><div class="pn-kpi-l">Last refreshed</div></div>
     </div>
     
     
@@ -2375,21 +2384,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </div>
     </a>
-    <a class="pn-card" href="https://www.ebay.com/itm/318409608434?_skw=Milotic+ex+Surging+Sparks&amp;hash=item4a22b10cf2:g:aoUAAeSw34VqIbLg" target="_blank" rel="noopener"
-       title="Pokemon **Surging Sparks EX&#x27;s** Choose Your Card!">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/aoUAAeSw34VqIbLg/s-l225.jpg');"></div>
-      <div class="pn-meta">
-        <div class="pn-price-row">
-          <span class="pn-price">$1.00</span>
-          
-        </div>
-        <div class="pn-title">Pokemon **Surging Sparks EX&#x27;s** Choose Your Card!</div>
-        <div class="pn-foot">
-          <span class="pn-chip pn-chip-type">Other</span>
-          <span class="pn-buy">BIN</span>
-        </div>
-      </div>
-    </a>
     <a class="pn-card" href="https://www.ebay.com/itm/336576232977?_skw=Milotic+ex+Surging+Sparks&amp;hash=item4e5d81be11:g:6d8AAeSw12VqE50c" target="_blank" rel="noopener"
        title="Pokemon Surging Sparks: Choose Your Card! Reverse Holos/EX/Full Arts Pack Fresh">
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/6d8AAeSw12VqE50c/s-l225.jpg');"></div>
@@ -2402,6 +2396,21 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">Single Card</span>
           <span class="pn-buy">BIN</span>
+        </div>
+      </div>
+    </a>
+    <a class="pn-card" href="https://www.ebay.com/itm/147231613703?_skw=Milotic+ex+Surging+Sparks&amp;hash=item2247b02307:g:ovIAAeSwz6ppypwq" target="_blank" rel="noopener"
+       title="Pokémon Milotic ex 042/191 Sv08 Surging Sparks Double Rare Stage 1 270 HP Holo">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/ovIAAeSwz6ppypwq/s-l225.jpg');"></div>
+      <div class="pn-meta">
+        <div class="pn-price-row">
+          <span class="pn-price">$1.43</span>
+          
+        </div>
+        <div class="pn-title">Pokémon Milotic ex 042/191 Sv08 Surging Sparks Double Rare Stage 1 270 HP Holo</div>
+        <div class="pn-foot">
+          <span class="pn-chip pn-chip-type">Single Card</span>
+          <span class="pn-buy">BIN · Best Offer</span>
         </div>
       </div>
     </a></div>
@@ -2881,24 +2890,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pn-chase">
           <div class="pn-chase-head">
             <h4>Iono&#x27;s Bellibolt ex</h4>
-            <span class="pn-chase-sub">from $1.00</span>
+            <span class="pn-chase-sub">from $1.39</span>
           </div>
           <div class="pn-grid pn-grid-sm">
-    <a class="pn-card" href="https://www.ebay.com/itm/318409578799?_skw=Iono%27s+Bellibolt+ex+Journey+Together&amp;hash=item4a22b0992f:g:WAEAAeSwO1dqIa8A" target="_blank" rel="noopener"
-       title="Pokemon **Journey Together EX&#x27;s** Choose your card!">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/WAEAAeSwO1dqIa8A/s-l225.jpg');"></div>
-      <div class="pn-meta">
-        <div class="pn-price-row">
-          <span class="pn-price">$1.00</span>
-          
-        </div>
-        <div class="pn-title">Pokemon **Journey Together EX&#x27;s** Choose your card!</div>
-        <div class="pn-foot">
-          <span class="pn-chip pn-chip-type">Other</span>
-          <span class="pn-buy">BIN</span>
-        </div>
-      </div>
-    </a>
     <a class="pn-card" href="https://www.ebay.com/itm/127762419287?_skw=Iono%27s+Bellibolt+ex+Journey+Together&amp;hash=item1dbf3bce57:g:4UAAAeSwYB1pvzgh" target="_blank" rel="noopener"
        title="Iono’s Bellibolt EX 053/159 - Double Rare Holo - Journey Together - NM">
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/4UAAAeSwYB1pvzgh/s-l225.jpg');"></div>
@@ -3094,21 +3088,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </div>
     </a>
-    <a class="pn-card" href="https://www.ebay.com/itm/137161026083?_skw=Team+Rocket%27s+Mewtwo+ex+Destined+Rivals&amp;hash=item1fef6f2a23:g:M0IAAeSwu5tpwbZJ" target="_blank" rel="noopener"
-       title="Destined Rivals Pokemon Cards NM Set Singles You Pick Reverse Holo EX Master">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/M0IAAeSwu5tpwbZJ/s-l225.jpg');"></div>
-      <div class="pn-meta">
-        <div class="pn-price-row">
-          <span class="pn-price">$0.99</span>
-          
-        </div>
-        <div class="pn-title">Destined Rivals Pokemon Cards NM Set Singles You Pick Reverse Holo EX Master</div>
-        <div class="pn-foot">
-          <span class="pn-chip pn-chip-type">Single Card</span>
-          <span class="pn-buy">BIN</span>
-        </div>
-      </div>
-    </a>
     <a class="pn-card" href="https://www.ebay.com/itm/358570848504?_skw=Team+Rocket%27s+Mewtwo+ex+Destined+Rivals&amp;hash=item537c7cf0f8:g:5SwAAeSw5GNqC72D" target="_blank" rel="noopener"
        title="Team Rocket&#x27;s Bother-Bot 172/182 Destined Rivals Regular Pokémon TCG Card">
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/5SwAAeSw5GNqC72D/s-l225.jpg');"></div>
@@ -3118,6 +3097,21 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           
         </div>
         <div class="pn-title">Team Rocket&#x27;s Bother-Bot 172/182 Destined Rivals Regular Pokémon TCG Card</div>
+        <div class="pn-foot">
+          <span class="pn-chip pn-chip-type">Other</span>
+          <span class="pn-buy">BIN</span>
+        </div>
+      </div>
+    </a>
+    <a class="pn-card" href="https://www.ebay.com/itm/389567775800?_skw=Team+Rocket%27s+Mewtwo+ex+Destined+Rivals&amp;hash=item5ab40c8438:g:B20AAeSwDrZpf8su" target="_blank" rel="noopener"
+       title="Pokemon TCG Destined Rivals Single Cards 1-182 YOU CHOOSE!! Ready to Ship">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/B20AAeSwDrZpf8su/s-l225.jpg');"></div>
+      <div class="pn-meta">
+        <div class="pn-price-row">
+          <span class="pn-price">$1.25</span>
+          
+        </div>
+        <div class="pn-title">Pokemon TCG Destined Rivals Single Cards 1-182 YOU CHOOSE!! Ready to Ship</div>
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">Other</span>
           <span class="pn-buy">BIN</span>
@@ -3161,21 +3155,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </div>
     </a>
-    <a class="pn-card" href="https://www.ebay.com/itm/137161026083?_skw=Cynthia%27s+Garchomp+ex+Destined+Rivals&amp;hash=item1fef6f2a23:g:M0IAAeSwu5tpwbZJ" target="_blank" rel="noopener"
-       title="Destined Rivals Pokemon Cards NM Set Singles You Pick Reverse Holo EX Master">
-      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/M0IAAeSwu5tpwbZJ/s-l225.jpg');"></div>
-      <div class="pn-meta">
-        <div class="pn-price-row">
-          <span class="pn-price">$0.99</span>
-          
-        </div>
-        <div class="pn-title">Destined Rivals Pokemon Cards NM Set Singles You Pick Reverse Holo EX Master</div>
-        <div class="pn-foot">
-          <span class="pn-chip pn-chip-type">Single Card</span>
-          <span class="pn-buy">BIN</span>
-        </div>
-      </div>
-    </a>
     <a class="pn-card" href="https://www.ebay.com/itm/377018934160?_skw=Cynthia%27s+Garchomp+ex+Destined+Rivals&amp;hash=item57c8146390:g:Zw8AAeSw7mhp1JGA" target="_blank" rel="noopener"
        title="Destined Rivals NON- Holo / Normal Bulk">
       <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/Zw8AAeSw7mhp1JGA/s-l225.jpg');"></div>
@@ -3187,6 +3166,21 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pn-title">Destined Rivals NON- Holo / Normal Bulk</div>
         <div class="pn-foot">
           <span class="pn-chip pn-chip-type">Other</span>
+          <span class="pn-buy">BIN</span>
+        </div>
+      </div>
+    </a>
+    <a class="pn-card" href="https://www.ebay.com/itm/157077521788?_skw=Cynthia%27s+Garchomp+ex+Destined+Rivals&amp;hash=item24928cc57c:g:W3IAAOSwoe9oRW~H" target="_blank" rel="noopener"
+       title="Pokemon Cards! Destined Rivals Holo/Reverse Holo EX Ultra Rare SIR Full Art Card">
+      <div class="pn-img" style="background-image:url('https://i.ebayimg.com/images/g/W3IAAOSwoe9oRW~H/s-l225.jpg');"></div>
+      <div class="pn-meta">
+        <div class="pn-price-row">
+          <span class="pn-price">$1.49</span>
+          
+        </div>
+        <div class="pn-title">Pokemon Cards! Destined Rivals Holo/Reverse Holo EX Ultra Rare SIR Full Art Card</div>
+        <div class="pn-foot">
+          <span class="pn-chip pn-chip-type">Single Card</span>
           <span class="pn-buy">BIN</span>
         </div>
       </div>
@@ -3788,7 +3782,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated Jun 06, 2026 · 02:37 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated Jun 06, 2026 · 04:35 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -3809,61 +3803,49 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       }
     })();
 
-    async function _sha256Hex(s) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    function _parseJwt(token) {
+      try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+      catch(e) { return null; }
     }
+    window.handleGoogleCredential = function(response) {
+      const payload = _parseJwt(response.credential);
+      if (!payload) {
+        document.getElementById('gate-error').textContent = 'Sign-in failed. Try again.';
+        return;
+      }
+      const email = (payload.email || '').toLowerCase();
+      if (email === window.__ADMIN_EMAIL) {
+        try {
+          localStorage.setItem('h2k_admin_email', email);
+          localStorage.setItem('h2k_admin_token', response.credential);
+        } catch(e) {}
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+        document.getElementById('gate-overlay').classList.remove('open');
+        showToast('Welcome back, Jason. Management tools unlocked.');
+      } else {
+        document.getElementById('gate-error').textContent = 'That Google account is not authorized.';
+      }
+    };
     window.openGate = function() {
       const o = document.getElementById('gate-overlay');
       if (o) o.classList.add('open');
-      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
     };
     window.closeGate = function() {
-      // On admin pages, can't close without authing — bounce to home instead
       if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
         const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
         location.href = home;
         return;
       }
       document.getElementById('gate-overlay')?.classList.remove('open');
-      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
-      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
-    };
-    window.adminAttempt = async function() {
-      const inp = document.getElementById('gate-input');
-      const err = document.getElementById('gate-error');
-      const v = (inp.value || '').trim();
-      if (!v) return;
-      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
-      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {
-        try { localStorage.setItem('h2k_admin_token', hash); } catch(e) {}
-        document.body.classList.add('is-admin');
-        document.documentElement.classList.add('pre-is-admin');
-        document.getElementById('gate-overlay').classList.remove('open');
-        showToast('Welcome back. Management tools unlocked.');
-
-        // Fire-and-forget alert ping (server decides if email is sent)
-        try {
-          let did = localStorage.getItem('h2k_device_id');
-          if (!did) {
-            did = (crypto.randomUUID && crypto.randomUUID()) ||
-                  (Date.now() + '-' + Math.random().toString(36).slice(2));
-            localStorage.setItem('h2k_device_id', did);
-          }
-          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
-          }).catch(() => {});
-        } catch(e) {}
-      } else {
-        err.textContent = 'Wrong passcode. Try again.';
-        inp.value = '';
-        inp.focus();
-      }
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
     };
     window.adminLogout = function() {
-      try { localStorage.removeItem('h2k_admin_token'); } catch(e) {}
+      try {
+        localStorage.removeItem('h2k_admin_email');
+        localStorage.removeItem('h2k_admin_token');
+      } catch(e) {}
+      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
       document.body.classList.remove('is-admin');
       document.documentElement.classList.remove('pre-is-admin');
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';

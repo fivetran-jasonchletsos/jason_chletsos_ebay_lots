@@ -32,15 +32,14 @@
         if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
       } catch(e) {}
     })();
-    // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["2a00368e9da62201f07f7046c332713827b25ccbd815ff7e8cd6af1fcfa861f6"];
-    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
+    // Admin gate — Google OAuth (jchletsos@gmail.com only)
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
     window.__IS_ADMIN_PAGE = false;
-    // Early body class: if a stored token matches any embedded hash, mark body admin
+    // Early body class: restore admin session from stored email
     (function() {
       try {
-        var stored = localStorage.getItem('h2k_admin_token');
-        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
         document.documentElement.classList.toggle('pre-is-admin', !!ok);
       } catch(e) {}
     })();
@@ -61,6 +60,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
 :root {
@@ -1820,7 +1820,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             Browse
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="browse.html" class="active">All Sets & Players</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a><a href="under_10.html">Under $10</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="browse.html" class="active">All Sets & Players</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a><a href="under_10.html">Under $10</a><a href="pokemon.html">Pokemon</a></div>
         </div>
 <a href="daily.html" class="nav-link admin-only" data-admin="1">Daily</a>
 <a href="collx_vs_ebay.html" class="nav-link admin-only" data-admin="1">CollX vs eBay</a>
@@ -1830,7 +1830,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             More
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="vault.html" data-admin="1">Vault</a><a href="whatnot.html" data-admin="1">Whatnot Prep</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="collect.html" data-admin="1">My Wants</a><a href="top_sellers.html" data-admin="1">Top Sellers</a><a href="pokemon_news.html" data-admin="1">Pokemon News</a><a href="price_drops.html" data-admin="1">Price Drops</a></div>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="lots.html" data-admin="1">Lots</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="collect.html" data-admin="1">My Wants</a><a href="top_sellers.html" data-admin="1">Top Sellers</a><a href="pokemon_news.html" data-admin="1">Pokemon News</a><a href="price_drops.html" data-admin="1">Price Drops</a><a href="deals.html" data-admin="1">Deal Hunter</a><a href="resale_flips.html" data-admin="1">Resale Flips</a><a href="jack_pokemon.html" data-admin="1">Jack's Pokemon</a></div>
         </div></nav>
       <!-- Action buttons are grouped in a flex container that never shrinks,
            so they always remain visible alongside the brand. -->
@@ -1876,19 +1876,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
 <a href="under_10.html">Under $10</a>
+<a href="pokemon.html">Pokemon</a>
 <a href="daily.html" class="admin-only" data-admin="1">Daily</a>
 <a href="collx_vs_ebay.html" class="admin-only" data-admin="1">CollX vs eBay</a>
 <div class="drawer-group" data-admin="1">More</div>
 <a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
 <a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
 <a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
-<a href="vault.html" class="admin-only" data-admin="1">Vault</a>
-<a href="whatnot.html" class="admin-only" data-admin="1">Whatnot Prep</a>
+<a href="lots.html" class="admin-only" data-admin="1">Lots</a>
 <a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
 <a href="collect.html" class="admin-only" data-admin="1">My Wants</a>
 <a href="top_sellers.html" class="admin-only" data-admin="1">Top Sellers</a>
 <a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
 <a href="price_drops.html" class="admin-only" data-admin="1">Price Drops</a>
+<a href="deals.html" class="admin-only" data-admin="1">Deal Hunter</a>
+<a href="resale_flips.html" class="admin-only" data-admin="1">Resale Flips</a>
+<a href="jack_pokemon.html" class="admin-only" data-admin="1">Jack's Pokemon</a>
     <div class="drawer-foot">
       <button class="drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
         Sign in
@@ -1904,16 +1907,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
     <div class="gate-card">
       <h2 id="gate-title">Owner Access</h2>
-      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
-      <form onsubmit="event.preventDefault(); adminAttempt();">
-        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
-        <div class="gate-error" id="gate-error">&nbsp;</div>
-        <div class="gate-actions">
-          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
-          <button type="submit" class="btn btn-gold">Unlock</button>
-        </div>
-      </form>
-      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+      <div class="gate-sub">Sign in with your Google account to access management tools.</div>
+      <div id="g_id_onload"
+           data-client_id="926594287569-f447rslcm2j1db0ul47o2n1mcgogmg13.apps.googleusercontent.com"
+           data-callback="handleGoogleCredential"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-theme="outline"
+           data-size="large"
+           data-text="sign_in_with"
+           data-shape="rectangular"
+           style="margin: 16px auto 0; display: flex; justify-content: center;">
+      </div>
+      <div class="gate-error" id="gate-error">&nbsp;</div>
+      <div class="gate-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+      </div>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no sign-in needed.</div>
     </div>
   </div>
 
@@ -1935,9 +1947,9 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
     
     <div class="br-kpis">
-      <div class="br-kpi"><div class="br-n">200</div><div class="br-l">Live listings</div></div>
+      <div class="br-kpi"><div class="br-n">259</div><div class="br-l">Live listings</div></div>
       <div class="br-kpi"><div class="br-n">20</div><div class="br-l">Unique sets</div></div>
-      <div class="br-kpi"><div class="br-n">23</div><div class="br-l">Unique players</div></div>
+      <div class="br-kpi"><div class="br-n">30</div><div class="br-l">Unique players</div></div>
       <div class="br-kpi"><div class="br-n">12</div><div class="br-l">Unique years</div></div>
     </div>
     
@@ -1956,7 +1968,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="br-landing-sub">
           For "every Mahomes I can find." Names pulled straight from the listing titles.
         </div>
-        <div class="br-landing-stat"><strong>23</strong> players</div>
+        <div class="br-landing-stat"><strong>30</strong> players</div>
       </a>
       <a class="br-landing-card" href="#by-year">
         <div class="br-landing-name">By Year</div>
@@ -1976,50 +1988,50 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="br-tile-grid">
             <a class="br-tile" href="by_set.html#g-topps-chrome">
               <div class="br-tile-name">Topps Chrome</div>
-              <div class="br-tile-count"><strong>47</strong> listings</div>
-            </a>
-            <a class="br-tile" href="by_set.html#g-panini-prizm-draft-picks">
-              <div class="br-tile-name">Panini Prizm Draft Picks</div>
-              <div class="br-tile-count"><strong>28</strong> listings</div>
-            </a>
-            <a class="br-tile" href="by_set.html#g-panini-select">
-              <div class="br-tile-name">Panini Select</div>
-              <div class="br-tile-count"><strong>23</strong> listings</div>
+              <div class="br-tile-count"><strong>46</strong> listings</div>
             </a>
             <a class="br-tile" href="by_set.html#g-panini-prizm">
               <div class="br-tile-name">Panini Prizm</div>
-              <div class="br-tile-count"><strong>18</strong> listings</div>
+              <div class="br-tile-count"><strong>36</strong> listings</div>
+            </a>
+            <a class="br-tile" href="by_set.html#g-panini-select">
+              <div class="br-tile-name">Panini Select</div>
+              <div class="br-tile-count"><strong>35</strong> listings</div>
+            </a>
+            <a class="br-tile" href="by_set.html#g-panini-prizm-draft-picks">
+              <div class="br-tile-name">Panini Prizm Draft Picks</div>
+              <div class="br-tile-count"><strong>31</strong> listings</div>
             </a>
             <a class="br-tile" href="by_set.html#g-panini-phoenix">
               <div class="br-tile-name">Panini Phoenix</div>
-              <div class="br-tile-count"><strong>18</strong> listings</div>
+              <div class="br-tile-count"><strong>24</strong> listings</div>
             </a>
             <a class="br-tile" href="by_set.html#g-panini">
               <div class="br-tile-name">Panini</div>
-              <div class="br-tile-count"><strong>15</strong> listings</div>
+              <div class="br-tile-count"><strong>17</strong> listings</div>
+            </a>
+            <a class="br-tile" href="by_set.html#g-panini-donruss-optic">
+              <div class="br-tile-name">Panini Donruss Optic</div>
+              <div class="br-tile-count"><strong>11</strong> listings</div>
             </a>
             <a class="br-tile" href="by_set.html#g-panini-score">
               <div class="br-tile-name">Panini Score</div>
-              <div class="br-tile-count"><strong>6</strong> listings</div>
+              <div class="br-tile-count"><strong>7</strong> listings</div>
+            </a>
+            <a class="br-tile" href="by_set.html#g-rookie-cards">
+              <div class="br-tile-name">Rookie Cards</div>
+              <div class="br-tile-count"><strong>4</strong> listings</div>
             </a>
             <a class="br-tile" href="by_set.html#g-panini-mosaic">
               <div class="br-tile-name">Panini Mosaic</div>
               <div class="br-tile-count"><strong>4</strong> listings</div>
             </a>
-            <a class="br-tile" href="by_set.html#g-rookie-cards">
-              <div class="br-tile-name">Rookie Cards</div>
-              <div class="br-tile-count"><strong>2</strong> listings</div>
+            <a class="br-tile" href="by_set.html#g-bowman">
+              <div class="br-tile-name">Bowman</div>
+              <div class="br-tile-count"><strong>3</strong> listings</div>
             </a>
             <a class="br-tile" href="by_set.html#g-fleer-ultra">
               <div class="br-tile-name">Fleer Ultra</div>
-              <div class="br-tile-count"><strong>2</strong> listings</div>
-            </a>
-            <a class="br-tile" href="by_set.html#g-panini-donruss">
-              <div class="br-tile-name">Panini Donruss</div>
-              <div class="br-tile-count"><strong>2</strong> listings</div>
-            </a>
-            <a class="br-tile" href="by_set.html#g-bowman">
-              <div class="br-tile-name">Bowman</div>
               <div class="br-tile-count"><strong>2</strong> listings</div>
             </a></div>
     </section>
@@ -2034,17 +2046,17 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="br-tile-name">Patrick Mahomes</div>
               <div class="br-tile-count"><strong>14</strong> listings</div>
             </a>
+            <a class="br-tile" href="by_player.html#g-drake-maye">
+              <div class="br-tile-name">Drake Maye</div>
+              <div class="br-tile-count"><strong>9</strong> listings</div>
+            </a>
             <a class="br-tile" href="by_player.html#g-caleb-williams">
               <div class="br-tile-name">Caleb Williams</div>
-              <div class="br-tile-count"><strong>3</strong> listings</div>
-            </a>
-            <a class="br-tile" href="by_player.html#g-lamar-jackson">
-              <div class="br-tile-name">Lamar Jackson</div>
-              <div class="br-tile-count"><strong>2</strong> listings</div>
+              <div class="br-tile-count"><strong>4</strong> listings</div>
             </a>
             <a class="br-tile" href="by_player.html#g-jayden-daniels">
               <div class="br-tile-name">Jayden Daniels</div>
-              <div class="br-tile-count"><strong>2</strong> listings</div>
+              <div class="br-tile-count"><strong>3</strong> listings</div>
             </a>
             <a class="br-tile" href="by_player.html#g-deion-sanders">
               <div class="br-tile-name">Deion Sanders</div>
@@ -2054,12 +2066,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="br-tile-name">DK Metcalf</div>
               <div class="br-tile-count"><strong>2</strong> listings</div>
             </a>
-            <a class="br-tile" href="by_player.html#g-christian-mccaffrey">
-              <div class="br-tile-name">Christian McCaffrey</div>
-              <div class="br-tile-count"><strong>2</strong> listings</div>
-            </a>
-            <a class="br-tile" href="by_player.html#g-jim-everett">
-              <div class="br-tile-name">Jim Everett</div>
+            <a class="br-tile" href="by_player.html#g-dan-marino">
+              <div class="br-tile-name">Dan Marino</div>
               <div class="br-tile-count"><strong>1</strong> listings</div>
             </a>
             <a class="br-tile" href="by_player.html#g-garrett-nussmeier">
@@ -2070,12 +2078,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               <div class="br-tile-name">Marcelo Mayer</div>
               <div class="br-tile-count"><strong>1</strong> listings</div>
             </a>
-            <a class="br-tile" href="by_player.html#g-charles-haley">
-              <div class="br-tile-name">Charles Haley</div>
+            <a class="br-tile" href="by_player.html#g-marvin-harrison-jr">
+              <div class="br-tile-name">Marvin Harrison Jr</div>
               <div class="br-tile-count"><strong>1</strong> listings</div>
             </a>
-            <a class="br-tile" href="by_player.html#g-barry-sanders">
-              <div class="br-tile-name">Barry Sanders</div>
+            <a class="br-tile" href="by_player.html#g-cooper-kupp">
+              <div class="br-tile-name">Cooper Kupp</div>
+              <div class="br-tile-count"><strong>1</strong> listings</div>
+            </a>
+            <a class="br-tile" href="by_player.html#g-chuba-hubbard">
+              <div class="br-tile-name">Chuba Hubbard</div>
               <div class="br-tile-count"><strong>1</strong> listings</div>
             </a></div>
     </section>
@@ -2085,7 +2097,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <h2>Browse by Year</h2>
         <span class="br-count">12 years</span>
       </div>
-      <div class="br-anchor-jump"><a class="br-tile" href="#y-2026"><div class="br-tile-name">2026</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-2025"><div class="br-tile-name">2025</div><div class="br-tile-count"><strong>163</strong> listings</div></a><a class="br-tile" href="#y-2024"><div class="br-tile-name">2024</div><div class="br-tile-count"><strong>2</strong> listings</div></a><a class="br-tile" href="#y-2023"><div class="br-tile-name">2023</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-2009"><div class="br-tile-name">2009</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1994"><div class="br-tile-name">1994</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1993"><div class="br-tile-name">1993</div><div class="br-tile-count"><strong>2</strong> listings</div></a><a class="br-tile" href="#y-1991"><div class="br-tile-name">1991</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1990"><div class="br-tile-name">1990</div><div class="br-tile-count"><strong>2</strong> listings</div></a><a class="br-tile" href="#y-1989"><div class="br-tile-name">1989</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1983"><div class="br-tile-name">1983</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1975"><div class="br-tile-name">1975</div><div class="br-tile-count"><strong>1</strong> listings</div></a></div>
+      <div class="br-anchor-jump"><a class="br-tile" href="#y-2026"><div class="br-tile-name">2026</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-2025"><div class="br-tile-name">2025</div><div class="br-tile-count"><strong>213</strong> listings</div></a><a class="br-tile" href="#y-2024"><div class="br-tile-name">2024</div><div class="br-tile-count"><strong>4</strong> listings</div></a><a class="br-tile" href="#y-2023"><div class="br-tile-name">2023</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-2009"><div class="br-tile-name">2009</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1994"><div class="br-tile-name">1994</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1993"><div class="br-tile-name">1993</div><div class="br-tile-count"><strong>2</strong> listings</div></a><a class="br-tile" href="#y-1991"><div class="br-tile-name">1991</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1990"><div class="br-tile-name">1990</div><div class="br-tile-count"><strong>2</strong> listings</div></a><a class="br-tile" href="#y-1989"><div class="br-tile-name">1989</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1983"><div class="br-tile-name">1983</div><div class="br-tile-count"><strong>1</strong> listings</div></a><a class="br-tile" href="#y-1975"><div class="br-tile-name">1975</div><div class="br-tile-count"><strong>1</strong> listings</div></a></div>
       
         <section class="br-section" id="y-2026">
           <div class="br-section-head">
@@ -2093,7 +2105,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             <span class="br-count">1 listing</span>
           </div>
           <div class="pk-grid">
-    <a class="pk-card" href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306951752307" target="_blank" rel="noopener">
+    <a class="pk-card" href="https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/306981279666" target="_blank" rel="noopener">
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/zmcAAeSw8oNqBSXY/s-l500.jpg');"></div>
       <div class="pk-meta">
         <div class="pk-price-row">
@@ -2108,26 +2120,56 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <section class="br-section" id="y-2025">
           <div class="br-section-head">
             <h2>2025</h2>
-            <span class="br-count">163 listings</span>
+            <span class="br-count">213 listings</span>
           </div>
           <div class="pk-grid">
     <a class="pk-card" href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener">
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg');"></div>
       <div class="pk-meta">
         <div class="pk-price-row">
-          <span class="pk-price">$33.33</span>
+          <span class="pk-price">$27.99</span>
         </div>
         <div class="pk-title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</div>
         <div class="pk-buying">BIN</div>
       </div>
     </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Mosaic-Purple-Prizm-Jacksonville-Jaguars-49-Bhayshul-Tuten-RC-385-/306956335494" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/6vUAAeSw5D5qER9t/s-l500.jpg');"></div>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Will-Howard-367-Silver-Prizm-RC--/306962137413" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/X~8AAeSwz5hqFMQ4/s-l500.jpg');"></div>
       <div class="pk-meta">
         <div class="pk-price-row">
-          <span class="pk-price">$11.22</span>
+          <span class="pk-price">$18.00</span>
         </div>
-        <div class="pk-title">2025 Panini Mosaic Purple Prizm Jacksonville Jaguars /49 Bhayshul Tuten RC #385</div>
+        <div class="pk-title">2025 Panini Prizm - Rookies Will Howard #367 Silver Prizm (RC)</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-Rated-Rookie-Matthew-Golden-205-Stars-Prizm-RC--/306962126602" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/RwUAAeSw3UtqFMDd/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$14.56</span>
+        </div>
+        <div class="pk-title">2025 Panini Donruss Optic - Rated Rookie Matthew Golden #205 Stars Prizm (RC)</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookie-Variation-Tetairoa-McMillan-401-Silver-Prizm-RC--/306960410595" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/gdIAAeSwCctqE7Oe/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$11.99</span>
+        </div>
+        <div class="pk-title">2025 Panini Prizm - Rookie Variation Tetairoa McMillan #401 Silver Prizm (RC)</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Terrance-Ferguson-379-Green-Ice-Prizm-RC--/306967133225" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/OiAAAeSwvnlqF8fU/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$11.99</span>
+        </div>
+        <div class="pk-title">2025 Panini Prizm - Rookies Terrance Ferguson #379 Green Ice Prizm (RC)</div>
         <div class="pk-buying">BIN</div>
       </div>
     </a>
@@ -2138,6 +2180,26 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <span class="pk-price">$10.99</span>
         </div>
         <div class="pk-title">2025 Panini Donruss Optic - My House DK Metcalf #8 Black Pandora Prizm /149</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-J-K-Dobbins-55-One-Hundred-Prizm-/306962001495" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/bQMAAeSwFd5qFKyb/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$9.99</span>
+        </div>
+        <div class="pk-title">2025 Panini Donruss Optic - J.K. Dobbins #55 One Hundred Prizm</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/3WUAAeSwYudqBlLc/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$8.99</span>
+        </div>
+        <div class="pk-title">2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints RC #398</div>
         <div class="pk-buying">BIN</div>
       </div>
     </a>
@@ -2191,16 +2253,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pk-buying">BIN</div>
       </div>
     </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Score-Stars-of-the-Nfl-Christian-McCaffrey-SNJ-CMY-Jersey-MEM--/306953914713" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/qHkAAeSwuqpqD6n2/s-l500.jpg');"></div>
-      <div class="pk-meta">
-        <div class="pk-price-row">
-          <span class="pk-price">$6.99</span>
-        </div>
-        <div class="pk-title">2025 Score - Stars of the Nfl Christian McCaffrey #SNJ-CMY Jersey (MEM)</div>
-        <div class="pk-buying">BIN</div>
-      </div>
-    </a>
     <a class="pk-card" href="https://www.ebay.com/itm/2025-Score-Alex-Highsmith-102-Stars-499-/306953932686" target="_blank" rel="noopener">
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/WKkAAeSwKDVqD6zL/s-l500.jpg');"></div>
       <div class="pk-meta">
@@ -2208,6 +2260,16 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <span class="pk-price">$6.99</span>
         </div>
         <div class="pk-title">2025 Score - Alex Highsmith #102 Stars /499</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Bowman-University-Chrome-Bryce-Underwood-196-Pink-Lava-Refractor-RC--/306967210472" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/PxAAAeSwfqVqF9fy/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$6.99</span>
+        </div>
+        <div class="pk-title">2025 Bowman University Chrome - Bryce Underwood #196 Pink Lava Refractor (RC)</div>
         <div class="pk-buying">BIN</div>
       </div>
     </a>
@@ -2221,7 +2283,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pk-buying">BIN</div>
       </div>
     </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Topps-Update-Series-1990-Topps-Baseball-Marcelo-Mayer-U90-9-Green--/306951955235" target="_blank" rel="noopener">
+    <a class="pk-card" href="https://www.ebay.com/itm/2025-Topps-Update-Series-1990-Topps-Baseball-Marcelo-Mayer-U90-9-Green--/306981451920" target="_blank" rel="noopener">
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/LcIAAeSw-7BqBUUx/s-l500.jpg');"></div>
       <div class="pk-meta">
         <div class="pk-price-row">
@@ -2229,16 +2291,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         <div class="pk-title">2025 Topps Update Series - 1990 Topps Baseball Marcelo Mayer #U90-9 Green...</div>
         <div class="pk-buying">Auction</div>
-      </div>
-    </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-NFL-Tyler-Shough-Rookie-New-Orleans-Saints-RC-398-/306939345538" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/3WUAAeSwYudqBlLc/s-l500.jpg');"></div>
-      <div class="pk-meta">
-        <div class="pk-price-row">
-          <span class="pk-price">$5.99</span>
-        </div>
-        <div class="pk-title">2025 Topps Chrome NFL Tyler Shough Rookie New Orleans Saints RC #398</div>
-        <div class="pk-buying">BIN</div>
       </div>
     </a>
     <a class="pk-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-Future-Stars-Ladd-McConkey-FS-3-NFL-Rookie-Chargers-WR-/306939367849" target="_blank" rel="noopener">
@@ -2250,55 +2302,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pk-title">2025 Topps Chrome Future Stars Ladd McConkey #FS-3 NFL Rookie Chargers WR</div>
         <div class="pk-buying">BIN</div>
       </div>
-    </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/Topps-Chrome-All-Chrome-Insert-Justin-Jefferson-ACT-6-Vikings-2025-NFL-/306947434271" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/tAUAAeSwxGJqC7FH/s-l500.jpg');"></div>
-      <div class="pk-meta">
-        <div class="pk-price-row">
-          <span class="pk-price">$5.99</span>
-        </div>
-        <div class="pk-title">Topps Chrome All-Chrome Insert Justin Jefferson ACT-6 Vikings 2025 NFL</div>
-        <div class="pk-buying">BIN</div>
-      </div>
-    </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-Walter-Nolan-Pigskin-Football-Leather-Refractor-Walter-Nolen-/306951619756" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/bnoAAeSwOhNqDkko/s-l500.jpg');"></div>
-      <div class="pk-meta">
-        <div class="pk-price-row">
-          <span class="pk-price">$5.99</span>
-        </div>
-        <div class="pk-title">2025 Topps Chrome Walter Nolan Pigskin Football Leather Refractor Walter Nolen</div>
-        <div class="pk-buying">BIN</div>
-      </div>
-    </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Score-Patrick-Surtain-II-110-Stars-499-/306953923179" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/8WcAAeSwuu5qD6rY/s-l500.jpg');"></div>
-      <div class="pk-meta">
-        <div class="pk-price-row">
-          <span class="pk-price">$5.99</span>
-        </div>
-        <div class="pk-title">2025 Score - Patrick Surtain II #110 Stars /499</div>
-        <div class="pk-buying">BIN</div>
-      </div>
-    </a>
-    <a class="pk-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Matthew-Golden-326-Silver-Prizm-RC--/306952170626" target="_blank" rel="noopener">
-      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/xY0AAeSwd2xqDqg7/s-l500.jpg');"></div>
-      <div class="pk-meta">
-        <div class="pk-price-row">
-          <span class="pk-price">$4.99</span>
-        </div>
-        <div class="pk-title">2025 Panini Prizm - Rookies Matthew Golden #326 Silver Prizm (RC)</div>
-        <div class="pk-buying">BIN</div>
-      </div>
     </a></div>
-          <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">+ 145 more 2025 listings &mdash; see <a href="index.html" style="color:var(--accent-gold,#d4af37);">the full grid</a>.</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">+ 195 more 2025 listings &mdash; see <a href="index.html" style="color:var(--accent-gold,#d4af37);">the full grid</a>.</div>
         </section>
         <section class="br-section" id="y-2024">
           <div class="br-section-head">
             <h2>2024</h2>
-            <span class="br-count">2 listings</span>
+            <span class="br-count">4 listings</span>
           </div>
           <div class="pk-grid">
+    <a class="pk-card" href="https://www.ebay.com/itm/2024-Panini-Select-Concourse-Drake-Maye-27-Red-Yellow-Shock-Prizm-RC--/306967149977" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/TMUAAeSwKDVqF8uB/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$19.99</span>
+        </div>
+        <div class="pk-title">2024 Panini Select - Concourse Drake Maye #27 Red &amp; Yellow Shock Prizm (RC)</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
     <a class="pk-card" href="https://www.ebay.com/itm/Topps-2024-Chrome-Checkerboard-Jayden-Daniels-74TF-2-Commanders-NFL-Card-/306947440872" target="_blank" rel="noopener">
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/lL0AAeSws11qC7Kh/s-l500.jpg');"></div>
       <div class="pk-meta">
@@ -2309,11 +2331,21 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         <div class="pk-buying">BIN</div>
       </div>
     </a>
+    <a class="pk-card" href="https://www.ebay.com/itm/2024-Panini-Select-Concourse-Jayden-Daniels-26-Silver-Prizm-RC--/306967174461" target="_blank" rel="noopener">
+      <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/NlYAAeSwGgVqF9AM/s-l500.jpg');"></div>
+      <div class="pk-meta">
+        <div class="pk-price-row">
+          <span class="pk-price">$4.99</span>
+        </div>
+        <div class="pk-title">2024 Panini Select - Concourse Jayden Daniels #26 Silver Prizm (RC)</div>
+        <div class="pk-buying">BIN</div>
+      </div>
+    </a>
     <a class="pk-card" href="https://www.ebay.com/itm/2024-Topps-Chrome-Rookies-Marvin-Harrison-Jr-204-RC-NFL-/306939312739" target="_blank" rel="noopener">
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/S10AAeSwSptqBkxq/s-l500.jpg');"></div>
       <div class="pk-meta">
         <div class="pk-price-row">
-          <span class="pk-price">$2.34</span>
+          <span class="pk-price">$3.99</span>
         </div>
         <div class="pk-title">2024 Topps Chrome - Rookies Marvin Harrison Jr. #204 (RC) NFL</div>
         <div class="pk-buying">BIN</div>
@@ -2413,7 +2445,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <div class="pk-img" style="background-image:url('https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg');"></div>
       <div class="pk-meta">
         <div class="pk-price-row">
-          <span class="pk-price">$5.99</span>
+          <span class="pk-price">$8.99</span>
         </div>
         <div class="pk-title">4 1991 Playball U.S.A. - Darryl Strawberry NFL</div>
         <div class="pk-buying">BIN</div>
@@ -2508,7 +2540,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated May 27, 2026 · 20:18 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated Jun 06, 2026 · 04:39 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -2529,61 +2561,49 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       }
     })();
 
-    async function _sha256Hex(s) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    function _parseJwt(token) {
+      try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+      catch(e) { return null; }
     }
+    window.handleGoogleCredential = function(response) {
+      const payload = _parseJwt(response.credential);
+      if (!payload) {
+        document.getElementById('gate-error').textContent = 'Sign-in failed. Try again.';
+        return;
+      }
+      const email = (payload.email || '').toLowerCase();
+      if (email === window.__ADMIN_EMAIL) {
+        try {
+          localStorage.setItem('h2k_admin_email', email);
+          localStorage.setItem('h2k_admin_token', response.credential);
+        } catch(e) {}
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+        document.getElementById('gate-overlay').classList.remove('open');
+        showToast('Welcome back, Jason. Management tools unlocked.');
+      } else {
+        document.getElementById('gate-error').textContent = 'That Google account is not authorized.';
+      }
+    };
     window.openGate = function() {
       const o = document.getElementById('gate-overlay');
       if (o) o.classList.add('open');
-      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
     };
     window.closeGate = function() {
-      // On admin pages, can't close without authing — bounce to home instead
       if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
         const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
         location.href = home;
         return;
       }
       document.getElementById('gate-overlay')?.classList.remove('open');
-      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
-      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
-    };
-    window.adminAttempt = async function() {
-      const inp = document.getElementById('gate-input');
-      const err = document.getElementById('gate-error');
-      const v = (inp.value || '').trim();
-      if (!v) return;
-      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
-      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {
-        try { localStorage.setItem('h2k_admin_token', hash); } catch(e) {}
-        document.body.classList.add('is-admin');
-        document.documentElement.classList.add('pre-is-admin');
-        document.getElementById('gate-overlay').classList.remove('open');
-        showToast('Welcome back. Management tools unlocked.');
-
-        // Fire-and-forget alert ping (server decides if email is sent)
-        try {
-          let did = localStorage.getItem('h2k_device_id');
-          if (!did) {
-            did = (crypto.randomUUID && crypto.randomUUID()) ||
-                  (Date.now() + '-' + Math.random().toString(36).slice(2));
-            localStorage.setItem('h2k_device_id', did);
-          }
-          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
-          }).catch(() => {});
-        } catch(e) {}
-      } else {
-        err.textContent = 'Wrong passcode. Try again.';
-        inp.value = '';
-        inp.focus();
-      }
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
     };
     window.adminLogout = function() {
-      try { localStorage.removeItem('h2k_admin_token'); } catch(e) {}
+      try {
+        localStorage.removeItem('h2k_admin_email');
+        localStorage.removeItem('h2k_admin_token');
+      } catch(e) {}
+      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
       document.body.classList.remove('is-admin');
       document.documentElement.classList.remove('pre-is-admin');
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';

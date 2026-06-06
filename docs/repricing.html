@@ -32,15 +32,14 @@
         if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
       } catch(e) {}
     })();
-    // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = [];
-    window.__ADMIN_SALT   = '905074ae5fa3ec101d862705f7dc0ac7';
+    // Admin gate — Google OAuth (jchletsos@gmail.com only)
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
     window.__IS_ADMIN_PAGE = false;
-    // Early body class: if a stored token matches any embedded hash, mark body admin
+    // Early body class: restore admin session from stored email
     (function() {
       try {
-        var stored = localStorage.getItem('h2k_admin_token');
-        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
         document.documentElement.classList.toggle('pre-is-admin', !!ok);
       } catch(e) {}
     })();
@@ -61,6 +60,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
 :root {
@@ -1910,16 +1910,25 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
     <div class="gate-card">
       <h2 id="gate-title">Owner Access</h2>
-      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
-      <form onsubmit="event.preventDefault(); adminAttempt();">
-        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
-        <div class="gate-error" id="gate-error">&nbsp;</div>
-        <div class="gate-actions">
-          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
-          <button type="submit" class="btn btn-gold">Unlock</button>
-        </div>
-      </form>
-      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+      <div class="gate-sub">Sign in with your Google account to access management tools.</div>
+      <div id="g_id_onload"
+           data-client_id="926594287569-f447rslcm2j1db0ul47o2n1mcgogmg13.apps.googleusercontent.com"
+           data-callback="handleGoogleCredential"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-theme="outline"
+           data-size="large"
+           data-text="sign_in_with"
+           data-shape="rectangular"
+           style="margin: 16px auto 0; display: flex; justify-content: center;">
+      </div>
+      <div class="gate-error" id="gate-error">&nbsp;</div>
+      <div class="gate-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+      </div>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no sign-in needed.</div>
     </div>
   </div>
 
@@ -1929,12 +1938,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     
 <section class="hero">
   <h1>Repricing Agent</h1>
-  <p class="sub">Last run: <code>2026-06-06 02:38 UTC</code></p>
+  <p class="sub">Last run: <code>2026-06-06 04:39 UTC</code></p>
   <div class="stat-grid">
-    <div class="stat"><div class="stat-n">131</div><div class="stat-l">to apply</div></div>
-    <div class="stat"><div class="stat-n">118</div><div class="stat-l">in dead zone</div></div>
-    <div class="stat"><div class="stat-n">15</div><div class="stat-l">blocked</div></div>
-    <div class="stat"><div class="stat-n">$54.07</div><div class="stat-l">listed Δ</div></div>
+    <div class="stat"><div class="stat-n">130</div><div class="stat-l">to apply</div></div>
+    <div class="stat"><div class="stat-n">113</div><div class="stat-l">in dead zone</div></div>
+    <div class="stat"><div class="stat-n">21</div><div class="stat-l">blocked</div></div>
+    <div class="stat"><div class="stat-n">$53.07</div><div class="stat-l">listed Δ</div></div>
   </div>
 </section>
 
@@ -1951,7 +1960,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 </section>
 
 
-        <h3>🎯 Will apply <span class='count'>(131)</span></h3>
+        <h3>🎯 Will apply <span class='count'>(130)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -3922,23 +3931,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-apply">
           <td class="item">
-            <a href="https://www.ebay.com/itm/Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-Football-Card-Lot-7--/306904174454" target="_blank" rel="noopener">
-              <span class="title">Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)</span>
-              <span class="item-id">306904174454</span>
-            </a>
-          </td>
-          <td class="num">$5.99</td>
-          <td class="num target">$6.99</td>
-          <td class="num delta delta-rise">+16.7%</td>
-          <td class="num">$0.66</td>
-          <td class="basis">pricecharting · n=3 · ref $119.97<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">pricecharting median $119.97 (n=3, high) → target $6.99<br><em>capped to max_step_up_pct=25.0%</em></td>
-          <td class="decision decision-apply">APPLY</td>
-        </tr>
-        
-
-        <tr class="row-apply">
-          <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Terrance-Ferguson-379-Green-Ice-Prizm-RC--/306967133225" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm - Rookies Terrance Ferguson #379 Green Ice Prizm (RC)</span>
               <span class="item-id">306967133225</span>
@@ -4195,7 +4187,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         
 
-        <h3>⊝ In dead zone (no-op) <span class='count'>(118)</span></h3>
+        <h3>⊝ In dead zone (no-op) <span class='count'>(113)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -4647,40 +4639,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$0.89</td>
           <td class="basis">pricecharting · n=6 · ref $2.25<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_down_pct=15.0%</em></td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-NFL-Football-/306931209046" target="_blank" rel="noopener">
-              <span class="title">1983 Donruss - Rickey Henderson #35 NFL Football</span>
-              <span class="item-id">306931209046</span>
-            </a>
-          </td>
-          <td class="num">$2.99</td>
-          <td class="num target">$2.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$0.89</td>
-          <td class="basis">pricecharting · n=7 · ref $3.13<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
-            <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457-NFL-/306931236773" target="_blank" rel="noopener">
-              <span class="title">1990 Bowman - Rickey Henderson #457 NFL</span>
-              <span class="item-id">306931236773</span>
-            </a>
-          </td>
-          <td class="num">$5.99</td>
-          <td class="num target">$5.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$3.50</td>
-          <td class="basis">pricecharting · n=9 · ref $5.82<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
         
@@ -5843,23 +5801,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-skip">
           <td class="item">
-            <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener">
-              <span class="title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</span>
-              <span class="item-id">306904078786</span>
-            </a>
-          </td>
-          <td class="num">$10.99</td>
-          <td class="num target">$10.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$4.13</td>
-          <td class="basis">pricecharting · n=3 · ref $10.91<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
             <a href="https://www.ebay.com/itm/12-Jim-Everett-Cards-Los-Angeles-Rams-New-Orleans-Saints-Football-Card-Lot-/306904215389" target="_blank" rel="noopener">
               <span class="title">12 Jim Everett Cards Los Angeles Rams New Orleans Saints Football Card Lot</span>
               <span class="item-id">306904215389</span>
@@ -5928,23 +5869,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-skip">
           <td class="item">
-            <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-Football-Card-Lot-NFL-/306913186982" target="_blank" rel="noopener">
-              <span class="title">11 Mel Gray Cards Detroit Lions Football Card Lot NFL</span>
-              <span class="item-id">306913186982</span>
-            </a>
-          </td>
-          <td class="num">$3.99</td>
-          <td class="num target">$3.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$-1.94</td>
-          <td class="basis">pricecharting · n=7 · ref $4.20<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
             <a href="https://www.ebay.com/itm/5-Bobby-Humphrey-Cards-Denver-Broncos-Football-Card-Lot-NFL-/306913307606" target="_blank" rel="noopener">
               <span class="title">5 Bobby Humphrey Cards Denver Broncos Football Card Lot NFL</span>
               <span class="item-id">306913307606</span>
@@ -5954,8 +5878,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num target">$1.99</td>
           <td class="num delta delta-flat">0.0%</td>
           <td class="num">$-3.67</td>
-          <td class="basis">pricecharting · n=3 · ref $10.91<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="basis">ebay_active · n=3 · ref $1.89<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
           <td class="decision decision-skip">SKIP</td>
         </tr>
         
@@ -6132,23 +6056,6 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-skip">
           <td class="item">
-            <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener">
-              <span class="title">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</span>
-              <span class="item-id">306914547105</span>
-            </a>
-          </td>
-          <td class="num">$20.99</td>
-          <td class="num target">$20.99</td>
-          <td class="num delta delta-flat">0.0%</td>
-          <td class="num">$12.81</td>
-          <td class="basis">pricecharting · n=3 · ref $20.96<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">delta 0.0% inside dead_zone_pct=5.0%</td>
-          <td class="decision decision-skip">SKIP</td>
-        </tr>
-        
-
-        <tr class="row-skip">
-          <td class="item">
             <a href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Travis-Hunter-RC-20-Silver-Prizm-Football-/306914915295" target="_blank" rel="noopener">
               <span class="title">2025 Panini Prizm Draft Picks Travis Hunter RC #20 Silver Prizm Football</span>
               <span class="item-id">306914915295</span>
@@ -6218,7 +6125,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
         
 
-        <h3>⛔ Blocked <span class='count'>(15)</span></h3>
+        <h3>⛔ Blocked <span class='count'>(21)</span></h3>
         <div class="tbl-wrap">
           <table class="reprice-tbl">
             <thead><tr>
@@ -6262,6 +6169,40 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">—</td>
           <td class="basis">—<br><small class="conf-low">low confidence</small></td>
           <td class="reasons">insufficient comps (need >=3, got 1 on ebay_active)</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/1983-Donruss-Rickey-Henderson-35-NFL-Football-/306931209046" target="_blank" rel="noopener">
+              <span class="title">1983 Donruss - Rickey Henderson #35 NFL Football</span>
+              <span class="item-id">306931209046</span>
+            </a>
+          </td>
+          <td class="num">$2.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 2 on sold_history)</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/1990-Bowman-Rickey-Henderson-457-NFL-/306931236773" target="_blank" rel="noopener">
+              <span class="title">1990 Bowman - Rickey Henderson #457 NFL</span>
+              <span class="item-id">306931236773</span>
+            </a>
+          </td>
+          <td class="num">$5.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 2 on sold_history)</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -6370,6 +6311,40 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-blocked">
           <td class="item">
+            <a href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener">
+              <span class="title">Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF</span>
+              <span class="item-id">306904078786</span>
+            </a>
+          </td>
+          <td class="num">$10.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 2 on sold_history)</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/Boomer-Esiason-Cincinnati-Bengals-New-York-Jets-Football-Card-Lot-7--/306904174454" target="_blank" rel="noopener">
+              <span class="title">Boomer Esiason Cincinnati Bengals New York Jets Football Card Lot (7)</span>
+              <span class="item-id">306904174454</span>
+            </a>
+          </td>
+          <td class="num">$5.99</td>
+          <td class="num target">$4.99</td>
+          <td class="num delta delta-drop">-16.7%</td>
+          <td class="num">$-1.07</td>
+          <td class="basis">ebay_active · n=10 · ref $0.94<br><small class="conf-mid">mid confidence</small></td>
+          <td class="reasons">net $-1.07 would fall below min_net_after_fees $0.25<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
             <a href="https://www.ebay.com/itm/4-Aaron-Glenn-Rookie-Cards-New-York-Jets-Football-Card-Lot-NFL-/306904189481" target="_blank" rel="noopener">
               <span class="title">4 Aaron Glenn Rookie Cards New York Jets Football Card Lot NFL</span>
               <span class="item-id">306904189481</span>
@@ -6421,6 +6396,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 
         <tr class="row-blocked">
           <td class="item">
+            <a href="https://www.ebay.com/itm/11-Mel-Gray-Cards-Detroit-Lions-Football-Card-Lot-NFL-/306913186982" target="_blank" rel="noopener">
+              <span class="title">11 Mel Gray Cards Detroit Lions Football Card Lot NFL</span>
+              <span class="item-id">306913186982</span>
+            </a>
+          </td>
+          <td class="num">$3.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 1 on sold_history)</td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
             <a href="https://www.ebay.com/itm/9-Ronnie-Lott-Cards-49ers-Raiders-Jets-Football-Card-Lot-NFL-/306913853080" target="_blank" rel="noopener">
               <span class="title">9 Ronnie Lott Cards 49ers Raiders Jets Football Card Lot NFL</span>
               <span class="item-id">306913853080</span>
@@ -6444,11 +6436,11 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
             </a>
           </td>
           <td class="num">$6.99</td>
-          <td class="num target">$5.99</td>
-          <td class="num delta delta-drop">-14.3%</td>
-          <td class="num">$-0.20</td>
-          <td class="basis">pricecharting · n=6 · ref $4.13<br><small class="conf-high">high confidence</small></td>
-          <td class="reasons">net $-0.20 would fall below min_net_after_fees $0.25<br><em>capped to max_step_down_pct=15.0%</em></td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 1 on ebay_active)</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -6466,6 +6458,23 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <td class="num">$-4.54</td>
           <td class="basis">pricecharting · n=3 · ref $5.39<br><small class="conf-high">high confidence</small></td>
           <td class="reasons">net $-4.54 would fall below min_net_after_fees $0.25<br><em>capped to max_step_up_pct=25.0%</em></td>
+          <td class="decision decision-blocked">BLOCKED</td>
+        </tr>
+        
+
+        <tr class="row-blocked">
+          <td class="item">
+            <a href="https://www.ebay.com/itm/Andre-Rison-Indianapolis-Colts-Atlanta-Falcons-Football-Card-Lot-12-RC-NFL-/306914547105" target="_blank" rel="noopener">
+              <span class="title">Andre Rison Indianapolis Colts Atlanta Falcons Football Card Lot (12) RC NFL</span>
+              <span class="item-id">306914547105</span>
+            </a>
+          </td>
+          <td class="num">$20.99</td>
+          <td class="num target">—</td>
+          <td class="num delta delta-flat">—</td>
+          <td class="num">—</td>
+          <td class="basis">—<br><small class="conf-low">low confidence</small></td>
+          <td class="reasons">insufficient comps (need >=3, got 2 on sold_history)</td>
           <td class="decision decision-blocked">BLOCKED</td>
         </tr>
         
@@ -6547,7 +6556,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated Jun 06, 2026 · 02:38 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated Jun 06, 2026 · 04:39 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -6568,61 +6577,49 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       }
     })();
 
-    async function _sha256Hex(s) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    function _parseJwt(token) {
+      try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+      catch(e) { return null; }
     }
+    window.handleGoogleCredential = function(response) {
+      const payload = _parseJwt(response.credential);
+      if (!payload) {
+        document.getElementById('gate-error').textContent = 'Sign-in failed. Try again.';
+        return;
+      }
+      const email = (payload.email || '').toLowerCase();
+      if (email === window.__ADMIN_EMAIL) {
+        try {
+          localStorage.setItem('h2k_admin_email', email);
+          localStorage.setItem('h2k_admin_token', response.credential);
+        } catch(e) {}
+        document.body.classList.add('is-admin');
+        document.documentElement.classList.add('pre-is-admin');
+        document.getElementById('gate-overlay').classList.remove('open');
+        showToast('Welcome back, Jason. Management tools unlocked.');
+      } else {
+        document.getElementById('gate-error').textContent = 'That Google account is not authorized.';
+      }
+    };
     window.openGate = function() {
       const o = document.getElementById('gate-overlay');
       if (o) o.classList.add('open');
-      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
     };
     window.closeGate = function() {
-      // On admin pages, can't close without authing — bounce to home instead
       if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
         const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
         location.href = home;
         return;
       }
       document.getElementById('gate-overlay')?.classList.remove('open');
-      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
-      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
-    };
-    window.adminAttempt = async function() {
-      const inp = document.getElementById('gate-input');
-      const err = document.getElementById('gate-error');
-      const v = (inp.value || '').trim();
-      if (!v) return;
-      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
-      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {
-        try { localStorage.setItem('h2k_admin_token', hash); } catch(e) {}
-        document.body.classList.add('is-admin');
-        document.documentElement.classList.add('pre-is-admin');
-        document.getElementById('gate-overlay').classList.remove('open');
-        showToast('Welcome back. Management tools unlocked.');
-
-        // Fire-and-forget alert ping (server decides if email is sent)
-        try {
-          let did = localStorage.getItem('h2k_device_id');
-          if (!did) {
-            did = (crypto.randomUUID && crypto.randomUUID()) ||
-                  (Date.now() + '-' + Math.random().toString(36).slice(2));
-            localStorage.setItem('h2k_device_id', did);
-          }
-          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
-          }).catch(() => {});
-        } catch(e) {}
-      } else {
-        err.textContent = 'Wrong passcode. Try again.';
-        inp.value = '';
-        inp.focus();
-      }
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
     };
     window.adminLogout = function() {
-      try { localStorage.removeItem('h2k_admin_token'); } catch(e) {}
+      try {
+        localStorage.removeItem('h2k_admin_email');
+        localStorage.removeItem('h2k_admin_token');
+      } catch(e) {}
+      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
       document.body.classList.remove('is-admin');
       document.documentElement.classList.remove('pre-is-admin');
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
