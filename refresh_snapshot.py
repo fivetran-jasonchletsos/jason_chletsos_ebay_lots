@@ -51,6 +51,13 @@ def main() -> int:
         print(f"  WARNING: 0 listings returned. Not overwriting existing snapshot.")
         return 1
 
+    # Enrich every listing with the derived category so downstream readers
+    # (agents, website) always see a populated category field even when the
+    # eBay Trading API returns an empty PrimaryCategory/CategoryName.
+    for row in listings:
+        if not row.get("category"):
+            row["category"] = promote._categorize(row)
+
     # Single atomic write through snapshot_store.
     import snapshot_store
     snapshot_store.replace_all(listings)

@@ -201,6 +201,13 @@ CASCADE_FULL = [
     [
         Step("daily_digest_agent.py",  desc="daily digest (rollup)",  allow_failure=True),
     ],
+
+    # Wave 7: atomically publish enriched docs/ JSON so the static website
+    # always serves a consistent, category-annotated view of the data.
+    # Runs LAST so it captures every update from waves 0-6 in one snapshot.
+    [
+        Step("sync_docs_json.py",      desc="publish enriched docs/ JSON (listings + index + deals)", timeout=60),
+    ],
 ]
 
 

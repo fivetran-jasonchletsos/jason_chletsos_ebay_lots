@@ -156,6 +156,11 @@ register_io("daily_digest_agent.py",
                     "output/best_offer_plan.json"],
             outputs=["docs/daily.html"])
 
+register_io("sync_docs_json.py",
+            inputs=["output/listings_snapshot.json", "docs/_seller.json"],
+            outputs=["docs/listings_snapshot.json", "docs/_index_listings.json",
+                     "docs/_deals_listings.json"])
+
 # Agents that hit eBay APIs every run regardless of input mtimes — they read
 # from a live remote, not from a local file, so they have no meaningful
 # "is this stale" answer based on local mtimes. Mark them as ALWAYS RUN by

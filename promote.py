@@ -10497,8 +10497,22 @@ def main():
     # Always snapshot the current listings so sister agents (seller_hub_agent,
     # specifics_agent, watchers_offer_agent, etc.) read fresh data even when
     # SportsCardsPro is disabled.
-    snap_path = OUTPUT_DIR / "listings_snapshot.json"
-    snap_path.write_text(json.dumps(listings, indent=2, default=str), encoding="utf-8")
+    #
+    # Two writes for two consumers:
+    #   output/listings_snapshot.json — canonical source for every agent script
+    #   docs/listings_snapshot.json   — enriched (category annotated) copy for
+    #                                   the static website
+    import snapshot_store as _snap_store
+    _snap_store.replace_all(listings)          # atomic write → output/
+    try:
+        import sync_docs_json as _sdj
+        _sdj_result = _sdj.publish()
+        _cat_summary = ", ".join(
+            f"{k} ({v})" for k, v in list(_sdj_result.get("categories", {}).items())[:6]
+        )
+        print(f"  docs/ JSON synced: {_sdj_result.get('listings', 0)} listings · {_cat_summary}")
+    except Exception as _sdj_exc:
+        print(f"  docs/ JSON sync skipped: {_sdj_exc}")
 
     # Run the SportsCardsPro "actual" price agent for any stale/new listings.
     # Rate-limited 1 req/sec by the provider; cached 7d in sportscardspro_prices.json.
