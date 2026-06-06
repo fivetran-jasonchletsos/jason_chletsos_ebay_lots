@@ -155,14 +155,15 @@ LOCAL_GENERATORS = []
 
 # Full DAG — waves run sequentially, steps within a wave run in parallel.
 CASCADE_FULL = [
-    # Wave 0: refresh listings_snapshot.json from eBay's GetMyeBaySelling.
-    # This is the canonical "what's live on eBay right now" file. Every
-    # downstream reader (cassini, photo_audit, repricing, best_offer,
-    # promoted_listings, build_collx_vs_ebay) joins against it. Without this
-    # step, --full ran against the snapshot from the last manual promote.py
-    # — which is exactly the staleness the script was supposed to eliminate.
+    # Wave 0: snapshot + cache hygiene run in parallel.
+    # refresh_snapshot.py pulls "what's live on eBay right now".
+    # validate_pricing_cache.py purges any PriceCharting entries where the
+    # matched product shares no meaningful tokens with the query (e.g. a
+    # Rolling Stones card matched to a Shedeur Sanders pink prizm by card
+    # number). Both run before any downstream agent reads pricing data.
     [
-        Step("refresh_snapshot.py", desc="snapshot listings from eBay GetMyeBaySelling", timeout=120),
+        Step("refresh_snapshot.py",       desc="snapshot listings from eBay GetMyeBaySelling", timeout=120),
+        Step("validate_pricing_cache.py", desc="purge bad PriceCharting matches from cache",   timeout=60, allow_failure=True),
     ],
 
     # Wave 1: write-once local generators. Hoisted out of Wave 2 so the
