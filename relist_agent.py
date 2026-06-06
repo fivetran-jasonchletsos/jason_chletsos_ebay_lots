@@ -406,6 +406,14 @@ def main() -> int:
         suggested = compute_new_price(u)
         plans.append({**u, "suggested_price": suggested})
 
+    # Cam Ward Pink Refractor ghost — only the real listing (306939333836)
+    # may exist; never relist the duplicate. See repo memory.
+    GHOST_IDS = {"306965305227"}
+    _before = len(plans)
+    plans = [p for p in plans if str(p.get("item_id") or "") not in GHOST_IDS]
+    if len(plans) != _before:
+        print(f"  Excluded Cam Ward ghost from relist ({_before} -> {len(plans)}).")
+
     history_entries: list[dict] = []
     if args.apply and token:
         for plan in plans:

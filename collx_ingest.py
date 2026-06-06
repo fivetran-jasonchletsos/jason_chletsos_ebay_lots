@@ -255,6 +255,7 @@ def main() -> int:
         return 0
 
     print("Cascading downstream refresh so the dashboard isn't stale...")
+    sys.stdout.flush()  # show ingest summary BEFORE cascade output starts streaming
     import subprocess
     r = subprocess.run(
         ["python3", "refresh_pipeline.py", "--after-ingest"],

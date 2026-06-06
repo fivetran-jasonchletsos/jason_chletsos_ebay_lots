@@ -573,6 +573,19 @@ def fetch_deals(cfg: dict) -> dict:
                 deals.append({**c, "median": median, "discount_pct": discount_pct})
         # Sort deals by discount_pct desc (best deals first)
         deals.sort(key=lambda d: -d["discount_pct"])
+        # Pick 3–5 items priced closest to the median (not the deals themselves)
+        # so buyers can double-check the median against real listings.
+        deal_urls = {c["url"] for c in deals}
+        median_comps = sorted(
+            [c for c in clean if c["url"] not in deal_urls],
+            key=lambda x: abs(x["price"] - median)
+        )[:5]
+        median_comps_data = [
+            {"title": c["title"], "price": c["price"], "url": c["url"]}
+            for c in median_comps
+        ]
+        # Attach comps to every deal from this query
+        deals = [{**d, "median_comps": median_comps_data} for d in deals]
         out_queries.append({
             "q":       q,
             "category": category,
@@ -591,6 +604,29 @@ def fetch_deals(cfg: dict) -> dict:
         "min_comps":    min_comps,
         "total_deals":  total_deals,
     }
+
+
+def _render_deal_comps(comps: list, median: float) -> str:
+    """Render a small comp-verification strip below a deal card (up to 3 links)."""
+    if not comps:
+        return ""
+    links = []
+    for c in comps[:3]:
+        price = c.get("price", 0)
+        title = (c.get("title") or "")[:70]
+        url   = c.get("url") or "#"
+        links.append(
+            f'<a href="{url}" target="_blank" rel="noopener" class="deal-comp-link">'
+            f'<span class="deal-comp-price">${price:.2f}</span>'
+            f'<span class="deal-comp-title">{title}</span>'
+            f'</a>'
+        )
+    return (
+        f'<div class="deal-comps">'
+        f'<span class="deal-comps-label">Comps near ${median:.2f} median</span>'
+        + "".join(links)
+        + "</div>"
+    )
 
 
 def build_deals_page(deals_data: dict) -> Path:
@@ -702,11 +738,13 @@ def build_deals_page(deals_data: dict) -> Path:
         </div>
         <div class="deal-price-block">
           <div class="deal-price">${d['price']:.2f}</div>
-          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
+          <div class="deal-pct-down">-{d['discount_pct']:.0f}% vs median</div>
           <div class="deal-median">{price_label} · median ${d['median']:.2f}</div>
+          <span class="trust-chip" aria-label="Free shipping, combined shipping on 2 or more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="17.5" cy="18.5" r="1.8"/></svg>Free ship · Combined ship 2+</span>
           <a href="{d['url']}" target="_blank" rel="noopener" class="btn btn-gold" style="padding:8px 14px;font-size:11px;margin-top:8px;">Check on eBay →</a>
         </div>
-      </article>''')
+      </article>
+      {_render_deal_comps(d.get('median_comps', []), d['median'])}''')
 
     # P2 page-weight fix: only the first 12 deal cards ship inline. The rest
     # are written to _deals_listings.json and hydrated client-side after first
@@ -809,7 +847,32 @@ def build_deals_page(deals_data: dict) -> Path:
       color: var(--gold);
       letter-spacing: .02em;
     }
-    .deal-median { font-size: 11px; color: var(--text-muted); text-decoration: line-through; margin-top: 4px; }
+    .deal-pct-down {
+      font-size: 13px; font-weight: 700; color: var(--gold);
+      letter-spacing: .03em; margin-top: 4px;
+    }
+    .deal-median { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .deal-comps {
+      grid-column: 1 / -1;
+      border-top: 1px solid var(--border);
+      padding-top: 8px; margin-top: 4px;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    .deal-comps-label {
+      font-size: 10px; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: .06em; white-space: nowrap; margin-right: 4px;
+    }
+    .deal-comp-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; text-decoration: none;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 3px 8px;
+      color: var(--text-muted); max-width: 260px;
+      transition: border-color var(--t-fast), color var(--t-fast);
+    }
+    .deal-comp-link:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .deal-comp-price { font-weight: 700; color: var(--text); white-space: nowrap; }
+    .deal-comp-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .summary-table { width: 100%; }
     .summary-table th, .summary-table td { font-size: 12px; padding: 8px 10px; text-align: left; }
     .summary-table th:not(:first-child), .summary-table td:not(:first-child) { text-align: right; }
