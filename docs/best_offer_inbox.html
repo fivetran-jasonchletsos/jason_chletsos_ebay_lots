@@ -32,15 +32,14 @@
         if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
       } catch(e) {}
     })();
-    // Admin gate constants (populated at build time)
-    window.__ADMIN_HASHES = ["2a00368e9da62201f07f7046c332713827b25ccbd815ff7e8cd6af1fcfa861f6"];
-    window.__ADMIN_SALT   = '08e099733ea209a9d2b5b205e9515a69';
-    window.__IS_ADMIN_PAGE = true;
-    // Early body class: if a stored token matches any embedded hash, mark body admin
+    // Admin gate — Google OAuth (jchletsos@gmail.com only)
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
+    window.__IS_ADMIN_PAGE = false;
+    // Early body class: restore admin session from stored email
     (function() {
       try {
-        var stored = localStorage.getItem('h2k_admin_token');
-        var ok = stored && window.__ADMIN_HASHES.indexOf(stored) !== -1;
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
         document.documentElement.classList.toggle('pre-is-admin', !!ok);
       } catch(e) {}
     })();
@@ -1868,16 +1867,18 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
     <div class="gate-card">
       <h2 id="gate-title">Owner Access</h2>
-      <div class="gate-sub">Enter the passcode to view management tools (Quality, Pricing, Titles, Reddit, Craigslist).</div>
-      <form onsubmit="event.preventDefault(); adminAttempt();">
-        <input type="password" id="gate-input" autocomplete="current-password" placeholder="••••••••" autofocus>
-        <div class="gate-error" id="gate-error">&nbsp;</div>
-        <div class="gate-actions">
-          <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
-          <button type="submit" class="btn btn-gold">Unlock</button>
-        </div>
-      </form>
-      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no passcode needed.</div>
+      <div class="gate-sub">Sign in with your Google account to access management tools.</div>
+      <div style="margin: 20px auto 0; display: flex; justify-content: center;">
+        <button onclick="promptAdminSignIn()" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;background:#fff;border:1px solid #dadce0;border-radius:4px;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:#3c4043;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08);">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+      <div class="gate-error" id="gate-error">&nbsp;</div>
+      <div class="gate-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+      </div>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no sign-in needed.</div>
     </div>
   </div>
 
@@ -1909,61 +1910,60 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       }
     })();
 
-    async function _sha256Hex(s) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
+    window.promptAdminSignIn = function() {
+      const err = document.getElementById('gate-error');
+      if (!window.google?.accounts?.oauth2) {
+        err.textContent = 'Google library still loading — try again in a moment.';
+        return;
+      }
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: '926594287569-f447rslcm2j1db0ul47o2n1mcgogmg13.apps.googleusercontent.com',
+        scope: 'openid email profile',
+        prompt: 'select_account',
+        callback: async function(resp) {
+          if (resp.error) {
+            err.textContent = 'Sign-in error: ' + (resp.error_description || resp.error);
+            return;
+          }
+          try {
+            const ui = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+              { headers: { Authorization: 'Bearer ' + resp.access_token } });
+            if (!ui.ok) throw new Error('userinfo ' + ui.status);
+            const info = await ui.json();
+            const email = (info.email || '').toLowerCase();
+            if (email === window.__ADMIN_EMAIL) {
+              try {
+                localStorage.setItem('h2k_admin_email', email);
+              } catch(e) {}
+              document.body.classList.add('is-admin');
+              document.documentElement.classList.add('pre-is-admin');
+              document.getElementById('gate-overlay').classList.remove('open');
+              showToast('Welcome back, Jason. Management tools unlocked.');
+            } else {
+              err.textContent = 'That Google account (' + info.email + ') is not authorized.';
+            }
+          } catch(e) {
+            err.textContent = 'Could not verify account: ' + e.message;
+          }
+        }
+      });
+      client.requestAccessToken();
+    };
     window.openGate = function() {
       const o = document.getElementById('gate-overlay');
       if (o) o.classList.add('open');
-      setTimeout(() => document.getElementById('gate-input')?.focus(), 50);
     };
     window.closeGate = function() {
-      // On admin pages, can't close without authing — bounce to home instead
       if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
         const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
         location.href = home;
         return;
       }
       document.getElementById('gate-overlay')?.classList.remove('open');
-      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
-      const inp = document.getElementById('gate-input'); if (inp) inp.value = '';
-    };
-    window.adminAttempt = async function() {
-      const inp = document.getElementById('gate-input');
-      const err = document.getElementById('gate-error');
-      const v = (inp.value || '').trim();
-      if (!v) return;
-      const hash = await _sha256Hex(window.__ADMIN_SALT + v);
-      if (window.__ADMIN_HASHES.indexOf(hash) !== -1) {
-        try { localStorage.setItem('h2k_admin_token', hash); } catch(e) {}
-        document.body.classList.add('is-admin');
-        document.documentElement.classList.add('pre-is-admin');
-        document.getElementById('gate-overlay').classList.remove('open');
-        showToast('Welcome back. Management tools unlocked.');
-
-        // Fire-and-forget alert ping (server decides if email is sent)
-        try {
-          let did = localStorage.getItem('h2k_device_id');
-          if (!did) {
-            did = (crypto.randomUUID && crypto.randomUUID()) ||
-                  (Date.now() + '-' + Math.random().toString(36).slice(2));
-            localStorage.setItem('h2k_device_id', did);
-          }
-          fetch('https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/admin-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: did, user_agent: navigator.userAgent })
-          }).catch(() => {});
-        } catch(e) {}
-      } else {
-        err.textContent = 'Wrong passcode. Try again.';
-        inp.value = '';
-        inp.focus();
-      }
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
     };
     window.adminLogout = function() {
-      try { localStorage.removeItem('h2k_admin_token'); } catch(e) {}
+      try { localStorage.removeItem('h2k_admin_email'); } catch(e) {}
       document.body.classList.remove('is-admin');
       document.documentElement.classList.remove('pre-is-admin');
       if (window.__IS_ADMIN_PAGE) location.href = 'index.html';
