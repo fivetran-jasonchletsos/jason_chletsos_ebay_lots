@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Harpua2001">
+  <meta property="og:title" content="Seller Dashboard · Harpua2001">
+  <meta property="og:description" content="Admin seller dashboard — store health, attention cards, weekly revenue, listing diagnostics.">
+  <meta property="og:image" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/og-card.jpg">
+  <meta property="og:url" content="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/seller.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='128' font-family='Fraunces, Georgia, serif' font-style='italic' font-size='128' font-weight='500' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Harpua2001">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('h2k_theme');
+        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
+    window.__IS_ADMIN_PAGE = true;
+    (function() {
+      try {
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
+        document.documentElement.classList.toggle('pre-is-admin', !!ok);
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    html:not(.pre-is-admin) body.admin-page main { filter: blur(14px); pointer-events: none; user-select: none; }
+  </style>
+  <title>Seller Dashboard · Harpua2001</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Familjen+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+:root {
+  --bg:          #0a0a0a;
+  --surface:     #141414;
+  --surface-2:   #1a1a1a;
+  --surface-3:   #232323;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
+  --gold-dim:    #8a7521;
+  --text:        #f1efe9;
+  --text-muted:  #9a9388;
+  --text-dim:    #7a7268;
+  --success:     #7fc77a;
+  --warning:     #e0b54a;
+  --danger:      #e07b6f;
+  --link:        var(--gold);
+  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --t-fast: 160ms cubic-bezier(.4,0,.2,1);
+  --t-base: 280ms cubic-bezier(.4,0,.2,1);
+  --fs-xs:    clamp(11px,   0.68rem + 0.1vw, 12.5px);
+  --fs-sm:    clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base:  clamp(15px,   0.9rem + 0.2vw, 17px);
+  --fs-lg:    clamp(17px,   1rem + 0.4vw, 20px);
+  --fs-xl:    clamp(20px,   1.15rem + 0.7vw, 26px);
+  --fs-h3:    clamp(20px,   1.1rem + 1vw, 28px);
+  --fs-h2:    clamp(24px,   1.3rem + 1.4vw, 34px);
+  --fs-num:   clamp(32px,   1.5rem + 2.4vw, 52px);
+  --fs-num-sm:clamp(22px,   1.2rem + 1.2vw, 32px);
+  --fs-eyebrow: clamp(10px, 0.62rem + 0.08vw, 11.5px);
+  --space-xs:  clamp(6px,  0.4rem + 0.15vw, 10px);
+  --space-sm:  clamp(10px, 0.6rem + 0.25vw, 14px);
+  --space-md:  clamp(14px, 0.85rem + 0.4vw, 22px);
+  --space-lg:  clamp(20px, 1.1rem + 0.8vw, 32px);
+  --space-xl:  clamp(28px, 1.4rem + 1.4vw, 48px);
+  --space-2xl: clamp(40px, 2rem + 2.2vw, 72px);
+  --container-max: min(92vw, 1280px);
+}
+
+[data-theme="cream"] {
+  --bg:#f5f0e8; --surface:#e8e0d0; --surface-2:#ede5d6; --surface-3:#d8ccba;
+  --border:rgba(13,31,60,0.10); --border-mid:rgba(13,31,60,0.22); --border-hi:rgba(13,31,60,0.45);
+  --gold:#c05a1a; --gold-bright:#e57228; --gold-dim:#8a3e10;
+  --text:#0d1f3c; --text-muted:#5a6a7a; --text-dim:#8a98a8;
+  --success:#2f7d4a; --warning:#b8860b; --danger:#b54a3e;
+  --shadow-card:0 2px 10px rgba(13,31,60,.08), 0 0 0 1px var(--border) inset;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: dark; }
+[data-theme="cream"] { color-scheme: light; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Familjen Grotesk', system-ui, sans-serif;
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; opacity: .85; }
+
+/* ---- LAYOUT ---- */
+.site-container { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-md); }
+
+/* ---- NAV ---- */
+.site-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-sm) 0;
+  max-width: var(--container-max); margin: 0 auto; padding-left: var(--space-md); padding-right: var(--space-md);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-size: 1.2rem; font-weight: 700;
+  color: var(--gold); text-decoration: none;
+}
+.brand-mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: #0a0a0a;
+}
+.nav-links { display: flex; gap: var(--space-md); align-items: center; }
+.nav-links a { font-size: var(--fs-sm); color: var(--text-muted); transition: color var(--t-fast); }
+.nav-links a:hover, .nav-links a.active { color: var(--text); text-decoration: none; }
+.nav-badge {
+  background: var(--gold); color: #0a0a0a;
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+  margin-left: 4px; vertical-align: middle;
+}
+
+/* ---- PAGE HEADER ---- */
+.page-header {
+  padding: var(--space-xl) 0 var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-xl);
+}
+.page-eyebrow {
+  font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+}
+.page-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: var(--fs-h2); font-style: italic; font-weight: 700;
+  color: var(--text); line-height: 1.1; margin-bottom: 6px;
+}
+.page-subtitle { font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* ---- DAILY BRIEF ---- */
+.daily-brief {
+  background: linear-gradient(135deg, rgba(201,165,66,.08) 0%, rgba(201,165,66,.04) 100%);
+  border: 1px solid var(--border-mid);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--r-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+.brief-label {
+  font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+}
+.brief-text {
+  font-size: var(--fs-base); color: var(--text); line-height: 1.7;
+}
+.brief-text strong { color: var(--gold-bright); }
+
+/* ---- HERO METRICS GRID ---- */
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+.hero-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--space-md) var(--space-lg);
+  position: relative;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.hero-card:hover { border-color: var(--border-mid); }
+.hero-card.featured {
+  background: linear-gradient(135deg, rgba(201,165,66,.10) 0%, rgba(201,165,66,.04) 100%);
+  border-color: var(--border-mid);
+}
+.hero-card.alert { border-color: rgba(224,123,111,.3); }
+.hero-card.positive { border-color: rgba(127,199,122,.3); }
+.hero-eyebrow {
+  font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+}
+.hero-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-num); font-weight: 700; line-height: 1;
+  color: var(--text); margin-bottom: 6px;
+}
+.hero-number.danger { color: var(--danger); }
+.hero-number.warning { color: var(--warning); }
+.hero-number.success { color: var(--success); }
+.hero-number.gold { color: var(--gold); }
+.hero-sublabel { font-size: var(--fs-xs); color: var(--text-dim); line-height: 1.4; }
+
+/* ---- HEALTH GAUGE ---- */
+.health-gauge-wrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px;
+}
+.gauge-svg { width: 96px; height: 54px; overflow: visible; }
+.gauge-track { fill: none; stroke: var(--surface-3); stroke-width: 10; stroke-linecap: round; }
+.gauge-fill  { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+.gauge-label { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; fill: var(--text); }
+.gauge-sub   { font-size: 9px; fill: var(--text-muted); }
+
+/* ---- SECTION HEADERS ---- */
+.section-header {
+  display: flex; align-items: baseline; gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+.section-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: var(--fs-h3); font-style: italic; font-weight: 600; color: var(--text);
+}
+.section-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-sm); color: var(--text-dim); padding-top: 2px;
+}
+.section-gap { margin-bottom: var(--space-2xl); }
+
+/* ---- BUY RADAR ---- */
+.radar-summary {
+  display: flex; align-items: center; gap: var(--space-lg);
+  background: linear-gradient(135deg, rgba(127,199,122,.06) 0%, rgba(127,199,122,.02) 100%);
+  border: 1px solid rgba(127,199,122,.2);
+  border-radius: var(--r-lg); padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap; gap: var(--space-md);
+}
+.radar-stat { text-align: center; }
+.radar-stat-num {
+  font-family: 'JetBrains Mono', monospace; font-size: var(--fs-num-sm);
+  font-weight: 700; color: var(--success); line-height: 1;
+}
+.radar-stat-label { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px; }
+.radar-divider { width: 1px; height: 40px; background: rgba(127,199,122,.2); }
+.son-rules {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md); font-size: var(--fs-sm);
+}
+.son-rules summary {
+  cursor: pointer; font-weight: 600; color: var(--gold);
+  font-size: var(--fs-sm); letter-spacing: .02em; list-style: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.son-rules summary::before { content: '▶'; font-size: 9px; transition: transform var(--t-fast); }
+.son-rules[open] summary::before { transform: rotate(90deg); }
+.son-rules-body { margin-top: var(--space-sm); line-height: 1.7; }
+.son-rules-body strong { color: var(--success); }
+.son-rules-body .skip { color: var(--danger); }
+.flip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.flip-card {
+  display: flex; gap: var(--space-sm); align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: var(--space-sm);
+  text-decoration: none; color: inherit;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.flip-card:hover { border-color: var(--border-mid); box-shadow: var(--shadow-card); text-decoration: none; }
+.flip-thumb {
+  width: 60px; height: 80px; border-radius: 6px;
+  object-fit: cover; flex-shrink: 0; background: var(--surface-3);
+}
+.flip-body { flex: 1; min-width: 0; }
+.flip-title {
+  font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.4;
+  margin-bottom: 6px; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.flip-metrics { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.flip-badge {
+  font-size: 9px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 20px;
+}
+.badge-flip { background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); }
+.badge-hold { background: rgba(224,181,74,.15); color: var(--warning); border: 1px solid rgba(224,181,74,.3); }
+.flip-buy { font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--text-muted); }
+.flip-net { font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--success); font-weight: 700; }
+.flip-vel { font-size: var(--fs-xs); color: var(--text-dim); }
+
+/* ---- CHARTS ROW ---- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr 1fr; }
+  .charts-grid .chart-card:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--space-md) var(--space-lg);
+}
+.chart-label {
+  font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-sm);
+}
+.chart-sub {
+  font-size: var(--fs-xs); color: var(--text-dim); margin-bottom: var(--space-sm);
+}
+.chart-wrap { position: relative; }
+
+/* ---- ATTENTION CARDS ---- */
+.attention-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+.attn-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  display: flex;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.attn-card:hover { border-color: var(--border-mid); box-shadow: var(--shadow-lg); }
+.attn-thumb {
+  width: 72px; min-width: 72px;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  background: var(--surface-3);
+}
+.attn-thumb-placeholder {
+  width: 72px; min-width: 72px;
+  background: var(--surface-3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim); font-size: 22px;
+}
+.attn-body { padding: var(--space-sm) var(--space-md); flex: 1; min-width: 0; }
+.attn-title {
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text);
+  line-height: 1.35; margin-bottom: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.attn-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--gold);
+  margin-bottom: 8px;
+}
+.attn-labels { display: flex; flex-wrap: wrap; gap: 4px; }
+.attn-label {
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 20px; white-space: nowrap;
+}
+.label-photo { background: rgba(224,123,111,.15); color: var(--danger); border: 1px solid rgba(224,123,111,.3); }
+.label-watch { background: rgba(201,165,66,.15); color: var(--gold); border: 1px solid rgba(201,165,66,.3); }
+.label-visibility { background: rgba(224,181,74,.12); color: var(--warning); border: 1px solid rgba(224,181,74,.3); }
+.label-market { background: rgba(127,199,122,.10); color: var(--success); border: 1px solid rgba(127,199,122,.25); }
+
+/* ---- PRICE BAND BARS ---- */
+.price-bars { display: flex; flex-direction: column; gap: 12px; margin-top: var(--space-sm); }
+.price-row { display: flex; align-items: center; gap: 10px; }
+.price-band-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-xs); color: var(--text-muted); width: 90px; flex-shrink: 0; text-align: right;
+}
+.price-bar-track { flex: 1; background: var(--surface-3); border-radius: 4px; height: 8px; overflow: hidden; }
+.price-bar-fill { height: 8px; border-radius: 4px; background: var(--gold); transition: width .6s ease; }
+.price-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-xs); color: var(--text-dim); width: 32px; text-align: right;
+}
+
+/* ---- VELOCITY BAR ---- */
+.velocity-section { margin-bottom: var(--space-2xl); }
+.velocity-row {
+  display: flex; gap: var(--space-md); margin-bottom: var(--space-md);
+}
+.velocity-week {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: var(--space-sm) var(--space-md);
+  text-align: center;
+}
+.velocity-week.current { border-color: var(--border-mid); background: var(--surface-2); }
+.velocity-week-label { font-size: var(--fs-xs); color: var(--text-dim); margin-bottom: 6px; }
+.velocity-week-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-num-sm); font-weight: 700; color: var(--text); line-height: 1;
+}
+.velocity-week-val.zero { color: var(--text-dim); }
+.velocity-week-sub { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px; }
+
+/* ---- FOOTER ---- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: var(--space-xl) 0;
+  margin-top: var(--space-2xl);
+}
+.footer-inner {
+  max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-md);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);
+}
+.footer-links { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+.footer-links a { font-size: var(--fs-sm); color: var(--text-muted); }
+.footer-links a:hover { color: var(--text); }
+.footer-copy { font-size: var(--fs-xs); color: var(--text-dim); }
+
+/* ---- ADMIN GATE ---- */
+.admin-gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: var(--space-lg);
+  padding: var(--space-xl);
+}
+.admin-gate.hidden { display: none; }
+.gate-logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-size: 2.5rem; color: var(--gold); font-weight: 700;
+}
+.gate-desc { font-size: var(--fs-sm); color: var(--text-muted); text-align: center; max-width: 320px; }
+
+/* ---- THEME TOGGLE ---- */
+.theme-btn {
+  appearance: none; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 5px 12px; cursor: pointer;
+  font-family: 'Familjen Grotesk', sans-serif; font-size: var(--fs-xs);
+  color: var(--text-muted); transition: color var(--t-fast), background var(--t-fast);
+}
+.theme-btn:hover { color: var(--text); background: var(--surface-3); }
+
+@media (max-width: 700px) {
+  .hero-grid { grid-template-columns: repeat(2, 1fr); }
+  .velocity-row { flex-wrap: wrap; }
+  .velocity-week { flex: calc(50% - var(--space-md)/2); }
+}
+  </style>
+</head>
+<body class="admin-page">
+
+<!-- Admin gate -->
+<div class="admin-gate" id="adminGate">
+  <div class="gate-logo">Harpua2001</div>
+  <div class="gate-desc">Seller dashboard — sign in with your Google account to continue.</div>
+  <div id="g_id_onload"
+    data-client_id="YOUR_CLIENT_ID"
+    data-context="signin"
+    data-ux_mode="popup"
+    data-callback="handleGoogleSignIn"
+    data-auto_prompt="true">
+  </div>
+  <div class="g_id_signin"
+    data-type="standard"
+    data-shape="rectangular"
+    data-theme="outline"
+    data-text="sign_in_with"
+    data-size="large"
+    data-logo_alignment="left">
+  </div>
+  <p style="font-size:11px;color:var(--text-dim);">Access restricted to jchletsos@gmail.com</p>
+</div>
+
+<!-- Nav -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">H</div>
+      Harpua2001
+    </a>
+    <div class="nav-links">
+      <a href="seller.html" class="active">Dashboard</a>
+      <a href="repricing.html">Repricing</a>
+      <a href="photo_audit.html">Photos</a>
+      <a href="cassini.html">Cassini</a>
+      <a href="orders_watch.html">Orders</a>
+      <a href="seller_hub.html">Seller Hub</a>
+      <button class="theme-btn" id="themeBtn">Light</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="site-container">
+
+    <!-- Page header -->
+    <header class="page-header">
+      <p class="page-eyebrow">Admin</p>
+      <h1 class="page-title">Seller Dashboard</h1>
+      <p class="page-subtitle" id="headerSub">Updated Jun 7, 2026 &middot; 265 active listings</p>
+    </header>
+
+    <!-- Daily Brief -->
+    <div class="daily-brief">
+      <div class="brief-label">Today's brief</div>
+      <div class="brief-text" id="dailyBrief">
+        You have <strong>29 watchers</strong> across 23 listings and <strong>$0 in sales this week</strong> — the slow week follows a strong May (50 orders, $491 revenue). Your biggest lever right now is <strong>photo quality</strong>: 197 listings have poor or severe photo issues with an estimated <strong>$990 in sell-through value</strong> sitting behind them.
+      </div>
+    </div>
+
+    <!-- Hero Metrics -->
+    <div class="hero-grid" id="heroGrid">
+
+      <!-- Store Health Gauge -->
+      <div class="hero-card featured" style="grid-column: span 1;">
+        <div class="hero-eyebrow">Store Health</div>
+        <div class="health-gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 120 70">
+            <!-- half-circle arc: cx=60, cy=60, r=50, from 180deg to 0deg -->
+            <path class="gauge-track"
+              d="M 10 60 A 50 50 0 0 1 110 60"
+              stroke-dasharray="157 157" stroke-dashoffset="0"/>
+            <path class="gauge-fill" id="gaugeFill"
+              d="M 10 60 A 50 50 0 0 1 110 60"
+              stroke="#e07b6f"
+              stroke-dasharray="157 157" stroke-dashoffset="136"/>
+            <text class="gauge-label" x="60" y="58" text-anchor="middle" dominant-baseline="middle" id="gaugeText">13</text>
+            <text class="gauge-sub" x="60" y="69" text-anchor="middle">/100</text>
+          </svg>
+        </div>
+        <div class="hero-sublabel" style="text-align:center;">
+          262 red &middot; 3 yellow &middot; 0 green<br>
+          Cassini avg 27.7 &middot; photo OK rate 1.5%
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-eyebrow">30-Day Revenue</div>
+        <div class="hero-number gold">$491</div>
+        <div class="hero-sublabel">50 orders &middot; avg $9.83/order<br>May 8 – Jun 6</div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-eyebrow">This Week Revenue</div>
+        <div class="hero-number danger">$0</div>
+        <div class="hero-sublabel">0 sales &middot; repriced tonight<br>May 31 – Jun 6</div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-eyebrow">Active Watchers</div>
+        <div class="hero-number warning">29</div>
+        <div class="hero-sublabel">Across 23 listings<br>Potential buy signals</div>
+      </div>
+
+      <div class="hero-card alert">
+        <div class="hero-eyebrow">Photo Revenue Risk</div>
+        <div class="hero-number danger">$990</div>
+        <div class="hero-sublabel">197 listings — poor or severe<br>Market value trapped behind bad photos</div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-eyebrow">Best Offer</div>
+        <div class="hero-number gold">39</div>
+        <div class="hero-sublabel">Enabled tonight (was 0)<br>226 more not eligible</div>
+      </div>
+
+      <div class="hero-card positive">
+        <div class="hero-eyebrow">Promo Spend</div>
+        <div class="hero-number success">$3.54</div>
+        <div class="hero-sublabel">Per month projected<br>Down from $21 — budget optimized</div>
+      </div>
+
+    </div>
+
+    <!-- Sales Velocity -->
+    <section class="section-gap">
+      <div class="section-header">
+        <h2 class="section-title">Sales Velocity</h2>
+        <span class="section-count">Last 4 weeks</span>
+      </div>
+
+      <div class="velocity-row">
+        <div class="velocity-week">
+          <div class="velocity-week-label">May 10–16</div>
+          <div class="velocity-week-val">$314</div>
+          <div class="velocity-week-sub">17 orders</div>
+        </div>
+        <div class="velocity-week">
+          <div class="velocity-week-label">May 17–23</div>
+          <div class="velocity-week-val">$102</div>
+          <div class="velocity-week-sub">19 orders</div>
+        </div>
+        <div class="velocity-week">
+          <div class="velocity-week-label">May 24–30</div>
+          <div class="velocity-week-val">$75</div>
+          <div class="velocity-week-sub">14 orders</div>
+        </div>
+        <div class="velocity-week current">
+          <div class="velocity-week-label">May 31–Jun 6 (this week)</div>
+          <div class="velocity-week-val zero">$0</div>
+          <div class="velocity-week-sub">Just repriced — watch this space</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">Weekly Revenue</div>
+        <div class="chart-sub">Bar height = dollars. Zero this week reflects tonight's reprice reset — prior 3 weeks averaged $164.</div>
+        <div class="chart-wrap" style="height:180px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts row -->
+    <section class="section-gap">
+      <div class="section-header">
+        <h2 class="section-title">Store Composition</h2>
+      </div>
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-label">Price Distribution — 265 listings</div>
+          <div class="chart-sub">83% of inventory sits at the $1.99 floor. The 45 listings above $3.99 account for the majority of revenue opportunity.</div>
+          <div class="price-bars" id="priceBars"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-label">Cassini Health</div>
+          <div class="chart-sub">eBay's search visibility score. Red = suppressed in search.</div>
+          <div class="chart-wrap" style="height:160px; margin-top:8px;">
+            <canvas id="cassiniChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-label">Photo Quality</div>
+          <div class="chart-sub">Of 200 audited listings. Good + OK is only 3 listings.</div>
+          <div class="chart-wrap" style="height:160px; margin-top:8px;">
+            <canvas id="photoChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Buy Radar -->
+    <section class="section-gap">
+      <div class="section-header">
+        <h2 class="section-title">Buy Radar</h2>
+        <span class="section-count" id="radarCount">— clean flips</span>
+      </div>
+      <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-md);">
+        Underpriced listings tracked by the resale agent. Buy these, relist at market. Net profit shown is after eBay fees, shipping, and handling.
+      </p>
+      <div class="radar-summary">
+        <div class="radar-stat">
+          <div class="radar-stat-num" id="radarCleanCount">63</div>
+          <div class="radar-stat-label">Clean flips right now</div>
+        </div>
+        <div class="radar-divider"></div>
+        <div class="radar-stat">
+          <div class="radar-stat-num">$15–$80</div>
+          <div class="radar-stat-label">Sweet-spot buy range</div>
+        </div>
+        <div class="radar-divider"></div>
+        <div class="radar-stat">
+          <div class="radar-stat-num">$128</div>
+          <div class="radar-stat-label">Avg net profit (top 8)</div>
+        </div>
+        <div class="radar-divider"></div>
+        <div class="radar-stat">
+          <div class="radar-stat-num">31/mo</div>
+          <div class="radar-stat-label">Avg velocity (top 8)</div>
+        </div>
+      </div>
+      <details class="son-rules">
+        <summary>Quick-buy rules (for you &amp; your son)</summary>
+        <div class="son-rules-body">
+          <strong>Buy if ALL three:</strong> Net profit shown is $15+, sold 10+ times last 30 days, no red badges.<br>
+          <span class="skip">Skip if ANY of these:</span> Spending more than $75 on one card, comp count under 8, seller under 98% feedback, player hasn't started a game this season.<br><br>
+          <strong>Green number + no red = BUY. Red badge anywhere = SKIP.</strong>
+        </div>
+      </details>
+      <div class="flip-grid" id="flipGrid"></div>
+    </section>
+
+    <!-- Attention Cards -->
+    <section class="section-gap">
+      <div class="section-header">
+        <h2 class="section-title">Needs Attention</h2>
+        <span class="section-count">Ranked by value at risk</span>
+      </div>
+      <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-md);">
+        These listings combine high market potential with fixable problems — watchers with no offer, poor photos on valuable cards, or low Cassini visibility. Fix one per day.
+      </p>
+      <div class="attention-grid" id="attentionGrid"></div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="index.html">Shop</a>
+      <a href="lots.html">Lots</a>
+      <a href="orders_watch.html">Orders</a>
+      <a href="seller_hub.html">Seller Hub</a>
+      <a href="https://www.ebay.com/sch/i.html?_ssn=harpua2001" target="_blank" rel="noopener">eBay Store</a>
+    </div>
+    <div class="footer-copy">Harpua2001 &middot; on eBay since 1998</div>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const D = {
+  generatedAt: "2026-06-07T04:43:00Z",
+  hero: {
+    totalListings: 265,
+    watchers: 29,
+    watcherListings: 23,
+    revenue30d: 491.46,
+    revenue7d: 0,
+    orders30d: 50,
+    avgCassini: 27.7,
+    bestOfferEnabled: 39,
+    storeHealth: 13.1,
+    revenueAtStake: 990.52,
+    staleListings: 22,
+    promoSpend: 3.54,
+    cassiniRed: 262, cassiniYellow: 3, cassiniGreen: 0
+  },
+  weeklyRevenue: [313.93, 102.49, 75.04, 0.0],
+  weeklyOrders:  [17, 19, 14, 0],
+  weekLabels: ["May 10–16","May 17–23","May 24–30","May 31–Jun 6"],
+  priceDist: {
+    "$1.99": 220, "$2–$4.99": 16, "$5–$9.99": 24, "$10–$24.99": 4, "$25+": 1
+  },
+  cassini: { Red: 262, Yellow: 3, Green: 0 },
+  photoSeverity: { Severe: 68, Poor: 129, OK: 2, Good: 1, Unknown: 65 },
+  flipOpportunities: [
+    { title:"PATRICK MAHOMES Panini GREEN PRIZM REFRACTOR College Rookie", price:20.0, net:142.9, vel:31, pct_below:91, url:"https://www.ebay.com/itm/187941589043", image:"https://i.ebayimg.com/images/g/hQsAAeSwCqBpDWT5/s-l225.jpg" },
+    { title:"Patrick Mahomes II 2025 Panini Prizm No Huddle Disco Flashback", price:22.5, net:140.4, vel:33, pct_below:90, url:"https://www.ebay.com/itm/327071831062", image:"https://i.ebayimg.com/images/g/h84AAeSwqP5pxsB4/s-l225.jpg" },
+    { title:"2018 Panini Prizm #102 Patrick Mahomes Second Year Kansas City", price:24.99, net:137.91, vel:31, pct_below:88, url:"https://www.ebay.com/itm/126900932107", image:"https://i.ebayimg.com/images/g/UtQAAOSwDBRnlABK/s-l225.jpg" },
+    { title:"2024 Panini Rookies & Stars Thrillers Patrick Mahomes II", price:27.99, net:134.91, vel:31, pct_below:87, url:"https://www.ebay.com/itm/397688017375", image:"https://i.ebayimg.com/images/g/lfEAAeSwH1RprP33/s-l225.jpg" },
+    { title:"Patrick Mahomes 2017 Panini Elite Draft Picks #145 Rookie", price:29.99, net:132.91, vel:14, pct_below:86, url:"https://www.ebay.com/itm/117091143724", image:"https://i.ebayimg.com/images/g/sw4AAeSwpvJpuCYb/s-l225.jpg" },
+    { title:"2020 Panini Prizm All Out! No Huddle Prizm Patrick Mahomes II", price:34.99, net:127.91, vel:31, pct_below:84, url:"https://www.ebay.com/itm/116225327353", image:"https://i.ebayimg.com/images/g/EEAAAOSwFY1mdOs8/s-l225.jpg" },
+    { title:"2023 Panini Prizm #2 Patrick Mahomes II Prizmatic GRADED 10", price:35.0, net:127.9, vel:31, pct_below:84, url:"https://www.ebay.com/itm/285672372048", image:"https://i.ebayimg.com/images/g/LdkAAOSwIjhltEnB/s-l225.jpg" },
+    { title:"2025 Panini Prizm Football Mega Box SEALED — Feat. Patrick Mahomes", price:39.69, net:123.21, vel:34, pct_below:82, url:"https://www.ebay.com/itm/406905999068", image:"https://i.ebayimg.com/images/g/y~MAAeSwjX1p0y1n/s-l225.jpg" }
+  ],
+  attentionCards: [
+    {
+      item_id: "306985615478",
+      title: "2025 Topps Signature Class Football — Travis Etienne Jr AUTO 150/225",
+      price: 34.56, cassini: 20, photo_severity: "UNKNOWN", photo_count: 1,
+      watchers: 0, sell_potential: 34.56,
+      labels: ["low visibility","1 photo","$34.56 market"],
+      thumb: "https://i.ebayimg.com/images/g/U5QAAeSwPZdqI4nz/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2025-Topps-Signature-Class-Football-Travis-Etienne-Jr-AUTO-150-225-/306985615478"
+    },
+    {
+      item_id: "306939333836",
+      title: "2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP Titans",
+      price: 9.99, cassini: 55, photo_severity: "POOR", photo_count: 2,
+      watchers: 3, sell_potential: 12.57,
+      labels: ["3 watching","poor photos","$12.57 market"],
+      thumb: "https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836"
+    },
+    {
+      item_id: "306981279666",
+      title: "2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/1 Prizm",
+      price: 14.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
+      watchers: 0, sell_potential: 14.99,
+      labels: ["poor photos","low visibility","$14.99 market"],
+      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-1-Prizm-/306981279666"
+    },
+    {
+      item_id: "306960252436",
+      title: "2025 Panini Absolute — Drake Maye #79",
+      price: 1.99, cassini: 15, photo_severity: "SEVERE", photo_count: 1,
+      watchers: 0, sell_potential: 12.84,
+      labels: ["1 photo","low visibility","$12.84 market"],
+      thumb: "https://i.ebayimg.com/images/g/oREAAeSwamJqE5fe/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2025-Panini-Absolute-Drake-Maye-79-/306960252436"
+    },
+    {
+      item_id: "306939369726",
+      title: "2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor NFL",
+      price: 2.99, cassini: 40, photo_severity: "POOR", photo_count: 2,
+      watchers: 2, sell_potential: 11.34,
+      labels: ["2 watching","poor photos","$11.34 market"],
+      thumb: "https://i.ebayimg.com/images/g/S5kAAeSwWuFqC3j7/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-NFL-/306939369726"
+    },
+    {
+      item_id: "306939367698",
+      title: "2025 Bowman University Chrome — Reggie Virgil Jr Auto",
+      price: 3.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
+      watchers: 0, sell_potential: 12.49,
+      labels: ["poor photos","low visibility","$12.49 market"],
+      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2025-Bowman-University-Chrome-Reggie-Virgil-Jr-Auto-/306939367698"
+    },
+    {
+      item_id: "306939386698",
+      title: "1994 Sportflics 2000 Rookie & Traded — Deion Sanders",
+      price: 14.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
+      watchers: 0, sell_potential: 14.99,
+      labels: ["poor photos","low visibility"],
+      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
+      url: "https://www.ebay.com/itm/1994-Sportflics-2000-Deion-Sanders-/306939386698"
+    },
+    {
+      item_id: "306939389698",
+      title: "2025-26 Topps Chrome Cam Ward RC Pink X Fractor — Alt Version",
+      price: 27.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
+      watchers: 0, sell_potential: 12.57,
+      labels: ["poor photos","low visibility"],
+      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
+      url: "https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939389698"
+    }
+  ]
+};
+
+// ============================================================
+// ADMIN GATE
+// ============================================================
+function handleGoogleSignIn(response) {
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    if (payload.email === window.__ADMIN_EMAIL) {
+      localStorage.setItem('h2k_admin_email', payload.email);
+      document.body.classList.add('is-admin');
+      document.getElementById('adminGate').classList.add('hidden');
+    } else {
+      alert('Access denied: ' + payload.email);
+    }
+  } catch(e) { console.error(e); }
+}
+
+(function initAdminGate() {
+  try {
+    var stored = localStorage.getItem('h2k_admin_email');
+    if (stored === window.__ADMIN_EMAIL) {
+      document.body.classList.add('is-admin');
+      document.getElementById('adminGate').classList.add('hidden');
+    }
+  } catch(e) {}
+})();
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+document.getElementById('themeBtn').addEventListener('click', function() {
+  const html = document.documentElement;
+  if (html.getAttribute('data-theme') === 'cream') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('h2k_theme', 'dark');
+    this.textContent = 'Light';
+  } else {
+    html.setAttribute('data-theme', 'cream');
+    localStorage.setItem('h2k_theme', 'cream');
+    this.textContent = 'Dark';
+  }
+});
+(function() {
+  const t = localStorage.getItem('h2k_theme');
+  const btn = document.getElementById('themeBtn');
+  if (t === 'cream') btn.textContent = 'Dark';
+})();
+
+// ============================================================
+// RENDER PRICE BARS
+// ============================================================
+function renderPriceBars() {
+  const container = document.getElementById('priceBars');
+  const data = D.priceDist;
+  const max = Math.max(...Object.values(data));
+  container.innerHTML = Object.entries(data).map(([label, count]) => {
+    const pct = Math.round((count / max) * 100);
+    return `<div class="price-row">
+      <div class="price-band-label">${label}</div>
+      <div class="price-bar-track">
+        <div class="price-bar-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="price-count">${count}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// RENDER ATTENTION CARDS
+// ============================================================
+function renderAttentionCards() {
+  const grid = document.getElementById('attentionGrid');
+  const labelClass = {
+    'watching': 'label-watch',
+    'photo': 'label-photo',
+    'visibility': 'label-visibility',
+    'market': 'label-market'
+  };
+  grid.innerHTML = D.attentionCards.map(card => {
+    const labels = card.labels.map(l => {
+      let cls = 'label-visibility';
+      if (l.includes('watch')) cls = 'label-watch';
+      else if (l.includes('photo') || l.includes('photo')) cls = 'label-photo';
+      else if (l.includes('market') || l.includes('$')) cls = 'label-market';
+      return `<span class="attn-label ${cls}">${l}</span>`;
+    }).join('');
+    const thumb = card.thumb && card.thumb !== 'https://i.ebayimg.com/images/g/1/s-l500.jpg'
+      ? `<img class="attn-thumb" src="${card.thumb}" alt="" loading="lazy">`
+      : `<div class="attn-thumb-placeholder">&#9824;</div>`;
+    return `<a class="attn-card" href="${card.url}" target="_blank" rel="noopener" title="${card.title}">
+      ${thumb}
+      <div class="attn-body">
+        <div class="attn-title">${card.title}</div>
+        <div class="attn-price">$${card.price.toFixed(2)}</div>
+        <div class="attn-labels">${labels}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { enabled: true } }
+};
+
+function getChartColors() {
+  const cream = document.documentElement.getAttribute('data-theme') === 'cream';
+  return {
+    gridColor: cream ? 'rgba(13,31,60,.08)' : 'rgba(255,255,255,.06)',
+    textColor: cream ? '#5a6a7a' : '#7a7268',
+    gold: '#c9a542',
+    danger: '#e07b6f',
+    warning: '#e0b54a',
+    success: '#7fc77a'
+  };
+}
+
+let revenueChart, cassiniChart, photoChart;
+
+function buildRevenueChart() {
+  const c = getChartColors();
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  if (revenueChart) revenueChart.destroy();
+  revenueChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: D.weekLabels,
+      datasets: [{
+        data: D.weeklyRevenue,
+        backgroundColor: D.weeklyRevenue.map((v, i) => i === 3 ? 'rgba(224,123,111,.25)' : 'rgba(201,165,66,.35)'),
+        borderColor: D.weeklyRevenue.map((v, i) => i === 3 ? c.danger : c.gold),
+        borderWidth: 1.5,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      scales: {
+        x: { grid: { color: c.gridColor }, ticks: { color: c.textColor, font: { family: 'Familjen Grotesk', size: 11 } } },
+        y: {
+          grid: { color: c.gridColor }, ticks: { color: c.textColor, font: { family: 'JetBrains Mono', size: 10 },
+          callback: v => '$' + v }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `$${ctx.parsed.y.toFixed(2)} revenue (${D.weeklyOrders[ctx.dataIndex]} orders)`
+          }
+        }
+      }
+    }
+  });
+}
+
+function buildCassiniChart() {
+  const c = getChartColors();
+  const ctx = document.getElementById('cassiniChart').getContext('2d');
+  if (cassiniChart) cassiniChart.destroy();
+  cassiniChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Red (invisible)', 'Yellow (limited)', 'Green (healthy)'],
+      datasets: [{
+        data: [262, 3, 0],
+        backgroundColor: ['rgba(224,123,111,.7)', 'rgba(224,181,74,.7)', 'rgba(127,199,122,.7)'],
+        borderColor: [c.danger, c.warning, c.success],
+        borderWidth: 1.5,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      cutout: '64%',
+      plugins: {
+        legend: {
+          display: true, position: 'bottom',
+          labels: { color: c.textColor, font: { family: 'Familjen Grotesk', size: 10 }, boxWidth: 10, padding: 8 }
+        },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}` } }
+      }
+    }
+  });
+}
+
+function buildPhotoChart() {
+  const c = getChartColors();
+  const ctx = document.getElementById('photoChart').getContext('2d');
+  if (photoChart) photoChart.destroy();
+  photoChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Severe (1 photo)', 'Poor (2 photos)', 'OK', 'Good', 'Not audited'],
+      datasets: [{
+        data: [68, 129, 2, 1, 65],
+        backgroundColor: [
+          'rgba(224,123,111,.8)', 'rgba(224,181,74,.6)',
+          'rgba(127,199,122,.5)', 'rgba(127,199,122,.8)', 'rgba(255,255,255,.08)'
+        ],
+        borderColor: [c.danger, c.warning, c.success, c.success, 'rgba(255,255,255,.1)'],
+        borderWidth: 1.5, hoverOffset: 4
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      cutout: '64%',
+      plugins: {
+        legend: {
+          display: true, position: 'bottom',
+          labels: { color: c.textColor, font: { family: 'Familjen Grotesk', size: 10 }, boxWidth: 10, padding: 6 }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// GAUGE ANIMATION
+// ============================================================
+function animateGauge(score) {
+  const fill = document.getElementById('gaugeFill');
+  const label = document.getElementById('gaugeText');
+  const total = 157; // full arc dasharray
+  const offset = total - (score / 100) * total;
+
+  // Color by score
+  let color = '#e07b6f'; // red
+  if (score >= 60) color = '#7fc77a';
+  else if (score >= 35) color = '#e0b54a';
+
+  fill.setAttribute('stroke', color);
+
+  // Animate via rAF
+  const start = performance.now();
+  const duration = 900;
+  const startOffset = total; // from full offset (empty)
+  function frame(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const current = startOffset - (startOffset - offset) * eased;
+    fill.setAttribute('stroke-dashoffset', current);
+    const displayScore = Math.round(score * eased);
+    label.textContent = displayScore;
+    if (t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// ============================================================
+// RENDER FLIP GRID
+// ============================================================
+function renderFlipGrid() {
+  const grid = document.getElementById('flipGrid');
+  if (!grid) return;
+  grid.innerHTML = D.flipOpportunities.map(f => {
+    const badge = f.vel >= 10
+      ? '<span class="flip-badge badge-flip">FLIP</span>'
+      : '<span class="flip-badge badge-hold">HOLD</span>';
+    return `<a class="flip-card" href="${f.url}" target="_blank" rel="noopener">
+      <img class="flip-thumb" src="${f.image}" alt="" loading="lazy">
+      <div class="flip-body">
+        <div class="flip-title">${f.title}</div>
+        <div class="flip-metrics">
+          ${badge}
+          <span class="flip-buy">Buy $${f.price.toFixed(2)}</span>
+          <span class="flip-net">+$${f.net.toFixed(0)} net</span>
+        </div>
+        <div class="flip-vel">${f.vel}/mo velocity &middot; ${f.pct_below}% below market</div>
+      </div>
+    </a>`;
+  }).join('');
+  const countEl = document.getElementById('radarCleanCount');
+  if (countEl) countEl.textContent = '63';
+  const sectionCount = document.getElementById('radarCount');
+  if (sectionCount) sectionCount.textContent = '63 clean flips';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  renderPriceBars();
+  renderFlipGrid();
+  renderAttentionCards();
+  buildRevenueChart();
+  buildCassiniChart();
+  buildPhotoChart();
+  setTimeout(() => animateGauge(D.hero.storeHealth), 300);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+// Re-render charts on theme change (so colors update)
+const observer = new MutationObserver(() => {
+  buildRevenueChart();
+  buildCassiniChart();
+  buildPhotoChart();
+});
+observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>
+</body>
+</html>

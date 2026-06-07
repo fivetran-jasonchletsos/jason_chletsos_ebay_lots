@@ -17,21 +17,26 @@
       "criteria": "age_days <= 60"
     },
     "aggressive": {
-      "rate": 0.15,
-      "label": "AGGRESSIVE",
+      "rate": 0.08,
+      "label": "AGGRESSIVE (capped — stale listings need price drops not more spend)",
       "criteria": "age_days > 60 AND age_days <= 120 AND watchers == 0"
     },
     "max": {
-      "rate": 0.2,
-      "label": "MAX",
+      "rate": 0.08,
+      "label": "MAX (capped — flag for relist)",
       "criteria": "age_days > 120"
     }
   },
-  "min_margin_pct_to_promote": 0.0,
+  "price_band_tiers": [
+    {"max_price": 2.00, "tier": "no_ad",    "note": "bulk $1.99 singles — no promo, thin margin"},
+    {"max_price": 9.99, "tier": "low",      "note": "$2-$10 — 3% floor rate"},
+    {"max_price": 9999, "tier": "standard", "note": "$10+ named items — 8% full push"}
+  ],
+  "min_margin_pct_to_promote": 0.05,
   "skip_categories": [],
   "max_total_30d_ad_spend_usd": 200,
   "default_30d_sellthrough": 0.25,
-  "unknown_age_default_tier": "standard",
+  "unknown_age_default_tier": "low",
   "default_campaign": {
     "name": "Harpua2001 Priority Manual-Bid 2026-05-17",
     "funding_model": "COST_PER_SALE",
