@@ -320,6 +320,29 @@ a:hover { text-decoration: underline; opacity: .85; }
 .flip-net { font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--success); font-weight: 700; }
 .flip-vel { font-size: var(--fs-xs); color: var(--text-dim); }
 
+/* ---- TASK LIST ---- */
+.today-tasks{background:var(--surface);border:1px solid var(--border-mid);border-radius:var(--r-lg);margin-bottom:var(--space-xl);overflow:hidden;}
+.today-tasks-header{padding:16px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.today-tasks-header h2{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:600;font-size:var(--fs-h3);color:var(--text);}
+.task-count-badge{background:var(--gold);color:var(--bg);border-radius:20px;padding:3px 10px;font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+.task-list{list-style:none;}
+.task-item{display:grid;grid-template-columns:30px 1fr auto;align-items:start;gap:12px;padding:14px 22px;border-bottom:1px dashed var(--border);transition:background var(--t-fast);}
+.task-item:last-child{border-bottom:none;}
+.task-item:hover{background:var(--surface-2);}
+.task-priority{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:var(--fs-xs);font-weight:700;background:var(--task-bg,var(--surface-3));color:var(--task-fg,var(--text-muted));border:1px solid var(--task-border,var(--border));flex-shrink:0;}
+.task-item.p0{--task-bg:rgba(224,123,111,0.12);--task-fg:var(--danger);--task-border:rgba(224,123,111,0.35);}
+.task-item.p1{--task-bg:rgba(224,181,74,0.12);--task-fg:var(--warning);--task-border:rgba(224,181,74,0.35);}
+.task-item.p2{--task-bg:rgba(127,199,122,0.10);--task-fg:var(--success);--task-border:rgba(127,199,122,0.35);}
+.task-body{min-width:0;}
+.task-title{font-size:var(--fs-base);font-weight:600;color:var(--text);line-height:1.35;margin-bottom:3px;}
+.task-why{font-size:var(--fs-xs);color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:.03em;}
+.task-action{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:transparent;color:var(--gold);border:1px solid var(--border-mid);border-radius:var(--r-sm);font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:all var(--t-fast);}
+.task-action:hover{background:var(--gold);color:var(--bg);border-color:var(--gold);text-decoration:none;}
+/* ---- TOOLS GRID ---- */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;}
+.tool-link{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);text-decoration:none;font-size:var(--fs-sm);font-weight:600;color:var(--text-muted);transition:all var(--t-fast);}
+.tool-link:hover{color:var(--gold);border-color:var(--border-mid);background:var(--surface-2);text-decoration:none;}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--tl-color,var(--border-mid));flex-shrink:0;}
 /* ---- CHARTS ROW ---- */
 .charts-grid {
   display: grid;
@@ -538,6 +561,17 @@ a:hover { text-decoration: underline; opacity: .85; }
       </div>
     </div>
 
+    <!-- What to do today -->
+    <div class="today-tasks">
+      <div class="today-tasks-header">
+        <h2>What to do today</h2>
+        <span class="task-count-badge" id="taskCountBadge">loading…</span>
+      </div>
+      <ul class="task-list" id="taskList">
+        <li style="padding:18px 22px;color:var(--text-muted);font-size:var(--fs-sm);">Loading…</li>
+      </ul>
+    </div>
+
     <!-- Hero Metrics -->
     <div class="hero-grid" id="heroGrid">
 
@@ -724,6 +758,35 @@ a:hover { text-decoration: underline; opacity: .85; }
         These listings combine high market potential with fixable problems — watchers with no offer, poor photos on valuable cards, or low Cassini visibility. Fix one per day.
       </p>
       <div class="attention-grid" id="attentionGrid"></div>
+    </section>
+
+  </div>
+    <!-- Specialist Tools -->
+    <section class="section-gap">
+      <div class="section-header">
+        <h2 class="section-title">All Tools</h2>
+        <span class="section-count">Every agent, one click</span>
+      </div>
+      <div class="tools-grid">
+        <a href="photo_audit.html"       class="tool-link"><span class="tl-dot" style="--tl-color:var(--danger)"></span>Photo Audit</a>
+        <a href="repricing.html"         class="tool-link"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Repricing</a>
+        <a href="relist.html"            class="tool-link"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Relist Unsold</a>
+        <a href="cassini.html"           class="tool-link"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Cassini Score</a>
+        <a href="best_offer.html"        class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Best Offer</a>
+        <a href="promoted_listings.html" class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Promoted Listings</a>
+        <a href="orders_watch.html"      class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Orders Watch</a>
+        <a href="sold.html"              class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Recently Sold</a>
+        <a href="resale_flips.html"      class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Resale Flips</a>
+        <a href="price_drops.html"       class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Price Drops</a>
+        <a href="seller_hub.html"        class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Seller Hub</a>
+        <a href="daily.html"             class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Daily Digest</a>
+        <a href="watchers.html"          class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Watchers</a>
+        <a href="top_sellers.html"       class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Top Sellers</a>
+        <a href="specifics.html"         class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Item Specifics</a>
+        <a href="price_consistency.html" class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Price Gate</a>
+        <a href="returns.html"           class="tool-link"><span class="tl-dot" style="--tl-color:var(--danger)"></span>Returns</a>
+        <a href="collx_vs_ebay.html"     class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>CollX vs eBay</a>
+      </div>
     </section>
 
   </div>
@@ -1109,6 +1172,49 @@ function animateGauge(score) {
 }
 
 // ============================================================
+// RENDER TASK LIST
+// ============================================================
+function renderTasks() {
+  const tasks = [];
+  const severe = D.photoSeverity.Severe || 0;
+  if (severe > 0) tasks.push({
+    p:'p0', title: severe + ' listings need a photo reshoot',
+    why: 'SEVERE flag = 1 photo only. Cassini awards up to 25 pts for 8+ photos at 1600px — the single biggest score lever you have.',
+    link:'photo_audit.html', action:'View queue'
+  });
+  tasks.push({
+    p:'p0', title: '2 manual auction conversions still outstanding',
+    why: 'Travis Etienne AUTO + Mahomes Icon Red — end listings and relist as auctions. API cannot do this for you.',
+    link:'https://www.ebay.com/itm/306985615478', action:'Etienne listing'
+  });
+  if (D.hero.avgCassini < 40) tasks.push({
+    p:'p1', title: 'Cassini avg ' + D.hero.avgCassini + '/100 — ' + D.hero.cassiniRed + ' listings in red',
+    why: 'Fill item specifics (+15-20 pts each). Run specifics agent again — 133 listings still have gaps.',
+    link:'cassini.html', action:'See signals'
+  });
+  tasks.push({
+    p:'p1', title: 'Check Monday sales data — 265 listings repriced tonight',
+    why: 'Emergency reprice just pushed. Pull orders Monday and decide what still needs to move.',
+    link:'orders_watch.html', action:'Orders watch'
+  });
+  tasks.push({
+    p:'p2', title: '63 flip opportunities in the Buy Radar right now',
+    why: 'Mahomes parallels at $20-40 buy price, $120-143 net profit, 31-34 sales/month velocity.',
+    link:'resale_flips.html', action:'Browse flips'
+  });
+  document.getElementById('taskCountBadge').textContent = tasks.length + ' tasks';
+  document.getElementById('taskList').innerHTML = tasks.map((t, i) => `
+    <li class="task-item ${t.p}">
+      <div class="task-priority">${i+1}</div>
+      <div class="task-body">
+        <div class="task-title">${t.title}</div>
+        <div class="task-why">${t.why}</div>
+      </div>
+      <a href="${t.link}" class="task-action" target="${t.link.startsWith('http')?'_blank':'_self'}">${t.action} &rarr;</a>
+    </li>`).join('');
+}
+
+// ============================================================
 // RENDER FLIP GRID
 // ============================================================
 function renderFlipGrid() {
@@ -1141,6 +1247,7 @@ function renderFlipGrid() {
 // INIT
 // ============================================================
 function init() {
+  renderTasks();
   renderPriceBars();
   renderFlipGrid();
   renderAttentionCards();
