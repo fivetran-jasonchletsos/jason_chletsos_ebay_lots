@@ -792,8 +792,7 @@ function handleGoogleSignIn(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
     if (payload.email === window.__ADMIN_EMAIL) {
       localStorage.setItem('h2k_admin_email', payload.email);
-      document.body.classList.add('is-admin');
-      document.getElementById('adminGate').classList.add('hidden');
+      location.reload();
     } else {
       alert('Access denied: ' + payload.email);
     }
