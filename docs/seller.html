@@ -738,9 +738,20 @@ a:hover { text-decoration: underline; opacity: .85; }
         <h2 class="section-title">Buy Radar</h2>
         <span class="section-count" id="radarCount">— clean flips</span>
       </div>
-      <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-md);">
-        Underpriced listings tracked by the resale agent. Buy these, relist at market. Net profit shown is after eBay fees, shipping, and handling.
+      <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-sm);">
+        Underpriced listings tracked by the resale agent. Net profit is after all eBay fees and shipping.
       </p>
+      <!-- Buy Radar filters -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--space-md);align-items:center;">
+        <span style="font-size:var(--fs-xs);color:var(--text-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-right:4px;">Buy price:</span>
+        <button class="radar-filter active" data-max="9999" onclick="radarFilter(this,9999)">All</button>
+        <button class="radar-filter" data-max="25"   onclick="radarFilter(this,25)">Under $25</button>
+        <button class="radar-filter" data-max="50"   onclick="radarFilter(this,50)">Under $50</button>
+        <button class="radar-filter" data-max="75"   onclick="radarFilter(this,75)">Under $75</button>
+        <span style="margin-left:12px;font-size:var(--fs-xs);color:var(--text-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;">Sort:</span>
+        <button class="radar-filter active" data-sort="net" onclick="radarSort(this,'net')">Best profit</button>
+        <button class="radar-filter" data-sort="vel" onclick="radarSort(this,'vel')">Fastest</button>
+      </div>
       <div class="radar-summary">
         <div class="radar-stat">
           <div class="radar-stat-num" id="radarCleanCount">63</div>
@@ -954,7 +965,7 @@ async function renderTasks(preloadedListings) {
       why: 'Best Offer drives engagement signals Cassini rewards. Run: python3 best_offer_agent.py --apply',
       link:'#bo-expand', action:'Show all',
       expand: true,
-      expandItems: noBO.slice(0,20).map(l => ({title: (l.title||'').slice(0,55), price: l.price}))
+      expandItems: noBO.slice(0,20).map(l => ({title: (l.title||'').slice(0,55), price: l.price, item_id: l.item_id}))
     });
 
     // P1 — stale listings
@@ -962,7 +973,7 @@ async function renderTasks(preloadedListings) {
       p:'p1',
       title: stale.length + ' listings are 60+ days old with zero watchers',
       why: 'End and relist to get a fresh Cassini boost. Or drop price — silence means the market said no.',
-      link:'#relist-expand', action:'Show all', expand: true, expandItems: stale.slice(0,20).map(l => ({title:(l.title||'').slice(0,55),price:l.price}))
+      link:'#relist-expand', action:'Show all', expand: true, expandItems: stale.slice(0,20).map(l => ({title:(l.title||'').slice(0,55),price:l.price,item_id:l.item_id}))
     });
 
     // P2 — underpriced vs market
@@ -1027,9 +1038,28 @@ async function renderTasks(preloadedListings) {
       btn = `<a href="${t.link}" class="task-action" target="_blank">${t.action} &rarr;</a>`;
     }
     const expandHtml = t.expandItems && t.expandItems.length ? `
-      <ul class="task-expand" style="margin:10px 22px 0 54px;padding:0;list-style:none;border-top:1px dashed var(--border);padding-top:10px;">
-        ${t.expandItems.slice(0,12).map(it => `<li style="font-size:var(--fs-xs);color:var(--text-muted);padding:3px 0;display:flex;justify-content:space-between;"><span>${it.title}</span><span style="color:var(--gold);font-family:'JetBrains Mono',monospace;margin-left:12px;">$${parseFloat(it.price||0).toFixed(2)}</span></li>`).join('')}
-        ${t.expandItems.length > 12 ? `<li style="font-size:var(--fs-xs);color:var(--text-dim);padding-top:6px;">+ ${t.expandItems.length - 12} more</li>` : ''}
+      <ul class="task-expand" style="margin:10px 0 0 0;padding:0;list-style:none;border-top:1px dashed var(--border);padding-top:10px;" data-all='${JSON.stringify(t.expandItems)}' data-showing='12'>
+        ${t.expandItems.slice(0,12).map(it => {
+          const url = it.item_id ? `https://www.ebay.com/itm/${it.item_id}` : '#';
+          return `<a href="${url}" target="_blank" rel="noopener" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:6px;text-decoration:none;gap:12px;transition:background .15s;" onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background=''">
+            <span style="font-size:var(--fs-xs);color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${it.title}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:var(--fs-xs);color:var(--success);flex-shrink:0;">$${parseFloat(it.price||0).toFixed(2)} ↗</span>
+          </a>`;
+        }).join('')}
+        ${t.expandItems.length > 12 ? `<button onclick="
+          const ul=this.closest('ul');
+          const all=JSON.parse(ul.dataset.all);
+          ul.querySelectorAll('a').forEach(el=>el.remove());
+          this.remove();
+          all.forEach(it=>{
+            const url=it.item_id?'https://www.ebay.com/itm/'+it.item_id:'#';
+            const a=document.createElement('a');
+            a.href=url;a.target='_blank';a.rel='noopener';
+            a.style='display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:6px;text-decoration:none;gap:12px;';
+            a.innerHTML='<span style=\'font-size:var(--fs-xs);color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\'>'+(it.title||'')+'</span><span style=\'font-family:JetBrains Mono,monospace;font-size:var(--fs-xs);color:var(--success);flex-shrink:0;\'>\$'+parseFloat(it.price||0).toFixed(2)+' ↗</span>';
+            ul.appendChild(a);
+          });
+        " style="font-size:var(--fs-xs);color:var(--gold);background:none;border:none;cursor:pointer;padding:6px 8px;font-family:inherit;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">+ ${t.expandItems.length - 12} more — show all</button>` : ''}
       </ul>` : '';
     return `<li class="task-item ${t.p}">
       <div class="task-priority">${i+1}</div>
@@ -1196,6 +1226,33 @@ function renderSparkline(orders) {
   if (peakEl && peak > 0) peakEl.textContent = 'peak $' + peak.toFixed(2);
 }
 
+
+// ============================================================
+// BUY RADAR FILTERS
+// ============================================================
+let _allFlips = [];
+let _radarMaxPrice = 9999;
+let _radarSort = 'net';
+
+function radarFilter(btn, maxPrice) {
+  _radarMaxPrice = maxPrice;
+  document.querySelectorAll('.radar-filter[data-max]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _renderRadarFiltered();
+}
+function radarSort(btn, sortKey) {
+  _radarSort = sortKey;
+  document.querySelectorAll('.radar-filter[data-sort]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _renderRadarFiltered();
+}
+function _renderRadarFiltered() {
+  let filtered = _allFlips.filter(f => (f.price||0) <= _radarMaxPrice);
+  if (_radarSort === 'vel') filtered.sort((a,b) => (b.vel||0)-(a.vel||0));
+  else filtered.sort((a,b) => (b.net||0)-(a.net||0));
+  renderFlipGrid(filtered);
+}
+
 // ============================================================
 // RENDER RECENT SALES
 // ============================================================
@@ -1306,6 +1363,7 @@ async function init() {
       brief.innerHTML = txt;
     }
 
+    _allFlips = flipList;
     renderFlipGrid(flipList);
     renderAttentionCards(listings);
     setTimeout(() => animateGauge(13), 300);
