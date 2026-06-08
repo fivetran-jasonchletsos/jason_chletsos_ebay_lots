@@ -835,6 +835,17 @@ async function renderTasks(preloadedListings) {
       });
     }
 
+    // Lot builder nudge when bulk inventory is high
+    const bulkCount = listings.filter(l => parseFloat(l.price||0) <= 1.99).length;
+    if (bulkCount >= 50) {
+      tasks.push({
+        p:'p1',
+        title: bulkCount + ' cards at $1.99 — bundle 10 into a themed lot at $12.99',
+        why: 'A 10-card lot at $12.99 = $7.50 net after fees. Ten individual $1.99 sales = $11.15 net but require 10 shipments. One lot = 7x fewer packages at better margin per transaction.',
+        link:'#needs-attention', action:'View inventory'
+      });
+    }
+
     tasks.push({
       p:'p2',
       title: 'Buy Radar has live flip opportunities below — check before buying',
@@ -1057,7 +1068,7 @@ function renderFlipGrid(flips) {
           <span class="flip-buy">Buy ${fmt(f.price)}</span>
           <span class="flip-net" style="font-size:var(--fs-lg);font-weight:800;">+$${(f.net||0).toFixed(0)}</span>
         </div>
-        <div class="flip-vel">${f.vel||0}/mo &middot; ${f.pct_below||0}% below market</div>
+        <div class="flip-vel">${f.vel||0}/mo velocity &middot; ~${f.vel>0?Math.round(30/f.vel):90}d to sell &middot; ${f.pct_below||0}% below market</div>
       </div>
     </a>`;
   }).join('');
