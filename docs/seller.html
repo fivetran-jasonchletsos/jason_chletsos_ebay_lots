@@ -629,7 +629,7 @@ a:hover { text-decoration: underline; opacity: .85; }
         <span class="section-count">Ranked by what buyers actually buy</span>
       </div>
       <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-md);">
-        These are your best bets to sell this week — scored by what has actually moved: Prizm/Chrome cards, lots, popular players, $2-10 price range.
+        Scored by your actual sales patterns: <strong>Prizm cards = 44% of your sales</strong>, Chrome/lots/autos also move. Sweet spot is $2–10. Clicking opens the live eBay listing.
       </p>
       <div class="attention-grid" id="attentionGrid"></div>
     </section>
@@ -809,6 +809,17 @@ async function renderTasks(preloadedListings) {
     });
 
     // P2 — buy radar
+    // Monday reprice review — check if we're past June 7 reprice and need to review
+    const daysSinceReprice = Math.floor((Date.now() - new Date('2026-06-07T04:00:00Z')) / 86400000);
+    if (daysSinceReprice >= 1 && daysSinceReprice <= 7) {
+      tasks.push({
+        p:'p0',
+        title: 'Review the June 7 reprice — ' + daysSinceReprice + ' day' + (daysSinceReprice===1?'':'s') + ' since 265 listings were repriced',
+        why: 'Run orders_watch_agent.py to pull fresh sales data, then decide what still needs to move.',
+        link:'https://www.ebay.com/sh/ord/', action:'eBay Orders'
+      });
+    }
+
     tasks.push({
       p:'p2',
       title: 'Buy Radar has live flip opportunities below — check before buying',
@@ -1012,6 +1023,8 @@ async function init() {
       if (totalW > 0) txt += `<strong>${totalW} watchers</strong> across ${watchedItems.length} listings. `;
       if (noBO > 0) txt += `${noBO} listings $5+ have no Best Offer — run best_offer_agent.py --apply to fix. `;
       txt += `<strong>${flipList.length} flip opportunities</strong> in Buy Radar below.`;
+      // CollX pricing reminder
+      txt += ` When pricing from CollX: veterans ×0.60, modern RCs ×0.50, hot RCs ×0.70.`;
       brief.innerHTML = txt;
     }
 
