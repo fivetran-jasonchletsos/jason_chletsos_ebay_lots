@@ -570,11 +570,26 @@ a:hover { text-decoration: underline; opacity: .85; }
         <a href="https://www.ebay.com/sh/ord/" target="_blank" style="font-size:var(--fs-xs);color:var(--gold);">eBay Orders &rarr;</a>
       </div>
     </div>
+    <!-- Inventory distribution strip -->
+    <div id="invBands" style="display:flex;gap:4px;margin-bottom:var(--space-lg);align-items:flex-end;height:48px;">
+      <div style="color:var(--text-muted);font-size:var(--fs-xs);">Loading…</div>
+    </div>
+
     <!-- Recent Sales -->
     <section class="section-gap" id="recent-sales">
       <div class="section-header">
         <h2 class="section-title">Recent Sales</h2>
         <span class="section-count" id="salesCount">loading…</span>
+      </div>
+      <!-- 30-day revenue sparkline -->
+      <div style="margin-bottom:var(--space-md);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 16px;">
+        <div style="font-size:var(--fs-xs);color:var(--text-dim);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;">30-day revenue</div>
+        <svg id="sparkline30" viewBox="0 0 300 40" width="100%" height="40" preserveAspectRatio="none" style="display:block;">
+          <text x="150" y="24" text-anchor="middle" fill="var(--text-dim)" font-size="10" font-family="inherit">Loading…</text>
+        </svg>
+        <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--text-dim);margin-top:4px;font-family:'JetBrains Mono',monospace;">
+          <span id="sparkStart">30d ago</span><span id="sparkPeak"></span><span>today</span>
+        </div>
       </div>
       <div id="salesGrid" style="display:grid;gap:8px;">
         <div style="color:var(--text-muted);font-size:var(--fs-sm);padding:8px 0;">Loading sales…</div>
@@ -921,11 +936,83 @@ function renderAttentionCards(listings) {
 }
 
 // ============================================================
+// RENDER INVENTORY PRICE BAND CHART
+// ============================================================
+function renderInvBands(listings) {
+  const wrap = document.getElementById('invBands');
+  if (!wrap || !listings || !listings.length) return;
+  const bands = [
+    {label:'$1.99', color:'var(--text-dim)'},
+    {label:'$2–5',  color:'var(--warning)'},
+    {label:'$5–10', color:'var(--gold)'},
+    {label:'$10–25',color:'var(--success)'},
+    {label:'$25+',  color:'var(--danger)'}
+  ];
+  const counts = [0,0,0,0,0];
+  listings.forEach(l => {
+    const p = parseFloat(l.price||0);
+    if (p <= 1.99) counts[0]++;
+    else if (p <= 5) counts[1]++;
+    else if (p <= 10) counts[2]++;
+    else if (p <= 25) counts[3]++;
+    else counts[4]++;
+  });
+  const maxCount = Math.max(...counts, 1);
+  wrap.innerHTML = counts.map((c, i) => {
+    const h = Math.max(8, Math.round((c / maxCount) * 44));
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${bands[i].color};">${c}</div>
+      <div style="width:100%;height:${h}px;background:${bands[i].color};opacity:.7;border-radius:3px 3px 0 0;transition:height .4s ease;"></div>
+      <div style="font-size:9px;color:var(--text-dim);white-space:nowrap;">${bands[i].label}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// RENDER 30-DAY SPARKLINE
+// ============================================================
+function renderSparkline(orders) {
+  const svg = document.getElementById('sparkline30');
+  if (!svg || !orders || !orders.length) return;
+  const daily = {};
+  const now = Date.now();
+  orders.forEach(o => {
+    const d = (o.created_at||'').slice(0,10);
+    if (d) daily[d] = (daily[d]||0) + parseFloat(o.sale_price||0);
+  });
+  const vals = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now - i*86400000).toISOString().slice(0,10);
+    vals.push(daily[d]||0);
+  }
+  const max = Math.max(...vals, 0.01);
+  const peak = Math.max(...vals);
+  const W = 300, H = 40, pad = 2;
+  const pts = vals.map((v,i) => [
+    pad + (i/(vals.length-1))*(W-2*pad),
+    H - pad - (v/max)*(H-2*pad-4)
+  ]);
+  const line = pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area = line+' L'+pts[pts.length-1][0].toFixed(1)+','+H+' L'+pts[0][0].toFixed(1)+','+H+' Z';
+  const last = pts[pts.length-1];
+  svg.innerHTML = `<defs><linearGradient id="spGrad" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0%" stop-color="var(--gold)" stop-opacity=".3"/>
+    <stop offset="100%" stop-color="var(--gold)" stop-opacity=".03"/>
+  </linearGradient></defs>
+  <path d="${area}" fill="url(#spGrad)" stroke="none"/>
+  <path d="${line}" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.5" fill="var(--gold)"/>`;
+  const peakEl = document.getElementById('sparkPeak');
+  if (peakEl && peak > 0) peakEl.textContent = 'peak $' + peak.toFixed(2);
+}
+
+// ============================================================
 // RENDER RECENT SALES
 // ============================================================
 function renderSales(orders) {
   const grid = document.getElementById('salesGrid');
   if (!grid) return;
+  renderSparkline(orders);
   const sorted = (orders||[]).slice().sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
   const ago = dt => { const d = Math.floor((Date.now()-new Date(dt))/86400000); return d===0?'today':d===1?'yesterday':d+'d ago'; };
   const rev7  = sorted.filter(o => (Date.now()-new Date(o.created_at))/86400000 < 7).reduce((s,o)=>s+parseFloat(o.sale_price||0),0);
@@ -968,7 +1055,7 @@ function renderFlipGrid(flips) {
         <div class="flip-metrics">
           ${badge}
           <span class="flip-buy">Buy ${fmt(f.price)}</span>
-          <span class="flip-net">+$${(f.net||0).toFixed(0)} net</span>
+          <span class="flip-net" style="font-size:var(--fs-lg);font-weight:800;">+$${(f.net||0).toFixed(0)}</span>
         </div>
         <div class="flip-vel">${f.vel||0}/mo &middot; ${f.pct_below||0}% below market</div>
       </div>
@@ -995,6 +1082,7 @@ async function init() {
     const flipList  = flipsD.flips || flipsD;
 
     renderSales(orderList);
+    renderInvBands(listings);
     await renderTasks(listings);
 
     const w = listings.reduce((s,l)=>s+parseInt(l.watchers||0),0);
