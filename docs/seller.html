@@ -570,7 +570,18 @@ a:hover { text-decoration: underline; opacity: .85; }
         <a href="https://www.ebay.com/sh/ord/" target="_blank" style="font-size:var(--fs-xs);color:var(--gold);">eBay Orders &rarr;</a>
       </div>
     </div>
-    <!-- Buy Radar -->
+    <!-- Recent Sales -->
+    <section class="section-gap" id="recent-sales">
+      <div class="section-header">
+        <h2 class="section-title">Recent Sales</h2>
+        <span class="section-count" id="salesCount">loading…</span>
+      </div>
+      <div id="salesGrid" style="display:grid;gap:8px;">
+        <div style="color:var(--text-muted);font-size:var(--fs-sm);padding:8px 0;">Loading sales…</div>
+      </div>
+    </section>
+
+        <!-- Buy Radar -->
     <section class="section-gap" id="buy-radar">
       <div class="section-header">
         <h2 class="section-title">Buy Radar</h2>
@@ -638,116 +649,12 @@ a:hover { text-decoration: underline; opacity: .85; }
 // ============================================================
 // DATA
 // ============================================================
-const D = {
-  generatedAt: "2026-06-07T04:43:00Z",
-  hero: {
-    totalListings: 265,
-    watchers: 29,
-    watcherListings: 23,
-    revenue30d: 491.46,
-    revenue7d: 0,
-    orders30d: 50,
-    avgCassini: 27.7,
-    bestOfferEnabled: 39,
-    storeHealth: 13.1,
-    revenueAtStake: 990.52,
-    staleListings: 22,
-    promoSpend: 3.54,
-    cassiniRed: 262, cassiniYellow: 3, cassiniGreen: 0
-  },
-  weeklyRevenue: [313.93, 102.49, 75.04, 0.0],
-  weeklyOrders:  [17, 19, 14, 0],
-  weekLabels: ["May 10–16","May 17–23","May 24–30","May 31–Jun 6"],
-  priceDist: {
-    "$1.99": 220, "$2–$4.99": 16, "$5–$9.99": 24, "$10–$24.99": 4, "$25+": 1
-  },
-  cassini: { Red: 262, Yellow: 3, Green: 0 },
-  photoSeverity: { Severe: 68, Poor: 129, OK: 2, Good: 1, Unknown: 65 },
-  flipOpportunities: [
-    { title:"PATRICK MAHOMES Panini GREEN PRIZM REFRACTOR College Rookie", price:20.0, net:142.9, vel:31, pct_below:91, url:"https://www.ebay.com/itm/187941589043", image:"https://i.ebayimg.com/images/g/hQsAAeSwCqBpDWT5/s-l225.jpg" },
-    { title:"Patrick Mahomes II 2025 Panini Prizm No Huddle Disco Flashback", price:22.5, net:140.4, vel:33, pct_below:90, url:"https://www.ebay.com/itm/327071831062", image:"https://i.ebayimg.com/images/g/h84AAeSwqP5pxsB4/s-l225.jpg" },
-    { title:"2018 Panini Prizm #102 Patrick Mahomes Second Year Kansas City", price:24.99, net:137.91, vel:31, pct_below:88, url:"https://www.ebay.com/itm/126900932107", image:"https://i.ebayimg.com/images/g/UtQAAOSwDBRnlABK/s-l225.jpg" },
-    { title:"2024 Panini Rookies & Stars Thrillers Patrick Mahomes II", price:27.99, net:134.91, vel:31, pct_below:87, url:"https://www.ebay.com/itm/397688017375", image:"https://i.ebayimg.com/images/g/lfEAAeSwH1RprP33/s-l225.jpg" },
-    { title:"Patrick Mahomes 2017 Panini Elite Draft Picks #145 Rookie", price:29.99, net:132.91, vel:14, pct_below:86, url:"https://www.ebay.com/itm/117091143724", image:"https://i.ebayimg.com/images/g/sw4AAeSwpvJpuCYb/s-l225.jpg" },
-    { title:"2020 Panini Prizm All Out! No Huddle Prizm Patrick Mahomes II", price:34.99, net:127.91, vel:31, pct_below:84, url:"https://www.ebay.com/itm/116225327353", image:"https://i.ebayimg.com/images/g/EEAAAOSwFY1mdOs8/s-l225.jpg" },
-    { title:"2023 Panini Prizm #2 Patrick Mahomes II Prizmatic GRADED 10", price:35.0, net:127.9, vel:31, pct_below:84, url:"https://www.ebay.com/itm/285672372048", image:"https://i.ebayimg.com/images/g/LdkAAOSwIjhltEnB/s-l225.jpg" },
-    { title:"2025 Panini Prizm Football Mega Box SEALED — Feat. Patrick Mahomes", price:39.69, net:123.21, vel:34, pct_below:82, url:"https://www.ebay.com/itm/406905999068", image:"https://i.ebayimg.com/images/g/y~MAAeSwjX1p0y1n/s-l225.jpg" }
-  ],
-  attentionCards: [
-    {
-      item_id: "306985615478",
-      title: "2025 Topps Signature Class Football — Travis Etienne Jr AUTO 150/225",
-      price: 34.56, cassini: 20, photo_severity: "UNKNOWN", photo_count: 1,
-      watchers: 0, sell_potential: 34.56,
-      labels: ["low visibility","$34.56 market"],
-      thumb: "https://i.ebayimg.com/images/g/U5QAAeSwPZdqI4nz/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2025-Topps-Signature-Class-Football-Travis-Etienne-Jr-AUTO-150-225-/306985615478"
-    },
-    {
-      item_id: "306939333836",
-      title: "2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP Titans",
-      price: 9.99, cassini: 55, photo_severity: "POOR", photo_count: 2,
-      watchers: 3, sell_potential: 12.57,
-      labels: ["3 watching","$12.57 market"],
-      thumb: "https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836"
-    },
-    {
-      item_id: "306981279666",
-      title: "2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/1 Prizm",
-      price: 14.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
-      watchers: 0, sell_potential: 14.99,
-      labels: ["low visibility","$14.99 market"],
-      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-1-Prizm-/306981279666"
-    },
-    {
-      item_id: "306960252436",
-      title: "2025 Panini Absolute — Drake Maye #79",
-      price: 1.99, cassini: 15, photo_severity: "SEVERE", photo_count: 1,
-      watchers: 0, sell_potential: 12.84,
-      labels: ["low visibility","$12.84 market"],
-      thumb: "https://i.ebayimg.com/images/g/oREAAeSwamJqE5fe/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2025-Panini-Absolute-Drake-Maye-79-/306960252436"
-    },
-    {
-      item_id: "306939369726",
-      title: "2025 Topps Chrome Football Brock Bowers Fortune 15 Xfractor NFL",
-      price: 2.99, cassini: 40, photo_severity: "POOR", photo_count: 2,
-      watchers: 2, sell_potential: 11.34,
-      labels: ["2 watching","$11.34 market"],
-      thumb: "https://i.ebayimg.com/images/g/S5kAAeSwWuFqC3j7/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2025-Topps-Chrome-Football-Brock-Bowers-Fortune-15-Xfractor-NFL-/306939369726"
-    },
-    {
-      item_id: "306939367698",
-      title: "2025 Bowman University Chrome — Reggie Virgil Jr Auto",
-      price: 3.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
-      watchers: 0, sell_potential: 12.49,
-      labels: ["low visibility","$12.49 market"],
-      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2025-Bowman-University-Chrome-Reggie-Virgil-Jr-Auto-/306939367698"
-    },
-    {
-      item_id: "306939386698",
-      title: "1994 Sportflics 2000 Rookie & Traded — Deion Sanders",
-      price: 14.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
-      watchers: 0, sell_potential: 14.99,
-      labels: ["low visibility"],
-      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
-      url: "https://www.ebay.com/itm/1994-Sportflics-2000-Deion-Sanders-/306939386698"
-    },
-    {
-      item_id: "306939389698",
-      title: "2025-26 Topps Chrome Cam Ward RC Pink X Fractor — Alt Version",
-      price: 27.99, cassini: 15, photo_severity: "POOR", photo_count: 2,
-      watchers: 0, sell_potential: 12.57,
-      labels: ["low visibility"],
-      thumb: "https://i.ebayimg.com/images/g/1/s-l500.jpg",
-      url: "https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939389698"
-    }
-  ]
-};
+// ============================================================
+// LIVE DATA LOADER
+// ============================================================
+const $ = id => document.getElementById(id);
+const fmt$ = v => '$' + parseFloat(v||0).toFixed(2);
+const ago = dt => { const d = Math.floor((Date.now()-new Date(dt))/86400000); return d===0?'today':d===1?'yesterday':d+'d ago'; };
 
 // ============================================================
 // ADMIN GATE
@@ -843,13 +750,16 @@ function animateGauge(score) {
 // ============================================================
 // RENDER TASK LIST
 // ============================================================
-async function renderTasks() {
+async function renderTasks(preloadedListings) {
   const tasks = [];
 
-  // --- Live data from listings_snapshot.json ---
+  // --- Use pre-fetched listings or fetch fresh ---
   try {
-    const snap = await fetch('listings_snapshot.json?_=' + Date.now()).then(r => r.json());
-    const listings = snap.listings || snap;
+    let listings = preloadedListings;
+    if (!listings || !listings.length) {
+      const snap = await fetch('listings_snapshot.json?_=' + Date.now()).then(r => r.json());
+      listings = snap.listings || snap;
+    }
 
     const active = listings.length;
     const elCount = document.getElementById("liveListingCount");
@@ -947,50 +857,128 @@ async function renderTasks() {
 }
 
 // ============================================================
-// RENDER FLIP GRID
+// RENDER ATTENTION CARDS (live from listings)
 // ============================================================
-function renderFlipGrid() {
+function renderAttentionCards(listings) {
+  const grid = document.getElementById('attentionGrid');
+  if (!grid) return;
+  if (!listings || !listings.length) { grid.innerHTML = '<div style="color:var(--text-muted);padding:16px 0;">Loading listings…</div>'; return; }
+  const cards = listings
+    .filter(l => parseFloat(l.price||0) >= 3)
+    .sort((a,b) => parseFloat(b.price||0) - parseFloat(a.price||0))
+    .slice(0, 8);
+  grid.innerHTML = cards.map(l => {
+    const w = parseInt(l.watchers||0);
+    const price = parseFloat(l.price||0);
+    const labels = [w > 0 ? w+' watching' : null, price < 5 ? 'low price' : null].filter(Boolean);
+    const labelHtml = labels.map(lb => `<span class="attn-label ${lb.includes('watch') ? 'label-watch' : 'label-visibility'}">${lb}</span>`).join('');
+    const thumb = l.image_url ? `<img class="attn-thumb" src="${l.image_url}" alt="" loading="lazy">` : `<div class="attn-thumb-placeholder">♠</div>`;
+    return `<a class="attn-card" href="https://www.ebay.com/itm/${l.item_id}" target="_blank" rel="noopener">
+      ${thumb}
+      <div class="attn-body">
+        <div class="attn-title">${(l.title||'').slice(0,60)}</div>
+        <div class="attn-price">$${price.toFixed(2)}</div>
+        <div class="attn-labels">${labelHtml}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+// ============================================================
+// RENDER RECENT SALES
+// ============================================================
+function renderSales(orders) {
+  const grid = document.getElementById('salesGrid');
+  if (!grid) return;
+  const sorted = (orders||[]).slice().sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
+  const ago = dt => { const d = Math.floor((Date.now()-new Date(dt))/86400000); return d===0?'today':d===1?'yesterday':d+'d ago'; };
+  const rev7  = sorted.filter(o => (Date.now()-new Date(o.created_at))/86400000 < 7).reduce((s,o)=>s+parseFloat(o.sale_price||0),0);
+  const rev30 = sorted.reduce((s,o)=>s+parseFloat(o.sale_price||0),0);
+  const cnt = document.getElementById('salesCount');
+  if (cnt) cnt.textContent = sorted.length + ' orders \xb7 $' + rev7.toFixed(2) + ' this week \xb7 $' + rev30.toFixed(2) + ' / 30d';
+  if (!sorted.length) { grid.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-sm);">No sales data — run orders_watch_agent.py to refresh.</div>'; return; }
+  grid.innerHTML = sorted.slice(0,10).map(o => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--border);">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:var(--fs-num-sm);font-weight:700;color:var(--success);min-width:56px;">$${parseFloat(o.sale_price||0).toFixed(2)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:var(--fs-sm);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.item_title||'Unknown'}</div>
+        <div style="font-size:var(--fs-xs);color:var(--text-dim);margin-top:2px;">${ago(o.created_at)} &middot; ${o.ship_state||'—'}</div>
+      </div>
+      <a href="https://www.ebay.com/sh/ord/" target="_blank" style="font-size:var(--fs-xs);color:var(--gold);white-space:nowrap;flex-shrink:0;">View &rarr;</a>
+    </div>`).join('');
+}
+
+// ============================================================
+// RENDER FLIP GRID (live from flips.json)
+// ============================================================
+function renderFlipGrid(flips) {
   const grid = document.getElementById('flipGrid');
   if (!grid) return;
-  grid.innerHTML = D.flipOpportunities.map(f => {
-    const badge = f.vel >= 10
+  const data = (flips||[]).slice(0,12);
+  const countEl = document.getElementById('radarCleanCount');
+  const sectionCount = document.getElementById('radarCount');
+  if (countEl) countEl.textContent = flips ? flips.length : '—';
+  if (sectionCount) sectionCount.textContent = (flips ? flips.length : '—') + ' clean flips';
+  if (!data.length) { grid.innerHTML = '<div style="color:var(--text-muted);padding:16px 0;">No flip data — run resale_flips_agent.py to refresh.</div>'; return; }
+  const fmt = v => '$' + parseFloat(v||0).toFixed(2);
+  grid.innerHTML = data.map(f => {
+    const badge = (f.vel||0) >= 10
       ? '<span class="flip-badge badge-flip">FLIP</span>'
       : '<span class="flip-badge badge-hold">HOLD</span>';
     return `<a class="flip-card" href="${f.url}" target="_blank" rel="noopener">
-      <img class="flip-thumb" src="${f.image}" alt="" loading="lazy">
+      <img class="flip-thumb" src="${f.image||''}" alt="" loading="lazy">
       <div class="flip-body">
         <div class="flip-title">${f.title}</div>
         <div class="flip-metrics">
           ${badge}
-          <span class="flip-buy">Buy $${f.price.toFixed(2)}</span>
-          <span class="flip-net">+$${f.net.toFixed(0)} net</span>
+          <span class="flip-buy">Buy ${fmt(f.price)}</span>
+          <span class="flip-net">+$${(f.net||0).toFixed(0)} net</span>
         </div>
-        <div class="flip-vel">${f.vel}/mo velocity &middot; ${f.pct_below}% below market</div>
+        <div class="flip-vel">${f.vel||0}/mo &middot; ${f.pct_below||0}% below market</div>
       </div>
     </a>`;
   }).join('');
-  const countEl = document.getElementById('radarCleanCount');
-  if (countEl) countEl.textContent = '63';
-  const sectionCount = document.getElementById('radarCount');
-  if (sectionCount) sectionCount.textContent = '63 clean flips';
 }
 
 // ============================================================
-// INIT
+// INIT — fetch all live data
 // ============================================================
-function init() {
-  renderTasks();
-  renderPriceBars();
-  renderFlipGrid();
-  renderAttentionCards();
-  buildRevenueChart();
-  buildCassiniChart();
-  setTimeout(() => animateGauge(D.hero.storeHealth), 300);
+async function init() {
+  const bust = '?_=' + Date.now();
+  try {
+    const [snapRes, ordersRes, flipsRes] = await Promise.all([
+      fetch('listings_snapshot.json' + bust),
+      fetch('orders.json' + bust),
+      fetch('flips.json' + bust)
+    ]);
+    const snap      = await snapRes.json();
+    const ordersD   = await ordersRes.json();
+    const flipsD    = await flipsRes.json();
+    const listings  = snap.listings || snap;
+    const orderList = ordersD.orders || [];
+    const flipList  = flipsD.flips || flipsD;
+
+    renderSales(orderList);
+    await renderTasks(listings);
+
+    const w = listings.reduce((s,l)=>s+parseInt(l.watchers||0),0);
+    const elC = document.getElementById('liveListingCount');
+    const elW = document.getElementById('liveWatcherCount');
+    if (elC) elC.textContent = listings.length;
+    if (elW) elW.textContent = w;
+
+    renderFlipGrid(flipList);
+    renderAttentionCards(listings);
+    setTimeout(() => animateGauge(13), 300);
+
+  } catch(e) {
+    console.error('Init error:', e);
+    renderTasks([]);
+    renderFlipGrid([]);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
-
-// Re-render charts on theme change (so colors update)
 
 </script>
 </body>
