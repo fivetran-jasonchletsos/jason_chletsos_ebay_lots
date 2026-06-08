@@ -535,10 +535,10 @@ a:hover { text-decoration: underline; opacity: .85; }
     <header class="page-header">
       <p class="page-eyebrow">Admin</p>
       <h1 class="page-title">Seller Dashboard</h1>
-      <p class="page-subtitle" id="headerSub">Updated Jun 7, 2026 &middot; 265 active listings</p>
+      <p class="page-subtitle" id="headerSub">Updated <span id="headerDate">loading…</span> &middot; <span id="headerListings">—</span> active listings</p>
     </header>
       <div class="brief-text" id="dailyBrief">
-        You have <strong>29 watchers</strong> across 23 listings and <strong>$0 in sales this week</strong> — the slow week follows a strong May (50 orders, $491 revenue). Your biggest lever right now is run <code>python3 specifics_agent.py --apply</code> to fill item specifics gaps and lift Cassini scores.
+        <span id="dailyBriefText">Loading store summary…</span>
       </div>
     </div>
 
@@ -779,7 +779,7 @@ async function renderTasks(preloadedListings) {
       p:'p0',
       title: watcherTotal + ' watchers across ' + withWatchers.length + ' listings — send offers',
       why: 'Buyers watching your cards are the warmest leads you have. Send a 5-10% offer now.',
-      link:'watchers.html', action:'Send offers'
+      link:'#needs-attention', action:'View listings'
     });
 
     // P1 — listings without Best Offer
@@ -805,7 +805,7 @@ async function renderTasks(preloadedListings) {
       p:'p2',
       title: underpriced.length + ' listings are priced 30%+ below market median',
       why: 'You may be leaving money on the table. Review before they sell.',
-      link:'repricing.html', action:'Review prices'
+      link:'https://www.ebay.com/sh/reports/listings', action:'eBay Reports'
     });
 
     // P2 — buy radar
@@ -824,7 +824,7 @@ async function renderTasks(preloadedListings) {
 
   } catch(e) {
     // Fallback if fetch fails
-    tasks.push({ p:'p1', title: 'Check orders for recent sales', why: 'Review what sold and update pricing strategy.', link:'orders_watch.html', action:'Orders watch' });
+    tasks.push({ p:'p1', title: 'Check orders for recent sales', why: 'Review what sold and update pricing strategy.', link:'#recent-sales', action:'See sales' });
     tasks.push({ p:'p2', title: 'Browse live flip opportunities', why: 'Mahomes parallels at $20-40 buy price, $120+ net.', link:'#buy-radar', action:'Browse flips' });
   }
 
@@ -966,6 +966,29 @@ async function init() {
     const elW = document.getElementById('liveWatcherCount');
     if (elC) elC.textContent = listings.length;
     if (elW) elW.textContent = w;
+
+    // Update page header
+    const hDate = document.getElementById('headerDate');
+    const hList = document.getElementById('headerListings');
+    if (hDate) hDate.textContent = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    if (hList) hList.textContent = listings.length;
+
+    // Update daily brief with live summary
+    const brief = document.getElementById('dailyBriefText');
+    if (brief) {
+      const rev7  = orderList.filter(o => (Date.now()-new Date(o.created_at))/86400000 < 7).reduce((s,o)=>s+parseFloat(o.sale_price||0),0);
+      const rev30 = orderList.reduce((s,o)=>s+parseFloat(o.sale_price||0),0);
+      const watchedItems = listings.filter(l => parseInt(l.watchers||0) > 0);
+      const totalW = watchedItems.reduce((s,l)=>s+parseInt(l.watchers||0),0);
+      const noBO  = listings.filter(l => !l.best_offer_enabled && parseFloat(l.price||0) >= 5).length;
+      let txt = '';
+      if (rev7 > 0) txt += `<strong>$${rev7.toFixed(2)} sold this week</strong> (${orderList.filter(o=>(Date.now()-new Date(o.created_at))/86400000<7).length} orders). `;
+      else txt += `<strong>$0 sold this week</strong> — last 30 days: $${rev30.toFixed(2)}. `;
+      if (totalW > 0) txt += `<strong>${totalW} watchers</strong> across ${watchedItems.length} listings. `;
+      if (noBO > 0) txt += `${noBO} listings $5+ have no Best Offer — run best_offer_agent.py --apply to fix. `;
+      txt += `<strong>${flipList.length} flip opportunities</strong> in Buy Radar below.`;
+      brief.innerHTML = txt;
+    }
 
     renderFlipGrid(flipList);
     renderAttentionCards(listings);
