@@ -1106,24 +1106,76 @@ function animateGauge(score) {
 // ============================================================
 // RENDER TASK LIST
 // ============================================================
-function renderTasks() {
+async function renderTasks() {
   const tasks = [];
 
-  if (D.hero.avgCassini < 40) tasks.push({
-    p:'p1', title: 'Cassini avg ' + D.hero.avgCassini + '/100 — ' + D.hero.cassiniRed + ' listings in red',
-    why: 'Fill item specifics (+15-20 pts each). Run specifics agent again — 133 listings still have gaps.',
-    link:'cassini.html', action:'See signals'
-  });
-  tasks.push({
-    p:'p1', title: 'Check Monday sales data — 265 listings repriced tonight',
-    why: 'Emergency reprice just pushed. Pull orders Monday and decide what still needs to move.',
-    link:'orders_watch.html', action:'Orders watch'
-  });
-  tasks.push({
-    p:'p2', title: '63 flip opportunities in the Buy Radar right now',
-    why: 'Mahomes parallels at $20-40 buy price, $120-143 net profit, 31-34 sales/month velocity.',
-    link:'resale_flips.html', action:'Browse flips'
-  });
+  // --- Live data from listings_snapshot.json ---
+  try {
+    const snap = await fetch('listings_snapshot.json?_=' + Date.now()).then(r => r.json());
+    const listings = snap.listings || snap;
+
+    const active = listings.length;
+    const withWatchers = listings.filter(l => parseInt(l.watchers || 0) > 0);
+    const watcherTotal = withWatchers.reduce((s, l) => s + parseInt(l.watchers || 0), 0);
+    const noBO = listings.filter(l => !l.best_offer_enabled && parseFloat(l.price || 0) >= 5);
+    const stale = listings.filter(l => parseInt(l.days_active || 0) > 60 && parseInt(l.watchers || 0) === 0);
+    const underpriced = listings.filter(l => {
+      const p = parseFloat(l.price || 0), m = parseFloat(l.market_median || 0);
+      return m > 0 && p < m * 0.7;
+    });
+
+    // P0 — watcher offers ready to send
+    if (withWatchers.length > 0) tasks.push({
+      p:'p0',
+      title: watcherTotal + ' watchers across ' + withWatchers.length + ' listings — send offers',
+      why: 'Buyers watching your cards are the warmest leads you have. Send a 5-10% offer now.',
+      link:'watchers.html', action:'Send offers'
+    });
+
+    // P1 — listings without Best Offer
+    if (noBO.length > 0) tasks.push({
+      p:'p1',
+      title: noBO.length + ' listings $5+ have no Best Offer enabled',
+      why: 'Best Offer drives engagement signals Cassini rewards. Run best_offer_agent --apply.',
+      link:'best_offer.html', action:'Enable offers'
+    });
+
+    // P1 — stale listings
+    if (stale.length > 0) tasks.push({
+      p:'p1',
+      title: stale.length + ' listings are 60+ days old with zero watchers',
+      why: 'End and relist to get a fresh Cassini boost. Or drop price — silence means the market said no.',
+      link:'relist.html', action:'Relist queue'
+    });
+
+    // P2 — underpriced vs market
+    if (underpriced.length > 0) tasks.push({
+      p:'p2',
+      title: underpriced.length + ' listings are priced 30%+ below market median',
+      why: 'You may be leaving money on the table. Review before they sell.',
+      link:'repricing.html', action:'Review prices'
+    });
+
+    // P2 — buy radar
+    tasks.push({
+      p:'p2',
+      title: 'Buy Radar has live flip opportunities below — check before buying',
+      why: 'Cards priced below their sold-price median. Net profit is after all eBay fees.',
+      link:'resale_flips.html', action:'Browse flips'
+    });
+
+    // Update hero watcher count with live data
+    const watchEl = document.querySelector('.hero-number.warning');
+    if (watchEl && watcherTotal > 0) watchEl.textContent = watcherTotal;
+    const listingCountEl = document.getElementById('activeListingCount');
+    if (listingCountEl) listingCountEl.textContent = active;
+
+  } catch(e) {
+    // Fallback if fetch fails
+    tasks.push({ p:'p1', title: 'Check orders for recent sales', why: 'Review what sold and update pricing strategy.', link:'orders_watch.html', action:'Orders watch' });
+    tasks.push({ p:'p2', title: 'Browse live flip opportunities', why: 'Mahomes parallels at $20-40 buy price, $120+ net.', link:'resale_flips.html', action:'Browse flips' });
+  }
+
   document.getElementById('taskCountBadge').textContent = tasks.length + ' tasks';
   document.getElementById('taskList').innerHTML = tasks.map((t, i) => `
     <li class="task-item ${t.p}">
@@ -1132,7 +1184,7 @@ function renderTasks() {
         <div class="task-title">${t.title}</div>
         <div class="task-why">${t.why}</div>
       </div>
-      <a href="${t.link}" class="task-action" target="${t.link.startsWith('http')?'_blank':'_self'}">${t.action} &rarr;</a>
+      <a href="${t.link}" class="task-action">${t.action} &rarr;</a>
     </li>`).join('');
 }
 
