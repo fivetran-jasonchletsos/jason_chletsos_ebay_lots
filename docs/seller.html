@@ -95,6 +95,8 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { color-scheme: dark; }
+
+/* ── ATMOSPHERIC BODY ── */
 body {
   background: var(--bg);
   color: var(--text);
@@ -102,7 +104,36 @@ body {
   font-size: var(--fs-base);
   line-height: 1.6;
   min-height: 100vh;
+  /* Subtle grain — signals authority, not decoration */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(201,165,66,0.06) 0%, transparent 70%);
 }
+
+/* ── TOP COMMAND STRIPE ── */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-bright) 50%, var(--gold) 80%, transparent 100%);
+  z-index: 9999;
+}
+
+/* ── SECTION REVEAL ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) both;
+}
+.reveal-1 { animation-delay: 0.05s; }
+.reveal-2 { animation-delay: 0.15s; }
+.reveal-3 { animation-delay: 0.25s; }
+.reveal-4 { animation-delay: 0.35s; }
+.reveal-5 { animation-delay: 0.45s; }
+.reveal-6 { animation-delay: 0.55s; }
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; opacity: .85; }
 
@@ -148,17 +179,31 @@ a:hover { text-decoration: underline; opacity: .85; }
   padding: var(--space-xl) 0 var(--space-lg);
   border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-xl);
+  position: relative;
 }
 .page-eyebrow {
-  font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+  font-size: 9px; font-weight: 800; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 10px;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.page-eyebrow::before {
+  content: ''; display: inline-block;
+  width: 24px; height: 1px; background: var(--gold); opacity: .6;
 }
 .page-title {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: var(--fs-h2); font-style: italic; font-weight: 700;
-  color: var(--text); line-height: 1.1; margin-bottom: 6px;
+  font-size: clamp(2.2rem, 4vw + 1rem, 4rem);
+  font-style: italic; font-weight: 800;
+  font-variation-settings: 'opsz' 144, 'SOFT' 60, 'WONK' 0;
+  color: var(--text); line-height: 1; margin-bottom: 10px;
+  letter-spacing: -.02em;
 }
-.page-subtitle { font-size: var(--fs-sm); color: var(--text-muted); }
+.page-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-xs); color: var(--text-dim);
+  letter-spacing: .06em;
+}
 
 /* ---- DAILY BRIEF ---- */
 .daily-brief {
@@ -230,10 +275,14 @@ a:hover { text-decoration: underline; opacity: .85; }
 .section-header {
   display: flex; align-items: baseline; gap: var(--space-sm);
   margin-bottom: var(--space-md);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
 }
 .section-title {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: var(--fs-h3); font-style: italic; font-weight: 600; color: var(--text);
+  font-size: var(--fs-h3); font-style: italic; font-weight: 700;
+  font-variation-settings: 'opsz' 144, 'SOFT' 40;
+  color: var(--text);
 }
 .section-count {
   font-family: 'JetBrains Mono', monospace;
@@ -274,57 +323,144 @@ a:hover { text-decoration: underline; opacity: .85; }
 .son-rules-body .skip { color: var(--danger); }
 .flip-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-md);
   margin-bottom: var(--space-md);
 }
+@media (min-width: 520px) { .flip-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .flip-grid { grid-template-columns: repeat(3, 1fr); } }
+/* ── FLIP CARDS — "Buy Signal" aesthetic ── */
 .flip-card {
   display: flex; gap: var(--space-sm); align-items: flex-start;
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
   border-radius: var(--r-lg); padding: var(--space-sm);
   text-decoration: none; color: inherit;
-  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
+  position: relative; overflow: hidden;
 }
-.flip-card:hover { border-color: var(--border-mid); box-shadow: var(--shadow-card); text-decoration: none; }
+.flip-card:hover {
+  border-color: var(--border-mid);
+  border-left-color: var(--success);
+  box-shadow: var(--glow-gold);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
 .flip-thumb {
-  width: 60px; height: 80px; border-radius: 6px;
+  width: 56px; height: 76px; border-radius: 5px;
   object-fit: cover; flex-shrink: 0; background: var(--surface-3);
 }
 .flip-body { flex: 1; min-width: 0; }
 .flip-title {
   font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.4;
-  margin-bottom: 6px; display: -webkit-box;
+  margin-bottom: 8px; display: -webkit-box;
   -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.flip-metrics { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.flip-metrics { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
 .flip-badge {
-  font-size: 9px; font-weight: 800; letter-spacing: .06em;
-  text-transform: uppercase; padding: 2px 7px; border-radius: 20px;
+  font-size: 8px; font-weight: 900; letter-spacing: .1em;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 3px;
 }
-.badge-flip { background: rgba(127,199,122,.15); color: var(--success); border: 1px solid rgba(127,199,122,.3); }
+.badge-flip { background: rgba(127,199,122,.18); color: var(--success); border: 1px solid rgba(127,199,122,.35); }
 .badge-hold { background: rgba(224,181,74,.15); color: var(--warning); border: 1px solid rgba(224,181,74,.3); }
-.flip-buy { font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--text-muted); }
-.flip-net { font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--success); font-weight: 700; }
-.flip-vel { font-size: var(--fs-xs); color: var(--text-dim); }
+.flip-buy { font-family: 'JetBrains Mono', monospace; font-size: var(--fs-xs); color: var(--text-dim); }
+/* Net profit is THE number — make it count */
+.flip-net {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-weight: 800;
+  font-size: var(--fs-xl);
+  color: var(--success); line-height: 1;
+}
+.flip-vel { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); }
 
-/* ---- TASK LIST ---- */
-.today-tasks{background:var(--surface);border:1px solid var(--border-mid);border-radius:var(--r-lg);margin-bottom:var(--space-xl);overflow:hidden;}
-.today-tasks-header{padding:16px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-.today-tasks-header h2{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:600;font-size:var(--fs-h3);color:var(--text);}
-.task-count-badge{background:var(--gold);color:var(--bg);border-radius:20px;padding:3px 10px;font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
-.task-list{list-style:none;}
-.task-item{display:grid;grid-template-columns:30px 1fr auto;align-items:start;gap:12px;padding:14px 22px;border-bottom:1px dashed var(--border);transition:background var(--t-fast);}
-.task-item:last-child{border-bottom:none;}
-.task-item:hover{background:var(--surface-2);}
-.task-priority{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:var(--fs-xs);font-weight:700;background:var(--task-bg,var(--surface-3));color:var(--task-fg,var(--text-muted));border:1px solid var(--task-border,var(--border));flex-shrink:0;}
-.task-item.p0{--task-bg:rgba(224,123,111,0.12);--task-fg:var(--danger);--task-border:rgba(224,123,111,0.35);}
-.task-item.p1{--task-bg:rgba(224,181,74,0.12);--task-fg:var(--warning);--task-border:rgba(224,181,74,0.35);}
-.task-item.p2{--task-bg:rgba(127,199,122,0.10);--task-fg:var(--success);--task-border:rgba(127,199,122,0.35);}
-.task-body{min-width:0;}
-.task-title{font-size:var(--fs-base);font-weight:600;color:var(--text);line-height:1.35;margin-bottom:3px;}
-.task-why{font-size:var(--fs-xs);color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:.03em;}
-.task-action{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:transparent;color:var(--gold);border:1px solid var(--border-mid);border-radius:var(--r-sm);font-size:var(--fs-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:all var(--t-fast);}
-.task-action:hover{background:var(--gold);color:var(--bg);border-color:var(--gold);text-decoration:none;}
+/* ── TASK LIST — instrument panel urgency ── */
+.today-tasks {
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-lg);
+  margin-bottom: var(--space-xl);
+  overflow: hidden;
+}
+.today-tasks-header {
+  padding: 16px 22px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(201,165,66,.04) 0%, transparent 60%);
+}
+.today-tasks-header h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-weight: 700;
+  font-variation-settings: 'opsz' 144, 'SOFT' 40;
+  font-size: var(--fs-h3); color: var(--text);
+}
+.task-count-badge {
+  background: var(--gold); color: var(--bg);
+  border-radius: 4px; padding: 3px 10px;
+  font-size: var(--fs-xs); font-weight: 800;
+  letter-spacing: .1em; font-family: 'JetBrains Mono', monospace;
+}
+.task-list { list-style: none; }
+.task-item {
+  display: grid;
+  grid-template-columns: 4px 32px 1fr auto;
+  align-items: start; gap: 0 12px;
+  padding: 14px 20px 14px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t-fast);
+  position: relative;
+}
+.task-item:last-child { border-bottom: none; }
+.task-item:hover { background: var(--surface-2); }
+/* Left rail — the priority signal */
+.task-item::before {
+  content: '';
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: stretch;
+  width: 4px;
+  background: var(--task-rail, var(--border));
+  border-radius: 0 2px 2px 0;
+}
+.task-item.p0 { --task-rail: var(--danger);   --task-bg: rgba(224,123,111,0.06); background: var(--task-bg); }
+.task-item.p1 { --task-rail: var(--warning);  --task-bg: rgba(224,181,74,0.04);  background: var(--task-bg); }
+.task-item.p2 { --task-rail: var(--success);  --task-bg: rgba(127,199,122,0.03); background: var(--task-bg); }
+.task-item.p0:hover { background: rgba(224,123,111,0.10); }
+.task-item.p1:hover { background: rgba(224,181,74,0.08); }
+.task-item.p2:hover { background: rgba(127,199,122,0.07); }
+.task-priority {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 800;
+  background: var(--task-bg, var(--surface-3));
+  color: var(--task-rail, var(--text-muted));
+  border: 1.5px solid var(--task-rail, var(--border));
+  flex-shrink: 0; margin-top: 1px;
+}
+.task-body { min-width: 0; }
+.task-title {
+  font-size: var(--fs-base); font-weight: 700;
+  color: var(--text); line-height: 1.3; margin-bottom: 4px;
+}
+.task-why {
+  font-size: var(--fs-xs); color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace; letter-spacing: .02em;
+  line-height: 1.5;
+}
+.task-action {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  background: transparent; color: var(--gold);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs); font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  text-decoration: none; white-space: nowrap;
+  transition: all var(--t-fast);
+  font-family: 'JetBrains Mono', monospace;
+}
+.task-action:hover { background: var(--gold); color: var(--bg); border-color: var(--gold); text-decoration: none; }
 /* ---- TOOLS GRID ---- */
 .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;}
 .tool-link{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);text-decoration:none;font-size:var(--fs-sm);font-weight:600;color:var(--text-muted);transition:all var(--t-fast);}
@@ -543,7 +679,7 @@ a:hover { text-decoration: underline; opacity: .85; }
     </div>
 
     <!-- What to do today -->
-    <div class="today-tasks">
+    <div class="today-tasks reveal reveal-1">
       <div class="today-tasks-header">
         <h2>What to do today</h2>
         <span class="task-count-badge" id="taskCountBadge">loading…</span>
@@ -554,7 +690,7 @@ a:hover { text-decoration: underline; opacity: .85; }
     </div>
 
     <!-- Quick stats -->
-    <div style="display:flex;gap:16px;margin-bottom:var(--space-xl);flex-wrap:wrap;">
+    <div class="reveal reveal-2" style="display:flex;gap:16px;margin-bottom:var(--space-xl);flex-wrap:wrap;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:var(--fs-sm);color:var(--text-muted);">
         <span id="liveListingCount" style="color:var(--text);font-weight:700;">262</span> active listings
       </div>
@@ -576,7 +712,7 @@ a:hover { text-decoration: underline; opacity: .85; }
     </div>
 
     <!-- Recent Sales -->
-    <section class="section-gap" id="recent-sales">
+    <section class="section-gap reveal reveal-2" id="recent-sales">
       <div class="section-header">
         <h2 class="section-title">Recent Sales</h2>
         <span class="section-count" id="salesCount">loading…</span>
@@ -597,7 +733,7 @@ a:hover { text-decoration: underline; opacity: .85; }
     </section>
 
         <!-- Buy Radar -->
-    <section class="section-gap" id="buy-radar">
+    <section class="section-gap reveal reveal-3" id="buy-radar">
       <div class="section-header">
         <h2 class="section-title">Buy Radar</h2>
         <span class="section-count" id="radarCount">— clean flips</span>
@@ -638,7 +774,7 @@ a:hover { text-decoration: underline; opacity: .85; }
     </section>
 
     <!-- Attention Cards -->
-    <section class="section-gap" id="needs-attention">
+    <section class="section-gap reveal reveal-4" id="needs-attention">
       <div class="section-header">
         <h2 class="section-title">From Your Inventory</h2>
         <span class="section-count">Ranked by what buyers actually buy</span>
