@@ -625,11 +625,11 @@ a:hover { text-decoration: underline; opacity: .85; }
     <!-- Attention Cards -->
     <section class="section-gap" id="needs-attention">
       <div class="section-header">
-        <h2 class="section-title">Needs Attention</h2>
-        <span class="section-count">Ranked by value at risk</span>
+        <h2 class="section-title">From Your Inventory</h2>
+        <span class="section-count">Ranked by what buyers actually buy</span>
       </div>
       <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-md);">
-        These listings combine high market potential with fixable issues — watchers with no offer, or low Cassini visibility. Act on one per day.
+        These are your best bets to sell this week — scored by what has actually moved: Prizm/Chrome cards, lots, popular players, $2-10 price range.
       </p>
       <div class="attention-grid" id="attentionGrid"></div>
     </section>
@@ -863,16 +863,41 @@ function renderAttentionCards(listings) {
   const grid = document.getElementById('attentionGrid');
   if (!grid) return;
   if (!listings || !listings.length) { grid.innerHTML = '<div style="color:var(--text-muted);padding:16px 0;">Loading listings…</div>'; return; }
-  const cards = listings
-    .filter(l => parseFloat(l.price||0) >= 3)
-    .sort((a,b) => parseFloat(b.price||0) - parseFloat(a.price||0))
-    .slice(0, 8);
-  grid.innerHTML = cards.map(l => {
+
+  // Score by what actually sells: Prizm/Chrome, lots, $2-10 range, popular players, watchers
+  const HOT_KEYWORDS = ['prizm','chrome','optic','refractor','lot','auto','rookie','rc','mahomes','daniels','maye','bowers','caleb'];
+  function score(l) {
+    const t = (l.title||'').toLowerCase();
+    const p = parseFloat(l.price||0);
+    const w = parseInt(l.watchers||0);
+    let s = 0;
+    HOT_KEYWORDS.forEach(k => { if (t.includes(k)) s += (k==='prizm'||k==='chrome') ? 3 : 1; });
+    if (p >= 2 && p <= 10) s += 3;   // sweet spot price band
+    else if (p > 10 && p <= 25) s += 1;
+    if (w > 0) s += w * 2;            // watchers = serious signal
+    if (t.includes('lot')) s += 2;     // lots sell as units
+    return s;
+  }
+
+  const scored = listings
+    .filter(l => parseFloat(l.price||0) >= 1.50)
+    .map(l => ({...l, _score: score(l)}))
+    .sort((a,b) => b._score - a._score)
+    .slice(0, 10);
+
+  grid.innerHTML = scored.map(l => {
     const w = parseInt(l.watchers||0);
     const price = parseFloat(l.price||0);
-    const labels = [w > 0 ? w+' watching' : null, price < 5 ? 'low price' : null].filter(Boolean);
-    const labelHtml = labels.map(lb => `<span class="attn-label ${lb.includes('watch') ? 'label-watch' : 'label-visibility'}">${lb}</span>`).join('');
-    const thumb = l.image_url ? `<img class="attn-thumb" src="${l.image_url}" alt="" loading="lazy">` : `<div class="attn-thumb-placeholder">♠</div>`;
+    const t = (l.title||'').toLowerCase();
+    const why = [];
+    if (t.includes('prizm')) why.push('prizm');
+    if (t.includes('chrome')) why.push('chrome');
+    if (t.includes('lot')) why.push('lot');
+    if (t.includes('auto')) why.push('auto');
+    if (w > 0) why.push(w+' watching');
+    if (!why.length) why.push('$' + price.toFixed(2) + ' range');
+    const labelHtml = why.slice(0,3).map(lb => `<span class="attn-label ${lb.includes('watch') ? 'label-watch' : 'label-market'}">${lb}</span>`).join('');
+    const thumb = l.image_url ? `<img class="attn-thumb" src="${l.image_url}" alt="" loading="lazy">` : `<div class="attn-thumb-placeholder">&#9824;</div>`;
     return `<a class="attn-card" href="https://www.ebay.com/itm/${l.item_id}" target="_blank" rel="noopener">
       ${thumb}
       <div class="attn-body">
@@ -881,7 +906,7 @@ function renderAttentionCards(listings) {
         <div class="attn-labels">${labelHtml}</div>
       </div>
     </a>`;
-  }).join('');
+  }).join('') || '<div style="color:var(--text-muted);padding:16px 0;">No listings loaded.</div>';
 }
 
 // ============================================================
