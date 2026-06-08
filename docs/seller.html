@@ -1349,19 +1349,21 @@ function renderFlipGrid(flips) {
 async function init() {
   const bust = '?_=' + Date.now();
   try {
-    const [snapRes, ordersRes, flipsRes] = await Promise.all([
+    const [snapRes, ordersRes, flipsRes, unlistedRes] = await Promise.all([
       fetch('listings_snapshot.json' + bust),
       fetch('orders.json' + bust),
-      fetch('flips.json' + bust)
+      fetch('flips.json' + bust),
+      fetch('unlisted.json' + bust)
     ]);
-    const snap      = await snapRes.json();
-    const ordersD   = await ordersRes.json();
-    const flipsD    = await flipsRes.json();
-    const listings  = snap.listings || snap;
-    const orderList = ordersD.orders || [];
-    const flipList  = flipsD.flips || flipsD;
+    const snap        = await snapRes.json();
+    const ordersD     = await ordersRes.json();
+    const flipsD      = await flipsRes.json();
+    const unlistedD   = await unlistedRes.json().catch(() => null);
+    const listings    = snap.listings || snap;
+    const orderList   = ordersD.orders || [];
+    const flipList    = flipsD.flips || flipsD;
 
-    renderSales(orderList);
+    renderUnlisted(unlistedD);
     renderInvBands(listings);
     await renderTasks(listings);
 
