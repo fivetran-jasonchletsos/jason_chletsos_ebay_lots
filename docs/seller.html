@@ -22,10 +22,7 @@
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
   <script>
     (function() {
-      try {
-        var t = localStorage.getItem('h2k_theme');
-        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
-      } catch(e) {}
+      /* admin: always dark */
     })();
     window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
     window.__IS_ADMIN_PAGE = true;
@@ -96,18 +93,8 @@
   --container-max: min(92vw, 1280px);
 }
 
-[data-theme="cream"] {
-  --bg:#f5f0e8; --surface:#e8e0d0; --surface-2:#ede5d6; --surface-3:#d8ccba;
-  --border:rgba(13,31,60,0.10); --border-mid:rgba(13,31,60,0.22); --border-hi:rgba(13,31,60,0.45);
-  --gold:#c05a1a; --gold-bright:#e57228; --gold-dim:#8a3e10;
-  --text:#0d1f3c; --text-muted:#5a6a7a; --text-dim:#8a98a8;
-  --success:#2f7d4a; --warning:#b8860b; --danger:#b54a3e;
-  --shadow-card:0 2px 10px rgba(13,31,60,.08), 0 0 0 1px var(--border) inset;
-}
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { color-scheme: dark; }
-[data-theme="cream"] { color-scheme: light; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -537,7 +524,7 @@ a:hover { text-decoration: underline; opacity: .85; }
       <a href="resale_flips.html">Buy Radar</a>
       <a href="orders_watch.html">Orders</a>
       <a href="index.html">Store</a>
-      <button class="theme-btn" id="themeBtn">Light</button>
+      <span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0a0a0a;background:var(--gold);padding:3px 10px;border-radius:20px;">ADMIN</span>
     </div>
   </div>
 </nav>
@@ -551,10 +538,6 @@ a:hover { text-decoration: underline; opacity: .85; }
       <h1 class="page-title">Seller Dashboard</h1>
       <p class="page-subtitle" id="headerSub">Updated Jun 7, 2026 &middot; 265 active listings</p>
     </header>
-
-    <!-- Daily Brief -->
-    <div class="daily-brief">
-      <div class="brief-label">Today's brief</div>
       <div class="brief-text" id="dailyBrief">
         You have <strong>29 watchers</strong> across 23 listings and <strong>$0 in sales this week</strong> — the slow week follows a strong May (50 orders, $491 revenue). Your biggest lever right now is <strong>item specifics</strong>: run the specifics agent to fill gaps and lift Cassini scores.
       </div>
@@ -571,99 +554,23 @@ a:hover { text-decoration: underline; opacity: .85; }
       </ul>
     </div>
 
-    <!-- Hero Metrics -->
-    <div class="hero-grid" id="heroGrid">
-
-      <!-- Store Health Gauge -->
-      <div class="hero-card featured" style="grid-column: span 1;">
-        <div class="hero-eyebrow">Store Health</div>
-        <div class="health-gauge-wrap">
-          <svg class="gauge-svg" viewBox="0 0 120 70">
-            <!-- half-circle arc: cx=60, cy=60, r=50, from 180deg to 0deg -->
-            <path class="gauge-track"
-              d="M 10 60 A 50 50 0 0 1 110 60"
-              stroke-dasharray="157 157" stroke-dashoffset="0"/>
-            <path class="gauge-fill" id="gaugeFill"
-              d="M 10 60 A 50 50 0 0 1 110 60"
-              stroke="#e07b6f"
-              stroke-dasharray="157 157" stroke-dashoffset="136"/>
-            <text class="gauge-label" x="60" y="58" text-anchor="middle" dominant-baseline="middle" id="gaugeText">13</text>
-            <text class="gauge-sub" x="60" y="69" text-anchor="middle">/100</text>
-          </svg>
-        </div>
-        <div class="hero-sublabel" style="text-align:center;">
-          262 red &middot; 3 yellow &middot; 0 green<br>
-          Cassini avg 27.7
-        </div>
+    <!-- Quick stats -->
+    <div style="display:flex;gap:16px;margin-bottom:var(--space-xl);flex-wrap:wrap;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:var(--fs-sm);color:var(--text-muted);">
+        <span id="liveListingCount" style="color:var(--text);font-weight:700;">262</span> active listings
       </div>
-
-      <div class="hero-card">
-        <div class="hero-eyebrow">30-Day Revenue</div>
-        <div class="hero-number gold">$491</div>
-        <div class="hero-sublabel">50 orders &middot; avg $9.83/order<br>May 8 – Jun 6</div>
+      <div style="color:var(--text-muted);font-size:var(--fs-sm);">&middot;</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:var(--fs-sm);color:var(--text-muted);">
+        <span id="liveWatcherCount" style="color:var(--warning);font-weight:700;">—</span> watchers
       </div>
-
-      <div class="hero-card">
-        <div class="hero-eyebrow">This Week Revenue</div>
-        <div class="hero-number danger">$0</div>
-        <div class="hero-sublabel">0 sales &middot; repriced tonight<br>May 31 – Jun 6</div>
+      <div style="color:var(--text-muted);font-size:var(--fs-sm);">&middot;</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:var(--fs-sm);color:var(--text-muted);">
+        <span id="liveRecentSales" style="color:var(--success);font-weight:700;">—</span> sales this week
       </div>
-
-      <div class="hero-card">
-        <div class="hero-eyebrow">Active Watchers</div>
-        <div class="hero-number warning">29</div>
-        <div class="hero-sublabel">Across 23 listings<br>Potential buy signals</div>
+      <div style="margin-left:auto;">
+        <a href="orders_watch.html" target="_blank" style="font-size:var(--fs-xs);color:var(--gold);">View orders &rarr;</a>
       </div>
-<div class="hero-number danger">$990</div>
-        <div class="hero-sublabel">197 listings — poor or severe<br>Market value trapped behind bad photos</div>
-      </div>
-
-      <div class="hero-card">
-        <div class="hero-eyebrow">Best Offer</div>
-        <div class="hero-number gold">39</div>
-        <div class="hero-sublabel">Enabled tonight (was 0)<br>226 more not eligible</div>
-      </div>
-
-      <div class="hero-card positive">
-        <div class="hero-eyebrow">Promo Spend</div>
-        <div class="hero-number success">$3.54</div>
-        <div class="hero-sublabel">Per month projected<br>Down from $21 — budget optimized</div>
-      </div>
-
     </div>
-
-    <!-- Sales Velocity -->
-    <section class="section-gap">
-      <div class="section-header">
-        <h2 class="section-title">Sales Velocity</h2>
-        <span class="section-count">Last 4 weeks</span>
-      </div>
-
-      <div class="velocity-row">
-        <div class="velocity-week">
-          <div class="velocity-week-label">May 10–16</div>
-          <div class="velocity-week-val">$314</div>
-          <div class="velocity-week-sub">17 orders</div>
-        </div>
-        <div class="velocity-week">
-          <div class="velocity-week-label">May 17–23</div>
-          <div class="velocity-week-val">$102</div>
-          <div class="velocity-week-sub">19 orders</div>
-        </div>
-        <div class="velocity-week">
-          <div class="velocity-week-label">May 24–30</div>
-          <div class="velocity-week-val">$75</div>
-          <div class="velocity-week-sub">14 orders</div>
-        </div>
-        <div class="velocity-week current">
-          <div class="velocity-week-label">May 31–Jun 6 (this week)</div>
-          <div class="velocity-week-val zero">$0</div>
-          <div class="velocity-week-sub">Just repriced — watch this space</div>
-        </div>
-      </div>
-      </div>
-    </section>
-
     <!-- Buy Radar -->
     <section class="section-gap">
       <div class="section-header">
@@ -725,24 +632,24 @@ a:hover { text-decoration: underline; opacity: .85; }
         <span class="section-count">Every agent, one click</span>
       </div>
       <div class="tools-grid">
-        <a href="photo_audit.html"       class="tool-link"><span class="tl-dot" style="--tl-color:var(--danger)"></span>Photo Audit</a>
-        <a href="repricing.html"         class="tool-link"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Repricing</a>
-        <a href="relist.html"            class="tool-link"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Relist Unsold</a>
-        <a href="cassini.html"           class="tool-link"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Cassini Score</a>
-        <a href="best_offer.html"        class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Best Offer</a>
-        <a href="promoted_listings.html" class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Promoted Listings</a>
-        <a href="orders_watch.html"      class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Orders Watch</a>
-        <a href="sold.html"              class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Recently Sold</a>
-        <a href="resale_flips.html"      class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Resale Flips</a>
-        <a href="price_drops.html"       class="tool-link"><span class="tl-dot" style="--tl-color:var(--success)"></span>Price Drops</a>
-        <a href="seller_hub.html"        class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Seller Hub</a>
-        <a href="daily.html"             class="tool-link"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Daily Digest</a>
-        <a href="watchers.html"          class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Watchers</a>
-        <a href="top_sellers.html"       class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Top Sellers</a>
-        <a href="specifics.html"         class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Item Specifics</a>
-        <a href="price_consistency.html" class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Price Gate</a>
-        <a href="returns.html"           class="tool-link"><span class="tl-dot" style="--tl-color:var(--danger)"></span>Returns</a>
-        <a href="collx_vs_ebay.html"     class="tool-link"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>CollX vs eBay</a>
+        <a href="photo_audit.html"       class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--danger)"></span>Photo Audit</a>
+        <a href="repricing.html"         class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Repricing</a>
+        <a href="relist.html"            class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Relist Unsold</a>
+        <a href="cassini.html"           class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--warning)"></span>Cassini Score</a>
+        <a href="best_offer.html"        class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Best Offer</a>
+        <a href="promoted_listings.html" class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Promoted Listings</a>
+        <a href="orders_watch.html"      class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--success)"></span>Orders Watch</a>
+        <a href="sold.html"              class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--success)"></span>Recently Sold</a>
+        <a href="resale_flips.html"      class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--success)"></span>Resale Flips</a>
+        <a href="price_drops.html"       class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--success)"></span>Price Drops</a>
+        <a href="seller_hub.html"        class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Seller Hub</a>
+        <a href="daily.html"             class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--gold)"></span>Daily Digest</a>
+        <a href="watchers.html"          class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Watchers</a>
+        <a href="top_sellers.html"       class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Top Sellers</a>
+        <a href="specifics.html"         class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Item Specifics</a>
+        <a href="price_consistency.html" class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>Price Gate</a>
+        <a href="returns.html"           class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--danger)"></span>Returns</a>
+        <a href="collx_vs_ebay.html"     class="tool-link" target="_blank"><span class="tl-dot" style="--tl-color:var(--text-dim)"></span>CollX vs eBay</a>
       </div>
     </section>
 
@@ -906,133 +813,6 @@ function handleGoogleSignIn(response) {
 // ============================================================
 // THEME TOGGLE
 // ============================================================
-document.getElementById('themeBtn').addEventListener('click', function() {
-  const html = document.documentElement;
-  if (html.getAttribute('data-theme') === 'cream') {
-    html.removeAttribute('data-theme');
-    localStorage.setItem('h2k_theme', 'dark');
-    this.textContent = 'Light';
-  } else {
-    html.setAttribute('data-theme', 'cream');
-    localStorage.setItem('h2k_theme', 'cream');
-    this.textContent = 'Dark';
-  }
-});
-(function() {
-  const t = localStorage.getItem('h2k_theme');
-  const btn = document.getElementById('themeBtn');
-  if (t === 'cream') btn.textContent = 'Dark';
-})();
-
-// ============================================================
-// RENDER PRICE BARS
-// ============================================================
-function renderPriceBars() {
-  const container = document.getElementById('priceBars');
-  const data = D.priceDist;
-  const max = Math.max(...Object.values(data));
-  container.innerHTML = Object.entries(data).map(([label, count]) => {
-    const pct = Math.round((count / max) * 100);
-    return `<div class="price-row">
-      <div class="price-band-label">${label}</div>
-      <div class="price-bar-track">
-        <div class="price-bar-fill" style="width:${pct}%"></div>
-      </div>
-      <div class="price-count">${count}</div>
-    </div>`;
-  }).join('');
-}
-
-// ============================================================
-// RENDER ATTENTION CARDS
-// ============================================================
-function renderAttentionCards() {
-  const grid = document.getElementById('attentionGrid');
-  const labelClass = {
-    'watching': 'label-watch',
-    'photo': 'label-photo',
-    'visibility': 'label-visibility',
-    'market': 'label-market'
-  };
-  grid.innerHTML = D.attentionCards.map(card => {
-    const labels = card.labels.map(l => {
-      let cls = 'label-visibility';
-      if (l.includes('watch')) cls = 'label-watch';
-      else if (l.includes('photo') || l.includes('photo')) cls = 'label-photo';
-      else if (l.includes('market') || l.includes('$')) cls = 'label-market';
-      return `<span class="attn-label ${cls}">${l}</span>`;
-    }).join('');
-    const thumb = card.thumb && card.thumb !== 'https://i.ebayimg.com/images/g/1/s-l500.jpg'
-      ? `<img class="attn-thumb" src="${card.thumb}" alt="" loading="lazy">`
-      : `<div class="attn-thumb-placeholder">&#9824;</div>`;
-    return `<a class="attn-card" href="${card.url}" target="_blank" rel="noopener" title="${card.title}">
-      ${thumb}
-      <div class="attn-body">
-        <div class="attn-title">${card.title}</div>
-        <div class="attn-price">$${card.price.toFixed(2)}</div>
-        <div class="attn-labels">${labels}</div>
-      </div>
-    </a>`;
-  }).join('');
-}
-
-// ============================================================
-// CHARTS
-// ============================================================
-const chartDefaults = {
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: false }, tooltip: { enabled: true } }
-};
-
-function getChartColors() {
-  const cream = document.documentElement.getAttribute('data-theme') === 'cream';
-  return {
-    gridColor: cream ? 'rgba(13,31,60,.08)' : 'rgba(255,255,255,.06)',
-    textColor: cream ? '#5a6a7a' : '#7a7268',
-    gold: '#c9a542',
-    danger: '#e07b6f',
-    warning: '#e0b54a',
-    success: '#7fc77a'
-  };
-}
-
-let revenueChart, cassiniChart;
-
-function buildRevenueChart() {
-  const c = getChartColors();
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  if (revenueChart) revenueChart.destroy();
-  revenueChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: D.weekLabels,
-      datasets: [{
-        data: D.weeklyRevenue,
-        backgroundColor: D.weeklyRevenue.map((v, i) => i === 3 ? 'rgba(224,123,111,.25)' : 'rgba(201,165,66,.35)'),
-        borderColor: D.weeklyRevenue.map((v, i) => i === 3 ? c.danger : c.gold),
-        borderWidth: 1.5,
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      ...chartDefaults,
-      scales: {
-        x: { grid: { color: c.gridColor }, ticks: { color: c.textColor, font: { family: 'Familjen Grotesk', size: 11 } } },
-        y: {
-          grid: { color: c.gridColor }, ticks: { color: c.textColor, font: { family: 'JetBrains Mono', size: 10 },
-          callback: v => '$' + v }
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => `$${ctx.parsed.y.toFixed(2)} revenue (${D.weeklyOrders[ctx.dataIndex]} orders)`
-          }
-        }
-      }
-    }
-  });
 }
 
 function buildCassiniChart() {
@@ -1114,6 +894,9 @@ async function renderTasks() {
     const listings = snap.listings || snap;
 
     const active = listings.length;
+    const elCount = document.getElementById("liveListingCount");
+    const elWatch = document.getElementById("liveWatcherCount");
+    if (elCount) elCount.textContent = active;
     const withWatchers = listings.filter(l => parseInt(l.watchers || 0) > 0);
     const watcherTotal = withWatchers.reduce((s, l) => s + parseInt(l.watchers || 0), 0);
     const noBO = listings.filter(l => !l.best_offer_enabled && parseFloat(l.price || 0) >= 5);
@@ -1232,11 +1015,7 @@ function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 // Re-render charts on theme change (so colors update)
-const observer = new MutationObserver(() => {
-  buildRevenueChart();
-  buildCassiniChart();
-});
-observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
 </script>
 </body>
 </html>
