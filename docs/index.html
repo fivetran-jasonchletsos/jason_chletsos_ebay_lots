@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cream">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -27,7 +27,10 @@
   <script>
     // Apply saved theme synchronously to avoid flash-of-wrong-theme.
     (function() {
-      /* buyer site: always cream */
+      try {
+        var t = localStorage.getItem('h2k_theme');
+        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
     })();
     // Admin gate — Google OAuth (jchletsos@gmail.com only)
     window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
@@ -57,6 +60,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
 :root {
@@ -2010,6 +2014,8 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </a>
       <nav class="nav-links"><a href="index.html" class="nav-link active">Shop</a>
 <a href="steals.html" class="nav-link">Steals</a>
+<a href="sold.html" class="nav-link">Recently Sold</a>
+<a href="harpua_ai_overview.pdf" class="nav-link">AI Overview</a>
 
         <div class="nav-dropdown">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
@@ -2018,20 +2024,15 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           </button>
           <div class="nav-dropdown-menu" role="menu"><a href="browse.html">All Sets & Players</a><a href="by_set.html">By Set</a><a href="by_player.html">By Player</a><a href="under_10.html">Under $10</a><a href="pokemon.html">Pokemon</a></div>
         </div>
+<a href="daily.html" class="nav-link admin-only" data-admin="1">Daily</a>
+<a href="collx_vs_ebay.html" class="nav-link admin-only" data-admin="1">CollX vs eBay</a>
 
-        <div class="nav-dropdown">
+        <div class="nav-dropdown" data-admin="1">
           <button class="nav-dropdown-trigger" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleNavDropdown(this, event)">
-            Browse
+            More
             <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.8"/></svg>
           </button>
-          <div class="nav-dropdown-menu" role="menu">
-            <a href="browse.html">All Cards</a>
-            <a href="by_player.html">By Player</a>
-            <a href="by_set.html">By Set</a>
-            <a href="under_10.html">Under $10</a>
-            <a href="lots.html">Lots</a>
-            <a href="pokemon.html">Pokemon</a>
-          </div>
+          <div class="nav-dropdown-menu" role="menu"><a href="seller_hub.html" data-admin="1">Seller Hub</a><a href="price_consistency.html" data-admin="1">Price Gate</a><a href="best_offer.html" data-admin="1">Best Offer</a><a href="lots.html" data-admin="1">Lots</a><a href="relist.html" data-admin="1">Relist Unsold</a><a href="collect.html" data-admin="1">My Wants</a><a href="top_sellers.html" data-admin="1">Top Sellers</a><a href="pokemon_news.html" data-admin="1">Pokemon News</a><a href="price_drops.html" data-admin="1">Price Drops</a><a href="deals.html" data-admin="1">Deal Hunter</a><a href="resale_flips.html" data-admin="1">Resale Flips</a><a href="jack_pokemon.html" data-admin="1">Jack's Pokemon</a></div>
         </div></nav>
       <!-- Action buttons are grouped in a flex container that never shrinks,
            so they always remain visible alongside the brand. -->
@@ -2042,6 +2043,14 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </button>
         <div class="theme-popover" id="theme-popover" role="menu"></div>
       </div>
+      <button class="btn-login"  onclick="openGate()" title="Sign in to manage listings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sign in
+      </button>
+      <button class="btn-logout" onclick="adminLogout()" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign out
+      </button>
       </div><!-- /.nav-actions -->
       <button class="menu-toggle" onclick="openDrawer()" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
@@ -2063,25 +2072,57 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
     <a href="index.html" class="active">Shop</a>
 <a href="steals.html">Steals</a>
 <a href="sold.html">Recently Sold</a>
+<a href="harpua_ai_overview.pdf">AI Overview</a>
 <div class="drawer-group">Browse</div>
 <a href="browse.html">All Sets & Players</a>
 <a href="by_set.html">By Set</a>
 <a href="by_player.html">By Player</a>
 <a href="under_10.html">Under $10</a>
 <a href="pokemon.html">Pokemon</a>
-<div class="drawer-group">Browse</div>
-<a href="browse.html">All Cards</a>
-<a href="by_player.html">By Player</a>
-<a href="by_set.html">By Set</a>
-<a href="under_10.html">Under $10</a>
-<a href="lots.html">Lots</a>
-<a href="pokemon.html">Pokemon</a>
+<a href="daily.html" class="admin-only" data-admin="1">Daily</a>
+<a href="collx_vs_ebay.html" class="admin-only" data-admin="1">CollX vs eBay</a>
+<div class="drawer-group" data-admin="1">More</div>
+<a href="seller_hub.html" class="admin-only" data-admin="1">Seller Hub</a>
+<a href="price_consistency.html" class="admin-only" data-admin="1">Price Gate</a>
+<a href="best_offer.html" class="admin-only" data-admin="1">Best Offer</a>
+<a href="lots.html" class="admin-only" data-admin="1">Lots</a>
+<a href="relist.html" class="admin-only" data-admin="1">Relist Unsold</a>
+<a href="collect.html" class="admin-only" data-admin="1">My Wants</a>
+<a href="top_sellers.html" class="admin-only" data-admin="1">Top Sellers</a>
+<a href="pokemon_news.html" class="admin-only" data-admin="1">Pokemon News</a>
+<a href="price_drops.html" class="admin-only" data-admin="1">Price Drops</a>
+<a href="deals.html" class="admin-only" data-admin="1">Deal Hunter</a>
+<a href="resale_flips.html" class="admin-only" data-admin="1">Resale Flips</a>
+<a href="jack_pokemon.html" class="admin-only" data-admin="1">Jack's Pokemon</a>
     <div class="drawer-foot">
+      <button class="drawer-signin"  onclick="openGate()"     style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;">
+        Sign in
+      </button>
+      <button class="drawer-signout" onclick="adminLogout()"  style="width:100%;padding:14px;font-size:13px;background:transparent;color:var(--text);border:1px solid var(--border-mid);margin-bottom:8px;display:none;">
+        Sign out
+      </button>
     </div>
   </aside>
 
   <div id="nav-toast" class="toast"></div>
-</div>
+
+  <div class="gate-overlay" id="gate-overlay" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-card">
+      <h2 id="gate-title">Owner Access</h2>
+      <div class="gate-sub">Sign in with your Google account to access management tools.</div>
+      <div style="margin: 20px auto 0; display: flex; justify-content: center;">
+        <button onclick="promptAdminSignIn()" style="display:inline-flex;align-items:center;gap:10px;padding:10px 20px;background:#fff;border:1px solid #dadce0;border-radius:4px;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:#3c4043;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08);">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+      <div class="gate-error" id="gate-error">&nbsp;</div>
+      <div class="gate-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeGate()">Cancel</button>
+      </div>
+      <div class="gate-storefront-msg">Browsing? Listings + Sold are public — no sign-in needed.</div>
+    </div>
+  </div>
 
   <a href="https://www.ebay.com/usr/harpua2001" class="site-banner" target="_blank" rel="noopener" aria-label="Visit Harpua2001 on eBay"><img src="banner.jpg" alt="Harpua2001 Storefront — Sports + Pokemon Cards" loading="eager" width="1600" height="533"></a>
 
@@ -2095,12 +2136,12 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
           <span class="sf-headline-display">cards, hand-listed since 1998.</span>
         </h1>
         <p class="sf-lede">
-          262+ live listings, real photos, ships next business day from Ohio.
+          263+ live listings, real photos, ships next business day from Ohio.
           Combined shipping free on 2+. Checkout happens on eBay with buyer protection
           on every order — tap any card to bid or buy.
         </p>
         <div class="sf-hero-stats">
-          <div class="sf-stat"><b>262</b><span>cards in shop</span></div>
+          <div class="sf-stat"><b>263</b><span>cards in shop</span></div>
           <div class="sf-stat"><b>21</b><span>sets</span></div>
           <div class="sf-stat"><b>32</b><span>players &amp; Pokémon</span></div>
           <div class="sf-stat"><b>from $1.99</b><span>cheapest card</span></div>
@@ -2138,7 +2179,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       <a class="sf-card" href="https://www.ebay.com/itm/2025-26-Topps-Chrome-Cam-Ward-RC-Pink-X-Fractor-Mega-Exclusive-SP-TN-Titans-/306939333836" target="_blank" rel="noopener nofollow" style="animation-delay:30ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/T~QAAeSwEoBqBk~-/s-l500.jpg" alt="2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans" loading="lazy">
-          <span class="sf-price">$27.99</span>
+          <span class="sf-price">$23.99</span>
         </div>
         <div class="sf-meta">
           <div class="sf-title">2025-26 Topps Chrome Cam Ward RC Pink X Fractor Mega Exclusive SP TN Titans</div>
@@ -2183,10 +2224,22 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-NFL-/306931278274" target="_blank" rel="noopener nofollow" style="animation-delay:150ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener nofollow" style="animation-delay:150ms">
+        <div class="sf-pic">
+          <img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="4 1991 Playball U.S.A. - Darryl Strawberry NFL" loading="lazy">
+          <span class="sf-price">$13.99</span>
+        </div>
+        <div class="sf-meta">
+          <div class="sf-title">4 1991 Playball U.S.A. - Darryl Strawberry NFL</div>
+          <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
+          <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
+        </div>
+      </a>
+
+      <a class="sf-card" href="https://www.ebay.com/itm/1994-Sportflics-2000-Rookie-Traded-Deion-Sanders-25-Sample-NFL-/306931278274" target="_blank" rel="noopener nofollow" style="animation-delay:180ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/aS0AAeSwx-BqATId/s-l500.jpg" alt="1994 Sportflics 2000 Rookie &amp; Traded - Deion Sanders #25 Sample NFL" loading="lazy">
-          <span class="sf-price">$14.99</span>
+          <span class="sf-price">$12.99</span>
         </div>
         <div class="sf-meta">
           <div class="sf-title">1994 Sportflics 2000 Rookie &amp; Traded - Deion Sanders #25 Sample NFL</div>
@@ -2195,7 +2248,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-Football-Card-Lot-11-HOF-/306904068997" target="_blank" rel="noopener nofollow" style="animation-delay:180ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/Marcus-Allen-Los-Angeles-Raiders-Kansas-City-Chiefs-Football-Card-Lot-11-HOF-/306904068997" target="_blank" rel="noopener nofollow" style="animation-delay:210ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/sc0AAeSwVNVp7uZe/s-l500.jpg" alt="Marcus Allen Los Angeles Raiders Kansas City Chiefs Football Card Lot (11) HOF" loading="lazy">
           <span class="sf-price">$12.99</span>
@@ -2207,7 +2260,19 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookie-Variation-Tetairoa-McMillan-401-Silver-Prizm-RC--/306960410595" target="_blank" rel="noopener nofollow" style="animation-delay:210ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/Topps-James-Cook-Buffalo-Bills-2025-Signature-Class-Round-2-Pick-31-256-275-/306989643227" target="_blank" rel="noopener nofollow" style="animation-delay:240ms">
+        <div class="sf-pic">
+          <img src="https://i.ebayimg.com/images/g/C3oAAeSwg11qJn34/s-l500.jpg" alt="Topps James Cook Buffalo Bills 2025 Signature Class Round 2 Pick 31 #256 /275" loading="lazy">
+          <span class="sf-price">$12.34</span>
+        </div>
+        <div class="sf-meta">
+          <div class="sf-title">Topps James Cook Buffalo Bills 2025 Signature Class Round 2 Pick 31 #256 /275</div>
+          <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
+          <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
+        </div>
+      </a>
+
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookie-Variation-Tetairoa-McMillan-401-Silver-Prizm-RC--/306960410595" target="_blank" rel="noopener nofollow" style="animation-delay:270ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/gdIAAeSwCctqE7Oe/s-l500.jpg" alt="2025 Panini Prizm - Rookie Variation Tetairoa McMillan #401 Silver Prizm (RC)" loading="lazy">
           <span class="sf-price">$11.99</span>
@@ -2219,7 +2284,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Terrance-Ferguson-379-Green-Ice-Prizm-RC--/306967133225" target="_blank" rel="noopener nofollow" style="animation-delay:240ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Terrance-Ferguson-379-Green-Ice-Prizm-RC--/306967133225" target="_blank" rel="noopener nofollow" style="animation-delay:300ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/OiAAAeSwvnlqF8fU/s-l500.jpg" alt="2025 Panini Prizm - Rookies Terrance Ferguson #379 Green Ice Prizm (RC)" loading="lazy">
           <span class="sf-price">$11.99</span>
@@ -2231,19 +2296,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/4-1991-Playball-U-S-A-Darryl-Strawberry-NFL-/306931303163" target="_blank" rel="noopener nofollow" style="animation-delay:270ms">
-        <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/QtwAAeSwxGJqATX3/s-l500.jpg" alt="4 1991 Playball U.S.A. - Darryl Strawberry NFL" loading="lazy">
-          <span class="sf-price">$10.99</span>
-        </div>
-        <div class="sf-meta">
-          <div class="sf-title">4 1991 Playball U.S.A. - Darryl Strawberry NFL</div>
-          <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
-          <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
-        </div>
-      </a>
-
-      <a class="sf-card" href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener nofollow" style="animation-delay:300ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/Steve-Atwater-Denver-Broncos-Football-Card-Lot-7-Includes-Rookie-Cards-RC-HOF-/306904078786" target="_blank" rel="noopener nofollow" style="animation-delay:330ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/nSIAAeSwq55p7uia/s-l500.jpg" alt="Steve Atwater Denver Broncos Football Card Lot (7) Includes Rookie Cards RC HOF" loading="lazy">
           <span class="sf-price">$10.99</span>
@@ -2255,7 +2308,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener nofollow" style="animation-delay:330ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/11-Raghib-And-Quadry-Ismail-Cards-Raiders-Vikings-/306913790653" target="_blank" rel="noopener nofollow" style="animation-delay:360ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/Vd0AAeSwNIpp9d9G/s-l500.jpg" alt="11 Raghib And Quadry Ismail Cards Raiders Vikings" loading="lazy">
           <span class="sf-price">$10.99</span>
@@ -2267,7 +2320,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-J-K-Dobbins-55-One-Hundred-Prizm-/306962001495" target="_blank" rel="noopener nofollow" style="animation-delay:360ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Donruss-Optic-J-K-Dobbins-55-One-Hundred-Prizm-/306962001495" target="_blank" rel="noopener nofollow" style="animation-delay:390ms">
         <div class="sf-pic">
           <img src="https://i.ebayimg.com/images/g/bQMAAeSwFd5qFKyb/s-l500.jpg" alt="2025 Panini Donruss Optic - J.K. Dobbins #55 One Hundred Prizm" loading="lazy">
           <span class="sf-price">$9.99</span>
@@ -2279,133 +2332,121 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Topps-Signature-Class-Drake-Maye-Stefon-Diggs-Paramount-Pairings-PP-4-/306985879757" target="_blank" rel="noopener nofollow" style="animation-delay:390ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Jayden-Daniels-178-Silver-Prizm-NFL-Football-/306930942401" target="_blank" rel="noopener nofollow" style="animation-delay:420ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/CuwAAeSw729qI91I/s-l500.jpg" alt="2025 Topps Signature Class Drake Maye Stefon Diggs Paramount Pairings #PP-4" loading="lazy">
-          <span class="sf-price">$9.99</span>
+          <img src="https://i.ebayimg.com/images/g/64EAAeSwZLVqAPgo/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm NFL Football" loading="lazy">
+          <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Topps Signature Class Drake Maye Stefon Diggs Paramount Pairings #PP-4</div>
+          <div class="sf-title">2025 Panini Prizm Draft Picks - Jayden Daniels #178 Silver Prizm NFL Football</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-Football-NFL-Hollywood-Brown-X-Fractor-Refractor-Chiefs-/306957098462" target="_blank" rel="noopener nofollow" style="animation-delay:420ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Rookies-Phil-Mafah-378-Silver-Prizm-RC--/306958353061" target="_blank" rel="noopener nofollow" style="animation-delay:450ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/L1MAAeSwCbZqEZz0/s-l500.jpg" alt="2025 Topps Chrome Football NFL Hollywood Brown X-Fractor Refractor Chiefs" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/lDgAAeSwqBdqElsI/s-l500.jpg" alt="2025 Panini Prizm - Rookies Phil Mafah #378 Silver Prizm (RC)" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Topps Chrome Football NFL Hollywood Brown X-Fractor Refractor Chiefs</div>
+          <div class="sf-title">2025 Panini Prizm - Rookies Phil Mafah #378 Silver Prizm (RC)</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Score-Rookies-Tetairoa-McMillan-17-RC--/306953938392" target="_blank" rel="noopener nofollow" style="animation-delay:450ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Icon-Collection-Mahomes-TW-2-Title-Waves-Super-Bowl-LIV-Champ-/306953378457" target="_blank" rel="noopener nofollow" style="animation-delay:480ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/fjIAAeSwAFFqD63y/s-l500.jpg" alt="2025 Score - Rookies Tetairoa McMillan #17 (RC)" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/ym0AAeSwYudqD1Pa/s-l500.jpg" alt="2025 Panini Icon Collection-Mahomes #TW-2 Title Waves Super Bowl LIV Champ" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Score - Rookies Tetairoa McMillan #17 (RC)</div>
+          <div class="sf-title">2025 Panini Icon Collection-Mahomes #TW-2 Title Waves Super Bowl LIV Champ</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/Bhayshul-Tuten-2025-Select-Football-BLACK-GREEN-SHOCK-PRIZM-29-Jaguars-RC-/306958230048" target="_blank" rel="noopener nofollow" style="animation-delay:480ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/1989-Fleer-Mike-Heathb-On-Front-Tom-Brookens-On-Back-And-Vice-Versa--/306931330505" target="_blank" rel="noopener nofollow" style="animation-delay:510ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/XGwAAeSwfLxqEkMe/s-l500.jpg" alt="Bhayshul Tuten 2025 Select Football BLACK GREEN SHOCK PRIZM #29 Jaguars RC" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/XXsAAeSwDgxqATpd/s-l500.jpg" alt="1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. And Vice Versa." loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">Bhayshul Tuten 2025 Select Football BLACK GREEN SHOCK PRIZM #29 Jaguars RC</div>
+          <div class="sf-title">1989 Fleer - Mike Heathb On Front , Tom Brookens On Back. And Vice Versa.</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Phoenix-Rookies-Tetairoa-McMillan-155-Silver-Pyramids-RC--/306960398359" target="_blank" rel="noopener nofollow" style="animation-delay:510ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Cam-Ward-57-Silver-Prizm-RC--/306956692936" target="_blank" rel="noopener nofollow" style="animation-delay:540ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/VlMAAeSwpB1qE7I6/s-l500.jpg" alt="2025 Panini Phoenix - Rookies Tetairoa McMillan #155 Silver Pyramids (RC)" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/IkYAAeSwFd5qEV~T/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Cam Ward #57 Silver Prizm (RC)" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Panini Phoenix - Rookies Tetairoa McMillan #155 Silver Pyramids (RC)</div>
+          <div class="sf-title">2025 Panini Prizm Draft Picks - Cam Ward #57 Silver Prizm (RC)</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Select-Concourse-Quinshon-Judkins-55-Pink-Shock-Prizm-RC--/306960264237" target="_blank" rel="noopener nofollow" style="animation-delay:540ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-Micah-Parsons-Hot-Pink-X-Fractor-Refractor-77-/306947419189" target="_blank" rel="noopener nofollow" style="animation-delay:570ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/mNwAAeSwIGhqE5nL/s-l500.jpg" alt="2025 Panini Select - Concourse Quinshon Judkins #55 Pink Shock Prizm (RC)" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/J~4AAeSwrGRqC666/s-l500.jpg" alt="2025 Topps Chrome Micah Parsons Hot Pink X-Fractor Refractor #77" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Panini Select - Concourse Quinshon Judkins #55 Pink Shock Prizm (RC)</div>
+          <div class="sf-title">2025 Topps Chrome Micah Parsons Hot Pink X-Fractor Refractor #77</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Dan-Marino-192-Red-Ice-Prizm-NFL-Football-/306930938563" target="_blank" rel="noopener nofollow" style="animation-delay:570ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-Penei-Sewell-99-Refractor-NFL-/306939281535" target="_blank" rel="noopener nofollow" style="animation-delay:600ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/iAkAAeSwhANqAPdG/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm NFL Football" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/86MAAeSwKDVqBkgx/s-l500.jpg" alt="2025 Topps Chrome - Penei Sewell #99 Refractor NFL" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Panini Prizm Draft Picks - Dan Marino #192 Red Ice Prizm NFL Football</div>
+          <div class="sf-title">2025 Topps Chrome - Penei Sewell #99 Refractor NFL</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/6-Basketball-Cards-From-The-90s-/306931142490" target="_blank" rel="noopener nofollow" style="animation-delay:600ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Prizmatic-Ashton-Jeanty-7-Silver-Prizm-RC--/306956129162" target="_blank" rel="noopener nofollow" style="animation-delay:630ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/uXIAAeSwJSpqAR2W/s-l500.jpg" alt="6 Basketball Cards From The 90s" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/~loAAeSwuqpqEPtB/s-l500.jpg" alt="2025 Panini Prizm - Prizmatic Ashton Jeanty #7 Silver Prizm (RC)" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">6 Basketball Cards From The 90s</div>
+          <div class="sf-title">2025 Panini Prizm - Prizmatic Ashton Jeanty #7 Silver Prizm (RC)</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/3-Marshall-Faulk-Cards-San-Diego-State-Indianapolis-Colts-/306785270903" target="_blank" rel="noopener nofollow" style="animation-delay:630ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-276-Kenneth-Walker-III-Lime-Green-X-Fractor-NFL-/306939339030" target="_blank" rel="noopener nofollow" style="animation-delay:660ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/qYsAAeSw~J9pm222/s-l500.jpg" alt="3 Marshall Faulk Cards San Diego State Indianapolis Colts" loading="lazy">
+          <img src="https://i.ebayimg.com/images/g/4mUAAeSwN8dqBlFC/s-l500.jpg" alt="2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL" loading="lazy">
           <span class="sf-price">$1.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">3 Marshall Faulk Cards San Diego State Indianapolis Colts</div>
+          <div class="sf-title">2025 Topps Chrome #276 Kenneth Walker III Lime Green X-Fractor NFL</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
       </a>
 
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Topps-Chrome-Rookies-Riley-Leonard-318-Pink-X-Fractor-RC--/306939289562" target="_blank" rel="noopener nofollow" style="animation-delay:660ms">
+      <a class="sf-card" href="https://www.ebay.com/itm/Patrick-Mahomes-Panini-Icon-Collection-Highlights-IC-1-Red-Parallel-/306953389827" target="_blank" rel="noopener nofollow" style="animation-delay:690ms">
         <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/XU4AAeSwrclqBknS/s-l500.jpg" alt="2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)" loading="lazy">
-          <span class="sf-price">$1.99</span>
+          <img src="https://i.ebayimg.com/images/g/CC8AAeSw16pqD1Zi/s-l500.jpg" alt="Patrick Mahomes Panini Icon Collection Highlights IC-1 Red Parallel" loading="lazy">
+          <span class="sf-price">$6.99</span>
         </div>
         <div class="sf-meta">
-          <div class="sf-title">2025 Topps Chrome - Rookies Riley Leonard #318 Pink X-Fractor (RC)</div>
-          <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
-          <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
-        </div>
-      </a>
-
-      <a class="sf-card" href="https://www.ebay.com/itm/2025-Panini-Prizm-Draft-Picks-Julian-Sayin-161-Silver-Prizm-RC--/306958930201" target="_blank" rel="noopener nofollow" style="animation-delay:690ms">
-        <div class="sf-pic">
-          <img src="https://i.ebayimg.com/images/g/p-8AAeSwTpVqEsxH/s-l500.jpg" alt="2025 Panini Prizm Draft Picks - Julian Sayin #161 Silver Prizm (RC)" loading="lazy">
-          <span class="sf-price">$1.99</span>
-        </div>
-        <div class="sf-meta">
-          <div class="sf-title">2025 Panini Prizm Draft Picks - Julian Sayin #161 Silver Prizm (RC)</div>
+          <div class="sf-title">Patrick Mahomes Panini Icon Collection Highlights IC-1 Red Parallel</div>
           <div class="sf-ship" aria-label="Free shipping, combined shipping on 2 or more">Free ship · Combined ship 2+</div>
           <div class="sf-row"><span class="sf-cta">View on eBay →</span></div>
         </div>
@@ -2447,7 +2488,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       </a>
 <a class="sf-tile" href="by_set.html#topps">
         <div class="sf-tile-name">Topps</div>
-        <div class="sf-tile-meta">7 listings</div>
+        <div class="sf-tile-meta">8 listings</div>
       </a></div>
       <div class="sf-subhead">Popular players</div>
       <div class="sf-tiles"><a class="sf-tile sf-tile-player" href="by_player.html#patrick-mahomes">
@@ -2516,7 +2557,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   </main>
 
   <footer class="app-footer">
-    Updated Jun 08, 2026 · 02:59 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
+    Updated Jun 08, 2026 · 09:20 UTC · <a href="https://www.ebay.com/usr/harpua2001" class="seller-link" target="_blank" rel="noopener">Harpua2001 on eBay</a>
     · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
@@ -2564,7 +2605,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
               } catch(e) {}
               document.body.classList.add('is-admin');
               document.documentElement.classList.add('pre-is-admin');
-              
+              document.getElementById('gate-overlay').classList.remove('open');
               showToast('Welcome back, Jason. Management tools unlocked.');
             } else {
               err.textContent = 'That Google account (' + info.email + ') is not authorized.';
@@ -2576,7 +2617,20 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
       });
       client.requestAccessToken();
     };
-window.adminLogout = function() {
+    window.openGate = function() {
+      const o = document.getElementById('gate-overlay');
+      if (o) o.classList.add('open');
+    };
+    window.closeGate = function() {
+      if (window.__IS_ADMIN_PAGE && !document.body.classList.contains('is-admin')) {
+        const home = location.pathname.includes('/items/') ? '../index.html' : 'index.html';
+        location.href = home;
+        return;
+      }
+      document.getElementById('gate-overlay')?.classList.remove('open');
+      const err = document.getElementById('gate-error'); if (err) err.textContent = ' ';
+    };
+    window.adminLogout = function() {
       try { localStorage.removeItem('h2k_admin_email'); } catch(e) {}
       document.body.classList.remove('is-admin');
       document.documentElement.classList.remove('pre-is-admin');
