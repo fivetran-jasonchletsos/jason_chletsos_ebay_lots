@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Operation Jack and Nate's Room</title>
+<style>
+  @page { size: letter; margin: 0.55in 0.6in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.45;
+    color: #111;
+  }
+
+  .page-break { page-break-before: always; margin-top: 0; }
+
+  /* HEADER */
+  .header {
+    background: #111;
+    color: #fff;
+    padding: 10px 14px 9px;
+    margin-bottom: 12px;
+    border-radius: 3px;
+  }
+  .header h1 { font-size: 16pt; font-weight: 800; letter-spacing: -0.5px; }
+  .header .sub { font-size: 8.5pt; opacity: 0.75; margin-top: 2px; }
+  .header .rule { font-size: 8pt; margin-top: 5px; background: rgba(255,255,255,0.12); padding: 4px 8px; border-radius: 2px; display: inline-block; }
+
+  /* SECTION TITLES */
+  h2 {
+    font-size: 9pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid #111;
+    padding-bottom: 3px;
+    margin-bottom: 7px;
+    margin-top: 12px;
+  }
+
+  h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    margin-bottom: 4px;
+    margin-top: 0;
+  }
+
+  /* ZONE MAP */
+  .zone-map {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .zone-box {
+    border: 1.5px solid #111;
+    border-radius: 3px;
+    padding: 6px 8px;
+  }
+  .zone-box .zone-label {
+    font-size: 7.5pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+  }
+  .zone-box .zone-name {
+    font-size: 9.5pt;
+    font-weight: 700;
+    margin-top: 1px;
+    margin-bottom: 2px;
+  }
+  .zone-box .zone-items {
+    font-size: 7.5pt;
+    color: #444;
+    line-height: 1.5;
+  }
+  .zone-box.priority {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+  }
+  .zone-box.priority .zone-label { color: rgba(255,255,255,0.6); }
+  .zone-box.priority .zone-items { color: rgba(255,255,255,0.75); }
+
+  /* SUPPLY SETUP */
+  .supply-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .supply-box {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 8pt;
+  }
+  .supply-box strong { display: block; font-size: 8.5pt; margin-bottom: 2px; }
+
+  /* PHASE BLOCKS */
+  .phase {
+    border: 1.5px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    background: #f0f0f0;
+    padding: 5px 10px;
+    gap: 10px;
+  }
+  .phase-num {
+    background: #111;
+    color: #fff;
+    font-size: 8pt;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .phase-title { font-size: 10pt; font-weight: 700; flex: 1; }
+  .phase-time {
+    font-size: 8pt;
+    font-weight: 700;
+    color: #555;
+    white-space: nowrap;
+  }
+  .phase-body { padding: 7px 10px; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 2.5px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checkbox {
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid #aaa;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .checklist .sub-note {
+    color: #666;
+    font-size: 7.5pt;
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* RULES SIDEBAR */
+  .rules-box {
+    background: #f7f7f7;
+    border: 1.5px solid #ddd;
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+  }
+  .rules-box h3 { font-size: 9pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .rules-box .rule-row { font-size: 8pt; padding: 2px 0; border-bottom: 1px solid #e8e8e8; }
+  .rules-box .rule-row:last-child { border-bottom: none; }
+  .rules-box .keep { color: #1a6b2a; font-weight: 700; }
+  .rules-box .donate { color: #b05a00; font-weight: 700; }
+  .rules-box .trash { color: #a00; font-weight: 700; }
+
+  /* TWO COLUMN */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* PRIORITY LABEL */
+  .priority-tag {
+    display: inline-block;
+    background: #111;
+    color: #fff;
+    font-size: 7pt;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 4px;
+    vertical-align: middle;
+    letter-spacing: 0.3px;
+  }
+
+  .footer {
+    margin-top: 10px;
+    padding-top: 6px;
+    border-top: 1px solid #ccc;
+    font-size: 7.5pt;
+    color: #777;
+    text-align: center;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    display: flex;
+    gap: 0;
+    height: 28px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+  }
+  .tl-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7pt;
+    font-weight: 700;
+    text-align: center;
+    color: #fff;
+    line-height: 1.2;
+    padding: 0 2px;
+    overflow: hidden;
+  }
+
+  /* REVEAL BOX */
+  .reveal-box {
+    border: 2px solid #111;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 10px;
+    background: #fafafa;
+  }
+  .reveal-box h3 { font-size: 10pt; font-weight: 800; margin-bottom: 5px; }
+  .reveal-box ul { padding-left: 14px; font-size: 8.5pt; }
+  .reveal-box li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="header">
+  <h1>Operation: Jack and Nate's Room</h1>
+  <div class="sub">Overnight surprise cleanup — ~4.5 hours — Dad solo mission</div>
+  <div class="rule">The 2-second rule: if you are still deciding after 2 seconds, it donates. Keep moving.</div>
+</div>
+
+<!-- ZONE MAP -->
+<h2>Room Zone Map</h2>
+<div class="zone-map">
+  <div class="zone-box priority">
+    <div class="zone-label">Zone 1 — Jack #1</div>
+    <div class="zone-name">Gaming Zone</div>
+    <div class="zone-items">L-shaped desk, PS5 (hero piece), monitor, controller, cables tamed, red lantern, chair cleared</div>
+  </div>
+  <div class="zone-box priority">
+    <div class="zone-label">Zone 2 — Jack #2</div>
+    <div class="zone-name">Pokemon Zone</div>
+    <div class="zone-items">White credenza top — binders, tins, figures grouped. Plush cluster one end. Nothing else lives here.</div>
+  </div>
+  <div class="zone-box">
+    <div class="zone-label">Zone 3 — Sleep</div>
+    <div class="zone-name">Bunk Bed Zone</div>
+    <div class="zone-items">Lower bunk: clear + made. Upper bunk: Nate's stuffies at head, 1 blanket, done. No dumping.</div>
+  </div>
+  <div class="zone-box">
+    <div class="zone-label">Zone 4 — Nate</div>
+    <div class="zone-name">Lego Display Zone</div>
+    <div class="zone-items">Dark dresser top — Technic builds + Spider-Man stay. Do NOT move or disassemble. Fragile.</div>
+  </div>
+  <div class="zone-box">
+    <div class="zone-label">Zone 5 — Books + Nate</div>
+    <div class="zone-name">Bookcase Zone</div>
+    <div class="zone-items">Left column keeps books. Right shelves: purge bags/junk. Lego boxes + manuals get one shelf.</div>
+  </div>
+  <div class="zone-box">
+    <div class="zone-label">Zone 6 — Storage</div>
+    <div class="zone-name">Closet Zone</div>
+    <div class="zone-items">Ladder OUT of house. Top shelf: camping gear + extra bedding. Eye-level: backpacks. Floor: clear.</div>
+  </div>
+</div>
+
+<!-- SUPPLY SETUP -->
+<h2>Before You Touch Anything — Set Up Supplies (10 min)</h2>
+<div class="supply-grid">
+  <div class="supply-box">
+    <strong>Trash (3 bags)</strong>
+    A = obvious junk, wrappers, broken stuff (center of room, main bag)<br>
+    B = mystery items you are 90% sure are trash<br>
+    C = overflow
+  </div>
+  <div class="supply-box">
+    <strong>Donate (3 boxes/bags)</strong>
+    1 = toys and random items<br>
+    2 = outgrown books and board games<br>
+    3 = clothes they will not miss
+  </div>
+  <div class="supply-box">
+    <strong>Laundry pile</strong>
+    Pick one corner or the doorway. Every item on the floor that is clothing goes here with zero exceptions. No smell-testing.
+  </div>
+  <div class="supply-box">
+    <strong>Return to house / other rooms</strong>
+    1 box — the ladder goes here first. Random house items (tools, etc.) go here.
+  </div>
+</div>
+
+<!-- VISUAL TIMELINE -->
+<h2>4.5-Hour Timeline</h2>
+<div class="timeline">
+  <div class="tl-seg" style="width:7%;background:#222;">Setup<br>10m</div>
+  <div class="tl-seg" style="width:8%;background:#444;">Floor<br>30m</div>
+  <div class="tl-seg" style="width:6%;background:#555;">Bunks<br>25m</div>
+  <div class="tl-seg" style="width:12%;background:#333;">Closet<br>50m</div>
+  <div class="tl-seg" style="width:13%;background:#1a1a1a;">Desk+<br>Cables 55m</div>
+  <div class="tl-seg" style="width:9%;background:#666;">Book-<br>case 35m</div>
+  <div class="tl-seg" style="width:7%;background:#888;">Pokemon<br>10m</div>
+  <div class="tl-seg" style="width:8%;background:#777;">Drawer<br>25m</div>
+  <div class="tl-seg" style="width:7%;background:#999;">Final<br>20m</div>
+</div>
+
+<!-- PHASES: 3 per row to save space on page 1 -->
+<div class="two-col">
+<div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 1</div>
+    <div class="phase-title">Floor Sweep — Clear Your Workspace</div>
+    <div class="phase-time">30 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Every piece of clothing on the floor goes to the laundry pile corner. No exceptions.</li>
+      <li><div class="checkbox"></div>Wrappers, random paper, mystery trash into Bag A.</li>
+      <li><div class="checkbox"></div>Loose Lego pieces: corral into one bowl or bin. Do NOT sort tonight. Set on dresser.</li>
+      <li><div class="checkbox"></div>Guitar case: lean against the wall by the desk (or closet floor later). Out of traffic lane.</li>
+      <li><div class="checkbox"></div>Random toys on floor: 2-second rule. Keep into the under-bed drawer section, donate into Box 1.</li>
+      <li><div class="checkbox"></div>Floor is clear. You can now move freely for the next 4 hours.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 2</div>
+    <div class="phase-title">Upper Bunk — Biggest Quick Win</div>
+    <div class="phase-time">25 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Strip everything off the upper bunk mattress onto the floor.</li>
+      <li><div class="checkbox"></div>Tent / green outdoor gear bag: goes to the "return to house" box. This never lives in a bedroom.</li>
+      <li><div class="checkbox"></div>Sleeping bags: keep 2 (one per boy), bag/roll the third for closet or donate it.</li>
+      <li><div class="checkbox"></div>Extra blankets: keep 2 total. The rest go to the hall linen closet, NOT this room.</li>
+      <li><div class="checkbox"></div>Extra pillows: keep 2 total. Extras out to the hall closet.</li>
+      <li><div class="checkbox"></div>Upper bunk end state: 1 blanket laid out, Nate's favorite stuffies grouped at the pillow end. Done.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 3</div>
+    <div class="phase-title">Lower Bunk — Make It a Real Bed</div>
+    <div class="phase-time">20 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>All clothes on the lower bunk: laundry pile.</li>
+      <li><div class="checkbox"></div>Backpacks: 2 daily-use ones hang on closet door or hooks near the door. The rest in the closet.</li>
+      <li><div class="checkbox"></div>Any bags, gear, or random items: sort to closet or donate.</li>
+      <li><div class="checkbox"></div>Strip and remake the lower bunk — flat sheet, blanket, one pillow at the head. Looks like a hotel bed.</li>
+      <li><div class="checkbox"></div>The basketball hoop on the rail: leave it. It is part of the personality.</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+<div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 4</div>
+    <div class="phase-title">Closet — Full Gut and Smart Reload <span class="priority-tag">Big one</span></div>
+    <div class="phase-time">50 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>FIRST: move the ladder to outside the bedroom door immediately. It leaves the house tonight (garage/basement).</li>
+      <li><div class="checkbox"></div>Pull EVERYTHING out of the closet onto the cleared floor.</li>
+      <li><div class="checkbox"></div>Books from the closet top shelf: move to the bookcase. Books live on bookshelves.</li>
+      <li><div class="checkbox"></div>Run the 2-second rule on everything that came out.</li>
+      <li><div class="checkbox"></div>Reload the closet shelves with one job per shelf:</li>
+      <li><div class="checkbox"></div><span class="sub-note">Top shelf (hardest reach): tent bag, sleeping bags rolled, extra blankets folded flat. Seasonal/rare use only.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">2nd shelf: travel/duffel bags not in daily use, standing upright.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">3rd shelf: board games, or Jack's overflow. One category only.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Lower shelves: one shelf per boy for personal overflow items.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Closet floor: completely clear except guitar case standing against the back wall (if it fits).</span></li>
+      <li><div class="checkbox"></div>Hooks on closet wall or back of door: hang the 2 daily-use backpacks here.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 5</div>
+    <div class="phase-title">Gaming Desk + PS5 Setup <span class="priority-tag">Jack #1</span></div>
+    <div class="phase-time">55 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Clear the gaming chair first — all clothes to laundry pile. Sit down, you have earned it for 30 seconds.</li>
+      <li><div class="checkbox"></div>Sweep everything off the desk surface onto the floor. Clean slate first, then put back only what belongs.</li>
+      <li><div class="checkbox"></div>Papers: fast sort — school stuff into backpack, rest goes in Trash A. Middle schoolers' desk papers are 90% trash.</li>
+      <li><div class="checkbox"></div>Guitar book: goes to the bookcase. Not a desk item.</li>
+      <li><div class="checkbox"></div>Cable management (15-20 min — do not rush this, the result is dramatic):</li>
+      <li><div class="checkbox"></div><span class="sub-note">Position power strip at the back-right of the desk against the wall.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Bundle PS5 power + HDMI together with a zip tie right where they leave the PS5. Run behind the monitor, not in front.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Route all cables along the back edge of the desk and down one desk leg to the power strip.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Any cable that is too long: fold the excess into a fist-size coil, zip-tie the coil, tuck behind the PS5.</span></li>
+      <li><div class="checkbox"></div>Surface layout — what goes back ON the desk:</li>
+      <li><div class="checkbox"></div><span class="sub-note">Monitor (centered or slightly right), PS5 standing vertically with white faceplate facing the door, controller in its designated spot, red lantern back-left corner. Nothing else.</span></li>
+      <li><div class="checkbox"></div>Mini fridge: move it to the floor on the left side of the desk. Off the surface.</li>
+      <li><div class="checkbox"></div>Lego display builds: move to the windowsill behind the desk (if sill is wide enough) or to the bookcase. Off the desk surface.</li>
+      <li><div class="checkbox"></div>The 3-drawer acrylic unit: stays on desk right side or goes on the floor beside the desk. Holds small accessories and random small items.</li>
+      <li><div class="checkbox"></div>Stand at the door. PS5 faceplate should be visible. Desk should look like a gaming setup, not a junk drawer.</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div class="footer">Page 1 of 2 — Operation Jack and Nate's Room — continue on page 2</div>
+
+<!-- PAGE 2 -->
+<div class="page-break"></div>
+
+<div class="header">
+  <h1>Operation: Jack and Nate's Room — Page 2</h1>
+  <div class="sub">Phases 6–9 + Decision Rules + The Reveal</div>
+</div>
+
+<div class="two-col">
+<div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 6</div>
+    <div class="phase-title">Built-In Bookcase — Sort and Reload</div>
+    <div class="phase-time">35 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Left column (Star Wars, Marvel, DOAWK series): leave the books. Just straighten them upright.</li>
+      <li><div class="checkbox"></div>All other shelves: pull everything off onto the cleared floor.</li>
+      <li><div class="checkbox"></div>Drawstring bags (Star Wars, orange mesh, others): keep 1-2 if they are used. Donate the rest.</li>
+      <li><div class="checkbox"></div>Any books mixed in: sort — keep age-appropriate ones, donate outgrown ones to Box 2.</li>
+      <li><div class="checkbox"></div>Any books that came out of the closet: add them to the bookcase left column.</li>
+      <li><div class="checkbox"></div>Reload with intention — assign each shelf one job:</li>
+      <li><div class="checkbox"></div><span class="sub-note">Top 1-2 shelves: books only, standing upright with spines out.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">One middle shelf: Lego boxed sets and instruction booklets (Nate's section).</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">One shelf: Jack's card overflow (extra binders or boxes that don't fit the credenza).</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Remaining shelves: leave deliberately empty or put 1 display item per shelf. Empty = clean. Random = messy.</span></li>
+      <li><div class="checkbox"></div>The "About Nate" cork board stays exactly as it is. Do not touch it.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 7</div>
+    <div class="phase-title">Pokemon Zone — Credenza <span class="priority-tag">Jack #2</span></div>
+    <div class="phase-time">15 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Group the card storage boxes together in a row at the back of the credenza.</li>
+      <li><div class="checkbox"></div>Stack the tins neatly — 2-3 tall max. Place them in one area, not scattered.</li>
+      <li><div class="checkbox"></div>Pokemon plush (Eevee, Bulbasaur, Pikachu, others): cluster them together in one corner of the credenza. They are a display, not scatter decoration.</li>
+      <li><div class="checkbox"></div>Pokemon figures: stand them in a small group near the tins. Facing outward.</li>
+      <li><div class="checkbox"></div>Binders: upright in a row, spine out like books.</li>
+      <li><div class="checkbox"></div>The Pokemon playmat can lay flat on the credenza surface as the base layer. It looks great as a display backdrop.</li>
+      <li><div class="checkbox"></div>Wipe the credenza surface quickly. The before vs. after here is dramatic even with a fast wipe.</li>
+      <li><div class="checkbox"></div>Board games (Connect Four etc.) move to a closet shelf or the bookcase bottom shelf. They are not display items.</li>
+      <li><div class="checkbox"></div>The tripod: lean it flat against the wall behind the credenza or in the closet. Off the floor.</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+<div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 8</div>
+    <div class="phase-title">Under-Bed Drawer — Sort and Reload</div>
+    <div class="phase-time">20 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Pull the full drawer out if possible. Dump contents on the cleared floor.</li>
+      <li><div class="checkbox"></div>Canteen: keep. Goes on a closet shelf or bookcase shelf.</li>
+      <li><div class="checkbox"></div>Small collectibles and figurines: keep ones that are clearly cared about. Donate the fast-food-toy-level stuff.</li>
+      <li><div class="checkbox"></div>Reload the drawer using the dividers — one section per purpose:</li>
+      <li><div class="checkbox"></div><span class="sub-note">Section 1: Jack's small collectibles and gaming accessories.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Section 2: Nate's small items, Lego accessories, overflow.</span></li>
+      <li><div class="checkbox"></div><span class="sub-note">Section 3: shared items — rubber bands, loose change, whatever has no other home.</span></li>
+      <li><div class="checkbox"></div>The Lego pieces you corralled in Phase 1: they can go in a small bin in the Nate section of this drawer.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-header">
+    <div class="phase-num">Phase 9</div>
+    <div class="phase-title">Final Sweep — The Reveal Setup</div>
+    <div class="phase-time">20 min</div>
+  </div>
+  <div class="phase-body">
+    <ul class="checklist">
+      <li><div class="checkbox"></div>Walk the perimeter of the room. Anything still on the floor that should not be there: find it a home.</li>
+      <li><div class="checkbox"></div>Wipe down the desk surface, the credenza top, and the top of the dresser.</li>
+      <li><div class="checkbox"></div>Straighten the posters (Iverson, boombox) — they are crooked in the photos.</li>
+      <li><div class="checkbox"></div>All donate boxes and trash bags go OUTSIDE the bedroom door tonight. They leave the house tomorrow.</li>
+      <li><div class="checkbox"></div>Laundry pile: move it to the laundry room or a hamper outside the door. Not their problem tonight.</li>
+      <li><div class="checkbox"></div>Turn on the red LED lantern on the desk. The PS5 faceplate should be visible from the doorway.</li>
+      <li><div class="checkbox"></div>Final check: stand at the door. Floor clear. Both beds made. PS5 as the hero. Pokemon zone curated. Lego builds displayed. Done.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- DECISION RULES -->
+<div class="rules-box">
+  <h3>Keep / Donate / Trash — 2-Second Rules</h3>
+  <div class="rule-row"><span class="keep">KEEP</span> — Touched in last 2 months, active collection (Pokemon, Lego), obvious sentimental value, functional and used.</div>
+  <div class="rule-row"><span class="donate">DONATE</span> — You do not know what it is, younger-kid toy, duplicate, missing pieces, still deciding after 2 seconds.</div>
+  <div class="rule-row"><span class="trash">TRASH</span> — Wrappers, random paper, broken with no fix, mystery object with no clear owner.</div>
+</div>
+
+</div>
+</div>
+
+<!-- THE REVEAL -->
+<div class="reveal-box">
+  <h3>The Reveal — What He Will See When He Walks In</h3>
+  <div class="two-col" style="margin-top:4px;">
+  <ul>
+    <li>PS5 standing vertically, white faceplate facing the door, red lantern glowing</li>
+    <li>Gaming desk surface clear — monitor, controller, PS5. Nothing else.</li>
+    <li>Pokemon zone on the credenza: cards organized, figures displayed, tins stacked, plush grouped</li>
+    <li>Both beds made flat and clean</li>
+  </ul>
+  <ul>
+    <li>Floor completely clear — no clothes, no random items, no garbage</li>
+    <li>Nate's Lego builds still exactly where he left them on the dresser (untouched)</li>
+    <li>Nate's stuffies at the head of the upper bunk</li>
+    <li>The "About Nate" cork board exactly as he hung it</li>
+  </ul>
+  </div>
+</div>
+
+<div class="footer" style="margin-top:8px;">
+  Operation Jack and Nate's Room — Generated 2026-06-07 — Good luck JC. We can do this.
+</div>
+
+</body>
+</html>

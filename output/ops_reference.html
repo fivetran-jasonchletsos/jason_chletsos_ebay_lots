@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Harpua2001 eBay Site — Ops Reference</title>
+<style>
+  @page {
+    size: letter;
+    margin: 0.65in 0.7in 0.65in 0.7in;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+  }
+
+  h1 {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #0a0a0a;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 5px;
+    margin-bottom: 14px;
+    letter-spacing: -0.3px;
+  }
+
+  h2 {
+    font-size: 10pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1a1a1a;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    border-left: 3px solid #1a1a1a;
+    padding-left: 7px;
+  }
+
+  p { margin-bottom: 5px; }
+
+  pre, code {
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 8pt;
+  }
+
+  pre {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  code {
+    background: #f0f0f0;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+    font-size: 8.5pt;
+  }
+
+  th {
+    background: #1a1a1a;
+    color: #fff;
+    text-align: left;
+    padding: 4px 8px;
+    font-weight: 600;
+    font-size: 8pt;
+    letter-spacing: 0.2px;
+  }
+
+  td {
+    padding: 3px 8px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: #fafafa; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 2px;
+  }
+
+  .section { margin-bottom: 10px; }
+
+  .note {
+    background: #f5f5f5;
+    border-left: 3px solid #888;
+    padding: 5px 8px;
+    font-size: 8.5pt;
+    margin-bottom: 8px;
+  }
+
+  ul {
+    padding-left: 14px;
+    margin-bottom: 6px;
+  }
+
+  li { margin-bottom: 2px; }
+
+  .tag {
+    display: inline-block;
+    background: #1a1a1a;
+    color: #fff;
+    font-family: "SF Mono", monospace;
+    font-size: 7.5pt;
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  .footer {
+    margin-top: 12px;
+    padding-top: 6px;
+    border-top: 1px solid #ccc;
+    font-size: 8pt;
+    color: #555;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Harpua2001 eBay Site — Ops Reference</h1>
+
+<div class="two-col">
+
+  <div>
+
+    <div class="section">
+      <h2>Daily Routine (5 min)</h2>
+      <pre>cd ~/Documents/GitHub/jason_chletsos_ebay_lots
+
+# Full rebuild + push to GitHub Pages
+python3 promote.py
+
+# Apply repricing decisions
+python3 promote.py --reprice-apply
+
+# Fill Item Specifics gaps (Cassini rank)
+python3 specifics_agent.py --apply --no-fetch
+
+# Auto-respond to best offers
+python3 best_offer_autorespond_agent.py --apply
+
+# Auto-respond to buyer messages
+python3 message_responder_agent.py --apply</pre>
+      <div class="note">Or just say "run the daily tasks" — the <code>harpua-daily</code> skill handles the full dry-run sweep and waits for your --apply confirmation.</div>
+    </div>
+
+    <div class="section">
+      <h2>Agent Quick-Reference</h2>
+      <table>
+        <tr><th>Goal</th><th>Command</th><th>Notes</th></tr>
+        <tr><td>Reprice to market</td><td><code>python3 repricing_agent.py</code></td><td>dry-run; add <code>--apply</code></td></tr>
+        <tr><td>Send watcher offers</td><td><code>python3 watchers_offer_agent.py --apply</code></td><td>needs sell.negotiation scope</td></tr>
+        <tr><td>Best offer bulk push</td><td><code>python3 best_offer_agent.py --apply</code></td><td>slow — per-item API</td></tr>
+        <tr><td>Promoted listings bids</td><td><code>python3 promoted_listings_agent.py --apply</code></td><td></td></tr>
+        <tr><td>Photo quality report</td><td><code>python3 photo_audit_agent.py</code></td><td>P1 open issue</td></tr>
+        <tr><td>Lot generator</td><td><code>python3 lot_generator_agent.py</code></td><td>flagship feature</td></tr>
+        <tr><td>CollX import</td><td><code>python3 collx_ingest.py</code></td><td>staging only, never auto-post</td></tr>
+        <tr><td>Emergency reprice</td><td><code>python3 emergency_reprice.py</code></td><td>break-glass</td></tr>
+        <tr><td>Lambda deploy</td><td><code>cd ebay_notifications &amp;&amp; ./deploy.sh</code></td><td>after AWS SSO login</td></tr>
+      </table>
+    </div>
+
+  </div>
+
+  <div>
+
+    <div class="section">
+      <h2>Skill Invocations</h2>
+      <table>
+        <tr><th>Skill</th><th>When to use</th></tr>
+        <tr><td><span class="tag">/harpua-daily</span></td><td>Every morning. Dry-run sweep of all agents, waits for your --apply confirmation.</td></tr>
+        <tr><td><span class="tag">/ebay-search</span></td><td>Research competitor listings before repricing or building a new lot.</td></tr>
+        <tr><td><span class="tag">/frontend-design</span></td><td>Visual overhaul of any site page — avoids generic AI aesthetics.</td></tr>
+        <tr><td><span class="tag">/code-review</span></td><td>Run after any non-trivial agent change before deploying Lambda.</td></tr>
+        <tr><td><span class="tag">/verify</span></td><td>Confirm a code change works in the live site before reporting done.</td></tr>
+        <tr><td><span class="tag">/deep-research</span></td><td>Multi-source market research (e.g. which refractors are appreciating) before a lot build or price inference pass.</td></tr>
+        <tr><td><span class="tag">/creating-data-visualizations</span></td><td>Quick charts from pricing or audit output without building a full page.</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Useful Prompts</h2>
+      <ul>
+        <li>"Run the daily tasks" — triggers harpua-daily</li>
+        <li>"Fan out 4 agents to research [card/set]" — bulk comp research</li>
+        <li>"Make [page] look great" — triggers frontend-design polish</li>
+        <li>"Add a new agent that does X" — follows dry-run/apply pattern</li>
+        <li>"Audit the [agent] plan output and tell me what to apply" — reads output/*.json and summarizes recommended actions</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>One-Time Outstanding (MANUAL_STEPS.md)</h2>
+      <table>
+        <tr><th>#</th><th>Task</th><th>Est.</th></tr>
+        <tr><td>1</td><td>Upload <code>docs/ebay_billboard.jpg</code> to eBay Store Design</td><td>3 min</td></tr>
+        <tr><td>2</td><td>Re-mint OAuth token with <code>sell.negotiation</code> scope via <code>python3 oauth_remint_helper.py</code></td><td>5 min</td></tr>
+        <tr><td>3</td><td>Sign up for eBay Partner Network → set <code>epn_campid</code> in <code>configuration.json</code></td><td>5 min</td></tr>
+        <tr><td>4</td><td>Submit <code>docs/google_feed.xml</code> to Google Merchant Center (free Shopping placement)</td><td>5 min</td></tr>
+        <tr><td>5</td><td>Add <code>ANTHROPIC_API_KEY</code> to Lambda env vars (activates AI Assistant page)</td><td>2 min</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Skills Worth Adding</h2>
+      <ul>
+        <li>A price-tracking / market data MCP skill — would speed up the pricing loop beyond the current SportsCardsPro scrape</li>
+        <li>A Google Merchant Center skill — monitoring the Shopping feed is currently manual</li>
+        <li>A push notification skill — get the daily digest on your phone without opening Claude Code</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  Harpua2001 eBay Site — Ops Reference &nbsp;|&nbsp; Generated 2026-06-07 &nbsp;|&nbsp; github.com/fivetran-jasonchletsos/jason_chletsos_ebay_lots
+</div>
+
+</body>
+</html>
