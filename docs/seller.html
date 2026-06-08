@@ -773,8 +773,22 @@ a:hover { text-decoration: underline; opacity: .85; }
       <div class="flip-grid" id="flipGrid"></div>
     </section>
 
+    <!-- List These Next -->
+    <section class="section-gap reveal reveal-4" id="list-next">
+      <div class="section-header">
+        <h2 class="section-title">List These Next</h2>
+        <span class="section-count" id="unlistedCount">loading…</span>
+      </div>
+      <p style="font-size:var(--fs-sm);color:var(--text-muted);margin-bottom:var(--space-md);">
+        Cards in your inventory not currently on eBay, ranked by CollX market value. These have value sitting on the shelf.
+      </p>
+      <div id="unlistedGrid" class="attention-grid">
+        <div style="color:var(--text-muted);font-size:var(--fs-sm);">Loading…</div>
+      </div>
+    </section>
+
     <!-- Attention Cards -->
-    <section class="section-gap reveal reveal-4" id="needs-attention">
+    <section class="section-gap reveal reveal-5" id="needs-attention">
       <div class="section-header">
         <h2 class="section-title">From Your Inventory</h2>
         <span class="section-count">Ranked by what buyers actually buy</span>
@@ -1032,6 +1046,35 @@ async function renderTasks(preloadedListings) {
 // ============================================================
 // RENDER ATTENTION CARDS (live from listings)
 // ============================================================
+// ============================================================
+// RENDER UNLISTED INVENTORY
+// ============================================================
+function renderUnlisted(data) {
+  const grid = document.getElementById('unlistedGrid');
+  const cnt  = document.getElementById('unlistedCount');
+  if (!grid) return;
+  if (!data || !data.top || !data.top.length) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:var(--fs-sm);">No unlisted data — run sync_docs_json.py to refresh.</div>';
+    return;
+  }
+  if (cnt) cnt.textContent = data.count + ' cards >= $3 not on eBay';
+  const cards = data.top.slice(0, 10);
+  grid.innerHTML = cards.map(c => {
+    const collxUrl = `https://collx.app/card/${c.collx_id}`;
+    const thumb = c.image
+      ? `<img class="attn-thumb" src="${c.image}" alt="" loading="lazy">`
+      : `<div class="attn-thumb-placeholder" style="font-size:22px;">&#9824;</div>`;
+    return `<a class="attn-card" href="${collxUrl}" target="_blank" rel="noopener">
+      ${thumb}
+      <div class="attn-body">
+        <div class="attn-title">${c.title}</div>
+        <div class="attn-price" style="color:var(--success);">$${c.market_value.toFixed(2)}</div>
+        <div class="attn-labels"><span class="attn-label label-market">not listed</span></div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
 function renderAttentionCards(listings) {
   const grid = document.getElementById('attentionGrid');
   if (!grid) return;
