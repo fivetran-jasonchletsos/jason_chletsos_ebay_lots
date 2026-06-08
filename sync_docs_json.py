@@ -272,6 +272,19 @@ def _render_listing_card(listing: dict) -> str:
 INLINE_CARDS = 12   # first N cards ship as real HTML; rest go into JSON
 
 
+def _slim_flips(data) -> dict:
+    """Trim resale_flips_plan.json to clean top-50 for seller dashboard."""
+    items = data if isinstance(data, list) else data.get('flips', data.get('candidates', []))
+    clean = [f for f in items if not f.get('warnings') and float(f.get('net_profit', 0) or 0) >= 10]
+    slim = sorted(clean, key=lambda x: float(x.get('net_profit', 0)), reverse=True)[:50]
+    return {'generated_at': data.get('generated_at', '') if isinstance(data, dict) else '', 'flips': [
+        {'title': f.get('title', '')[:70], 'price': f.get('price', 0), 'net': round(float(f.get('net_profit', 0) or 0), 2),
+         'vel': round(float(f.get('velocity_30d', 0) or 0), 0), 'url': f.get('url', ''), 'image': f.get('image', ''),
+         'pct_below': round(float(f.get('pct_below', 0) or 0), 0), 'query': f.get('from_query', '')}
+        for f in slim
+    ]}
+
+
 def publish(dry_run: bool = False) -> dict:
     """Enrich the snapshot and atomically publish all four docs/ JSON files.
 
@@ -335,6 +348,21 @@ def publish(dry_run: bool = False) -> dict:
     else:
         if not dry_run:
             changed.append("docs/_deals_listings.json (unchanged — live deal data present)")
+
+    # Sync orders.json and flips.json to docs/ for seller dashboard live fetch
+    for src_name, dst_name, transform in [
+        ("output/orders_watch_plan.json", "docs/orders.json", None),
+        ("output/resale_flips_plan.json", "docs/flips.json", _slim_flips),
+    ]:
+        src = REPO / src_name if not src_name.startswith('/') else Path(src_name)
+        src = Path(__file__).parent / src_name
+        dst = Path(__file__).parent / dst_name
+        if src.exists():
+            data = json.loads(src.read_text())
+            payload = transform(data) if transform else data
+            if not dry_run:
+                _atomic_write(dst, payload)
+                changed.append(dst_name)
 
     return {
         "listings": len(enriched),
