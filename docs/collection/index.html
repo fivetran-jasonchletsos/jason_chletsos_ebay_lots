@@ -119,7 +119,7 @@
     <div class="tab active" onclick="switchPlayer('dart')">Jaxson Dart</div>
     <div class="tab" onclick="switchPlayer('skattebo')">Cam Skattebo</div>
     <div class="tab" onclick="switchPlayer('nabers')">Malik Nabers</div>
-    <div class="tab coming-soon">Abdul Carter</div>
+    <div class="tab" onclick="switchPlayer('carter')">Abdul Carter</div>
   </div>
 </header>
 
@@ -245,6 +245,42 @@ const NABERS_CARDS = [
   { id:56, set:"2025 Topps Signature Class", subset:"Round 1 Pick 6",   parallel:"Dark/Warm",   type:"base",    grade:null,     serial:null,    value:8,   tags:["topps","base"] },
 ];
 
+const CARTER_CARDS = [
+  // ── SCAN 11 (1×2) ───────────────────────────────────────────────────────
+  { id:1,  set:"2025 Panini Prizm",           subset:"Prizmatic",              parallel:"Prizmatic",    type:"insert",  grade:null, serial:null, value:20, tags:["prizm","insert"] },
+  { id:2,  set:"2025 Panini Prizm",           subset:"Fireworks",              parallel:"Base",         type:"insert",  grade:null, serial:null, value:15, tags:["prizm","insert"] },
+  // ── SCAN 10 (3×3) ───────────────────────────────────────────────────────
+  { id:3,  set:"2025 Panini Prizm",           subset:"Base RC",                parallel:"Silver",       type:"base",    grade:null, serial:null, value:10, tags:["prizm","base"] },
+  { id:4,  set:"2025 Panini Select",          subset:"Base RC",                parallel:"Silver",       type:"base",    grade:null, serial:null, value:8,  tags:["select","base"] },
+  { id:5,  set:"2025 Topps Signature Class",  subset:"Round 1 Pick 3",         parallel:"Base",         type:"base",    grade:null, serial:null, value:12, tags:["topps","base"] },
+  { id:6,  set:"2025 Panini Select",          subset:"Concourse RC",           parallel:"Concourse",    type:"base",    grade:null, serial:null, value:6,  tags:["select","base"] },
+  { id:7,  set:"2025 Panini Select",          subset:"Concourse RC",           parallel:"Concourse",    type:"base",    grade:null, serial:null, value:6,  tags:["select","base"] },
+  { id:8,  set:"2025 Panini Select",          subset:"Club Level RC",          parallel:"Club Level Pink", type:"base", grade:null, serial:null, value:10, tags:["select","base"] },
+  { id:9,  set:"2025 Panini Score",           subset:"Super Rookie RC",        parallel:"Base",         type:"base",    grade:null, serial:null, value:4,  tags:["base"] },
+  { id:10, set:"2025 Panini Select",          subset:"Future",                 parallel:"Base",         type:"insert",  grade:null, serial:null, value:8,  tags:["select","insert"] },
+  { id:11, set:"2025 Panini Select",          subset:"Future",                 parallel:"Gold",         type:"insert",  grade:null, serial:null, value:8,  tags:["select","insert"] },
+  // ── SCAN 8 (3×3) ────────────────────────────────────────────────────────
+  { id:12, set:"2025 Panini Select",          subset:"Concourse RC",           parallel:"Concourse",    type:"base",    grade:null, serial:null, value:6,  tags:["select","base"] },
+  { id:13, set:"2025 Topps Signature Class",  subset:"Class Jams",             parallel:"Base",         type:"insert",  grade:null, serial:null, value:15, tags:["topps","insert"] },
+  { id:14, set:"2025 Panini Select",          subset:"Turbocharged",           parallel:"Orange/Gold",  type:"insert",  grade:null, serial:null, value:12, tags:["select","insert"] },
+  { id:15, set:"2025 Panini Mosaic",          subset:"Base RC",                parallel:"Silver",       type:"base",    grade:null, serial:null, value:8,  tags:["base"] },
+  { id:16, set:"2025 Topps Chrome Edge",      subset:"Base RC",                parallel:"Xfractor",     type:"base",    grade:null, serial:null, value:25, tags:["topps","base"] },
+  { id:17, set:"2025 Panini Select",          subset:"Select Certified",       parallel:"Base",         type:"insert",  grade:null, serial:null, value:12, tags:["select","insert"] },
+  { id:18, set:"2025 Topps Signature Class",  subset:"Round 1 Pick 3",         parallel:"Base",         type:"base",    grade:null, serial:null, value:12, tags:["topps","base"] },
+  { id:19, set:"2025 Panini Select",          subset:"Concourse RC",           parallel:"Concourse",    type:"base",    grade:null, serial:null, value:6,  tags:["select","base"] },
+  { id:20, set:"2025 Panini Prizm",           subset:"Base RC",                parallel:"Silver",       type:"base",    grade:null, serial:null, value:10, tags:["prizm","base"] },
+  // ── SCAN 9 (3×3) ────────────────────────────────────────────────────────
+  { id:21, set:"2025 Panini Mosaic",          subset:"Mosaic RC",              parallel:"Mosaic",       type:"base",    grade:null, serial:null, value:12, tags:["base"] },
+  { id:22, set:"2025 Panini Select",          subset:"Club Level RC",          parallel:"Club Level",   type:"base",    grade:null, serial:null, value:6,  tags:["select","base"] },
+  { id:23, set:"2025 Panini Select",          subset:"Base RC",                parallel:"Silver",       type:"base",    grade:null, serial:null, value:8,  tags:["select","base"] },
+  { id:24, set:"2025 Panini Mosaic",          subset:"Notoriety",              parallel:"Base",         type:"insert",  grade:null, serial:null, value:15, tags:["insert"] },
+  { id:25, set:"2025 Panini Select",          subset:"Field Level RC",         parallel:"Field Level",  type:"base",    grade:null, serial:null, value:10, tags:["select","base"] },
+  { id:26, set:"2025 Panini Rookies & Stars", subset:"Base RC",                parallel:"Base",         type:"base",    grade:null, serial:null, value:5,  tags:["base"] },
+  { id:27, set:"2025 Panini Mosaic",          subset:"RC",                     parallel:"Starburst",    type:"base",    grade:null, serial:null, value:10, tags:["base"] },
+  { id:28, set:"2025 Panini Select",          subset:"Concourse RC",           parallel:"Concourse",    type:"base",    grade:null, serial:null, value:6,  tags:["select","base"] },
+  { id:29, set:"2025 Panini Select",          subset:"Future",                 parallel:"Gold",         type:"insert",  grade:null, serial:null, value:8,  tags:["select","insert"] },
+];
+
 const SKATTEBO_CARDS = [
   // ── SCAN 10 (1×3) ───────────────────────────────────────────────────────
   { id:1,  set:"2025 Donruss Optic",           subset:"Rated Rookie",          parallel:"Teal",        type:"base",   grade:null, serial:null, value:8,  tags:["optic","base"] },
@@ -366,15 +402,17 @@ const DART_CARDS = [
 let activeFilter = 'all';
 
 const PLAYER_DATA = {
-  dart:     { cards: null, dir: 'dart',     prefix: 'dart',  name: 'Jaxson Dart',  team: 'NY Giants · QB' },
-  skattebo: { cards: null, dir: 'skattebo', prefix: 'skat',  name: 'Cam Skattebo', team: 'NY Giants · RB' },
-  nabers:   { cards: null, dir: 'nabers',   prefix: 'nabe',  name: 'Malik Nabers', team: 'NY Giants · WR' },
+  dart:     { cards: null, dir: 'dart',     prefix: 'dart',  name: 'Jaxson Dart',   team: 'NY Giants · QB' },
+  skattebo: { cards: null, dir: 'skattebo', prefix: 'skat',  name: 'Cam Skattebo',  team: 'NY Giants · RB' },
+  nabers:   { cards: null, dir: 'nabers',   prefix: 'nabe',  name: 'Malik Nabers',  team: 'NY Giants · WR' },
+  carter:   { cards: null, dir: 'carter',   prefix: 'cart',  name: 'Abdul Carter',  team: 'NY Giants · LB' },
 };
 
 function getCards() {
   if (CURRENT_PLAYER === 'dart')     return DART_CARDS;
   if (CURRENT_PLAYER === 'skattebo') return SKATTEBO_CARDS;
-  return NABERS_CARDS;
+  if (CURRENT_PLAYER === 'nabers')   return NABERS_CARDS;
+  return CARTER_CARDS;
 }
 
 function cardImage(id) {
