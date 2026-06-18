@@ -157,6 +157,7 @@
   <div class="search-row">
     <input class="search-input" id="searchInput" placeholder="Search by set, parallel, type..." oninput="applyFilters()">
     <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+      <option value="dupes" selected>Value + Set</option>
       <option value="value-desc">Value ↓</option>
       <option value="value-asc">Value ↑</option>
       <option value="set-az">Set A–Z</option>
@@ -496,7 +497,13 @@ function applyFilters() {
     if (q && !`${c.set} ${c.subset} ${c.parallel} ${c.grade||''} ${c.serial||''}`.toLowerCase().includes(q)) return false;
     return true;
   });
-  if (sort === 'value-desc') filtered.sort((a,b) => b.value - a.value);
+  if (sort === 'dupes') filtered.sort((a,b) =>
+    b.value - a.value ||
+    a.set.localeCompare(b.set) ||
+    (a.subset||'').localeCompare(b.subset||'') ||
+    (a.parallel||'').localeCompare(b.parallel||'')
+  );
+  else if (sort === 'value-desc') filtered.sort((a,b) => b.value - a.value);
   else if (sort === 'value-asc') filtered.sort((a,b) => a.value - b.value);
   else if (sort === 'set-az') filtered.sort((a,b) => a.set.localeCompare(b.set));
   else filtered.sort((a,b) => a.id - b.id);
