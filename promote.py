@@ -3960,7 +3960,9 @@ def fetch_pokemontcg(title: str, cache: dict, api_key: str = "") -> dict | None:
 
 
 def gather_pricing_sources(title: str, cfg: dict, sold_history: list[dict],
-                           ebay_market: dict | None, cache: dict) -> dict:
+                           ebay_market: dict | None, cache: dict,
+                           item_id: str | None = None,
+                           _scp_store: dict | None = None) -> dict:
     """Aggregate pricing from every available source for one item.
     Returns dict keyed by source name with {median, low, high, count, url, label, freshness}."""
     out = {}
@@ -4014,15 +4016,32 @@ def gather_pricing_sources(title: str, cfg: dict, sold_history: list[dict],
             "label":   "PokemonTCG.io",
             "subnote": f"TCGplayer · {ptcg.get('matched_title', '')[:50]}",
         }
+    # 5. SportsCardsPro guide price (fetched by card_price_agent.py, cached 7d)
+    if item_id:
+        scp_store = _scp_store if _scp_store is not None else _load_sportscardspro_prices()
+        scp_rec = scp_store.get(str(item_id))
+        if scp_rec and scp_rec.get("actual_price") and scp_rec.get("confidence", 0) >= 0.40:
+            out["scp_actual"] = {
+                "median":  scp_rec["actual_price"],
+                "low":     None,
+                "high":    None,
+                "count":   1,
+                "url":     scp_rec.get("scp_url", ""),
+                "label":   "SportsCardsPro",
+                "subnote": f"{scp_rec.get('used_grade', 'raw')} · conf {scp_rec.get('confidence', 0):.2f} · {(scp_rec.get('matched_product') or '')[:40]}",
+            }
     return out
 
 
 def _suggest_price_multi(your_price: float, sources: dict) -> dict:
     """Recommend a list price using all available sources, ranked by reliability.
-    Priority: sold_history > pricecharting > pokemontcg > ebay_active*0.95."""
+    Priority: sold_history > scp_actual > pricecharting > pokemontcg > ebay_active*0.95."""
     if "sold_history" in sources and sources["sold_history"]["count"] >= 3:
         ref = sources["sold_history"]["median"]
         basis = "Your past sales"
+    elif "scp_actual" in sources:
+        ref = sources["scp_actual"]["median"]
+        basis = "SportsCardsPro"
     elif "pricecharting" in sources:
         ref = sources["pricecharting"]["median"]
         basis = "PriceCharting"
@@ -10485,14 +10504,17 @@ def main():
     print("  Aggregating multi-source pricing (cached 24h)...")
     pricing_cache = _pricing_cache_load()
     pricing_by_id: dict[str, dict] = {}
-    pc_count = ptcg_count = 0
+    pc_count = ptcg_count = scp_count = 0
+    _scp_store = _load_sportscardspro_prices()
     for l in listings:
-        srcs = gather_pricing_sources(l["title"], cfg, sold, market.get(l["item_id"]), pricing_cache)
+        srcs = gather_pricing_sources(l["title"], cfg, sold, market.get(l["item_id"]), pricing_cache,
+                                      item_id=l["item_id"], _scp_store=_scp_store)
         pricing_by_id[l["item_id"]] = srcs
         if "pricecharting" in srcs: pc_count += 1
         if "pokemontcg"    in srcs: ptcg_count += 1
+        if "scp_actual"    in srcs: scp_count += 1
     _pricing_cache_save(pricing_cache)
-    print(f"  Pricing sources: eBay active on all · PriceCharting matched {pc_count}/{len(listings)} · PokemonTCG.io matched {ptcg_count}/{len(listings)}")
+    print(f"  Pricing sources: eBay active on all · SCP matched {scp_count}/{len(listings)} · PriceCharting matched {pc_count}/{len(listings)} · PokemonTCG.io matched {ptcg_count}/{len(listings)}")
 
     # Always snapshot the current listings so sister agents (seller_hub_agent,
     # specifics_agent, watchers_offer_agent, etc.) read fresh data even when

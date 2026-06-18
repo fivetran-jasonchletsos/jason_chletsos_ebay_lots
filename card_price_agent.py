@@ -364,9 +364,30 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="Refetch every listing")
     ap.add_argument("--item",  help="Only price this item_id")
     ap.add_argument("--limit", type=int, help="Cap how many listings to process")
+    ap.add_argument("--title", help="Price a single card by raw title (unlisted/inventory lookup)")
     args = ap.parse_args()
 
-    token    = load_token()
+    token = load_token()
+
+    # One-off title lookup — doesn't touch the store, just prints results.
+    if args.title:
+        rec = price_listing({"title": args.title, "item_id": None}, token)
+        if not rec:
+            print("No result.")
+            return 1
+        if rec.get("actual_price"):
+            print(f"SportsCardsPro: ${rec['actual_price']:.2f} ({rec.get('used_grade','raw')}) · conf {rec['confidence']:.2f}")
+            print(f"  Match: {rec.get('matched_product')} — {rec.get('matched_set')}")
+            print(f"  URL:   {rec.get('scp_url','')}")
+            if rec.get("grades"):
+                for g, v in rec["grades"].items():
+                    print(f"  {g}: ${v:.2f}")
+        elif rec.get("matched_product"):
+            print(f"Low confidence ({rec['confidence']:.2f}): {rec.get('matched_product')}")
+        else:
+            print(f"No match found (query: {rec.get('query','')})")
+        return 0
+
     listings = load_listings()
     store    = load_store()
 

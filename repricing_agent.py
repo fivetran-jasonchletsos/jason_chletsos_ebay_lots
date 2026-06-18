@@ -68,7 +68,7 @@ DEFAULT_CONFIG: dict = {
     # ReviseItem calls aggressively for high-volume sellers.
     "max_changes_per_run":  25,
     # Rank of trusted sources, in order of preference for the "basis".
-    "trust_sources":        ["sold_history", "pricecharting", "pokemontcg", "ebay_active"],
+    "trust_sources":        ["sold_history", "scp_actual", "pricecharting", "pokemontcg", "ebay_active"],
     # If True, require at least one "high-confidence" source (sold_history or
     # pricecharting) before lowering price. Active eBay comps alone don't count.
     "require_high_confidence_to_drop": True,
@@ -122,6 +122,8 @@ def _ship_for(listing: dict) -> float:
 def _source_confidence(source_key: str, source_data: dict) -> str:
     """Return 'high', 'mid', or 'low' for a pricing source."""
     if source_key == "sold_history" and source_data.get("count", 0) >= 3:
+        return "high"
+    if source_key == "scp_actual":
         return "high"
     if source_key == "pricecharting":
         return "high"
@@ -332,16 +334,24 @@ def decide(listing: dict, market_row: dict, pricing_sources: dict,
 EBAY_NS = "urn:ebay:apis:eBLBaseComponents"
 
 
-def revise_price(item_id: str, new_price: float, ebay_cfg: dict, token: str) -> dict:
-    """Push a single StartPrice update via Trading API ReviseItem."""
-    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-<ReviseItemRequest xmlns="{EBAY_NS}">
-  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
-  <Item>
-    <ItemID>{item_id}</ItemID>
-    <StartPrice currencyID="USD">{new_price:.2f}</StartPrice>
-  </Item>
-</ReviseItemRequest>"""
+# Best Offer thresholds recomputed on every price change so a price drop never
+# lands below the auto-accept/auto-decline floors that best_offer_agent set at
+# the OLD price (eBay codes 23004 / 22003 — 93% of historical revise failures).
+# Ratios mirror best_offer_agent: ACCEPT_BIN_CAP_PCT / DECLINE_FALLBACK_PCT.
+REVISE_ACCEPT_PCT  = 0.98
+REVISE_DECLINE_PCT = 0.70
+
+# Trading API category 261328 requires condition descriptors on revise too
+# (code 21920349) — same values post_from_scan.py sends on AddItem.
+_CONDITION_XML = (
+    "<ConditionID>4000</ConditionID>"
+    "<ConditionDescriptors><ConditionDescriptor>"
+    "<Name>40001</Name><Value>400010</Value>"
+    "</ConditionDescriptor></ConditionDescriptors>"
+)
+
+
+def _post_revise(xml_body: str, ebay_cfg: dict) -> dict:
     headers = {
         "X-EBAY-API-SITEID":              "0",
         "X-EBAY-API-COMPATIBILITY-LEVEL": "967",
@@ -366,6 +376,38 @@ def revise_price(item_id: str, new_price: float, ebay_cfg: dict, token: str) -> 
         "errors":  errors,
         "http":    r.status_code,
     }
+
+
+def revise_price(item_id: str, new_price: float, ebay_cfg: dict, token: str) -> dict:
+    """Push a StartPrice update, moving Best Offer thresholds with the price."""
+    accept  = round(new_price * REVISE_ACCEPT_PCT, 2)
+    decline = round(new_price * REVISE_DECLINE_PCT, 2)
+    item_inner = (
+        f"<ItemID>{item_id}</ItemID>"
+        f'<StartPrice currencyID="USD">{new_price:.2f}</StartPrice>'
+        f"{_CONDITION_XML}"
+        "<ListingDetails>"
+        f'<BestOfferAutoAcceptPrice currencyID="USD">{accept:.2f}</BestOfferAutoAcceptPrice>'
+        f'<MinimumBestOfferPrice currencyID="USD">{decline:.2f}</MinimumBestOfferPrice>'
+        "</ListingDetails>"
+    )
+    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
+<ReviseItemRequest xmlns="{EBAY_NS}">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <Item>{item_inner}</Item>
+</ReviseItemRequest>"""
+    result = _post_revise(xml_body, ebay_cfg)
+
+    # Listings without Best Offer enabled reject the threshold fields —
+    # retry with price + condition only.
+    if not result["ok"] and any("offer" in (e["msg"] or "").lower() for e in result["errors"]):
+        fallback = f"""<?xml version="1.0" encoding="utf-8"?>
+<ReviseItemRequest xmlns="{EBAY_NS}">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice>{_CONDITION_XML}</Item>
+</ReviseItemRequest>"""
+        result = _post_revise(fallback, ebay_cfg)
+    return result
 
 
 # --------------------------------------------------------------------------- #
@@ -641,6 +683,24 @@ def plan_all(listings: list[dict], pricing_by_id: dict, cfg: dict) -> list[dict]
     return plan
 
 
+# Codes that fail deterministically for a given item+price — retrying the
+# identical revision just burns cap slots (this caused the "7/25 applied"
+# multi-pass toil before thresholds were bundled into revise_price).
+NON_RETRYABLE_CODES = {"22003", "23004", "21920349", "10023", "240", "291"}
+
+
+def _recently_failed_same_price(history: list[dict]) -> dict[str, dict]:
+    """Map item_id -> last failed record with a non-retryable code."""
+    last: dict[str, dict] = {}
+    for rec in history:
+        if rec.get("item_id"):
+            last[rec["item_id"]] = rec
+    return {
+        iid: rec for iid, rec in last.items()
+        if not rec.get("ok") and str(rec.get("error_code")) in NON_RETRYABLE_CODES
+    }
+
+
 def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
                only_item: str | None = None) -> list[dict]:
     token = promote.get_access_token(ebay_cfg)
@@ -649,11 +709,39 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
     if only_item:
         to_apply = [d for d in to_apply if d["item_id"] == only_item]
     cap = cfg["max_changes_per_run"]
-    if len(to_apply) > cap:
-        print(f"  Capping run at {cap} of {len(to_apply)} eligible changes")
-        to_apply = to_apply[:cap]
 
+    # Build item_id -> last history record. Two skip rules:
+    #  - last attempt FAILED with a deterministic code at this price: will fail again
+    #  - last attempt SUCCEEDED at this exact price: the snapshot is stale and
+    #    the change is already live on eBay (re-applying burns cap for nothing)
+    history = load_history()
+    last: dict[str, dict] = {}
+    for rec in history:
+        if rec.get("item_id"):
+            last[rec["item_id"]] = rec
+    skipped_known, skipped_done, queue = [], [], []
     for d in to_apply:
+        prior = last.get(d["item_id"])
+        same_price = prior and abs(float(prior.get("to_price") or 0) - d["target_price"]) < 0.01
+        if same_price and prior.get("ok"):
+            skipped_done.append(d["item_id"])
+        elif same_price and str(prior.get("error_code")) in NON_RETRYABLE_CODES:
+            skipped_known.append((d["item_id"], prior.get("error_code"), prior.get("error")))
+        else:
+            queue.append(d)
+    if skipped_done:
+        print(f"  Skipping {len(skipped_done)} item(s) already revised to target (stale snapshot)")
+    if skipped_known:
+        print(f"  Skipping {len(skipped_known)} item(s) blocked by previous eBay rejection:")
+        for iid, code, msg in skipped_known[:10]:
+            print(f"    blocked {iid} [{code}] {str(msg)[:80]}")
+
+    successes = 0
+    error_counts: dict[str, int] = {}
+    for d in queue:
+        if successes >= cap:
+            print(f"  Reached {cap} successful changes; {len(queue) - queue.index(d)} still queued for next run")
+            break
         print(f"  → {d['item_id']}: ${d['current_price']:.2f} → ${d['target_price']:.2f}  ({d['delta_pct']:+.1f}%)")
         result = revise_price(d["item_id"], d["target_price"], ebay_cfg, token)
         record = {
@@ -671,20 +759,29 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
             "url":         d.get("url"),
         }
         applied.append(record)
-        # If eBay rejected with content-policy or ended-listing codes, auto-lock
-        if not result["ok"] and result["errors"]:
-            code = result["errors"][0]["code"]
+        if result["ok"]:
+            successes += 1
+        else:
+            code = (result["errors"][0]["code"] if result["errors"] else f"http{result['http']}")
+            msg = (result["errors"][0]["msg"] if result["errors"] else "no error detail in response")
+            print(f"    FAILED [{code}] {msg[:120]}")
+            error_counts[f"{code}: {msg[:60]}"] = error_counts.get(f"{code}: {msg[:60]}", 0) + 1
             if code in ("240", "291"):
                 locks = promote.load_locks()
                 locks.setdefault("items", {})[d["item_id"]] = {
                     "code":   code,
-                    "reason": result["errors"][0]["msg"] or f"eBay error {code}",
+                    "reason": msg or f"eBay error {code}",
                     "since":  datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 }
                 promote.LOCKS_FILE.write_text(json.dumps(locks, indent=2))
                 print(f"    ↳ auto-locked {d['item_id']} (eBay code {code})")
         # eBay throttles aggressive revisers; small pacing helps.
         time.sleep(0.5)
+
+    if error_counts:
+        print("\n  Failure histogram:")
+        for key, n in sorted(error_counts.items(), key=lambda kv: -kv[1]):
+            print(f"    {n}x  {key}")
     return applied
 
 

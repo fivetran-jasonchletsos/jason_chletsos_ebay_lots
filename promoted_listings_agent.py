@@ -441,6 +441,13 @@ def build_decision(listing: dict, sold_idx: dict[str, list[dict]],
     decision["rate"] = rate
     decision["reasons"].extend(reasons)
 
+    # Floor: promote every eligible listing at minimum LOW rate (3%).
+    # Blocked listings (wrong category, zero price) are exempt.
+    if decision["tier"] == "no_ad" and not decision["blocked"]:
+        decision["tier"] = "low"
+        decision["rate"] = cfg["tiers"]["low"]["rate"]
+        decision["reasons"].append("floored to LOW — minimum promotion on all eligible listings")
+
     # Project 30-day ad spend = price × rate × prob(sells in 30d).
     p_sell_30d = 1.0 if sold_30d >= 1 else cfg.get("default_30d_sellthrough", 0.25)
     decision["projected_30d_spend"] = round(price * rate * p_sell_30d, 4)
@@ -953,14 +960,18 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
                create_campaign_if_missing: bool) -> list[dict]:
     """Push every non-zero bid through the Marketing API."""
     token = get_marketing_token(ebay_cfg)
-    campaigns = list_campaigns(token)
+    all_campaigns = list_campaigns(token)
+    active_statuses = {"RUNNING", "PAUSED"}
+    campaigns = [c for c in all_campaigns
+                 if c.get("campaignStatus", "").upper() in active_statuses
+                 and c.get("fundingStrategy", {}).get("fundingModel", "") == "COST_PER_SALE"]
     campaign_id = None
     if campaigns:
         campaign_id = campaigns[0].get("campaignId")
         print(f"  Using existing campaign {campaign_id} "
               f"({campaigns[0].get('campaignName', '')})")
     elif create_campaign_if_missing:
-        print("  No campaigns found — creating one with defaults...")
+        print("  No active campaigns found — creating one with defaults...")
         created = create_campaign(token, cfg["default_campaign"])
         campaign_id = created["campaignId"]
         print(f"  Created campaign {campaign_id}")

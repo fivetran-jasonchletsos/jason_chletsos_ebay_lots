@@ -72,8 +72,8 @@ DEFAULT_CONFIG: dict = {
     "min_watchers_to_offer":  1,
     "cooldown_days":          7,
     "max_offers_per_run":     50,
-    "offer_duration_days":    2,
-    "allow_counter_offer":    True,
+    "offer_duration_days":    4,
+    "allow_counter_offer":    False,  # eBay rejects true on this endpoint
     "take_rate_baseline":     0.15,
     "message":                "Saw you were watching — here's {pct}% off if you grab it today. Free combined shipping on 2+ cards.",
 }
@@ -161,14 +161,11 @@ def get_marketing_token(cfg: dict) -> str:
     # Sandbox capabilities and OAuth scopes are only available with
     # additional licenses or contracts in Production."
     #
-    # To actually unblock send_offer_to_interested_buyers, jchletsos
-    # needs to apply for the Negotiation API license at:
-    #   https://developer.ebay.com → API License Agreement → Negotiation
-    # The scope below is the right one to request once the license is
-    # approved; until then this agent will dry-run only.
+    # API docs confirm the Negotiation API requires sell.inventory scope,
+    # not sell.marketing. sell.inventory is already granted on this keyset.
     scopes = " ".join([
         "https://api.ebay.com/oauth/api_scope",
-        "https://api.ebay.com/oauth/api_scope/sell.marketing",
+        "https://api.ebay.com/oauth/api_scope/sell.inventory",
     ])
     resp = requests.post(
         "https://api.ebay.com/identity/v1/oauth2/token",
@@ -377,9 +374,42 @@ def decide(listing: dict, watchers: int, sold: list[dict], recent: set[str],
 # eBay write path — REST sell/negotiation send_offer_to_interested_buyers     #
 # --------------------------------------------------------------------------- #
 
-NEGOTIATION_URL = (
-    "https://api.ebay.com/sell/negotiation/v1/send_offer_to_interested_buyers"
-)
+NEGOTIATION_URL       = "https://api.ebay.com/sell/negotiation/v1/send_offer_to_interested_buyers"
+FIND_ELIGIBLE_URL     = "https://api.ebay.com/sell/negotiation/v1/find_eligible_items"
+
+
+def fetch_eligible_listing_ids(token: str) -> set[str]:
+    """Call findEligibleItems to get eBay-confirmed eligible listing IDs."""
+    eligible = set()
+    offset = 0
+    while True:
+        try:
+            resp = requests.get(
+                FIND_ELIGIBLE_URL,
+                headers={
+                    "Authorization":           f"Bearer {token}",
+                    "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
+                },
+                params={"limit": "200", "offset": str(offset)},
+                timeout=15,
+            )
+            if resp.status_code == 204:  # no eligible items
+                break
+            if resp.status_code != 200:
+                print(f"  WARNING: findEligibleItems HTTP {resp.status_code}: {resp.text[:200]}")
+                break
+            data = resp.json()
+            items = data.get("eligibleItems") or []
+            for item in items:
+                eligible.add(str(item.get("listingId", "")))
+            total = data.get("total", 0)
+            offset += len(items)
+            if offset >= total or not items:
+                break
+        except Exception as exc:
+            print(f"  WARNING: findEligibleItems request failed: {exc}")
+            break
+    return eligible
 
 
 def send_offer(item_id: str, discount_pct_int: int, message: str,
@@ -391,7 +421,9 @@ def send_offer(item_id: str, discount_pct_int: int, message: str,
             "quantity":           1,
             "discountPercentage": str(discount_pct_int),
         }],
-        "allowCounterOffer":   bool(allow_counter),
+        # eBay's sendOfferToInterestedBuyers rejects allowCounterOffer=true with
+        # HTTP 400 "Invalid value for allowCounterOffer" — must always be False.
+        "allowCounterOffer":   False,
         "message":             message,
         "offerDuration": {
             "unit":  "DAY",
@@ -708,7 +740,18 @@ def plan_all(listings: list[dict], watcher_map: dict[str, int],
 
 def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict) -> list[dict]:
     token = get_marketing_token(ebay_cfg)
-    to_send = [d for d in plan if d["decision"] == "apply"]
+
+    # Cross-reference with eBay's findEligibleItems — only send to listings
+    # that eBay confirms have interested buyers (watchers alone isn't enough).
+    print("  Checking findEligibleItems for eBay-confirmed eligible listings...")
+    eligible_ids = fetch_eligible_listing_ids(token)
+    print(f"  eBay reports {len(eligible_ids)} listing(s) with eligible buyers.")
+
+    to_send = [d for d in plan if d["decision"] == "apply"
+               and str(d["item_id"]) in eligible_ids]
+    if not to_send:
+        print("  No listings overlap between watcher plan and eBay eligible set.")
+        return []
     cap = cfg["max_offers_per_run"]
     if len(to_send) > cap:
         print(f"  Capping run at {cap} of {len(to_send)} eligible offers")
@@ -727,6 +770,8 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict) -> list[dict]:
             allow_counter=cfg["allow_counter_offer"],
             token=token,
         )
+        if not res["ok"]:
+            print(f"    FAILED [http {res['http']}] {str(res.get('error'))[:200]}")
         sent.append({
             "offered_at":    datetime.now(timezone.utc).isoformat(),
             "item_id":       d["item_id"],
