@@ -56,10 +56,33 @@
   /* ── CARD GRID ── */
   .grid-wrap { padding: 12px; }
   .count-row { font-size: 0.75rem; color: var(--sub); margin-bottom: 10px; }
-  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  @media (min-width: 480px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (min-width: 700px) { .card-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
-  @media (min-width: 1000px) { .card-grid { grid-template-columns: repeat(5, 1fr); } }
+  .card-grid { display: grid; gap: 8px; }
+
+  /* Small — image-only grid, most cards per row */
+  .card-grid.size-s { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .card-grid.size-s .card-info { display: none; }
+  @media (min-width: 480px) { .card-grid.size-s { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 700px) { .card-grid.size-s { grid-template-columns: repeat(5, 1fr); gap: 8px; } }
+  @media (min-width: 1000px) { .card-grid.size-s { grid-template-columns: repeat(6, 1fr); } }
+
+  /* Medium — labels visible */
+  .card-grid.size-m { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 480px) { .card-grid.size-m { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 700px) { .card-grid.size-m { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
+  @media (min-width: 1000px) { .card-grid.size-m { grid-template-columns: repeat(5, 1fr); } }
+
+  /* Large — big cards, fewest per row */
+  .card-grid.size-l { grid-template-columns: repeat(1, 1fr); gap: 12px; }
+  @media (min-width: 480px) { .card-grid.size-l { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 700px) { .card-grid.size-l { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+  @media (min-width: 1000px) { .card-grid.size-l { grid-template-columns: repeat(4, 1fr); } }
+
+  /* Size toggle buttons */
+  .size-btns { display: flex; gap: 0; flex-shrink: 0; }
+  .size-btn { padding: 7px 11px; font-size: 0.75rem; font-weight: 700; background: var(--chip-bg); border: 1px solid var(--card-border); color: var(--sub); cursor: pointer; line-height: 1; transition: background 0.15s, color 0.15s; }
+  .size-btn:first-child { border-radius: 8px 0 0 8px; }
+  .size-btn:last-child  { border-radius: 0 8px 8px 0; }
+  .size-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
   .card-tile { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
   .card-tile:active { transform: scale(0.97); }
@@ -139,6 +162,11 @@
       <option value="set-az">Set A–Z</option>
       <option value="id-asc">Original Order</option>
     </select>
+    <div class="size-btns">
+      <button class="size-btn" data-size="s" onclick="setSize('s')">S</button>
+      <button class="size-btn" data-size="m" onclick="setSize('m')">M</button>
+      <button class="size-btn" data-size="l" onclick="setSize('l')">L</button>
+    </div>
   </div>
   <div class="chips" id="chipRow">
     <div class="chip active" data-filter="all" onclick="setChip(this)">All</div>
@@ -534,8 +562,18 @@ function switchPlayer(p) {
   applyFilters();
 }
 
+function setSize(s) {
+  const grid = document.getElementById('cardGrid');
+  grid.classList.remove('size-s', 'size-m', 'size-l');
+  grid.classList.add('size-' + s);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s));
+  try { localStorage.setItem('gridSize', s); } catch(e) {}
+}
+
+const _initSize = (() => { try { return localStorage.getItem('gridSize') || 's'; } catch(e) { return 's'; } })();
 updateStats();
 applyFilters();
+setSize(_initSize);
 </script>
 </body>
 </html>
