@@ -99,7 +99,11 @@
   .badge.numbered { background: #003087; color: #fff; }
   .badge.insert { background: #1a4a1a; color: #7fff7f; }
   .badge.auto   { background: #4a1a4a; color: #ff9fff; }
+  .badge.listed { background: #0d3b0d; color: #5dff5d; }
   .val-badge { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); color: var(--gold); font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+  .list-btn { position: absolute; bottom: 5px; left: 5px; background: rgba(0,20,60,0.92); border: 1px solid #4a6a9a; color: #aaccff; font-size: 0.58rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; cursor: pointer; z-index: 2; letter-spacing: 0.3px; white-space: nowrap; }
+  .list-btn.is-listed { background: rgba(0,40,0,0.92); border-color: #2a6a2a; color: #5dff5d; cursor: default; }
+  .card-grid.size-s .list-btn { display: none; }
 
   .card-info { padding: 7px 8px 9px; }
   .card-set { font-size: 0.7rem; color: var(--sub); line-height: 1.2; margin-bottom: 2px; }
@@ -172,6 +176,8 @@
   </div>
   <div class="chips" id="chipRow">
     <div class="chip active" data-filter="all" onclick="setChip(this)">All</div>
+    <div class="chip" data-filter="dupes" onclick="setChip(this)">Dupes</div>
+    <div class="chip" data-filter="listed" onclick="setChip(this)">On eBay</div>
     <div class="chip" data-filter="psa" onclick="setChip(this)">PSA Graded</div>
     <div class="chip" data-filter="relic" onclick="setChip(this)">Relic</div>
     <div class="chip" data-filter="numbered" onclick="setChip(this)">Numbered</div>
@@ -204,6 +210,33 @@
       <div class="modal-player" id="modalPlayer"></div>
       <div class="modal-set" id="modalSet"></div>
       <div id="modalRows"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="listOverlay" onclick="closeListModal(event)">
+  <div class="modal" id="listModal">
+    <div class="modal-header">
+      <div style="font-size:0.7rem;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">List on eBay</div>
+      <button class="modal-close" onclick="closeListModal()">x</button>
+    </div>
+    <div class="modal-img"><img id="listImg" src="" alt=""></div>
+    <div class="modal-details">
+      <div class="modal-player" id="listPlayer"></div>
+      <div class="modal-set" id="listSet" style="margin-bottom:12px;"></div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:0.72rem;color:var(--sub);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.8px;">Title</label>
+        <input id="listTitle" oninput="updateListCmd()" style="width:100%;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:0.78rem;outline:none;">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:0.72rem;color:var(--sub);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.8px;">Price ($)</label>
+        <input id="listPrice" type="number" step="0.01" oninput="updateListCmd()" style="width:100%;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:0.78rem;outline:none;">
+      </div>
+      <div style="background:var(--chip-bg);border:1px solid var(--card-border);border-radius:6px;padding:10px;margin-bottom:12px;">
+        <div style="font-size:0.62rem;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Terminal command</div>
+        <code id="listCmd" style="font-size:0.7rem;color:#aaccff;word-break:break-all;display:block;line-height:1.4;"></code>
+      </div>
+      <button id="listCopyBtn" onclick="copyListCmd()" style="width:100%;padding:11px;background:var(--navy);border:1px solid #4a6a8a;color:#fff;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;">Copy Command</button>
     </div>
   </div>
 </div>
@@ -452,6 +485,7 @@ function cardImage(id) {
 
 function badgeHTML(card) {
   let out = '';
+  if (isListed(card)) out += `<div class="badge listed">ON EBAY</div>`;
   if (card.grade) out += `<div class="badge psa">${card.grade}</div>`;
   if (card.type === 'relic') out += `<div class="badge relic">RELIC</div>`;
   if (card.serial) out += `<div class="badge numbered">${card.serial}</div>`;
@@ -474,11 +508,17 @@ function renderGrid(cards) {
   cards.forEach(c => {
     const tile = document.createElement('div');
     tile.className = 'card-tile';
+    const listed = isListed(c);
+    const dupe = isDupe(c);
+    const listBtnHTML = dupe
+      ? `<button class="list-btn${listed?' is-listed':''}" onclick="event.stopPropagation();${listed?'':' openListModal('+JSON.stringify(c)+', event)'}">${listed ? 'LISTED' : 'LIST'}</button>`
+      : '';
     tile.innerHTML = `
       <div class="thumb-wrap">
         <img src="${cardImage(c.id)}" alt="${c.subset}" loading="lazy">
         <div class="badges">${badgeHTML(c)}</div>
         <div class="val-badge">$${c.value}</div>
+        ${listBtnHTML}
       </div>
       <div class="card-info">
         <div class="card-set">${c.set}</div>
@@ -494,7 +534,9 @@ function applyFilters() {
   const sort = document.getElementById('sortSelect').value;
   const CARDS = getCards();
   let filtered = CARDS.filter(c => {
-    if (activeFilter !== 'all' && !c.tags.includes(activeFilter)) return false;
+    if (activeFilter === 'dupes'  && !isDupe(c))   return false;
+    if (activeFilter === 'listed' && !isListed(c)) return false;
+    if (activeFilter !== 'all' && activeFilter !== 'dupes' && activeFilter !== 'listed' && !c.tags.includes(activeFilter)) return false;
     if (q && !`${c.set} ${c.subset} ${c.parallel} ${c.grade||''} ${c.serial||''}`.toLowerCase().includes(q)) return false;
     return true;
   });
@@ -532,7 +574,7 @@ function updateStats() {
 
 function openModal(c) {
   document.getElementById('modalImg').src = cardImage(c.id);
-  document.getElementById('modalPlayer').textContent = 'Jaxson Dart';
+  document.getElementById('modalPlayer').textContent = PLAYER_DATA[CURRENT_PLAYER].name;
   document.getElementById('modalSet').textContent = c.set + (c.number ? ' · ' + c.number : '');
   const rows = [
     ['Subset', c.subset || '—'],
@@ -570,6 +612,85 @@ function switchPlayer(p) {
   applyFilters();
 }
 
+// ── DUPES + EBAY STATUS ──────────────────────────────────────────────────────
+let ebayStatus = {};
+let _dupeKeys = new Set();
+
+function computeDupeKeys() {
+  _dupeKeys = new Set();
+  const allPlayers = { dart: DART_CARDS, skattebo: SKATTEBO_CARDS, nabers: NABERS_CARDS, carter: CARTER_CARDS };
+  Object.entries(allPlayers).forEach(([player, cards]) => {
+    const counts = {};
+    cards.forEach(c => { const k = `${c.set}|${c.subset}|${c.parallel}`; counts[k] = (counts[k]||0)+1; });
+    cards.forEach(c => { if (counts[`${c.set}|${c.subset}|${c.parallel}`] > 1) _dupeKeys.add(player+'_'+c.id); });
+  });
+}
+
+function isDupe(c)   { return _dupeKeys.has(CURRENT_PLAYER+'_'+c.id); }
+function isListed(c) { return !!ebayStatus[CURRENT_PLAYER+'_'+c.id]; }
+
+async function loadEbayStatus() {
+  try {
+    const r = await fetch('./ebay_status.json?t='+Date.now());
+    if (r.ok) ebayStatus = await r.json();
+  } catch(e) {}
+  computeDupeKeys();
+  applyFilters();
+}
+
+function buildTitle(c) {
+  const p = PLAYER_DATA[CURRENT_PLAYER];
+  const parts = [c.set, p.name, c.subset];
+  if (c.parallel && c.parallel !== 'Base' && c.parallel !== 'Silver') parts.push(c.parallel);
+  if (c.serial) parts.push(c.serial);
+  if (c.grade) parts.push(c.grade);
+  parts.push('RC', p.team.split(' · ')[0], 'Football');
+  return parts.filter(Boolean).join(' ');
+}
+
+let _listingCard = null;
+
+function openListModal(c, e) {
+  if (e) e.stopPropagation();
+  _listingCard = c;
+  const p = PLAYER_DATA[CURRENT_PLAYER];
+  document.getElementById('listImg').src = cardImage(c.id);
+  document.getElementById('listPlayer').textContent = p.name;
+  document.getElementById('listSet').textContent = c.set + ' · ' + (c.subset || c.parallel);
+  document.getElementById('listTitle').value = buildTitle(c);
+  document.getElementById('listPrice').value = c.value.toFixed(2);
+  updateListCmd();
+  document.getElementById('listOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function updateListCmd() {
+  if (!_listingCard) return;
+  const p = PLAYER_DATA[CURRENT_PLAYER];
+  const img = `docs/collection/images/${p.dir}/${p.prefix}_${String(_listingCard.id).padStart(3,'0')}.jpg`;
+  const title = document.getElementById('listTitle').value.replace(/"/g, '\\"');
+  const price = document.getElementById('listPrice').value;
+  document.getElementById('listCmd').textContent =
+    `python3 post_collection_card.py --player ${CURRENT_PLAYER} --id ${_listingCard.id} --image "${img}" --title "${title}" --price ${price} --apply`;
+}
+
+function closeListModal(e) {
+  if (e && e.target !== document.getElementById('listOverlay') && !e.target.classList.contains('modal-close')) return;
+  document.getElementById('listOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _listingCard = null;
+}
+
+function copyListCmd() {
+  updateListCmd();
+  const cmd = document.getElementById('listCmd').textContent;
+  navigator.clipboard.writeText(cmd).then(() => {
+    const btn = document.getElementById('listCopyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy Command'; }, 2000);
+  });
+}
+
 function setSize(s) {
   const grid = document.getElementById('cardGrid');
   grid.classList.remove('size-s', 'size-m', 'size-l');
@@ -580,8 +701,8 @@ function setSize(s) {
 
 const _initSize = (() => { try { return localStorage.getItem('gridSize') || 's'; } catch(e) { return 's'; } })();
 updateStats();
-applyFilters();
 setSize(_initSize);
+loadEbayStatus(); // fetches ebay_status.json, then calls computeDupeKeys + applyFilters
 </script>
 </body>
 </html>
