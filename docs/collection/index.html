@@ -116,6 +116,7 @@
   .modal { background: var(--card-bg); border-top: 3px solid var(--red); border-radius: 16px 16px 0 0; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.25s ease; }
   @media (min-width: 600px) { .modal { border-radius: 16px; border-top: 3px solid var(--red); } }
   @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 0; }
   .modal-close { width: 32px; height: 32px; border-radius: 50%; background: var(--chip-bg); border: none; color: var(--text); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .modal-img { padding: 12px 16px; }
@@ -226,17 +227,19 @@
       <div class="modal-set" id="listSet" style="margin-bottom:12px;"></div>
       <div style="margin-bottom:8px;">
         <label style="font-size:0.72rem;color:var(--sub);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.8px;">Title</label>
-        <input id="listTitle" oninput="updateListCmd()" style="width:100%;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:0.78rem;outline:none;">
+        <input id="listTitle" style="width:100%;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:0.78rem;outline:none;">
       </div>
-      <div style="margin-bottom:12px;">
+      <div style="margin-bottom:14px;">
         <label style="font-size:0.72rem;color:var(--sub);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.8px;">Price ($)</label>
-        <input id="listPrice" type="number" step="0.01" oninput="updateListCmd()" style="width:100%;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:0.78rem;outline:none;">
+        <input id="listPrice" type="number" step="0.01" style="width:100%;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:0.78rem;outline:none;">
       </div>
-      <div style="background:var(--chip-bg);border:1px solid var(--card-border);border-radius:6px;padding:10px;margin-bottom:12px;">
-        <div style="font-size:0.62rem;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Terminal command</div>
-        <code id="listCmd" style="font-size:0.7rem;color:#aaccff;word-break:break-all;display:block;line-height:1.4;"></code>
+      <div id="listStatus" style="font-size:0.78rem;text-align:center;min-height:18px;margin-bottom:10px;color:var(--sub);"></div>
+      <button id="listSubmitBtn" onclick="submitListing()" style="width:100%;padding:13px;background:var(--navy);border:1px solid #4a6a8a;color:#fff;border-radius:8px;font-size:0.9rem;font-weight:800;cursor:pointer;letter-spacing:0.3px;">List on eBay</button>
+      <div id="listCmdWrap" style="display:none;margin-top:12px;">
+        <div style="font-size:0.65rem;color:var(--sub);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px;">Server offline — run this in terminal instead</div>
+        <code id="listCmd" style="font-size:0.68rem;color:#aaccff;word-break:break-all;display:block;line-height:1.5;background:var(--chip-bg);padding:8px;border-radius:6px;"></code>
+        <button onclick="copyListCmd()" style="width:100%;margin-top:8px;padding:9px;background:var(--chip-bg);border:1px solid var(--card-border);color:var(--text);border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;" id="listCopyBtn">Copy Command</button>
       </div>
-      <button id="listCopyBtn" onclick="copyListCmd()" style="width:100%;padding:11px;background:var(--navy);border:1px solid #4a6a8a;color:#fff;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;">Copy Command</button>
     </div>
   </div>
 </div>
@@ -510,21 +513,21 @@ function renderGrid(cards) {
     tile.className = 'card-tile';
     const listed = isListed(c);
     const dupe = isDupe(c);
-    const listBtnHTML = dupe
-      ? `<button class="list-btn${listed?' is-listed':''}" onclick="event.stopPropagation();${listed?'':' openListModal('+JSON.stringify(c)+', event)'}">${listed ? 'LISTED' : 'LIST'}</button>`
-      : '';
     tile.innerHTML = `
       <div class="thumb-wrap">
         <img src="${cardImage(c.id)}" alt="${c.subset}" loading="lazy">
         <div class="badges">${badgeHTML(c)}</div>
         <div class="val-badge">$${c.value}</div>
-        ${listBtnHTML}
+        ${dupe ? `<button class="list-btn${listed?' is-listed':''}" data-cid="${c.id}">${listed?'LISTED':'LIST'}</button>` : ''}
       </div>
       <div class="card-info">
         <div class="card-set">${c.set}</div>
         <div class="card-name">${c.subset || c.parallel}</div>
       </div>`;
     tile.onclick = () => openModal(c);
+    if (dupe && !listed) {
+      tile.querySelector('.list-btn').addEventListener('click', e => { e.stopPropagation(); openListModal(c); });
+    }
     grid.appendChild(tile);
   });
 }
@@ -649,29 +652,75 @@ function buildTitle(c) {
 }
 
 let _listingCard = null;
+let _listingPlayer = null;
+const SERVER = 'http://localhost:5001';
 
-function openListModal(c, e) {
-  if (e) e.stopPropagation();
+function openListModal(c) {
   _listingCard = c;
+  _listingPlayer = CURRENT_PLAYER;
   const p = PLAYER_DATA[CURRENT_PLAYER];
   document.getElementById('listImg').src = cardImage(c.id);
   document.getElementById('listPlayer').textContent = p.name;
   document.getElementById('listSet').textContent = c.set + ' · ' + (c.subset || c.parallel);
   document.getElementById('listTitle').value = buildTitle(c);
   document.getElementById('listPrice').value = c.value.toFixed(2);
-  updateListCmd();
+  document.getElementById('listStatus').textContent = '';
+  document.getElementById('listCmdWrap').style.display = 'none';
+  const btn = document.getElementById('listSubmitBtn');
+  btn.textContent = 'List on eBay';
+  btn.disabled = false;
+  btn.style.background = 'var(--navy)';
   document.getElementById('listOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function updateListCmd() {
+async function submitListing() {
   if (!_listingCard) return;
-  const p = PLAYER_DATA[CURRENT_PLAYER];
+  const p = PLAYER_DATA[_listingPlayer];
   const img = `docs/collection/images/${p.dir}/${p.prefix}_${String(_listingCard.id).padStart(3,'0')}.jpg`;
-  const title = document.getElementById('listTitle').value.replace(/"/g, '\\"');
-  const price = document.getElementById('listPrice').value;
-  document.getElementById('listCmd').textContent =
-    `python3 post_collection_card.py --player ${CURRENT_PLAYER} --id ${_listingCard.id} --image "${img}" --title "${title}" --price ${price} --apply`;
+  const title = document.getElementById('listTitle').value;
+  const price = parseFloat(document.getElementById('listPrice').value);
+  const btn = document.getElementById('listSubmitBtn');
+  const status = document.getElementById('listStatus');
+
+  btn.disabled = true;
+  btn.textContent = '';
+  btn.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border:2.5px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span> Listing…';
+  status.textContent = '';
+
+  try {
+    const resp = await fetch(SERVER + '/post', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({player: _listingPlayer, id: _listingCard.id, image: img, title, price})
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      if (data.status) ebayStatus = data.status;
+      btn.innerHTML = 'Listed!';
+      btn.style.background = '#0d3b0d';
+      btn.style.borderColor = '#2a6a2a';
+      status.style.color = '#5dff5d';
+      status.textContent = 'Posted to eBay successfully';
+      setTimeout(() => { closeListModal(); applyFilters(); updateStats(); }, 1800);
+    } else {
+      throw new Error(data.error || 'Post failed');
+    }
+  } catch(e) {
+    // Server offline or error — fall back to copy command
+    const isOffline = e instanceof TypeError;
+    btn.textContent = 'List on eBay';
+    btn.disabled = false;
+    btn.style.background = 'var(--navy)';
+    status.style.color = '#ff9999';
+    status.textContent = isOffline ? 'Run: python3 collection_server.py first' : ('Error: ' + e.message);
+    // Show command fallback
+    const img2 = `docs/collection/images/${p.dir}/${p.prefix}_${String(_listingCard.id).padStart(3,'0')}.jpg`;
+    const t = title.replace(/"/g, '\\"');
+    document.getElementById('listCmd').textContent =
+      `python3 post_collection_card.py --player ${_listingPlayer} --id ${_listingCard.id} --image "${img2}" --title "${t}" --price ${price} --apply`;
+    document.getElementById('listCmdWrap').style.display = 'block';
+  }
 }
 
 function closeListModal(e) {
@@ -682,7 +731,6 @@ function closeListModal(e) {
 }
 
 function copyListCmd() {
-  updateListCmd();
   const cmd = document.getElementById('listCmd').textContent;
   navigator.clipboard.writeText(cmd).then(() => {
     const btn = document.getElementById('listCopyBtn');
