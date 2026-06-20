@@ -665,23 +665,37 @@ def _summarize(plan: list[dict]) -> dict:
 
 
 def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
-                   use_cache: bool) -> dict[str, dict]:
-    """Fetch (or reuse cached) GetItem results for every 'apply' candidate."""
+                   use_cache: bool, max_hydrate: int = 200) -> dict[str, dict]:
+    """Fetch (or reuse cached) GetItem results for 'apply' candidates.
+
+    GetItem is a serial-per-item Trading call; hydrating every candidate (which
+    can balloon to 700+ when Browse comps are unavailable) is what timed the
+    agent out. So: fetch in parallel (bounded pool, no per-item sleep) and CAP
+    the count per run. Items beyond the cap are simply not hydrated this run —
+    they fall out of the idempotency filter and get picked up on a later run
+    (already-enabled offers become idempotent-skips, so coverage rotates).
+    """
+    from concurrent.futures import ThreadPoolExecutor
     cache = _load_cache() if use_cache else {}
     candidates = [d["item_id"] for d in plan if d["decision"] == "apply"]
     fresh: dict[str, dict] = dict(cache) if use_cache else {}
-    fetched = 0
-    for iid in candidates:
-        if use_cache and iid in cache:
-            continue
+    to_fetch = [iid for iid in candidates if not (use_cache and iid in cache)]
+    capped = len(to_fetch) > max_hydrate
+    if capped:
+        to_fetch = to_fetch[:max_hydrate]
+
+    def _one(iid):
         try:
-            fresh[iid] = fetch_item_state(iid, token, ebay_cfg)
-            fetched += 1
-            time.sleep(0.15)
+            return iid, fetch_item_state(iid, token, ebay_cfg)
         except Exception as exc:
-            fresh[iid] = {"ok": False, "errors": [{"msg": str(exc)}]}
-    if fetched:
-        print(f"  GetItem hydrated {fetched} listings ({len(fresh)-fetched} from cache)")
+            return iid, {"ok": False, "errors": [{"msg": str(exc)}]}
+
+    if to_fetch:
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            for iid, st in ex.map(_one, to_fetch):
+                fresh[iid] = st
+        print(f"  GetItem hydrated {len(to_fetch)} listings (parallel"
+              f"{'; capped this run' if capped else ''})")
     elif use_cache:
         print(f"  Reused {len(fresh)} cached GetItem results")
     _save_cache(fresh)

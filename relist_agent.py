@@ -202,7 +202,6 @@ def relist_as_fixed_price(token: str, item_id: str, ebay_cfg: dict,
         f'<ListingType>FixedPriceItem</ListingType>'
         f'<ListingDuration>GTC</ListingDuration>'
         f'{price_block.strip()}</Item>\n'
-        f'  <DeletedField>Item.BestOfferDetails</DeletedField>\n'
         f'  <ErrorLanguage>en_US</ErrorLanguage><WarningLevel>High</WarningLevel>\n'
         f'</RelistFixedPriceItemRequest>'
     )

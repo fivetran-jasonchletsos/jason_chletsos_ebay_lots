@@ -67,6 +67,8 @@ DEFAULT_CONFIG: dict = {
     # Cap how many price changes you'll push in one run. eBay throttles
     # ReviseItem calls aggressively for high-volume sellers.
     "max_changes_per_run":  25,
+    "max_listings_per_run": 250,
+    "rotation_offset":      0,
     # Rank of trusted sources, in order of preference for the "basis".
     "trust_sources":        ["sold_history", "scp_actual", "pricecharting", "pokemontcg", "ebay_active"],
     # If True, require at least one "high-confidence" source (sold_history or
@@ -648,7 +650,29 @@ def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[d
     print("  Getting eBay access token...")
     token = promote.get_access_token(ebay_cfg)
     print("  Fetching active listings...")
-    listings = promote.fetch_listings(token, ebay_cfg)
+    full_listings = promote.fetch_listings(token, ebay_cfg)
+
+    # Bound per-run work. Comps (Browse, rate-limited → 429 on bursts) and pricing
+    # (PriceCharting, ~1s/call) are expensive per card; evaluating all ~1400 every
+    # cold run is what times the agent out. The agent only applies
+    # max_changes_per_run regardless, so evaluate a CAPPED, ROTATING slice — the
+    # offset advances each run so the whole catalog is covered over successive runs.
+    rcfg = load_config()
+    cap = int(rcfg.get("max_listings_per_run", 250))
+    listings = full_listings
+    if full_listings and len(full_listings) > cap:
+        off = int(rcfg.get("rotation_offset", 0)) % len(full_listings)
+        listings = full_listings[off:off + cap]
+        if len(listings) < cap:
+            listings += full_listings[:cap - len(listings)]
+        rcfg["rotation_offset"] = (off + cap) % len(full_listings)
+        try:
+            CONFIG_PATH.write_text(json.dumps(rcfg, indent=2))
+        except Exception:
+            pass
+        print(f"  Evaluating {len(listings)} of {len(full_listings)} listings "
+              f"this run (rotating slice from offset {off})")
+
     print("  Fetching market comps...")
     market = promote.fetch_market_prices(listings, ebay_cfg)
     print("  Loading sold history...")
@@ -662,14 +686,20 @@ def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[d
         )
     promote._pricing_cache_save(pricing_cache)
 
-    LISTINGS_SNAPSHOT.parent.mkdir(exist_ok=True)
-    LISTINGS_SNAPSHOT.write_text(json.dumps({
+    # Write through snapshot_store so the empty-fetch guard applies: a failed
+    # or throttled GetMyeBaySelling (eBay 518) returns 0 listings, and we must
+    # never clobber a good snapshot with empty data — that starves every
+    # --no-fetch consumer (markdowns, offers, this agent on its next run).
+    import snapshot_store
+    written = snapshot_store.replace_all(full_listings, wrapper_meta={
         "saved_at":  datetime.now(timezone.utc).isoformat(),
-        "listings":  listings,
         "market":    market,
         "pricing":   pricing_by_id,
         "sold":      sold,
-    }, indent=2))
+    })
+    if not written:
+        print("  Kept existing snapshot; skipping repricing this run (empty fetch).")
+    # Return the evaluated slice for planning; the snapshot keeps the full catalog.
     return ebay_cfg, listings, market, pricing_by_id, sold
 
 

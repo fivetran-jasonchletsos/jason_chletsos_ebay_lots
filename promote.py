@@ -1188,86 +1188,103 @@ def fetch_market_prices(listings: list[dict], cfg: dict) -> dict:
     Uses the listing title (trimmed to key terms) as the search query.
     Rate-limited to ~1 req/sec to stay within eBay's limits.
     """
-    app_token = get_app_token(cfg)
-    results   = {}
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
 
-    print(f"  Fetching market comps for {len(listings)} listings...")
-    for i, l in enumerate(listings):
-        item_id   = l["item_id"]
-        our_price = float(l["price"]) if l["price"] else 0.0
-        query     = _market_query(l["title"])
+    results = {}
+    token_box = {"t": get_app_token(cfg), "429s": 0, "tripped": False}
+    tok_lock = threading.Lock()
+    SEARCH_URL = "https://api.ebay.com/buy/browse/v1/item_summary/search"
+    PARAMS = lambda q: {"q": q, "limit": 10, "sort": "price",
+                        "filter": "buyingOptions:{FIXED_PRICE}"}
 
-        try:
-            r = requests.get(
-                "https://api.ebay.com/buy/browse/v1/item_summary/search",
-                headers={
-                    "Authorization":          f"Bearer {app_token}",
-                    "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
-                },
-                params={
-                    "q":      query,
-                    "limit":  10,
-                    "sort":   "price",
-                    "filter": "buyingOptions:{FIXED_PRICE}",
-                },
-                timeout=10,
-            )
+    # Dedupe by query: many listings share a player/title, so we hit the Browse
+    # API once per UNIQUE query and fan the result back out to every item_id.
+    items = [(l["item_id"],
+              float(l["price"]) if l["price"] else 0.0,
+              _market_query(l["title"])) for l in listings]
+    unique_queries = sorted({q for _, _, q in items if q})
+    print(f"  Fetching market comps for {len(listings)} listings "
+          f"({len(unique_queries)} unique queries, parallel)...")
+
+    def _fetch(query):
+        """Return (query, prices_list_or_None). Handles 401 (token refresh) and
+        429 (rate limit). A short backoff absorbs transient per-second limits,
+        but once enough 429s accumulate the circuit trips and remaining queries
+        return immediately — so a genuinely exhausted Browse quota fails FAST
+        (NO_COMPS) instead of dragging every query through retries."""
+        if token_box["tripped"]:
+            return query, None
+        for attempt in range(2):                      # at most one retry
+            tok = token_box["t"]
+            try:
+                r = requests.get(SEARCH_URL,
+                                 headers={"Authorization": f"Bearer {tok}",
+                                          "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"},
+                                 params=PARAMS(query), timeout=10)
+            except Exception:
+                return query, None
             if r.status_code == 401:
-                # Token expired mid-run — refresh once
-                app_token = get_app_token(cfg)
-                r = requests.get(
-                    "https://api.ebay.com/buy/browse/v1/item_summary/search",
-                    headers={"Authorization": f"Bearer {app_token}",
-                             "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"},
-                    params={"q": query, "limit": 10, "sort": "price",
-                            "filter": "buyingOptions:{FIXED_PRICE}"},
-                    timeout=10,
-                )
-
+                with tok_lock:
+                    if token_box["t"] == tok:        # only one thread refreshes
+                        token_box["t"] = get_app_token(cfg)
+                continue
+            if r.status_code == 429:                  # rate limited
+                with tok_lock:
+                    token_box["429s"] += 1
+                    if token_box["429s"] >= 15:
+                        token_box["tripped"] = True
+                if token_box["tripped"]:
+                    return query, None
+                _time.sleep(0.6)
+                continue
             prices = []
-            for it in r.json().get("itemSummaries", []):
-                try:
-                    p = float(it["price"]["value"])
-                    if p > 0:
-                        prices.append(p)
-                except (KeyError, ValueError):
-                    pass
+            try:
+                for it in r.json().get("itemSummaries", []):
+                    try:
+                        p = float(it["price"]["value"])
+                        if p > 0:
+                            prices.append(p)
+                    except (KeyError, ValueError, TypeError):
+                        pass
+            except Exception:
+                return query, None
+            return query, prices
+        return query, None
 
-            if not prices:
-                results[item_id] = {"flag": "NO_COMPS", "comp_count": 0,
-                                    "market_median": None, "market_min": None,
-                                    "market_max": None, "gap_pct": None}
-            else:
-                med = _stats.median(prices)
-                gap = ((our_price - med) / med * 100) if med else 0
-                if gap < -15:
-                    flag = "UNDERPRICED"
-                elif gap > 20:
-                    flag = "OVERPRICED"
-                else:
-                    flag = "OK"
-                results[item_id] = {
-                    "flag":          flag,
-                    "comp_count":    len(prices),
-                    "market_median": round(med, 2),
-                    "market_min":    round(min(prices), 2),
-                    "market_max":    round(max(prices), 2),
-                    "gap_pct":       round(gap, 1),
-                }
+    # Bounded concurrency keeps us under eBay's Browse per-second cap (firing all
+    # at once returns 429). 6 workers + 429-backoff clears ~1k unique queries in
+    # ~1-2 min vs. 10+ min serially, without bursting the limit.
+    query_prices = {}
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        for query, prices in ex.map(_fetch, unique_queries):
+            query_prices[query] = prices
 
-        except Exception as exc:
+    for item_id, our_price, query in items:
+        prices = query_prices.get(query)
+        if not prices:
             results[item_id] = {"flag": "NO_COMPS", "comp_count": 0,
                                 "market_median": None, "market_min": None,
-                                "market_max": None, "gap_pct": None,
-                                "error": str(exc)}
-
-        # Polite rate limit — Browse API allows ~5k calls/day, no hard per-second limit
-        # but a short sleep avoids bursting
-        if i % 10 == 9:
-            _time.sleep(1)
+                                "market_max": None, "gap_pct": None}
+        else:
+            med = _stats.median(prices)
+            gap = ((our_price - med) / med * 100) if med else 0
+            flag = ("UNDERPRICED" if gap < -15 else
+                    "OVERPRICED" if gap > 20 else "OK")
+            results[item_id] = {
+                "flag":          flag,
+                "comp_count":    len(prices),
+                "market_median": round(med, 2),
+                "market_min":    round(min(prices), 2),
+                "market_max":    round(max(prices), 2),
+                "gap_pct":       round(gap, 1),
+            }
 
     underpriced = sum(1 for v in results.values() if v["flag"] == "UNDERPRICED")
     overpriced  = sum(1 for v in results.values() if v["flag"] == "OVERPRICED")
+    if token_box["tripped"]:
+        print("  Browse rate limit (429) exhausted — comps skipped this run "
+              "(falls back to sold_history/pricecharting). Quota resets daily.")
     print(f"  Market comps done — {underpriced} underpriced, {overpriced} overpriced")
     return results
 

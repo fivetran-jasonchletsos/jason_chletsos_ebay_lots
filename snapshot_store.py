@@ -101,17 +101,34 @@ def _write_back(listings: list, wrapper: dict | None) -> None:
         _atomic_write(paths.SNAPSHOT, listings)
 
 
-def replace_all(listings: list[dict], *, wrapper_meta: dict | None = None) -> None:
+def replace_all(listings: list[dict], *, wrapper_meta: dict | None = None,
+                force: bool = False) -> bool:
     """Wholesale replace the snapshot. Used by refresh_snapshot.py after a
     fresh GetMyeBaySelling fetch. If wrapper_meta is provided, the snapshot
     is written as a dict (so the file preserves saved_at / market / pricing
-    keys for callers that need them)."""
+    keys for callers that need them).
+
+    Guard: refuses to overwrite a non-empty snapshot with an empty list. An
+    empty fetch is the signature of a failed or throttled GetMyeBaySelling
+    call (e.g. eBay error 518 "call usage limit reached", or a transient
+    0-return) — never a real state for an active seller. Clobbering good data
+    with 0 rows then starves every --no-fetch consumer (repricing, markdowns,
+    offers). Pass force=True for a genuine full delist. Returns True if the
+    snapshot was written, False if the write was skipped by the guard."""
+    if not listings and not force:
+        existing = load()
+        if existing:
+            print(f"  snapshot_store: refusing to overwrite {len(existing)} cached "
+                  f"listings with 0 (failed/throttled fetch). Existing snapshot kept. "
+                  f"Pass force=True to override.")
+            return False
     if wrapper_meta is not None:
         wrapper = dict(wrapper_meta)
         wrapper["listings"] = listings
         _atomic_write(paths.SNAPSHOT, wrapper)
     else:
         _atomic_write(paths.SNAPSHOT, listings)
+    return True
 
 
 def append_listing(item_id: str, **fields) -> bool:

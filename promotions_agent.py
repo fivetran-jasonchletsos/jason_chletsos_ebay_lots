@@ -192,15 +192,26 @@ def _parse_iso(s: str) -> datetime | None:
 
 
 def fetch_listing_ages(token: str, ebay_cfg: dict, item_ids: list[str],
-                       cache: dict) -> dict:
+                       cache: dict, max_fetch: int = 40) -> dict:
     """For each item_id missing from cache, call GetItem to fetch StartTime.
 
     Trading API GetItem returns ListingDetails/StartTime in ISO format. We
     cache aggressively (start times don't change) and skip already-known ones.
+
+    Bounded by max_fetch: GetItem is a serial per-item Trading call, so fetching
+    hundreds at once both hangs the run and burns the daily call quota (eBay 518).
+    Start times are immutable, so the cache fills in over successive runs; any
+    items left unfetched this run fall back to the heuristic age (same basis the
+    dry-run uses). Pass max_fetch=0 to skip the network entirely.
     """
     missing = [iid for iid in item_ids if iid not in cache or not cache[iid].get("start_time")]
-    if not missing:
+    if not missing or max_fetch <= 0:
+        if missing:
+            print(f"  {len(missing)} listing(s) missing start time — using heuristic age (cache fills over future runs)")
         return cache
+    if len(missing) > max_fetch:
+        print(f"  {len(missing)} missing start times; fetching {max_fetch} this run (rest use heuristic age, cache fills over future runs)")
+        missing = missing[:max_fetch]
     print(f"  Fetching listing start times via Trading API GetItem for {len(missing)} item(s)...")
     headers = {
         "X-EBAY-API-SITEID":              "0",
@@ -435,20 +446,28 @@ def plan_markdown(listing: dict, age_days: int, age_source: str,
 # eBay Marketing API: Item Price Markdown                                     #
 # --------------------------------------------------------------------------- #
 
-def _markdown_payload(decision: dict, cfg: dict, marketplace_id: str) -> dict:
+def _markdown_payload(decision: dict, cfg: dict, marketplace_id: str, image_url: str = "") -> dict:
     """Build the POST body for /sell/marketing/v1/item_price_markdown.
 
     One promotion per listing is the simplest mapping. Discount is supplied as
     an absolute marked-down `priceDiscount.value`. eBay paints the
     strikethrough automatically.
     """
-    discount_amount = round(decision["current_price"] - decision["target_price"], 2)
     now = datetime.now(timezone.utc)
     duration_days = int(cfg.get("promotion_duration_days", 30))
     start_iso = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     end_iso = (now + timedelta(days=duration_days)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    # eBay MARKDOWN_SALE requires: a short description (<=50 chars), a hosted
+    # promotionImageUrl (the listing's own EPS image works), and the discount as
+    # an INTEGER percentageOffItem (amountOffItem rejects decimals). The markdown
+    # tiers are already percentages, so use the tier pct directly.
+    pct = decision.get("discount_pct") or 0
+    pct = float(pct)
+    pct_int = int(round(pct * 100)) if pct < 1 else int(round(pct))
     return {
-        "name":                  f"Markdown {decision['item_id']} ({decision['tier']})",
+        "name":                  f"MD-{decision['item_id']}"[:50],
+        "description":           "Markdown sale",
+        "promotionImageUrl":     image_url or "",
         "marketplaceId":         marketplace_id,
         "promotionStatus":       cfg["promotion_status_when_creating"],
         "startDate":             start_iso,
@@ -456,9 +475,7 @@ def _markdown_payload(decision: dict, cfg: dict, marketplace_id: str) -> dict:
         "applyMarkdownDiscount": True,
         "promotionType":         "MARKDOWN_SALE",
         "selectedInventoryDiscounts": [{
-            "discountBenefit": {
-                "amountOffItem": {"value": f"{discount_amount:.2f}", "currency": "USD"},
-            },
+            "discountBenefit": {"percentageOffItem": str(pct_int)},
             "ruleSelectionType": "INVENTORY_BY_VALUE",
             "inventoryCriterion": {
                 "inventoryCriterionType": "INVENTORY_BY_VALUE",
@@ -468,7 +485,7 @@ def _markdown_payload(decision: dict, cfg: dict, marketplace_id: str) -> dict:
     }
 
 
-def apply_markdown(token: str, decision: dict, cfg: dict) -> dict:
+def apply_markdown(token: str, decision: dict, cfg: dict, image_url: str = "") -> dict:
     """Create an item_price_markdown promotion for one listing."""
     url = f"{MARKETING_BASE}/item_price_markdown"
     headers = {
@@ -476,7 +493,7 @@ def apply_markdown(token: str, decision: dict, cfg: dict) -> dict:
         "Content-Type":   "application/json",
         "Content-Language": "en-US",
     }
-    payload = _markdown_payload(decision, cfg, cfg.get("marketplace_id", "EBAY_US"))
+    payload = _markdown_payload(decision, cfg, cfg.get("marketplace_id", "EBAY_US"), image_url)
     try:
         r = requests.post(url, headers=headers, json=payload, timeout=30)
     except requests.RequestException as exc:
@@ -1088,10 +1105,22 @@ def run(args: argparse.Namespace) -> int:
             if len(to_apply) > cap:
                 print(f"  Capping run at {cap} of {len(to_apply)} eligible markdowns")
                 to_apply = to_apply[:cap]
+            # MARKDOWN_SALE requires a hosted promotionImageUrl — use each
+            # listing's own EPS image (i.ebayimg.com s-l500 works fine).
+            image_by_id = {
+                str(l.get("item_id")): (l.get("pic") or l.get("galleryURL") or l.get("imageUrl") or "")
+                for l in listings
+            }
             print(f"\n  Applying {len(to_apply)} markdown(s) to eBay...")
+            skipped_ineligible = 0
             for d in to_apply:
                 print(f"    → {d['item_id']}: ${d['current_price']:.2f} → ${d['target_price']:.2f} ({d['tier']})")
-                res = apply_markdown(marketing_token, d, cfg)
+                res = apply_markdown(marketing_token, d, cfg, image_by_id.get(str(d["item_id"]), ""))
+                # 38272 = auction-style listing, not eligible for markdown — skip quietly.
+                err_str = json.dumps(res.get("error") or "")
+                if not res["ok"] and "38272" in err_str:
+                    skipped_ineligible += 1
+                    res["error"] = "skipped: auction-style listing (not markdown-eligible)"
                 applied_entries.append({
                     "applied_at":  datetime.now(timezone.utc).isoformat(),
                     "kind":        "markdown",

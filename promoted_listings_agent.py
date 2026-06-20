@@ -274,26 +274,27 @@ def classify(listing: dict, *, age_days: int | None, watchers: int,
         reasons.append(f"{watchers} watchers + age {age_days}d < 30 — moves itself")
         return "no_ad", reasons
 
-    # Unknown age — use price-band tiers if configured, else punt to fallback.
+    # Price-band tiers are AUTHORITATIVE when configured (promo-burst mode):
+    # the ad rate is driven by listing price/value, not age, so the visibility
+    # push reaches every listing. The no_ad guards above still exempt items
+    # that are already selling. Remove price_band_tiers from config to revert
+    # to the age-based ladder (steady-state 8% cap).
+    price_bands = cfg.get("price_band_tiers")
+    if price_bands:
+        try:
+            price = float(listing.get("price") or 0)
+            for band in sorted(price_bands, key=lambda b: b["max_price"]):
+                if price <= band["max_price"]:
+                    reasons.append(f"price ${price:.2f} → price-band tier {band['tier']}")
+                    return band["tier"], reasons
+            top = price_bands[-1]
+            reasons.append(f"price ${price:.2f} → price-band tier {top['tier']} (top band)")
+            return top["tier"], reasons
+        except (TypeError, ValueError):
+            pass
+
+    # No price bands configured and unknown age — punt to fallback.
     if age_days is None:
-        price_bands = cfg.get("price_band_tiers")
-        if price_bands:
-            try:
-                price = float(listing.get("price") or 0)
-                for band in sorted(price_bands, key=lambda b: b["max_price"]):
-                    if price <= band["max_price"]:
-                        reasons.append(
-                            f"no age signal — price ${price:.2f} → price-band tier {band['tier']}"
-                        )
-                        return band["tier"], reasons
-                # Above all bands — use last band's tier
-                top = price_bands[-1]
-                reasons.append(
-                    f"no age signal — price ${price:.2f} → price-band tier {top['tier']} (top band)"
-                )
-                return top["tier"], reasons
-            except (TypeError, ValueError):
-                pass
         fallback = cfg.get("unknown_age_default_tier", "standard")
         reasons.append(f"no age signal available — defaulting to {fallback}")
         return fallback, reasons
