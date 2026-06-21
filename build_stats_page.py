@@ -36,6 +36,13 @@ KNOWN = list(set(KNOWN + [
     "Keon Coleman","Luther Burden III","Tate Ratledge","Will Howard","Jalen Milroe",
     "Khalil Mack","Asante Samuel Jr.","Rashee Rice","Colston Loveland","Isaac TeSlaa",
     "Antwaun Powell-Ryland","Chris Olave","Tyler Warren","Myles Garrett",
+    # players the residual parser missed (insert-name-first titles)
+    "Baker Mayfield","Xavier Worthy","Christian McCaffrey","Kyler Murray","Drake London",
+    "Davante Adams","DK Metcalf","Travis Kelce","Pat Surtain II","Barry Sanders","Jerry Rice",
+    "Chad Johnson","David Montgomery","Ricky Pearsall","Sam Darnold","Jared Goff",
+    "Billy Bowman Jr.","Jaydon Blue","Ricky White III","Jacory Croskey-Merritt","William Perry",
+    "Carson Schwesinger","Will Campbell","DeIon Sanders","Deion Sanders","Bhayshul Tuten",
+    "Bryce Underwood","Reggie Virgil","Fernando Mendoza","Mike Evans",
 ]))
 KNOWN.sort(key=len, reverse=True)
 
@@ -64,8 +71,28 @@ PARALLELS = ["silver","gold","orange","pink","green","red","blue","purple","teal
     "checkerboard","tri-color","lazer","pulsar"]
 INSERTS = ["turbocharged","numbers","future","thunderbirds","touchdown masters","contours",
     "notoriety","paragon","epic performers","players","celebration","league leaders",
-    "round 1 pick","round 2 pick","round pick","class action","class icons","new wave",
-    "stargazing","sunday showcase","throwbacks","hidden potential","elevate","play action"]
+    "round 1 pick","round 2 pick","round 3 pick","round 4 pick","round 5 pick","round 6 pick",
+    "round 7 pick","round pick","class action","class icons","new wave","class jones",
+    "stargazing","sunday showcase","throwbacks","hidden potential","elevate","play action",
+    "paramount pairings","legends of the gridiron","total touchdowns","franchise foundations",
+    "intriguing players","power players","iconic collections","on target","artistry in motion",
+    "rookie variations","first class","saturday stars","draft selections","select certified",
+    "draft class","new wave","fluidity","roses","first year fresh","rated rookie"]
+# multi-word insert phrases to strip before residual player extraction
+INSERT_PHRASES = sorted([i for i in INSERTS if " " in i], key=len, reverse=True)
+
+NONFB = {  # category detection: substring -> category
+    "pokémon":"Pokémon","pokemon":"Pokémon","charizard":"Pokémon","pikachu":"Pokémon",
+    "eevee":"Pokémon","slowking":"Pokémon","crobat":"Pokémon","garchomp":"Pokémon",
+    "topps heritage":"Baseball","bowman university":"Baseball","tiffany":"Baseball",
+    "sportflics":"Baseball","commemorative":"Other","coin":"Other","medal":"Other",
+}
+def categorize(title):
+    tl = (title or "").lower()
+    for k,v in NONFB.items():
+        if k in tl: return v
+    if re.search(r"\blot\b|\d+\s+cards\b|cards from", tl): return "Lot"
+    return "Football"
 
 _STOP = set(w.lower() for w in (
     [t for _,t in BRANDS] + TEAMS + ["Football","Panini","Topps","RC","Rookie","Insert",
@@ -74,11 +101,21 @@ _STOP = set(w.lower() for w in (
     "Signature","Class","Certified","Prestige","Obsidian","Draft","Picks","NFL","The","And",
     "Wide","Receiver","Running","Back","Quarterback","Tight","End","QB","WR","RB","TE","CB",
     "Los","Angeles","New","York","San","Francisco","Tampa","Bay","Green","Kansas","City",
-    "Las","Vegas","Trojans","Wolverines"] + [p for p in PARALLELS] + [w for i in INSERTS for w in i.split()]))
+    "Las","Vegas","Trojans","Wolverines","Cards","Card","Front","Back","Jersey","Auto","Relic",
+    "Denver","Cincinnati","Cleveland","Indianapolis","Philadelphia","Detroit","Chicago","Dallas",
+    "Buffalo","Seattle","Miami","Houston","Baltimore","Pittsburgh","Atlanta","Carolina","Arizona",
+    "Minnesota","Washington","Jacksonville","Tennessee","Orleans","England","Bowl","Sample",
+    "Portraits","Collector","Edition","Variation","Promo","Holo","Refractor","Shimmer"]
+    + [p for p in PARALLELS] + [w for i in INSERTS for w in i.split()]))
 
 def _residual_name(t):
-    # strip year, serials, card numbers, then keep Capitalized word runs not in stoplist
-    s = re.sub(r"\b20\d{2}\b", " ", t)
+    # strip year, serials, card numbers, AND multi-word insert phrases (which
+    # otherwise sit in front of the player and get grabbed as the "name"),
+    # then keep Capitalized word runs not in the stoplist
+    s = t
+    for ph in INSERT_PHRASES:
+        s = re.sub(re.escape(ph), " ", s, flags=re.I)
+    s = re.sub(r"\b20\d{2}\b", " ", s)
     s = re.sub(r"\d+\s*/\s*\d+", " ", s); s = re.sub(r"#\s*[\w-]+", " ", s)
     s = re.sub(r"[^A-Za-z'.\- ]", " ", s)
     run = []
@@ -106,9 +143,12 @@ def parse(title):
     ins = next((i.title() for i in INSERTS if i in tl), "")
     rc = bool(re.search(r"\brc\b|\brookie\b", tl))
     numbered = bool(re.search(r"\d+\s*/\s*\d+", t))
+    cat = categorize(t)
+    if cat != "Football" and not player:
+        player = "(" + cat.lower() + ")"   # non-football items get a clear bucket
     return {"year":year,"brand":brand,"player":player or "(unmatched)","team":team or "(none)",
             "parallel":par or ("Base" if not ins else ""),"insert":ins or "(none)",
-            "rc":rc,"numbered":numbered}
+            "rc":rc,"numbered":numbered,"category":cat}
 
 rows = []
 for l in active:
@@ -163,16 +203,17 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const uniq = (k) => [...new Set(DATA.map(r=>r[k]).filter(v=>v!==''&&v!=null))].sort();
 function fill(sel, vals, label){ const e=$(sel); e.innerHTML='<option value="">'+label+'</option>'+vals.map(v=>`<option>${v}</option>`).join(''); }
+fill('#fcat', uniq('category'),'All categories');
 fill('#fbrand', uniq('brand'),'All brands'); fill('#fyear', uniq('year'),'All years');
 fill('#fteam', uniq('team'),'All teams'); fill('#fpar', uniq('parallel'),'All parallels');
 fill('#fins', uniq('insert'),'All inserts');
 
 function filtered(){
-  const src=$('#fsrc').value, b=$('#fbrand').value, y=$('#fyear').value, tm=$('#fteam').value,
+  const src=$('#fsrc').value, ct=$('#fcat').value, b=$('#fbrand').value, y=$('#fyear').value, tm=$('#fteam').value,
         pa=$('#fpar').value, ins=$('#fins').value, q=$('#fq').value.toLowerCase().trim(),
         rc=$('#frc').checked, num=$('#fnum').checked;
   return DATA.filter(r=>{
-    if(src&&r.src!==src)return false; if(b&&r.brand!==b)return false; if(y&&r.year!==y)return false;
+    if(src&&r.src!==src)return false; if(ct&&r.category!==ct)return false; if(b&&r.brand!==b)return false; if(y&&r.year!==y)return false;
     if(tm&&r.team!==tm)return false; if(pa&&r.parallel!==pa)return false; if(ins&&r.insert!==ins)return false;
     if(rc&&!r.rc)return false; if(num&&!r.numbered)return false;
     if(q&&!(r.player.toLowerCase().includes(q)||r.title.toLowerCase().includes(q)))return false;
@@ -200,7 +241,7 @@ function render(){
   $('#k5').textContent=rows.length? '$'+(rows.reduce((s,r)=>s+r.price,0)/rows.length).toFixed(2):'$0';
   bars('#bpc',rows,'player','n'); bars('#bpv',rows,'player','v');
   bars('#bbrand',rows,'brand','n'); bars('#byear',rows,'year','n');
-  bars('#bteam',rows,'team','n',10); bars('#bpar',rows,'parallel','n');
+  bars('#bteam',rows,'team','n',10); bars('#bpar',rows,'parallel','n'); bars('#bcat',rows,'category','n',8);
   const sorted=[...rows].sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:0)*sortDir;});
   $('#count').textContent=rows.length+' cards shown';
   $('#tbody').innerHTML=sorted.slice(0,400).map(r=>`<tr>
@@ -231,6 +272,7 @@ page = (
 "</div></header>"
 "<div class='bar'>"
 "<label>Source<select id='fsrc'><option value=''>Active + Sold</option><option value='active'>Active only</option><option value='sold'>Sold only</option></select></label>"
+"<label>Category<select id='fcat'></select></label>"
 "<label>Brand<select id='fbrand'></select></label>"
 "<label>Year<select id='fyear'></select></label>"
 "<label>Team<select id='fteam'></select></label>"
@@ -247,6 +289,7 @@ page = (
 "<div class='card'><h3>By year</h3><div id='byear'></div></div>"
 "<div class='card'><h3>Top teams</h3><div id='bteam'></div></div>"
 "<div class='card'><h3>By parallel</h3><div id='bpar'></div></div>"
+"<div class='card'><h3>By category (football vs other)</h3><div id='bcat'></div></div>"
 "</div>"
 "<div class='card' style='margin-top:16px'><h3>Cards (filtered) — click a header to sort</h3>"
 "<div id='count'></div><div id='tablewrap'><table><thead><tr>"
