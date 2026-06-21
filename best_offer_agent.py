@@ -360,7 +360,7 @@ def filter_for_idempotency(plan: list[dict],
             # ReviseItem (risks errorId 22003 or revising an Ended listing). It
             # rotates to a later run via the hydration window.
             out.append({**d, "decision": "skip",
-                        "skip_reason": "state not verified this run (hydration capped/failed)"})
+                        "reason": "state not verified this run (hydration capped/failed)"})
             continue
         # ReviseItem only succeeds on Active listings; skip Completed/Ended.
         status = (state.get("listing_status") or "").strip()
@@ -672,7 +672,8 @@ def _summarize(plan: list[dict]) -> dict:
 
 
 def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
-                   use_cache: bool, max_hydrate: int = 200) -> dict[str, dict]:
+                   use_cache: bool, max_hydrate: int = 200,
+                   advance_offset: bool = True) -> dict[str, dict]:
     """Fetch (or reuse cached) GetItem results for 'apply' candidates.
 
     GetItem is a serial-per-item Trading call; hydrating every candidate (which
@@ -696,7 +697,11 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
         off_path = OUTPUT_DIR / "best_offer_hydrate_offset.json"
         offset = (_read_json(off_path, {}) or {}).get("offset", 0) % len(to_fetch)
         to_fetch = (to_fetch + to_fetch)[offset:offset + max_hydrate]
-        _write_json(off_path, {"offset": (offset + max_hydrate) % len(candidates or [1])})
+        # Only advance/persist the window on a real apply run — advancing in a
+        # dry-run would skip that window forward so the next --apply run never
+        # hydrates (and thus never applies) the items we just previewed.
+        if advance_offset:
+            _write_json(off_path, {"offset": (offset + max_hydrate) % len(candidates or [1])})
 
     def _one(iid):
         try:
@@ -712,7 +717,17 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
               f"{'; capped this run' if capped else ''})")
     elif use_cache:
         print(f"  Reused {len(fresh)} cached GetItem results")
-    _save_cache(fresh)
+    # Merge into the on-disk cache rather than clobbering it — on the default
+    # (non --no-fetch) path `fresh` holds only this run's hydration window, so a
+    # wholesale write would shrink the idempotency cache to ~max_hydrate items
+    # and lose every previously-cached listing's state.
+    merged = _load_cache()
+    merged.update(fresh)
+    _save_cache(merged)
+    # Return THIS run's state (not the merged cache): filter_for_idempotency
+    # defers any 'apply' candidate whose state isn't present, so returning the
+    # full cache would let prior-run (possibly stale) state slip an un-hydrated
+    # listing through to an unverified ReviseItem.
     return fresh
 
 
@@ -752,7 +767,8 @@ def main() -> int:
         try:
             print("  Getting eBay access token for GetItem hydration...")
             token = promote.get_access_token(ebay_cfg)
-            cache = _hydrate_state(plan, token, ebay_cfg, use_cache=args.no_fetch)
+            cache = _hydrate_state(plan, token, ebay_cfg, use_cache=args.no_fetch,
+                                   advance_offset=args.apply)
             plan = filter_for_idempotency(plan, cache)
         except Exception as exc:
             print(f"  Hydration skipped ({exc}); proceeding without idempotency filter")

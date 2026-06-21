@@ -660,6 +660,23 @@ def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[d
     token = promote.get_access_token(ebay_cfg)
     print("  Fetching active listings...")
     full_listings = promote.fetch_listings(token, ebay_cfg)
+    if not full_listings:
+        # eBay 518 throttle / transient 0-return. Proceeding would price an
+        # empty slice and emit an all-blocked report; the snapshot_store guard
+        # protects the FILE but not this run's return value. Fall back to the
+        # last good cached snapshot if we have one, else bail with empties.
+        print("  Live fetch returned 0 listings (throttled?); falling back to cached snapshot.")
+        if LISTINGS_SNAPSHOT.exists():
+            try:
+                snap = json.loads(LISTINGS_SNAPSHOT.read_text())
+            except Exception:
+                snap = None
+            if isinstance(snap, dict) and snap.get("listings"):
+                priced = snap.get("pricing") or {}
+                cl = ([l for l in snap["listings"] if l.get("item_id") in priced]
+                      if priced else snap["listings"])
+                return ebay_cfg, cl, snap.get("market", {}), priced, snap.get("sold", [])
+        return ebay_cfg, [], {}, {}, []
 
     # Bound per-run work. Comps (Browse, rate-limited → 429 on bursts) and pricing
     # (PriceCharting, ~1s/call) are expensive per card; evaluating all ~1400 every

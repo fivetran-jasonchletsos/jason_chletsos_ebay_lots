@@ -1,5 +1,5 @@
 import sys; sys.path.insert(0, ".")
-import json, sys
+import json
 from pathlib import Path
 import card_price_agent as cpa
 from repricing_agent import _round_psych
@@ -15,22 +15,35 @@ for bf in batches:
         continue
     cards = json.loads(p.read_text())
     for c in cards:
-        title = c["title"]
+        title = c.get("title") or ""          # guard missing title (don't crash the pass)
+        if not title:
+            continue
         tl = title.lower()
-        # Caleb Williams base/non-insert pinned at 2.99
+        # Caleb Williams base/non-insert pinned at 2.99. Only PARALLEL/INSERT
+        # signals disqualify — NOT plain set/brand names (a base "Panini Select
+        # Caleb Williams" is still a base card and should get the $2.99 rule).
         if "caleb williams" in tl and not any(k in tl for k in
-            ["numbers","prizm","optic","mosaic","select","downtown","kaboom","insert","parallel","silver","gold","orange","pink","green","auto"]):
+            ["numbers","downtown","kaboom","insert","parallel","silver","gold",
+             "orange","pink","green","auto","cracked","prizmatic","wave","disco"]):
             c["price"] = 2.99; c["price_src"] = "caleb_base_rule"; priced += 1; fallbacks += 1
             continue
         try:
             rec = cpa.price_listing({"title": title, "item_id": None}, token)
-        except Exception as e:
+        except Exception:
             rec = None
-        # Use the ORIGINAL identification tier estimate as the sanity basis, and
-        # persist it (_tier) so re-running this pass stays idempotent — without
-        # this, a second run would read the already-SCP'd c["price"] as the
-        # "tier" and the 3x cap would drift upward each run.
-        tier = max(2.99, float(c.get("_tier", c["price"])))
+        # Sanity basis = the ORIGINAL identification tier estimate, persisted as
+        # _tier so re-runs stay idempotent. If _tier is absent AND the price was
+        # already SCP-anchored by an earlier version (price_src "scp:..."), the
+        # original tier is lost — fall back to the conservative floor rather than
+        # trusting the possibly-inflated current price (which would widen the 3x
+        # cap and let a bad match ratchet, e.g. the $161 Keon Coleman class).
+        prior_src = c.get("price_src") or ""
+        if "_tier" in c:
+            tier = max(2.99, float(c["_tier"]))
+        elif prior_src.startswith("scp:"):
+            tier = 2.99
+        else:
+            tier = max(2.99, float(c.get("price") or 2.99))
         c["_tier"] = tier
         conf = rec.get("confidence", 0) if rec else 0
         scp = float(rec["actual_price"]) if (rec and rec.get("actual_price")) else 0
@@ -44,8 +57,8 @@ for bf in batches:
             c["price_src"] = f"scp:{scp:.2f}/conf{conf:.2f}"
             scp_hits += 1
         else:
-            # keep rough tier price (already .99), floor 2.99
-            c["price"] = tier
+            # fall back to the tier estimate, psych-rounded + floored at 2.99
+            c["price"] = max(2.99, _round_psych(tier))
             c["price_src"] = "tier_fallback"
             fallbacks += 1
         priced += 1

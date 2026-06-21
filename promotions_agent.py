@@ -749,7 +749,8 @@ def build_report(plan: dict, history: list[dict], cfg: dict) -> Path:
         by_decision.setdefault(d["decision"], []).append(d)
     flagged = [d for d in markdowns if d.get("flag_for_review")]
     total_discount = sum(
-        (d["current_price"] - d["target_price"]) for d in by_decision["apply"]
+        (d["current_price"] - (d.get("applied_price") or d["target_price"]))
+        for d in by_decision["apply"]
         if d.get("target_price") and d.get("current_price")
     )
     tier_counts = {"61-120d": 0, "121-180d": 0, "181-9999d": 0}
@@ -782,7 +783,8 @@ def build_report(plan: dict, history: list[dict], cfg: dict) -> Path:
     )
 
     def _row(d: dict) -> str:
-        delta_amt = (d.get("current_price") or 0) - (d.get("target_price") or 0)
+        shown_price = d.get("applied_price") or d.get("target_price")
+        delta_amt = (d.get("current_price") or 0) - (shown_price or 0)
         flag = "🚩" if d.get("flag_for_review") else ""
         reasons = "<br>".join(d.get("reasons", []) or [])
         return f"""
@@ -796,7 +798,7 @@ def build_report(plan: dict, history: list[dict], cfg: dict) -> Path:
           <td class='num'>{d.get('age_days', '—')}d <small class='src'>{d.get('age_source','')}</small></td>
           <td class='band'>{d.get('tier') or '—'}</td>
           <td class='num'>{_fmt_money(d.get('current_price'))}</td>
-          <td class='num target'>{_fmt_money(d.get('target_price'))}</td>
+          <td class='num target'>{_fmt_money(shown_price)}</td>
           <td class='num delta'>−{_fmt_money(delta_amt)}</td>
           <td class='num'>{_fmt_money(d.get('floor'))}</td>
           <td class='flag'>{flag}</td>
@@ -844,7 +846,7 @@ def build_report(plan: dict, history: list[dict], cfg: dict) -> Path:
         "".join(
             f"<li><a href='{d['url']}' target='_blank'>{(d['title'] or '')[:90]}</a>"
             f" <code>{d['item_id']}</code> · {d.get('age_days','?')}d · "
-            f"now {_fmt_money(d.get('current_price'))} → {_fmt_money(d.get('target_price'))}</li>"
+            f"now {_fmt_money(d.get('current_price'))} → {_fmt_money(d.get('applied_price') or d.get('target_price'))}</li>"
             for d in flagged
         ) + "</ul>"
     ) if flagged else "<p class='empty'>Nothing flagged.</p>"
