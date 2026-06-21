@@ -432,10 +432,26 @@ def plan_markdown(listing: dict, age_days: int, age_source: str,
         return decision
 
     decision["target_price"] = target
-    decision["decision"]     = "apply"
+    # eBay applies the markdown as an INTEGER percentageOffItem. Round the
+    # discount DOWN (truncate) so the price eBay actually applies never dips
+    # below the floor-protected target_price. Record the real applied price so
+    # the report/history match what the buyer sees (the prior code sent the raw
+    # tier pct and logged target_price, so it silently sold below the floor).
+    pct_off_int = int((current - target) / current * 100)  # truncate = floor for positive
+    if pct_off_int < 1:
+        decision["decision"] = "skip"
+        decision["reasons"].append(
+            f"discount {(current - target) / current * 100:.1f}% rounds below 1% — "
+            "not representable as an integer markdown without breaching the floor"
+        )
+        return decision
+    applied_price = round(current * (1 - pct_off_int / 100.0), 2)
+    decision["markdown_pct"]  = pct_off_int
+    decision["applied_price"] = applied_price
+    decision["decision"]      = "apply"
     decision["reasons"].append(
         f"age {age_days}d ({age_source}) → tier {decision['tier']} @ {tier['pct']*100:.0f}% "
-        f"→ ${target:.2f} (floor ${floor:.2f})"
+        f"→ {pct_off_int}% off = ${applied_price:.2f} (target ${target:.2f}, floor ${floor:.2f})"
     )
     if decision["flag_for_review"]:
         decision["reasons"].append("flagged for manual review — consider relist/delist")
@@ -459,11 +475,16 @@ def _markdown_payload(decision: dict, cfg: dict, marketplace_id: str, image_url:
     end_iso = (now + timedelta(days=duration_days)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     # eBay MARKDOWN_SALE requires: a short description (<=50 chars), a hosted
     # promotionImageUrl (the listing's own EPS image works), and the discount as
-    # an INTEGER percentageOffItem (amountOffItem rejects decimals). The markdown
-    # tiers are already percentages, so use the tier pct directly.
-    pct = decision.get("discount_pct") or 0
-    pct = float(pct)
-    pct_int = int(round(pct * 100)) if pct < 1 else int(round(pct))
+    # an INTEGER percentageOffItem (amountOffItem rejects decimals). Use the
+    # floor-protected markdown_pct computed in decide() (rounded DOWN so the
+    # applied price never breaches the floor); fall back to deriving it from the
+    # current/target prices if absent.
+    pct_int = decision.get("markdown_pct")
+    if pct_int is None:
+        cur = float(decision.get("current_price") or 0)
+        tgt = float(decision.get("target_price") or 0)
+        pct_int = int((cur - tgt) / cur * 100) if cur > 0 and tgt > 0 else 0
+    pct_int = max(0, int(pct_int))
     return {
         "name":                  f"MD-{decision['item_id']}"[:50],
         "description":           "Markdown sale",
@@ -504,11 +525,17 @@ def apply_markdown(token: str, decision: dict, cfg: dict, image_url: str = "") -
     except json.JSONDecodeError:
         data = {"raw": body}
     ok = r.status_code in (200, 201, 204)
+    if ok:
+        err = None
+    elif isinstance(data, dict) and data.get("errors"):
+        err = json.dumps(data["errors"])[:600]
+    else:
+        err = (body or "")[:600]
     return {
         "ok":     ok,
         "http":   r.status_code,
         "data":   data,
-        "error":  None if ok else (data.get("errors") if isinstance(data, dict) else body)[:600] if not ok else None,
+        "error":  err,
         "payload": payload,
     }
 
@@ -1112,14 +1139,15 @@ def run(args: argparse.Namespace) -> int:
                 for l in listings
             }
             print(f"\n  Applying {len(to_apply)} markdown(s) to eBay...")
-            skipped_ineligible = 0
             for d in to_apply:
-                print(f"    → {d['item_id']}: ${d['current_price']:.2f} → ${d['target_price']:.2f} ({d['tier']})")
+                # applied_price is the real eBay result (floor-safe integer pct);
+                # target_price is the ideal. Report/record the applied price.
+                applied = d.get("applied_price", d["target_price"])
+                print(f"    → {d['item_id']}: ${d['current_price']:.2f} → ${applied:.2f} ({d['tier']})")
                 res = apply_markdown(marketing_token, d, cfg, image_by_id.get(str(d["item_id"]), ""))
                 # 38272 = auction-style listing, not eligible for markdown — skip quietly.
                 err_str = json.dumps(res.get("error") or "")
                 if not res["ok"] and "38272" in err_str:
-                    skipped_ineligible += 1
                     res["error"] = "skipped: auction-style listing (not markdown-eligible)"
                 applied_entries.append({
                     "applied_at":  datetime.now(timezone.utc).isoformat(),
@@ -1127,7 +1155,7 @@ def run(args: argparse.Namespace) -> int:
                     "item_id":     d["item_id"],
                     "title":       d["title"],
                     "from_price":  d["current_price"],
-                    "to_price":    d["target_price"],
+                    "to_price":    applied,
                     "tier":        d["tier"],
                     "ok":          res["ok"],
                     "http":        res["http"],

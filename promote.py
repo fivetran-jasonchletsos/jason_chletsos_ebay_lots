@@ -1195,8 +1195,6 @@ def fetch_market_prices(listings: list[dict], cfg: dict) -> dict:
     token_box = {"t": get_app_token(cfg), "429s": 0, "tripped": False}
     tok_lock = threading.Lock()
     SEARCH_URL = "https://api.ebay.com/buy/browse/v1/item_summary/search"
-    PARAMS = lambda q: {"q": q, "limit": 10, "sort": "price",
-                        "filter": "buyingOptions:{FIXED_PRICE}"}
 
     # Dedupe by query: many listings share a player/title, so we hit the Browse
     # API once per UNIQUE query and fan the result back out to every item_id.
@@ -1215,19 +1213,35 @@ def fetch_market_prices(listings: list[dict], cfg: dict) -> dict:
         (NO_COMPS) instead of dragging every query through retries."""
         if token_box["tripped"]:
             return query, None
-        for attempt in range(2):                      # at most one retry
+        params = {"q": query, "limit": 10, "sort": "price",
+                  "filter": "buyingOptions:{FIXED_PRICE}"}
+        # Separate budgets: one one-shot 401 token refresh, plus a few 429
+        # backoffs. Sharing a single 2-iteration budget meant a 401 (refresh)
+        # followed by one 429 exhausted the loop before ever retrying the query.
+        refreshed = False
+        for attempt in range(5):
             tok = token_box["t"]
             try:
                 r = requests.get(SEARCH_URL,
                                  headers={"Authorization": f"Bearer {tok}",
                                           "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"},
-                                 params=PARAMS(query), timeout=10)
+                                 params=params, timeout=10)
             except Exception:
                 return query, None
             if r.status_code == 401:
+                if refreshed:                         # already refreshed once
+                    return query, None
+                refreshed = True
                 with tok_lock:
                     if token_box["t"] == tok:        # only one thread refreshes
-                        token_box["t"] = get_app_token(cfg)
+                        try:
+                            token_box["t"] = get_app_token(cfg)
+                        except Exception:
+                            # Can't mint a token — stop hammering across all
+                            # threads rather than raising out of the pool.
+                            token_box["tripped"] = True
+                if token_box["tripped"]:
+                    return query, None
                 continue
             if r.status_code == 429:                  # rate limited
                 with tok_lock:
@@ -1257,8 +1271,13 @@ def fetch_market_prices(listings: list[dict], cfg: dict) -> dict:
     # ~1-2 min vs. 10+ min serially, without bursting the limit.
     query_prices = {}
     with ThreadPoolExecutor(max_workers=6) as ex:
-        for query, prices in ex.map(_fetch, unique_queries):
-            query_prices[query] = prices
+        try:
+            for query, prices in ex.map(_fetch, unique_queries):
+                query_prices[query] = prices
+        except Exception as exc:
+            # Never let one worker's stray exception abort the whole comp pass;
+            # uncovered queries simply fall through to NO_COMPS below.
+            print(f"  Market comp fetch interrupted ({exc}); using partial results.")
 
     for item_id, our_price, query in items:
         prices = query_prices.get(query)

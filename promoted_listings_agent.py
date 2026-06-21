@@ -290,7 +290,9 @@ def classify(listing: dict, *, age_days: int | None, watchers: int,
             top = price_bands[-1]
             reasons.append(f"price ${price:.2f} → price-band tier {top['tier']} (top band)")
             return top["tier"], reasons
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, KeyError, IndexError):
+            # Malformed band entry (missing 'max_price'/'tier', non-list, etc.)
+            # — fall through to the age-based ladder rather than crash the run.
             pass
 
     # No price bands configured and unknown age — punt to fallback.

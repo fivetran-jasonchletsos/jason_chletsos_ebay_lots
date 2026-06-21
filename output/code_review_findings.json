@@ -1,0 +1,107 @@
+[
+  {
+    "file": "promotions_agent.py",
+    "line": 478,
+    "verdict": "CONFIRMED",
+    "summary": "Markdown payload now sends a flat tier percentage (percentageOffItem = pct_int derived from raw tier['pct'] at lines 464-466), completely bypassing the floor-adjusted target_price computed at lines 400-434. The decision pipeline computes ta",
+    "failure_scenario": "current=$10, tier pct=0.22, sold_median=$12 -> raw_target=$7.80 but sold floor = 12*0.75=$9.00, so target=$9.00 (psych ~$8.99). The log/report and the applied_entries history (lines 1117, 1130) both record 'to_price=$8.99', but eBay actually applies 22% off current = $7.80 -- below the sold-history floor the agent was "
+  },
+  {
+    "file": "repricing_agent.py",
+    "line": 694,
+    "verdict": "CONFIRMED",
+    "summary": "Snapshot is written with full_listings (all ~1400 cards) as the 'listings' key, but the 'market' and 'pricing' keys only cover the ~250-card rotating slice that was actually evaluated (market/pricing_by_id were built from the sliced `listin",
+    "failure_scenario": "On a subsequent cached/--no-fetch repricing run, gather_inputs returns snap['listings'] (1400) with snap['pricing'] (250 keys) at lines 645-647. plan_all then iterates all 1400 listings; the ~1150 with no pricing entry get sources={} and decide() returns 'blocked: no pricing sources' (line 227-229). The dry-run report "
+  },
+  {
+    "file": "promotions_agent.py",
+    "line": 511,
+    "verdict": "CONFIRMED",
+    "summary": "In apply_markdown (signature changed this diff), the error-extraction expression `(data.get('errors') if isinstance(data, dict) else body)[:600]` slices None when data is a dict lacking an 'errors' key. On a non-ok response with an empty or",
+    "failure_scenario": "eBay returns HTTP 400/500 with an empty body (common for gateway/throttle errors). r.text='' -> data={} -> ok=False -> error expression evaluates None[:600] -> TypeError propagates out of apply_markdown, aborting the apply loop in run() at line 1118 and losing the applied_entries already collected for the rest of the r"
+  },
+  {
+    "file": "best_offer_agent.py",
+    "line": 685,
+    "verdict": "CONFIRMED",
+    "summary": "ANGLE B re-clamp / idempotency guard dropped for capped items. Old _hydrate_state fetched GetItem state for EVERY 'apply' candidate; filter_for_idempotency then used that state to (a) skip listings whose Active status fails (ReviseItem requ",
+    "failure_scenario": "Catalog has 400 apply-candidates; cap hydrates the first 200. A card at index 250 was repriced down earlier today (live BIN now $6, snapshot $10); its plan auto_decline of $9 is never re-clamped, so --apply sends ReviseItem and eBay rejects with errorId 22003. Worse, an already-BO-enabled card past the cap is re-applie"
+  },
+  {
+    "file": "best_offer_agent.py",
+    "line": 689,
+    "verdict": "CONFIRMED",
+    "summary": "_hydrate_state now caps hydration at max_hydrate=200, but its caller filter_for_idempotency (line 355-357) treats any item missing from the cache as an UNVERIFIED pass-through: `state = cache.get(item_id) or {}` then `if not state.get(\"ok\")",
+    "failure_scenario": "On a `best_offer_agent.py --apply` run where the 'apply' candidate count exceeds 200 (the diff comment notes this 'can balloon to 700+' when Browse comps are unavailable), every candidate past index 200 is pushed via ReviseItem with stale-snapshot accept/decline thresholds and no idempotency check. Already-enabled offe"
+  },
+  {
+    "file": "repricing_agent.py",
+    "line": 670,
+    "verdict": "CONFIRMED",
+    "summary": "After computing the rotating slice, CONFIG_PATH is overwritten with rcfg, but rcfg came from load_config() which setdefault-merges EVERY DEFAULT_CONFIG key (load_config lines 90-91). So the persisted repricing_config.json is rewritten to in",
+    "failure_scenario": "A user who deliberately left a key out of repricing_config.json (to inherit the default and pick up future default changes) finds it pinned to today's default value after the first capped run; later raising the default in code no longer affects their pinned config, and any external tooling diffing the config file sees "
+  },
+  {
+    "file": "promote.py",
+    "line": 1218,
+    "verdict": "CONFIRMED",
+    "summary": "In fetch_market_prices._fetch the per-query retry loop is `for attempt in range(2)` (only two tries), but BOTH the 401 token-refresh path (continue) AND the 429 rate-limit-backoff path (sleep 0.6 then continue) spend from that same 2-iterat",
+    "failure_scenario": "Under the new 6-worker parallel fan-out eBay expires the app token mid-run. The first query each worker issues returns 401 -> token refresh (consumes attempt 0); the immediate parallel burst then returns 429 (attempt 1) -> 429s++ + 0.6s sleep + continue -> range(2) is exhausted -> that listing is recorded NO_COMPS. A b"
+  },
+  {
+    "file": "promoted_listings_agent.py",
+    "line": 286,
+    "verdict": "CONFIRMED",
+    "summary": "The price-band block (the diff promoted it from the rare `age_days is None` path to be AUTHORITATIVE for every listing) does `sorted(price_bands, key=lambda b: b['max_price'])` and reads `band['tier']`/`band['max_price']`, but the surroundi",
+    "failure_scenario": "An operator edits promoted_listings_config.json and omits 'max_price' (or mistypes the key) on one band entry. The very first listing processed enters the now-universal band block, `sorted(..., key=lambda b: b['max_price'])` raises KeyError, the except clause (TypeError/ValueError only) does not catch it, and classify("
+  },
+  {
+    "file": "output/_price_pass.py",
+    "line": 29,
+    "verdict": "CONFIRMED",
+    "summary": "The SCP sanity-cap basis `tier = max(2.99, float(c['price']))` reads the card's CURRENT price, but the script overwrites c['price'] with the chosen price and writes it back to the SAME batch file (line 47). On a re-run over the already-pric",
+    "failure_scenario": "JC runs _price_pass.py twice over the same batch_scan*_new.json set. Run 1 anchors a rough-$5 card to SCP $14 (14 <= 5*3). Run 2 reads price=14, sets tier=14 and cap=42, so an erroneous $40 SCP match for a graded/numbered variant now passes (40 <= 42) and is written as the list price, ratcheting the card far above the "
+  },
+  {
+    "file": "dedup_check.py",
+    "line": 51,
+    "verdict": "CONFIRMED",
+    "summary": "Reuse: dedup_check.is_dup re-implements duplicate detection from scratch (custom toks() tokenizer, hardcoded BRANDS/PARALLELS sets, Jaccard overlap thresholds 0.85 / 0.72) while card_identity.py already provides the canonical duplicate-dete",
+    "failure_scenario": "A player's #50 base and #120 base from the same set share player+brand+empty-parallel tokens, hit Jaccard >= 0.72 with same_brand, and #120 is wrongly HELD as a dup of #50 and never posted; meanwhile a genuine re-scan of an already-listed card whose title is reworded falls under 0.72 and is posted as a second active li"
+  },
+  {
+    "file": "promote.py",
+    "line": 1259,
+    "verdict": "CONFIRMED",
+    "summary": "The parallel comp fetch (with ThreadPoolExecutor as ex: for q,p in ex.map(_fetch, unique_queries)) has no try/except, and _fetch calls get_app_token(cfg) inside the 401 branch (line 1230) under tok_lock with no guard. get_app_token does res",
+    "failure_scenario": "eBay returns a single 401 mid-run (token expired), the refresh POST to the OAuth endpoint hits a momentary network error or 5xx, raise_for_status() raises, and instead of that one query degrading to NO_COMPS the exception unwinds the ThreadPoolExecutor and aborts the comp fetch \u2014 the repricing/promote run dies outright"
+  },
+  {
+    "file": "promotions_agent.py",
+    "line": 1115,
+    "verdict": "CONFIRMED",
+    "summary": "Dead variable. skipped_ineligible is initialized at line 1115 and incremented at line 1122 when a markdown is rejected as an auction-style listing (38272), but it is never read or printed anywhere afterward (grep shows only the two write si",
+    "failure_scenario": "No failure -- purely dead state. Misleads a reader into thinking a 'skipped N ineligible auctions' summary exists when it doesn't, so auction listings that silently fail markdown leave no visible tally."
+  },
+  {
+    "file": "dedup_check.py",
+    "line": 39,
+    "verdict": "CONFIRMED",
+    "summary": "_load_titles builds a redundant intermediate. It appends (title, None) tuples into out (line 47) only to immediately unpack and throw away the None in the final comprehension (line 48): return [(t, toks(t)) for t, _ in out if t]. The None p",
+    "failure_scenario": "No runtime failure; this is pure noise that obscures intent. The (title, None) shape invites a reader to think the second slot is meaningful state, when it is discarded one line later."
+  },
+  {
+    "file": "promote.py",
+    "line": 1198,
+    "verdict": "CONFIRMED",
+    "summary": "PARAMS = lambda q: {...} assigns a lambda to a name (PEP8 E731) and is invoked in exactly one place (params=PARAMS(query) at line 1224). Inline the dict literal at the call site, or use a plain def. The named-lambda adds an indirection with",
+    "failure_scenario": "No failure -- style/readability only. A named single-use lambda reads as if it's reused or hot-swappable when it is neither."
+  },
+  {
+    "file": "dedup_check.py",
+    "line": 62,
+    "verdict": "CONFIRMED",
+    "summary": "is_dup() calls toks(bm) to re-tokenize the best-match reference title, but that title was already tokenized into `rt` and is available in the loop. The matched tokens should be carried out of the loop (e.g. track `best_rt` alongside `bm`) i",
+    "failure_scenario": "On a batch run every candidate that has any non-zero overlap triggers a redundant full re-tokenization (regex substitution + split + set comprehension) of the matched title. With hundreds of candidates each calling is_dup 3x (active, sold, batch refs), this is hundreds-to-thousands of avoidable regex passes per run; ch"
+  }
+]

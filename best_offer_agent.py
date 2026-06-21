@@ -354,7 +354,14 @@ def filter_for_idempotency(plan: list[dict],
             out.append(d); continue
         state = cache.get(d["item_id"]) or {}
         if not state.get("ok"):
-            out.append(d); continue
+            # Not hydrated this run (hydration is capped) or GetItem failed — we
+            # can't confirm the listing is Active or re-clamp accept/decline
+            # against the live BIN, so DEFER instead of firing an unverified
+            # ReviseItem (risks errorId 22003 or revising an Ended listing). It
+            # rotates to a later run via the hydration window.
+            out.append({**d, "decision": "skip",
+                        "skip_reason": "state not verified this run (hydration capped/failed)"})
+            continue
         # ReviseItem only succeeds on Active listings; skip Completed/Ended.
         status = (state.get("listing_status") or "").strip()
         if status and status.lower() != "active":
@@ -682,7 +689,14 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
     to_fetch = [iid for iid in candidates if not (use_cache and iid in cache)]
     capped = len(to_fetch) > max_hydrate
     if capped:
-        to_fetch = to_fetch[:max_hydrate]
+        # Rotate the hydration window each run so every candidate eventually
+        # gets verified+applied. Without rotation the first max_hydrate items
+        # would be the only ones ever hydrated — and the rest, now deferred by
+        # filter_for_idempotency (state never verified), would never apply.
+        off_path = OUTPUT_DIR / "best_offer_hydrate_offset.json"
+        offset = (_read_json(off_path, {}) or {}).get("offset", 0) % len(to_fetch)
+        to_fetch = (to_fetch + to_fetch)[offset:offset + max_hydrate]
+        _write_json(off_path, {"offset": (offset + max_hydrate) % len(candidates or [1])})
 
     def _one(iid):
         try:

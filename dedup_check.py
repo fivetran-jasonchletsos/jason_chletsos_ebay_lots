@@ -41,25 +41,23 @@ def _load_titles(path: Path, kind: str) -> list[tuple[str, set]]:
         return []
     raw = json.loads(path.read_text())
     items = raw if isinstance(raw, list) else (raw.get("listings") or list(raw.values()))
-    out = []
-    for it in items:
-        if isinstance(it, dict):
-            out.append((it.get("title") or it.get("Title") or "", None))
-    return [(t, toks(t)) for t, _ in out if t]
+    titles = [it.get("title") or it.get("Title") or ""
+              for it in items if isinstance(it, dict)]
+    return [(t, toks(t)) for t in titles if t]
 
 
 def is_dup(ct: set, refs: list[tuple[str, set]]) -> tuple[bool, str]:
     """Same-card match: identical parallel-status + high token overlap, or
     same-brand + strong overlap. Returns (matched, matched_title)."""
-    best, bm = 0.0, None
+    best, bm, best_rt = 0.0, None, None
     for title, rt in refs:
         if not rt or (ct & PARALLELS) != (rt & PARALLELS):
             continue
         j = len(ct & rt) / len(ct | rt)
         if j > best:
-            best, bm = j, title
+            best, bm, best_rt = j, title, rt
     if bm:
-        same_brand = (ct & BRANDS) == (toks(bm) & BRANDS)
+        same_brand = (ct & BRANDS) == (best_rt & BRANDS)  # reuse already-computed tokens
         if best >= 0.85 or (best >= 0.72 and same_brand):
             return True, bm
     return False, ""

@@ -644,7 +644,16 @@ def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[d
         else:
             if isinstance(snap, dict) and "market" in snap and "pricing" in snap:
                 print(f"  Using cached snapshot at {LISTINGS_SNAPSHOT.relative_to(REPO_ROOT)}")
-                return ebay_cfg, snap["listings"], snap["market"], snap["pricing"], snap.get("sold", [])
+                # The snapshot stores the FULL active set as 'listings' (so the
+                # markdown/offer consumers see everything), but market/pricing
+                # only cover the rotating slice that was actually evaluated.
+                # Restrict the cached repricing run to listings that HAVE pricing
+                # — otherwise the ~1150 uncovered cards each decide() as
+                # "blocked: no pricing sources" and flood the report.
+                priced = snap.get("pricing") or {}
+                cached_listings = [l for l in snap.get("listings", [])
+                                   if l.get("item_id") in priced]
+                return ebay_cfg, cached_listings, snap["market"], priced, snap.get("sold", [])
             print(f"  Cache lacks market/pricing wrapper; falling through to live fetch.")
 
     print("  Getting eBay access token...")
@@ -665,9 +674,13 @@ def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[d
         listings = full_listings[off:off + cap]
         if len(listings) < cap:
             listings += full_listings[:cap - len(listings)]
-        rcfg["rotation_offset"] = (off + cap) % len(full_listings)
+        # Persist ONLY the advanced rotation_offset. load_config() merged every
+        # DEFAULT_CONFIG key into rcfg, so writing rcfg wholesale would bloat the
+        # on-disk repricing_config.json with defaults the user never set.
         try:
-            CONFIG_PATH.write_text(json.dumps(rcfg, indent=2))
+            raw = json.loads(CONFIG_PATH.read_text()) if CONFIG_PATH.exists() else {}
+            raw["rotation_offset"] = (off + cap) % len(full_listings)
+            CONFIG_PATH.write_text(json.dumps(raw, indent=2))
         except Exception:
             pass
         print(f"  Evaluating {len(listings)} of {len(full_listings)} listings "
