@@ -673,7 +673,8 @@ def _summarize(plan: list[dict]) -> dict:
 
 def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
                    use_cache: bool, max_hydrate: int = 200,
-                   advance_offset: bool = True) -> dict[str, dict]:
+                   advance_offset: bool = True,
+                   only_item: str | None = None) -> dict[str, dict]:
     """Fetch (or reuse cached) GetItem results for 'apply' candidates.
 
     GetItem is a serial-per-item Trading call; hydrating every candidate (which
@@ -685,7 +686,11 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
     """
     from concurrent.futures import ThreadPoolExecutor
     cache = _load_cache() if use_cache else {}
-    candidates = [d["item_id"] for d in plan if d["decision"] == "apply"]
+    # When targeting a single item (--item), hydrate ONLY that item so it can't
+    # fall outside the rotating window and get silently deferred (--apply --item X
+    # would otherwise apply nothing if X wasn't in this run's window).
+    candidates = [d["item_id"] for d in plan if d["decision"] == "apply"
+                  and (only_item is None or d["item_id"] == only_item)]
     fresh: dict[str, dict] = dict(cache) if use_cache else {}
     to_fetch = [iid for iid in candidates if not (use_cache and iid in cache)]
     capped = len(to_fetch) > max_hydrate
@@ -720,8 +725,9 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
     # Merge into the on-disk cache rather than clobbering it — on the default
     # (non --no-fetch) path `fresh` holds only this run's hydration window, so a
     # wholesale write would shrink the idempotency cache to ~max_hydrate items
-    # and lose every previously-cached listing's state.
-    merged = _load_cache()
+    # and lose every previously-cached listing's state. Reuse the disk read from
+    # the top on the use_cache path instead of reading it a second time.
+    merged = dict(cache) if use_cache else _load_cache()
     merged.update(fresh)
     _save_cache(merged)
     # Return THIS run's state (not the merged cache): filter_for_idempotency
@@ -768,7 +774,7 @@ def main() -> int:
             print("  Getting eBay access token for GetItem hydration...")
             token = promote.get_access_token(ebay_cfg)
             cache = _hydrate_state(plan, token, ebay_cfg, use_cache=args.no_fetch,
-                                   advance_offset=args.apply)
+                                   advance_offset=args.apply, only_item=args.item)
             plan = filter_for_idempotency(plan, cache)
         except Exception as exc:
             print(f"  Hydration skipped ({exc}); proceeding without idempotency filter")

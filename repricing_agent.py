@@ -672,9 +672,12 @@ def gather_inputs(use_cache: bool) -> tuple[dict, list[dict], dict, dict, list[d
             except Exception:
                 snap = None
             if isinstance(snap, dict) and snap.get("listings"):
+                # Mirror the cache-hit path: restrict to listings that HAVE
+                # pricing so decide() doesn't mark the rest "no pricing sources"
+                # and flood the report. If pricing is empty there's nothing to
+                # reprice — return empties rather than the full unpriced catalog.
                 priced = snap.get("pricing") or {}
-                cl = ([l for l in snap["listings"] if l.get("item_id") in priced]
-                      if priced else snap["listings"])
+                cl = [l for l in snap["listings"] if l.get("item_id") in priced]
                 return ebay_cfg, cl, snap.get("market", {}), priced, snap.get("sold", [])
         return ebay_cfg, [], {}, {}, []
 

@@ -149,7 +149,10 @@ def load_promotion_summary() -> dict:
                or markdowns.get("decisions") or [])
     md_apply = [m for m in md_plan if (m.get("decision") or "").lower() == "apply"]
     md_total = sum(
-        max((m.get("current_price") or 0) - (m.get("target_price") or 0), 0)
+        # applied_price is the floor-truncated price eBay actually applies;
+        # fall back to target_price for older plans that predate it.
+        max((m.get("current_price") or 0)
+            - (m.get("applied_price") or m.get("target_price") or 0), 0)
         for m in md_apply
     )
 
