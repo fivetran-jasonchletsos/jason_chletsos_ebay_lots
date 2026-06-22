@@ -1,19 +1,20 @@
-"""ODI demo build for a Claude-Code NOVICE, across three 1-hour sessions.
+"""ODI demo build — TRAINER'S GUIDE, for the facilitator (Jason), across 3 sessions.
 
-Written for a boss who is new to AI and Claude Code. Heavy hand-holding:
-a plain-English primer on how Claude Code works, a glossary, a clear
-"your job vs the driver's job" split, and under every prompt a "what it does /
-what you'll see" line. Maps the ~3-hour odi-demo-builder flow onto 3 sessions:
+Audience flip: this is for the person running the session, not the novice.
+Jason narrates, pastes prompts into chat; the boss copies them into Claude Code
+and clicks Allow. Each step has:
+  Say:        a short talk track to read to the room
+  PASTE:      the exact prompt (blue box) to hand over
+  You watch:  trainer-only notes (grey box) — what's happening, what can break
+
+Maps the ~3-hour odi-demo-builder flow onto 3 one-hour sessions:
   S1 Foundation & first data   S2 dbt pipeline   S3 Frontend + tour
 
 Reality baked in: AWS creds + the Fivetran API key are NOT set on the machine,
-so S1 opens with a 5-minute access check and a no-AWS fallback.
+so S1 has a pre-session access setup the trainer handles.
 
-Note: all shaded callouts (warn / done / tip / prompt / session band) are
-rendered as single-cell Tables, not bordered Paragraphs. ReportLab does not
-reserve a bordered Paragraph's top padding, which makes the box overlap the
-heading above it — tables reserve their space exactly and never overlap.
-
+Shaded callouts are single-cell Tables (ReportLab doesn't reserve a bordered
+Paragraph's top padding, which makes boxes overlap the heading above).
 Outputs to output/ and is copied to ~/Downloads (JC's standing pref).
 """
 from pathlib import Path
@@ -28,44 +29,38 @@ REPO = Path(__file__).parent
 OUT = REPO / "output/odi_demo_3session_plan.pdf"
 
 LM = RM = 0.55 * inch
-CW = letter[0] - LM - RM            # usable content width
+CW = letter[0] - LM - RM
 
 INK = HexColor("#111111"); MID = HexColor("#444444"); WHITE = HexColor("#ffffff")
 ACCENT = HexColor("#1a5fb4"); BOX = HexColor("#eef3fb"); BORD = HexColor("#c7d6ee")
 GREEN = HexColor("#1a7f47"); GBOX = HexColor("#e8f5ee"); GBORD = HexColor("#bfe2cd")
 AMBER = HexColor("#8a5a00"); ABOX = HexColor("#fbf2dd"); ABORD = HexColor("#ecd9a6")
-GREYBOX = HexColor("#f1f3f5"); LINE = HexColor("#cccccc"); GREY = HexColor("#777777")
+SLATE = HexColor("#33415c")
+GREYBOX = HexColor("#f1f3f5"); GREYBORD = HexColor("#d4d9de"); LINE = HexColor("#cccccc"); GREY = HexColor("#777777")
 
-h2   = ParagraphStyle("h2", fontName="Helvetica-Bold", fontSize=11, textColor=ACCENT,
-                      spaceBefore=9, spaceAfter=4, leading=13)
+h2   = ParagraphStyle("h2", fontName="Helvetica-Bold", fontSize=11, textColor=ACCENT, spaceBefore=9, spaceAfter=4, leading=13)
 body = ParagraphStyle("body", fontName="Helvetica", fontSize=9, textColor=INK, leading=12.5, spaceAfter=4)
 small= ParagraphStyle("small", fontName="Helvetica", fontSize=8.3, textColor=MID, leading=10.5, spaceAfter=2)
-plab = ParagraphStyle("plab", fontName="Helvetica-Bold", fontSize=9.2, textColor=ACCENT, leading=11, spaceAfter=2)
-expl = ParagraphStyle("expl", fontName="Helvetica-Oblique", fontSize=8.2, textColor=MID, leading=10.4,
-                      spaceAfter=5, leftIndent=4)
-# plain text styles used INSIDE boxed tables (no backColor/border here)
+plab = ParagraphStyle("plab", fontName="Helvetica-Bold", fontSize=9.4, textColor=ACCENT, leading=11, spaceBefore=4, spaceAfter=2)
+say  = ParagraphStyle("say", fontName="Helvetica", fontSize=9, textColor=SLATE, leading=12, spaceAfter=3, leftIndent=2)
 sesh_t   = ParagraphStyle("sesh_t", fontName="Helvetica-Bold", fontSize=12.5, textColor=WHITE, leading=15)
 prompt_t = ParagraphStyle("prompt_t", fontName="Helvetica", fontSize=9, textColor=INK, leading=11.6)
+note_t   = ParagraphStyle("note_t", fontName="Helvetica", fontSize=8.3, textColor=MID, leading=10.8)
 warn_t   = ParagraphStyle("warn_t", fontName="Helvetica", fontSize=8.8, textColor=AMBER, leading=11.6)
 done_t   = ParagraphStyle("done_t", fontName="Helvetica-Bold", fontSize=8.8, textColor=GREEN, leading=11.5)
-tip_t    = ParagraphStyle("tip_t", fontName="Helvetica", fontSize=8.7, textColor=INK, leading=11.4)
 
 
 def boxed(para, bg, border, pad=7, space_before=3, space_after=6, line_w=0.6):
-    """Wrap a flowable in a single-cell table so its background/border reserve
-    exact space and never overlap the element above."""
     t = Table([[para]], colWidths=[CW])
     style = [
-        ("BACKGROUND", (0, 0), (-1, -1), bg),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("BACKGROUND", (0, 0), (-1, -1), bg), ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), pad), ("RIGHTPADDING", (0, 0), (-1, -1), pad),
         ("TOPPADDING", (0, 0), (-1, -1), pad), ("BOTTOMPADDING", (0, 0), (-1, -1), pad),
     ]
     if border is not None:
         style.append(("BOX", (0, 0), (-1, -1), line_w, border))
     t.setStyle(TableStyle(style))
-    t.spaceBefore = space_before
-    t.spaceAfter = space_after
+    t.spaceBefore = space_before; t.spaceAfter = space_after
     return t
 
 
@@ -73,12 +68,14 @@ def band(title):
     return boxed(Paragraph(title, sesh_t), ACCENT, None, pad=6, space_before=12, space_after=6)
 
 
-def PROMPT(label, text, does):
-    """A prompt the boss types, with a plain-English 'what it does' line under it."""
+def STEP(label, say_text, prompt_text, watch):
+    """One facilitated step: talk track, the paste prompt, and trainer notes."""
     return KeepTogether([
         Paragraph(label, plab),
-        boxed(Paragraph(text, prompt_t), BOX, BORD, space_before=1, space_after=2),
-        Paragraph("What it does: " + does, expl),
+        Paragraph('Say:&nbsp; &ldquo;' + say_text + '&rdquo;', say),
+        boxed(Paragraph("PASTE &rarr; he enters this in Claude Code:<br/><br/>" + prompt_text, prompt_t),
+              BOX, BORD, space_before=1, space_after=2),
+        boxed(Paragraph("<b>You watch for:</b> " + watch, note_t), GREYBOX, GREYBORD, space_before=1, space_after=7),
     ])
 
 
@@ -89,58 +86,44 @@ def DONE(text):
 flow = []
 
 # =========================================================
-# orientation for a first-time Claude Code user
+# how to run it (trainer)
 # =========================================================
-flow.append(Paragraph("What you're building", h2))
+flow.append(Paragraph("How to run these sessions", h2))
 flow.append(Paragraph(
-    "A working data demo. Over three short sessions you'll pull data out of a cloud app (like Salesforce), land "
-    "it automatically in a data lake on Amazon's cloud, tidy it up, and show it in a small web app. You won't "
-    "write any code yourself — you describe what you want in plain English and Claude does the work.", body))
+    "You facilitate; he stays hands-on so he learns by doing. <b>You</b> handle every login, credential, and any "
+    "red error. <b>He</b> pastes each prompt into Claude Code and clicks <b>Allow</b> when it asks. Read the "
+    "<b>Say</b> line to frame each step, paste the blue prompt into chat for him to copy, and keep the grey notes "
+    "to yourself. Pause whenever he's curious — letting him ask Claude <i>\"explain that like I'm new to this\"</i> "
+    "is the best moment in the whole demo.", body))
 
-flow.append(Paragraph("How Claude Code works — read this first (you're new to it, that's fine)", h2))
+flow.append(Paragraph("Lock these before session 1 (fill the blanks in every prompt below)", h2))
 flow.append(Paragraph(
-    "<b>1. It's a chat in a terminal window.</b> You type a request in plain English and press Enter. There is "
-    "nothing to memorize and no special syntax — full sentences are perfect.<br/>"
-    "<b>2. It does real work for you.</b> It writes code, runs commands, and sets up cloud services on its own. "
-    "You watch it happen and approve along the way.<br/>"
-    "<b>3. It asks permission before doing anything that matters.</b> When it wants to run a command, a box pops "
-    "up asking you to allow it. Read the one-line summary and choose <b>Yes / Allow</b>. If you're unsure, ask "
-    "the person next to you before allowing.<br/>"
-    "<b>4. Let it finish.</b> It works in steps and will often pause, show progress, or ask you a question. Wait "
-    "until it stops and hands the turn back to you before typing the next thing.<br/>"
-    "<b>5. You can always just talk to it.</b> If you don't understand something on screen, type "
-    "<i>\"explain that to me like I'm new to this\"</i> or <i>\"what did that just do?\"</i> It will answer in "
-    "plain language. This is the best habit to build today.", body))
+    "&bull;&nbsp; <b>[VERTICAL]</b> — the industry story (e.g. Banking, Insurance)<br/>"
+    "&bull;&nbsp; <b>[ORG]</b> — a made-up demo company name (generic; must not collide with a real entity)<br/>"
+    "&bull;&nbsp; <b>[PERSONA]</b> — who the demo is for (e.g. a risk analyst)<br/>"
+    "&bull;&nbsp; <b>[source]</b> — the app to pull from with OAuth (e.g. Salesforce, HubSpot, Google)", body))
 
-flow.append(Paragraph("Your job vs. the driver's job", h2))
-flow.append(Paragraph(
-    "<b>You (hands on keyboard):</b> read each prompt below, type or paste it, press Enter, and choose "
-    "<b>Allow</b> when asked. Ask questions freely.<br/>"
-    "<b>The driver next to you:</b> handles logins and passwords, anything that turns up as a red error, and any "
-    "decision about cost or accounts. If anything looks confusing or alarming, hand it to them — nothing you type "
-    "can cause real damage.", body))
-
-flow.append(Paragraph("If you get stuck (keep this handy)", h2))
+flow.append(Paragraph("Your pre-session setup (every session, ~3 min)", h2))
 flow.append(boxed(Paragraph(
-    "&bull;&nbsp; A box asks to run a command and you don't know what it is &rarr; it's normal; choose Allow (or ask the driver).<br/>"
-    "&bull;&nbsp; Claude asks a question you don't understand &rarr; type: <i>\"I'm new to this — explain what you need in simple terms.\"</i><br/>"
-    "&bull;&nbsp; You see red error text &rarr; don't worry, hand it to the driver, or type: <i>\"that looks like an error — can you fix it?\"</i><br/>"
-    "&bull;&nbsp; Claude seems frozen &rarr; it's probably still working; give it a minute before typing again.<br/>"
-    "&bull;&nbsp; You lost track of where you are &rarr; type: <i>\"summarize what we've done so far and what's next.\"</i>",
-    tip_t), GREYBOX, LINE))
+    "&bull;&nbsp; Fivetran API key in the shell: <code>export FIVETRAN_API_KEY=key:secret</code> "
+    "(re-do each session — it doesn't survive a new terminal)<br/>"
+    "&bull;&nbsp; AWS: <code>aws configure</code> then verify <code>aws sts get-caller-identity</code> "
+    "(both are currently NOT set on this machine)<br/>"
+    "&bull;&nbsp; Open the Fivetran dashboard and the AWS Glue/Athena console in browser tabs so he sees things appear live<br/>"
+    "&bull;&nbsp; <b>If a login won't cooperate:</b> don't burn the session — have Claude tour a finished demo in "
+    "<code>~/Documents/GitHub/*-ODI-Demo</code> and provision next time", warn_t), ABOX, ABORD, line_w=0.8))
 
-flow.append(Paragraph("Plain-English glossary (skim it, refer back as needed)", h2))
+flow.append(Paragraph("If he asks what something means — your one-line answers", h2))
 gloss = [
-    ("Prompt", "What you type to Claude — a plain-English instruction."),
-    ("Connector", "An automatic pipe that pulls data out of an app (e.g. Salesforce) for you."),
-    ("OAuth", "The \"Sign in with Google/Salesforce\" button. You log in; no passwords are shared."),
+    ("Connector", "An automatic pipe that pulls data out of an app for you."),
+    ("OAuth", "The \"Sign in with Google/Salesforce\" button — he logs in, no passwords shared."),
     ("Sync", "The connector copying the data over for the first time."),
     ("Data lake / MDLS", "Cloud storage where all the data lands, in an open format anyone can read."),
-    ("Iceberg", "The modern table format the data is stored as inside the lake."),
-    ("AWS", "Amazon's cloud. S3 stores files, Glue lists the tables, Athena runs queries, IAM is permissions."),
-    ("Terraform", "A tool that sets up those cloud pieces automatically from a script Claude writes."),
+    ("Iceberg", "The modern open table format the data is stored as in the lake."),
+    ("AWS", "Amazon's cloud — S3 stores files, Glue lists tables, Athena queries, IAM is permissions."),
+    ("Terraform", "A tool that builds the cloud pieces automatically from a script Claude writes."),
     ("dbt", "A tool that cleans and reshapes raw data into tidy tables for analysis."),
-    ("Connect Card", "A Fivetran link you open in your browser to log into the source app with OAuth."),
+    ("Connect Card", "A Fivetran browser link he opens to log into the source app with OAuth."),
 ]
 gdata = [[Paragraph(f"<b>{t}</b>", small), Paragraph(d, small)] for t, d in gloss]
 gt = Table(gdata, colWidths=[1.35*inch, CW - 1.35*inch])
@@ -152,119 +135,122 @@ gt.setStyle(TableStyle([
 ]))
 flow.append(gt)
 
-# ---------- ACCESS GATE ----------
-flow.append(Paragraph("Session 1 opens with a 5-minute access check (done by the driver)", h2))
-flow.append(boxed(Paragraph(
-    "<b>This must happen first, or the cloud build can't start.</b> The programs are installed; the logins are not.<br/>"
-    "&bull;&nbsp; <b>Fivetran:</b> log in, generate an API key, then in the terminal "
-    "<code>export FIVETRAN_API_KEY=key:secret</code><br/>"
-    "&bull;&nbsp; <b>AWS:</b> run <code>aws configure</code> (paste an admin access key + secret, or use SSO), then "
-    "confirm with <code>aws sts get-caller-identity</code><br/>"
-    "&bull;&nbsp; <b>If a login isn't available:</b> don't burn the hour on it. Instead, open one of the finished "
-    "demos in <code>~/Documents/GitHub/*-ODI-Demo</code> and have Claude give you a guided tour — you'll still see "
-    "exactly what we're building — then provision for real next session.",
-    warn_t), ABOX, ABORD, line_w=0.8))
-
-flow.append(Paragraph("Carry into each session (no homework between sessions)", h2))
-flow.append(Paragraph(
-    "&bull;&nbsp; The <b>Fivetran API key</b> — re-paste the <code>export</code> line at the start of each session "
-    "(it doesn't carry over to a new terminal window).<br/>"
-    "&bull;&nbsp; The driver re-runs the AWS login if needed.<br/>"
-    "&bull;&nbsp; If you forget where things are, just ask Claude: <i>\"list the demo we built and where it lives.\"</i>", body))
-
 # =========================================================
 # SESSION 1
 # =========================================================
 flow.append(band("Session 1 (today) — set up the cloud and pull in the data"))
-flow.append(Paragraph("Goal: stand up the AWS data lake, connect the source app, and start the first data sync. "
-                      "Before you provision, decide the blanks below.", small))
-flow.append(Paragraph("<b>Fill these in first:</b> [VERTICAL] = the industry story (e.g. Banking). "
-                      "[ORG] = a made-up company name for the demo. [PERSONA] = who the demo is for (e.g. a risk "
-                      "analyst). [source] = the app to pull from (e.g. Salesforce).", small))
+flow.append(Paragraph("Your goal: AWS lake provisioned, source connected, first sync started. The Terraform step "
+                      "is the slow/risky one — protect time for it.", small))
 
-flow.append(PROMPT("Prompt 1 — kick off the build",
+flow.append(STEP("Step 1 — kick off the build",
+    "We start by telling Claude what we want, and it lays out the whole plan before doing anything.",
     "Let's build a new ODI demo with the odi-demo-builder skill. Vertical: [VERTICAL]. Org name: [ORG]. Buyer "
-    "persona: [PERSONA]. Nothing is set up yet and my AWS and Fivetran logins are now configured. Walk me through "
-    "it step by step, and explain what each step does in plain language as you go.",
-    "Starts the guided build. Claude lays out the plan and begins writing the cloud setup. Expect it to ask you to "
-    "allow a few commands — choose Allow."))
+    "persona: [PERSONA]. My AWS and Fivetran logins are configured. Walk me through it step by step and explain "
+    "each step in plain language as you go.",
+    "Claude invokes the odi-demo-builder skill and prints the GATHER/PROVISION/BUILD/RUN plan, then starts "
+    "scaffolding. Good teaching moment: point out it's writing infrastructure-as-code itself."))
 
-flow.append(PROMPT("Prompt 2 — build the cloud storage",
-    "Scaffold the Terraform for the S3 bucket, the Glue databases, and the Fivetran permissions role, then walk me "
-    "through applying it. Tell me when you need anything from me.",
-    "Claude writes a setup script and runs it to create the storage and permissions on AWS. The driver may need to "
-    "paste two values from the Fivetran screen when asked. You'll see a list of created resources at the end."))
+flow.append(STEP("Step 2 — build the cloud storage (the risky one)",
+    "Now it builds the storage on AWS automatically — this is the part that normally takes a team a day.",
+    "Scaffold the Terraform for the S3 bucket, the Glue databases, and the Fivetran IAM role, then walk me through "
+    "applying it. Tell me when you need anything from me.",
+    "The MDLS handshake: you start the destination in the Fivetran UI to get aws_account_id + external_id, paste "
+    "them into tfvars, then it runs terraform apply (S3 + Glue + IAM). Most likely failure point: AWS perms or a "
+    "stale external_id. Budget the most time here."))
 
-flow.append(PROMPT("Prompt 3 — create the data lake destination",
-    "Create the Managed Data Lake destination in Fivetran using what Terraform just set up, and show me that it "
+flow.append(STEP("Step 3 — create the data lake destination",
+    "We point Fivetran at the lake we just built.",
+    "Create the Managed Data Lake destination via the REST API using the Terraform outputs, and show me it "
     "connected successfully.",
-    "Tells Fivetran where to put the data (our new lake). You'll see a confirmation with a status of connected."))
+    "POST /v1/destinations; expect code Created. A permission error here almost always means the external_id in "
+    "tfvars doesn't match the one from the destination setup UI."))
 
-flow.append(PROMPT("Prompt 4 — connect the source app",
-    "Create the [source] connector, then give me a Connect Card link so I can sign in to [source] with OAuth.",
-    "Claude sets up the pipe from the source app and hands you a link. Open it in your browser, sign in the normal "
-    "way, pick the data, and click Save. No passwords are typed into Claude."))
+flow.append(STEP("Step 4 — connect the source app (OAuth)",
+    "Now we connect the source app. You'll sign in the normal way in your browser — no passwords go into Claude.",
+    "Create the [source] connector via the REST API, then give me a Fivetran Connect Card link so I can sign in "
+    "with OAuth.",
+    "Claude creates the connector and mints a Connect Card token; he opens the URL, does OAuth consent, picks "
+    "tables, Saves. Teaching moment: OAuth shares access, not passwords. If your key lacks connect-card scope, "
+    "finish auth in the Fivetran UI instead."))
 
-flow.append(PROMPT("Prompt 5 — start the data flowing",
-    "Test the connection, then start the first sync and tell me when it has finished and which tables came across.",
-    "Kicks off the first copy of data into the lake. This can take a few minutes; Claude watches it and reports "
-    "when it's done."))
+flow.append(STEP("Step 5 — start the data flowing",
+    "Last step for today — kick off the first sync and watch the data land.",
+    "Run the connector setup test (expect CONNECTED), then trigger the first sync and poll until it's SYNCED. Tell "
+    "me which tables landed.",
+    "Keep the source selection small so this finishes fast. While it syncs, this is the spot for the Hybrid "
+    "deployment talking point (agent runs in the customer's network; only metadata leaves)."))
 
-flow.append(DONE("the cloud lake is live, the app is connected, and data is flowing in. If the AWS setup ran long, "
-                 "stopping here is a perfectly good session 1 — we model the data next time."))
+flow.append(DONE("the cloud lake is live, the app is connected, and data is flowing in. If Terraform ran long, "
+                 "stopping after the connector is created and the sync is triggered is a fine session 1."))
 
 # =========================================================
 # SESSION 2
 # =========================================================
 flow.append(band("Session 2 — shape the raw data into clean tables"))
-flow.append(Paragraph("At the start: re-paste the Fivetran key line, the driver re-checks the AWS login, and "
-                      "confirm last session's data arrived.", small))
+flow.append(Paragraph("Your prep: re-export the Fivetran key, re-verify aws sts get-caller-identity, confirm "
+                      "session 1's sync finished.", small))
 
-flow.append(PROMPT("Prompt 1 — pick up where we left off",
-    "Resume the ODI demo we started. Confirm the data sync from last session finished and show me the tables that "
-    "landed in the lake.",
-    "Re-orients Claude and proves the data from session 1 is really there before we build on it."))
+flow.append(STEP("Step 1 — pick up where we left off",
+    "Let's make sure last session's data actually arrived before we build on it.",
+    "Resume the ODI demo we started. Confirm the Fivetran sync from last session finished and list the tables that "
+    "landed in the Glue bronze database.",
+    "Re-orients Claude to the demo dir and proves the bronze tables exist. If the sync wasn't finished last time, "
+    "this is where it completes."))
 
-flow.append(PROMPT("Prompt 2 — build the data pipeline",
-    "Build the dbt pipeline to the portfolio standard — a raw layer, a cleaned layer, and a final reporting layer "
-    "of tables. Apply Niraj's content rules, and explain each layer in plain language.",
-    "Claude generates the data-cleaning project that turns raw rows into tidy, business-ready tables."))
+flow.append(STEP("Step 2 — build the data pipeline",
+    "Now we turn those raw tables into clean, business-ready ones — bronze, silver, gold.",
+    "Scaffold the dbt project to the portfolio standard — bronze sources, silver staging models, and one gold "
+    "Iceberg fact/dimension. Apply Niraj's content rules, and explain each layer in plain language.",
+    "Niraj rules: [ORG] everywhere, every connector keeps its Fivetran deep link, no raw table names exposed. "
+    "Confirms the dbt-athena profile env vars (LAKE_BUCKET, ATHENA_WORKGROUP) are set."))
 
-flow.append(PROMPT("Prompt 3 — run it and check the result",
-    "Run the pipeline and confirm the final tables were created. If anything fails, explain the error simply and "
-    "fix it. Then show me a sample of the finished data.",
-    "Executes the pipeline and shows you the polished tables. You'll see a short sample of real data at the end."))
+flow.append(STEP("Step 3 — run it and check the result",
+    "Run the pipeline and let's look at the finished data.",
+    "Run dbt build --select bronze silver gold and confirm the gold Iceberg tables were created in Glue. If it "
+    "fails, explain the error simply and fix it, then show me a sample of the gold data via Athena.",
+    "Common build failures: wrong awsdatacatalog database ref in profiles.yml, missing Athena workgroup, or an IAM "
+    "gap. Claude diagnoses from the error message."))
 
-flow.append(DONE("raw data has been turned into clean, query-ready tables in the lake. Strong stopping point."))
+flow.append(DONE("raw data has been turned into clean, query-ready gold Iceberg tables. Strong stopping point."))
 
 # =========================================================
 # SESSION 3
 # =========================================================
 flow.append(band("Session 3 — build the web app and tour the demo"))
-flow.append(Paragraph("Same quick restart at the top: re-paste the key, re-check the AWS login.", small))
+flow.append(Paragraph("Your prep: same quick restart — re-export the key, re-verify the AWS login.", small))
 
-flow.append(PROMPT("Prompt 1 — generate the web app",
-    "Generate the React frontend for the demo — a landing page with the [ORG] name and a simple diagram of the "
-    "data flow, and a page that lists the connector with a link to it in Fivetran.",
-    "Claude builds a small website that presents the demo. You'll get pages you can open in a browser."))
+flow.append(STEP("Step 1 — generate the web app",
+    "Now we put a face on it — a small web app that presents the whole pipeline.",
+    "Generate the React frontend shell — a Landing page with the [ORG] hero and a data-flow diagram "
+    "(Fivetran to S3/Iceberg to dbt to Athena), and a Pipeline page listing the connector with its Fivetran deep link.",
+    "Produces the frontend/ shell. Connector entries must carry the Fivetran deep link per Niraj's standard."))
 
-flow.append(PROMPT("Prompt 2 — make it look sharp",
+flow.append(STEP("Step 2 — make it look sharp",
+    "Let's give it a real, distinctive look instead of a generic template.",
     "Run the frontend-design pass for the [VERTICAL] industry and [PERSONA] audience — a distinctive, professional "
-    "look, clean charts, and no generic AI styling.",
-    "Polishes the look and feel so it's presentation-ready rather than plain."))
+    "look, analytical charts instead of dense tables, and no generic AI styling.",
+    "Invokes the frontend-design skill. This is a strong wow moment for a novice — the before/after is dramatic."))
 
-flow.append(PROMPT("Prompt 3 — final quality check",
-    "Do a content quality pass: make sure the [ORG] name appears everywhere it should, no raw technical names are "
-    "showing, and the connector link works.",
-    "A final cleanup so nothing looks unfinished in front of an audience."))
+flow.append(STEP("Step 3 — final quality check",
+    "Quick polish pass so nothing looks unfinished in front of an audience.",
+    "Do a Niraj content QA pass: [ORG] in every title, H1, and navbar; no raw table names exposed; every connector "
+    "shows its Fivetran deep link.",
+    "Catches the content-standard misses that read as sloppy in a customer demo."))
 
-flow.append(PROMPT("Prompt 4 — walk the demo",
-    "Start the web app and give me a guided tour from start to finish — the landing page, the data flow, and the "
+flow.append(STEP("Step 4 — walk the demo",
+    "And here's the finished product — let's walk it end to end.",
+    "Start the frontend and give me a guided tour from start to finish — the landing page, the data flow, and the "
     "data in the lake.",
-    "Opens the finished demo and narrates it end to end. This is the version you'd show a customer."))
+    "Opens the app and narrates it. This is the artifact he'd actually show a customer; let him drive the click-through."))
 
-flow.append(DONE("a demo-ready ODI app: a live connector, a cloud data lake, a clean data pipeline, and a polished "
-                 "web app you can present."))
+flow.append(DONE("a demo-ready ODI app: live connector, cloud data lake, clean dbt pipeline, and a polished web app."))
+
+flow.append(Paragraph("If a session stalls (trainer triage)", h2))
+flow.append(boxed(Paragraph(
+    "Protect the CORE path over polish. Priority order if time runs short: data in the lake (S1) &gt; clean gold "
+    "tables (S2) &gt; web app (S3). Every green box above is a clean place to stop and resume next time. If AWS "
+    "fights you, fall back to touring a finished demo and provision next session — never spend more than ~15 min "
+    "debugging credentials live in front of him.", note_t), GREYBOX, GREYBORD, line_w=0.6))
 
 
 # ---------- header / footer ----------
@@ -273,22 +259,21 @@ def header_footer(c, doc):
     c.saveState()
     if doc.page == 1:
         c.setFillColor(INK); c.setFont("Helvetica-Bold", 16)
-        c.drawString(LM, h - 0.55*inch, "Building an ODI Demo with Claude Code — A Beginner's Guide")
+        c.drawString(LM, h - 0.55*inch, "ODI Demo Build — Trainer's Guide (3 sessions)")
         c.setFillColor(MID); c.setFont("Helvetica", 9)
         c.drawString(LM, h - 0.72*inch,
-                     "Three 1-hour sessions. Written for a first-time Claude Code user. You type plain English; "
-                     "Claude does the work.")
+                     "For you, the facilitator. You narrate and paste the prompts into chat; he copies them into "
+                     "Claude Code and clicks Allow.")
         c.setStrokeColor(ACCENT); c.setLineWidth(1.2)
         c.line(LM, h - 0.80*inch, w - RM, h - 0.80*inch)
     c.setFillColor(GREY); c.setFont("Helvetica-Oblique", 7.5)
-    c.drawString(LM, 0.4*inch, "Tip: at any time, type \"explain that like I'm new to this.\"   ·   green = a safe place to stop")
+    c.drawString(LM, 0.4*inch, "Grey boxes are your notes — don't read them aloud.   ·   green = a safe place to stop")
     c.drawRightString(w - RM, 0.4*inch, f"page {doc.page}")
     c.restoreState()
 
 
-doc = SimpleDocTemplate(str(OUT), pagesize=letter,
-                        leftMargin=LM, rightMargin=RM,
+doc = SimpleDocTemplate(str(OUT), pagesize=letter, leftMargin=LM, rightMargin=RM,
                         topMargin=0.95*inch, bottomMargin=0.6*inch,
-                        title="Building an ODI Demo with Claude Code - Beginner's Guide")
+                        title="ODI Demo Build - Trainer's Guide")
 doc.build(flow, onFirstPage=header_footer, onLaterPages=header_footer)
 print(f"wrote {OUT}")
