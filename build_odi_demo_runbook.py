@@ -143,12 +143,16 @@ flow.append(Paragraph("Your goal: AWS lake provisioned, source connected, first 
                       "is the slow/risky one — protect time for it.", small))
 
 flow.append(STEP("Step 1 — kick off the build",
-    "We start by telling Claude what we want, and it lays out the whole plan before doing anything.",
-    "Let's build a new ODI demo with the odi-demo-builder skill. Vertical: [VERTICAL]. Org name: [ORG]. Buyer "
-    "persona: [PERSONA]. My AWS and Fivetran logins are configured. Walk me through it step by step and explain "
-    "each step in plain language as you go.",
-    "Claude invokes the odi-demo-builder skill and prints the GATHER/PROVISION/BUILD/RUN plan, then starts "
-    "scaffolding. Good teaching moment: point out it's writing infrastructure-as-code itself."))
+    "We tell Claude the whole goal and point it at a finished demo to copy the conventions from — then it lays out "
+    "the plan before doing anything.",
+    "Help me build an ODI demo from scratch — no special tooling, just you and me. End goal: an AWS Managed Data "
+    "Lake destination in Fivetran, a source connector, synced data, a dbt bronze/silver/gold pipeline, and a small "
+    "React web app. Use one of the finished demos in ~/Documents/GitHub/*-ODI-Demo as the reference pattern for "
+    "structure and conventions. Vertical: [VERTICAL]. Org name: [ORG]. Buyer persona: [PERSONA]. My AWS and "
+    "Fivetran logins are configured. Lay out the plan, then walk me through it step by step in plain language.",
+    "No skill needed — Claude reads a sibling demo in ~/Documents/GitHub/*-ODI-Demo to mirror its structure "
+    "(bronze/silver/gold, deep links, frontend), prints a plan, then starts scaffolding. Teaching moment: it's "
+    "writing infrastructure-as-code itself."))
 
 flow.append(STEP("Step 2 — build the cloud storage (the risky one)",
     "Now it builds the storage on AWS automatically — this is the part that normally takes a team a day.",
@@ -199,10 +203,11 @@ flow.append(STEP("Step 1 — pick up where we left off",
 
 flow.append(STEP("Step 2 — build the data pipeline",
     "Now we turn those raw tables into clean, business-ready ones — bronze, silver, gold.",
-    "Scaffold the dbt project to the portfolio standard — bronze sources, silver staging models, and one gold "
-    "Iceberg fact/dimension. Apply Niraj's content rules, and explain each layer in plain language.",
-    "Niraj rules: [ORG] everywhere, every connector keeps its Fivetran deep link, no raw table names exposed. "
-    "Confirms the dbt-athena profile env vars (LAKE_BUCKET, ATHENA_WORKGROUP) are set."))
+    "Build the dbt project the same way the reference demo does — bronze sources, silver staging models, and one "
+    "gold Iceberg fact/dimension. Keep it customer-ready: use the [ORG] name in anything user-facing, never raw "
+    "table names. Explain each layer in plain language.",
+    "Content standards: [ORG] everywhere, every connector keeps its Fivetran deep link, no raw table names exposed. "
+    "Mirror the reference demo's dbt layout. Confirm the dbt-athena env vars (LAKE_BUCKET, ATHENA_WORKGROUP) are set."))
 
 flow.append(STEP("Step 3 — run it and check the result",
     "Run the pipeline and let's look at the finished data.",
@@ -222,19 +227,21 @@ flow.append(Paragraph("Your prep: same quick restart — re-export the key, re-v
 flow.append(STEP("Step 1 — generate the web app",
     "Now we put a face on it — a small web app that presents the whole pipeline.",
     "Generate the React frontend shell — a Landing page with the [ORG] hero and a data-flow diagram "
-    "(Fivetran to S3/Iceberg to dbt to Athena), and a Pipeline page listing the connector with its Fivetran deep link.",
-    "Produces the frontend/ shell. Connector entries must carry the Fivetran deep link per Niraj's standard."))
+    "(Fivetran to S3/Iceberg to dbt to Athena), and a Pipeline page listing the connector with its Fivetran deep link. "
+    "Match the layout of the reference demo's frontend.",
+    "Produces the frontend/ shell. Connector entries must carry the Fivetran deep link per our content standard."))
 
 flow.append(STEP("Step 2 — make it look sharp",
     "Let's give it a real, distinctive look instead of a generic template.",
-    "Run the frontend-design pass for the [VERTICAL] industry and [PERSONA] audience — a distinctive, professional "
-    "look, analytical charts instead of dense tables, and no generic AI styling.",
-    "Invokes the frontend-design skill. This is a strong wow moment for a novice — the before/after is dramatic."))
+    "Give the web app a distinctive, professional design for the [VERTICAL] industry and [PERSONA] audience — strong "
+    "typography, a cohesive color system, analytical charts instead of dense tables, and none of the generic "
+    "AI-template look. Match the polish of the reference demo.",
+    "Direct design pass, no skill required. Strong wow moment for a novice — the before/after is dramatic."))
 
 flow.append(STEP("Step 3 — final quality check",
     "Quick polish pass so nothing looks unfinished in front of an audience.",
-    "Do a Niraj content QA pass: [ORG] in every title, H1, and navbar; no raw table names exposed; every connector "
-    "shows its Fivetran deep link.",
+    "Do a content QA pass: [ORG] in every title, H1, and navbar; no raw table names exposed anywhere; every "
+    "connector shows its Fivetran deep link.",
     "Catches the content-standard misses that read as sloppy in a customer demo."))
 
 flow.append(STEP("Step 4 — walk the demo",
