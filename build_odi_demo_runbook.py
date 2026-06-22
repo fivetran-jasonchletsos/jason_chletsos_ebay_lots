@@ -8,6 +8,12 @@ what you'll see" line. Maps the ~3-hour odi-demo-builder flow onto 3 sessions:
 
 Reality baked in: AWS creds + the Fivetran API key are NOT set on the machine,
 so S1 opens with a 5-minute access check and a no-AWS fallback.
+
+Note: all shaded callouts (warn / done / tip / prompt / session band) are
+rendered as single-cell Tables, not bordered Paragraphs. ReportLab does not
+reserve a bordered Paragraph's top padding, which makes the box overlap the
+heading above it — tables reserve their space exactly and never overlap.
+
 Outputs to output/ and is copied to ~/Downloads (JC's standing pref).
 """
 from pathlib import Path
@@ -21,48 +27,69 @@ from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table,
 REPO = Path(__file__).parent
 OUT = REPO / "output/odi_demo_3session_plan.pdf"
 
-INK = HexColor("#111111"); MID = HexColor("#444444")
+LM = RM = 0.55 * inch
+CW = letter[0] - LM - RM            # usable content width
+
+INK = HexColor("#111111"); MID = HexColor("#444444"); WHITE = HexColor("#ffffff")
 ACCENT = HexColor("#1a5fb4"); BOX = HexColor("#eef3fb"); BORD = HexColor("#c7d6ee")
 GREEN = HexColor("#1a7f47"); GBOX = HexColor("#e8f5ee"); GBORD = HexColor("#bfe2cd")
 AMBER = HexColor("#8a5a00"); ABOX = HexColor("#fbf2dd"); ABORD = HexColor("#ecd9a6")
 GREYBOX = HexColor("#f1f3f5"); LINE = HexColor("#cccccc"); GREY = HexColor("#777777")
 
-sesh = ParagraphStyle("sesh", fontName="Helvetica-Bold", fontSize=12.5, textColor=HexColor("#ffffff"),
-                      backColor=ACCENT, borderPadding=5, spaceBefore=10, spaceAfter=6, leading=15)
 h2   = ParagraphStyle("h2", fontName="Helvetica-Bold", fontSize=11, textColor=ACCENT,
-                      spaceBefore=8, spaceAfter=4, leading=13)
+                      spaceBefore=9, spaceAfter=4, leading=13)
 body = ParagraphStyle("body", fontName="Helvetica", fontSize=9, textColor=INK, leading=12.5, spaceAfter=4)
 small= ParagraphStyle("small", fontName="Helvetica", fontSize=8.3, textColor=MID, leading=10.5, spaceAfter=2)
-plab = ParagraphStyle("plab", fontName="Helvetica-Bold", fontSize=9.2, textColor=ACCENT,
-                      leading=11, spaceBefore=7, spaceAfter=2)
-prompt = ParagraphStyle("prompt", fontName="Helvetica", fontSize=9, textColor=INK, leading=11.6,
-                        backColor=BOX, borderColor=BORD, borderWidth=0.6, borderPadding=6, spaceAfter=2)
+plab = ParagraphStyle("plab", fontName="Helvetica-Bold", fontSize=9.2, textColor=ACCENT, leading=11, spaceAfter=2)
 expl = ParagraphStyle("expl", fontName="Helvetica-Oblique", fontSize=8.2, textColor=MID, leading=10.4,
                       spaceAfter=5, leftIndent=4)
-done = ParagraphStyle("done", fontName="Helvetica-Bold", fontSize=8.8, textColor=GREEN, leading=11.5,
-                      backColor=GBOX, borderColor=GBORD, borderWidth=0.6, borderPadding=6, spaceBefore=3, spaceAfter=5)
-warn = ParagraphStyle("warn", fontName="Helvetica", fontSize=8.8, textColor=AMBER, leading=11.6,
-                      backColor=ABOX, borderColor=ABORD, borderWidth=0.8, borderPadding=7, spaceBefore=2, spaceAfter=6)
-tipbox = ParagraphStyle("tipbox", fontName="Helvetica", fontSize=8.7, textColor=INK, leading=11.4,
-                        backColor=GREYBOX, borderColor=LINE, borderWidth=0.6, borderPadding=7, spaceBefore=2, spaceAfter=6)
+# plain text styles used INSIDE boxed tables (no backColor/border here)
+sesh_t   = ParagraphStyle("sesh_t", fontName="Helvetica-Bold", fontSize=12.5, textColor=WHITE, leading=15)
+prompt_t = ParagraphStyle("prompt_t", fontName="Helvetica", fontSize=9, textColor=INK, leading=11.6)
+warn_t   = ParagraphStyle("warn_t", fontName="Helvetica", fontSize=8.8, textColor=AMBER, leading=11.6)
+done_t   = ParagraphStyle("done_t", fontName="Helvetica-Bold", fontSize=8.8, textColor=GREEN, leading=11.5)
+tip_t    = ParagraphStyle("tip_t", fontName="Helvetica", fontSize=8.7, textColor=INK, leading=11.4)
 
-def S(title):   return Paragraph(title, sesh)
+
+def boxed(para, bg, border, pad=7, space_before=3, space_after=6, line_w=0.6):
+    """Wrap a flowable in a single-cell table so its background/border reserve
+    exact space and never overlap the element above."""
+    t = Table([[para]], colWidths=[CW])
+    style = [
+        ("BACKGROUND", (0, 0), (-1, -1), bg),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), pad), ("RIGHTPADDING", (0, 0), (-1, -1), pad),
+        ("TOPPADDING", (0, 0), (-1, -1), pad), ("BOTTOMPADDING", (0, 0), (-1, -1), pad),
+    ]
+    if border is not None:
+        style.append(("BOX", (0, 0), (-1, -1), line_w, border))
+    t.setStyle(TableStyle(style))
+    t.spaceBefore = space_before
+    t.spaceAfter = space_after
+    return t
+
+
+def band(title):
+    return boxed(Paragraph(title, sesh_t), ACCENT, None, pad=6, space_before=12, space_after=6)
+
 
 def PROMPT(label, text, does):
     """A prompt the boss types, with a plain-English 'what it does' line under it."""
     return KeepTogether([
         Paragraph(label, plab),
-        Paragraph(text, prompt),
+        boxed(Paragraph(text, prompt_t), BOX, BORD, space_before=1, space_after=2),
         Paragraph("What it does: " + does, expl),
     ])
 
+
 def DONE(text):
-    return Paragraph("SESSION DONE — " + text, done)
+    return boxed(Paragraph("SESSION DONE — " + text, done_t), GBOX, GBORD, space_before=3, space_after=6)
+
 
 flow = []
 
 # =========================================================
-# PAGE 1 — orientation for a first-time Claude Code user
+# orientation for a first-time Claude Code user
 # =========================================================
 flow.append(Paragraph("What you're building", h2))
 flow.append(Paragraph(
@@ -94,12 +121,13 @@ flow.append(Paragraph(
     "can cause real damage.", body))
 
 flow.append(Paragraph("If you get stuck (keep this handy)", h2))
-flow.append(Paragraph(
+flow.append(boxed(Paragraph(
     "&bull;&nbsp; A box asks to run a command and you don't know what it is &rarr; it's normal; choose Allow (or ask the driver).<br/>"
-    "&bull;&nbsp; Claude asks you a question you don't understand &rarr; type: <i>\"I'm new to this — explain what you need in simple terms.\"</i><br/>"
+    "&bull;&nbsp; Claude asks a question you don't understand &rarr; type: <i>\"I'm new to this — explain what you need in simple terms.\"</i><br/>"
     "&bull;&nbsp; You see red error text &rarr; don't worry, hand it to the driver, or type: <i>\"that looks like an error — can you fix it?\"</i><br/>"
     "&bull;&nbsp; Claude seems frozen &rarr; it's probably still working; give it a minute before typing again.<br/>"
-    "&bull;&nbsp; You lost track of where you are &rarr; type: <i>\"summarize what we've done so far and what's next.\"</i>", tipbox))
+    "&bull;&nbsp; You lost track of where you are &rarr; type: <i>\"summarize what we've done so far and what's next.\"</i>",
+    tip_t), GREYBOX, LINE))
 
 flow.append(Paragraph("Plain-English glossary (skim it, refer back as needed)", h2))
 gloss = [
@@ -109,24 +137,24 @@ gloss = [
     ("Sync", "The connector copying the data over for the first time."),
     ("Data lake / MDLS", "Cloud storage where all the data lands, in an open format anyone can read."),
     ("Iceberg", "The modern table format the data is stored as inside the lake."),
-    ("AWS", "Amazon's cloud. S3 stores the files, Glue lists the tables, Athena runs queries, IAM is permissions."),
+    ("AWS", "Amazon's cloud. S3 stores files, Glue lists the tables, Athena runs queries, IAM is permissions."),
     ("Terraform", "A tool that sets up those cloud pieces automatically from a script Claude writes."),
     ("dbt", "A tool that cleans and reshapes raw data into tidy tables for analysis."),
     ("Connect Card", "A Fivetran link you open in your browser to log into the source app with OAuth."),
 ]
 gdata = [[Paragraph(f"<b>{t}</b>", small), Paragraph(d, small)] for t, d in gloss]
-gt = Table(gdata, colWidths=[1.35*inch, 5.7*inch])
+gt = Table(gdata, colWidths=[1.35*inch, CW - 1.35*inch])
 gt.setStyle(TableStyle([
-    ("VALIGN", (0,0), (-1,-1), "TOP"),
-    ("LINEBELOW", (0,0), (-1,-2), 0.3, HexColor("#e3e3e3")),
-    ("TOPPADDING", (0,0), (-1,-1), 2.5), ("BOTTOMPADDING", (0,0), (-1,-1), 2.5),
-    ("LEFTPADDING", (0,0), (0,-1), 0),
+    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ("LINEBELOW", (0, 0), (-1, -2), 0.3, HexColor("#e3e3e3")),
+    ("TOPPADDING", (0, 0), (-1, -1), 2.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+    ("LEFTPADDING", (0, 0), (0, -1), 0),
 ]))
 flow.append(gt)
 
 # ---------- ACCESS GATE ----------
 flow.append(Paragraph("Session 1 opens with a 5-minute access check (done by the driver)", h2))
-flow.append(Paragraph(
+flow.append(boxed(Paragraph(
     "<b>This must happen first, or the cloud build can't start.</b> The programs are installed; the logins are not.<br/>"
     "&bull;&nbsp; <b>Fivetran:</b> log in, generate an API key, then in the terminal "
     "<code>export FIVETRAN_API_KEY=key:secret</code><br/>"
@@ -134,7 +162,8 @@ flow.append(Paragraph(
     "confirm with <code>aws sts get-caller-identity</code><br/>"
     "&bull;&nbsp; <b>If a login isn't available:</b> don't burn the hour on it. Instead, open one of the finished "
     "demos in <code>~/Documents/GitHub/*-ODI-Demo</code> and have Claude give you a guided tour — you'll still see "
-    "exactly what we're building — then provision for real next session.", warn))
+    "exactly what we're building — then provision for real next session.",
+    warn_t), ABOX, ABORD, line_w=0.8))
 
 flow.append(Paragraph("Carry into each session (no homework between sessions)", h2))
 flow.append(Paragraph(
@@ -146,9 +175,9 @@ flow.append(Paragraph(
 # =========================================================
 # SESSION 1
 # =========================================================
-flow.append(S("Session 1 (today) — set up the cloud and pull in the data"))
+flow.append(band("Session 1 (today) — set up the cloud and pull in the data"))
 flow.append(Paragraph("Goal: stand up the AWS data lake, connect the source app, and start the first data sync. "
-                      "Before you provision, decide the three blanks below.", small))
+                      "Before you provision, decide the blanks below.", small))
 flow.append(Paragraph("<b>Fill these in first:</b> [VERTICAL] = the industry story (e.g. Banking). "
                       "[ORG] = a made-up company name for the demo. [PERSONA] = who the demo is for (e.g. a risk "
                       "analyst). [source] = the app to pull from (e.g. Salesforce).", small))
@@ -157,8 +186,8 @@ flow.append(PROMPT("Prompt 1 — kick off the build",
     "Let's build a new ODI demo with the odi-demo-builder skill. Vertical: [VERTICAL]. Org name: [ORG]. Buyer "
     "persona: [PERSONA]. Nothing is set up yet and my AWS and Fivetran logins are now configured. Walk me through "
     "it step by step, and explain what each step does in plain language as you go.",
-    "Starts the guided build. Claude will lay out the plan and begin writing the cloud setup. Expect it to ask you "
-    "to allow a few commands — choose Allow."))
+    "Starts the guided build. Claude lays out the plan and begins writing the cloud setup. Expect it to ask you to "
+    "allow a few commands — choose Allow."))
 
 flow.append(PROMPT("Prompt 2 — build the cloud storage",
     "Scaffold the Terraform for the S3 bucket, the Glue databases, and the Fivetran permissions role, then walk me "
@@ -178,7 +207,7 @@ flow.append(PROMPT("Prompt 4 — connect the source app",
 
 flow.append(PROMPT("Prompt 5 — start the data flowing",
     "Test the connection, then start the first sync and tell me when it has finished and which tables came across.",
-    "Kicks off the first copy of data into the lake. This can take a few minutes; Claude will watch it and report "
+    "Kicks off the first copy of data into the lake. This can take a few minutes; Claude watches it and reports "
     "when it's done."))
 
 flow.append(DONE("the cloud lake is live, the app is connected, and data is flowing in. If the AWS setup ran long, "
@@ -187,7 +216,7 @@ flow.append(DONE("the cloud lake is live, the app is connected, and data is flow
 # =========================================================
 # SESSION 2
 # =========================================================
-flow.append(S("Session 2 — shape the raw data into clean tables"))
+flow.append(band("Session 2 — shape the raw data into clean tables"))
 flow.append(Paragraph("At the start: re-paste the Fivetran key line, the driver re-checks the AWS login, and "
                       "confirm last session's data arrived.", small))
 
@@ -211,7 +240,7 @@ flow.append(DONE("raw data has been turned into clean, query-ready tables in the
 # =========================================================
 # SESSION 3
 # =========================================================
-flow.append(S("Session 3 — build the web app and tour the demo"))
+flow.append(band("Session 3 — build the web app and tour the demo"))
 flow.append(Paragraph("Same quick restart at the top: re-paste the key, re-check the AWS login.", small))
 
 flow.append(PROMPT("Prompt 1 — generate the web app",
@@ -237,26 +266,28 @@ flow.append(PROMPT("Prompt 4 — walk the demo",
 flow.append(DONE("a demo-ready ODI app: a live connector, a cloud data lake, a clean data pipeline, and a polished "
                  "web app you can present."))
 
+
 # ---------- header / footer ----------
 def header_footer(c, doc):
     w, h = letter
     c.saveState()
     if doc.page == 1:
         c.setFillColor(INK); c.setFont("Helvetica-Bold", 16)
-        c.drawString(0.55*inch, h - 0.55*inch, "Building an ODI Demo with Claude Code — A Beginner's Guide")
+        c.drawString(LM, h - 0.55*inch, "Building an ODI Demo with Claude Code — A Beginner's Guide")
         c.setFillColor(MID); c.setFont("Helvetica", 9)
-        c.drawString(0.55*inch, h - 0.72*inch,
+        c.drawString(LM, h - 0.72*inch,
                      "Three 1-hour sessions. Written for a first-time Claude Code user. You type plain English; "
                      "Claude does the work.")
         c.setStrokeColor(ACCENT); c.setLineWidth(1.2)
-        c.line(0.55*inch, h - 0.80*inch, w - 0.55*inch, h - 0.80*inch)
+        c.line(LM, h - 0.80*inch, w - RM, h - 0.80*inch)
     c.setFillColor(GREY); c.setFont("Helvetica-Oblique", 7.5)
-    c.drawString(0.55*inch, 0.4*inch, "Tip: at any time, type \"explain that like I'm new to this.\"  ·  green = a safe place to stop")
-    c.drawRightString(w - 0.55*inch, 0.4*inch, f"page {doc.page}")
+    c.drawString(LM, 0.4*inch, "Tip: at any time, type \"explain that like I'm new to this.\"   ·   green = a safe place to stop")
+    c.drawRightString(w - RM, 0.4*inch, f"page {doc.page}")
     c.restoreState()
 
+
 doc = SimpleDocTemplate(str(OUT), pagesize=letter,
-                        leftMargin=0.55*inch, rightMargin=0.55*inch,
+                        leftMargin=LM, rightMargin=RM,
                         topMargin=0.95*inch, bottomMargin=0.6*inch,
                         title="Building an ODI Demo with Claude Code - Beginner's Guide")
 doc.build(flow, onFirstPage=header_footer, onLaterPages=header_footer)
