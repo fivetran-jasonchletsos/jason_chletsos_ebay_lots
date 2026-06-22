@@ -110,8 +110,10 @@ flow.append(boxed(Paragraph(
     "&bull;&nbsp; AWS: <code>aws configure</code> then verify <code>aws sts get-caller-identity</code> "
     "(both are currently NOT set on this machine)<br/>"
     "&bull;&nbsp; Open the Fivetran dashboard and the AWS Glue/Athena console in browser tabs so he sees things appear live<br/>"
-    "&bull;&nbsp; <b>If a login won't cooperate:</b> don't burn the session — have Claude tour a finished demo in "
-    "<code>~/Documents/GitHub/*-ODI-Demo</code> and provision next time", warn_t), ABOX, ABORD, line_w=0.8))
+    "&bull;&nbsp; <b>Reference demo:</b> he'll clone one in Session 1 Step 0. If your demo repos are private, make "
+    "sure his machine is logged into GitHub first (<code>gh auth login</code>), or you clone it for him<br/>"
+    "&bull;&nbsp; <b>If a login won't cooperate:</b> don't burn the session — have Claude tour the cloned demo and "
+    "provision next time", warn_t), ABOX, ABORD, line_w=0.8))
 
 flow.append(Paragraph("If he asks what something means — your one-line answers", h2))
 gloss = [
@@ -142,17 +144,26 @@ flow.append(band("Session 1 (today) — set up the cloud and pull in the data"))
 flow.append(Paragraph("Your goal: AWS lake provisioned, source connected, first sync started. The Terraform step "
                       "is the slow/risky one — protect time for it.", small))
 
+flow.append(STEP("Step 0 — grab a reference demo to copy from",
+    "First we pull down a finished demo so Claude has a working example to copy the structure and conventions from.",
+    "Clone this reference demo so we can mirror its structure, then give me a quick tour of how it's organized "
+    "(connectors, the dbt transform, and the frontend): "
+    "git clone https://github.com/fivetran-jasonchletsos/Banking-ODI-Demo.git ~/Documents/GitHub/Banking-ODI-Demo",
+    "If your demo repos are private and his machine isn't logged into GitHub, run gh auth login first (or clone it "
+    "for him). Swap Banking for whichever finished demo is your cleanest template. This also doubles as his first "
+    "look at what “done” looks like."))
+
 flow.append(STEP("Step 1 — kick off the build",
-    "We tell Claude the whole goal and point it at a finished demo to copy the conventions from — then it lays out "
-    "the plan before doing anything.",
+    "Now we tell Claude the whole goal and point it at the demo we just cloned — then it lays out the plan before "
+    "doing anything.",
     "Help me build an ODI demo from scratch — no special tooling, just you and me. End goal: an AWS Managed Data "
     "Lake destination in Fivetran, a source connector, synced data, a dbt bronze/silver/gold pipeline, and a small "
-    "React web app. Use one of the finished demos in ~/Documents/GitHub/*-ODI-Demo as the reference pattern for "
+    "React web app. Use the demo we just cloned at ~/Documents/GitHub/Banking-ODI-Demo as the reference pattern for "
     "structure and conventions. Vertical: [VERTICAL]. Org name: [ORG]. Buyer persona: [PERSONA]. My AWS and "
     "Fivetran logins are configured. Lay out the plan, then walk me through it step by step in plain language.",
-    "No skill needed — Claude reads a sibling demo in ~/Documents/GitHub/*-ODI-Demo to mirror its structure "
-    "(bronze/silver/gold, deep links, frontend), prints a plan, then starts scaffolding. Teaching moment: it's "
-    "writing infrastructure-as-code itself."))
+    "No skill needed — Claude reads the cloned reference demo to mirror its structure (bronze/silver/gold, deep "
+    "links, frontend), prints a plan, then starts scaffolding. Teaching moment: it's writing infrastructure-as-code "
+    "itself."))
 
 flow.append(STEP("Step 2 — build the cloud storage (the risky one)",
     "Now it builds the storage on AWS automatically — this is the part that normally takes a team a day.",
