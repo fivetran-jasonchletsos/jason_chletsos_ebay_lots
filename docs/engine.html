@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JC² Cards — eBay Automation Engine</title>
+<style>
+:root{--bg:#0d0f13;--surf:#171a21;--surf2:#1f232c;--bd:#2a2f3a;--tx:#e8eaee;--mut:#98a2b3;--ac:#4a9eff;--ok:#2ecc71;--gd:#f1c40f;--pu:#b07cff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+header{padding:54px 0 30px;border-bottom:1px solid var(--bd)}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.5px}
+.lead{color:var(--mut);font-size:16px;max-width:680px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+.stat{background:var(--surf);border:1px solid var(--bd);border-radius:11px;padding:14px 18px;min-width:150px}
+.stat .v{font-size:25px;font-weight:800;color:var(--ac)}
+.stat .l{font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+section{padding:42px 0;border-bottom:1px solid var(--bd)}
+.kic{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);font-weight:700;margin-bottom:6px}
+h2{font-size:23px;margin:0 0 6px;letter-spacing:-.3px}
+.sub{color:var(--mut);margin:0 0 24px;max-width:720px}
+.step{display:grid;grid-template-columns:42px 1fr;gap:16px;margin-bottom:18px}
+.step .n{width:42px;height:42px;border-radius:11px;background:var(--surf2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ac);font-size:17px}
+.step .b{background:var(--surf);border:1px solid var(--bd);border-radius:11px;padding:14px 16px}
+.step h3{margin:0 0 4px;font-size:15.5px}
+.step p{margin:0;color:var(--mut);font-size:13.8px}
+.step .tag{display:inline-block;font-size:11px;color:var(--pu);border:1px solid var(--bd);border-radius:5px;padding:1px 7px;margin-top:8px;background:var(--surf2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cardx{background:var(--surf);border:1px solid var(--bd);border-radius:11px;padding:16px 18px}
+.cardx h3{margin:0 0 5px;font-size:15px}.cardx h3 .d{color:var(--ok)}
+.cardx p{margin:0;color:var(--mut);font-size:13.5px}
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 26px}
+.flow .node{background:var(--surf2);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600}
+.flow .ar{color:var(--mut);font-size:16px}
+.flow .fan{border-color:var(--pu);color:var(--pu)}
+ul.tight{margin:8px 0 0;padding-left:18px;color:var(--mut);font-size:13.8px}ul.tight li{margin-bottom:4px}
+.tech{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px}
+.tech span{background:var(--surf2);border:1px solid var(--bd);border-radius:18px;padding:5px 13px;font-size:12.5px;color:var(--tx)}
+footer{padding:34px 0 70px;color:var(--mut);font-size:12.5px;text-align:center}
+a{color:var(--ac);text-decoration:none}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+</style></head><body>
+<div class="wrap">
+
+<header>
+  <h1>JC&sup2; Cards — eBay Automation Engine</h1>
+  <div class="lead">An agent-driven pipeline that scans physical cards, identifies and prices them, lists them on eBay, and runs a daily optimization routine across the whole catalog. Built and operated by one person with a multi-agent assistant.</div>
+  <div class="stats">
+    <div class="stat"><div class="v">1,688</div><div class="l">Active listings</div></div>
+    <div class="stat"><div class="v">$7,855</div><div class="l">Inventory value</div></div>
+    <div class="stat"><div class="v">217</div><div class="l">Cards sold</div></div>
+    <div class="stat"><div class="v">307</div><div class="l">Posted in one day</div></div>
+    <div class="stat"><div class="v">~25</div><div class="l">Daily agents</div></div>
+  </div>
+</header>
+
+<section>
+  <div class="kic">Core pipeline</div>
+  <h2>From a scanned page to a live listing</h2>
+  <p class="sub">A flatbed scan holds nine cards in a 3&times;3 grid. The pipeline turns each page into individual, identified, priced, deduped eBay listings without manual data entry.</p>
+  <div class="flow">
+    <span class="node">Scan</span><span class="ar">&rarr;</span>
+    <span class="node">Grid split</span><span class="ar">&rarr;</span>
+    <span class="node fan">Identify (agents)</span><span class="ar">&rarr;</span>
+    <span class="node">Dedup guard</span><span class="ar">&rarr;</span>
+    <span class="node">Price</span><span class="ar">&rarr;</span>
+    <span class="node">Post to eBay</span>
+  </div>
+  <div class="step"><div class="n">1</div><div class="b"><h3>Scan</h3><p>Cards are scanned nine at a time. One image, nine cards.</p></div></div>
+  <div class="step"><div class="n">2</div><div class="b"><h3>Grid split</h3><p>A forced-grid splitter cuts each page into nine card images, snapping the cut lines to the whitest bands between cards so full-bleed and die-cut cards don't get clipped.</p></div></div>
+  <div class="step"><div class="n">3</div><div class="b"><h3>Identify — multi-agent fan-out</h3><p>One agent per scan reads the nine card images and returns a structured record for each: year, brand, parallel/insert, player, team, rookie flag, numbered flag, and a clean eBay title. Seventeen scans are read in parallel, not one at a time.</p><span class="tag">parallel subagents · vision · structured output</span></div></div>
+  <div class="step"><div class="n">4</div><div class="b"><h3>Dedup guard — oversell prevention</h3><p>Before anything posts, every candidate is checked against three sets: cards already listed, cards sold in the last 90 days, and duplicates within the same batch. A numbered card you own one copy of can never end up listed twice. This guard was added after a double-sale and has held clean across 300+ posts.</p><span class="tag">sold-aware · token similarity</span></div></div>
+  <div class="step"><div class="n">5</div><div class="b"><h3>Price</h3><p>Each card is priced against SportsCardsPro with a confidence gate and a sanity cap, falling back to a velocity tier when no confident match exists. Autos and rare parallels are routed to a separate deep-dive that verifies the exact card and pulls comparable sales before pricing.</p><span class="tag">multi-source · confidence-gated</span></div></div>
+  <div class="step"><div class="n">6</div><div class="b"><h3>Post to eBay</h3><p>Cards are listed through the eBay Trading API with image upload, returns-not-accepted, and a per-card dupe check at post time. The snapshot is refreshed immediately before every run so the dedup decision is always made against current state.</p></div></div>
+</section>
+
+<section>
+  <div class="kic">Daily automation</div>
+  <h2>The morning routine</h2>
+  <p class="sub">About 25 agents run each morning. Every agent produces a plan and a dashboard first (a dry run); the real-world actions that change live listings are applied in a safe order only after review.</p>
+  <div class="grid2">
+    <div class="cardx"><h3>Repricing</h3><p>Moves prices toward market, capped per run for safety. Built for velocity — prices trend down to move inventory.</p></div>
+    <div class="cardx"><h3>Markdowns</h3><p>Age-tiered markdowns on stale stock, floor-protected so a card never sells below its sold-history floor.</p></div>
+    <div class="cardx"><h3>Promoted listings</h3><p>Pushes per-listing ad bids across the catalog — the visibility lever for a low-traffic store.</p></div>
+    <div class="cardx"><h3>Offers to watchers</h3><p>Sends targeted discounts to the highest-intent buyers: people already watching a card.</p></div>
+    <div class="cardx"><h3>Best Offer</h3><p>Enables and re-clamps accept/decline thresholds so a price drop never breaks an existing offer rule.</p></div>
+    <div class="cardx"><h3>Health &amp; digests</h3><p>Inventory, photo audit, price consistency, Cassini visibility scoring, and a daily digest — all rendered as dashboards.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="kic">Intelligence layer</div>
+  <h2>What makes it more than a script</h2>
+  <p class="sub">The pipeline is wrapped in agent panels that handle the judgment calls a solo seller would otherwise make by hand.</p>
+  <div class="grid2">
+    <div class="cardx"><h3>Sourcing committee</h3><p>A panel of agents with distinct personas (comp analyst, trend scout, value investor, velocity flipper, risk manager) debates and ranks which players to buy next, scored against current inventory depth.</p></div>
+    <div class="cardx"><h3>Three-card lots</h3><p>A four-expert committee bundles slow, low-view singles into themed lots priced to move, then the originals are delisted once a lot sells.</p></div>
+    <div class="cardx"><h3>Premium-card deep-dive</h3><p>Autos, serial-numbered cards, and rare die-cut parallels are pulled out of the velocity flow and individually verified and comp-priced.</p></div>
+    <div class="cardx"><h3>Self-auditing code review</h3><p>Code changes are reviewed by a fan-out of agents across nine angles; each finding is independently verified before it's accepted, then the fixes are re-reviewed.</p></div>
+    <div class="cardx"><h3>QC review page</h3><p>Every posted card is re-checked against its image with a confidence score, surfacing likely mis-identifications before a buyer finds them.</p></div>
+    <div class="cardx"><h3>Analytics dashboard</h3><p>Listing and sales titles are parsed into structured fields, giving filterable insight into top players, brands, parallels, and what is actually selling.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="kic">How the agents work</div>
+  <h2>Fan out, verify, synthesize</h2>
+  <p class="sub">The heavy work is done by deterministic workflows that orchestrate many short-lived agents rather than one long conversation.</p>
+  <ul class="tight">
+    <li><b>Fan-out:</b> independent work (identifying 160 cards, reviewing nine code angles) runs as parallel subagents, so wall-clock time is the slowest single task, not the sum.</li>
+    <li><b>Structured output:</b> agents return validated JSON, not prose — titles, prices, verdicts — so results drop straight into the pipeline.</li>
+    <li><b>Adversarial verification:</b> findings and identifications are confirmed by separate agents before they're trusted, which is how mis-IDs and false bug reports get filtered out.</li>
+    <li><b>Committees:</b> for judgment calls, several agents argue distinct positions and a chair synthesizes the decision.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="kic">Built on</div>
+  <h2>Stack</h2>
+  <div class="tech">
+    <span>Python</span><span>eBay Trading API</span><span>eBay Browse API</span><span>eBay Marketing API</span>
+    <span>SportsCardsPro</span><span>PriceCharting</span><span>Multi-agent orchestration</span>
+    <span>GitHub Pages dashboards</span><span>OpenCV grid split</span>
+  </div>
+  <p class="sub" style="margin-top:22px">Everything above runs from one repository. Plans and dashboards are published as static pages; the only manual steps are scanning the cards and approving the actions that touch live listings.</p>
+</section>
+
+<footer>JC&sup2; Cards · operated by Jason Chletsos · built with a multi-agent assistant</footer>
+</div></body></html>
