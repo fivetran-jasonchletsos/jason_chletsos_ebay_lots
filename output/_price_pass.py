@@ -5,7 +5,7 @@ import card_price_agent as cpa
 from repricing_agent import _round_psych
 
 token = cpa.load_token()
-batches = [f"output/batch_scan{n}_new.json" for n in range(257, 260)]
+batches = [f"output/batch_scan{n}_new.json" for n in range(272, 284)]
 summary = []
 priced = scp_hits = fallbacks = 0
 
