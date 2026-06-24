@@ -3061,6 +3061,7 @@ _NAV_ITEMS = [
 
     # ── Admin: hidden behind auth gate ──
     ("daily.html",            "Daily",         False, None),
+    ("sales_trends.html",     "Sales Trends",  False, None),
     ("collx_vs_ebay.html",    "CollX vs eBay", False, None),
     ("seller_hub.html",       "Seller Hub",    False, "More"),
     ("price_consistency.html","Price Gate",    False, "More"),
