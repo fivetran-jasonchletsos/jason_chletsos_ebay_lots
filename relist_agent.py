@@ -413,6 +413,68 @@ def main() -> int:
     if len(plans) != _before:
         print(f"  Excluded Cam Ward ghost from relist ({_before} -> {len(plans)}).")
 
+    # NEVER relist a card that has already SOLD. When a sold card's duplicate
+    # listing is ended (EndingReason NotAvailable), eBay files it under
+    # UnsoldList — relisting it re-creates an oversell. Exclude by title match
+    # against sold history + a fresh SoldList. (Root cause: CollX re-list churn,
+    # 2026-06-26.) See memory project_cdp_inventory_removal_delists_ebay.
+    try:
+        import re as _re
+        from pathlib import Path as _Path
+        _norm = lambda t: _re.sub(r"[^a-z0-9]", "", (t or "").lower())
+        _sold_titles: set[str] = set()
+        _sh = _Path(__file__).parent / "sold_history.json"
+        if _sh.exists():
+            for _s in json.loads(_sh.read_text()):
+                if _s.get("title"):
+                    _sold_titles.add(_norm(_s["title"]))
+        if token:  # fresh SoldList (90d) on top of history
+            try:
+                _x = (f'<?xml version="1.0" encoding="utf-8"?><GetMyeBaySellingRequest xmlns="{EBAY_NS}">'
+                      f'<RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>'
+                      f'<SoldList><Include>true</Include><DurationInDays>90</DurationInDays>'
+                      f'<Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>1</PageNumber></Pagination>'
+                      f'</SoldList></GetMyeBaySellingRequest>')
+                _root = _trading_post("GetMyeBaySelling", _x, ebay_cfg)
+                for _t in _root.findall(f".//{NS}SoldList//{NS}Item/{NS}Title"):
+                    if _t.text:
+                        _sold_titles.add(_norm(_t.text))
+            except Exception:
+                pass
+        _b2 = len(plans)
+        plans = [p for p in plans
+                 if not (len(_norm(p.get("title"))) > 14 and _norm(p.get("title")) in _sold_titles)]
+        if len(plans) != _b2:
+            print(f"  GUARD: excluded {_b2 - len(plans)} already-SOLD card(s) from relist.")
+    except Exception as _e:
+        print(f"  sold-exclusion guard failed (not relisting to be safe): {_e}")
+        plans = []
+
+    # NEVER relist a card that is ALREADY ACTIVE. When we end a duplicate
+    # listing for inventory hygiene (oversell_guard), it lands in UnsoldList
+    # and relist_agent would re-create a second copy on top of the still-live
+    # original. Guard: cross-reference by normalized title against the active
+    # listings snapshot.
+    try:
+        import re as _re2
+        _norm2 = lambda t: _re2.sub(r"[^a-z0-9]", "", (t or "").lower())
+        _snap_path = OUTPUT_DIR / "listings_snapshot.json"
+        _active_titles: set[str] = set()
+        if _snap_path.exists():
+            _snap = json.loads(_snap_path.read_text())
+            _snp_list = _snap.get("listings", []) if isinstance(_snap, dict) else _snap
+            for _l in _snp_list:
+                if isinstance(_l, dict) and _l.get("title"):
+                    _active_titles.add(_norm2(_l["title"]))
+        _b3 = len(plans)
+        plans = [p for p in plans
+                 if not (len(_norm2(p.get("title", ""))) > 14
+                         and _norm2(p.get("title", "")) in _active_titles)]
+        if len(plans) != _b3:
+            print(f"  GUARD: excluded {_b3 - len(plans)} already-ACTIVE card(s) from relist (dup prevention).")
+    except Exception as _e:
+        print(f"  active-dup guard error (safe, continuing): {_e}")
+
     history_entries: list[dict] = []
     if args.apply and token:
         for plan in plans:

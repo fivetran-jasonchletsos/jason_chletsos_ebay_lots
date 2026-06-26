@@ -77,10 +77,22 @@ def main():
     by_sku = defaultdict(list)
     for iid, d in active.items():
         by_sku[d["sku"]].append(iid)
-    sold_skus = {d["sku"] for d in sold.values()}
+    sold_skus = {d["sku"] for d in sold.values() if d["sku"]}
 
-    # 1) oversell: active listing whose SKU already sold
-    oversell = [(iid, active[iid]) for iid in active if active[iid]["sku"] in sold_skus]
+    # Title-based sold set (SoldList SKU is unreliable + Trading relists carry no
+    # SKU), so also match by normalized title against SoldList + sold_history.json.
+    norm = lambda t: re.sub(r"[^a-z0-9]", "", (t or "").lower())
+    sold_titles = {norm(d["title"]) for d in sold.values() if d.get("title")}
+    sh = Path("sold_history.json")
+    if sh.exists():
+        for s in json.loads(sh.read_text()):
+            if s.get("title"):
+                sold_titles.add(norm(s["title"]))
+
+    # 1) oversell: active listing whose SKU already sold OR whose title matches a sold card
+    oversell = [(iid, active[iid]) for iid in active
+                if active[iid]["sku"] in sold_skus
+                or (len(norm(active[iid]["title"])) > 14 and norm(active[iid]["title"]) in sold_titles)]
     # 2) dup: same SKU live more than once -> end all but the oldest (min ItemID)
     dups = []
     for sku, ids in by_sku.items():
