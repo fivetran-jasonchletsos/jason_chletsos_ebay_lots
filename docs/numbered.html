@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Numbered Cards · Harpua2001</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Familjen+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
+    window.__IS_ADMIN_PAGE = true;
+    (function() {
+      try {
+        var stored = localStorage.getItem('h2k_admin_email');
+        var ok = stored && stored === window.__ADMIN_EMAIL;
+        document.documentElement.classList.toggle('pre-is-admin', !!ok);
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    html:not(.pre-is-admin) body.admin-page main { filter: blur(14px); pointer-events: none; user-select: none; }
+  </style>
+  <style>
+:root {
+  --bg:          #0a0a0a;
+  --surface:     #141414;
+  --surface-2:   #1a1a1a;
+  --surface-3:   #232323;
+  --border:      rgba(201,165,66,0.10);
+  --border-mid:  rgba(201,165,66,0.22);
+  --border-hi:   rgba(201,165,66,0.42);
+  --gold:        #c9a542;
+  --gold-bright: #e6c66a;
+  --gold-dim:    #8a7521;
+  --text:        #f1efe9;
+  --text-muted:  #9a9388;
+  --text-dim:    #7a7268;
+  --success:     #7fc77a;
+  --warning:     #e0b54a;
+  --danger:      #e07b6f;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --fs-xs:  clamp(11px, 0.68rem + 0.1vw, 12.5px);
+  --fs-sm:  clamp(12.5px, 0.78rem + 0.12vw, 14px);
+  --fs-base: clamp(15px, 0.9rem + 0.2vw, 17px);
+  --fs-lg:  clamp(17px, 1rem + 0.4vw, 20px);
+  --fs-xl:  clamp(20px, 1.2rem + 0.6vw, 26px);
+  --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: dark; background: var(--bg); }
+body {
+  margin: 0; padding: 0;
+  font-family: 'Familjen Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 var(--space-lg);
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: var(--fs-lg);
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+.nav-links { display: flex; gap: var(--space-md); align-items: center; }
+.nav-links a { font-size: var(--fs-sm); color: var(--text-muted); text-decoration: none; transition: color 160ms; }
+.nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+/* MAIN */
+main { max-width: 960px; margin: 0 auto; padding: var(--space-xl) var(--space-lg); }
+
+.page-header { margin-bottom: var(--space-xl); }
+.page-header h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: var(--fs-xl);
+  color: var(--gold-bright);
+  margin: 0 0 var(--space-xs);
+}
+.page-header p { color: var(--text-muted); font-size: var(--fs-sm); margin: 0; }
+
+/* STATS ROW */
+.stats-row {
+  display: flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-xl);
+}
+.stat-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--space-sm) var(--space-md);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat-pill .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-lg);
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+.stat-pill .lbl { font-size: var(--fs-xs); color: var(--text-dim); }
+
+/* FILTER BAR */
+.filter-bar {
+  display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); align-items: center;
+}
+.filter-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-family: 'Familjen Grotesk', sans-serif;
+  cursor: pointer;
+  transition: all 160ms;
+}
+.filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+.filter-btn.active { background: var(--gold); border-color: var(--gold); color: #0a0a0a; font-weight: 600; }
+
+/* CARDS GRID */
+.cards-grid {
+  display: flex; flex-direction: column; gap: var(--space-sm);
+}
+
+/* TIER HEADER */
+.tier-header {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-xs);
+  display: flex; align-items: center; gap: var(--space-sm);
+}
+
+/* numbered card row */
+.card-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px 90px;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--space-sm) var(--space-md);
+  transition: border-color 160ms, background 160ms;
+  text-decoration: none;
+  color: var(--text);
+}
+.card-row:hover {
+  border-color: var(--border-hi);
+  background: var(--surface-2);
+}
+
+.serial-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+
+.card-title {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-sm);
+  color: var(--success);
+  text-align: right;
+  font-weight: 600;
+}
+
+.card-link-btn {
+  font-size: var(--fs-xs);
+  color: var(--gold);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* RARITY TIER COLORS */
+.tier-legendary { color: #e6c66a; background: rgba(230,198,106,0.12); border-left: 3px solid #e6c66a; }
+.badge-legendary { background: rgba(230,198,106,0.18); color: #e6c66a; border: 1px solid rgba(230,198,106,0.4); }
+.row-legendary { border-left: 3px solid rgba(230,198,106,0.5); }
+
+.tier-ultra { color: #c084fc; background: rgba(192,132,252,0.10); border-left: 3px solid #c084fc; }
+.badge-ultra { background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.35); }
+.row-ultra { border-left: 3px solid rgba(192,132,252,0.4); }
+
+.tier-rare { color: #fb923c; background: rgba(251,146,60,0.10); border-left: 3px solid #fb923c; }
+.badge-rare { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.35); }
+.row-rare { border-left: 3px solid rgba(251,146,60,0.4); }
+
+.tier-uncommon { color: #60a5fa; background: rgba(96,165,250,0.10); border-left: 3px solid #60a5fa; }
+.badge-uncommon { background: rgba(96,165,250,0.15); color: #60a5fa; border: 1px solid rgba(96,165,250,0.35); }
+.row-uncommon { border-left: 3px solid rgba(96,165,250,0.4); }
+
+.tier-semi { color: #4ade80; background: rgba(74,222,128,0.10); border-left: 3px solid #4ade80; }
+.badge-semi { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.35); }
+.row-semi { border-left: 3px solid rgba(74,222,128,0.4); }
+
+.tier-common { color: var(--text-dim); background: rgba(255,255,255,0.04); border-left: 3px solid var(--text-dim); }
+.badge-common { background: rgba(255,255,255,0.08); color: var(--text-dim); border: 1px solid rgba(255,255,255,0.15); }
+.row-common { border-left: 3px solid rgba(255,255,255,0.15); }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: var(--space-xl); color: var(--text-dim); font-size: var(--fs-sm); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: var(--space-md) var(--space-lg);
+  text-align: center;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  margin-top: var(--space-xl);
+}
+
+@media (max-width: 600px) {
+  .card-row { grid-template-columns: 70px 1fr 70px; }
+  .card-link-btn { display: none; }
+  main { padding: var(--space-lg) var(--space-md); }
+}
+  </style>
+</head>
+<body class="admin-page">
+
+<nav>
+  <a class="brand" href="seller.html">Harpua2001</a>
+  <div class="nav-links">
+    <a href="seller.html">Dashboard</a>
+    <a href="daily.html" target="_blank">Daily</a>
+    <a href="https://www.ebay.com/sch/i.html?_ssn=harpua2001" target="_blank">eBay Store</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>Numbered Cards</h1>
+    <p id="subtitle">Serial-numbered listings active on eBay, sorted rarest first.</p>
+  </div>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-tier="all">All</button>
+    <button class="filter-btn" data-tier="legendary">Legendary /1–/5</button>
+    <button class="filter-btn" data-tier="ultra">Ultra Rare /6–/25</button>
+    <button class="filter-btn" data-tier="rare">Rare /26–/99</button>
+    <button class="filter-btn" data-tier="uncommon">Uncommon /100–/249</button>
+    <button class="filter-btn" data-tier="semi">Semi-Rare /250–/499</button>
+    <button class="filter-btn" data-tier="common">/500+</button>
+  </div>
+
+  <div class="cards-grid" id="cards-grid"></div>
+</main>
+
+<footer>
+  <span id="footer-ts">Refreshed from listings_snapshot.json</span>
+  &nbsp;&middot;&nbsp;
+  <a href="seller.html" style="color:var(--gold-dim)">Seller Dashboard</a>
+</footer>
+
+<script>
+const LISTINGS = [
+  {"item_id":"307021757816","title":"2025 Topps Signature Class Trevor Lawrence Round 1 Pick 1 Purple Parallel #005/1","price":16.99,"num":5,"total":1,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Trevor-Lawrence-Round-1-Pick-1-Purple-Parallel-005-1-/307021757816"},
+  {"item_id":"307023490308","title":"2026 Garrett Nussmeier 5 Card Draw Wild Card RC 1/2 Silver Holo Queen","price":12.99,"num":1,"total":2,"url":"https://www.ebay.com/itm/2026-Garrett-Nussmeier-5-Card-Draw-Wild-Card-RC-1-2-Silver-Holo-Queen-/307023490308"},
+  {"item_id":"307021756373","title":"2025 Topps Signature Class CJ Stroud Class Action #10/10 Houston Texans Football","price":39.99,"num":10,"total":10,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-CJ-Stroud-Class-Action-10-10-Houston-Texans-Football-/307021756373"},
+  {"item_id":"307021757702","title":"2025 Topps Signature Class Xavier Worthy Round 4 Pick 28 Red Parallel #14/25 Kan","price":14.99,"num":14,"total":25,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Xavier-Worthy-Round-4-Pick-28-Red-Parallel-14-25-Kan-/307021757702"},
+  {"item_id":"307021757759","title":"2025 Topps Signature Class Brock Bowers Orange 12/50 Las Vegas Raiders Football","price":14.99,"num":12,"total":50,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Brock-Bowers-Orange-12-50-Las-Vegas-Raiders-Football-/307021757759"},
+  {"item_id":"307021757972","title":"2025 Panini Donruss Optic Howie Long Orange 37/79 Raiders Football","price":11.99,"num":37,"total":79,"url":"https://www.ebay.com/itm/2025-Panini-Donruss-Optic-Howie-Long-Orange-37-79-Raiders-Football-/307021757972"},
+  {"item_id":"307003201985","title":"2025 Panini Contenders NIL Ricky Williams Campus Legends Swirl Parallel #019/99","price":6.99,"num":19,"total":99,"url":"https://www.ebay.com/itm/2025-Panini-Contenders-NIL-Ricky-Williams-Campus-Legends-Swirl-Parallel-019-99-/307003201985"},
+  {"item_id":"307003199117","title":"2025 Topps Signature Class Sauce Gardner Round 1 Pick 4 #090/100 Indianapolis Co","price":15.99,"num":90,"total":100,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Sauce-Gardner-Round-1-Pick-4-090-100-Indianapolis-Co-/307003199117"},
+  {"item_id":"307015227069","title":"2025 Topps Iconic Round Pick Devin Neal 018/150 RC Saints Football","price":8.99,"num":18,"total":150,"url":"https://www.ebay.com/itm/2025-Topps-Iconic-Round-Pick-Devin-Neal-018-150-RC-Saints-Football-/307015227069"},
+  {"item_id":"307004744152","title":"2025 Topps Signature Class Dylan Sampson RC Round 4 Pick 24 #065/150 Browns","price":3.99,"num":65,"total":150,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Dylan-Sampson-RC-Round-4-Pick-24-065-150-Browns-/307004744152"},
+  {"item_id":"307021758040","title":"2024 Topps Chrome Players Josh Allen 66/150 Buffalo Bills Football","price":14.99,"num":66,"total":150,"url":"https://www.ebay.com/itm/2024-Topps-Chrome-Players-Josh-Allen-66-150-Buffalo-Bills-Football-/307021758040"},
+  {"item_id":"307014459410","title":"2023 Phoenix Fire Burst Bijan Robinson 033/225 Falcons Football","price":4.99,"num":33,"total":225,"url":"https://www.ebay.com/itm/2023-Phoenix-Fire-Burst-Bijan-Robinson-033-225-Falcons-Football-/307014459410"},
+  {"item_id":"307021757669","title":"2025 Topps Signature Class Matthew Golden RC Auto #212/225 Packers Football","price":44.99,"num":212,"total":225,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Matthew-Golden-RC-Auto-212-225-Packers-Football-/307021757669"},
+  {"item_id":"307021758470","title":"2025 Topps Signature Class Billy Bowman Jr RC Round 4 Pick 16 Green 235/240","price":9.49,"num":235,"total":240,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Billy-Bowman-Jr-RC-Round-4-Pick-16-Green-235-240-/307021758470"},
+  {"item_id":"307018621496","title":"2025 Select Red Andrew Van Ginkel #164 063/249 Vikings Football","price":5.99,"num":63,"total":249,"url":"https://www.ebay.com/itm/2025-Select-Red-Andrew-Van-Ginkel-164-063-249-Vikings-Football-/307018621496"},
+  {"item_id":"307021775517","title":"2025 Topps Signature Class Jabbar Muhammad Undrafted RC #136/250 Jacksonville Ja","price":3.99,"num":136,"total":250,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Jabbar-Muhammad-Undrafted-RC-136-250-Jacksonville-Ja-/307021775517"},
+  {"item_id":"307021776759","title":"2025 Topps Signature Class Devin Neal RC 203/250 New Orleans Saints Football","price":3.99,"num":203,"total":250,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Devin-Neal-RC-203-250-New-Orleans-Saints-Football-/307021776759"},
+  {"item_id":"307010511103","title":"2025 Topps Signature Class Tony Pollard Fractal 118/275 Tennessee Titans Footbal","price":4.99,"num":118,"total":275,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Tony-Pollard-Fractal-118-275-Tennessee-Titans-Footbal-/307010511103"},
+  {"item_id":"307006131711","title":"2025 Topps Signature Class Will Campbell RC Round 1 Pick 4 #141/275 New England","price":7.03,"num":141,"total":275,"url":"https://www.ebay.com/itm/2025-Topps-Signature-Class-Will-Campbell-RC-Round-1-Pick-4-141-275-New-England-/307006131711"},
+  {"item_id":"307021771769","title":"2025 Topps Chrome Jonah Savaiinaea RC Gold Refractor 204/275 Miami Dolphins Foot","price":4.99,"num":204,"total":275,"url":"https://www.ebay.com/itm/2025-Topps-Chrome-Jonah-Savaiinaea-RC-Gold-Refractor-204-275-Miami-Dolphins-Foot-/307021771769"},
+  {"item_id":"307012613587","title":"2024 Panini Phoenix Blue Pyramids Mike Vrabel 219/385 Patriots Football","price":2.99,"num":219,"total":385,"url":"https://www.ebay.com/itm/2024-Panini-Phoenix-Blue-Pyramids-Mike-Vrabel-219-385-Patriots-Football-/307012613587"},
+  {"item_id":"306995849361","title":"2025 Panini Phoenix Nick Barnett Red Prizm 034/399 Packers Football","price":2.33,"num":34,"total":399,"url":"https://www.ebay.com/itm/2025-Panini-Phoenix-Nick-Barnett-Red-Prizm-034-399-Packers-Football-/306995849361"},
+  {"item_id":"307021760030","title":"2025 Select Purple Jack Bech 236/699 RC Raiders Football","price":7.99,"num":236,"total":699,"url":"https://www.ebay.com/itm/2025-Select-Purple-Jack-Bech-236-699-RC-Raiders-Football-/307021760030"},
+  {"item_id":"307021767875","title":"2025 Select Green Mason Taylor 339/699 RC Jets Football","price":4.99,"num":339,"total":699,"url":"https://www.ebay.com/itm/2025-Select-Green-Mason-Taylor-339-699-RC-Jets-Football-/307021767875"},
+  {"item_id":"307021768744","title":"2025 Select Purple Jakobi Meyers #5 396/699 Raiders Football","price":4.99,"num":396,"total":699,"url":"https://www.ebay.com/itm/2025-Select-Purple-Jakobi-Meyers-5-396-699-Raiders-Football-/307021768744"},
+  {"item_id":"306995237663","title":"2025 Panini Select Tristan Wirfs Club Level Green Prizm 593/699 Buccaneers","price":3.11,"num":593,"total":699,"url":"https://www.ebay.com/itm/2025-Panini-Select-Tristan-Wirfs-Club-Level-Green-Prizm-593-699-Buccaneers-/306995237663"},
+  {"item_id":"307021758517","title":"2025 Panini Select Travis Hunter Concourse RC #645/699 Jacksonville Jaguars Foot","price":9.99,"num":645,"total":699,"url":"https://www.ebay.com/itm/2025-Panini-Select-Travis-Hunter-Concourse-RC-645-699-Jacksonville-Jaguars-Foot-/307021758517"}
+];
+
+function tierOf(total) {
+  if (total <= 5)   return 'legendary';
+  if (total <= 25)  return 'ultra';
+  if (total <= 99)  return 'rare';
+  if (total <= 249) return 'uncommon';
+  if (total <= 499) return 'semi';
+  return 'common';
+}
+
+const TIER_LABELS = {
+  legendary: 'Legendary  /1 – /5',
+  ultra:     'Ultra Rare  /6 – /25',
+  rare:      'Rare  /26 – /99',
+  uncommon:  'Uncommon  /100 – /249',
+  semi:      'Semi-Rare  /250 – /499',
+  common:    '/500+',
+};
+
+const sorted = [...LISTINGS].sort((a, b) => a.total - b.total || a.num - b.num);
+
+function renderStats(data) {
+  const totalValue = data.reduce((s, l) => s + l.price, 0);
+  const byTier = {};
+  data.forEach(l => { const t = tierOf(l.total); byTier[t] = (byTier[t]||0) + 1; });
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-pill"><span class="val">${data.length}</span><span class="lbl">Numbered Listings</span></div>
+    <div class="stat-pill"><span class="val">$${totalValue.toFixed(2)}</span><span class="lbl">Total Ask Value</span></div>
+    <div class="stat-pill"><span class="val">${byTier.legendary||0}</span><span class="lbl">Legendary (/1–/5)</span></div>
+    <div class="stat-pill"><span class="val">${byTier.ultra||0}</span><span class="lbl">Ultra Rare (/6–/25)</span></div>
+    <div class="stat-pill"><span class="val">${byTier.rare||0}</span><span class="lbl">Rare (/26–/99)</span></div>
+  `;
+}
+
+function renderGrid(tier) {
+  const data = tier === 'all' ? sorted : sorted.filter(l => tierOf(l.total) === tier);
+  if (!data.length) {
+    document.getElementById('cards-grid').innerHTML = '<div class="empty">No listings in this tier.</div>';
+    renderStats(sorted);
+    return;
+  }
+  renderStats(data);
+
+  let html = '';
+  let lastTier = null;
+  data.forEach(l => {
+    const t = tierOf(l.total);
+    if (t !== lastTier && tier === 'all') {
+      html += `<div class="tier-header tier-${t}">${TIER_LABELS[t]}</div>`;
+      lastTier = t;
+    }
+    const titleShort = l.title.length > 72 ? l.title.slice(0, 71) + '…' : l.title;
+    html += `
+    <a class="card-row row-${t}" href="${l.url}" target="_blank" rel="noopener">
+      <span class="serial-badge badge-${t}">/${l.total}</span>
+      <span class="card-title">${titleShort}</span>
+      <span class="card-price">$${l.price.toFixed(2)}</span>
+      <span class="card-link-btn">#${l.num}/${l.total} &rarr;</span>
+    </a>`;
+  });
+  document.getElementById('cards-grid').innerHTML = html;
+}
+
+// filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid(btn.dataset.tier);
+  });
+});
+
+// admin gate
+(function() {
+  const stored = localStorage.getItem('h2k_admin_email');
+  if (!stored || stored !== window.__ADMIN_EMAIL) {
+    const email = prompt('Admin email:');
+    if (email === window.__ADMIN_EMAIL) {
+      localStorage.setItem('h2k_admin_email', email);
+      document.documentElement.classList.add('pre-is-admin');
+    }
+  }
+})();
+
+// footer timestamp
+document.getElementById('footer-ts').textContent =
+  'Last updated: ' + new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+
+renderGrid('all');
+</script>
+</body>
+</html>
