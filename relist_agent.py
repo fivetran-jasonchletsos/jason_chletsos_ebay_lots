@@ -475,6 +475,24 @@ def main() -> int:
     except Exception as _e:
         print(f"  active-dup guard error (safe, continuing): {_e}")
 
+    # NEVER relist (a) an ended LOT listing or (b) a card that is a component of
+    # a player lot. Lot components' single-titles don't match the lot's title,
+    # so the active-dup guard above misses them. build_lot_listing.py records
+    # every ended lot-component id in output/do_not_relist.json, and any title
+    # containing the word "lot" is a (superseded) lot listing. Root cause:
+    # 2026-06-29 relist resurrected ~40 lot components + 6 ended lots as dupes.
+    try:
+        import re as _re3
+        _dnr = set(str(x) for x in _read_json(OUTPUT_DIR / "do_not_relist.json", []))
+        _b4 = len(plans)
+        plans = [p for p in plans
+                 if str(p.get("item_id") or "") not in _dnr
+                 and not _re3.search(r"\blot\b", (p.get("title", "") or "").lower())]
+        if len(plans) != _b4:
+            print(f"  GUARD: excluded {_b4 - len(plans)} lot / lot-component listing(s) from relist.")
+    except Exception as _e:
+        print(f"  lot-guard error (safe, continuing): {_e}")
+
     history_entries: list[dict] = []
     if args.apply and token:
         for plan in plans:
