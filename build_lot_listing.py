@@ -120,8 +120,19 @@ AUTO_LOTS = {
 }
 
 
+def _card_key(title):
+    """Normalized identity of a card (set+parallel+player), serial/punct stripped,
+    so two copies of the same card collapse to one — enforces 'no duplicates'."""
+    import re
+    t = re.sub(r"/\s*\d+\b", "", title.lower())          # drop serials like /25
+    t = re.sub(r"#\s*\d+", "", t)                          # drop card numbers
+    t = re.sub(r"\b(rc|football|card)\b", "", t)           # drop common filler
+    return re.sub(r"[^a-z0-9]", "", t)
+
+
 def auto_select(player_canon, n=5):
-    """Return the n cheapest non-lot, non-chase singles for a player from the snapshot."""
+    """Return the n cheapest non-lot, non-chase singles for a player from the
+    snapshot — DEDUPED so all n are different cards (no doubles)."""
     import browse_index_agent as B
     d = json.loads(Path("output/listings_snapshot.json").read_text())
     L = d.get("listings", d) if isinstance(d, dict) else d
@@ -137,7 +148,16 @@ def auto_select(player_canon, n=5):
             continue
         cands.append((str(x.get("item_id")), t, x.get("pic"), pr))
     cands.sort(key=lambda c: c[3])
-    return cands[:n]
+    seen, out = set(), []
+    for c in cands:
+        k = _card_key(c[1])
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(c)
+        if len(out) == n:
+            break
+    return out
 
 
 def fetch_thumb_for(item_id, url):

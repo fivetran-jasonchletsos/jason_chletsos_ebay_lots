@@ -38,6 +38,7 @@ NS           = ebay_client.NS
 TRADING_URL  = ebay_client.TRADING_URL
 CATEGORY_ID  = "261328"    # Trading Card Singles
 CONDITION_ID = "4000"      # Ungraded
+SPORT        = "Football"  # overridable via --sport (e.g. Basketball)
 
 
 def xml_escape(s: str) -> str:
@@ -188,7 +189,7 @@ def infer_specifics(title: str) -> dict[str, str] | None:
     hits.sort()
     _, _, set_token, mfg = hits[0]
 
-    specifics = {"Sport": "Football", "Card Manufacturer": mfg}
+    specifics = {"Sport": SPORT, "Card Manufacturer": mfg}
     year_m = re.search(r"\b(20[0-2]\d)(?:-\d{2})?\b", title)
     season = year_m.group(1) if year_m else None
     if season:
@@ -345,8 +346,12 @@ def main():
     ap.add_argument("--apply",  action="store_true", help="Actually post (default: dry-run)")
     ap.add_argument("--force",  action="store_true",
                     help="Post even if a live listing already has this title")
+    ap.add_argument("--sport",  default="Football",
+                    help="Sport item-specific (default Football; e.g. Basketball)")
     args = ap.parse_args()
     post_card.force = args.force
+    global SPORT
+    SPORT = args.sport
 
     cfg   = json.loads(Path(paths.CONFIG).read_text())
     token = ebay_client.get_write_token(cfg)
