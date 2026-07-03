@@ -555,15 +555,25 @@ def _volume_discount_payload(cfg: dict, marketplace_id: str) -> dict:
     duration_days = int(cfg.get("promotion_duration_days", 30))
     start_iso = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
     end_iso = (now + timedelta(days=duration_days)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    discount_rules = []
-    for tier in vd["tiers"]:
+    # VOLUME_DISCOUNT rules: eBay requires a baseline rule (minQuantity 1, 0% off,
+    # ruleOrder 1) followed by the real tiers, and EVERY rule must carry a
+    # ruleOrder. Only percentageOffOrder + minQuantity are valid for volume
+    # pricing. Omitting ruleOrder / the baseline makes eBay report
+    # "discountBenefit is missing" (errorId 38238).
+    discount_rules = [{
+        "discountBenefit": {"percentageOffOrder": "0"},
+        "discountSpecification": {"minQuantity": 1},
+        "ruleOrder": 1,
+    }]
+    for i, tier in enumerate(vd["tiers"], start=2):
         discount_rules.append({
             "discountBenefit": {
-                "percentageOffOrder": f"{tier['discount_pct']*100:.2f}",
+                "percentageOffOrder": f"{tier['discount_pct']*100:g}",
             },
             "discountSpecification": {
                 "minQuantity": int(tier["min_quantity"]),
             },
+            "ruleOrder": i,
         })
     return {
         "name":                  vd.get("name", "Store Volume Discount"),
@@ -574,9 +584,9 @@ def _volume_discount_payload(cfg: dict, marketplace_id: str) -> dict:
         "startDate":             start_iso,
         "endDate":               end_iso,
         "applyDiscountToSingleItemOnly": False,
-        "selectionRules": [{
-            "selectionType":      "ALL_INVENTORY_BY_SELLER",
-        }],
+        "inventoryCriterion": {
+            "inventoryCriterionType": "INVENTORY_ANY",
+        },
         "discountRules":         discount_rules,
     }
 
@@ -586,7 +596,10 @@ def find_existing_volume_promotion(token: str, marketplace_id: str) -> dict | No
 
     Returns the first VOLUME_DISCOUNT promotion if any, else None.
     """
-    url = f"{MARKETING_BASE}/item_promotion"
+    # NOTE: the LIST endpoint is /promotion (getPromotions). /item_promotion is
+    # only for create (POST) and get-by-id (GET /item_promotion/{id}); calling it
+    # for a list query returns HTTP 400.
+    url = f"{MARKETING_BASE}/promotion"
     headers = {"Authorization": f"Bearer {token}"}
     try:
         r = requests.get(url, headers=headers,
@@ -627,6 +640,8 @@ def _volume_drift(existing: dict, cfg: dict) -> list[str]:
         elif abs(have[mq] - pct) > 0.01:
             drift.append(f"tier {mq}: live {have[mq]}% vs config {pct}%")
     for mq in have:
+        if mq == 1:
+            continue  # baseline rule (buy 1 = 0%) is required by eBay, not drift
         if mq not in want:
             drift.append(f"extra live tier: buy {mq} = {have[mq]}%")
     if existing.get("promotionStatus") not in ("RUNNING", "SCHEDULED"):
