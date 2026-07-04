@@ -63,6 +63,118 @@ ADMIN_ALERT_SNS_TOPIC  = os.environ.get("ADMIN_ALERT_SNS_TOPIC", "")
 ADMIN_KNOWN_DEVICES    = [d.strip() for d in os.environ.get("ADMIN_KNOWN_DEVICES", "").split(",") if d.strip()]
 ADMIN_KNOWN_IP_PREFIXES = [p.strip() for p in os.environ.get("ADMIN_KNOWN_IP_PREFIXES", "").split(",") if p.strip()]
 
+# Anthropic vision + optional live pricing for the "Beyond Cards" appraiser
+ANTHROPIC_API_KEY_ENV = os.environ.get("ANTHROPIC_API_KEY", "")
+PRICECHARTING_API_KEY = os.environ.get("PRICECHARTING_API_KEY", "")
+
+
+def _extract_json(text):
+    """Pull the first JSON object out of a model reply (handles ``` fences)."""
+    if not text:
+        return None
+    t = text.strip()
+    if t.startswith("```"):
+        parts = t.split("```")
+        if len(parts) >= 2:
+            t = parts[1]
+        if t.lstrip().lower().startswith("json"):
+            t = t.lstrip()[4:]
+    try:
+        return json.loads(t)
+    except Exception:
+        pass
+    start, end = t.find("{"), t.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        try:
+            return json.loads(t[start:end + 1])
+        except Exception:
+            return None
+    return None
+
+
+def _scp_comp(title, token):
+    """Best-effort live SportsCardsPro raw/graded comp. Returns dict or None."""
+    if not (title and token):
+        return None
+    ua = {"User-Agent": "beyond-cards/1.0"}
+    try:
+        q = urllib.parse.quote(title[:120])
+        surl = f"https://www.sportscardspro.com/api/products?t={urllib.parse.quote(token)}&q={q}"
+        with urllib.request.urlopen(urllib.request.Request(surl, headers=ua), timeout=12) as r:
+            d = json.loads(r.read().decode())
+        if d.get("status") != "success":
+            return None
+        products = d.get("products") or []
+        if not products:
+            return None
+        pid = products[0].get("id")
+        if not pid:
+            return None
+        purl = f"https://www.sportscardspro.com/api/product?t={urllib.parse.quote(token)}&id={urllib.parse.quote(str(pid))}"
+        with urllib.request.urlopen(urllib.request.Request(purl, headers=ua), timeout=12) as r:
+            p = json.loads(r.read().decode())
+        if p.get("status") != "success":
+            return None
+
+        def cents(v):
+            return round(v / 100.0, 2) if isinstance(v, (int, float)) and v > 0 else None
+
+        return {
+            "product": p.get("product-name") or products[0].get("product-name") or "",
+            "raw":     cents(p.get("loose-price")),
+            "psa9":    cents(p.get("graded-price")),
+            "psa10":   cents(p.get("manual-only-price")),
+            "url":     f"https://www.sportscardspro.com/game/sportscardspro/{pid}",
+            "source":  "SportsCardsPro",
+        }
+    except Exception as exc:
+        logger.info(f"scp_comp failed: {exc}")
+        return None
+
+
+_BEYOND_SYSTEM_PROMPT = (
+    "You are the appraiser behind \"Beyond Cards\", a public tool by the eBay seller "
+    "harpua2001 that identifies a trading card from a phone photo and drafts an eBay "
+    "listing. You are an expert in modern and vintage sports cards (Panini "
+    "Prizm/Select/Optic/Mosaic/Donruss, Topps Chrome/Bowman/Signature Class, Upper "
+    "Deck) and Pokemon TCG.\n\n"
+    "Look at the photo(s) — a front, and optionally a back — identify the card, then "
+    "produce an eBay listing and a realistic value estimate for a RAW (ungraded) copy "
+    "in the condition shown, unless it is clearly in a graded slab (PSA/BGS/CGC/SGC), "
+    "in which case price for that grade.\n\n"
+    "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
+    "trailing commas) with exactly these keys: is_card (boolean; false if the image is "
+    "not a trading card), category (\"sports\"|\"pokemon\"|\"other\"), sport, player "
+    "(player or character name), team, year, brand, set_name, parallel, card_number, "
+    "serial (only if a serial number is visibly printed, e.g. \"26/249\", else \"\"), "
+    "is_rookie (boolean), is_auto (boolean), is_relic (boolean), condition_notes "
+    "(brief, only what is visible), ebay_title (<=80 characters, keyword-rich, format: "
+    "Year Brand Set Player Parallel #Number RC/Auto/Serial Team Sport), "
+    "ebay_description (2-4 factual sentences, plain text), estimated_value_usd (object "
+    "with numeric low, typical, high), value_basis (one short sentence), confidence "
+    "(\"low\"|\"medium\"|\"high\").\n\n"
+    "Rules: Never invent details you cannot see — if a serial number, autograph, or "
+    "rookie logo is not visible, use \"\"/false. Keep ebay_title <= 80 characters and "
+    "avoid ALL-CAPS words. Be honest and realistic about value — a common base card may "
+    "be $1-5; do not inflate. If is_card is false, still return the JSON with empty "
+    "fields. The output must be machine-parseable JSON."
+)
+
+
+def _decode_image(data_url):
+    """Split a data URL (or bare base64) into (media_type, base64_data)."""
+    if not data_url:
+        return None, None
+    media = "image/jpeg"
+    b64 = data_url
+    if data_url.startswith("data:"):
+        head, _, b64 = data_url.partition(",")
+        if ":" in head and ";" in head:
+            cand = head[head.index(":") + 1:head.index(";")]
+            if cand.startswith("image/"):
+                media = cand
+    return media, b64
+
 
 def lambda_handler(event, context):
     method = event.get("httpMethod") or event.get("requestContext", {}).get("http", {}).get("method", "GET")
@@ -578,6 +690,111 @@ def lambda_handler(event, context):
     # Body: {question: str, context?: dict, history?: list[{role, content}]}
     # Returns: {answer, model, usage, success}
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # POST /ebay/upload-photos — "Beyond Cards" public AI card appraiser.
+    # Body: {"image": <data-url or base64>, "back": <optional>}.
+    # Identifies the card via Claude vision, drafts an eBay title +
+    # description + value estimate, and (if PRICECHARTING_API_KEY is set)
+    # attaches a live SportsCardsPro comp. Appraise-only — posts nothing.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/upload-photos"):
+        try:
+            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                logger.error("upload-photos: ANTHROPIC_API_KEY not set")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "Appraiser not configured — ANTHROPIC_API_KEY missing on Lambda.",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            front = str(body.get("image") or "").strip()
+            back  = str(body.get("back") or "").strip()
+            if not front:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+
+            fmedia, fb64 = _decode_image(front)
+            if not fb64:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(fb64) > 7_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            content = [{"type": "image", "source": {
+                "type": "base64", "media_type": fmedia, "data": fb64}}]
+            if back:
+                bmedia, bb64 = _decode_image(back)
+                if bb64 and len(bb64) <= 7_000_000:
+                    content.append({"type": "image", "source": {
+                        "type": "base64", "media_type": bmedia, "data": bb64}})
+            content.append({"type": "text", "text":
+                "Identify this trading card and produce the eBay listing JSON. "
+                "Return ONLY the JSON object."})
+
+            payload = json.dumps({
+                "model":      "claude-sonnet-4-6",
+                "max_tokens": 1200,
+                "system":     _BEYOND_SYSTEM_PROMPT,
+                "messages":   [{"role": "user", "content": content}],
+            }).encode()
+
+            req = urllib.request.Request(
+                "https://api.anthropic.com/v1/messages",
+                data=payload,
+                headers={
+                    "x-api-key":         api_key,
+                    "anthropic-version": "2023-06-01",
+                    "Content-Type":      "application/json",
+                },
+                method="POST",
+            )
+            try:
+                resp = urllib.request.urlopen(req, timeout=50)
+                data = json.loads(resp.read().decode())
+            except urllib.error.HTTPError as exc:
+                err_body = exc.read().decode()[:300]
+                logger.error(f"upload-photos Anthropic HTTP {exc.code}: {err_body}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"AI vision error (HTTP {exc.code}). Please try again.",
+                }, event)
+
+            raw = "".join(
+                b.get("text", "") for b in data.get("content", [])
+                if isinstance(b, dict) and b.get("type") == "text"
+            ).strip()
+            card = _extract_json(raw)
+            logger.info(f"upload-photos: model={data.get('model')} usage={data.get('usage')} "
+                        f"parsed={isinstance(card, dict)}")
+
+            if not isinstance(card, dict):
+                return _cors_response(200, {
+                    "success":    True,
+                    "identified": False,
+                    "message":    "Couldn't read the card clearly — try a straight, well-lit photo of the front.",
+                }, event)
+
+            comp = None
+            if card.get("is_card", True) and card.get("ebay_title"):
+                comp = _scp_comp(card.get("ebay_title", ""), PRICECHARTING_API_KEY)
+
+            return _cors_response(200, {
+                "success":    True,
+                "identified": bool(card.get("is_card", True)),
+                "card":       card,
+                "comp":       comp,
+                "model":      data.get("model", ""),
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"upload-photos error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/upload-photos"):
+        return _cors_preflight(event)
+
     if method == "POST" and path.endswith("/ebay/ai-chat"):
         try:
             api_key = os.environ.get("ANTHROPIC_API_KEY", "")
