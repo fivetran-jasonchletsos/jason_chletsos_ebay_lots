@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ee1515">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ChletsosScanner — AI Card Identifier</title>
+<meta name="description" content="Scan a Pokemon or Marvel card and the AI tells you what it is, how rare it is, and what it might be worth!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#ee1515; --red-d:#c50f0f; --blue:#2a75bb; --blue-d:#1b5591;
+    --yellow:#ffcb05; --marvel:#ed1d24; --purple:#7c4dff;
+    --ink:#26243a; --ink-soft:#5a5772; --line:#eadff3;
+    --card:#ffffff; --r:18px; --r-lg:26px;
+    --t:200ms cubic-bezier(.34,1.4,.5,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Nunito',system-ui,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(120% 60% at 10% -5%, rgba(255,203,5,.28), transparent 55%),
+      radial-gradient(120% 60% at 100% 0%, rgba(42,117,187,.22), transparent 55%),
+      linear-gradient(180deg,#fef7ff,#f3f7ff);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:min(94vw,640px);margin-inline:auto;padding:0 16px 60px}
+
+  /* Header */
+  .top{text-align:center;padding:26px 0 6px}
+  .ball{
+    width:60px;height:60px;margin:0 auto 12px;border-radius:50%;
+    background:linear-gradient(180deg,var(--red) 0 48%,#fff 48% 52%,#f3f3f3 52% 100%);
+    border:4px solid var(--ink); position:relative;
+    box-shadow:0 10px 26px rgba(238,21,21,.32);
+  }
+  .ball::after{content:"";position:absolute;top:50%;left:50%;width:18px;height:18px;
+    transform:translate(-50%,-50%);background:#fff;border:4px solid var(--ink);border-radius:50%}
+  h1{
+    font-family:'Fredoka',sans-serif;font-weight:700;margin:0;line-height:1;
+    font-size:clamp(32px,9vw,50px);letter-spacing:-.01em;
+    background:linear-gradient(90deg,var(--red),var(--purple) 55%,var(--blue));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .sub{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--blue);font-size:14px;letter-spacing:.18em;text-transform:uppercase;margin-top:8px}
+  .lede{color:var(--ink-soft);font-size:16px;font-weight:600;margin:12px auto 0;max-width:26em}
+
+  .panel{background:var(--card);border:2px solid var(--line);border-radius:var(--r-lg);padding:18px;margin-top:18px;box-shadow:0 12px 30px rgba(124,77,255,.08)}
+  .panel h2{font-family:'Fredoka',sans-serif;font-weight:600;font-size:20px;margin:0 0 14px;color:var(--ink)}
+  .step{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--yellow);color:var(--ink);font-weight:800;margin-right:8px;font-family:'Fredoka',sans-serif}
+
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .shot{position:relative;border:3px dashed #d9cdf0;border-radius:var(--r);background:#faf6ff;aspect-ratio:3/4;overflow:hidden;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink-soft);transition:transform var(--t),border-color var(--t);text-align:center;padding:10px}
+  .shot:active{transform:scale(.97);border-color:var(--red)}
+  .shot.filled{border-style:solid;border-color:var(--blue)}
+  .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .shot .badge{position:absolute;top:8px;left:8px;background:var(--red);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px}
+  .shot .badge.opt{background:var(--blue)}
+  .shot .swap{position:absolute;bottom:8px;right:8px;background:rgba(38,36,58,.8);color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;font-weight:700}
+  .shot .ic{font-size:30px}
+  .shot .t{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--ink);font-size:14px}
+  .shot .s{font-size:12px;color:var(--ink-soft)}
+  .shot input{display:none}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:none;border-radius:var(--r);padding:17px;margin-top:16px;cursor:pointer;
+    font-family:'Fredoka',sans-serif;font-size:20px;font-weight:700;color:#fff;transition:transform var(--t),box-shadow var(--t)}
+  .btn-go{background:linear-gradient(120deg,var(--red),var(--marvel) 50%,var(--purple));box-shadow:0 10px 26px rgba(237,29,36,.34)}
+  .btn-go:active{transform:translateY(2px) scale(.99)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none;filter:grayscale(.3)}
+  .btn-again{background:linear-gradient(120deg,var(--blue),var(--blue-d));font-size:17px;padding:14px}
+
+  .loading{display:none;text-align:center;padding:32px 10px}
+  .loading.on{display:block}
+  .pokespin{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;
+    background:linear-gradient(180deg,var(--red) 0 48%,#fff 48% 52%,#eee 52% 100%);border:4px solid var(--ink);animation:sp 700ms linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .loading p{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--purple);font-size:16px;margin:0}
+
+  #results{display:none}
+  #results.on{display:block;animation:pop 360ms cubic-bezier(.34,1.5,.5,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+  .name{font-family:'Fredoka',sans-serif;font-size:26px;font-weight:700;line-height:1.15;margin:0 0 4px;color:var(--ink)}
+  .sub2{color:var(--ink-soft);font-size:15px;font-weight:700;margin:0 0 12px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .chip{font-family:'Fredoka',sans-serif;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;color:#fff}
+  .chip.rc{background:var(--red)} .chip.holo{background:var(--purple)} .chip.ser{background:var(--blue)}
+  .chip.par{background:linear-gradient(90deg,var(--red),var(--blue))} .chip.type{background:var(--marvel)}
+
+  .value{text-align:center;padding:22px 14px;border-radius:var(--r);margin:16px 0;
+    background:linear-gradient(135deg,#fff7d6,#ffe9ea);border:2px solid var(--yellow)}
+  .value .lab{font-family:'Fredoka',sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--red-d);font-weight:600}
+  .value .amt{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(34px,11vw,50px);line-height:1;margin:6px 0;color:var(--marvel)}
+  .value .typ{color:var(--ink-soft);font-size:14px;font-weight:700}
+  .value .basis{color:var(--ink-soft);font-size:12.5px;margin-top:8px}
+  .conf{display:inline-block;margin-top:10px;font-family:'Fredoka',sans-serif;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;color:#fff}
+  .conf.high{background:#3fae4a} .conf.medium{background:#e59a1c} .conf.low{background:#c85a5a}
+
+  .comp{background:#f4f8ff;border:2px solid #d9e6ff;border-radius:var(--r);padding:12px 14px;margin-bottom:14px}
+  .comp .ct{font-family:'Fredoka',sans-serif;color:var(--blue-d);text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:600;margin-bottom:6px}
+  .comp .row{display:flex;justify-content:space-between;padding:3px 0;font-weight:700;font-size:14px}
+  .comp .row b{color:var(--marvel)}
+  .comp a{color:var(--blue);font-weight:700;font-size:13px}
+
+  .field{margin-top:14px}
+  .field .fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .field .fl{font-family:'Fredoka',sans-serif;font-size:13px;color:var(--ink-soft);font-weight:600}
+  .copy{background:var(--yellow);border:none;color:var(--ink);font-family:'Fredoka',sans-serif;font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;cursor:pointer;transition:transform var(--t)}
+  .copy:active{transform:scale(.95)} .copy.done{background:#3fae4a;color:#fff}
+  .box{background:#faf7ff;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-weight:600;line-height:1.5}
+
+  .note{color:var(--ink-soft);font-size:12.5px;text-align:center;margin-top:16px;font-weight:600}
+  .err{display:none;background:#ffe9ea;border:2px solid var(--red);color:var(--red-d);border-radius:var(--r);padding:14px;margin-top:14px;font-weight:700;text-align:center}
+  .err.on{display:block}
+
+  footer{margin-top:36px;text-align:center;color:var(--ink-soft);font-size:13px;font-weight:700}
+  footer .ded{font-family:'Fredoka',sans-serif;color:var(--purple);font-size:16px;margin-bottom:6px}
+  footer .catch{color:var(--red)}
+  .hr{height:3px;border-radius:3px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--blue));margin:24px 0 16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="ball" aria-hidden="true"></div>
+    <h1>ChletsosScanner</h1>
+    <div class="sub">AI Card Identifier</div>
+    <p class="lede">Snap a Pokemon or Marvel card and the AI tells you what it is, how rare it is, and what it's worth!</p>
+  </header>
+
+  <section class="panel">
+    <h2><span class="step">1</span>Take a photo</h2>
+    <div class="shots">
+      <label class="shot" id="shot-front">
+        <span class="badge">Front</span>
+        <span class="ic">📸</span>
+        <span class="t">Snap the front</span>
+        <span class="s">tap to open camera</span>
+        <input type="file" accept="image/*" capture="environment" id="in-front">
+      </label>
+      <label class="shot" id="shot-back">
+        <span class="badge opt">Back</span>
+        <span class="ic">🔄</span>
+        <span class="t">Add the back</span>
+        <span class="s">optional — helps!</span>
+        <input type="file" accept="image/*" capture="environment" id="in-back">
+      </label>
+    </div>
+    <button class="btn btn-go" id="go" disabled>⚡ Scan it!</button>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="pokespin"></div>
+    <p id="loadmsg">Powering up…</p>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <section id="results">
+    <div class="panel">
+      <h2 style="margin-bottom:8px">✨ It's a…</h2>
+      <div class="chips" id="chips"></div>
+      <p class="name" id="name"></p>
+      <p class="sub2" id="sub2"></p>
+
+      <div class="value">
+        <div class="lab">What it's worth</div>
+        <div class="amt" id="amt">—</div>
+        <div class="typ" id="typ"></div>
+        <div class="basis" id="basis"></div>
+        <div class="conf" id="conf"></div>
+      </div>
+
+      <div class="comp" id="comp" style="display:none">
+        <div class="ct">Real recent prices</div>
+        <div id="comprows"></div>
+      </div>
+
+      <div class="field">
+        <div class="fh"><span class="fl">Full card name</span><button class="copy" data-src="fullname">Copy</button></div>
+        <div class="box" id="fullname"></div>
+      </div>
+
+      <div class="field">
+        <div class="fh"><span class="fl">About this card</span><button class="copy" data-src="about">Copy</button></div>
+        <div class="box" id="about"></div>
+      </div>
+
+      <p class="note">This is a fun estimate — real prices depend on condition and how rare the card is!</p>
+    </div>
+    <button class="btn btn-again" id="again">🔍 Scan another card</button>
+  </section>
+
+  <footer>
+    <div class="hr"></div>
+    <div class="ded">Made for Andrew, Ella, Pete, Myra &amp; Nora</div>
+    <div class="catch">Gotta scan 'em all!</div>
+    <div style="margin-top:10px;color:var(--ink-soft);font-weight:600">Powered by Uncle Jason's card AI</div>
+  </footer>
+
+</div>
+
+<script>
+const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
+const state = { front:null, back:null };
+const $ = id => document.getElementById(id);
+
+function downscale(file, maxDim=1280, quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let {width:w, height:h} = img;
+      if (Math.max(w,h) > maxDim){ const s = maxDim/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Could not read that photo.')); };
+    img.src = url;
+  });
+}
+
+function wireShot(inputId, shotId, key){
+  const input = $(inputId), shot = $(shotId);
+  input.addEventListener('change', async ()=>{
+    const f = input.files && input.files[0]; if (!f) return;
+    try{
+      const data = await downscale(f); state[key] = data;
+      shot.classList.add('filled');
+      shot.querySelectorAll('.ic,.t,.s').forEach(e=>e.style.display='none');
+      let prev = shot.querySelector('img'); if(!prev){ prev=document.createElement('img'); shot.appendChild(prev); }
+      prev.src = data;
+      if(!shot.querySelector('.swap')){ const sw=document.createElement('span'); sw.className='swap'; sw.textContent='Retake'; shot.appendChild(sw); }
+      $('go').disabled = !state.front;
+    }catch(e){ showErr(e.message || 'Could not read that photo.'); }
+  });
+}
+wireShot('in-front','shot-front','front');
+wireShot('in-back','shot-back','back');
+
+function showErr(m){ const e=$('err'); e.textContent=m; e.classList.add('on'); }
+function clearErr(){ $('err').classList.remove('on'); }
+
+const LOAD_MSGS = ['Powering up…','Looking at your card…','Checking the Pokedex…','Asking the AI…','Almost there…'];
+
+$('go').addEventListener('click', scan);
+$('again').addEventListener('click', ()=>{ $('results').classList.remove('on'); window.scrollTo({top:0,behavior:'smooth'}); });
+
+async function scan(){
+  if (!state.front) return;
+  clearErr(); $('results').classList.remove('on'); $('go').disabled = true;
+  const load=$('loading'); load.classList.add('on');
+  let i=0; $('loadmsg').textContent=LOAD_MSGS[0];
+  const cyc=setInterval(()=>{ i=(i+1)%LOAD_MSGS.length; $('loadmsg').textContent=LOAD_MSGS[i]; },1900);
+  try{
+    const res = await fetch(LAMBDA + '/upload-photos', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: state.front, back: state.back || undefined })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Something went wrong.');
+    if (!data.identified || !data.card) throw new Error(data.message || "Hmm, I couldn't read that card. Try a clear, bright photo of the front!");
+    render(data);
+  }catch(e){ showErr(e.message || 'No internet? Try again!'); }
+  finally{ clearInterval(cyc); load.classList.remove('on'); $('go').disabled=false; }
+}
+
+function money(n){ return (typeof n==='number' && isFinite(n)) ? '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : null; }
+
+function render(data){
+  const c = data.card;
+  const chips=$('chips'); chips.innerHTML='';
+  const add=(t,cls)=>{ const s=document.createElement('span'); s.className='chip '+cls; s.textContent=t; chips.appendChild(s); };
+  if (c.is_rookie) add('Rookie ⭐','rc');
+  if (c.is_auto) add('Autograph ✍️','holo');
+  if (c.is_relic) add('Relic','holo');
+  if (c.serial) add('# '+c.serial+' (rare!)','ser');
+  if (c.parallel) add(c.parallel,'par');
+  if (c.category==='pokemon') add('Pokemon','type');
+  else if (c.category==='sports' && c.sport) add(c.sport,'type');
+
+  const idBits = [c.year, c.brand, c.set_name, c.player].filter(Boolean).join(' ');
+  $('name').textContent = c.player || idBits || 'Your card!';
+  $('sub2').textContent = [c.year, c.brand, c.set_name, c.team, c.card_number?('#'+c.card_number):''].filter(Boolean).join(' · ');
+
+  const v=c.estimated_value_usd||{}; const lo=money(v.low),hi=money(v.high),typ=money(v.typical);
+  $('amt').textContent = (lo&&hi)?(lo+' – '+hi):(typ||'—');
+  $('typ').textContent = typ?('Usually about '+typ):'';
+  $('basis').textContent = c.value_basis||'';
+  const conf=$('conf'); const cf=(c.confidence||'').toLowerCase();
+  conf.textContent = cf?('AI is '+cf+' sure'):''; conf.className='conf '+(cf||'');
+
+  const comp=$('comp'), rows=$('comprows');
+  if (data.comp && (data.comp.raw||data.comp.psa9||data.comp.psa10)){
+    rows.innerHTML='';
+    const r=(l,val)=>{ if(!val) return; const d=document.createElement('div'); d.className='row'; d.innerHTML='<span>'+l+'</span><b>'+money(val)+'</b>'; rows.appendChild(d); };
+    r('Regular card', data.comp.raw); r('Graded PSA 9', data.comp.psa9); r('Graded PSA 10 (perfect!)', data.comp.psa10);
+    if (data.comp.url){ const a=document.createElement('a'); a.href=data.comp.url; a.target='_blank'; a.rel='noopener'; a.textContent='See more prices →'; rows.appendChild(a); }
+    comp.style.display='block';
+  } else comp.style.display='none';
+
+  $('fullname').textContent = (c.ebay_title||idBits||'').trim();
+  $('about').textContent = (c.ebay_description||'').trim();
+
+  $('results').classList.add('on');
+  setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const txt=$(btn.dataset.src).textContent;
+    try{ await navigator.clipboard.writeText(txt); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    const o=btn.textContent; btn.textContent='Copied!'; btn.classList.add('done');
+    setTimeout(()=>{ btn.textContent=o; btn.classList.remove('done'); },1400);
+  });
+});
+</script>
+</body>
+</html>
