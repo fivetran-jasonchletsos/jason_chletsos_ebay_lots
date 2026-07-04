@@ -66,6 +66,67 @@ ADMIN_KNOWN_IP_PREFIXES = [p.strip() for p in os.environ.get("ADMIN_KNOWN_IP_PRE
 # Anthropic vision + optional live pricing for the "Beyond Cards" appraiser
 ANTHROPIC_API_KEY_ENV = os.environ.get("ANTHROPIC_API_KEY", "")
 PRICECHARTING_API_KEY = os.environ.get("PRICECHARTING_API_KEY", "")
+# If set, Claude vision runs through AWS Bedrock (bills the AWS account) instead
+# of the Anthropic API key. Set to a Bedrock model / inference-profile id, e.g.
+# "us.anthropic.claude-3-5-sonnet-20241022-v2:0".
+BEDROCK_MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "")
+
+
+def _run_vision(system, images, instruction, max_tokens=1200):
+    """Send image(s) + an instruction to a vision model; return (text, label).
+
+    `images` is a list of (format, raw_bytes) tuples (format in
+    jpeg/png/gif/webp). Uses AWS Bedrock's Converse API when BEDROCK_MODEL_ID
+    is set (model-agnostic — Amazon Nova, Claude, etc.; auth via the Lambda's
+    IAM role, no API key). Falls back to the Anthropic API key otherwise.
+    """
+    if BEDROCK_MODEL_ID:
+        import boto3
+        client = boto3.client("bedrock-runtime")
+        content = [{"image": {"format": fmt, "source": {"bytes": raw}}}
+                   for (fmt, raw) in images]
+        content.append({"text": instruction})
+        resp = client.converse(
+            modelId=BEDROCK_MODEL_ID,
+            system=[{"text": system}],
+            messages=[{"role": "user", "content": content}],
+            inferenceConfig={"maxTokens": max_tokens, "temperature": 0.2},
+        )
+        blocks = resp.get("output", {}).get("message", {}).get("content", [])
+        text = "".join(b.get("text", "") for b in blocks
+                       if isinstance(b, dict) and "text" in b).strip()
+        return text, f"bedrock:{BEDROCK_MODEL_ID}"
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        raise RuntimeError("no BEDROCK_MODEL_ID and no ANTHROPIC_API_KEY configured")
+    a_content = [{"type": "image", "source": {
+        "type": "base64", "media_type": f"image/{fmt}",
+        "data": base64.b64encode(raw).decode()}} for (fmt, raw) in images]
+    a_content.append({"type": "text", "text": instruction})
+    payload = json.dumps({
+        "model":      "claude-sonnet-4-6",
+        "max_tokens": max_tokens,
+        "system":     system,
+        "messages":   [{"role": "user", "content": a_content}],
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.anthropic.com/v1/messages",
+        data=payload,
+        headers={
+            "x-api-key":         api_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type":      "application/json",
+        },
+        method="POST",
+    )
+    resp = urllib.request.urlopen(req, timeout=50)
+    data = json.loads(resp.read().decode())
+    text = "".join(
+        b.get("text", "") for b in data.get("content", [])
+        if isinstance(b, dict) and b.get("type") == "text"
+    ).strip()
+    return text, data.get("model", "")
 
 
 def _extract_json(text):
@@ -161,19 +222,30 @@ _BEYOND_SYSTEM_PROMPT = (
 )
 
 
-def _decode_image(data_url):
-    """Split a data URL (or bare base64) into (media_type, base64_data)."""
+def _img_bytes(data_url):
+    """Turn a data URL (or bare base64) into (format, raw_bytes).
+
+    format is one of jpeg/png/gif/webp (Converse-API image formats). Returns
+    (None, None) if it can't decode.
+    """
     if not data_url:
         return None, None
-    media = "image/jpeg"
+    fmt = "jpeg"
     b64 = data_url
     if data_url.startswith("data:"):
         head, _, b64 = data_url.partition(",")
         if ":" in head and ";" in head:
-            cand = head[head.index(":") + 1:head.index(";")]
-            if cand.startswith("image/"):
-                media = cand
-    return media, b64
+            mime = head[head.index(":") + 1:head.index(";")]
+            if mime.startswith("image/"):
+                sub = mime.split("/", 1)[1].lower()
+                fmt = {"jpg": "jpeg"}.get(sub, sub)
+    try:
+        raw = base64.b64decode(b64)
+    except Exception:
+        return None, None
+    if fmt not in ("jpeg", "png", "gif", "webp"):
+        fmt = "jpeg"
+    return fmt, raw
 
 
 def lambda_handler(event, context):
@@ -699,12 +771,11 @@ def lambda_handler(event, context):
     # ------------------------------------------------------------------
     if method == "POST" and path.endswith("/ebay/upload-photos"):
         try:
-            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-            if not api_key:
-                logger.error("upload-photos: ANTHROPIC_API_KEY not set")
+            if not (BEDROCK_MODEL_ID or os.environ.get("ANTHROPIC_API_KEY")):
+                logger.error("upload-photos: no BEDROCK_MODEL_ID / ANTHROPIC_API_KEY")
                 return _cors_response(503, {
                     "success": False,
-                    "error":   "Appraiser not configured — ANTHROPIC_API_KEY missing on Lambda.",
+                    "error":   "Appraiser not configured — no model backend set on Lambda.",
                 }, event)
 
             body = json.loads(event.get("body") or "{}")
@@ -713,61 +784,41 @@ def lambda_handler(event, context):
             if not front:
                 return _cors_response(400, {"success": False, "error": "image required"}, event)
 
-            fmedia, fb64 = _decode_image(front)
-            if not fb64:
+            ffmt, fraw = _img_bytes(front)
+            if not fraw:
                 return _cors_response(400, {"success": False, "error": "invalid image"}, event)
-            if len(fb64) > 7_000_000:
+            if len(fraw) > 3_500_000:
                 return _cors_response(413, {
                     "success": False,
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
-            content = [{"type": "image", "source": {
-                "type": "base64", "media_type": fmedia, "data": fb64}}]
+            images = [(ffmt, fraw)]
             if back:
-                bmedia, bb64 = _decode_image(back)
-                if bb64 and len(bb64) <= 7_000_000:
-                    content.append({"type": "image", "source": {
-                        "type": "base64", "media_type": bmedia, "data": bb64}})
-            content.append({"type": "text", "text":
-                "Identify this trading card and produce the eBay listing JSON. "
-                "Return ONLY the JSON object."})
+                bfmt, braw = _img_bytes(back)
+                if braw and len(braw) <= 3_500_000:
+                    images.append((bfmt, braw))
+            instruction = ("Identify this trading card and produce the eBay listing JSON. "
+                           "Return ONLY the JSON object.")
 
-            payload = json.dumps({
-                "model":      "claude-sonnet-4-6",
-                "max_tokens": 1200,
-                "system":     _BEYOND_SYSTEM_PROMPT,
-                "messages":   [{"role": "user", "content": content}],
-            }).encode()
-
-            req = urllib.request.Request(
-                "https://api.anthropic.com/v1/messages",
-                data=payload,
-                headers={
-                    "x-api-key":         api_key,
-                    "anthropic-version": "2023-06-01",
-                    "Content-Type":      "application/json",
-                },
-                method="POST",
-            )
             try:
-                resp = urllib.request.urlopen(req, timeout=50)
-                data = json.loads(resp.read().decode())
+                raw, model_label = _run_vision(_BEYOND_SYSTEM_PROMPT, images, instruction, 1200)
             except urllib.error.HTTPError as exc:
                 err_body = exc.read().decode()[:300]
-                logger.error(f"upload-photos Anthropic HTTP {exc.code}: {err_body}")
+                logger.error(f"upload-photos vision HTTP {exc.code}: {err_body}")
                 return _cors_response(502, {
                     "success": False,
                     "error":   f"AI vision error (HTTP {exc.code}). Please try again.",
                 }, event)
+            except Exception as exc:
+                logger.error(f"upload-photos vision error: {exc}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "AI vision error. Please try again.",
+                }, event)
 
-            raw = "".join(
-                b.get("text", "") for b in data.get("content", [])
-                if isinstance(b, dict) and b.get("type") == "text"
-            ).strip()
             card = _extract_json(raw)
-            logger.info(f"upload-photos: model={data.get('model')} usage={data.get('usage')} "
-                        f"parsed={isinstance(card, dict)}")
+            logger.info(f"upload-photos: model={model_label} parsed={isinstance(card, dict)}")
 
             if not isinstance(card, dict):
                 return _cors_response(200, {
@@ -785,7 +836,7 @@ def lambda_handler(event, context):
                 "identified": bool(card.get("is_card", True)),
                 "card":       card,
                 "comp":       comp,
-                "model":      data.get("model", ""),
+                "model":      model_label,
             }, event)
 
         except Exception as exc:
