@@ -152,13 +152,15 @@ C = [
  (235,9,"Christian Watson","Packers","WR","Topps Chrome","XFractor",0),
  (236,1,"Joe Montana","49ers","Legend","Prizm","Prizmatic",0),
  (236,2,"Rome Odunze","Bears","WR","Phoenix Contours","Base",0),
- (236,3,"TreVeyon Henderson","Patriots","RB","Phoenix Contours","Printing Plate Cyan",1),
- (236,4,"Tetairoa McMillan","Panthers","WR","Phoenix Contours","Printing Plate Cyan",1),
+ # Scan 236 Contours are CMYK color cards, NOT serial-numbered 1/1 plates (JC
+ # confirmed in-hand). Relabeled by color; verified each crop. Watt Yellow SOLD
+ # (was double-scanned in 236_6 & 237_9) so it's removed to avoid relisting.
+ (236,3,"TreVeyon Henderson","Patriots","RB","Phoenix Contours","Cyan",1),
+ (236,4,"Tetairoa McMillan","Panthers","WR","Phoenix Contours","Cyan",1),
  (236,5,"Rome Odunze","Bears","WR","Phoenix Contours","Base",0),
- (236,6,"T.J. Watt","Steelers","Defense","Phoenix Contours","Printing Plate Yellow",0),
- (236,7,"Xavier Worthy","Chiefs","WR","Phoenix Contours","Printing Plate Magenta",0),
- (236,8,"TreVeyon Henderson","Patriots","RB","Phoenix Contours","Printing Plate Cyan",1),
- (236,9,"RJ Harvey","Broncos","RB","Phoenix Contours","Printing Plate Black",1),
+ (236,7,"Xavier Worthy","Chiefs","WR","Phoenix Contours","Red",0),
+ (236,8,"TreVeyon Henderson","Patriots","RB","Phoenix Contours","Black",1),
+ (236,9,"RJ Harvey","Broncos","RB","Phoenix Contours","Black",1),
  (237,1,"Quincy Riley","Saints","Defense","Topps Icons","Base",1),
  (237,2,"Tyler Booker","Cowboys","Defense","Topps Icons","Base",1),
  (237,3,"Marvin Mims Jr","Broncos","WR","Topps Icons","Base",0),
@@ -167,7 +169,7 @@ C = [
  (237,6,"Rome Odunze","Bears","WR","Phoenix Contours","Base",0),
  (237,7,"Jack Sawyer","Steelers","Defense","Topps Icons","Base",1),
  (237,8,"David Njoku","Browns","TE","Topps Icons","Base",0),
- (237,9,"T.J. Watt","Steelers","Defense","Phoenix Contours","Printing Plate Yellow",0),
+ # (237,9) T.J. Watt Contours Yellow removed — same card as 236_6, already SOLD.
  (238,1,"Malachi Moore","Jets","Defense","Topps Icons","Base",1),
  (238,2,"Kyle Kennard","Chargers","Defense","Topps Icons","Base",1),
  (238,3,"Mike Green","Ravens","Defense","Topps Icons","Base",1),
@@ -252,7 +254,8 @@ STARS = {"Patrick Mahomes","Joe Montana","Josh Allen","Lamar/Henry","Jalen Hurts
  "Omarion Hampton","Luther Burden III","Arch Manning","Caleb Williams","Trevor Lawrence",
  "Colston Loveland","Matthew Golden","Quinshon Judkins","Emeka Egbuka","TreVeyon Henderson",
  "Mason Taylor","Travis Kelce","Justin Jefferson","Lamar Jackson","Dak Prescott",
- "Kyler Murray","Jaxon Smith-Njigba","Michael Penix Jr","Drake Maye","Bo Nix","Jameson Williams"}
+ "Kyler Murray","Jaxon Smith-Njigba","Michael Penix Jr","Drake Maye","Bo Nix","Jameson Williams",
+ "Xavier Worthy","RJ Harvey"}
 
 def is_single(c):
     scan,idx,player,team,pos,prod,par,rc = c
@@ -383,6 +386,27 @@ def do_apply(mode):
     cfg = json.loads(Path("configuration.json").read_text()); token = get_write_token(cfg)
     singles, lots = build()
 
+    # Pull current active titles so we NEVER double-post a card already live.
+    import re as _re
+    def _norm(t): return _re.sub(r"\s+"," ",(t or "").strip().lower())
+    active_titles=set(); _pg=1
+    while True:
+        _h=trading_headers("GetMyeBaySelling",cfg,token)
+        _x=('<?xml version="1.0" encoding="utf-8"?>'
+            '<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">'
+            '<ActiveList><Include>true</Include>'
+            f'<Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>{_pg}</PageNumber></Pagination>'
+            '</ActiveList></GetMyeBaySellingRequest>')
+        _r=requests.post(TRADING_URL,headers=_h,data=_x.encode(),timeout=60)
+        _ts=_re.findall(r"<Title>(.*?)</Title>",_r.text)
+        if not _ts: break
+        for _t in _ts: active_titles.add(_norm(_t))
+        _tp=_re.search(r"<TotalNumberOfPages>(\d+)</TotalNumberOfPages>",_r.text)
+        _tot=int(_tp.group(1)) if _tp else _pg
+        if _pg>=_tot: break
+        _pg+=1
+    print(f"  {len(active_titles)} active titles loaded — will skip any already live.")
+
     def add(title, price, url, desc, category, cond, specifics):
         sx = "".join(f"<NameValueList><Name>{xml_escape(k)}</Name><Value>{xml_escape(v)}</Value></NameValueList>"
                      for k,v in specifics.items())
@@ -422,26 +446,34 @@ def do_apply(mode):
     if mode in ("singles","all"):
         for c in singles:
             title = _title_single(c); price = price_single(c)
+            if _norm(title) in active_titles:
+                print(f"  S  SKIP (already live) {title[:52]}"); continue
             try:
                 url = upload_image(crop(c[0],c[1]), token, cfg)
             except Exception as e:
                 print(f"  UPLOAD FAIL {c[2]}: {e}"); fail+=1; continue
+            ser = SERIAL.get((c[0],c[1]))
+            serline = f"<li>Serial numbered <b>{xml_escape(ser)}</b>.</li>" if ser else ""
             desc = (f"<h3>{xml_escape(title)}</h3><p>You receive the <b>exact card pictured</b>.</p>"
-                    "<ul><li>Raw / ungraded, pack-fresh condition.</li>"
+                    f"<ul>{serline}<li>Raw / ungraded, pack-fresh condition.</li>"
                     "<li>Shipped in a penny sleeve + top loader (or team bag) via eBay Standard Envelope.</li>"
                     "<li>Combine with any other cards in our store for one shipping charge.</li></ul>")
             spec = {"Sport":"Football","Type":"Sports Trading Card",
                     "League":"National Football League (NFL)","Original/Licensed Reprint":"Original",
                     "Card Condition":"Near Mint or Better"}
+            if ser: spec["Features"]="Serial Numbered"+(", Rookie" if c[7] else ""); spec["Card Number"]=ser
             if "Printing Plate" in c[6]: spec["Features"]="1/1, Printing Plate"; spec["Parallel/Variety"]="Printing Plate"
-            elif c[7]: spec["Features"]="Rookie"
+            elif c[7] and not ser: spec["Features"]="Rookie"
             ack,iid,txt = add(title, price, url, desc, "261328", 4000, spec)
             if ack in ("Success","Warning") and iid:
-                print(f"  S  ${price:5.2f} {iid}  {title[:52]}"); ok+=1
+                print(f"  S  ${price:5.2f} {iid}  {title[:52]}"); ok+=1; active_titles.add(_norm(title))
             else:
                 print(f"  S  FAIL ({ack}) {title[:48]}: {txt[:160]}"); fail+=1
     if mode in ("lots","all"):
         for l in lots:
+            title = _lot_title(l)
+            if _norm(title) in active_titles:
+                print(f"  L  SKIP (already live) {title[:52]}"); continue
             paths = [crop(c[0],c[1]) for c in l["cards"]]
             key = (l['family']+l['cards'][0][2]).replace(' ','')[:24]
             collage = build_collage(paths, Path(f"output/_lot241_{key}.jpg"))
@@ -460,7 +492,7 @@ def do_apply(mode):
                     "League":"National Football League (NFL)"}
             ack,iid,txt = add(title, price, url, desc, "261329", 3000, spec)
             if ack in ("Success","Warning") and iid:
-                print(f"  L  ${price:5.2f} {iid}  {title[:52]}"); ok+=1
+                print(f"  L  ${price:5.2f} {iid}  {title[:52]}"); ok+=1; active_titles.add(_norm(title))
             else:
                 print(f"  L  FAIL ({ack}) {title[:48]}: {txt[:160]}"); fail+=1
     print(f"\n  ==== {ok} posted, {fail} failed ====")
