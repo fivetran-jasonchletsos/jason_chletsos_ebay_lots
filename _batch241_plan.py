@@ -188,7 +188,61 @@ C = [
  (240,3,"Marist Liufau","Cowboys","Defense","Totally Certified","Purple",1),
  (240,4,"Calen Bullock","Texans","Defense","Phoenix","Blue",1),
  (240,5,"Christian McCaffrey","49ers","RB","Phoenix","Blue",0),
+ # --- Scans 245-249 (added 2026-07-05): every crop read directly, corners grid-verified. ---
+ # Scan 245 — Phoenix Thunderbirds / Contours sheet
+ (245,1,"TreVeyon Henderson","Patriots","RB","Phoenix","Thunderbirds",1),
+ (245,2,"Travis Kelce","Chiefs","TE","Phoenix","Thunderbirds",0),
+ (245,3,"Tank Bigsby","Jaguars","RB","Phoenix","Teal",0),
+ (245,4,"Drake Maye","Patriots","QB","Phoenix","Thunderbirds",0),
+ (245,5,"Mark Andrews","Ravens","TE","Phoenix","Blue",0),
+ (245,6,"Kyler Murray","Cardinals","QB","Phoenix Contours","Red",0),
+ (245,7,"Bijan Robinson","Falcons","RB","Phoenix Contours","Red",0),
+ (245,8,"Dan Fouts","Chargers","Legend","Phoenix","Base",0),
+ (245,9,"Keon Coleman","Bills","WR","Phoenix","Teal",0),
+ # Scan 246 — Phoenix + two Optic
+ (246,1,"Bo Nix","Broncos","QB","Phoenix","Silver",0),
+ (246,2,"Lamar Jackson","Ravens","QB","Phoenix","Thunderbirds",0),
+ (246,3,"Brock Bowers","Raiders","TE","Optic","Base",0),
+ (246,4,"Cam Ward","Titans","QB","Phoenix Contours","Base",1),
+ (246,5,"Drake Maye","Patriots","QB","Phoenix","Paragon Orange",0),
+ (246,6,"Jackson Hawes","Bills","TE","Optic","Rated Rookie Blue",1),
+ (246,7,"Patrick Surtain II","Broncos","Defense","Phoenix","Silver",0),
+ (246,8,"Terry McLaurin","Commanders","WR","Phoenix","Red",0),
+ (246,9,"Dak Prescott","Cowboys","QB","Phoenix","Thunderbirds",0),
+ # Scan 247 — Select
+ (247,1,"Travis Kelce","Chiefs","TE","Select","Numbers",0),
+ (247,2,"Quinshon Judkins","Browns","RB","Select","Select Certified",1),
+ (247,3,"Tyler Shough","Saints","QB","Select","Select Certified",1),
+ (247,4,"Bijan Robinson","Falcons","RB","Select","Red",0),
+ (247,5,"Nik Bonitto","Broncos","Defense","Select","Base",0),
+ (247,6,"A.J. Green","Bengals","WR","Select","Red",0),
+ (247,7,"Dont'e Thornton Jr","Raiders","WR","Select","Base",1),
+ (247,8,"Malaki Starks","Ravens","Defense","Select","Future",1),
+ (247,9,"Christian McCaffrey","49ers","RB","Select","Turbocharged",0),
+ # Scan 248 — Select
+ (248,1,"Alfred Collins","49ers","Defense","Select","Tri-Color",1),
+ (248,2,"Jameson Williams","Lions","WR","Select","Zebra",0),
+ (248,3,"Luther Burden III","Bears","WR","Select","Future",1),
+ (248,4,"Jaxon Smith-Njigba","Seahawks","WR","Select","Numbers",0),
+ (248,5,"Patrick Mahomes","Chiefs","QB","Select","Base",0),
+ (248,6,"Tyler Warren","Colts","TE","Select","Base",1),
+ (248,7,"Tai Felton","Vikings","WR","Select","Base",1),
+ (248,8,"Joe Milton III","Cowboys","QB","Select","Base",0),
+ (248,9,"Terrance Ferguson","Rams","TE","Select","Tri-Color",1),
+ # Scan 249 — mixed Phoenix / Select (Mason Graham & Bhayshul Tuten serial-numbered)
+ (249,1,"Mason Graham","Browns","Defense","Phoenix","Orange",1),
+ (249,2,"Bhayshul Tuten","Jaguars","RB","Select","Copper",1),
+ (249,3,"TreVeyon Henderson","Patriots","RB","Select","Tri-Color",1),
+ (249,4,"Tyler Shough","Saints","QB","Phoenix","Paragon Orange",1),
+ (249,5,"Matthew Golden","Packers","WR","Select","Future",1),
+ (249,6,"Justin Jefferson","Vikings","WR","Select","Sparks",0),
+ (249,7,"Ashton Jeanty","Raiders","RB","Select","Select Certified",1),
+ (249,8,"Michael Penix Jr","Falcons","QB","Select","Numbers",0),
+ (249,9,"Jahdae Barron","Broncos","Defense","Select","Base",1),
 ]
+
+# Serial-numbered cards (JC-supplied) -> always singles, price + title reflect the serial.
+SERIAL = {(249,1):"159/385", (249,2):"654/899"}
 
 # Marquee names -> always a single
 STARS = {"Patrick Mahomes","Joe Montana","Josh Allen","Lamar/Henry","Jalen Hurts",
@@ -197,10 +251,12 @@ STARS = {"Patrick Mahomes","Joe Montana","Josh Allen","Lamar/Henry","Jalen Hurts
  "Calvin Johnson","Ashton Jeanty","Travis Hunter","Cam Ward","Tetairoa McMillan",
  "Omarion Hampton","Luther Burden III","Arch Manning","Caleb Williams","Trevor Lawrence",
  "Colston Loveland","Matthew Golden","Quinshon Judkins","Emeka Egbuka","TreVeyon Henderson",
- "Mason Taylor"}
+ "Mason Taylor","Travis Kelce","Justin Jefferson","Lamar Jackson","Dak Prescott",
+ "Kyler Murray","Jaxon Smith-Njigba","Michael Penix Jr","Drake Maye","Bo Nix","Jameson Williams"}
 
 def is_single(c):
     scan,idx,player,team,pos,prod,par,rc = c
+    if (scan,idx) in SERIAL: return True              # serial-numbered
     if "Printing Plate" in par: return True          # 1/1 plates
     if pos == "Multi": return True                    # dual-star Paramount Pairings
     if "Touchdown Masters" in par or par=="The Pick": return True
@@ -268,7 +324,9 @@ BRAND = {
 MARQUEE = {"Patrick Mahomes","Joe Burrow","Josh Allen","Jalen Hurts","Ashton Jeanty",
  "Cam Ward","Travis Hunter","Ja'Marr Chase","Brock Bowers","Bijan Robinson","CeeDee Lamb",
  "Micah Parsons","Christian McCaffrey","Trevor Lawrence","Caleb Williams","Arch Manning",
- "Mark Andrews","Sam LaPorta"}
+ "Mark Andrews","Sam LaPorta","Justin Jefferson","Lamar Jackson","Travis Kelce",
+ "Dak Prescott","Kyler Murray","Jaxon Smith-Njigba","Michael Penix Jr","Matthew Golden",
+ "Quinshon Judkins","TreVeyon Henderson","Luther Burden III"}
 
 def _title_single(c):
     scan,idx,player,team,pos,prod,par,rc = c
@@ -276,12 +334,15 @@ def _title_single(c):
     t = f"{b} {player}"
     if par and par != "Base": t += f" {par}"
     if "Printing Plate" in par: t += " 1/1"
+    ser = SERIAL.get((scan,idx))
+    if ser: t += f" /{ser.split('/')[-1]}"     # print run, e.g. /385
     if rc: t += " RC"
     t += f" {team} Football"
     return t[:80]
 
 def price_single(c):
     if "Printing Plate" in c[6]: return 24.99
+    if (c[0],c[1]) in SERIAL: return 12.99
     if c[4] == "Legend": return 9.99
     if c[4] == "Multi": return 6.99
     if c[2] in MARQUEE: return 6.99
@@ -454,8 +515,10 @@ def render(singles, lots):
         except: w=int(TH*0.72); im=Image.new("RGB",(w,TH),(230,230,230))
         page.paste(im,(x+(CW-w)//2,yy))
         tag="PLATE 1/1 " if "Printing Plate" in c[6] else ""
+        ser=SERIAL.get((c[0],c[1]))
+        par=(c[6] or c[5])+(f"  {ser}" if ser else "")
         d.text((x+2,yy+TH+3),fit(tag+c[2],nf,CW),font=nf,fill="black")
-        d.text((x+2,yy+TH+19),fit(c[6] or c[5],pf,CW),font=pf,fill=(120,120,120))
+        d.text((x+2,yy+TH+19),fit(par,pf,CW),font=pf,fill=((150,110,20) if ser else (120,120,120)))
     def grid(cards):
         nonlocal y
         i=0
