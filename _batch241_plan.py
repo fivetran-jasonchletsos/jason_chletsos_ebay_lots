@@ -194,7 +194,7 @@ C = [
  (245,2,"Travis Kelce","Chiefs","TE","Phoenix","Thunderbirds",0),
  (245,3,"Tank Bigsby","Jaguars","RB","Phoenix","Teal",0),
  (245,4,"Drake Maye","Patriots","QB","Phoenix","Thunderbirds",0),
- (245,5,"Mark Andrews","Ravens","TE","Phoenix","Blue",0),
+ # (245,5) Mark Andrews Phoenix Blue removed — confirmed dupe of (240,2), JC pulling one.
  (245,6,"Kyler Murray","Cardinals","QB","Phoenix Contours","Red",0),
  (245,7,"Bijan Robinson","Falcons","RB","Phoenix Contours","Red",0),
  (245,8,"Dan Fouts","Chargers","Legend","Phoenix","Base",0),
