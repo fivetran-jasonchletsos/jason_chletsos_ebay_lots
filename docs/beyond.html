@@ -97,6 +97,23 @@
   .btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
   .btn-ghost{background:var(--surface-3);color:var(--text);border:1px solid var(--border);font-weight:600;font-size:14px;padding:12px}
 
+  .lang-toggle{
+    position:fixed;top:14px;right:14px;z-index:30;font-family:inherit;
+    background:var(--surface-3);border:1px solid var(--border-strong);color:var(--gold-bright);
+    font-size:12px;font-weight:700;letter-spacing:.05em;padding:7px 13px;border-radius:20px;
+    cursor:pointer;transition:all var(--t);
+  }
+  .lang-toggle:active{transform:translateY(1px)}
+
+  .toast{
+    position:fixed;top:60px;right:14px;z-index:30;max-width:230px;
+    background:var(--surface-3);border:1px solid var(--gold-dim);color:var(--gold-bright);
+    font-size:12.5px;line-height:1.45;padding:11px 15px;border-radius:12px;
+    box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transform:translateY(-6px);
+    pointer-events:none;transition:opacity 220ms ease,transform 220ms ease;
+  }
+  .toast.on{opacity:1;transform:none}
+
   /* Loading */
   .loading{display:none;text-align:center;padding:34px 10px}
   .loading.on{display:block}
@@ -159,36 +176,39 @@
 <body>
 <div class="wrap">
 
+  <button class="lang-toggle" id="langToggle" type="button" aria-label="Switch to German">DE</button>
+  <div class="toast" id="toast"></div>
+
   <header class="top">
     <div class="mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2.4" stroke="#1a1405" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="#1a1405" stroke-width="1.8" stroke-linecap="round"/></svg>
     </div>
     <h1 class="brand">Beyond Cards</h1>
-    <div class="tag">AI Card Appraiser</div>
-    <p class="lede">Snap a photo of any card. Get its estimated value plus a ready-to-post eBay title &amp; description.</p>
+    <div class="tag" data-en="AI Card Appraiser" data-de="KI-Kartensch&auml;tzer">AI Card Appraiser</div>
+    <p class="lede" data-en="Snap a photo of any card. Get its estimated value plus a ready-to-post eBay title & description." data-de="Fotografiere eine beliebige Karte und erhalte ihren gesch&auml;tzten Wert sowie einen fertigen eBay-Titel & eine Beschreibung.">Snap a photo of any card. Get its estimated value plus a ready-to-post eBay title &amp; description.</p>
   </header>
 
   <section class="panel">
-    <h2>1 · Photograph the card</h2>
+    <h2 data-en="1 · Photograph the card" data-de="1 · Karte fotografieren">1 · Photograph the card</h2>
     <div class="shots">
       <label class="shot" id="shot-front">
-        <span class="badge">Front <span class="req">*</span></span>
+        <span class="badge"><span data-en="Front" data-de="Vorderseite">Front</span> <span class="req">*</span></span>
         <svg class="ph-ic" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 012-2h1.5l1-1.6a1 1 0 01.86-.4h5.28a1 1 0 01.86.4L21.5 6H22a2 2 0 012 2" stroke="currentColor" stroke-width="1.6"/><rect x="2" y="6" width="20" height="14" rx="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.6" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="ph-t">Take / choose</span>
-        <span class="ph-s">front of card</span>
+        <span class="ph-t" data-en="Take / choose" data-de="Aufnehmen / ausw&auml;hlen">Take / choose</span>
+        <span class="ph-s" data-en="front of card" data-de="Vorderseite der Karte">front of card</span>
         <input type="file" accept="image/*" capture="environment" id="in-front">
       </label>
       <label class="shot" id="shot-back">
-        <span class="badge">Back <span style="color:var(--text-dim)">(optional)</span></span>
+        <span class="badge"><span data-en="Back" data-de="R&uuml;ckseite">Back</span> <span style="color:var(--text-dim)" data-en="(optional)" data-de="(optional)">(optional)</span></span>
         <svg class="ph-ic" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2.2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <span class="ph-t">Add back</span>
-        <span class="ph-s">helps accuracy</span>
+        <span class="ph-t" data-en="Add back" data-de="R&uuml;ckseite hinzuf&uuml;gen">Add back</span>
+        <span class="ph-s" data-en="helps accuracy" data-de="verbessert die Genauigkeit">helps accuracy</span>
         <input type="file" accept="image/*" capture="environment" id="in-back">
       </label>
     </div>
     <button class="btn btn-gold" id="go" disabled>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="#1a1405" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" fill="#1a1405"/></svg>
-      Appraise card
+      <span data-en="Appraise card" data-de="Karte sch&auml;tzen">Appraise card</span>
     </button>
   </section>
 
@@ -201,13 +221,13 @@
 
   <section id="results">
     <div class="panel">
-      <h2 style="margin-bottom:8px">Appraisal</h2>
+      <h2 style="margin-bottom:8px" data-en="Appraisal" data-de="Sch&auml;tzung">Appraisal</h2>
       <div class="chips" id="chips"></div>
       <p class="ident" id="ident"></p>
       <p class="subident" id="subident"></p>
 
       <div class="value">
-        <div class="lab">Estimated value</div>
+        <div class="lab" data-en="Estimated value" data-de="Gesch&auml;tzter Wert">Estimated value</div>
         <div class="amt" id="amt">—</div>
         <div class="typ" id="typ"></div>
         <div class="basis" id="basis"></div>
@@ -215,31 +235,31 @@
       </div>
 
       <div class="comp" id="comp" style="display:none">
-        <div class="ct">Live market comp</div>
+        <div class="ct" data-en="Live market comp" data-de="Aktueller Marktvergleich">Live market comp</div>
         <div id="comprows"></div>
       </div>
 
       <div class="field">
-        <div class="fh"><span class="fl">eBay title</span><button class="copy" data-src="title">Copy</button></div>
+        <div class="fh"><span class="fl" data-en="eBay title" data-de="eBay-Titel">eBay title</span><button class="copy" data-src="title" data-en="Copy" data-de="Kopieren">Copy</button></div>
         <div class="box mono" id="title"></div>
         <div class="cc" id="cc"></div>
       </div>
 
       <div class="field">
-        <div class="fh"><span class="fl">eBay description</span><button class="copy" data-src="desc">Copy</button></div>
+        <div class="fh"><span class="fl" data-en="eBay description" data-de="eBay-Beschreibung">eBay description</span><button class="copy" data-src="desc" data-en="Copy" data-de="Kopieren">Copy</button></div>
         <div class="box" id="desc"></div>
       </div>
 
-      <p class="note">Estimate only — actual sale price varies with condition, timing &amp; grading. Not a formal appraisal.</p>
+      <p class="note" data-en="Estimate only — actual sale price varies with condition, timing & grading. Not a formal appraisal." data-de="Nur eine Sch&auml;tzung — der tats&auml;chliche Verkaufspreis h&auml;ngt von Zustand, Zeitpunkt & Bewertung ab. Keine formale Begutachtung.">Estimate only — actual sale price varies with condition, timing &amp; grading. Not a formal appraisal.</p>
     </div>
-    <button class="btn btn-ghost" id="again">Appraise another card</button>
+    <button class="btn btn-ghost" id="again" data-en="Appraise another card" data-de="Weitere Karte sch&auml;tzen">Appraise another card</button>
   </section>
 
   <footer>
     <div class="hr"></div>
-    <div class="ded">Made for Amanda, Mike &amp; Moo at Beyond — thanks for the good medicine.</div>
-    <div class="ded" style="font-size:13px;color:var(--text-dim)">And dedicated to Mike's German wife, whose name I always forget.</div>
-    <div style="margin-top:12px">Powered by <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener">Harpua2001</a> card intelligence</div>
+    <div class="ded" data-en="Made for Amanda, Mike & Moo at Beyond — thanks for the good medicine." data-de="F&uuml;r Amanda, Mike & Moo bei Beyond — danke f&uuml;r die gute Medizin.">Made for Amanda, Mike &amp; Moo at Beyond — thanks for the good medicine.</div>
+    <div class="ded" style="font-size:13px;color:var(--text-dim)" data-en="And dedicated to Mike's German wife, whose name I always forget." data-de="Und gewidmet Mikes deutscher Frau, deren Namen ich mir nie merken kann.">And dedicated to Mike's German wife, whose name I always forget.</div>
+    <div style="margin-top:12px" data-en-html='Powered by &lt;a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener"&gt;Harpua2001&lt;/a&gt; card intelligence' data-de-html='Unterst&uuml;tzt durch die Kartenexpertise von &lt;a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener"&gt;Harpua2001&lt;/a&gt;'>Powered by <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener">Harpua2001</a> card intelligence</div>
   </footer>
 
 </div>
@@ -247,8 +267,69 @@
 <script>
 const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
 const state = { front:null, back:null };
+let lastData = null;
 
 const $ = id => document.getElementById(id);
+
+// --- language toggle (UI strings only — AI-generated appraisal text stays as returned) ---
+const I18N = {
+  en: {
+    title: 'Beyond Cards — AI Card Appraiser',
+    retake: 'Retake', copy: 'Copy', copied: 'Copied',
+    rookie: 'Rookie', autograph: 'Autograph', relic: 'Relic / Patch', pokemon: 'Pokemon',
+    rawUngraded: 'Raw / ungraded', viewOn: 'View on ', viewArrow: ' →',
+    typical: 'Typical: ', confidence: ' confidence', confLow: 'low', confMedium: 'medium', confHigh: 'high',
+    loadMsgs: ['Reading the card…','Identifying the set & player…','Checking recent values…','Writing your eBay listing…'],
+    errImg: 'Could not read that image.', errGeneric: 'Something went wrong.',
+    errUnclear: "Couldn't read the card clearly — try a straight, well-lit photo of the front.",
+    errNetwork: 'Network error — please try again.',
+  },
+  de: {
+    title: 'Beyond Cards — KI-Kartenschätzer',
+    retake: 'Neu aufnehmen', copy: 'Kopieren', copied: 'Kopiert',
+    rookie: 'Rookie', autograph: 'Autogramm', relic: 'Relikt / Patch', pokemon: 'Pokémon',
+    rawUngraded: 'Roh / ungeprüft', viewOn: 'Ansehen auf ', viewArrow: ' →',
+    typical: 'Typisch: ', confidence: ' Konfidenz', confLow: 'niedrig', confMedium: 'mittel', confHigh: 'hoch',
+    loadMsgs: ['Karte wird gelesen…','Set & Spieler werden identifiziert…','Aktuelle Werte werden geprüft…','eBay-Angebot wird geschrieben…'],
+    errImg: 'Dieses Bild konnte nicht gelesen werden.', errGeneric: 'Etwas ist schiefgelaufen.',
+    errUnclear: 'Die Karte konnte nicht klar erkannt werden — versuche ein gerades, gut beleuchtetes Foto der Vorderseite.',
+    errNetwork: 'Netzwerkfehler — bitte versuche es erneut.',
+    mikeToast: 'Danke, dass du Mike zum Verkaufen motivierst. Das macht Spaß.',
+  },
+};
+let lang = localStorage.getItem('beyondLang') === 'de' ? 'de' : 'en';
+let loadMsgIdx = 0;
+const t = key => I18N[lang][key];
+
+function applyLang(newLang){
+  lang = newLang;
+  localStorage.setItem('beyondLang', lang);
+  document.documentElement.lang = lang;
+  document.title = t('title');
+  document.querySelectorAll('[data-en]').forEach(el=>{ el.textContent = lang==='de' ? el.dataset.de : el.dataset.en; });
+  document.querySelectorAll('[data-en-html]').forEach(el=>{ el.innerHTML = lang==='de' ? el.dataset.deHtml : el.dataset.enHtml; });
+  $('langToggle').textContent = lang==='de' ? 'EN' : 'DE';
+  $('langToggle').setAttribute('aria-label', lang==='de' ? 'Switch to English' : 'Auf Deutsch wechseln');
+  document.querySelectorAll('.swap').forEach(s=>{ s.textContent = t('retake'); });
+  document.querySelectorAll('.copy').forEach(btn=>{ if (!btn.classList.contains('done')) btn.textContent = t('copy'); });
+  if ($('loading').classList.contains('on')) $('loadmsg').textContent = t('loadMsgs')[loadMsgIdx];
+  if (lastData && $('results').classList.contains('on')) renderResultLabels(lastData);
+}
+
+let toastTimer = null;
+function showToast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('on'), 3400);
+}
+
+$('langToggle').addEventListener('click', ()=>{
+  const newLang = lang==='de' ? 'en' : 'de';
+  applyLang(newLang);
+  if (newLang==='de') showToast(t('mikeToast'));
+});
 
 // --- image capture + client-side downscale (keeps payload small & fast) ---
 function downscale(file, maxDim=1280, quality=0.82){
@@ -265,7 +346,7 @@ function downscale(file, maxDim=1280, quality=0.82){
       c.getContext('2d').drawImage(img,0,0,w,h);
       resolve(c.toDataURL('image/jpeg', quality));
     };
-    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error(t('errImg'))); };
     img.src = url;
   });
 }
@@ -282,9 +363,9 @@ function wireShot(inputId, shotId, key){
       shot.querySelectorAll('.ph-ic,.ph-t,.ph-s').forEach(e=>e.style.display='none');
       let prev = shot.querySelector('img'); if(!prev){ prev=document.createElement('img'); shot.appendChild(prev); }
       prev.src = data;
-      let swap = shot.querySelector('.swap'); if(!swap){ swap=document.createElement('span'); swap.className='swap'; swap.textContent='Retake'; shot.appendChild(swap); }
+      let swap = shot.querySelector('.swap'); if(!swap){ swap=document.createElement('span'); swap.className='swap'; swap.textContent=t('retake'); shot.appendChild(swap); }
       $('go').disabled = !state.front;
-    }catch(e){ showErr(e.message || 'Could not read that image.'); }
+    }catch(e){ showErr(e.message || t('errImg')); }
   });
 }
 wireShot('in-front','shot-front','front');
@@ -292,8 +373,6 @@ wireShot('in-back','shot-back','back');
 
 function showErr(msg){ const e=$('err'); e.textContent=msg; e.classList.add('on'); }
 function clearErr(){ $('err').classList.remove('on'); }
-
-const LOAD_MSGS = ['Reading the card…','Identifying the set & player…','Checking recent values…','Writing your eBay listing…'];
 
 $('go').addEventListener('click', appraise);
 $('again').addEventListener('click', ()=>{
@@ -307,8 +386,8 @@ async function appraise(){
   $('results').classList.remove('on');
   $('go').disabled = true;
   const load = $('loading'); load.classList.add('on');
-  let i=0; $('loadmsg').textContent=LOAD_MSGS[0];
-  const cycle = setInterval(()=>{ i=(i+1)%LOAD_MSGS.length; $('loadmsg').textContent=LOAD_MSGS[i]; }, 2200);
+  loadMsgIdx=0; $('loadmsg').textContent=t('loadMsgs')[0];
+  const cycle = setInterval(()=>{ loadMsgIdx=(loadMsgIdx+1)%t('loadMsgs').length; $('loadmsg').textContent=t('loadMsgs')[loadMsgIdx]; }, 2200);
 
   try{
     const res = await fetch(LAMBDA + '/upload-photos', {
@@ -317,13 +396,14 @@ async function appraise(){
       body: JSON.stringify({ image: state.front, back: state.back || undefined })
     });
     const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Something went wrong.');
+    if (!data.success) throw new Error(data.error || t('errGeneric'));
     if (!data.identified || !data.card){
-      throw new Error(data.message || "Couldn't read the card clearly — try a straight, well-lit photo of the front.");
+      throw new Error(data.message || t('errUnclear'));
     }
+    lastData = data;
     render(data);
   }catch(e){
-    showErr(e.message || 'Network error — please try again.');
+    showErr(e.message || t('errNetwork'));
   }finally{
     clearInterval(cycle);
     load.classList.remove('on');
@@ -333,17 +413,45 @@ async function appraise(){
 
 function money(n){ return (typeof n==='number' && isFinite(n)) ? '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : null; }
 
-function render(data){
+// The language-sensitive chrome around the appraisal (chips, comp labels, confidence
+// wording) — split out so applyLang() can refresh it in place without re-triggering
+// the reveal animation or resurrecting a dismissed results panel.
+function renderResultLabels(data){
   const c = data.card;
   // chips
   const chips = $('chips'); chips.innerHTML='';
-  const add=(t,cls)=>{ const s=document.createElement('span'); s.className='chip'+(cls?' '+cls:''); s.textContent=t; chips.appendChild(s); };
-  if (c.is_rookie) add('Rookie');
-  if (c.is_auto) add('Autograph');
-  if (c.is_relic) add('Relic / Patch');
+  const add=(txt,cls)=>{ const s=document.createElement('span'); s.className='chip'+(cls?' '+cls:''); s.textContent=txt; chips.appendChild(s); };
+  if (c.is_rookie) add(t('rookie'));
+  if (c.is_auto) add(t('autograph'));
+  if (c.is_relic) add(t('relic'));
   if (c.serial) add('# '+c.serial);
   if (c.parallel) add(c.parallel,'blue');
-  if (c.category==='pokemon') add('Pokemon','blue');
+  if (c.category==='pokemon') add(t('pokemon'),'blue');
+
+  const v = c.estimated_value_usd || {};
+  const typ=money(v.typical);
+  $('typ').textContent = typ ? (t('typical')+typ) : '';
+  const conf=$('conf'); const cf=(c.confidence||'').toLowerCase();
+  const cfLabel = {low:t('confLow'), medium:t('confMedium'), high:t('confHigh')}[cf];
+  conf.textContent = cfLabel ? (cfLabel+t('confidence')) : '';
+  conf.className = 'conf '+(cf||'');
+
+  // live comp
+  const comp=$('comp'), rows=$('comprows');
+  if (data.comp && (data.comp.raw||data.comp.psa9||data.comp.psa10)){
+    rows.innerHTML='';
+    const r=(label,val)=>{ if(!val) return; const d=document.createElement('div'); d.className='row'; d.innerHTML='<span>'+label+'</span><b>'+money(val)+'</b>'; rows.appendChild(d); };
+    r(t('rawUngraded'), data.comp.raw);
+    r('PSA 9', data.comp.psa9);
+    r('PSA 10', data.comp.psa10);
+    if (data.comp.url){ const a=document.createElement('a'); a.href=data.comp.url; a.target='_blank'; a.rel='noopener'; a.textContent=t('viewOn')+(data.comp.source||'SportsCardsPro')+t('viewArrow'); rows.appendChild(a); }
+    comp.style.display='block';
+  } else { comp.style.display='none'; }
+}
+
+function render(data){
+  const c = data.card;
+  renderResultLabels(data);
 
   // identity
   const idBits = [c.year, c.brand, c.set_name, c.player].filter(Boolean).join(' ');
@@ -354,23 +462,7 @@ function render(data){
   const v = c.estimated_value_usd || {};
   const lo=money(v.low), hi=money(v.high), typ=money(v.typical);
   $('amt').textContent = (lo&&hi) ? (lo+' – '+hi) : (typ || '—');
-  $('typ').textContent = typ ? ('Typical: '+typ) : '';
   $('basis').textContent = c.value_basis || '';
-  const conf=$('conf'); const cf=(c.confidence||'').toLowerCase();
-  conf.textContent = cf ? (cf+' confidence') : '';
-  conf.className = 'conf '+(cf||'');
-
-  // live comp
-  const comp=$('comp'), rows=$('comprows');
-  if (data.comp && (data.comp.raw||data.comp.psa9||data.comp.psa10)){
-    rows.innerHTML='';
-    const r=(label,val)=>{ if(!val) return; const d=document.createElement('div'); d.className='row'; d.innerHTML='<span>'+label+'</span><b>'+money(val)+'</b>'; rows.appendChild(d); };
-    r('Raw / ungraded', data.comp.raw);
-    r('PSA 9', data.comp.psa9);
-    r('PSA 10', data.comp.psa10);
-    if (data.comp.url){ const a=document.createElement('a'); a.href=data.comp.url; a.target='_blank'; a.rel='noopener'; a.textContent='View on '+(data.comp.source||'SportsCardsPro')+' →'; rows.appendChild(a); }
-    comp.style.display='block';
-  } else { comp.style.display='none'; }
 
   // listing copy
   const title=(c.ebay_title||'').trim();
@@ -388,10 +480,12 @@ document.querySelectorAll('.copy').forEach(btn=>{
     const txt = $(btn.dataset.src).textContent;
     try{ await navigator.clipboard.writeText(txt); }
     catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
-    const orig=btn.textContent; btn.textContent='Copied'; btn.classList.add('done');
-    setTimeout(()=>{ btn.textContent=orig; btn.classList.remove('done'); }, 1400);
+    btn.textContent=t('copied'); btn.classList.add('done');
+    setTimeout(()=>{ btn.textContent=t('copy'); btn.classList.remove('done'); }, 1400);
   });
 });
+
+applyLang(lang);
 </script>
 </body>
 </html>
