@@ -108,15 +108,17 @@ C = [
  (230,7,"Colston Loveland","Bears","TE","Revolution","Base",1),
  (230,8,"Emeka Egbuka","Buccaneers","WR","Mosaic","Elevate Green",1),
  (230,9,"Joe Alt","Chargers","Defense","Topps Chrome","Pink XFractor",0),
- (231,1,"Kelvin Banks Jr","Saints","Defense","Prizm","Green Shimmer",1),
+ # Scan 231 FULLY re-verified by reading every crop (2026-07-05). The auto-ID had
+ # hallucinated these as Prizm stars; they are mostly Optic Rated Rookies. Ground truth:
+ (231,1,"Tre Harris","Chargers","WR","Prizm","Green Shimmer",1),
  (231,2,"Joe Montana","49ers","Legend","Prizm","Prizmatic",0),
- (231,3,"RJ Harvey","Broncos","RB","Prizm","Emergent",1),
- (231,4,"Derwin James Jr","Chargers","Defense","Prizm","Green Shimmer",0),
- (231,5,"Ashton Jeanty","Raiders","RB","Prizm","Prizmatic",1),
- (231,6,"Tai Felton","Vikings","WR","Mosaic","Elevate",1),
- (231,7,"Mike Vrabel","Patriots","Legend","Prizm","Green Shimmer",0),
- (231,8,"Caleb Williams","Bears","QB","Prizm","Global Reach Green",0),
- (231,9,"Arch Manning","Texas","QB","Prizm Draft","Instant Impact",0),
+ (231,3,"Arian Smith","Jets","WR","Optic","Rated Rookie Purple",1),
+ (231,4,"Jordan Addison","Vikings","WR","Prizm","Green Shimmer",0),
+ (231,5,"Tyleik Williams","Lions","Defense","Optic","Rated Rookie Blue Stars",1),
+ (231,6,"Pat Bryant","Broncos","WR","Optic","Rated Rookie Purple",1),
+ (231,7,"Cam Ward","Titans","QB","Prizm","Prizmatic Green",1),
+ (231,8,"Robbie Ouzts","Seahawks","TE","Optic","Rated Rookie Blue",1),
+ (231,9,"Tyleik Williams","Lions","Defense","Optic","Rated Rookie Blue",1),
  (232,1,"Ryan Wingo","Texas","WR","Prizm Draft","Red Cracked Ice",1),
  (232,2,"Riley Leonard","Notre Dame","QB","Prizm Draft","New Recruits Green",1),
  (232,3,"Zy Alexander","LSU","Defense","Prizm Draft","Purple Wave",1),
@@ -126,14 +128,10 @@ C = [
  (232,7,"Jalen Milroe","Alabama","QB","Prizm Draft","Fearless Red Cracked Ice",1),
  (232,8,"Nick Emmanwori","South Carolina","Defense","Prizm Draft","Purple Wave",1),
  (232,9,"Tez Johnson","Buccaneers","WR","Optic","Rated Rookie Purple",1),
- # Scan 233 was a DUPLICATE scan of the Prizm Draft page (Scan 232); its 9
- # "Optic" cards were an auto-ID hallucination and have been removed. The two
- # real Optic Rated Rookie Blue cards come from Scan 241 (JC re-scanned them):
- (241,1,"Robbie Ouzts","Seahawks","TE","Optic","Rated Rookie Blue",1),
- # Optic cards from JC's clean re-scans (241/243):
+ # Scan 233 was a duplicate/hallucination and was removed. Robbie Ouzts and BOTH
+ # Tyleik Williams Optic cards live in Scan 231 above (241/243 were re-scans of the
+ # SAME physical cards — deduped here to avoid overselling). Only Cole Kmet is unique:
  (243,1,"Cole Kmet","Bears","TE","Optic","Blue Stars",0),
- (243,2,"Tyleik Williams","Lions","Defense","Optic","Rated Rookie Blue Stars",1),
- (243,3,"Tyleik Williams","Lions","Defense","Optic","Rated Rookie Blue",1),
  (234,1,"Keon Coleman","Bills","WR","Select","Future",1),
  (234,2,"Alvin Kamara","Saints","RB","Select","Turbocharged Orange",0),
  (234,3,"T.J. Watt","Steelers","Defense","Select","Turbocharged Orange",0),
@@ -434,34 +432,49 @@ def _font(s,b=False):
     return ImageFont.load_default()
 
 def render(singles, lots):
-    PW,PH,M=1275,1650,40; th=150; gap=10
-    hf,lf,tf=_font(26,True),_font(15),_font(13)
+    # Dense grid: pack many cards per row, no wasted whitespace.
+    PW,PH,M=1275,1650,40
+    TH=196; CW=163; COLGAP=8; CAPH=40; ROWGAP=14
+    NCOLS=(PW-2*M)//(CW+COLGAP)
+    hf,sf,nf,pf=_font(24,True),_font(15,True),_font(13,True),_font(12)
     pages=[]; page=Image.new("RGB",(PW,PH),"white"); d=ImageDraw.Draw(page); y=M
     def newpage():
         nonlocal page,d,y; pages.append(page); page=Image.new("RGB",(PW,PH),"white"); d=ImageDraw.Draw(page); y=M
     def band(txt,color):
         nonlocal y
-        if y>PH-M-th-60: newpage()
+        if y>PH-M-TH-CAPH-10: newpage()
         d.rectangle([M,y,PW-M,y+34],fill=color); d.text((M+10,y+6),txt,font=hf,fill="white"); y+=44
-    def row(cards,label):
+    def fit(text,fnt,maxw):
+        t=text or ""
+        while t and d.textlength(t,font=fnt)>maxw: t=t[:-1]
+        return t
+    def cell(c,x,yy):
+        try:
+            im=Image.open(crop(c[0],c[1])).convert("RGB"); w=int(im.width*TH/im.height); im=im.resize((w,TH))
+        except: w=int(TH*0.72); im=Image.new("RGB",(w,TH),(230,230,230))
+        page.paste(im,(x+(CW-w)//2,yy))
+        tag="PLATE 1/1 " if "Printing Plate" in c[6] else ""
+        d.text((x+2,yy+TH+3),fit(tag+c[2],nf,CW),font=nf,fill="black")
+        d.text((x+2,yy+TH+19),fit(c[6] or c[5],pf,CW),font=pf,fill=(120,120,120))
+    def grid(cards):
         nonlocal y
-        if y>PH-M-th-30: newpage()
-        d.text((M,y),label,font=_font(16,True),fill=(60,20,90)); y+=22
-        x=M
-        for c in cards:
-            try:
-                im=Image.open(crop(c[0],c[1])).convert("RGB"); w=int(im.width*th/im.height); im=im.resize((w,th))
-            except: w=int(th*0.7); im=Image.new("RGB",(w,th),(230,230,230))
-            if x+w>PW-M: x=M; y+=th+34
-            page.paste(im,(x,y)); d.text((x,y+th+2),c[2][:16],font=tf,fill="black")
-            d.text((x,y+th+16),(c[6] or c[5])[:18],font=tf,fill=(120,120,120)); x+=w+gap
-        y+=th+40
-    band(f"SINGLES — {len(singles)} cards","#5a1470".replace("#","") and (90,20,110))
-    for c in sorted(singles,key=lambda x:(x[4],x[2])):
-        row([c], ("PLATE 1/1 " if "Printing Plate" in c[6] else "")+c[2])
+        i=0
+        while i<len(cards):
+            if y>PH-M-TH-CAPH: newpage()
+            for col in range(NCOLS):
+                if i>=len(cards): break
+                cell(cards[i], M+col*(CW+COLGAP), y); i+=1
+            y+=TH+CAPH+ROWGAP
+    band(f"SINGLES — {len(singles)} cards",(90,20,110))
+    grid(sorted(singles,key=lambda x:(x[4],x[2])))
     band(f"LOTS — {len(lots)} lots (4 max)",(20,90,60))
     for i,l in enumerate(lots,1):
-        row(l["cards"], f"Lot {i}: {l['family']} · {l['pos']} ({len(l['cards'])})")
+        if y>PH-M-TH-CAPH-28: newpage()
+        d.text((M,y),f"Lot {i}: {l['family']} ({len(l['cards'])} cards)",font=sf,fill=(20,90,60)); y+=24
+        x=M
+        for c in l["cards"]:
+            cell(c,x,y); x+=CW+COLGAP
+        y+=TH+CAPH+ROWGAP
     pages.append(page)
     out=Path("output/batch241_plan.pdf")
     pages[0].save(out,"PDF",save_all=True,append_images=pages[1:],resolution=150)
