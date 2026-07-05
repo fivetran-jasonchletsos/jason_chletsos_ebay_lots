@@ -127,7 +127,9 @@ C = [
  (232,6,"T.J. Sanders","South Carolina","Defense","Prizm Draft","Red Cracked Ice",1),
  (232,7,"Jalen Milroe","Alabama","QB","Prizm Draft","Fearless Red Cracked Ice",1),
  (232,8,"Nick Emmanwori","South Carolina","Defense","Prizm Draft","Purple Wave",1),
- (232,9,"Tez Johnson","Buccaneers","WR","Optic","Rated Rookie Purple",1),
+ # 232_9 was auto-ID'd "Tez Johnson Optic" but is really Arch Manning Prizm Draft
+ # Instant Impact (verified crop). Now a single, out of the Optic lot.
+ (232,9,"Arch Manning","Texas","QB","Prizm Draft","Instant Impact",0),
  # Scan 233 was a duplicate/hallucination and was removed. Robbie Ouzts and BOTH
  # Tyleik Williams Optic cards live in Scan 231 above (241/243 were re-scans of the
  # SAME physical cards — deduped here to avoid overselling). Only Cole Kmet is unique:
@@ -246,6 +248,9 @@ C = [
 # Serial-numbered cards (JC-supplied) -> always singles, price + title reflect the serial.
 SERIAL = {(249,1):"159/385", (249,2):"654/899"}
 
+# Per-card price overrides.
+SPECIAL_PRICE = {(232,9): 9.99}   # Arch Manning Prizm Draft Instant Impact (premium name)
+
 # Marquee names -> always a single
 STARS = {"Patrick Mahomes","Joe Montana","Josh Allen","Lamar/Henry","Jalen Hurts",
  "Joe Burrow","Christian McCaffrey","CeeDee Lamb","Ja'Marr Chase","Bijan Robinson",
@@ -254,12 +259,12 @@ STARS = {"Patrick Mahomes","Joe Montana","Josh Allen","Lamar/Henry","Jalen Hurts
  "Omarion Hampton","Luther Burden III","Arch Manning","Caleb Williams","Trevor Lawrence",
  "Colston Loveland","Matthew Golden","Quinshon Judkins","Emeka Egbuka","TreVeyon Henderson",
  "Mason Taylor","Travis Kelce","Justin Jefferson","Lamar Jackson","Dak Prescott",
- "Kyler Murray","Jaxon Smith-Njigba","Michael Penix Jr","Drake Maye","Bo Nix","Jameson Williams",
- "Xavier Worthy","RJ Harvey"}
+ "Kyler Murray","Jaxon Smith-Njigba","Michael Penix Jr","Drake Maye","Bo Nix","Jameson Williams"}
 
 def is_single(c):
     scan,idx,player,team,pos,prod,par,rc = c
     if (scan,idx) in SERIAL: return True              # serial-numbered
+    if prod=="Phoenix Contours" and par not in ("Base",""): return True  # color Contours single
     if "Printing Plate" in par: return True          # 1/1 plates
     if pos == "Multi": return True                    # dual-star Paramount Pairings
     if "Touchdown Masters" in par or par=="The Pick": return True
@@ -344,8 +349,9 @@ def _title_single(c):
     return t[:80]
 
 def price_single(c):
-    if "Printing Plate" in c[6]: return 24.99
+    if (c[0],c[1]) in SPECIAL_PRICE: return SPECIAL_PRICE[(c[0],c[1])]
     if (c[0],c[1]) in SERIAL: return 12.99
+    if c[5]=="Phoenix Contours" and c[6] not in ("Base",""): return 12.99  # color Contours
     if c[4] == "Legend": return 9.99
     if c[4] == "Multi": return 6.99
     if c[2] in MARQUEE: return 6.99
