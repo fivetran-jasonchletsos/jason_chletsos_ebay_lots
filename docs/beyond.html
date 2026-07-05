@@ -22,6 +22,26 @@
     --container:min(94vw,680px);
     --t:200ms cubic-bezier(.4,0,.2,1);
   }
+
+  /* Theme skins — swap the palette only; layout and semantic colors (success/warn/danger) stay put. */
+  html[data-club="eagles"]{
+    --bg:#04181a; --surface:#0b2628; --surface-2:#113133; --surface-3:#163c3e;
+    --border:rgba(165,172,175,.12); --border-strong:rgba(165,172,175,.22);
+    --text:#eef3f2; --text-muted:#9fb4b1; --text-dim:#6c8481;
+    --gold:#a7d9c4; --gold-bright:#23b47c; --gold-dim:#0c3d3a;
+  }
+  html[data-club="pokemon"]{
+    --bg:#0a0a16; --surface:#14142a; --surface-2:#1b1b36; --surface-3:#232342;
+    --border:rgba(255,203,5,.14); --border-strong:rgba(255,203,5,.24);
+    --text:#f5f1e6; --text-muted:#a6a2c9; --text-dim:#736f9c;
+    --gold:#ffcb05; --gold-bright:#ffe066; --gold-dim:#ee1515;
+  }
+  html[data-club="moo"]{
+    --bg:#031517; --surface:#082226; --surface-2:#0c2c30; --surface-3:#10373c;
+    --border:rgba(0,142,151,.16); --border-strong:rgba(0,142,151,.26);
+    --text:#eef8f8; --text-muted:#8fb9bd; --text-dim:#5f8a8e;
+    --gold:#5fd8de; --gold-bright:#00c7cf; --gold-dim:#fc4c02;
+  }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
@@ -98,6 +118,29 @@
   }
   .lang-toggle:active{transform:translateY(1px)}
 
+  .theme-picker{position:fixed;top:14px;left:14px;z-index:30;display:flex;gap:6px}
+  .swatch{
+    width:26px;height:26px;border-radius:50%;padding:0;cursor:pointer;
+    border:2px solid rgba(255,255,255,.25);box-shadow:0 4px 14px rgba(0,0,0,.4);
+    transition:transform var(--t),border-color var(--t);
+  }
+  .swatch:active{transform:scale(.9)}
+  .swatch.active{border-color:#fff}
+  .swatch.default{background:linear-gradient(150deg,#e6c66a,#8a7521)}
+  .swatch.eagles{background:linear-gradient(150deg,#23b47c,#0c3d3a)}
+  .swatch.pokemon{background:linear-gradient(150deg,#ffe066,#ee1515)}
+  .swatch.moo{background:linear-gradient(150deg,#00c7cf,#fc4c02)}
+
+  .moo-btn{
+    position:fixed;bottom:14px;right:14px;z-index:30;display:flex;align-items:baseline;gap:6px;
+    background:var(--surface-3);border:1px solid var(--border-strong);color:var(--gold-bright);
+    font-family:inherit;padding:9px 14px;border-radius:24px;cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform var(--t);
+  }
+  .moo-btn:active{transform:translateY(1px)}
+  .moo-btn .moo-name{font-weight:700;font-size:13px}
+  .moo-btn .moo-sub{font-size:10.5px;color:var(--text-dim)}
+
   .toast{
     position:fixed;top:60px;right:14px;z-index:30;max-width:230px;
     background:var(--surface-3);border:1px solid var(--gold-dim);color:var(--gold-bright);
@@ -171,6 +214,18 @@
 
   <button class="lang-toggle" id="langToggle" type="button" aria-label="Switch to German">DE</button>
   <div class="toast" id="toast"></div>
+
+  <div class="theme-picker" id="themePicker" role="group" aria-label="Theme">
+    <button class="swatch default" type="button" data-theme-name="default" aria-label="Classic theme" title="Classic"></button>
+    <button class="swatch eagles" type="button" data-theme-name="eagles" aria-label="Philadelphia Eagles theme" title="Eagles"></button>
+    <button class="swatch pokemon" type="button" data-theme-name="pokemon" aria-label="Pokemon theme" title="Pokemon"></button>
+    <button class="swatch moo" type="button" data-theme-name="moo" aria-label="Moo (Ricky Williams) theme" title="Moo"></button>
+  </div>
+
+  <button class="moo-btn" id="mooBtn" type="button" aria-label="Take me to a random card auction site">
+    <span class="moo-name">Moo</span>
+    <span class="moo-sub" data-en="random auction" data-de="zuf&auml;llige Auktion">random auction</span>
+  </button>
 
   <header class="top">
     <h1 class="brand">Beyond Cards</h1>
@@ -473,6 +528,35 @@ document.querySelectorAll('.copy').forEach(btn=>{
     btn.textContent=t('copied'); btn.classList.add('done');
     setTimeout(()=>{ btn.textContent=t('copy'); btn.classList.remove('done'); }, 1400);
   });
+});
+
+// --- theme switcher (Classic / Eagles / Pokemon / Moo) — palette only, no layout changes ---
+const THEMES = ['default','eagles','pokemon','moo'];
+let club = THEMES.includes(localStorage.getItem('beyondClub')) ? localStorage.getItem('beyondClub') : 'default';
+
+function applyTheme(newClub){
+  club = newClub;
+  localStorage.setItem('beyondClub', club);
+  if (club === 'default') document.documentElement.removeAttribute('data-club');
+  else document.documentElement.setAttribute('data-club', club);
+  document.querySelectorAll('.swatch').forEach(s=> s.classList.toggle('active', s.dataset.themeName===club));
+}
+document.querySelectorAll('.swatch').forEach(s=>{
+  s.addEventListener('click', ()=> applyTheme(s.dataset.themeName));
+});
+applyTheme(club);
+
+// --- Moo button: he likes watching card auctions, so send him somewhere new each time ---
+const MOO_LINKS = [
+  'https://www.ebay.com/live',
+  'https://www.ebay.com/sch/i.html?_nkw=trading+card+lot',
+  'https://www.whatnot.com/',
+  'https://goldin.co/',
+  'https://www.pwccmarketplace.com/',
+];
+$('mooBtn').addEventListener('click', ()=>{
+  const url = MOO_LINKS[Math.floor(Math.random()*MOO_LINKS.length)];
+  window.open(url, '_blank', 'noopener');
 });
 
 applyLang(lang);
