@@ -119,21 +119,42 @@ C = [
  (231,7,"Cam Ward","Titans","QB","Prizm","Prizmatic Green",1),
  (231,8,"Robbie Ouzts","Seahawks","TE","Optic","Rated Rookie Blue",1),
  (231,9,"Tyleik Williams","Lions","Defense","Optic","Rated Rookie Blue",1),
- (232,1,"Ryan Wingo","Texas","WR","Prizm Draft","Red Cracked Ice",1),
- (232,2,"Riley Leonard","Notre Dame","QB","Prizm Draft","New Recruits Green",1),
- (232,3,"Zy Alexander","LSU","Defense","Prizm Draft","Purple Wave",1),
- (232,4,"Omarion Hampton","Chargers","RB","Prizm","Green Cracked Ice",1),
- (232,5,"Xavier Watts","Notre Dame","Defense","Prizm Draft","Green",1),
- (232,6,"T.J. Sanders","South Carolina","Defense","Prizm Draft","Red Cracked Ice",1),
- (232,7,"Jalen Milroe","Alabama","QB","Prizm Draft","Fearless Red Cracked Ice",1),
- (232,8,"Nick Emmanwori","South Carolina","Defense","Prizm Draft","Purple Wave",1),
- # 232_9 was auto-ID'd "Tez Johnson Optic" but is really Arch Manning Prizm Draft
- # Instant Impact (verified crop). Now a single, out of the Optic lot.
- (232,9,"Arch Manning","Texas","QB","Prizm Draft","Instant Impact",0),
+ # SCAN 232 RE-VERIFIED 2026-07-05 by reading every crop directly. The auto-ID
+ # labels above (Wingo/Leonard/Alexander/Hampton/Watts/Sanders/Milroe/Emmanwori)
+ # were 100% WRONG — the sheet is a Panini Prizm base/insert sheet, not Prizm Draft.
+ # All real cards are now live in their correct form, so these entries are disabled:
+ #   232_1 = Kelvin Banks Jr RC (Green)     -> Lot 16 (307044256082)
+ #   232_2 = Joe Montana (Prizmatic)        -> already live as a single (skipped)
+ #   232_3 = RJ Harvey RC (Emergent)        -> Lot 16
+ #   232_4 = Derwin James (per sheet) -> NOT listed; crop unverified, flag to JC
+ #   232_5 = Ashton Jeanty RC (Prizmatic)   -> single 307044447834
+ #   232_6 = Tai Felton RC (Elevate)        -> Lot 16
+ #   232_7 = Mike Vrabel (Green)            -> Lot 17 (307044256122)
+ #   232_8 = Caleb Williams (Global Reach)  -> Lot 17
+ #   232_9 = Arch Manning (Instant Impact)  -> ended per JC (see below)
+ # (232,1,"Ryan Wingo","Texas","WR","Prizm Draft","Red Cracked Ice",1),
+ # (232,2,"Riley Leonard","Notre Dame","QB","Prizm Draft","New Recruits Green",1),
+ # (232,3,"Zy Alexander","LSU","Defense","Prizm Draft","Purple Wave",1),
+ # (232,4,"Omarion Hampton","Chargers","RB","Prizm","Green Cracked Ice",1),
+ # (232,5,"Xavier Watts","Notre Dame","Defense","Prizm Draft","Green",1),
+ # (232,6,"T.J. Sanders","South Carolina","Defense","Prizm Draft","Red Cracked Ice",1),
+ # (232,7,"Jalen Milroe","Alabama","QB","Prizm Draft","Fearless Red Cracked Ice",1),
+ # (232,8,"Nick Emmanwori","South Carolina","Defense","Prizm Draft","Purple Wave",1),
+ # 232_9 REMOVED 2026-07-05: JC says he doesn't have an Arch Manning in this batch.
+ # Listing 307044329349 ended. The crop shows one, but JC is card authority — do not
+ # repost without physical confirmation. (Also: whole scan-232 crop set is a Prizm
+ # sheet [Kelvin Banks, Montana, RJ Harvey...], NOT the Prizm Draft College labels
+ # below — the labels are stale and need full re-verification before trusting.)
+ # (232,9,"Arch Manning","Texas","QB","Prizm Draft","Instant Impact",0),
  # Scan 233 was a duplicate/hallucination and was removed. Robbie Ouzts and BOTH
  # Tyleik Williams Optic cards live in Scan 231 above (241/243 were re-scans of the
- # SAME physical cards — deduped here to avoid overselling). Only Cole Kmet is unique:
- (243,1,"Cole Kmet","Bears","TE","Optic","Blue Stars",0),
+ # SAME physical cards — deduped here to avoid overselling).
+ # 243_1 "Cole Kmet" REMOVED 2026-07-05: the full Scan 243 sheet is just two card
+ # BACKS — a Tyleik Williams Optic back (dup of 231) and a Zay Flowers "After Image
+ # AI-3" Topps Signature Class insert back. There is NO Cole Kmet in scan 243; the
+ # entry was fiction and poisoned Lot 10. (JC's real Cole Kmet is listed separately,
+ # item 307021786668 Topps Signature Class.)
+ # (243,1,"Cole Kmet","Bears","TE","Optic","Blue Stars",0),
  (234,1,"Keon Coleman","Bills","WR","Select","Future",1),
  (234,2,"Alvin Kamara","Saints","RB","Select","Turbocharged Orange",0),
  (234,3,"T.J. Watt","Steelers","Defense","Select","Turbocharged Orange",0),
@@ -249,7 +270,7 @@ C = [
 SERIAL = {(249,1):"159/385", (249,2):"654/899"}
 
 # Per-card price overrides.
-SPECIAL_PRICE = {(232,9): 9.99}   # Arch Manning Prizm Draft Instant Impact (premium name)
+SPECIAL_PRICE = {}   # (232,9) Arch Manning removed 2026-07-05 per JC
 
 # Marquee names -> always a single
 STARS = {"Patrick Mahomes","Joe Montana","Josh Allen","Lamar/Henry","Jalen Hurts",
@@ -413,6 +434,30 @@ def do_apply(mode):
         _pg+=1
     print(f"  {len(active_titles)} active titles loaded — will skip any already live.")
 
+    # ALSO pull SOLD titles (last 90 days) so we NEVER repost a card that already sold.
+    # This is the fix for the zebra oversell: the guard used to check active listings
+    # only, so a sold-then-ended card could be reposted. Fold sold titles into the same
+    # skip set.
+    _sold=0; _pg=1
+    while True:
+        _h=trading_headers("GetMyeBaySelling",cfg,token)
+        _x=('<?xml version="1.0" encoding="utf-8"?>'
+            '<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">'
+            '<SoldList><Include>true</Include><DurationInDays>90</DurationInDays>'
+            f'<Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>{_pg}</PageNumber></Pagination>'
+            '</SoldList></GetMyeBaySellingRequest>')
+        _r=requests.post(TRADING_URL,headers=_h,data=_x.encode(),timeout=60)
+        _ts=_re.findall(r"<Title>(.*?)</Title>",_r.text)
+        if not _ts: break
+        for _t in _ts:
+            _n=_norm(_t)
+            if _n not in active_titles: active_titles.add(_n); _sold+=1
+        _tp=_re.search(r"<TotalNumberOfPages>(\d+)</TotalNumberOfPages>",_r.text)
+        _tot=int(_tp.group(1)) if _tp else _pg
+        if _pg>=_tot: break
+        _pg+=1
+    print(f"  {_sold} sold titles added to skip set — will not repost anything already sold.")
+
     def add(title, price, url, desc, category, cond, specifics):
         sx = "".join(f"<NameValueList><Name>{xml_escape(k)}</Name><Value>{xml_escape(v)}</Value></NameValueList>"
                      for k,v in specifics.items())
@@ -566,6 +611,12 @@ def render(singles, lots):
                 if i>=len(cards): break
                 cell(cards[i], M+col*(CW+COLGAP), y); i+=1
             y+=TH+CAPH+ROWGAP
+    # Page-1 header + link to the session report (iOS PDF viewers auto-linkify URLs).
+    d.text((M,y),"Batch plan — scans 221-249",font=_font(28,True),fill=(20,30,50)); y+=38
+    d.text((M,y),"Session report (what changed + open items):",font=pf,fill=(90,90,90)); y+=18
+    _rpturl="https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/session_report.pdf"
+    d.text((M,y),_rpturl,font=nf,fill=(20,80,180)); y+=26
+    d.line([M,y,PW-M,y],fill=(210,210,210),width=1); y+=16
     band(f"SINGLES — {len(singles)} cards",(90,20,110))
     grid(sorted(singles,key=lambda x:(x[4],x[2])))
     band(f"LOTS — {len(lots)} lots (4 max)",(20,90,60))
