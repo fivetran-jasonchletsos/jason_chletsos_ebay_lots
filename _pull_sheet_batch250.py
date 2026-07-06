@@ -12,11 +12,18 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 from PIL import Image
 CROP = Path("output/split_cards")
-THUMB = Path("output/_thumbs250"); THUMB.mkdir(exist_ok=True)
+THUMB = Path("output/_thumbs250b"); THUMB.mkdir(exist_ok=True)
 OUT = Path("output/pull_sheet_batch250.pdf")
+# grid_split assigned scan file numbers in a different order than the sheets were
+# read into the catalog. This maps catalog-block number -> real file on disk.
+# Verified by reading position-1 of all 10 files (10/10 anchors match) + spot checks
+# (254_06 Tyler Baron, 261_02 CeeDee Lamb, 259_05 Bosa). No duplicate files.
+REMAP = {252:257, 253:261, 254:253, 255:255, 256:256,
+         257:260, 258:258, 259:259, 260:254, 261:252}
 def crop(scan, idx):
-    src = CROP / f"Scan {scan}" / f"Scan {scan}_{idx:02d}.jpg"
-    th = THUMB / f"{scan}_{idx:02d}.jpg"
+    f = REMAP.get(scan, scan)
+    src = CROP / f"Scan {f}" / f"Scan {f}_{idx:02d}.jpg"
+    th = THUMB / f"{f}_{idx:02d}.jpg"
     if not th.exists():
         im = Image.open(src).convert("RGB")
         w = 300; im = im.resize((w, int(im.height*w/im.width)))
@@ -90,7 +97,8 @@ DUPES = [(255,3,"Tate Ratledge (2nd?)"),(255,8,"Tory Horton (2nd?)")]
 
 story=[]
 story.append(Paragraph("Pull sheet — scans 252-261 (~90 cards)", H))
-story.append(Paragraph("harpua2001 &bull; 2026-07-06 &bull; 2-expert plan. <b>Nothing posted yet.</b> "
+story.append(Paragraph("harpua2001 &bull; 2026-07-06 &bull; 2-expert plan. <b>Nothing posted yet &mdash; images now verified.</b> "
+    "The scan files were mis-numbered by the splitter; that's fixed, so every crop below is the correct card. "
     "[VERIFY-LIVE] = likely already listed today; set aside until de-dup confirms. Prices are Best-Offer starts.", SUB))
 
 IW,IH=0.92*inch,1.26*inch
