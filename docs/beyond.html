@@ -138,6 +138,17 @@
   .swatch.pokemon{background:linear-gradient(150deg,#ffe066,#ee1515)}
   .swatch.moo{background:linear-gradient(150deg,#00c7cf,#fc4c02)}
 
+  .moo-btn{
+    position:fixed;bottom:14px;right:14px;z-index:30;display:flex;align-items:baseline;gap:6px;
+    background:var(--surface-3);border:1px solid var(--border-strong);color:var(--gold-bright);
+    font-family:inherit;padding:9px 14px;border-radius:24px;cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform var(--t),opacity var(--t);
+  }
+  .moo-btn:active{transform:translateY(1px)}
+  .moo-btn[disabled]{opacity:.5;cursor:wait}
+  .moo-btn .moo-name{font-weight:700;font-size:13px}
+  .moo-btn .moo-sub{font-size:10.5px;color:var(--text-dim)}
+
   .toast{
     position:fixed;top:60px;right:14px;z-index:30;max-width:230px;
     background:var(--surface-3);border:1px solid var(--gold-dim);color:var(--gold-bright);
@@ -251,6 +262,11 @@
     <button class="swatch moo" type="button" data-theme-name="moo" aria-label="Moo (Ricky Williams) theme" title="Moo"></button>
   </div>
 
+  <button class="moo-btn" id="mooBtn" type="button" aria-label="Take me to one of harpua2001's top 25 highest-priced listings">
+    <span class="moo-name">Moo</span>
+    <span class="moo-sub" data-en="top-25 pick" data-de="Top-25-Tipp">top-25 pick</span>
+  </button>
+
   <header class="top">
     <h1 class="brand">Beyond Cards</h1>
     <div class="tag" data-en="AI Card Appraiser" data-de="KI-Kartensch&auml;tzer">AI Card Appraiser</div>
@@ -353,6 +369,7 @@ const I18N = {
     errUnclear: "Couldn't read the card clearly — try a straight, well-lit photo of the front.",
     errNetwork: 'Network error — please try again.',
     themeDefault: 'Classic', themeEagles: 'Eagles', themePokemon: 'Pokemon', themeMoo: 'Moo',
+    mooLoadErr: "Couldn't load the listings — try again.",
   },
   de: {
     title: 'Beyond Cards — KI-Kartenschätzer',
@@ -366,6 +383,7 @@ const I18N = {
     errNetwork: 'Netzwerkfehler — bitte versuche es erneut.',
     mikeToast: 'Danke, dass du Mike zum Verkaufen motivierst. Das macht Spaß.',
     themeDefault: 'Klassisch', themeEagles: 'Eagles', themePokemon: 'Pokémon', themeMoo: 'Moo',
+    mooLoadErr: 'Angebote konnten nicht geladen werden — bitte erneut versuchen.',
   },
 };
 let lang = localStorage.getItem('beyondLang') === 'de' ? 'de' : 'en';
@@ -575,6 +593,35 @@ document.querySelectorAll('.swatch').forEach(s=>{
   });
 });
 applyTheme(club);
+
+// --- Moo button: random pick from harpua2001's top 25 highest-priced live listings ---
+let topListings = null;
+async function loadTopListings(){
+  if (topListings) return topListings;
+  const res = await fetch('listings_snapshot.json');
+  const all = await res.json();
+  topListings = all
+    .map(x => ({ url: x.url, priceNum: parseFloat(x.price) }))
+    .filter(x => x.url && isFinite(x.priceNum))
+    .sort((a,b) => b.priceNum - a.priceNum)
+    .slice(0, 25);
+  return topListings;
+}
+
+$('mooBtn').addEventListener('click', async ()=>{
+  const btn = $('mooBtn');
+  btn.disabled = true;
+  try{
+    const list = await loadTopListings();
+    if (!list.length) throw new Error('no listings');
+    const pick = list[Math.floor(Math.random()*list.length)];
+    window.open(pick.url, '_blank', 'noopener');
+  }catch(e){
+    showToast(t('mooLoadErr'));
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 applyLang(lang);
 </script>
