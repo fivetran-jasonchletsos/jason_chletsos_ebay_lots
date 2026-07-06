@@ -220,6 +220,7 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
     min_offer   = root.findtext(f".//{NS}ListingDetails/{NS}MinimumBestOfferPrice", "")
     listing_type   = root.findtext(f".//{NS}ListingType", "") or ""
     listing_status = root.findtext(f".//{NS}SellingStatus/{NS}ListingStatus", "") or ""
+    sku            = root.findtext(f".//{NS}SKU", "") or ""
     # The live BIN/current price. Used by the clamp to guard against snapshot
     # drift: when the listing was repriced down after the snapshot saved, the
     # snapshot's `price` is stale and the clamp must use the live BIN instead.
@@ -236,6 +237,7 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
         "current_price":      float(current_price) if current_price else None,
         "listing_type":       listing_type,
         "listing_status":     listing_status,
+        "sku":                sku,
         "fetched_at":         datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
@@ -362,6 +364,17 @@ def filter_for_idempotency(plan: list[dict],
             out.append({**d, "decision": "skip",
                         "reason": "state not verified this run (hydration capped/failed)"})
             continue
+        # Inventory-API-managed listings (CollX imports, SKU CDP-*) reject Trading
+        # ReviseItem with err 21919474 ("not allowed for inventory items"). They
+        # already carry Best Offer set via the Sell Inventory API on import, so
+        # there is nothing to push here — skip to stop generating false failures.
+        sku = (state.get("sku") or "")
+        if sku.upper().startswith("CDP-"):
+            d = dict(d)
+            d["decision"] = "skip"
+            d["reason"]   = ("inventory-managed (SKU " + sku + "); Best Offer set via "
+                             "Sell Inventory API — Trading ReviseItem not allowed (21919474)")
+            out.append(d); continue
         # ReviseItem only succeeds on Active listings; skip Completed/Ended.
         status = (state.get("listing_status") or "").strip()
         if status and status.lower() != "active":
