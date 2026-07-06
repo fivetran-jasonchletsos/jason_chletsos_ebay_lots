@@ -53,7 +53,14 @@
     font-size:16px; line-height:1.5; min-height:100vh;
     -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   }
-  .wrap{max-width:var(--container);margin-inline:auto;padding:0 18px 56px}
+  .wrap{max-width:var(--container);margin-inline:auto;padding:0 18px 56px;position:relative;z-index:1}
+
+  /* Theme background art — original SVG motifs, no external images/logos */
+  .theme-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .theme-art{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 320ms ease}
+  html[data-club="eagles"] .art-eagles{opacity:.16}
+  html[data-club="pokemon"] .art-pokemon{opacity:.16}
+  html[data-club="moo"] .art-moo{opacity:.16}
 
   /* Header */
   .top{padding:30px 0 8px;text-align:center}
@@ -118,7 +125,7 @@
   }
   .lang-toggle:active{transform:translateY(1px)}
 
-  .theme-picker{position:fixed;top:14px;left:14px;z-index:30;display:flex;gap:6px}
+  .theme-picker{position:fixed;top:14px;left:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
   .swatch{
     width:26px;height:26px;border-radius:50%;padding:0;cursor:pointer;
     border:2px solid rgba(255,255,255,.25);box-shadow:0 4px 14px rgba(0,0,0,.4);
@@ -130,16 +137,6 @@
   .swatch.eagles{background:linear-gradient(150deg,#23b47c,#0c3d3a)}
   .swatch.pokemon{background:linear-gradient(150deg,#ffe066,#ee1515)}
   .swatch.moo{background:linear-gradient(150deg,#00c7cf,#fc4c02)}
-
-  .moo-btn{
-    position:fixed;bottom:14px;right:14px;z-index:30;display:flex;align-items:baseline;gap:6px;
-    background:var(--surface-3);border:1px solid var(--border-strong);color:var(--gold-bright);
-    font-family:inherit;padding:9px 14px;border-radius:24px;cursor:pointer;
-    box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform var(--t);
-  }
-  .moo-btn:active{transform:translateY(1px)}
-  .moo-btn .moo-name{font-weight:700;font-size:13px}
-  .moo-btn .moo-sub{font-size:10.5px;color:var(--text-dim)}
 
   .toast{
     position:fixed;top:60px;right:14px;z-index:30;max-width:230px;
@@ -210,6 +207,38 @@
 </style>
 </head>
 <body>
+
+<div class="theme-bg" aria-hidden="true">
+  <svg class="theme-art art-eagles" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
+    <g fill="#23b47c">
+      <path d="M420,720 L300,560 L340,540 L440,660 Z"/>
+      <path d="M420,720 L260,600 L295,570 L430,670 Z"/>
+      <path d="M420,720 L230,650 L260,610 L410,690 Z"/>
+    </g>
+    <g fill="#0c3d3a">
+      <path d="M420,720 L330,520 L360,510 L440,630 Z"/>
+      <path d="M420,720 L200,690 L225,640 L400,700 Z"/>
+    </g>
+  </svg>
+  <svg class="theme-art art-pokemon" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
+    <g transform="translate(300,150)">
+      <circle r="130" fill="#ffe066"/>
+      <path d="M-130,0 A130,130 0 0 1 130,0 Z" fill="#ee1515"/>
+      <rect x="-130" y="-13" width="260" height="26" fill="#0a0a16"/>
+      <circle r="32" fill="#0a0a16"/>
+      <circle r="18" fill="#1b1b36"/>
+    </g>
+  </svg>
+  <svg class="theme-art art-moo" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
+    <g transform="translate(290,150)" fill="none" stroke="#00c7cf" stroke-width="6">
+      <ellipse cx="0" cy="0" rx="95" ry="118" fill="#062b30"/>
+      <path d="M-68,20 Q0,80 68,20"/>
+      <path d="M-58,-8 L-58,42 M-19,-30 L-19,52 M19,-30 L19,52 M58,-8 L58,42"/>
+    </g>
+    <text x="200" y="540" font-family="Georgia, serif" font-size="280" font-weight="700" fill="#fc4c02" text-anchor="middle">34</text>
+  </svg>
+</div>
+
 <div class="wrap">
 
   <button class="lang-toggle" id="langToggle" type="button" aria-label="Switch to German">DE</button>
@@ -221,11 +250,6 @@
     <button class="swatch pokemon" type="button" data-theme-name="pokemon" aria-label="Pokemon theme" title="Pokemon"></button>
     <button class="swatch moo" type="button" data-theme-name="moo" aria-label="Moo (Ricky Williams) theme" title="Moo"></button>
   </div>
-
-  <button class="moo-btn" id="mooBtn" type="button" aria-label="Take me to a random card auction site">
-    <span class="moo-name">Moo</span>
-    <span class="moo-sub" data-en="random auction" data-de="zuf&auml;llige Auktion">random auction</span>
-  </button>
 
   <header class="top">
     <h1 class="brand">Beyond Cards</h1>
@@ -328,6 +352,7 @@ const I18N = {
     errImg: 'Could not read that image.', errGeneric: 'Something went wrong.',
     errUnclear: "Couldn't read the card clearly — try a straight, well-lit photo of the front.",
     errNetwork: 'Network error — please try again.',
+    themeDefault: 'Classic', themeEagles: 'Eagles', themePokemon: 'Pokemon', themeMoo: 'Moo',
   },
   de: {
     title: 'Beyond Cards — KI-Kartenschätzer',
@@ -340,6 +365,7 @@ const I18N = {
     errUnclear: 'Die Karte konnte nicht klar erkannt werden — versuche ein gerades, gut beleuchtetes Foto der Vorderseite.',
     errNetwork: 'Netzwerkfehler — bitte versuche es erneut.',
     mikeToast: 'Danke, dass du Mike zum Verkaufen motivierst. Das macht Spaß.',
+    themeDefault: 'Klassisch', themeEagles: 'Eagles', themePokemon: 'Pokémon', themeMoo: 'Moo',
   },
 };
 let lang = localStorage.getItem('beyondLang') === 'de' ? 'de' : 'en';
@@ -530,9 +556,10 @@ document.querySelectorAll('.copy').forEach(btn=>{
   });
 });
 
-// --- theme switcher (Classic / Eagles / Pokemon / Moo) — palette only, no layout changes ---
+// --- theme switcher (Classic / Eagles / Pokemon / Moo) — palette + background art, no layout changes ---
 const THEMES = ['default','eagles','pokemon','moo'];
 let club = THEMES.includes(localStorage.getItem('beyondClub')) ? localStorage.getItem('beyondClub') : 'default';
+const THEME_NAME_KEY = {default:'themeDefault', eagles:'themeEagles', pokemon:'themePokemon', moo:'themeMoo'};
 
 function applyTheme(newClub){
   club = newClub;
@@ -542,22 +569,12 @@ function applyTheme(newClub){
   document.querySelectorAll('.swatch').forEach(s=> s.classList.toggle('active', s.dataset.themeName===club));
 }
 document.querySelectorAll('.swatch').forEach(s=>{
-  s.addEventListener('click', ()=> applyTheme(s.dataset.themeName));
+  s.addEventListener('click', ()=>{
+    applyTheme(s.dataset.themeName);
+    showToast(t(THEME_NAME_KEY[club]));
+  });
 });
 applyTheme(club);
-
-// --- Moo button: he likes watching card auctions, so send him somewhere new each time ---
-const MOO_LINKS = [
-  'https://www.ebay.com/live',
-  'https://www.ebay.com/sch/i.html?_nkw=trading+card+lot',
-  'https://www.whatnot.com/',
-  'https://goldin.co/',
-  'https://www.pwccmarketplace.com/',
-];
-$('mooBtn').addEventListener('click', ()=>{
-  const url = MOO_LINKS[Math.floor(Math.random()*MOO_LINKS.length)];
-  window.open(url, '_blank', 'noopener');
-});
 
 applyLang(lang);
 </script>
