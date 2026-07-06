@@ -409,6 +409,22 @@ def revise_price(item_id: str, new_price: float, ebay_cfg: dict, token: str) -> 
   <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice>{_CONDITION_XML}</Item>
 </ReviseItemRequest>"""
         result = _post_revise(fallback, ebay_cfg)
+
+    # Inventory-API-flagged listings that have NO Sell Inventory API offer
+    # (relisted from de-listed CDP imports — see project_cdp_inventory_removal_delists_ebay)
+    # reject the full ReviseItem with err 21919474 ("not allowed for inventory
+    # items") — but only because of the BestOffer ListingDetails / Condition
+    # fields. A bare price-only ReviseItem is accepted. This recovers the ~24
+    # listings that neither the Trading nor the Inventory API path could reach.
+    if not result["ok"] and any(
+            e.get("code") == "21919474" or "inventory item" in (e.get("msg") or "").lower()
+            for e in result["errors"]):
+        minimal = f"""<?xml version="1.0" encoding="utf-8"?>
+<ReviseItemRequest xmlns="{EBAY_NS}">
+  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
+  <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice></Item>
+</ReviseItemRequest>"""
+        result = _post_revise(minimal, ebay_cfg)
     return result
 
 
