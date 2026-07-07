@@ -40,19 +40,16 @@ INSERT = [
  (266,2,"Peyton Manning",2024,"Epic Performers Fluorescent Pink",0,4.99),(266,8,"Dan Fouts",2024,"Touchdown Masters",0,2.99),
  (267,3,"Kaleb Johnson",2025,"Notoriety",1,2.99),(265,2,"Colston Loveland",2025,"Notoriety",1,3.99),
  (265,1,"Justin Jefferson",2024,"Elevate Fluorescent Pink",0,6.99),
+ (266,7,"Puka Nacua",2024,"Epic Performers Green & Gold",0,4.99),
+ (265,4,"Puka Nacua",2024,"Touchdown Masters Green & Gold",0,4.99),
 ]
 BASE = [
  (266,4,"Jared Verse",2024,"Mosaic",1,2.99),(266,5,"Bill Cowher",2024,"Mosaic",0,2.99),
  (266,6,"Bobby Wagner",2024,"Mosaic",0,1.99),(266,9,"Greg Rousseau",2024,"Mosaic",0,1.99),
  (265,7,"Trey Benson",2024,"Genesis",0,3.99),
 ]
-# (scan, idx, player, why) — verify against your listed copy before posting
-VERIFY = [
- (265,4,"Puka Nacua","TD Masters GREEN/gold parallel — you have the base listed; confirm this color is new"),
-]
 # (scan, idx, player, why) — confirmed base = already listed
 HELD = [
- (266,7,"Puka Nacua","Epic Performers (base) — already listed"),
  (266,3,"Drake Maye","Notoriety (base) — already listed"),
 ]
 
@@ -85,16 +82,14 @@ def grid(cards, kind):
     return out
 
 nnew=len(GREEN)+len(INSERT)+len(BASE)
-story=[Paragraph("Mosaic review — scans 265-267 (v2, corrected)", H),
- Paragraph(f"harpua2001 &bull; {nnew} new to post + 1 to verify + 2 already-listed. <b>Nothing posted yet.</b> "
-   "Fixes from your review: Jefferson &amp; Peyton are Fluorescent Pink, Trey Benson is Genesis, "
+story=[Paragraph("Mosaic review — scans 265-267 (v3, corrected)", H),
+ Paragraph(f"harpua2001 &bull; {nnew} new to post + 1 already-listed. <b>Nothing posted yet.</b> "
+   "Per your review: Jefferson &amp; Peyton = Fluorescent Pink, Trey Benson = Genesis, both Nacua = Green &amp; Gold, "
    "Scan 267 crops re-done. Cowher/Verse still plain 'Mosaic'. Prices are Best-Offer starts. Say 'go' to post.", SUB)]
 story.append(Paragraph(f"GREEN MOSAIC ({len(GREEN)})", H2)); story += grid(GREEN,"new")
 story.append(Paragraph(f"INSERTS ({len(INSERT)})", H2)); story += grid(INSERT,"new")
 story.append(Paragraph(f"BASE / PARALLEL ({len(BASE)})", H2)); story += grid(BASE,"new")
 story.append(Spacer(1,8))
-story.append(Paragraph(f"VERIFY BEFORE POSTING ({len(VERIFY)})", H2)); story += grid(VERIFY,"held")
-story.append(Spacer(1,6))
 story.append(Paragraph(f"ALREADY LISTED — HELD ({len(HELD)})", H2)); story += grid(HELD,"held")
 
 SimpleDocTemplate(str(OUT),pagesize=letter,topMargin=0.5*inch,bottomMargin=0.4*inch,leftMargin=0.5*inch,rightMargin=0.5*inch).build(story)
