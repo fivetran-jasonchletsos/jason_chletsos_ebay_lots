@@ -497,13 +497,25 @@ def apply_best_offer(token: str, plan: list[dict], ebay_cfg: dict,
             record["ack"]    = ack
             record["errors"] = errs
             record["ok"]     = ack in ("Success", "Warning")
-            line = (f"  → {d['item_id']}: ack={ack}  "
-                    f"(accept ${d['auto_accept']:.2f} / min ${d['auto_decline']:.2f})")
-            # Surface eBay's actual error reason on Failure so the operator can act.
-            if ack != "Success" and errs:
-                err_summary = "; ".join(f"{e['code']}:{e['msg']}" for e in errs[:2])
-                line += f"\n     errors: {err_summary}"
-            print(line)
+            # SKU-less inventory-flagged relist-orphans can't be caught by the
+            # pre-hydration CDP-* skip (no SKU to match), so they reach here and
+            # Trading rejects with 21919474. That's not a failure — Best Offer on
+            # inventory listings is managed via the Sell Inventory API. Reclassify
+            # as an inventory skip so it doesn't pollute the failure count. Catch
+            # by error CODE (matching repricing_agent) so both agents agree.
+            if not record["ok"] and any(e.get("code") == "21919474" for e in errs):
+                record["ok"]  = None
+                record["ack"] = "Skipped-Inventory"
+                print(f"  → {d['item_id']}: inventory-managed (21919474) — skipped; "
+                      f"Best Offer handled via Sell Inventory API")
+            else:
+                line = (f"  → {d['item_id']}: ack={ack}  "
+                        f"(accept ${d['auto_accept']:.2f} / min ${d['auto_decline']:.2f})")
+                # Surface eBay's actual error reason on Failure so the operator can act.
+                if ack != "Success" and errs:
+                    err_summary = "; ".join(f"{e['code']}:{e['msg']}" for e in errs[:2])
+                    line += f"\n     errors: {err_summary}"
+                print(line)
         except Exception as exc:
             record["ok"]     = False
             record["errors"] = [{"code": "EXC", "severity": "Error", "msg": str(exc)}]
@@ -698,14 +710,28 @@ def _hydrate_state(plan: list[dict], token: str, ebay_cfg: dict,
     (already-enabled offers become idempotent-skips, so coverage rotates).
     """
     from concurrent.futures import ThreadPoolExecutor
-    cache = _load_cache() if use_cache else {}
+    disk_cache = _load_cache()
+    cache = disk_cache if use_cache else {}
     # When targeting a single item (--item), hydrate ONLY that item so it can't
     # fall outside the rotating window and get silently deferred (--apply --item X
     # would otherwise apply nothing if X wasn't in this run's window).
     candidates = [d["item_id"] for d in plan if d["decision"] == "apply"
                   and (only_item is None or d["item_id"] == only_item)]
     fresh: dict[str, dict] = dict(cache) if use_cache else {}
-    to_fetch = [iid for iid in candidates if not (use_cache and iid in cache)]
+    # Inventory-managed listings (SKU CDP-*) can never take a Trading ReviseItem
+    # (they reject 21919474) and already carry Best Offer via the Inventory API.
+    # Once a prior GetItem has learned an item is CDP-*, don't burn a scarce
+    # hydration slot re-confirming it every run — seed its cached state so
+    # filter_for_idempotency skips it, and drop it from the fetch list. (SKU is
+    # immutable, so even stale CDP cache is safe for the skip decision, and a
+    # CDP state can only produce a skip, never an unverified ReviseItem.)
+    known_cdp = {iid for iid, st in disk_cache.items()
+                 if isinstance(st, dict) and (st.get("sku") or "").upper().startswith("CDP-")}
+    for iid in known_cdp:
+        if iid in candidates and iid not in fresh:
+            fresh[iid] = disk_cache[iid]
+    to_fetch = [iid for iid in candidates
+                if iid not in known_cdp and not (use_cache and iid in cache)]
     capped = len(to_fetch) > max_hydrate
     if capped:
         # Rotate the hydration window each run so every candidate eventually
@@ -815,8 +841,11 @@ def main() -> int:
         applied = apply_best_offer(token, plan, ebay_cfg,
                                    dry_run=False, only_item=args.item)
         _append_history(applied)
-        ok = sum(1 for a in applied if a["ok"])
-        print(f"\n  Result: {ok}/{len(applied)} applied successfully.")
+        ok  = sum(1 for a in applied if a["ok"])
+        inv = sum(1 for a in applied if a.get("ack") == "Skipped-Inventory")
+        fails = sum(1 for a in applied if a["ok"] is False)
+        tail = f"; {inv} inventory-managed skipped" if inv else ""
+        print(f"\n  Result: {ok}/{ok + fails} applied successfully{tail}.")
     else:
         print("\n  Dry run only. Re-run with --apply to push to eBay.")
 

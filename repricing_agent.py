@@ -833,8 +833,12 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
             "basis":       d["basis"],
             "ok":          result["ok"],
             "ack":         result["ack"],
-            "error":       (result["errors"][0]["msg"] if result["errors"] else None),
-            "error_code":  (result["errors"][0]["code"] if result["errors"] else None),
+            # Only record error fields on a genuine failure. A Warning ack is ok=True
+            # but still carries <Errors> nodes (e.g. the 21919474/business-policy
+            # warning on inventory-flagged relists); recording those would flag a
+            # successful apply as errored and corrupt the failure histogram.
+            "error":       (result["errors"][0]["msg"] if (not result["ok"] and result["errors"]) else None),
+            "error_code":  (result["errors"][0]["code"] if (not result["ok"] and result["errors"]) else None),
             "url":         d.get("url"),
         }
         applied.append(record)
