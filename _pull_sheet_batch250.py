@@ -95,6 +95,19 @@ LOTS = [
 # Possible duplicate re-scans to verify physically (fold into a lot if real):
 DUPES = [(255,3,"Tate Ratledge (2nd?)"),(255,8,"Tory Horton (2nd?)")]
 
+# --- Alphabetize everything so the sheet is walkable when pulling ---
+_SUFFIX = (" jr"," sr"," ii"," iii"," iv")
+def _surname(name):
+    n = name.lower().strip()
+    for s in _SUFFIX:
+        if n.endswith(s): n = n[:-len(s)].strip()
+    return (n.split()[-1] if n.split() else n, n)   # (last name, full) for tiebreak
+# Individuals sorted by player last name
+SINGLES.sort(key=lambda s: _surname(s[2]))
+# Cards within each lot sorted alpha by their label; lots sorted by title
+LOTS = [(title, price, sorted(cards, key=lambda c: c[2].lower())) for title, price, cards in LOTS]
+LOTS.sort(key=lambda lot: lot[0].lower())
+
 story=[]
 story.append(Paragraph("Pull sheet — scans 252-261 (~90 cards)", H))
 story.append(Paragraph("harpua2001 &bull; 2026-07-06 &bull; 2-expert plan. <b>Nothing posted yet &mdash; images now verified.</b> "
