@@ -1,0 +1,151 @@
+########## COMMIT cc8131c66a — best_offer_agent.py (inventory-skip) ##########
+commit cc8131c66a84226e7bb290b9cba767adb1f0efa8
+Author: Jason Chletsos <jchletsos@gmail.com>
+Date:   Mon Jul 6 15:11:53 2026 -0400
+
+    best_offer: skip inventory-managed (CDP-*) listings; stop false failures
+    
+    Root cause of the 74 daily 'failures': CollX/Inventory-API listings (SKU CDP-*)
+    already carry Best Offer set via the Sell Inventory API on import, and Trading
+    ReviseItem rejects them with 21919474. They were never missing Best Offer.
+    
+    fetch_item_state now parses <SKU>; filter_for_idempotency skips CDP-* with a
+    clear reason. Applied Best Offer to the 14 genuine Trading listings (14/14 ok).
+    
+    Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+diff --git a/best_offer_agent.py b/best_offer_agent.py
+index df3fbf7a00..1405a5463d 100644
+--- a/best_offer_agent.py
++++ b/best_offer_agent.py
+@@ -220,6 +220,7 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
+     min_offer   = root.findtext(f".//{NS}ListingDetails/{NS}MinimumBestOfferPrice", "")
+     listing_type   = root.findtext(f".//{NS}ListingType", "") or ""
+     listing_status = root.findtext(f".//{NS}SellingStatus/{NS}ListingStatus", "") or ""
++    sku            = root.findtext(f".//{NS}SKU", "") or ""
+     # The live BIN/current price. Used by the clamp to guard against snapshot
+     # drift: when the listing was repriced down after the snapshot saved, the
+     # snapshot's `price` is stale and the clamp must use the live BIN instead.
+@@ -236,6 +237,7 @@ def fetch_item_state(item_id: str, token: str, ebay_cfg: dict) -> dict:
+         "current_price":      float(current_price) if current_price else None,
+         "listing_type":       listing_type,
+         "listing_status":     listing_status,
++        "sku":                sku,
+         "fetched_at":         datetime.now(timezone.utc).isoformat(timespec="seconds"),
+     }
+ 
+@@ -362,6 +364,17 @@ def filter_for_idempotency(plan: list[dict],
+             out.append({**d, "decision": "skip",
+                         "reason": "state not verified this run (hydration capped/failed)"})
+             continue
++        # Inventory-API-managed listings (CollX imports, SKU CDP-*) reject Trading
++        # ReviseItem with err 21919474 ("not allowed for inventory items"). They
++        # already carry Best Offer set via the Sell Inventory API on import, so
++        # there is nothing to push here — skip to stop generating false failures.
++        sku = (state.get("sku") or "")
++        if sku.upper().startswith("CDP-"):
++            d = dict(d)
++            d["decision"] = "skip"
++            d["reason"]   = ("inventory-managed (SKU " + sku + "); Best Offer set via "
++                             "Sell Inventory API — Trading ReviseItem not allowed (21919474)")
++            out.append(d); continue
+         # ReviseItem only succeeds on Active listings; skip Completed/Ended.
+         status = (state.get("listing_status") or "").strip()
+         if status and status.lower() != "active":
+
+########## COMMIT f509364874 — repricing_agent.py (minimal ReviseItem fallback) ##########
+commit f5093648741e705bfb1eee2236c22a85531b8af2
+Author: Jason Chletsos <jchletsos@gmail.com>
+Date:   Mon Jul 6 16:59:52 2026 -0400
+
+    repricing: minimal price-only ReviseItem fallback for inventory-flagged listings
+    
+    The 24 listings that neither Trading (err 21919474) nor the Inventory API path
+    (no SKU / no offer) could reach are relist-orphans from the June CDP de-list
+    incident: Trading flags them as inventory items, but the rejection is caused by
+    the BestOffer ListingDetails / Condition fields in the revise call, NOT the
+    price change. A bare StartPrice-only ReviseItem is accepted (Ack=Warning).
+    
+    Added a 21919474 fallback to revise_price. Manually repriced all 24 today
+    (24/24 ok, verified live). This closes the reprice gap for these listings.
+    
+    Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+diff --git a/repricing_agent.py b/repricing_agent.py
+index 6202f0ce47..5da9a03344 100644
+--- a/repricing_agent.py
++++ b/repricing_agent.py
+@@ -409,6 +409,22 @@ def revise_price(item_id: str, new_price: float, ebay_cfg: dict, token: str) ->
+   <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice>{_CONDITION_XML}</Item>
+ </ReviseItemRequest>"""
+         result = _post_revise(fallback, ebay_cfg)
++
++    # Inventory-API-flagged listings that have NO Sell Inventory API offer
++    # (relisted from de-listed CDP imports — see project_cdp_inventory_removal_delists_ebay)
++    # reject the full ReviseItem with err 21919474 ("not allowed for inventory
++    # items") — but only because of the BestOffer ListingDetails / Condition
++    # fields. A bare price-only ReviseItem is accepted. This recovers the ~24
++    # listings that neither the Trading nor the Inventory API path could reach.
++    if not result["ok"] and any(
++            e.get("code") == "21919474" or "inventory item" in (e.get("msg") or "").lower()
++            for e in result["errors"]):
++        minimal = f"""<?xml version="1.0" encoding="utf-8"?>
++<ReviseItemRequest xmlns="{EBAY_NS}">
++  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
++  <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice></Item>
++</ReviseItemRequest>"""
++        result = _post_revise(minimal, ebay_cfg)
+     return result
+ 
+ 
+
+########## COMMIT 5fa930c4d2 — _pull_sheet_batch250.py (remap) ##########
+commit 5fa930c4d28b6404b953cc9dc304c18e92da9c2a
+Author: Jason Chletsos <jchletsos@gmail.com>
+Date:   Mon Jul 6 03:55:59 2026 -0400
+
+    Fix scans 252-261 pull sheet: correct scrambled scan-file mapping (verified crops)
+    
+    grid_split numbered the 10 scan files in a different order than the sheets
+    were read into the catalog. Added a verified block->file REMAP (all 10
+    position-1 anchors match, no duplicate files) so every crop resolves to the
+    right card. Republished to docs/lot_review.html.
+    
+    Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+diff --git a/_pull_sheet_batch250.py b/_pull_sheet_batch250.py
+index 1e98dafda8..d9aacddf72 100644
+--- a/_pull_sheet_batch250.py
++++ b/_pull_sheet_batch250.py
+@@ -12,11 +12,18 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+ 
+ from PIL import Image
+ CROP = Path("output/split_cards")
+-THUMB = Path("output/_thumbs250"); THUMB.mkdir(exist_ok=True)
++THUMB = Path("output/_thumbs250b"); THUMB.mkdir(exist_ok=True)
+ OUT = Path("output/pull_sheet_batch250.pdf")
++# grid_split assigned scan file numbers in a different order than the sheets were
++# read into the catalog. This maps catalog-block number -> real file on disk.
++# Verified by reading position-1 of all 10 files (10/10 anchors match) + spot checks
++# (254_06 Tyler Baron, 261_02 CeeDee Lamb, 259_05 Bosa). No duplicate files.
++REMAP = {252:257, 253:261, 254:253, 255:255, 256:256,
++         257:260, 258:258, 259:259, 260:254, 261:252}
+ def crop(scan, idx):
+-    src = CROP / f"Scan {scan}" / f"Scan {scan}_{idx:02d}.jpg"
+-    th = THUMB / f"{scan}_{idx:02d}.jpg"
++    f = REMAP.get(scan, scan)
++    src = CROP / f"Scan {f}" / f"Scan {f}_{idx:02d}.jpg"
++    th = THUMB / f"{f}_{idx:02d}.jpg"
+     if not th.exists():
+         im = Image.open(src).convert("RGB")
+         w = 300; im = im.resize((w, int(im.height*w/im.width)))
+@@ -90,7 +97,8 @@ DUPES = [(255,3,"Tate Ratledge (2nd?)"),(255,8,"Tory Horton (2nd?)")]
+ 
+ story=[]
+ story.append(Paragraph("Pull sheet — scans 252-261 (~90 cards)", H))
+-story.append(Paragraph("harpua2001 &bull; 2026-07-06 &bull; 2-expert plan. <b>Nothing posted yet.</b> "
++story.append(Paragraph("harpua2001 &bull; 2026-07-06 &bull; 2-expert plan. <b>Nothing posted yet &mdash; images now verified.</b> "
++    "The scan files were mis-numbered by the splitter; that's fixed, so every crop below is the correct card. "
+     "[VERIFY-LIVE] = likely already listed today; set aside until de-dup confirms. Prices are Best-Offer starts.", SUB))
+ 
+ IW,IH=0.92*inch,1.26*inch
