@@ -9,7 +9,7 @@ from pathlib import Path
 import requests, ebay_client
 from _dead_stock import scan, parse, is_lot
 
-AGE_LIMIT = 60
+DEFAULT_AGE = 60
 REPO = Path("output/pulled_repository.json")
 
 def load_repo():
@@ -30,7 +30,9 @@ def end_listing(iid, cfg, tok):
     return ack in ("Success", "Warning"), (ebay_client.find_tag(r.text, "LongMessage") or "")
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--apply", action="store_true"); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--days", type=int, default=DEFAULT_AGE, help="pull listings older than N days (routine uses 60)")
+    a = ap.parse_args(); AGE_LIMIT = a.days
     cfg = json.loads(Path("configuration.json").read_text()); tok = ebay_client.get_write_token(cfg)
     watched = set(json.load(open("output/_watched_ids.json"))) if Path("output/_watched_ids.json").exists() else set()
     snap = json.load(open("output/listings_snapshot.json"))
