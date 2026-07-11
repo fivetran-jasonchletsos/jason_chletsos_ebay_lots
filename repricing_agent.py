@@ -381,50 +381,49 @@ def _post_revise(xml_body: str, ebay_cfg: dict) -> dict:
 
 
 def revise_price(item_id: str, new_price: float, ebay_cfg: dict, token: str) -> dict:
-    """Push a StartPrice update, moving Best Offer thresholds with the price."""
+    """Push a StartPrice update, moving Best Offer thresholds with the price.
+
+    eBay validates different listing types differently, so we try progressively
+    stripped-down ReviseItem bodies and stop at the first eBay accepts:
+
+      1. price + condition + Best Offer  — singles happy path.
+      2. price + Best Offer (no condition) — LOTS (category 261329) reject the
+         singles ConditionID 4000 (err 21916883). Keeping the recomputed BO
+         thresholds is REQUIRED: dropping the price below a lot's stale
+         auto-accept trips err 23004, so we must lower auto-accept in the same
+         call rather than fall through to a price-only revise.
+      3. price + condition (no Best Offer) — listings without Best Offer enabled
+         reject the threshold fields ("offer" errors).
+      4. price only — Inventory-API-flagged relists from de-listed CDP imports
+         (err 21919474, "not allowed for inventory items") accept nothing else.
+    """
     accept  = round(new_price * REVISE_ACCEPT_PCT, 2)
     decline = round(new_price * REVISE_DECLINE_PCT, 2)
-    item_inner = (
-        f"<ItemID>{item_id}</ItemID>"
-        f'<StartPrice currencyID="USD">{new_price:.2f}</StartPrice>'
-        f"{_CONDITION_XML}"
-        "<ListingDetails>"
-        f'<BestOfferAutoAcceptPrice currencyID="USD">{accept:.2f}</BestOfferAutoAcceptPrice>'
-        f'<MinimumBestOfferPrice currencyID="USD">{decline:.2f}</MinimumBestOfferPrice>'
-        "</ListingDetails>"
-    )
-    xml_body = f"""<?xml version="1.0" encoding="utf-8"?>
-<ReviseItemRequest xmlns="{EBAY_NS}">
-  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
-  <Item>{item_inner}</Item>
-</ReviseItemRequest>"""
-    result = _post_revise(xml_body, ebay_cfg)
+    price = (f"<ItemID>{item_id}</ItemID>"
+             f'<StartPrice currencyID="USD">{new_price:.2f}</StartPrice>')
+    bo = ("<ListingDetails>"
+          f'<BestOfferAutoAcceptPrice currencyID="USD">{accept:.2f}</BestOfferAutoAcceptPrice>'
+          f'<MinimumBestOfferPrice currencyID="USD">{decline:.2f}</MinimumBestOfferPrice>'
+          "</ListingDetails>")
 
-    # Listings without Best Offer enabled reject the threshold fields —
-    # retry with price + condition only.
-    if not result["ok"] and any("offer" in (e["msg"] or "").lower() for e in result["errors"]):
-        fallback = f"""<?xml version="1.0" encoding="utf-8"?>
-<ReviseItemRequest xmlns="{EBAY_NS}">
-  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
-  <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice>{_CONDITION_XML}</Item>
-</ReviseItemRequest>"""
-        result = _post_revise(fallback, ebay_cfg)
+    def wrap(inner: str) -> str:
+        return (f'<?xml version="1.0" encoding="utf-8"?>\n'
+                f'<ReviseItemRequest xmlns="{EBAY_NS}">\n'
+                f'  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>\n'
+                f'  <Item>{inner}</Item>\n'
+                f'</ReviseItemRequest>')
 
-    # Inventory-API-flagged listings that have NO Sell Inventory API offer
-    # (relisted from de-listed CDP imports — see project_cdp_inventory_removal_delists_ebay)
-    # reject the full ReviseItem with err 21919474 ("not allowed for inventory
-    # items") — but only because of the BestOffer ListingDetails / Condition
-    # fields. A bare price-only ReviseItem is accepted. This recovers the ~24
-    # listings that neither the Trading nor the Inventory API path could reach.
-    if not result["ok"] and any(
-            e.get("code") == "21919474" or "inventory item" in (e.get("msg") or "").lower()
-            for e in result["errors"]):
-        minimal = f"""<?xml version="1.0" encoding="utf-8"?>
-<ReviseItemRequest xmlns="{EBAY_NS}">
-  <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
-  <Item><ItemID>{item_id}</ItemID><StartPrice currencyID="USD">{new_price:.2f}</StartPrice></Item>
-</ReviseItemRequest>"""
-        result = _post_revise(minimal, ebay_cfg)
+    variants = [
+        price + _CONDITION_XML + bo,   # 1. singles
+        price + bo,                    # 2. lots (no condition, keep BO)
+        price + _CONDITION_XML,        # 3. singles without Best Offer
+        price,                         # 4. inventory-API items
+    ]
+    result = None
+    for inner in variants:
+        result = _post_revise(wrap(inner), ebay_cfg)
+        if result["ok"]:
+            break
     return result
 
 
