@@ -393,6 +393,7 @@ locals {
     "create-listing",
     "ai-chat",
     "upload-photos",
+    "marvelify",
   ]
 }
 
