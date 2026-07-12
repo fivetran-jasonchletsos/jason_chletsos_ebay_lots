@@ -11,6 +11,7 @@ from _dead_stock import scan, parse, is_lot
 
 DEFAULT_AGE = 60
 REPO = Path("output/pulled_repository.json")
+DNR = Path("output/do_not_relist.json")  # relist_agent skips these item_ids
 
 def load_repo():
     if REPO.exists():
@@ -65,7 +66,12 @@ def main():
         else:
             err += 1; fails.append((r["id"], msg))
     REPO.write_text(json.dumps(repo, indent=1))
-    print(f"\n=== PULLED: {ok} ended + archived · {err} failed · repository now {len(repo)} ===")
+    # Add pulled ids to do_not_relist so relist_agent doesn't resurrect them
+    # (they'd otherwise reappear in UnsoldList and undo the slot-freeing).
+    dnr = set(str(x) for x in (json.load(open(DNR)) if DNR.exists() else []))
+    dnr.update(e["item_id"] for e in repo)
+    DNR.write_text(json.dumps(sorted(dnr), indent=1))
+    print(f"\n=== PULLED: {ok} ended + archived · {err} failed · repository now {len(repo)} · do-not-relist {len(dnr)} ===")
     for f in fails: print(f'  FAIL {f[0]}: {f[1]}')
 
 if __name__ == "__main__": main()
