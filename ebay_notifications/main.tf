@@ -269,8 +269,10 @@ resource "aws_lambda_function" "ebay_notifications" {
   runtime          = "python3.12"
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  timeout          = 10
-  memory_size      = 128
+  # Marvel-ify (Gemini image gen) needs headroom: vision + image gen ~10-25s,
+  # and the base64 image blobs want more CPU/RAM than the tiny default.
+  timeout          = 40
+  memory_size      = 512
 
   environment {
     variables = {

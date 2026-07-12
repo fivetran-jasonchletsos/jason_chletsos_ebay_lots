@@ -71,6 +71,14 @@ PRICECHARTING_API_KEY = os.environ.get("PRICECHARTING_API_KEY", "")
 # "us.anthropic.claude-3-5-sonnet-20241022-v2:0".
 BEDROCK_MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "")
 
+# Google Gemini image generation for the "Hero Pulls" Marvel-ify feature —
+# redraws a scanned athlete as a wholesome superhero while keeping their
+# likeness. Key stays server-side only (never shipped to the browser page).
+GEMINI_API_KEY     = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_IMAGE_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+GEMINI_URL = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+              f"{GEMINI_IMAGE_MODEL}:generateContent")
+
 
 def _run_vision(system, images, instruction, max_tokens=1200):
     """Send image(s) + an instruction to a vision model; return (text, label).
@@ -127,6 +135,90 @@ def _run_vision(system, images, instruction, max_tokens=1200):
         if isinstance(b, dict) and b.get("type") == "text"
     ).strip()
     return text, data.get("model", "")
+
+
+# --- Hero Pulls / Marvel-ify --------------------------------------------- #
+
+# Stage 1: Claude vision reads the card and designs a wholesome hero persona.
+_MARVELIFY_PERSONA_SYSTEM = (
+    "You are a kids'-comic character designer. You are shown a sports trading "
+    "card. Identify the athlete and design a WHOLESOME, family-friendly, "
+    "Marvel-style superhero version of them for an all-ages trading-card toy.\n"
+    "Return ONLY one valid JSON object (no markdown) with exactly these keys:\n"
+    '  "is_card"          (true if this is a trading card of a person; false for a plain selfie/face or non-card)\n'
+    '  "athlete_name"     (string; "" if unreadable)\n'
+    '  "sport"            (string) ,  "position" (string)\n'
+    '  "appearance_notes" (ONE sentence: face shape, skin tone, hair, facial hair, '
+    "build — the traits to PRESERVE so the hero still looks like this person)\n"
+    '  "hero_alias"       (invented wholesome hero name riffing on their sport/team, e.g. "The Gridiron Ghost")\n'
+    '  "archetype"        (one of: speedster, powerhouse, tech-armor, elemental, '
+    "cosmic, street-vigilante, winged-guardian, shield-sentinel, plasma-gunner, "
+    "juggernaut, sorcerer, radiant, beast-form, mutant-brawler)\n"
+    '  "powers"           (1-2 wholesome powers, no weapons, no violence)\n'
+    '  "costume_colors"   (2-3 colors, prefer their real team colors)\n'
+    '  "pose"             (one dynamic, heroic, NON-violent action)\n'
+    "Rules: everything strictly G-rated. No weapons, blood, or scary imagery. "
+    "If you cannot read a person, set is_card false; still fill the creative "
+    "fields generically. Output must be machine-parseable JSON only."
+)
+
+# Stage 2: built from the persona JSON + the ORIGINAL photo, sent to Gemini.
+_MARVELIFY_IMAGE_TMPL = (
+    "Transform the athlete IN THE PROVIDED PHOTO into a wholesome, kid-friendly "
+    "Marvel-style comic superhero, KEEPING THE SAME PERSON. Preserve their exact "
+    "face, {appearance_notes}. It must be instantly recognizable as the same "
+    "individual — do not change their face, skin tone, ethnicity, hair, or body "
+    "type, and do not change their apparent age.\n"
+    'Redraw them as "{hero_alias}", a {archetype} hero, wearing a heroic, fully-'
+    "covered superhero costume in {costume_colors}. Show them {pose}, using their "
+    "power of {powers}. Keep the face visible (no full mask).\n"
+    "Art style: bold Topps-Chrome-meets-Marvel trading-card comic art — clean ink "
+    "lines, dramatic cel shading, vivid chrome-foil rim light, energetic action "
+    "background with subtle motion lines and a soft glow. Vertical PORTRAIT "
+    "trading-card orientation, full-bleed, single subject centered.\n"
+    "STRICT: keep the exact same person's likeness; family-friendly and G-rated "
+    "only; no weapons, no blood, no gore, no scary or violent imagery, no "
+    "realistic firearms, fully clothed and dignified. Do NOT add any text, "
+    "letters, numbers, logos, signatures, or watermarks anywhere in the image. "
+    "One single character only."
+)
+
+
+def _gemini_image(prompt, img_fmt, img_raw, timeout=30):
+    """Identity-preserving hero restyle via Gemini 2.5 Flash Image.
+
+    Returns (out_mime, out_b64, block_reason). On success block_reason is None;
+    on a soft failure (safety block / no image) out_b64 is None and block_reason
+    carries the cause for logging.
+    """
+    mime = "jpeg" if img_fmt in ("jpg", "jpeg") else img_fmt
+    payload = json.dumps({
+        "contents": [{
+            "role": "user",
+            "parts": [
+                {"inline_data": {"mime_type": f"image/{mime}",
+                                 "data": base64.b64encode(img_raw).decode()}},
+                {"text": prompt},
+            ],
+        }],
+        "generationConfig": {"responseModalities": ["IMAGE"], "temperature": 0.4},
+    }).encode()
+    req = urllib.request.Request(
+        GEMINI_URL, data=payload,
+        headers={"Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY},
+        method="POST",
+    )
+    resp = urllib.request.urlopen(req, timeout=timeout)
+    data = json.loads(resp.read().decode())
+    cands = data.get("candidates") or []
+    if not cands:
+        return None, None, (data.get("promptFeedback") or {}).get("blockReason", "no_candidates")
+    cand = cands[0]
+    for part in cand.get("content", {}).get("parts", []):
+        inl = part.get("inlineData") or part.get("inline_data")
+        if inl and inl.get("data"):
+            return inl.get("mimeType", "image/png"), inl["data"], None
+    return None, None, cand.get("finishReason", "no_image")
 
 
 def _extract_json(text):
@@ -844,6 +936,95 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/upload-photos"):
+        return _cors_preflight(event)
+
+    # POST /ebay/marvelify — "Hero Pulls" Marvel-ify: redraw the scanned athlete
+    # as a wholesome superhero (Claude vision persona -> Gemini image restyle).
+    if method == "POST" and path.endswith("/ebay/marvelify"):
+        try:
+            if not GEMINI_API_KEY:
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "Hero maker not configured yet — no image key set on Lambda.",
+                }, event)
+
+            body  = json.loads(event.get("body") or "{}")
+            front = str(body.get("image") or "").strip()
+            if not front:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            fmt, raw = _img_bytes(front)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 3_500_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            # Stage 1 — persona (reuse the vision backend; never fatal)
+            persona = {}
+            try:
+                ptext, _lbl = _run_vision(
+                    _MARVELIFY_PERSONA_SYSTEM, [(fmt, raw)],
+                    "Design the hero persona JSON. Return ONLY JSON.", 700)
+                persona = _extract_json(ptext) or {}
+            except Exception as exc:
+                logger.error(f"marvelify persona error: {exc}")
+
+            # Guard: if the vision step is confident this is NOT a card of a
+            # person (e.g. a kid's selfie), decline gently rather than redraw it.
+            if persona.get("is_card") is False:
+                return _cors_response(200, {
+                    "success":   True,
+                    "generated": False,
+                    "persona":   persona,
+                    "message":   "Point me at a trading card and I'll make the magic happen!",
+                    "reason":    "not_a_card",
+                }, event)
+
+            # Stage 2 — image restyle
+            block = None
+            out_mime = out_b64 = None
+            try:
+                prompt = _MARVELIFY_IMAGE_TMPL.format(
+                    appearance_notes=persona.get("appearance_notes",
+                                                 "the same face, hair, skin tone and build"),
+                    hero_alias=persona.get("hero_alias", "The Champion"),
+                    archetype=persona.get("archetype", "powerhouse"),
+                    costume_colors=persona.get("costume_colors", "bold team colors"),
+                    pose=persona.get("pose", "leaping heroically toward the viewer"),
+                    powers=persona.get("powers", "super strength and speed"),
+                )
+                out_mime, out_b64, block = _gemini_image(prompt, fmt, raw, timeout=30)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"marvelify gemini HTTP {exc.code}: {exc.read().decode()[:300]}")
+                block = f"http_{exc.code}"
+            except Exception as exc:
+                logger.error(f"marvelify gemini error: {exc}")
+                block = "error"
+
+            if not out_b64 or len(out_b64) > 5_000_000:
+                return _cors_response(200, {
+                    "success":   True,
+                    "generated": False,
+                    "persona":   persona,
+                    "message":   "Your hero is shy today — try a clear photo of a single player's card.",
+                    "reason":    block,
+                }, event)
+
+            return _cors_response(200, {
+                "success":    True,
+                "generated":  True,
+                "persona":    persona,
+                "hero_image": f"data:{out_mime};base64,{out_b64}",
+                "model":      GEMINI_IMAGE_MODEL,
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"marvelify error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/marvelify"):
         return _cors_preflight(event)
 
     if method == "POST" and path.endswith("/ebay/ai-chat"):

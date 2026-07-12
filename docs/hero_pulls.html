@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B2265">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hero Pulls NYC — Turn any card into a super-card</title>
+<meta name="description" content="Snap any sports card and we'll turn that player into a New York super-hero. Then rip the pack and see how rare you pulled! Just for fun.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Familjen+Grotesk:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --giants-blue:#0B2265; --giants-red:#A71930;
+    --mets-blue:#002D72;   --mets-orange:#FF5910;
+    --ink:#0A1A3F; --ink-soft:#5b6685; --paper:#f6f8ff;
+    --foil:#c9d4f0; --gold:#FFC533; --line:#dde4f5;
+    --card:#ffffff; --r:16px; --r-lg:24px;
+    --t:200ms cubic-bezier(.34,1.4,.5,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Familjen Grotesk',system-ui,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(120% 60% at 8% -5%, rgba(11,34,101,.18), transparent 55%),
+      radial-gradient(120% 55% at 100% 0%, rgba(255,89,16,.16), transparent 55%),
+      linear-gradient(180deg,#eef2ff,#f7f9ff);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .skyline{position:fixed;left:0;right:0;bottom:0;height:120px;pointer-events:none;opacity:.06;z-index:0;
+    background:no-repeat bottom/contain;}
+  .wrap{position:relative;z-index:1;max-width:min(94vw,600px);margin-inline:auto;padding:0 16px 60px}
+
+  /* Header */
+  .top{text-align:center;padding:24px 0 6px}
+  .token{width:60px;height:60px;margin:0 auto 12px;border-radius:50%;
+    background:radial-gradient(circle at 50% 38%, var(--mets-orange), #d63e00 70%);
+    border:4px solid var(--giants-blue); position:relative;display:grid;place-items:center;
+    box-shadow:0 10px 24px rgba(11,34,101,.3)}
+  .token span{font-family:'Archivo Black',sans-serif;color:#fff;font-size:22px;letter-spacing:-.04em;line-height:1;transform:translateY(1px)}
+  h1{font-family:'Anton',sans-serif;font-weight:400;margin:0;line-height:.95;
+    font-size:clamp(34px,10vw,58px);letter-spacing:.01em;text-transform:uppercase;
+    background:linear-gradient(120deg,var(--giants-blue),var(--mets-blue) 60%,var(--giants-red));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-family:'Oswald',sans-serif;font-weight:600;color:var(--mets-orange);font-size:13px;letter-spacing:.2em;text-transform:uppercase;margin-top:6px}
+  .lede{color:var(--ink-soft);font-size:15.5px;font-weight:500;margin:12px auto 0;max-width:28em;line-height:1.45}
+
+  .panel{background:var(--card);border:2px solid var(--line);border-radius:var(--r-lg);padding:18px;margin-top:18px;box-shadow:0 12px 30px rgba(11,34,101,.08)}
+  .panel h2{font-family:'Oswald',sans-serif;font-weight:700;font-size:19px;margin:0 0 14px;color:var(--giants-blue);text-transform:uppercase;letter-spacing:.04em}
+  .step{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:800;margin-right:8px;font-family:'Oswald',sans-serif}
+
+  .shot{position:relative;border:3px dashed #c3cff0;border-radius:var(--r);background:#f2f6ff;aspect-ratio:5/7;max-width:260px;margin:0 auto;overflow:hidden;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink-soft);transition:transform var(--t),border-color var(--t);text-align:center;padding:12px}
+  .shot:active{transform:scale(.97);border-color:var(--mets-orange)}
+  .shot.filled{border-style:solid;border-color:var(--giants-blue)}
+  .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .shot .ic{font-size:34px}
+  .shot .t{font-family:'Oswald',sans-serif;font-weight:600;color:var(--ink);font-size:15px}
+  .shot .s{font-size:12.5px;color:var(--ink-soft)}
+  .shot .swap{position:absolute;bottom:8px;right:8px;background:rgba(11,34,101,.82);color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;font-weight:600}
+  .shot input{display:none}
+
+  .actions{display:none;gap:10px;margin-top:16px}
+  .actions.on{display:grid}
+  .btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:none;border-radius:var(--r);padding:16px;cursor:pointer;
+    font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:#fff;transition:transform var(--t),box-shadow var(--t),filter var(--t);text-transform:uppercase;letter-spacing:.03em}
+  .btn:active{transform:translateY(2px) scale(.99)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none;filter:grayscale(.3)}
+  .btn-hero{background:linear-gradient(120deg,var(--mets-orange),var(--gold));color:#26160a;box-shadow:0 10px 26px rgba(255,89,16,.34);font-size:20px;
+    animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:none}50%{transform:scale(1.02)}}
+  .btn-id{background:transparent;color:var(--giants-blue);border:2px solid var(--giants-blue);box-shadow:none}
+  .btn-again{background:linear-gradient(120deg,var(--giants-blue),var(--mets-blue));font-size:16px;padding:14px}
+  .btn-ghost{background:transparent;color:var(--giants-blue);border:2px solid #c3cff0}
+  .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .loading{display:none;text-align:center;padding:34px 10px}
+  .loading.on{display:block}
+  .spin{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;
+    border:5px solid #d7e0f7;border-top-color:var(--mets-orange);animation:sp 800ms linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .loading p{font-family:'Oswald',sans-serif;font-weight:600;color:var(--giants-blue);font-size:16px;margin:0;letter-spacing:.02em}
+
+  .err{display:none;background:#fff0ec;border:2px solid var(--mets-orange);color:#b0430f;border-radius:var(--r);padding:14px;margin-top:14px;font-weight:600;text-align:center}
+  .err.on{display:block}
+
+  /* ---------- Pack pull ---------- */
+  #pack{display:none;text-align:center;padding:14px 0}
+  #pack.on{display:block;animation:fade 300ms ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .pack-label{font-family:'Oswald',sans-serif;font-weight:600;color:var(--giants-blue);font-size:16px;margin:0 0 14px;letter-spacing:.03em}
+  .wax{position:relative;width:min(70vw,230px);aspect-ratio:5/7;margin:0 auto 18px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(150deg,var(--giants-blue),var(--mets-blue) 55%,#001a4d);
+    border:3px solid var(--gold);box-shadow:0 16px 40px rgba(11,34,101,.4);overflow:hidden;display:grid;place-items:center;transition:transform var(--t)}
+  .wax:active{transform:scale(.98)}
+  .wax::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.5) 48%,transparent 56%);animation:sheen 2.4s ease-in-out infinite}
+  @keyframes sheen{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
+  .wax .wm{font-family:'Anton',sans-serif;color:#fff;font-size:26px;text-transform:uppercase;text-align:center;line-height:1;letter-spacing:.02em;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .wax .wm small{display:block;color:var(--gold);font-size:13px;letter-spacing:.24em;margin-top:6px}
+  .wax.ripped{animation:rip 620ms cubic-bezier(.5,0,.4,1) forwards}
+  @keyframes rip{0%{clip-path:inset(0 0 0 0)}45%{transform:scale(1.04) rotate(-1deg)}100%{transform:scale(1.2);opacity:0;clip-path:inset(0 0 100% 0)}}
+
+  /* ---------- Rarity banner ---------- */
+  .rarity{display:none;margin:0 auto 14px;text-align:center}
+  .rarity.on{display:block;animation:slam 460ms cubic-bezier(.2,1.6,.4,1)}
+  @keyframes slam{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:none}}
+  .rarity .tier{font-family:'Anton',sans-serif;font-size:clamp(22px,7vw,34px);text-transform:uppercase;letter-spacing:.02em;line-height:1}
+  .rarity .sn{font-family:'Oswald',sans-serif;font-weight:600;color:var(--ink-soft);font-size:14px;margin-top:2px}
+
+  /* ---------- The hero card ---------- */
+  #reveal{display:none}
+  #reveal.on{display:block;animation:pop 460ms cubic-bezier(.34,1.5,.5,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.9) rotateY(18deg)}to{opacity:1;transform:none}}
+  .card-wrap{width:min(84vw,330px);margin:0 auto;perspective:900px}
+  .card{position:relative;width:100%;aspect-ratio:5/7;border-radius:5.5%/3.9%;overflow:hidden;
+    background:#0a0a10;box-shadow:0 22px 50px rgba(11,34,101,.5);transform:rotateX(var(--ry,0)) rotateY(var(--rx,0));transition:transform .1s;
+    --rail-gold:#E8B923;--rail-inner:var(--team-primary,#C0202F);--name-outline:var(--team-primary,#1E6FE0)}
+  .card .art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .card .art.placeholder{display:grid;place-items:center;background:linear-gradient(160deg,#12213f,#0a1327);color:#4f6396;font-family:'Anton';font-size:64px}
+  .fx{position:absolute;inset:0;pointer-events:none}
+  .fx.chrome{z-index:2;mix-blend-mode:screen;opacity:.5;
+    background:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.35) 45%,rgba(190,215,255,.15) 50%,rgba(255,255,255,.35) 55%,rgba(255,255,255,0) 70%)}
+  .fx.refractor{z-index:2;mix-blend-mode:color-dodge;opacity:0;filter:saturate(1.4);
+    background:conic-gradient(from 0deg,#ff2f6e,#ff8a00,#ffe600,#37ff8b,#00d4ff,#7a5cff,#ff2f6e)}
+  .fx.holo{z-index:2;mix-blend-mode:overlay;opacity:0;filter:blur(.4px);inset:-20%;transform:rotate(2deg);
+    background:repeating-linear-gradient(100deg,rgba(255,255,255,0) 0 6px,rgba(180,220,255,.5) 8px,rgba(255,190,230,.5) 12px,rgba(255,255,255,0) 18px)}
+  .fx.ice{z-index:2;mix-blend-mode:screen;opacity:0;
+    background:repeating-linear-gradient(60deg,rgba(255,255,255,.18) 0 2px,transparent 2px 22px),repeating-linear-gradient(-25deg,rgba(200,230,255,.16) 0 2px,transparent 2px 30px),repeating-linear-gradient(15deg,rgba(255,255,255,.12) 0 2px,transparent 2px 26px)}
+  .frame{position:absolute;inset:2.2% 3%;border-radius:4%/2.8%;z-index:3;pointer-events:none;
+    box-shadow:inset 0 0 0 .32vw var(--rail-gold),inset 0 0 0 .64vw #101015,inset 0 0 0 .98vw var(--rail-inner)}
+  .marvel-box{position:absolute;left:4.5%;top:3.2%;z-index:4;background:var(--giants-red);border:1.5px solid var(--gold);
+    color:#fff;font-family:'Archivo Black',sans-serif;font-size:min(3.6vw,15px);letter-spacing:-.02em;padding:2px 6px;border-radius:2px;line-height:1}
+  .chrome-bug{position:absolute;right:4.5%;top:3.4%;z-index:4;font-family:'Oswald',sans-serif;font-weight:700;color:#eaf1ff;
+    font-size:min(2.6vw,11px);letter-spacing:.06em;text-shadow:0 1px 2px rgba(0,0,0,.6);text-align:right;line-height:1.05}
+  .chrome-bug small{display:block;font-size:.8em;color:var(--gold)}
+  .hero-name{position:absolute;right:1%;top:50%;z-index:4;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;
+    font-family:'Anton',sans-serif;font-size:min(9vw,2rem);letter-spacing:.02em;color:#fff;
+    -webkit-text-stroke:.11em var(--name-outline);paint-order:stroke fill;
+    text-shadow:0 0 .18em rgba(0,0,0,.5);max-height:80%;white-space:nowrap;overflow:hidden}
+  .stamp{position:absolute;left:5%;bottom:5%;z-index:4;width:16%;aspect-ratio:1;border-radius:50%;
+    background:var(--giants-red);border:2px solid #fff;display:none;place-items:center;color:#fff;
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:min(2vw,9px);text-align:center;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .stamp.on{display:grid}
+  .serial{position:absolute;right:12%;bottom:4.5%;z-index:4;font-family:'Oswald',sans-serif;font-weight:600;
+    color:#eaf1ff;font-size:min(2.6vw,11px);letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.7);display:none}
+  .serial.on{display:block}
+  .madeup{position:absolute;left:50%;bottom:1.2%;transform:translateX(-50%);z-index:4;font-family:'Oswald',sans-serif;
+    font-size:min(2vw,8.5px);color:rgba(255,255,255,.75);letter-spacing:.04em;white-space:nowrap}
+  .glare{position:absolute;inset:0;z-index:5;pointer-events:none;mix-blend-mode:screen;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.5),rgba(255,255,255,0) 42%)}
+  .skin-giants{--team-primary:#0B2265;--team-secondary:#A71930}
+  .skin-mets{--team-primary:#002D72;--team-secondary:#FF5910}
+
+  .story{background:#f2f6ff;border:2px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-top:16px}
+  .story .who{font-family:'Oswald',sans-serif;font-weight:700;color:var(--giants-blue);font-size:15px;text-transform:uppercase;letter-spacing:.03em}
+  .story .pw{color:var(--ink-soft);font-size:14px;margin-top:3px;line-height:1.4}
+  .resultbtns{margin-top:16px;display:grid;gap:10px}
+
+  /* Identify results (old feature) */
+  #idres{display:none}
+  #idres.on{display:block;animation:pop 360ms cubic-bezier(.34,1.5,.5,1)}
+  .name{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;line-height:1.15;margin:0 0 4px;color:var(--ink)}
+  .sub2{color:var(--ink-soft);font-size:15px;font-weight:600;margin:0 0 12px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .chip{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;color:#fff}
+  .chip.rc{background:var(--giants-red)}.chip.holo{background:var(--mets-blue)}.chip.ser{background:var(--giants-blue)}
+  .chip.par{background:linear-gradient(90deg,var(--giants-blue),var(--mets-orange))}.chip.type{background:var(--mets-orange)}
+  .field{margin-top:14px}
+  .field .fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .field .fl{font-family:'Oswald',sans-serif;font-size:13px;color:var(--ink-soft);font-weight:600}
+  .copy{background:var(--gold);border:none;color:var(--ink);font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;cursor:pointer;transition:transform var(--t)}
+  .copy:active{transform:scale(.95)}.copy.done{background:#3fae4a;color:#fff}
+  .box{background:#f7f9ff;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-weight:500;line-height:1.5}
+  .xsell{margin-top:14px}
+
+  .note{color:var(--ink-soft);font-size:12.5px;text-align:center;margin-top:16px;font-weight:500}
+  footer{margin-top:36px;text-align:center;color:var(--ink-soft);font-size:13px;font-weight:600}
+  footer .ded{font-family:'Oswald',sans-serif;color:var(--giants-blue);font-size:16px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+  footer .catch{color:var(--mets-orange)}
+  .hr{height:3px;border-radius:3px;background:linear-gradient(90deg,var(--giants-blue),var(--gold),var(--mets-orange));margin:24px 0 16px}
+  .tally{color:var(--ink-soft);font-size:12.5px;margin-top:8px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="skyline" aria-hidden="true"></div>
+<div class="wrap">
+
+  <header class="top">
+    <div class="token" aria-hidden="true"><span>NY</span></div>
+    <h1>Hero Pulls NYC</h1>
+    <div class="sub">Turn any card into a super-card</div>
+    <p class="lede">Snap any card and we'll turn that player into a New York super-hero. Then rip the pack and see how rare you pulled!</p>
+  </header>
+
+  <section class="panel" id="scanpanel">
+    <h2><span class="step">1</span>Snap the front</h2>
+    <label class="shot" id="shot-front">
+      <span class="ic">📸</span>
+      <span class="t">Tap to snap a card</span>
+      <span class="s">a player, a Pokemon, anybody</span>
+      <input type="file" accept="image/*" capture="environment" id="in-front">
+    </label>
+    <div class="actions" id="actions">
+      <button class="btn btn-hero" id="go-hero">⚡ Marvel-ify me!</button>
+      <button class="btn btn-id" id="go-id">Who is this card?</button>
+    </div>
+    <div class="tally" id="tally" style="text-align:center"></div>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="spin"></div>
+    <p id="loadmsg">Scouting your hero…</p>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <!-- Pack pull -->
+  <section id="pack">
+    <p class="pack-label">Your pack is sealed…</p>
+    <div class="wax" id="wax"><div class="wm">NY<br>HEROES<small>rip it open</small></div></div>
+    <button class="btn btn-hero" id="rip">Rip it open</button>
+  </section>
+
+  <!-- Reveal -->
+  <section id="reveal">
+    <div class="rarity" id="rarity"><div class="tier" id="tierName"></div><div class="sn" id="tierSerial"></div></div>
+    <div class="card-wrap">
+      <div class="card skin-giants" id="card">
+        <div class="art placeholder" id="art">?</div>
+        <div class="fx chrome" id="fxChrome"></div>
+        <div class="fx refractor" id="fxRefractor"></div>
+        <div class="fx holo" id="fxHolo"></div>
+        <div class="fx ice" id="fxIce"></div>
+        <div class="frame"></div>
+        <div class="marvel-box">MARVEL</div>
+        <div class="chrome-bug">Topps<small>CHROME</small></div>
+        <div class="hero-name" id="heroName">HERO</div>
+        <div class="stamp" id="stamp">1<sup>st</sup></div>
+        <div class="serial" id="serial"></div>
+        <div class="madeup">Just for fun • not a real card</div>
+        <div class="glare" id="glare"></div>
+      </div>
+    </div>
+    <div class="story">
+      <div class="who" id="storyWho"></div>
+      <div class="pw" id="storyPw"></div>
+    </div>
+    <div class="resultbtns">
+      <div class="btnrow">
+        <button class="btn btn-hero" id="reroll">🎴 Pull again!</button>
+        <button class="btn btn-again" id="newhero">✨ New hero</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-ghost" id="save">💾 Save card</button>
+        <button class="btn btn-ghost" id="share">📤 Show a friend</button>
+      </div>
+      <button class="btn btn-again" id="makeanother">Make another</button>
+    </div>
+    <p class="note">Just for fun — made-up cards, not for sale. Your hero was drawn just for you!</p>
+  </section>
+
+  <!-- Identify results (classic feature) -->
+  <section id="idres">
+    <div class="panel">
+      <h2 style="margin-bottom:8px">✨ It's a…</h2>
+      <div class="chips" id="chips"></div>
+      <p class="name" id="idname"></p>
+      <p class="sub2" id="idsub"></p>
+      <div class="field">
+        <div class="fh"><span class="fl">Full card name</span><button class="copy" data-src="fullname">Copy</button></div>
+        <div class="box" id="fullname"></div>
+      </div>
+      <div class="field">
+        <div class="fh"><span class="fl">About this card</span><button class="copy" data-src="about">Copy</button></div>
+        <div class="box" id="about"></div>
+      </div>
+      <button class="btn btn-hero xsell" id="xsell">Now make them a hero →</button>
+      <p class="note">Fun facts about your card — powered by Uncle Jason's card AI.</p>
+    </div>
+    <button class="btn btn-again" id="idagain">🔍 Scan another</button>
+  </section>
+
+  <footer>
+    <div class="hr"></div>
+    <div class="ded">Made for Andrew, Ella, Pete, Myra &amp; Nora</div>
+    <div class="catch">Pull a rare one!</div>
+    <div style="margin-top:10px;color:var(--ink-soft);font-weight:500">Hero Pulls NYC — just for fun, never for sale.</div>
+  </footer>
+
+</div>
+
+<script>
+const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
+const state = { front:null, persona:null, heroImg:null, parallel:null, skin:'giants' };
+const $ = id => document.getElementById(id);
+
+/* ---------- shared helpers (same pattern as the other scanners) ---------- */
+function downscale(file, maxDim=1280, quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let {width:w, height:h} = img;
+      if (Math.max(w,h) > maxDim){ const s = maxDim/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Could not read that photo.')); };
+    img.src = url;
+  });
+}
+function showErr(m){ const e=$('err'); e.textContent=m; e.classList.add('on'); }
+function clearErr(){ $('err').classList.remove('on'); }
+function hide(...ids){ ids.forEach(i=>$(i).classList.remove('on')); }
+
+/* ---------- camera ---------- */
+$('in-front').addEventListener('change', async ()=>{
+  const f = $('in-front').files && $('in-front').files[0]; if(!f) return;
+  try{
+    const data = await downscale(f); state.front = data;
+    const shot=$('shot-front'); shot.classList.add('filled');
+    shot.querySelectorAll('.ic,.t,.s').forEach(e=>e.style.display='none');
+    let prev=shot.querySelector('img'); if(!prev){ prev=document.createElement('img'); shot.appendChild(prev); }
+    prev.src=data;
+    if(!shot.querySelector('.swap')){ const sw=document.createElement('span'); sw.className='swap'; sw.textContent='Retake'; shot.appendChild(sw); }
+    $('actions').classList.add('on');
+    clearErr();
+  }catch(e){ showErr(e.message||'Could not read that photo.'); }
+});
+
+/* ---------- loading ---------- */
+const HERO_MSGS = ['Scouting your hero…','Drawing the cape…','Mixing blue and orange paint…','Charging up super powers…','Rolling for rarity…','Buffing the chrome…','Signing the card…','Sealing the pack…'];
+const ID_MSGS   = ['Looking at your card…','Reading the name…','Checking the set…','Asking the AI…','Almost there…'];
+let cyc=null;
+function startLoad(msgs){ const load=$('loading'); load.classList.add('on'); let i=0; $('loadmsg').textContent=msgs[0];
+  cyc=setInterval(()=>{ i=Math.min(i+1,msgs.length-1); $('loadmsg').textContent=msgs[i]; },2600); }
+function stopLoad(){ if(cyc)clearInterval(cyc); cyc=null; $('loading').classList.remove('on'); }
+
+/* ---------- parallels (the pack-pull rarity roll) ---------- */
+const PARALLELS=[
+ {id:'base',   w:100, name:'Base Chrome',       rail:null,      tier:'#5b6685', fx:['chrome']},
+ {id:'refr',   w:55,  name:'Refractor',         rail:'#E8B923', tier:'#c99a1e', fx:['chrome','refractor'], refOp:.28},
+ {id:'blue',   w:35,  name:'Blue Wave',         rail:'#1E6FE0', tier:'#1E6FE0', fx:['chrome','holo'], holoOp:.5},
+ {id:'green',  w:22,  name:'Green Refractor',   rail:'#2FBF5B', tier:'#1f9c46', fx:['refractor'], serial:299, refOp:.24, refHue:80},
+ {id:'purple', w:14,  name:'Purple Prizm',      rail:'#8A2BE2', tier:'#8A2BE2', fx:['refractor'], serial:99,  refOp:.2, refHue:40},
+ {id:'ice',    w:8,   name:'Cracked Ice',       rail:'#BFEAFF', tier:'#3aa0c9', fx:['ice'], serial:49, iceOp:.6},
+ {id:'gold',   w:4,   name:'Gold Wave',         rail:'#F2C744', tier:'#d19a00', fx:['chrome','holo'], serial:10, holoOp:.7},
+ {id:'one',    w:1,   name:'Subway Series 1-of-1', rail:'#FFFFFF', tier:'#ff8a00', fx:['chrome','refractor','holo','ice'], serial:1, oneofone:true, refOp:.4, holoOp:.6, iceOp:.7},
+];
+function rollParallel(){
+  const total=PARALLELS.reduce((s,p)=>s+p.w,0); let r=Math.random()*total;
+  for(const p of PARALLELS){ if((r-=p.w)<0){
+    const sn = p.serial ? (p.serial===1 ? '1/1' : (1+Math.floor(Math.random()*p.serial))+'/'+p.serial) : null;
+    return {...p, serialNo:sn};
+  }}
+  return PARALLELS[0];
+}
+function applyParallel(p){
+  state.parallel=p;
+  const card=$('card');
+  card.style.setProperty('--rail-inner', p.rail || 'var(--team-primary)');
+  card.style.setProperty('--name-outline', p.rail && p.id!=='refr' ? p.rail : 'var(--team-primary)');
+  // reset fx
+  ['fxChrome','fxRefractor','fxHolo','fxIce'].forEach(id=>$(id).style.opacity=0);
+  if(p.fx.includes('chrome')) $('fxChrome').style.opacity=.5;
+  if(p.fx.includes('refractor')){ const e=$('fxRefractor'); e.style.opacity=p.refOp||.28; e.style.filter=`saturate(1.4) hue-rotate(${p.refHue||0}deg)`; }
+  if(p.fx.includes('holo')) $('fxHolo').style.opacity=p.holoOp||.5;
+  if(p.fx.includes('ice')) $('fxIce').style.opacity=p.iceOp||.6;
+  // stamp + serial
+  $('stamp').classList.toggle('on', p.id==='refr' ? false : (Math.random()<.2 || p.oneofone));
+  const ser=$('serial'); if(p.serialNo){ ser.textContent=p.serialNo; ser.classList.add('on'); } else ser.classList.remove('on');
+  // rarity banner
+  $('tierName').textContent = p.oneofone ? 'SUBWAY SERIES 1-OF-1!!' : p.name.toUpperCase();
+  $('tierName').style.color = p.tier;
+  $('tierSerial').textContent = p.serialNo ? ('#'+p.serialNo+' — only '+(p.serial)+' exist') : (p.id==='base'?'Common pull':'Nice pull!');
+  $('rarity').classList.remove('on'); void $('rarity').offsetWidth; $('rarity').classList.add('on');
+  if(navigator.vibrate){ navigator.vibrate(p.oneofone?[20,40,20,40,60]:(p.serial?[20,40,20]:30)); }
+}
+
+/* ---------- Marvel-ify ---------- */
+$('go-hero').addEventListener('click', ()=>runHero(state.front));
+$('go-id').addEventListener('click', runIdentify);
+$('rip').addEventListener('click', ripPack);
+$('wax').addEventListener('click', ripPack);
+$('reroll').addEventListener('click', ()=>{ applyParallel(rollParallel()); window.scrollTo({top:$('reveal').offsetTop-20,behavior:'smooth'}); });
+$('newhero').addEventListener('click', ()=>runHero(state.front));
+$('makeanother').addEventListener('click', resetAll);
+$('save').addEventListener('click', saveCard);
+$('share').addEventListener('click', shareCard);
+
+async function runHero(imgData){
+  if(!imgData) return;
+  clearErr(); hide('reveal','idres','pack','actions'); $('go-hero').disabled=true; $('go-id').disabled=true;
+  startLoad(HERO_MSGS);
+  try{
+    const res = await fetch(LAMBDA + '/marvelify', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: imgData })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Something went wrong.');
+    state.persona = data.persona || {};
+    if(!data.generated || !data.hero_image){
+      // graceful: still show a Mystery Hero card with the story
+      state.heroImg = null;
+      showPackThenReveal(data.message || "Your hero is shy today — pull again!");
+      return;
+    }
+    state.heroImg = data.hero_image;
+    showPackThenReveal(null);
+  }catch(e){ showErr(e.message || 'No internet? Give it another shot in a sec!'); }
+  finally{ stopLoad(); $('go-hero').disabled=false; $('go-id').disabled=false; $('actions').classList.add('on'); }
+}
+
+function showPackThenReveal(softMsg){
+  if(softMsg) showErr(softMsg);
+  state.skin = Math.random()<.5 ? 'giants':'mets';
+  $('pack').classList.add('on');
+  $('wax').classList.remove('ripped');
+  $('rip').style.display='';
+  window.scrollTo({top:$('pack').offsetTop-20,behavior:'smooth'});
+}
+
+function ripPack(){
+  if($('wax').classList.contains('ripped')) return;
+  $('wax').classList.add('ripped'); $('rip').style.display='none';
+  if(navigator.vibrate) navigator.vibrate(30);
+  setTimeout(revealCard, 560);
+}
+
+function revealCard(){
+  hide('pack');
+  const card=$('card'); card.className='card skin-'+state.skin;
+  // art (swap the #art node cleanly each pull, image or placeholder)
+  if(state.heroImg){ $('art').outerHTML = '<img class="art" id="art" src="'+state.heroImg+'" alt="your hero">'; }
+  else { $('art').outerHTML = '<div class="art placeholder" id="art">?</div>'; }
+  // name + story
+  const p=state.persona||{};
+  const alias=(p.hero_alias||'The Champion').toUpperCase();
+  $('heroName').textContent = alias.length>18 ? alias.slice(0,18) : alias;
+  $('storyWho').textContent = (p.hero_alias||'The Champion') + (p.athlete_name?(' — a.k.a. '+p.athlete_name):'');
+  $('storyPw').textContent = [p.archetype?('Type: '+p.archetype):'', p.powers?('Powers: '+p.powers):''].filter(Boolean).join('  •  ');
+  applyParallel(rollParallel());
+  // daily tally
+  bumpTally();
+  $('reveal').classList.add('on');
+  setTimeout(()=>$('reveal').scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+/* ---------- card tilt shimmer ---------- */
+const card=$('card');
+card.addEventListener('pointermove',e=>{
+  const r=card.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+  card.style.setProperty('--mx',(x*100)+'%'); card.style.setProperty('--my',(y*100)+'%');
+  card.style.setProperty('--rx',((x-.5)*14)+'deg'); card.style.setProperty('--ry',(-(y-.5)*14)+'deg');
+});
+card.addEventListener('pointerleave',()=>{ card.style.setProperty('--rx','0deg'); card.style.setProperty('--ry','0deg'); });
+
+/* ---------- Identify (classic) ---------- */
+async function runIdentify(){
+  if(!state.front) return;
+  clearErr(); hide('reveal','idres','pack'); $('go-hero').disabled=true; $('go-id').disabled=true;
+  startLoad(ID_MSGS);
+  try{
+    const res = await fetch(LAMBDA + '/upload-photos', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: state.front })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Something went wrong.');
+    if(!data.identified || !data.card) throw new Error(data.message || "Hmm, I couldn't read that card. Try a bright, straight photo of the front!");
+    renderId(data.card);
+  }catch(e){ showErr(e.message || 'No internet? Try again!'); }
+  finally{ stopLoad(); $('go-hero').disabled=false; $('go-id').disabled=false; }
+}
+function renderId(c){
+  const chips=$('chips'); chips.innerHTML='';
+  const add=(t,cls)=>{ const s=document.createElement('span'); s.className='chip '+cls; s.textContent=t; chips.appendChild(s); };
+  if(c.is_rookie) add('Rookie ⭐','rc');
+  if(c.is_auto) add('Autograph ✍️','holo');
+  if(c.is_relic) add('Relic','holo');
+  if(c.serial) add('# '+c.serial,'ser');
+  if(c.parallel) add(c.parallel,'par');
+  if(c.category==='pokemon') add('Pokemon','type'); else if(c.sport) add(c.sport,'type');
+  const idBits=[c.year,c.brand,c.set_name,c.player].filter(Boolean).join(' ');
+  $('idname').textContent = c.player || idBits || 'Your card!';
+  $('idsub').textContent = [c.year,c.brand,c.set_name,c.team,c.card_number?('#'+c.card_number):''].filter(Boolean).join(' · ');
+  $('fullname').textContent = (c.ebay_title||idBits||'').trim();
+  $('about').textContent = (c.ebay_description||'').trim();
+  $('idres').classList.add('on');
+  setTimeout(()=>$('idres').scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+$('xsell').addEventListener('click', ()=>{ hide('idres'); runHero(state.front); });
+$('idagain').addEventListener('click', resetAll);
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const txt=$(btn.dataset.src).textContent;
+    try{ await navigator.clipboard.writeText(txt); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    const o=btn.textContent; btn.textContent='Copied!'; btn.classList.add('done');
+    setTimeout(()=>{ btn.textContent=o; btn.classList.remove('done'); },1400);
+  });
+});
+
+/* ---------- Save / Share (canvas composite, 750x1050) ---------- */
+function drawRoundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+async function renderCardPNG(){
+  const W=750,H=1050; const c=document.createElement('canvas'); c.width=W; c.height=H; const ctx=c.getContext('2d');
+  const p=state.parallel||PARALLELS[0];
+  const team = state.skin==='mets' ? {pri:'#002D72',sec:'#FF5910'} : {pri:'#0B2265',sec:'#A71930'};
+  const rail = p.rail || team.pri;
+  // bg
+  ctx.fillStyle='#0a0a10'; ctx.fillRect(0,0,W,H);
+  // art
+  if(state.heroImg){
+    await new Promise(res=>{ const im=new Image(); im.crossOrigin='anonymous'; im.onload=()=>{
+      const s=Math.max(W/im.width,H/im.height), dw=im.width*s, dh=im.height*s;
+      ctx.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); res();
+    }; im.onerror=res; im.src=state.heroImg; });
+  } else { ctx.fillStyle='#12213f'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#4f6396'; ctx.font='bold 200px Anton, sans-serif'; ctx.textAlign='center'; ctx.fillText('?',W/2,H/2+70); }
+  // parallel tint
+  if(p.fx.includes('refractor')){ const g=ctx.createLinearGradient(0,0,W,H); ['#ff2f6e','#ff8a00','#ffe600','#37ff8b','#00d4ff','#7a5cff'].forEach((col,i,a)=>g.addColorStop(i/(a.length-1),col)); ctx.globalAlpha=(p.refOp||.28); ctx.globalCompositeOperation='color-dodge'; ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over'; }
+  // chrome sweep
+  const cg=ctx.createLinearGradient(0,0,W,H); cg.addColorStop(.35,'rgba(255,255,255,0)'); cg.addColorStop(.5,'rgba(255,255,255,.28)'); cg.addColorStop(.65,'rgba(255,255,255,0)'); ctx.globalCompositeOperation='screen'; ctx.fillStyle=cg; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation='source-over';
+  // frame rails
+  const inset=20; drawRoundRect(ctx,inset,inset,W-inset*2,H-inset*2,28); ctx.lineWidth=6; ctx.strokeStyle='#E8B923'; ctx.stroke();
+  drawRoundRect(ctx,inset+9,inset+9,W-inset*2-18,H-inset*2-18,22); ctx.lineWidth=7; ctx.strokeStyle=rail; ctx.stroke();
+  // MARVEL box
+  ctx.fillStyle=team.sec; drawRoundRect(ctx,40,34,150,44,4); ctx.fill(); ctx.strokeStyle='#FFC533'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='700 30px "Archivo Black", sans-serif'; ctx.textAlign='left'; ctx.fillText('MARVEL',52,66);
+  // chrome bug
+  ctx.textAlign='right'; ctx.fillStyle='#eaf1ff'; ctx.font='700 20px Oswald, sans-serif'; ctx.fillText('Topps',W-44,52); ctx.fillStyle='#FFC533'; ctx.font='700 15px Oswald, sans-serif'; ctx.fillText('CHROME',W-44,70);
+  // hero name vertical
+  ctx.save(); ctx.translate(W-42,H/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.font='90px Anton, sans-serif';
+  ctx.lineWidth=10; ctx.strokeStyle=(p.rail&&p.id!=='refr')?p.rail:team.pri; ctx.strokeText((state.persona?.hero_alias||'HERO').toUpperCase().slice(0,16),0,0);
+  ctx.fillStyle='#fff'; ctx.fillText((state.persona?.hero_alias||'HERO').toUpperCase().slice(0,16),0,0); ctx.restore();
+  // serial + made-up
+  ctx.textAlign='center'; ctx.fillStyle='#eaf1ff'; ctx.font='600 20px Oswald, sans-serif'; if(p.serialNo) ctx.fillText(p.serialNo,W*0.42,H-46);
+  ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='500 17px Oswald, sans-serif'; ctx.fillText('Just for fun • not a real card',W/2,H-20);
+  return await new Promise(res=>c.toBlob(res,'image/png',.95));
+}
+async function saveCard(){
+  try{ const blob=await renderCardPNG(); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='hero-pull.png'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }catch(e){ showErr('Could not save the card — try a screenshot!'); }
+}
+async function shareCard(){
+  try{
+    const blob=await renderCardPNG(); const file=new File([blob],'hero-pull.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'My Hero Pull!'}); }
+    else saveCard();
+  }catch(e){ /* user cancelled share */ }
+}
+
+/* ---------- daily tally + reset ---------- */
+function bumpTally(){
+  try{ const today=new Date().toDateString(); let t=JSON.parse(localStorage.getItem('hp_tally')||'{}');
+    if(t.day!==today) t={day:today,n:0}; t.n++; localStorage.setItem('hp_tally',JSON.stringify(t)); renderTally(t); }catch(e){}
+}
+function renderTally(t){ if(t&&t.n) $('tally').textContent='Cards pulled today: '+t.n; }
+try{ renderTally(JSON.parse(localStorage.getItem('hp_tally')||'{}')); }catch(e){}
+
+function resetAll(){
+  hide('reveal','idres','pack'); clearErr();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
