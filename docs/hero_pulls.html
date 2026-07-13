@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hero Pulls">
 <link rel="manifest" href="hero_pulls.webmanifest">
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='30' fill='%230B2265'/><circle cx='96' cy='96' r='58' fill='none' stroke='%23FF5910' stroke-width='9'/><circle cx='96' cy='96' r='34' fill='%23FF5910'/><text x='96' y='110' font-family='Arial Black, sans-serif' font-size='42' font-weight='900' fill='%23fff' text-anchor='middle'>NY</text></svg>">
+<link rel="apple-touch-icon" sizes="180x180" href="heropulls_icon_180.png">
 <title>Hero Pulls — Turn any card into a super-card</title>
 <meta name="description" content="Snap any sports card and we'll turn that player into a super-hero. Then rip the pack and see how rare you pulled! Just for fun.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,11 +19,11 @@
   :root{
     --giants-blue:#0B2265; --giants-red:#A71930;
     --mets-blue:#002D72;   --mets-orange:#FF5910;
-    --ink:#0A1A3F; --ink-soft:#5b6685; --paper:#f6f8ff;
-    --foil:#c9d4f0; --gold:#FFC533; --line:#dde4f5;
+    --ink:#0A1A3F; --ink-soft:#5b6685;
+    --gold:#FFC533; --line:#dde4f5;
     --card:#ffffff; --r:16px; --r-lg:24px;
     --t:200ms cubic-bezier(.34,1.4,.5,1);
-    --text:#e9f0ff; --text-soft:#9fb1d8; --chrome:#071233;
+    --text:#e9f0ff; --text-soft:#9fb1d8;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;overflow-x:hidden}
@@ -61,7 +61,8 @@
   .tab{position:relative;appearance:none;background:none;border:none;cursor:pointer;color:var(--text-soft);text-decoration:none;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:58px;padding:8px 0 10px;
     font-family:'Oswald',sans-serif;font-weight:600;font-size:11px;letter-spacing:.09em;text-transform:uppercase;transition:color var(--t)}
-  .tab .ic{font-size:19px;line-height:1}
+  .tab .ic{font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;height:22px}
+  .tab .ic svg{width:22px;height:22px;display:block}
   .tab:active{transform:scale(.94)}
   .tab.active{color:#fff}
   .tab.active::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;
@@ -93,6 +94,8 @@
   .lede{color:var(--text-soft);font-size:15px;font-weight:500;margin:12px auto 0;max-width:19em;line-height:1.5;padding:0 6px}
 
   .panel{background:var(--card);border:2px solid var(--line);border-radius:var(--r-lg);padding:18px;margin-top:18px;box-shadow:0 12px 30px rgba(11,34,101,.08)}
+  /* white/light surfaces get dark text by default so nothing inherits the near-white body color */
+  .panel,.story,.box{color:var(--ink)}
   .panel h2{font-family:'Oswald',sans-serif;font-weight:700;font-size:19px;margin:0 0 14px;color:var(--giants-blue);text-transform:uppercase;letter-spacing:.04em}
   .step{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:800;margin-right:8px;font-family:'Oswald',sans-serif}
 
@@ -118,7 +121,7 @@
   @keyframes pulse{0%,100%{transform:none}50%{transform:scale(1.02)}}
   .btn-id{background:transparent;color:var(--giants-blue);border:2px solid var(--giants-blue);box-shadow:none}
   .btn-again{background:linear-gradient(120deg,var(--giants-blue),var(--mets-blue));font-size:16px;padding:14px}
-  .btn-ghost{background:transparent;color:var(--giants-blue);border:2px solid #c3cff0}
+  .btn-ghost{background:rgba(255,255,255,.06);color:#eaf1ff;border:2px solid rgba(255,255,255,.28)}
   .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
   .loading{display:none;text-align:center;padding:34px 10px}
@@ -126,17 +129,17 @@
   .spin{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;
     border:5px solid #d7e0f7;border-top-color:var(--mets-orange);animation:sp 800ms linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
-  .loading p{font-family:'Oswald',sans-serif;font-weight:600;color:var(--giants-blue);font-size:16px;margin:0;letter-spacing:.02em}
+  .loading p{font-family:'Oswald',sans-serif;font-weight:600;color:#cfe0ff;font-size:16px;margin:0;letter-spacing:.02em}
 
   .err{display:none;background:#fff0ec;border:2px solid var(--mets-orange);color:#b0430f;border-radius:var(--r);padding:14px;margin-top:14px;font-weight:600;text-align:center}
   .err.on{display:block}
 
   /* ---------- Pack pull ---------- */
-  #pack{display:none;text-align:center;padding:14px 0}
+  #pack{display:none;text-align:center;padding:14px 0;scroll-margin-top:66px}
   #pack.on{display:block;animation:fade 300ms ease}
   @keyframes fade{from{opacity:0}to{opacity:1}}
-  .pack-label{font-family:'Oswald',sans-serif;font-weight:600;color:var(--giants-blue);font-size:16px;margin:0 0 14px;letter-spacing:.03em}
-  .wax{position:relative;width:min(70vw,230px);aspect-ratio:5/7;margin:0 auto 18px;border-radius:14px;cursor:pointer;
+  .pack-label{font-family:'Oswald',sans-serif;font-weight:600;color:#cfe0ff;font-size:16px;margin:0 0 14px;letter-spacing:.03em}
+  .wax{position:relative;width:min(76%,230px);aspect-ratio:5/7;margin:0 auto 18px;border-radius:14px;cursor:pointer;
     background:linear-gradient(150deg,var(--giants-blue),var(--mets-blue) 55%,#001a4d);
     border:3px solid var(--gold);box-shadow:0 16px 40px rgba(11,34,101,.4);overflow:hidden;display:grid;place-items:center;transition:transform var(--t)}
   .wax:active{transform:scale(.98)}
@@ -152,13 +155,13 @@
   .rarity.on{display:block;animation:slam 460ms cubic-bezier(.2,1.6,.4,1)}
   @keyframes slam{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:none}}
   .rarity .tier{font-family:'Anton',sans-serif;font-size:clamp(22px,7vw,34px);text-transform:uppercase;letter-spacing:.02em;line-height:1}
-  .rarity .sn{font-family:'Oswald',sans-serif;font-weight:600;color:var(--ink-soft);font-size:14px;margin-top:2px}
+  .rarity .sn{font-family:'Oswald',sans-serif;font-weight:600;color:#aebbdd;font-size:14px;margin-top:2px}
 
   /* ---------- The hero card ---------- */
-  #reveal{display:none}
+  #reveal{display:none;scroll-margin-top:66px}
   #reveal.on{display:block;animation:pop 460ms cubic-bezier(.34,1.5,.5,1)}
-  @keyframes pop{from{opacity:0;transform:scale(.9) rotateY(18deg)}to{opacity:1;transform:none}}
-  .card-wrap{width:min(84vw,330px);margin:0 auto;perspective:900px}
+  @keyframes pop{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+  .card-wrap{width:min(88%,330px);margin:0 auto;perspective:900px}
   .card{position:relative;width:100%;aspect-ratio:5/7;border-radius:5.5%/3.9%;overflow:hidden;
     background:#0a0a10;box-shadow:0 22px 50px rgba(11,34,101,.5);transform:rotateX(var(--ry,0)) rotateY(var(--rx,0));transition:transform .1s;
     --rail-gold:#E8B923;--rail-inner:var(--team-primary,#C0202F);--name-outline:var(--team-primary,#1E6FE0)}
@@ -207,7 +210,7 @@
   .resultbtns{margin-top:16px;display:grid;gap:10px}
 
   /* Identify results (old feature) */
-  #idres{display:none}
+  #idres{display:none;scroll-margin-top:66px}
   #idres.on{display:block;animation:pop 360ms cubic-bezier(.34,1.5,.5,1)}
   .name{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;line-height:1.15;margin:0 0 4px;color:var(--ink)}
   .sub2{color:var(--ink-soft);font-size:15px;font-weight:600;margin:0 0 12px}
@@ -225,7 +228,6 @@
 
   .note{color:var(--text-soft);font-size:12.5px;text-align:center;margin-top:16px;font-weight:500}
   #idres .note{color:var(--ink-soft)}
-  .loading p{color:#cfe0ff !important}
   footer{margin-top:30px;text-align:center}
   .hr{height:3px;border-radius:3px;background:linear-gradient(90deg,var(--giants-blue),var(--gold),var(--mets-orange));margin:22px 0 6px;opacity:.7}
   .tally{color:var(--ink-soft);font-size:12.5px;margin-top:8px;font-weight:600}
@@ -347,9 +349,9 @@
 </div>
 
 <nav class="tabbar" aria-label="App">
-  <button class="tab active" id="tab-pull"><span class="ic">⚡</span>Pull</button>
-  <a class="tab" id="tab-store" href="https://www.ebay.com/str/harpua2001" target="_blank" rel="noopener"><span class="ic">🏬</span>Store</a>
-  <button class="tab" id="tab-share"><span class="ic">📤</span>Share app</button>
+  <button class="tab active" id="tab-pull"><span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 2 4 13.2a.7.7 0 0 0 .53 1.15H10l-1.4 7.2a.5.5 0 0 0 .88.4L20 10.8a.7.7 0 0 0-.53-1.15H14l1.4-7.2a.5.5 0 0 0-.9-.45Z"/></svg></span>Pull</button>
+  <a class="tab" id="tab-store" href="https://www.ebay.com/str/harpua2001" target="_blank" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9 5 4h14l1.5 5M5 9.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5M3.2 9h17.6M9 20v-5h6v5"/></svg></span>Store</a>
+  <button class="tab" id="tab-share"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M8.5 6.5 12 3l3.5 3.5M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></span>Share app</button>
 </nav>
 
 <script>
@@ -402,13 +404,13 @@ function stopLoad(){ if(cyc)clearInterval(cyc); cyc=null; $('loading').classList
 
 /* ---------- parallels (the pack-pull rarity roll) ---------- */
 const PARALLELS=[
- {id:'base',   w:100, name:'Base Chrome',       rail:null,      tier:'#5b6685', fx:['chrome']},
- {id:'refr',   w:55,  name:'Refractor',         rail:'#E8B923', tier:'#c99a1e', fx:['chrome','refractor'], refOp:.28},
- {id:'blue',   w:35,  name:'Blue Wave',         rail:'#1E6FE0', tier:'#1E6FE0', fx:['chrome','holo'], holoOp:.5},
- {id:'green',  w:22,  name:'Green Refractor',   rail:'#2FBF5B', tier:'#1f9c46', fx:['refractor'], serial:299, refOp:.24, refHue:80},
- {id:'purple', w:14,  name:'Purple Prizm',      rail:'#8A2BE2', tier:'#8A2BE2', fx:['refractor'], serial:99,  refOp:.2, refHue:40},
- {id:'ice',    w:8,   name:'Cracked Ice',       rail:'#BFEAFF', tier:'#3aa0c9', fx:['ice'], serial:49, iceOp:.6},
- {id:'gold',   w:4,   name:'Gold Wave',         rail:'#F2C744', tier:'#d19a00', fx:['chrome','holo'], serial:10, holoOp:.7},
+ {id:'base',   w:100, name:'Base Chrome',       rail:null,      tier:'#c3d0ee', fx:['chrome']},
+ {id:'refr',   w:55,  name:'Refractor',         rail:'#E8B923', tier:'#f0c750', fx:['chrome','refractor'], refOp:.28},
+ {id:'blue',   w:35,  name:'Blue Wave',         rail:'#1E6FE0', tier:'#5b9bff', fx:['chrome','holo'], holoOp:.5},
+ {id:'green',  w:22,  name:'Green Refractor',   rail:'#2FBF5B', tier:'#46d97a', fx:['refractor'], serial:299, refOp:.24, refHue:80},
+ {id:'purple', w:14,  name:'Purple Prizm',      rail:'#8A2BE2', tier:'#b57bef', fx:['refractor'], serial:99,  refOp:.2, refHue:40},
+ {id:'ice',    w:8,   name:'Cracked Ice',       rail:'#BFEAFF', tier:'#5fcdee', fx:['ice'], serial:49, iceOp:.6},
+ {id:'gold',   w:4,   name:'Gold Wave',         rail:'#F2C744', tier:'#f2c744', fx:['chrome','holo'], serial:10, holoOp:.7},
  {id:'one',    w:1,   name:'Subway Series 1-of-1', rail:'#FFFFFF', tier:'#ff8a00', fx:['chrome','refractor','holo','ice'], serial:1, oneofone:true, refOp:.4, holoOp:.6, iceOp:.7},
 ];
 function rollParallel(){
