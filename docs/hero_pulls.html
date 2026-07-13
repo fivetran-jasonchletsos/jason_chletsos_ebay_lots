@@ -130,22 +130,25 @@
     background:repeating-linear-gradient(60deg,rgba(255,255,255,.18) 0 2px,transparent 2px 22px),repeating-linear-gradient(-25deg,rgba(200,230,255,.16) 0 2px,transparent 2px 30px),repeating-linear-gradient(15deg,rgba(255,255,255,.12) 0 2px,transparent 2px 26px)}
   .frame{position:absolute;inset:2.2% 3%;border-radius:4%/2.8%;z-index:3;pointer-events:none;
     box-shadow:inset 0 0 0 .32vw var(--rail-gold),inset 0 0 0 .64vw #101015,inset 0 0 0 .98vw var(--rail-inner)}
-  .marvel-box{position:absolute;left:4.5%;top:3.2%;z-index:4;background:var(--giants-red);border:1.5px solid var(--gold);
-    color:#fff;font-family:'Archivo Black',sans-serif;font-size:min(3.6vw,15px);letter-spacing:-.02em;padding:2px 6px;border-radius:2px;line-height:1}
-  .chrome-bug{position:absolute;right:4.5%;top:3.4%;z-index:4;font-family:'Oswald',sans-serif;font-weight:700;color:#eaf1ff;
-    font-size:min(2.6vw,11px);letter-spacing:.06em;text-shadow:0 1px 2px rgba(0,0,0,.6);text-align:right;line-height:1.05}
-  .chrome-bug small{display:block;font-size:.8em;color:var(--gold)}
-  .hero-name{position:absolute;right:1%;top:50%;z-index:4;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;
-    font-family:'Anton',sans-serif;font-size:min(9vw,2rem);letter-spacing:.02em;color:#fff;
-    -webkit-text-stroke:.11em var(--name-outline);paint-order:stroke fill;
-    text-shadow:0 0 .18em rgba(0,0,0,.5);max-height:80%;white-space:nowrap;overflow:hidden}
-  .stamp{position:absolute;left:5%;bottom:5%;z-index:4;width:16%;aspect-ratio:1;border-radius:50%;
-    background:var(--giants-red);border:2px solid #fff;display:none;place-items:center;color:#fff;
-    font-family:'Oswald',sans-serif;font-weight:700;font-size:min(2vw,9px);text-align:center;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-  .stamp.on{display:grid}
-  .serial{position:absolute;right:12%;bottom:4.5%;z-index:4;font-family:'Oswald',sans-serif;font-weight:600;
-    color:#eaf1ff;font-size:min(2.6vw,11px);letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.7);display:none}
+  .marvel-box{position:absolute;left:4.5%;top:3.4%;z-index:4;background:#EC1D24;
+    color:#fff;font-family:'Archivo Black',sans-serif;font-size:min(3.3vw,14px);letter-spacing:.01em;padding:3px 7px 2px;border-radius:2px;line-height:1;
+    box-shadow:0 1px 3px rgba(0,0,0,.55);text-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .chrome-bug{position:absolute;right:4.5%;top:3.2%;z-index:4;font-family:'Oswald',sans-serif;text-align:right;line-height:.92}
+  .chrome-bug b{display:block;font-style:italic;font-weight:700;font-size:min(3vw,13px);
+    background:linear-gradient(180deg,#ffffff,#a9bcdd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+  .chrome-bug small{display:block;font-size:min(2vw,8.5px);letter-spacing:.24em;color:#d3e2ff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+  .hero-name{position:absolute;right:1.5%;top:50%;z-index:4;transform:translateY(-50%) rotate(180deg) skewX(-4deg);writing-mode:vertical-rl;
+    font-family:'Anton',sans-serif;font-size:min(9.5vw,2.1rem);letter-spacing:.03em;color:#eef4ff;
+    -webkit-text-stroke:.1em var(--name-outline);paint-order:stroke fill;
+    text-shadow:.03em .03em 0 rgba(0,0,0,.55), 0 0 .22em rgba(0,0,0,.45);max-height:82%;white-space:nowrap;overflow:hidden}
+  .serial{position:absolute;right:6%;bottom:3.6%;z-index:4;font-family:'Oswald',sans-serif;font-weight:700;
+    font-size:min(4vw,17px);letter-spacing:.06em;display:none;
+    background:linear-gradient(180deg,#fff3c4 0%,#f5d76e 32%,#c8971f 66%,#8a6410 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 1px 0 rgba(0,0,0,.55)) drop-shadow(0 -1px 0 rgba(255,255,255,.25))}
   .serial.on{display:block}
+  .serial.oneofone{font-size:min(6vw,26px);letter-spacing:.04em}
   .madeup{position:absolute;left:50%;bottom:1.2%;transform:translateX(-50%);z-index:4;font-family:'Oswald',sans-serif;
     font-size:min(2vw,8.5px);color:rgba(255,255,255,.75);letter-spacing:.04em;white-space:nowrap}
   .glare{position:absolute;inset:0;z-index:5;pointer-events:none;mix-blend-mode:screen;
@@ -235,9 +238,8 @@
         <div class="fx ice" id="fxIce"></div>
         <div class="frame"></div>
         <div class="marvel-box">MARVEL</div>
-        <div class="chrome-bug">Topps<small>CHROME</small></div>
+        <div class="chrome-bug"><b>Topps</b><small>CHROME</small></div>
         <div class="hero-name" id="heroName">HERO</div>
-        <div class="stamp" id="stamp">1<sup>st</sup></div>
         <div class="serial" id="serial"></div>
         <div class="madeup">Just for fun • not a real card</div>
         <div class="glare" id="glare"></div>
@@ -366,9 +368,10 @@ function applyParallel(p){
   if(p.fx.includes('refractor')){ const e=$('fxRefractor'); e.style.opacity=p.refOp||.28; e.style.filter=`saturate(1.4) hue-rotate(${p.refHue||0}deg)`; }
   if(p.fx.includes('holo')) $('fxHolo').style.opacity=p.holoOp||.5;
   if(p.fx.includes('ice')) $('fxIce').style.opacity=p.iceOp||.6;
-  // stamp + serial
-  $('stamp').classList.toggle('on', p.id==='refr' ? false : (Math.random()<.2 || p.oneofone));
-  const ser=$('serial'); if(p.serialNo){ ser.textContent=p.serialNo; ser.classList.add('on'); } else ser.classList.remove('on');
+  // gold embossed serial (serialized-card style; no serial on base pulls)
+  const ser=$('serial');
+  if(p.serialNo){ ser.textContent=p.serialNo; ser.classList.add('on'); ser.classList.toggle('oneofone', !!p.oneofone); }
+  else { ser.classList.remove('on'); ser.classList.remove('oneofone'); }
   // rarity banner
   $('tierName').textContent = p.oneofone ? 'SUBWAY SERIES 1-OF-1!!' : p.name.toUpperCase();
   $('tierName').style.color = p.tier;
@@ -390,7 +393,7 @@ $('share').addEventListener('click', shareCard);
 
 async function runHero(imgData){
   if(!imgData) return;
-  clearErr(); hide('reveal','idres','pack','actions'); $('go-hero').disabled=true; $('go-id').disabled=true;
+  clearErr(); hide('reveal','idres','pack'); state.heroImg=null; $('go-hero').disabled=true; $('go-id').disabled=true;
   startLoad(HERO_MSGS);
   try{
     const res = await fetch(LAMBDA + '/marvelify', {
@@ -401,19 +404,19 @@ async function runHero(imgData){
     if(!data.success) throw new Error(data.error || 'Something went wrong.');
     state.persona = data.persona || {};
     if(!data.generated || !data.hero_image){
-      // graceful: still show a Mystery Hero card with the story
+      // graceful: still show a Mystery Hero card with the story + gentle nudge
       state.heroImg = null;
-      showPackThenReveal(data.message || "Your hero is shy today — pull again!");
+      showPackThenReveal(data.message || "Your hero is shy today — tap Pull again!");
       return;
     }
     state.heroImg = data.hero_image;
     showPackThenReveal(null);
   }catch(e){ showErr(e.message || 'No internet? Give it another shot in a sec!'); }
-  finally{ stopLoad(); $('go-hero').disabled=false; $('go-id').disabled=false; $('actions').classList.add('on'); }
+  finally{ stopLoad(); $('go-hero').disabled=false; $('go-id').disabled=false; }
 }
 
 function showPackThenReveal(softMsg){
-  if(softMsg) showErr(softMsg);
+  state.softMsg = softMsg || null;   // shown gently under the card, not as a red error
   state.skin = Math.random()<.5 ? 'giants':'mets';
   $('pack').classList.add('on');
   $('wax').classList.remove('ripped');
@@ -429,17 +432,25 @@ function ripPack(){
 }
 
 function revealCard(){
-  hide('pack');
+  hide('pack'); clearErr();
   const card=$('card'); card.className='card skin-'+state.skin;
-  // art (swap the #art node cleanly each pull, image or placeholder)
-  if(state.heroImg){ $('art').outerHTML = '<img class="art" id="art" src="'+state.heroImg+'" alt="your hero">'; }
-  else { $('art').outerHTML = '<div class="art placeholder" id="art">?</div>'; }
+  // clear any leftover tilt/glare state from the previous card
+  ['--rx','--ry'].forEach(v=>card.style.setProperty(v,'0deg'));
+  card.style.setProperty('--mx','50%'); card.style.setProperty('--my','50%');
+  // art (swap the #art node cleanly each pull; image gets an onerror fallback)
+  if(state.heroImg){
+    $('art').outerHTML = '<img class="art" id="art" alt="your hero">';
+    const img=$('art');
+    img.onerror=()=>{ img.outerHTML='<div class="art placeholder" id="art">?</div>'; };
+    img.src=state.heroImg;
+  } else { $('art').outerHTML = '<div class="art placeholder" id="art">?</div>'; }
   // name + story
   const p=state.persona||{};
   const alias=(p.hero_alias||'The Champion').toUpperCase();
   $('heroName').textContent = alias.length>18 ? alias.slice(0,18) : alias;
   $('storyWho').textContent = (p.hero_alias||'The Champion') + (p.athlete_name?(' — a.k.a. '+p.athlete_name):'');
-  $('storyPw').textContent = [p.archetype?('Type: '+p.archetype):'', p.powers?('Powers: '+p.powers):''].filter(Boolean).join('  •  ');
+  if(!state.heroImg && state.softMsg){ $('storyPw').textContent = state.softMsg; }
+  else { $('storyPw').textContent = [p.archetype?('Type: '+p.archetype):'', p.powers?('Powers: '+p.powers):''].filter(Boolean).join('  •  '); }
   applyParallel(rollParallel());
   // daily tally
   bumpTally();
@@ -506,6 +517,8 @@ document.querySelectorAll('.copy').forEach(btn=>{
 /* ---------- Save / Share (canvas composite, 750x1050) ---------- */
 function drawRoundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 async function renderCardPNG(){
+  // wait for the display webfonts so canvas text isn't drawn in a fallback face
+  if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
   const W=750,H=1050; const c=document.createElement('canvas'); c.width=W; c.height=H; const ctx=c.getContext('2d');
   const p=state.parallel||PARALLELS[0];
   const team = state.skin==='mets' ? {pri:'#002D72',sec:'#FF5910'} : {pri:'#0B2265',sec:'#A71930'};
@@ -514,10 +527,10 @@ async function renderCardPNG(){
   ctx.fillStyle='#0a0a10'; ctx.fillRect(0,0,W,H);
   // art
   if(state.heroImg){
-    await new Promise(res=>{ const im=new Image(); im.crossOrigin='anonymous'; im.onload=()=>{
+    await new Promise(res=>{ const im=new Image(); im.onload=()=>{
       const s=Math.max(W/im.width,H/im.height), dw=im.width*s, dh=im.height*s;
       ctx.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); res();
-    }; im.onerror=res; im.src=state.heroImg; });
+    }; im.onerror=()=>{ ctx.fillStyle='#12213f'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#4f6396'; ctx.font='bold 200px Anton, sans-serif'; ctx.textAlign='center'; ctx.fillText('?',W/2,H/2+70); res(); }; im.src=state.heroImg; });
   } else { ctx.fillStyle='#12213f'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#4f6396'; ctx.font='bold 200px Anton, sans-serif'; ctx.textAlign='center'; ctx.fillText('?',W/2,H/2+70); }
   // parallel tint
   if(p.fx.includes('refractor')){ const g=ctx.createLinearGradient(0,0,W,H); ['#ff2f6e','#ff8a00','#ffe600','#37ff8b','#00d4ff','#7a5cff'].forEach((col,i,a)=>g.addColorStop(i/(a.length-1),col)); ctx.globalAlpha=(p.refOp||.28); ctx.globalCompositeOperation='color-dodge'; ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over'; }
@@ -526,19 +539,26 @@ async function renderCardPNG(){
   // frame rails
   const inset=20; drawRoundRect(ctx,inset,inset,W-inset*2,H-inset*2,28); ctx.lineWidth=6; ctx.strokeStyle='#E8B923'; ctx.stroke();
   drawRoundRect(ctx,inset+9,inset+9,W-inset*2-18,H-inset*2-18,22); ctx.lineWidth=7; ctx.strokeStyle=rail; ctx.stroke();
-  // MARVEL box
-  ctx.fillStyle=team.sec; drawRoundRect(ctx,40,34,150,44,4); ctx.fill(); ctx.strokeStyle='#FFC533'; ctx.lineWidth=2; ctx.stroke();
-  ctx.fillStyle='#fff'; ctx.font='700 30px "Archivo Black", sans-serif'; ctx.textAlign='left'; ctx.fillText('MARVEL',52,66);
+  // MARVEL box (authentic solid red, no gold border)
+  ctx.fillStyle='#EC1D24'; drawRoundRect(ctx,40,34,152,46,4); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='700 30px "Archivo Black", sans-serif'; ctx.textAlign='left'; ctx.fillText('MARVEL',52,67);
   // chrome bug
-  ctx.textAlign='right'; ctx.fillStyle='#eaf1ff'; ctx.font='700 20px Oswald, sans-serif'; ctx.fillText('Topps',W-44,52); ctx.fillStyle='#FFC533'; ctx.font='700 15px Oswald, sans-serif'; ctx.fillText('CHROME',W-44,70);
-  // hero name vertical
-  ctx.save(); ctx.translate(W-42,H/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.font='90px Anton, sans-serif';
-  ctx.lineWidth=10; ctx.strokeStyle=(p.rail&&p.id!=='refr')?p.rail:team.pri; ctx.strokeText((state.persona?.hero_alias||'HERO').toUpperCase().slice(0,16),0,0);
-  ctx.fillStyle='#fff'; ctx.fillText((state.persona?.hero_alias||'HERO').toUpperCase().slice(0,16),0,0); ctx.restore();
-  // serial + made-up
-  ctx.textAlign='center'; ctx.fillStyle='#eaf1ff'; ctx.font='600 20px Oswald, sans-serif'; if(p.serialNo) ctx.fillText(p.serialNo,W*0.42,H-46);
-  ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='500 17px Oswald, sans-serif'; ctx.fillText('Just for fun • not a real card',W/2,H-20);
-  return await new Promise(res=>c.toBlob(res,'image/png',.95));
+  ctx.textAlign='right'; ctx.fillStyle='#eef4ff'; ctx.font='italic 700 22px Oswald, sans-serif'; ctx.fillText('Topps',W-44,54); ctx.fillStyle='#cfe0ff'; ctx.font='700 13px Oswald, sans-serif'; ctx.fillText('C H R O M E',W-44,72);
+  // hero name vertical (white fill + colored outline, chrome-card style)
+  const NAME=(state.persona&&state.persona.hero_alias?state.persona.hero_alias:'HERO').toUpperCase().slice(0,18);
+  ctx.save(); ctx.translate(W-40,H/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.font='92px Anton, sans-serif';
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=6; ctx.shadowOffsetX=3; ctx.shadowOffsetY=3;
+  ctx.lineWidth=11; ctx.strokeStyle=(p.rail&&p.id!=='refr')?p.rail:team.pri; ctx.strokeText(NAME,0,0);
+  ctx.shadowColor='transparent'; ctx.fillStyle='#eef4ff'; ctx.fillText(NAME,0,0); ctx.restore();
+  // gold embossed serial (serialized-card style), bottom-right
+  if(p.serialNo){
+    ctx.textAlign='right'; const fs=p.oneofone?44:30; ctx.font='700 '+fs+'px Oswald, sans-serif';
+    const gg=ctx.createLinearGradient(0,H-70-fs,0,H-40); gg.addColorStop(0,'#fff3c4'); gg.addColorStop(.32,'#f5d76e'); gg.addColorStop(.66,'#c8971f'); gg.addColorStop(1,'#8a6410');
+    ctx.shadowColor='rgba(0,0,0,.55)'; ctx.shadowBlur=1; ctx.shadowOffsetY=2; ctx.fillStyle=gg; ctx.fillText(p.serialNo,W-48,H-46); ctx.shadowColor='transparent'; ctx.shadowOffsetY=0;
+  }
+  // made-up label
+  ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='500 17px Oswald, sans-serif'; ctx.fillText('Just for fun • not a real card',W/2,H-20);
+  return await new Promise((res,rej)=>c.toBlob(b=> b?res(b):rej(new Error('render failed')),'image/png',.95));
 }
 async function saveCard(){
   try{ const blob=await renderCardPNG(); const url=URL.createObjectURL(blob);
@@ -547,11 +567,13 @@ async function saveCard(){
   }catch(e){ showErr('Could not save the card — try a screenshot!'); }
 }
 async function shareCard(){
+  let file;
   try{
-    const blob=await renderCardPNG(); const file=new File([blob],'hero-pull.png',{type:'image/png'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'My Hero Pull!'}); }
-    else saveCard();
-  }catch(e){ /* user cancelled share */ }
+    const blob=await renderCardPNG(); file=new File([blob],'hero-pull.png',{type:'image/png'});
+  }catch(e){ showErr('Could not make the card — try a screenshot!'); return; }
+  if(!(navigator.canShare && navigator.canShare({files:[file]}))){ saveCard(); return; }
+  try{ await navigator.share({files:[file], title:'My Hero Pull!'}); }
+  catch(e){ if(e && e.name==='AbortError') return; saveCard(); }
 }
 
 /* ---------- daily tally + reset ---------- */

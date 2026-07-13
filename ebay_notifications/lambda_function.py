@@ -25,8 +25,10 @@ import hashlib
 import json
 import logging
 import os
+import random
 import urllib.request
 import urllib.parse
+import urllib.error
 import xml.etree.ElementTree as ET
 
 logger = logging.getLogger()
@@ -162,7 +164,25 @@ _MARVELIFY_PERSONA_SYSTEM = (
     "fields generically. Output must be machine-parseable JSON only."
 )
 
+# Legendary Marvel artists — one is chosen at random per generation so pulls
+# vary in style. Each entry names the artist and the flavor to emulate.
+_MARVEL_ARTISTS = [
+    "Alex Ross — photorealistic painted gouache realism, cinematic lighting, lifelike rendering",
+    "Jim Lee — dynamic, hyper-detailed superhero linework with crisp inks and bold energy",
+    "Todd McFarlane — intricate, dramatic, sinewy detail with heavy dynamic shadow",
+    "Bill Sienkiewicz — expressive, painterly, textured mixed-media intensity",
+    "Arthur Adams — highly detailed, clean, richly rendered heroic figures",
+    "Frank Miller — bold high-contrast noir with strong silhouettes",
+    "Gabriele Dell'Otto — painted photorealistic cinematic Marvel cover art",
+    "Marc Silvestri — sharp, dynamic anatomy with fine detailed rendering",
+    "David Finch — gritty, muscular, deeply rendered modern superhero style",
+    "Esad Ribic — painterly, epic, atmospheric fine-art comic style",
+    "Olivier Coipel — dynamic, elegant, heroic modern Marvel style",
+    "Steve McNiven — clean, detailed, realistic blockbuster comic art",
+]
+
 # Stage 2: built from the persona JSON + the ORIGINAL photo, sent to Gemini.
+# {art_style} is a randomly-chosen legendary Marvel artist to emulate.
 _MARVELIFY_IMAGE_TMPL = (
     "Transform the athlete IN THE PROVIDED PHOTO into a wholesome, kid-friendly "
     "Marvel-style comic superhero, KEEPING THE SAME PERSON. Preserve their exact "
@@ -172,15 +192,16 @@ _MARVELIFY_IMAGE_TMPL = (
     'Redraw them as "{hero_alias}", a {archetype} hero, wearing a heroic, fully-'
     "covered superhero costume in {costume_colors}. Show them {pose}, using their "
     "power of {powers}. Keep the face visible (no full mask).\n"
-    "Art style: bold Topps-Chrome-meets-Marvel trading-card comic art — clean ink "
-    "lines, dramatic cel shading, vivid chrome-foil rim light, energetic action "
-    "background with subtle motion lines and a soft glow. Vertical PORTRAIT "
-    "trading-card orientation, full-bleed, single subject centered.\n"
+    "ART STYLE: render in the dramatic, professional style of {art_style}. "
+    "Museum-quality Marvel comic-book cover art — masterful anatomy, rich dramatic "
+    "lighting, deep rendering and detail, a dynamic action background with subtle "
+    "motion and glow. Vertical PORTRAIT trading-card orientation, full-bleed, a "
+    "single subject centered, framed head-to-mid-thigh.\n"
     "STRICT: keep the exact same person's likeness; family-friendly and G-rated "
     "only; no weapons, no blood, no gore, no scary or violent imagery, no "
     "realistic firearms, fully clothed and dignified. Do NOT add any text, "
-    "letters, numbers, logos, signatures, or watermarks anywhere in the image. "
-    "One single character only."
+    "letters, numbers, logos, signatures, borders, or watermarks anywhere in the "
+    "image. One single character only."
 )
 
 
@@ -947,6 +968,13 @@ def lambda_handler(event, context):
                     "success": False,
                     "error":   "Hero maker not configured yet — no image key set on Lambda.",
                 }, event)
+            # Require a vision backend too — the persona step IS the kid-safety
+            # gate (it flags non-cards / selfies). Without it we'd redraw anything.
+            if not (BEDROCK_MODEL_ID or os.environ.get("ANTHROPIC_API_KEY")):
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "Hero maker not fully configured — no vision backend set.",
+                }, event)
 
             body  = json.loads(event.get("body") or "{}")
             front = str(body.get("image") or "").strip()
@@ -971,9 +999,11 @@ def lambda_handler(event, context):
             except Exception as exc:
                 logger.error(f"marvelify persona error: {exc}")
 
-            # Guard: if the vision step is confident this is NOT a card of a
-            # person (e.g. a kid's selfie), decline gently rather than redraw it.
-            if persona.get("is_card") is False:
+            # Guard: if the vision step says this is NOT a card of a person
+            # (e.g. a kid's selfie), decline gently rather than redraw it.
+            # Robust to bool False, the strings "false"/"no", and 0.
+            _isc = persona.get("is_card", True)
+            if _isc is False or (isinstance(_isc, str) and _isc.strip().lower() in ("false", "no", "0")) or _isc == 0:
                 return _cors_response(200, {
                     "success":   True,
                     "generated": False,
@@ -982,18 +1012,30 @@ def lambda_handler(event, context):
                     "reason":    "not_a_card",
                 }, event)
 
-            # Stage 2 — image restyle
+            # Sanitize persona fields before splicing into the image prompt:
+            # join list values, strip newlines, cap length (defends against a
+            # doctored card injecting instructions into the Stage-2 prompt).
+            def _clean(key, default):
+                v = persona.get(key, default)
+                if isinstance(v, (list, tuple)):
+                    v = ", ".join(str(x) for x in v)
+                v = str(v).replace("\n", " ").replace("\r", " ").strip()
+                return (v[:200] or default)
+
+            # Stage 2 — image restyle (random legendary-artist style per pull)
             block = None
             out_mime = out_b64 = None
             try:
+                art_style = random.choice(_MARVEL_ARTISTS)
                 prompt = _MARVELIFY_IMAGE_TMPL.format(
-                    appearance_notes=persona.get("appearance_notes",
-                                                 "the same face, hair, skin tone and build"),
-                    hero_alias=persona.get("hero_alias", "The Champion"),
-                    archetype=persona.get("archetype", "powerhouse"),
-                    costume_colors=persona.get("costume_colors", "bold team colors"),
-                    pose=persona.get("pose", "leaping heroically toward the viewer"),
-                    powers=persona.get("powers", "super strength and speed"),
+                    appearance_notes=_clean("appearance_notes",
+                                            "the same face, hair, skin tone and build"),
+                    hero_alias=_clean("hero_alias", "The Champion"),
+                    archetype=_clean("archetype", "powerhouse"),
+                    costume_colors=_clean("costume_colors", "bold team colors"),
+                    pose=_clean("pose", "leaping heroically toward the viewer"),
+                    powers=_clean("powers", "super strength and speed"),
+                    art_style=art_style,
                 )
                 out_mime, out_b64, block = _gemini_image(prompt, fmt, raw, timeout=30)
             except urllib.error.HTTPError as exc:
