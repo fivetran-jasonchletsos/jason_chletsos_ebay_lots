@@ -20,6 +20,8 @@ SCANS = {
     "scan9": "Scan 359.jpeg",
     "scan10": "Scan 365.jpeg",
     "scan11": "Scan 366.jpeg",
+    "scan12": "Scan 367.jpeg",
+    "scan13": "Scan 368.jpeg",
 }
 
 SRC_DIR = "/Users/jason.chletsos/Downloads"

@@ -129,6 +129,26 @@ CARDS = [
     ("scan11", 2, 0, "One World Under Doom", "Topps Chrome", "One World Under Doom", "Insert", False, None, "Neutral", "Doom's Earth (Event)", 7),
     ("scan11", 2, 1, "The Human Torch", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Hero", "Fantastic Four", 6),
     ("scan11", 2, 2, "Green Goblin", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Spider-Man Villains", 6),
+
+    # ── scan12 : Profile / Cosmic Alpha Mjolnir / Johnny Watts page ─────────
+    ("scan12", 0, 0, "Profile", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Neutral", "Unknown", 5),
+    ("scan12", 0, 1, "Pepper Potts", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Hero", "Iron Man Supporting Cast", 6),
+    ("scan12", 0, 2, "The Hood", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Hood's Gang", 6),
+    ("scan12", 1, 0, "Cosmic Alpha Mjolnir (Thor)", "Upper Deck", "Cosmic Alpha", "Insert", False, None, "Hero", "Avengers", 8),
+    ("scan12", 1, 1, "Griffin", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Spider-Man Villains", 5),
+    ("scan12", 1, 2, "Ulik", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Asgardians", 5),
+    ("scan12", 2, 0, "Dazzler", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Hero", "X-Men", 6),
+    ("scan12", 2, 1, "Fantastic Four (Mister Fantastic)", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Hero", "Fantastic Four", 7),
+    ("scan12", 2, 2, "Johnny Watts", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Street-Level Villains", 5),
+
+    # ── scan13 : Silver Samurai / Jubilee / Uatu the Watcher page (7 cards) ──
+    ("scan13", 0, 0, "Silver Samurai", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Wolverine Villains", 6),
+    ("scan13", 0, 1, "Blade", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Anti-Hero", "Midnight Sons", 7),
+    ("scan13", 0, 2, "Mariko Yashida", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Hero", "Wolverine Supporting Cast", 6),
+    ("scan13", 1, 0, "Jubilee", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Hero", "X-Men", 6),
+    ("scan13", 1, 1, "Eimin", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Brood/X-Men Villains", 5),
+    ("scan13", 2, 0, "Uatu the Watcher", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Neutral", "Watchers", 6),
+    ("scan13", 2, 1, "Chameleon", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Spider-Man Villains", 6),
 ]
 
 out = []
