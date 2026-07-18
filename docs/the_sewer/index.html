@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sewer — Amanda's Marvel Collection</title>
+<style>
+  :root {
+    --red:     #e0263f;
+    --red-br:  #ff4a63;
+    --accent:  #5b8cff;
+    --bg:      #0a0a0d;
+    --panel:   #131318;
+    --panel2:  #1b1b22;
+    --border:  #2a2a33;
+    --text:    #f4f4f7;
+    --sub:     #9a9aa8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(224,38,63,0.10), transparent 40%),
+      radial-gradient(circle at 95% 10%, rgba(91,140,255,0.08), transparent 45%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(160deg, #0d0d11 0%, #16161c 100%);
+    padding: 18px 16px;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top { display: flex; align-items: center; gap: 12px; max-width: 900px; margin: 0 auto; }
+  .header-brand { flex: 1; }
+  .logo {
+    font-size: 1.5rem; font-weight: 900; letter-spacing: -0.3px;
+    color: var(--text);
+  }
+  .logo span { color: var(--red-br); }
+  .tagline { font-size: 0.68rem; color: var(--sub); letter-spacing: 1.8px; text-transform: uppercase; margin-top: 2px; font-weight: 700; }
+  .not-for-sale {
+    flex-shrink: 0; font-size: 0.6rem; background: var(--red); color: #fff;
+    padding: 3px 9px; border-radius: 3px; font-weight: 800; letter-spacing: 0.6px;
+  }
+
+  /* ── PULL QUOTE ── */
+  .pull-quote {
+    max-width: 720px; margin: 0 auto; padding: 34px 24px 8px; text-align: center;
+  }
+  .pull-quote p {
+    font-size: 1.4rem; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px;
+    background: linear-gradient(90deg, var(--red-br), var(--accent));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  @media (min-width: 600px) { .pull-quote p { font-size: 1.7rem; } }
+
+  /* ── STATS BAR ── */
+  .stats-bar { background: var(--panel); padding: 14px 16px; display: flex; gap: 22px; justify-content: center; margin-top: 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stat { text-align: center; }
+  .stat-val { font-size: 1.15rem; font-weight: 800; color: var(--red-br); }
+  .stat-lbl { font-size: 0.63rem; color: var(--sub); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { background: #0e0e12; padding: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 99; }
+  .search-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; max-width: 900px; margin-left: auto; margin-right: auto; }
+  .search-input {
+    flex: 1 1 180px; background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; outline: none;
+  }
+  .search-input::placeholder { color: var(--sub); }
+  .search-input:focus { border-color: var(--accent); }
+  select.filter-select {
+    background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 8px 8px; font-size: 0.76rem; outline: none; cursor: pointer;
+    max-width: 150px;
+  }
+  .size-btns { display: flex; gap: 0; flex-shrink: 0; }
+  .size-btn {
+    padding: 7px 11px; font-size: 0.75rem; font-weight: 700; background: var(--panel2);
+    border: 1px solid var(--border); color: var(--sub); cursor: pointer; line-height: 1;
+  }
+  .size-btn:first-child { border-radius: 6px 0 0 6px; }
+  .size-btn:last-child  { border-radius: 0 6px 6px 0; }
+  .size-btn.active { background: var(--red); color: #fff; border-color: var(--red-br); }
+
+  .chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; max-width: 900px; margin: 0 auto; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; padding: 5px 12px; border-radius: 3px; font-size: 0.74rem; font-weight: 700;
+    background: var(--panel2); color: var(--sub); border: 1px solid var(--border); cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .chip.active { background: var(--red); color: #fff; border-color: var(--red-br); }
+
+  /* ── CARD GRID ── */
+  .grid-wrap { padding: 12px; max-width: 1400px; margin: 0 auto; }
+  .count-row { font-size: 0.75rem; color: var(--sub); margin-bottom: 10px; }
+  .card-grid { display: grid; gap: 8px; }
+
+  .card-grid.size-s { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .card-grid.size-s .card-info { display: none; }
+  @media (min-width: 480px) { .card-grid.size-s { grid-template-columns: repeat(5, 1fr); } }
+  @media (min-width: 700px) { .card-grid.size-s { grid-template-columns: repeat(7, 1fr); } }
+  @media (min-width: 1000px) { .card-grid.size-s { grid-template-columns: repeat(9, 1fr); } }
+
+  .card-grid.size-m { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 480px) { .card-grid.size-m { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 700px) { .card-grid.size-m { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
+  @media (min-width: 1000px) { .card-grid.size-m { grid-template-columns: repeat(5, 1fr); } }
+
+  .card-grid.size-l { grid-template-columns: repeat(1, 1fr); gap: 12px; }
+  @media (min-width: 480px) { .card-grid.size-l { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 700px) { .card-grid.size-l { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+  @media (min-width: 1000px) { .card-grid.size-l { grid-template-columns: repeat(4, 1fr); } }
+
+  .card-tile {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .card-tile:active { transform: scale(0.97); }
+  @media (hover: hover) {
+    .card-tile:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(224,38,63,0.18); border-color: var(--red-br); }
+  }
+  .card-tile.hidden { display: none; }
+
+  .thumb-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #000; }
+  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badges { position: absolute; top: 5px; left: 5px; display: flex; flex-direction: column; gap: 3px; }
+  .badge { font-size: 0.56rem; font-weight: 800; padding: 2px 5px; border-radius: 2px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .badge.numbered { background: var(--accent); color: #06101f; }
+  .badge.firstapp { background: var(--red); color: #fff; }
+  .badge.refractor { background: linear-gradient(90deg,#7b2fa0,#2f7ba0,#a0902f); color: #fff; }
+  .badge.insert { background: #1a3a1a; color: #7fff7f; }
+  .val-badge {
+    position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.82);
+    border: 1px solid var(--accent); color: #cdd9ff; font-size: 0.65rem; font-weight: 800;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .card-grid.size-s .val-badge { display: none; }
+
+  .card-info { padding: 7px 8px 9px; }
+  .card-name { font-size: 0.82rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+  .card-set { font-size: 0.68rem; color: var(--sub); line-height: 1.3; margin-top: 2px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 999; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  @media (min-width: 600px) { .modal-overlay { align-items: center; justify-content: center; } }
+  .modal {
+    background: var(--panel); border-top: 3px solid var(--red-br); border-radius: 14px 14px 0 0;
+    width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.22s ease;
+  }
+  @media (min-width: 600px) { .modal { border-radius: 14px; } }
+  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 0; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--panel2); border: 1px solid var(--border);
+    color: var(--text); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-img { padding: 12px 16px; }
+  .modal-img img { width: 100%; border-radius: 8px; max-height: 340px; object-fit: contain; background: #000; }
+  .modal-details { padding: 0 16px 20px; }
+  .modal-name { font-size: 1.25rem; font-weight: 900; letter-spacing: -0.3px; }
+  .modal-sub { font-size: 0.82rem; color: var(--sub); margin: 3px 0 12px; }
+  .modal-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .modal-row:last-child { border-bottom: none; }
+  .modal-label { color: var(--sub); }
+  .modal-value { font-weight: 700; color: var(--text); text-align: right; }
+  .modal-value.highlight { color: var(--red-br); }
+  .price-note { font-size: 0.66rem; color: var(--sub); margin-top: 10px; line-height: 1.4; font-style: italic; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--sub); }
+  .empty-state.hidden { display: none; }
+
+  footer { text-align: center; padding: 22px 16px 34px; font-size: 0.68rem; color: var(--sub); }
+  footer .mark { color: var(--red-br); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="logo">The <span>Sewer</span></div>
+      <div class="tagline">Amanda's Marvel Collection</div>
+    </div>
+    <div class="not-for-sale">Not For Sale</div>
+  </div>
+</header>
+
+<div class="pull-quote">
+  <p>For a cool friend who is my dude but isn't a dude, she's a cool Asian dude.</p>
+</div>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Cards</div></div>
+  <div class="stat"><div class="stat-val" id="statValue">—</div><div class="stat-lbl">Est. eBay Value</div></div>
+  <div class="stat"><div class="stat-val" id="statFirsts">—</div><div class="stat-lbl">1st Appearances</div></div>
+  <div class="stat"><div class="stat-val" id="statRefractor">—</div><div class="stat-lbl">Refractors/Parallels</div></div>
+</div>
+
+<div class="filter-bar">
+  <div class="search-row">
+    <input class="search-input" id="searchInput" placeholder="Search name, team, series..." oninput="applyFilters()">
+    <select class="filter-select" id="brandSelect" onchange="applyFilters()"><option value="">Any Brand</option></select>
+    <select class="filter-select" id="seriesSelect" onchange="applyFilters()"><option value="">Any Series</option></select>
+    <select class="filter-select" id="typeSelect" onchange="applyFilters()"><option value="">Any Type</option></select>
+    <select class="filter-select" id="alignSelect" onchange="applyFilters()"><option value="">Any Alignment</option></select>
+    <select class="filter-select" id="teamSelect" onchange="applyFilters()"><option value="">Any Team</option></select>
+    <select class="filter-select" id="sortSelect" onchange="applyFilters()">
+      <option value="value-desc" selected>Value ↓</option>
+      <option value="value-asc">Value ↑</option>
+      <option value="name-az">Name A–Z</option>
+      <option value="id-asc">Scan Order</option>
+    </select>
+    <div class="size-btns">
+      <button class="size-btn" data-size="s" onclick="setSize('s')">S</button>
+      <button class="size-btn" data-size="m" onclick="setSize('m')">M</button>
+      <button class="size-btn" data-size="l" onclick="setSize('l')">L</button>
+    </div>
+  </div>
+  <div class="chips" id="chipRow">
+    <div class="chip active" data-filter="all" onclick="setChip(this)">All</div>
+    <div class="chip" data-filter="firstapp" onclick="setChip(this)">1st Appearance</div>
+    <div class="chip" data-filter="numbered" onclick="setChip(this)">Numbered</div>
+    <div class="chip" data-filter="refractor" onclick="setChip(this)">Refractor</div>
+    <div class="chip" data-filter="insert" onclick="setChip(this)">Insert</div>
+    <div class="chip" data-filter="hero" onclick="setChip(this)">Hero</div>
+    <div class="chip" data-filter="villain" onclick="setChip(this)">Villain</div>
+    <div class="chip" data-filter="anti-hero" onclick="setChip(this)">Anti-Hero</div>
+  </div>
+</div>
+
+<div class="grid-wrap">
+  <div class="count-row" id="countRow"></div>
+  <div class="card-grid" id="cardGrid"></div>
+  <div class="empty-state hidden" id="emptyState">No cards match that filter.</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div style="font-size:0.68rem;color:var(--sub);text-transform:uppercase;letter-spacing:1px;">Card Detail</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-img"><img id="modalImg" src="" alt=""></div>
+    <div class="modal-details">
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-sub" id="modalSub"></div>
+      <div id="modalRows"></div>
+      <div class="price-note">Est. eBay value is a typical secondary-market price for this product/parallel, not a live scraped comp.</div>
+    </div>
+  </div>
+</div>
+
+<footer>Scanned on a kitchen table, not the best lighting, still cool as hell — <span class="mark">these cards are staying with her.</span></footer>
+
+<script>
+let CARDS = [];
+
+function badgeHTML(c) {
+  let out = '';
+  if (c.firstAppearance) out += `<div class="badge firstapp">1st App</div>`;
+  if (c.serial) out += `<div class="badge numbered">${c.serial}</div>`;
+  if (c.cardType && c.cardType.includes('Refractor')) out += `<div class="badge refractor">${c.cardType}</div>`;
+  else if (c.cardType === 'Insert') out += `<div class="badge insert">Insert</div>`;
+  return out;
+}
+
+function renderGrid(cards) {
+  const grid = document.getElementById('cardGrid');
+  const empty = document.getElementById('emptyState');
+  const countRow = document.getElementById('countRow');
+  grid.innerHTML = '';
+  if (cards.length === 0) {
+    empty.classList.remove('hidden');
+    countRow.textContent = '';
+    return;
+  }
+  empty.classList.add('hidden');
+  countRow.textContent = `${cards.length} card${cards.length !== 1 ? 's' : ''} shown`;
+  cards.forEach(c => {
+    const tile = document.createElement('div');
+    tile.className = 'card-tile';
+    tile.innerHTML = `
+      <div class="thumb-wrap">
+        <img src="${c.image}" alt="${c.name}" loading="lazy">
+        <div class="badges">${badgeHTML(c)}</div>
+        <div class="val-badge">$${c.estValue}</div>
+      </div>
+      <div class="card-info">
+        <div class="card-name">${c.name}</div>
+        <div class="card-set">${c.brand} · ${c.series}</div>
+      </div>`;
+    tile.onclick = () => openModal(c);
+    grid.appendChild(tile);
+  });
+}
+
+let activeFilter = 'all';
+
+function populateSelect(id, values) {
+  const sel = document.getElementById(id);
+  const seen = [...new Set(values)].sort();
+  seen.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const brand = document.getElementById('brandSelect').value;
+  const series = document.getElementById('seriesSelect').value;
+  const type = document.getElementById('typeSelect').value;
+  const align = document.getElementById('alignSelect').value;
+  const team = document.getElementById('teamSelect').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = CARDS.filter(c => {
+    if (activeFilter === 'firstapp' && !c.firstAppearance) return false;
+    if (activeFilter === 'numbered' && !c.serial) return false;
+    if (activeFilter === 'refractor' && !(c.cardType || '').includes('Refractor')) return false;
+    if (activeFilter === 'insert' && c.cardType !== 'Insert') return false;
+    if (activeFilter === 'hero' && c.alignment !== 'Hero') return false;
+    if (activeFilter === 'villain' && c.alignment !== 'Villain') return false;
+    if (activeFilter === 'anti-hero' && c.alignment !== 'Anti-Hero') return false;
+    if (brand && c.brand !== brand) return false;
+    if (series && c.series !== series) return false;
+    if (type && c.cardType !== type) return false;
+    if (align && c.alignment !== align) return false;
+    if (team && c.team !== team) return false;
+    if (q && !`${c.name} ${c.brand} ${c.series} ${c.team} ${c.alignment}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (sort === 'value-desc') filtered.sort((a,b) => b.estValue - a.estValue);
+  else if (sort === 'value-asc') filtered.sort((a,b) => a.estValue - b.estValue);
+  else if (sort === 'name-az') filtered.sort((a,b) => a.name.localeCompare(b.name));
+  else filtered.sort((a,b) => a.id - b.id);
+
+  renderGrid(filtered);
+}
+
+function setChip(el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = el.dataset.filter;
+  applyFilters();
+}
+
+function updateStats() {
+  const total = CARDS.length;
+  const val = CARDS.reduce((s,c) => s + c.estValue, 0);
+  const firsts = CARDS.filter(c => c.firstAppearance).length;
+  const refr = CARDS.filter(c => (c.cardType||'').includes('Refractor') || (c.series||'').includes('Comic Book Gold')).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statValue').textContent = '$' + val;
+  document.getElementById('statFirsts').textContent = firsts;
+  document.getElementById('statRefractor').textContent = refr;
+}
+
+function openModal(c) {
+  document.getElementById('modalImg').src = c.image;
+  document.getElementById('modalName').textContent = c.name;
+  document.getElementById('modalSub').textContent = `${c.brand} · ${c.series}`;
+  const rows = [
+    ['Card Type', c.cardType],
+    ['Alignment', c.alignment],
+    ['Team', c.team],
+    ['1st Appearance', c.firstAppearance ? 'Yes' : 'No'],
+    ['Serial', c.serial || 'Not numbered'],
+    ['Est. eBay Value', '$' + c.estValue],
+  ];
+  document.getElementById('modalRows').innerHTML = rows.map(([l,v]) =>
+    `<div class="modal-row"><span class="modal-label">${l}</span><span class="modal-value${l==='Est. eBay Value'?' highlight':''}">${v}</span></div>`
+  ).join('');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay') && e.target.className !== 'modal-close') return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setSize(s) {
+  const grid = document.getElementById('cardGrid');
+  grid.classList.remove('size-s', 'size-m', 'size-l');
+  grid.classList.add('size-' + s);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s));
+  try { localStorage.setItem('sewerGridSize', s); } catch(e) {}
+}
+
+async function init() {
+  const r = await fetch('./cards.json?t=' + Date.now());
+  CARDS = await r.json();
+  populateSelect('brandSelect', CARDS.map(c => c.brand));
+  populateSelect('seriesSelect', CARDS.map(c => c.series));
+  populateSelect('typeSelect', CARDS.map(c => c.cardType));
+  populateSelect('alignSelect', CARDS.map(c => c.alignment));
+  populateSelect('teamSelect', CARDS.map(c => c.team));
+  updateStats();
+  const initSize = (() => { try { return localStorage.getItem('sewerGridSize') || 'm'; } catch(e) { return 'm'; } })();
+  setSize(initSize);
+  applyFilters();
+}
+init();
+</script>
+</body>
+</html>
