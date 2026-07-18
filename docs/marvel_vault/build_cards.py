@@ -149,6 +149,46 @@ CARDS = [
     ("scan13", 1, 1, "Eimin", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Brood/X-Men Villains", 5),
     ("scan13", 2, 0, "Uatu the Watcher", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Neutral", "Watchers", 6),
     ("scan13", 2, 1, "Chameleon", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Villain", "Spider-Man Villains", 6),
+
+    # ── scan14 : Star-Lord / Colossus / Black Widow page ────────────────────
+    ("scan14", 0, 0, "Star-Lord", "Topps Chrome", "The Beyond", "Insert", False, None, "Hero", "Guardians of the Galaxy", 8),
+    ("scan14", 0, 1, "Jeff the Land Shark", "Topps Chrome", "Base", "Base", False, None, "Neutral", "Guardians of the Galaxy Adjacent", 6),
+    ("scan14", 0, 2, "Silver Surfer", "Topps Chrome", "65 Fantastic Years", "Refractor", False, None, "Hero", "Fantastic Four Allies", 16),
+    ("scan14", 1, 0, "Kingpin", "Topps Chrome", "Base", "Base", False, None, "Villain", "Spider-Man Villains", 8),
+    ("scan14", 1, 1, "Colossus", "Topps Chrome", "Base", "Wave Refractor", False, None, "Hero", "X-Men", 16),
+    ("scan14", 1, 2, "Dazzler", "Topps Chrome", "Base", "Base", False, None, "Hero", "X-Men", 7),
+    ("scan14", 2, 0, "Kate Bishop", "Topps Chrome", "Base", "Wave Refractor", False, None, "Hero", "Young Avengers", 15),
+    ("scan14", 2, 1, "One World Under Doom", "Topps Chrome", "One World Under Doom", "Insert", False, None, "Neutral", "Doom's Earth (Event)", 8),
+    ("scan14", 2, 2, "Black Widow", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 9),
+
+    # ── scan15 : Iceman / Black Panther / Ghost-Spider page ──────────────────
+    ("scan15", 0, 0, "Iceman", "Topps Chrome", "Base", "Base", False, None, "Hero", "X-Men", 7),
+    ("scan15", 0, 1, "Rogue", "Topps Chrome", "Base", "Base", False, None, "Hero", "X-Men", 8),
+    ("scan15", 0, 2, "Abomination", "Topps Chrome", "Base", "Base", False, None, "Villain", "Hulk Villains", 6),
+    ("scan15", 1, 0, "Rocket Raccoon", "Topps Chrome", "Base", "Base", False, None, "Hero", "Guardians of the Galaxy", 7),
+    ("scan15", 1, 1, "Black Panther", "Topps Chrome", "Base", "Refractor", False, None, "Hero", "Avengers", 14),
+    ("scan15", 1, 2, "Human Torch", "Topps Chrome", "Base", "Base", False, None, "Hero", "Fantastic Four", 8),
+    ("scan15", 2, 0, "Omega Red", "Topps Chrome", "Base", "Base", False, None, "Villain", "X-Men Villains", 6),
+    ("scan15", 2, 1, "Emma Frost", "Topps Chrome", "Base", "Base", False, None, "Anti-Hero", "X-Men", 8),
+    ("scan15", 2, 2, "Ghost-Spider", "Topps Chrome", "Base", "Base", False, None, "Hero", "Spider-Society", 8),
+
+    # ── scan16 : Silk / Hulk / Agatha Harkness page ──────────────────────────
+    ("scan16", 0, 0, "Silk", "Topps Chrome", "Base", "Base", False, None, "Hero", "Spider-Society", 7),
+    ("scan16", 0, 1, "Kraven the Hunter", "Topps Chrome", "Base", "Base", False, None, "Villain", "Spider-Man Villains", 7),
+    ("scan16", 0, 2, "Beta Ray Bill", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 7),
+    ("scan16", 1, 0, "Hulk", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 9),
+    ("scan16", 1, 1, "Cyclops", "Topps Chrome", "Base", "Base", False, None, "Hero", "X-Men", 8),
+    ("scan16", 1, 2, "Enchantress", "Topps Chrome", "Base", "Base", False, None, "Villain", "Asgardians", 6),
+    ("scan16", 2, 0, "Hallows' Eve", "Topps Chrome", "Base", "Base", False, None, "Anti-Hero", "Moon Knight Family", 6),
+    ("scan16", 2, 1, "Nova", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 7),
+    ("scan16", 2, 2, "Agatha Harkness", "Topps Chrome", "Base", "Base", False, None, "Villain", "Scarlet Witch Adjacent", 7),
+
+    # ── scan17 : Silence / Captain Marvel / Rasputin IV page (5 cards) ───────
+    ("scan17", 0, 0, "Silence", "Topps Chrome", "Base", "Base", False, None, "Anti-Hero", "Symbiotes", 6),
+    ("scan17", 0, 1, "Spider-Man 2099", "Topps Chrome", "Base", "Base", False, None, "Hero", "Spider-Society", 9),
+    ("scan17", 1, 0, "Man-Thing", "Topps Chrome", "Base", "Base", False, None, "Neutral", "Midnight Sons", 6),
+    ("scan17", 1, 1, "Captain Marvel", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 9),
+    ("scan17", 2, 0, "Rasputin IV", "Topps Chrome", "Base", "Base", False, None, "Anti-Hero", "X-Men Adjacent", 6),
 ]
 
 out = []
