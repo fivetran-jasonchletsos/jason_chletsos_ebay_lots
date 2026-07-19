@@ -295,6 +295,15 @@ resource "aws_lambda_function" "ebay_notifications" {
       ADMIN_KNOWN_IP_PREFIXES = var.admin_known_ip_prefixes
     }
   }
+
+  # Several env vars (ANTHROPIC_API_KEY, BEDROCK_MODEL_ID, GEMINI_API_KEY,
+  # GITHUB_TOKEN, PRICECHARTING_API_KEY) are pushed out-of-band by feature
+  # deploy scripts (setup_bedrock.sh, deploy_marvelify.sh,
+  # deploy_natasha_pokedex.sh) and intentionally not tracked here — without
+  # this, `terraform apply` would treat them as drift and delete them.
+  lifecycle {
+    ignore_changes = [environment]
+  }
 }
 
 # ---------------------------------------------------------------------------
