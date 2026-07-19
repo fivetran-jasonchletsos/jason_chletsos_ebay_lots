@@ -1202,6 +1202,98 @@ def lambda_handler(event, context):
     if method == "OPTIONS" and path.endswith("/ebay/pokedex-save"):
         return _cors_preflight(event)
 
+    # ------------------------------------------------------------------
+    # POST /ebay/pokedex-delete — remove a card Natasha scanned, so she
+    # can re-scan it (bad photo, wrong card, etc). Body: {"id": <int>}.
+    # Removes the record from cards.json and deletes its image (best
+    # effort — a missing/already-gone image doesn't block the json update).
+    # Never raises — always returns {success: bool, ...} via _cors_response.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/pokedex-delete"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("pokedex-delete: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            try:
+                card_id = int(body.get("id"))
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "id required"}, event)
+
+            cards_path = "docs/natasha_pokedex/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"pokedex-delete cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            try:
+                cards = json.loads(current_raw.decode("utf-8")) if current_raw.strip() else []
+            except Exception as exc:
+                logger.error(f"pokedex-delete: cards.json unparseable, aborting: {exc}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                }, event)
+            if not isinstance(cards, list):
+                logger.error("pokedex-delete: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            target = next((c for c in cards if isinstance(c, dict) and c.get("id") == card_id), None)
+            if target is None:
+                return _cors_response(404, {"success": False, "error": "card not found"}, event)
+
+            remaining = [c for c in cards if not (isinstance(c, dict) and c.get("id") == card_id)]
+
+            # Best-effort image delete — a 404 (already missing) or any
+            # other failure here must not block removing the json entry.
+            image_rel = str(target.get("image") or "").strip()
+            if image_rel:
+                image_path = f"docs/natasha_pokedex/{image_rel}"
+                try:
+                    img_sha = _github_get_sha(image_path)
+                    _github_delete_file(
+                        image_path, img_sha,
+                        message=f"Natasha's Pokedex: remove card {card_id} image ({target.get('name') or 'unknown'})",
+                    )
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"pokedex-delete image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
+                except Exception as exc:
+                    logger.error(f"pokedex-delete image DELETE error: {exc}")
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(remaining, indent=2).encode("utf-8"),
+                    message=f"Natasha's Pokedex: remove card {card_id} ({target.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"pokedex-delete cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not update cards.json (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"pokedex-delete: removed card id={card_id} name={target.get('name')}")
+            return _cors_response(200, {"success": True, "id": card_id}, event)
+
+        except Exception as exc:
+            logger.error(f"pokedex-delete error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/pokedex-delete"):
+        return _cors_preflight(event)
+
     if method == "POST" and path.endswith("/ebay/ai-chat"):
         try:
             api_key = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -1878,6 +1970,38 @@ def _github_put_file(path: str, raw_bytes: bytes, message: str, sha: str | None 
         data=json.dumps(payload).encode(),
         headers={**_github_headers(), "Content-Type": "application/json"},
         method="PUT",
+    )
+    resp = urllib.request.urlopen(req, timeout=20)
+    return json.loads(resp.read().decode())
+
+
+def _github_get_sha(path: str) -> str:
+    """GET just a repo file's blob sha via the Contents API (no content decode
+    needed — used before deleting a binary file like a card image).
+
+    Raises urllib.error.HTTPError on any GitHub API error (e.g. 404).
+    """
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{path}?ref=main"
+    req = urllib.request.Request(url, headers=_github_headers(), method="GET")
+    resp = urllib.request.urlopen(req, timeout=15)
+    data = json.loads(resp.read().decode())
+    return data.get("sha", "")
+
+
+def _github_delete_file(path: str, sha: str, message: str):
+    """DELETE a repo file as a new commit on `main` via the Contents API.
+    Raises urllib.error.HTTPError on failure.
+    """
+    payload = {
+        "message": message,
+        "sha":     sha,
+        "branch":  "main",
+    }
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{GITHUB_REPO}/contents/{path}",
+        data=json.dumps(payload).encode(),
+        headers={**_github_headers(), "Content-Type": "application/json"},
+        method="DELETE",
     )
     resp = urllib.request.urlopen(req, timeout=20)
     return json.loads(resp.read().decode())

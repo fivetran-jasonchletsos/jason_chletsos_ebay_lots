@@ -297,6 +297,14 @@
     letter-spacing: 1px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--hairline);
   }
   .price-note { font-size: 0.68rem; color: var(--sub); margin-top: 14px; line-height: 1.5; font-style: italic; }
+  .delete-row { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hairline); text-align: center; }
+  .delete-btn { background: transparent; border: 1px solid rgba(238,21,21,0.35); color: var(--red-br);
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; padding: 8px 16px;
+    border-radius: 999px; cursor: pointer; letter-spacing: 0.3px; transition: all 0.15s ease; }
+  .delete-btn:hover, .delete-btn:focus-visible { background: rgba(238,21,21,0.14); border-color: var(--red-br); }
+  .delete-btn[disabled] { opacity: 0.5; cursor: wait; }
+  .delete-status { font-family: var(--font-mono); font-size: 0.68rem; color: var(--sub); margin-top: 8px; min-height: 1em; }
+  .delete-status.err { color: var(--red-br); }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--sub); font-family: var(--font-display); font-size: 1.1rem; }
   .empty-state.hidden { display: none; }
@@ -404,6 +412,10 @@
       <div class="modal-sub" id="modalSub"></div>
       <div id="modalRows"></div>
       <div class="price-note">Est. eBay value is a typical secondary-market price for this card/parallel, not a live scraped comp.</div>
+      <div class="delete-row">
+        <button class="delete-btn" id="deleteBtn" onclick="deleteCurrentCard()">Delete this card</button>
+        <div class="delete-status" id="deleteStatus"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -411,7 +423,9 @@
 <footer>Made for Natasha — <span class="mark">gotta scan 'em all.</span></footer>
 
 <script>
+const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
 let CARDS = [];
+let currentModalCard = null;
 
 const TYPE_COLORS = {
   Grass: '#4caf78', Fire: '#ff6b4a', Water: '#4fa8e0', Lightning: '#ffcb05',
@@ -488,12 +502,15 @@ let activeFilter = 'all';
 
 function populateSelect(id, values) {
   const sel = document.getElementById(id);
+  const prevValue = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
   const seen = [...new Set(values.filter(v => v !== null && v !== undefined && v !== ''))].sort();
   seen.forEach(v => {
     const opt = document.createElement('option');
     opt.value = v; opt.textContent = v;
     sel.appendChild(opt);
   });
+  if (seen.includes(prevValue)) sel.value = prevValue;
 }
 
 function updateFilterCount() {
@@ -560,6 +577,14 @@ function updateStats() {
 }
 
 function openModal(c) {
+  currentModalCard = c;
+  const deleteBtn = document.getElementById('deleteBtn');
+  const deleteStatus = document.getElementById('deleteStatus');
+  deleteBtn.disabled = false;
+  deleteBtn.textContent = 'Delete this card';
+  deleteStatus.textContent = '';
+  deleteStatus.classList.remove('err');
+
   const modalImg = document.getElementById('modalImg');
   modalImg.src = c.image;
   modalImg.alt = c.name;
@@ -602,6 +627,48 @@ function closeModal(e) {
   if (e && e.target !== document.getElementById('modalOverlay') && e.target.className !== 'modal-close') return;
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+async function deleteCurrentCard() {
+  const c = currentModalCard;
+  if (!c) return;
+  if (!confirm(`Delete "${c.name}"? You'll need to rescan it to get it back.`)) return;
+
+  const btn = document.getElementById('deleteBtn');
+  const status = document.getElementById('deleteStatus');
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  status.textContent = '';
+  status.classList.remove('err');
+
+  try {
+    const res = await fetch(LAMBDA + '/pokedex-delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: c.id })
+    });
+    const out = await res.json();
+    if (out && out.success) {
+      CARDS = CARDS.filter(x => x.id !== c.id);
+      populateSelect('typeSelect', CARDS.map(x => x.type));
+      populateSelect('languageSelect', CARDS.map(x => x.language));
+      populateSelect('raritySelect', CARDS.map(x => x.rarity));
+      populateSelect('setSelect', CARDS.map(x => x.set));
+      updateStats();
+      applyFilters();
+      closeModal();
+    } else {
+      status.textContent = (out && out.error) || 'Delete failed — try again.';
+      status.classList.add('err');
+      btn.disabled = false;
+      btn.textContent = 'Delete this card';
+    }
+  } catch (e) {
+    status.textContent = 'Network error — try again.';
+    status.classList.add('err');
+    btn.disabled = false;
+    btn.textContent = 'Delete this card';
+  }
 }
 
 function setSize(s) {

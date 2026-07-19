@@ -404,6 +404,7 @@ locals {
     "upload-photos",
     "marvelify",
     "pokedex-save",
+    "pokedex-delete",
   ]
 }
 
