@@ -247,6 +247,10 @@
       </div>
 
       <p class="note">Estimate only &mdash; actual sale price varies with condition, timing &amp; grading. Not a formal appraisal.</p>
+
+      <div id="pokedexLink" style="display:none;text-align:center;margin-top:14px">
+        <a href="natasha_pokedex/index.html" target="_blank" rel="noopener" style="color:var(--gold);font-size:12.5px;font-weight:600;text-decoration:none">View your Pokedex &rarr;</a>
+      </div>
     </div>
     <button class="btn btn-ghost" id="again">Appraise another card</button>
   </section>
@@ -330,6 +334,7 @@ async function appraise(){
   if (!state.front) return;
   clearErr();
   $('results').classList.remove('on');
+  const pokedexLinkEl = $('pokedexLink'); if (pokedexLinkEl) pokedexLinkEl.style.display = 'none';
   $('go').disabled = true;
   const load = $('loading'); load.classList.add('on');
   loadMsgIdx=0; $('loadmsg').textContent=LOAD_MSGS[0];
@@ -348,12 +353,39 @@ async function appraise(){
     }
     lastData = data;
     render(data);
+    savePokedex(data);
   }catch(e){
     showErr(e.message || 'Network error — please try again.');
   }finally{
     clearInterval(cycle);
     load.classList.remove('on');
     $('go').disabled = false;
+  }
+}
+
+// Fire-and-forget: save the scanned card + photo into Natasha's Pokedex showcase.
+// Never blocks the appraisal UI and never surfaces errors to the kid scanning.
+async function savePokedex(data){
+  try{
+    const res = await fetch(LAMBDA + '/pokedex-save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        image: state.front,
+        card: data.card,
+        scannedAt: new Date().toISOString().slice(0,10)
+      })
+    });
+    const out = await res.json();
+    if (out && out.success){
+      showToast('Added to your Pokedex!');
+      const link = $('pokedexLink');
+      if (link) link.style.display = 'block';
+    } else {
+      console.warn('Pokedex save did not succeed:', out && out.error);
+    }
+  }catch(e){
+    console.warn('Pokedex save failed:', e);
   }
 }
 

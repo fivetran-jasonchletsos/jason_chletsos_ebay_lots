@@ -1069,6 +1069,139 @@ def lambda_handler(event, context):
     if method == "OPTIONS" and path.endswith("/ebay/marvelify"):
         return _cors_preflight(event)
 
+    # ------------------------------------------------------------------
+    # POST /ebay/pokedex-save — "Natasha's Pokedex" auto-save.
+    # Body: {"image": <data-url>, "card": {...fields from /upload-photos'
+    #        "card" object}, "scannedAt": "YYYY-MM-DD" (computed client-side)}
+    # Uses the GitHub Contents API (read-modify-write, two commits) to:
+    #   1. GET docs/natasha_pokedex/cards.json for the current array + sha
+    #   2. next_id = max(existing id) + 1
+    #   3. PUT docs/natasha_pokedex/images/card{next_id}.jpg (new commit)
+    #   4. append the mapped record to the array
+    #   5. PUT (update, with the sha from step 1) the new cards.json
+    # Never raises — always returns {success: bool, ...} via _cors_response.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/pokedex-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("pokedex-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            card       = body.get("card") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            cards_path = "docs/natasha_pokedex/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"pokedex-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            if current_raw.strip():
+                try:
+                    cards = json.loads(current_raw.decode("utf-8"))
+                except Exception as exc:
+                    logger.error(f"pokedex-save: cards.json unparseable, aborting: {exc}")
+                    return _cors_response(502, {
+                        "success": False,
+                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                    }, event)
+            else:
+                cards = []
+            if not isinstance(cards, list):
+                logger.error("pokedex-save: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
+            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
+
+            image_path = f"docs/natasha_pokedex/images/card{next_id}.jpg"
+            try:
+                _github_put_file(image_path, raw, message=f"Natasha's Pokedex: add card {next_id} image (auto-save)")
+            except urllib.error.HTTPError as exc:
+                logger.error(f"pokedex-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not upload card image (HTTP {exc.code})",
+                }, event)
+
+            est = card.get("estimated_value_usd") or {}
+            try:
+                est_value = round(float((est or {}).get("typical") or 0))
+            except (TypeError, ValueError):
+                est_value = 0
+
+            record = {
+                "id":          next_id,
+                "name":        card.get("player"),
+                "image":       f"images/card{next_id}.jpg",
+                "dexNo":       None,
+                "hp":          None,
+                "type":        None,
+                "language":    None,
+                "set":         card.get("set_name") or card.get("brand"),
+                "cardNumber":  card.get("card_number"),
+                "rarity":      None,
+                "stage":       None,
+                "attacks":     [],
+                "illustrator": None,
+                "year":        card.get("year") or None,
+                "estValue":    est_value,
+                "scannedAt":   scanned_at,
+            }
+            cards.append(record)
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
+                    message=f"Natasha's Pokedex: add card {next_id} ({record.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"pokedex-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"pokedex-save: added card id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":     True,
+                "id":          next_id,
+                "pokedex_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/natasha_pokedex/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"pokedex-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/pokedex-save"):
+        return _cors_preflight(event)
+
     if method == "POST" and path.endswith("/ebay/ai-chat"):
         try:
             api_key = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -1698,6 +1831,56 @@ def _reddit_submit(subreddit: str, title: str, text: str):
         return False, "; ".join(f"{e[0]}: {e[1]}" for e in errors[:3])
     url = json_node.get("data", {}).get("url")
     return (True, url) if url else (False, f"unexpected response: {json.dumps(body)[:300]}")
+
+
+# ---------------------------------------------------------------------------
+# Natasha's Pokedex — GitHub Contents API helpers (read-modify-write of
+# docs/natasha_pokedex/cards.json + creating docs/natasha_pokedex/images/*.jpg)
+# ---------------------------------------------------------------------------
+def _github_headers() -> dict:
+    return {
+        "Authorization":        f"Bearer {GITHUB_TOKEN}",
+        "Accept":               "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent":           "natasha-pokedex-lambda",
+    }
+
+
+def _github_get_json_file(path: str):
+    """GET a repo file's raw decoded bytes + its blob sha via the Contents API.
+
+    Returns (raw_bytes, sha). Raises urllib.error.HTTPError on any GitHub API
+    error (e.g. 404 if the file doesn't exist yet).
+    """
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{path}?ref=main"
+    req = urllib.request.Request(url, headers=_github_headers(), method="GET")
+    resp = urllib.request.urlopen(req, timeout=15)
+    data = json.loads(resp.read().decode())
+    sha = data.get("sha", "")
+    b64 = (data.get("content") or "").replace("\n", "")
+    raw = base64.b64decode(b64) if b64 else b""
+    return raw, sha
+
+
+def _github_put_file(path: str, raw_bytes: bytes, message: str, sha: str | None = None):
+    """PUT (create, or update when `sha` is given) a repo file as a new commit
+    on `main` via the Contents API. Raises urllib.error.HTTPError on failure.
+    """
+    payload = {
+        "message": message,
+        "content": base64.b64encode(raw_bytes).decode(),
+        "branch":  "main",
+    }
+    if sha:
+        payload["sha"] = sha
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{GITHUB_REPO}/contents/{path}",
+        data=json.dumps(payload).encode(),
+        headers={**_github_headers(), "Content-Type": "application/json"},
+        method="PUT",
+    )
+    resp = urllib.request.urlopen(req, timeout=20)
+    return json.loads(resp.read().decode())
 
 
 # ---------------------------------------------------------------------------

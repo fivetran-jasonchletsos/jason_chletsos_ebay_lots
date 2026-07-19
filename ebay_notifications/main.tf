@@ -394,6 +394,7 @@ locals {
     "ai-chat",
     "upload-photos",
     "marvelify",
+    "pokedex-save",
   ]
 }
 
