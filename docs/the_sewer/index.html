@@ -305,7 +305,7 @@
   <div class="header-glow g2" aria-hidden="true"></div>
   <div class="header-top">
     <div>
-      <a href="surprise/index.html" style="text-decoration:none;color:inherit;display:inline-block" aria-label="The Sewer"><div class="logo">The <em>Sewer</em></div></a>
+      <div class="logo">The <em>Sewer</em></div>
       <div class="tagline">Amanda's Marvel Collection</div>
     </div>
     <a class="nav-link" href="tecmo.html">Tecmo Bowl Cards →</a>
@@ -565,7 +565,13 @@ function syncHeaderHeight() {
 }
 syncHeaderHeight();
 window.addEventListener('resize', syncHeaderHeight);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight);
 init();
 </script>
+
+<!-- Secret door: fixed, always-on-top tap zone over the logo's usual spot —
+     deliberately outside the header's stacking context so no sticky bar,
+     glow, or font-swap reflow can ever end up covering it. -->
+<a href="surprise/index.html" aria-label="secret" style="position:fixed;top:0;left:0;width:46vw;max-width:260px;height:78px;z-index:99999;-webkit-tap-highlight-color:transparent;"></a>
 </body>
 </html>
