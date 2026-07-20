@@ -225,6 +225,21 @@ GROUPS = {
   ("Mookie Betts","Dodgers · Titans of the Game insert",2,4,6,""),
   ("Tampa Bay Rays","Topps Heritage team photo card",1,2,3,""),
  ],
+ "Scan 410 — mixed inserts + real autograph": [
+  ("New York Yankees","Topps 75 All-Star Game team insert",1,2,3,""),
+  ("Brady House","Nationals · graffiti insert RC",1,2,4,""),
+  ("Bryce Eldridge","Giants · baseballs insert RC",2,4,7,""),
+  ("Paul O'Neill","Yankees · Topps Certified Autograph Issue, legend",20,28,38,"real autograph, unnumbered base tier"),
+  ("Byron Buxton","Twins · star insert",1,3,5,""),
+  ("Chris Sale","Braves · Topps 75 crystal parallel",1,3,5,""),
+  ("Jackson Merrill","Padres · graffiti insert (2nd design, see Scan 394)",1,3,5,""),
+  ("Kazuma Okamoto","Blue Jays · Topps 75 crystal parallel RC",1,2,4,""),
+  ("Reds 'All Smiles'","Team insert, crystal parallel (2nd design, see Scan 401)",1,2,3,""),
+ ],
+ "Scan 411 — partial page (2 cards)": [
+  ("Jackson Chourio","Brewers · graffiti insert (2nd design, see Scan 409)",1,3,5,""),
+  ("Steven Kwan","Guardians · Glove Work insert",1,3,5,""),
+ ],
 }
 
 st=getSampleStyleSheet()
@@ -249,16 +264,16 @@ Path("output/_baseball_batch_pricing.json").write_text(json.dumps(
 out=Path("docs/baseball_batch_pricing.pdf")
 doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
 flow=[Paragraph("Baseball batch &mdash; sort &amp; pricing worksheet (HOLD)",h1),
-      Paragraph(f"{len(all_rows)} cards &middot; Scans 391-409 &middot; raw/ungraded eBay-comp estimate &middot; NOT posted &mdash; more scans pending",sub),
+      Paragraph(f"{len(all_rows)} cards &middot; Scans 391-411 &middot; raw/ungraded eBay-comp estimate &middot; NOT posted &mdash; more scans pending",sub),
       Paragraph(f"<b>Batch total: {money(grand['low'])} &ndash; {money(grand['high'])}</b> "
                 f"(typical ~{money(grand['typical'])})",grp),
-      Paragraph("<b>Sort verdict: all lot material.</b> Nothing in this batch clears an individual-listing "
-                "threshold on real comps &mdash; even hyped rookie/star names (Burns, Yesavage, Teel, Caissie, "
-                "Schlittler, Basallo, Murakami, Skenes, Mayer) and HOF legends (Wagner, Koufax, Ryan, Clemente, "
-                "Frank Thomas) are running $1-9 raw for these base/insert versions. Bundle by theme "
-                "(rookies / veterans / legends / prospects) at 5 cards or fewer per lot. The two real numbered "
-                "autographs (Roenis Elias II /45, Juan Morillo /199) are the only cards worth a second look as "
-                "possible singles.",note)]
+      Paragraph("<b>Sort verdict: all lot material, with one exception.</b> Nothing else in this batch clears an "
+                "individual-listing threshold on real comps &mdash; even hyped rookie/star names (Burns, Yesavage, "
+                "Teel, Caissie, Schlittler, Basallo, Murakami, Skenes, Mayer, Eldridge) and HOF legends (Wagner, "
+                "Koufax, Ryan, Clemente, Frank Thomas) are running $1-9 raw for these base/insert versions. Bundle "
+                "by theme (rookies / veterans / legends / prospects) at 5 cards or fewer per lot. Three real "
+                "numbered/certified autographs are worth pulling as singles: Roenis Elias II /45, Juan Morillo /199, "
+                "and the Paul O'Neill Topps Certified Autograph (unnumbered but a real Yankees-legend auto, $20-38).",note)]
 
 def tbl(grp_name,cards):
     flow.append(Paragraph(grp_name,grp))
