@@ -98,7 +98,10 @@
   .banner {
     margin-top: 40px; border-radius: 14px; overflow: hidden;
     background: repeating-linear-gradient(135deg, var(--yellow) 0 26px, #111 26px 52px);
-    padding: 3px;
+    padding: 3px; transition: background 0.4s ease;
+  }
+  .banner.unlocked {
+    background: repeating-linear-gradient(135deg, #00a86b 0 26px, #111 26px 52px);
   }
   .banner-inner {
     background: #0a0a0a; border-radius: 11px; padding: 26px 20px; text-align: center;
@@ -108,6 +111,17 @@
     font-size: clamp(1.3rem, 6.2vw, 1.85rem); line-height: 1.2; color: var(--yellow-br);
     text-transform: uppercase; letter-spacing: -0.3px;
   }
+  .banner.unlocked .big { color: #39d698; }
+  .unlock-links { display: none; margin-top: 18px; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .banner.unlocked .unlock-links { display: flex; }
+  .banner.unlocked .locked-msg { display: none; }
+  .unlock-btn {
+    font-family: var(--font-mono); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.3px;
+    text-decoration: none; color: #00171a; background: #39d698; padding: 12px 20px;
+    border-radius: 999px; transition: transform 0.15s ease;
+  }
+  .unlock-btn:active { transform: scale(0.97); }
+  .unlock-btn.ghost { background: transparent; color: #39d698; border: 1px solid rgba(57,214,152,0.5); }
 
   footer {
     text-align: center; margin-top: 40px; font-family: var(--font-mono);
@@ -160,9 +174,14 @@
     </div>
   </div>
 
-  <div class="banner">
+  <div class="banner" id="banner">
     <div class="banner-inner">
-      <div class="big">When these are done,<br>you will get a site<br>and scanner.</div>
+      <div class="big locked-msg">When these are done,<br>you will get a site<br>and scanner.</div>
+      <div class="big" style="display:none" id="unlockedMsg">It's unlocked.<br>Welcome to your Nest.</div>
+      <div class="unlock-links">
+        <a class="unlock-btn" href="eagles_nest/scanner.html">Scan a card &rarr;</a>
+        <a class="unlock-btn ghost" href="eagles_nest/index.html">View The Eagles Nest &rarr;</a>
+      </div>
     </div>
   </div>
 
@@ -170,14 +189,45 @@
 </div>
 
 <script>
-function toggleTask(el){
-  el.classList.toggle('done');
+const STORAGE_KEY = 'eaglesNestTasks';
+
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e){ return {}; }
+}
+function saveState(state){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+function updateUI(){
   const total = document.querySelectorAll('.task').length;
   const done = document.querySelectorAll('.task.done').length;
   document.getElementById('doneCount').textContent = done;
   document.getElementById('progressFill').style.width = (done/total*100) + '%';
   document.getElementById('progressPct').textContent = Math.round(done/total*100) + '%';
+
+  const banner = document.getElementById('banner');
+  const unlockedMsg = document.getElementById('unlockedMsg');
+  const allDone = done === total;
+  banner.classList.toggle('unlocked', allDone);
+  unlockedMsg.style.display = allDone ? 'block' : 'none';
 }
+
+function toggleTask(el){
+  el.classList.toggle('done');
+  const state = loadState();
+  state[el.dataset.task] = el.classList.contains('done');
+  saveState(state);
+  updateUI();
+}
+
+(function restore(){
+  const state = loadState();
+  document.querySelectorAll('.task').forEach(el => {
+    if (state[el.dataset.task]) el.classList.add('done');
+  });
+  updateUI();
+})();
 </script>
 </body>
 </html>

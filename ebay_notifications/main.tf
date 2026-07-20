@@ -407,6 +407,8 @@ locals {
     "pokedex-delete",
     "sewer-save",
     "sewer-delete",
+    "eagles-save",
+    "eagles-delete",
   ]
 }
 
