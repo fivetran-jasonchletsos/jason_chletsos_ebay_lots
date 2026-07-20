@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Eagles Nest — Locked</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow:    #ffd400;
+    --yellow-br: #ffe873;
+    --bg:        #0a0a0a;
+    --panel:     #141414;
+    --panel2:    #1c1c1c;
+    --border:    rgba(255,212,0,.16);
+    --hairline:  rgba(241,239,233,.09);
+    --text:      #f1efe9;
+    --sub:       #9a9388;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse 1000px 700px at 50% -10%, rgba(255,212,0,.10), transparent 60%);
+  }
+
+  .hazard-stripe {
+    height: 10px;
+    background: repeating-linear-gradient(135deg, var(--yellow) 0 22px, #111 22px 44px);
+  }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 20px 60px; }
+
+  header { text-align: center; padding: 48px 0 8px; }
+  .lock-tag {
+    display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono);
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: #0a0a0a; background: var(--yellow); padding: 6px 14px; border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-family: var(--font-display); font-style: italic; font-weight: 700;
+    font-size: clamp(2rem, 9vw, 3rem); line-height: 1.05; letter-spacing: -0.5px;
+  }
+  .sub {
+    color: var(--sub); font-size: 0.96rem; margin-top: 16px; line-height: 1.6;
+    max-width: 34em; margin-inline: auto;
+  }
+
+  .panel {
+    background: linear-gradient(180deg, var(--panel), var(--panel2));
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 8px; margin-top: 36px;
+  }
+  .panel-title {
+    font-family: var(--font-mono); font-size: 0.68rem; color: var(--yellow-br);
+    letter-spacing: 2px; text-transform: uppercase; padding: 14px 16px 6px;
+  }
+  .task {
+    display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px;
+    border-top: 1px solid var(--hairline); cursor: pointer; user-select: none;
+    transition: background 0.15s ease;
+  }
+  .task:first-of-type { border-top: none; }
+  .task:hover { background: rgba(255,212,0,0.04); }
+  .box {
+    flex-shrink: 0; width: 24px; height: 24px; margin-top: 1px; border-radius: 6px;
+    border: 2px solid var(--border); background: #0d0d0d;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .task.done .box { background: var(--yellow); border-color: var(--yellow); }
+  .box svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.15s ease; }
+  .task.done .box svg { opacity: 1; }
+  .task-label { font-size: 0.98rem; line-height: 1.4; padding-top: 2px; transition: color 0.15s ease, opacity 0.15s ease; }
+  .task.done .task-label { color: var(--sub); text-decoration: line-through; opacity: 0.65; }
+  .task-num {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--sub);
+    flex-shrink: 0; padding-top: 4px; width: 16px;
+  }
+
+  .progress-row {
+    display: flex; align-items: center; gap: 10px; padding: 4px 16px 14px;
+    font-family: var(--font-mono); font-size: 0.72rem; color: var(--sub);
+  }
+  .progress-track { flex: 1; height: 6px; border-radius: 999px; background: #0d0d0d; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--yellow); transition: width 0.35s ease; }
+
+  .banner {
+    margin-top: 40px; border-radius: 14px; overflow: hidden;
+    background: repeating-linear-gradient(135deg, var(--yellow) 0 26px, #111 26px 52px);
+    padding: 3px;
+  }
+  .banner-inner {
+    background: #0a0a0a; border-radius: 11px; padding: 26px 20px; text-align: center;
+  }
+  .banner-inner .big {
+    font-family: var(--font-display); font-weight: 900; font-style: italic;
+    font-size: clamp(1.3rem, 6.2vw, 1.85rem); line-height: 1.2; color: var(--yellow-br);
+    text-transform: uppercase; letter-spacing: -0.3px;
+  }
+
+  footer {
+    text-align: center; margin-top: 40px; font-family: var(--font-mono);
+    font-size: 0.72rem; color: var(--sub); line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<div class="hazard-stripe"></div>
+
+<div class="wrap">
+  <header>
+    <div class="lock-tag">Locked</div>
+    <h1>The Eagles Nest</h1>
+    <p class="sub">Eventually this turns into a real card site with its own scanner — just like Amanda's and Natasha's. Eventually.</p>
+  </header>
+
+  <div class="panel">
+    <div class="panel-title">Requirements &middot; <span id="doneCount">0</span>/4</div>
+
+    <div class="task" data-task="1" onclick="toggleTask(this)">
+      <span class="task-num">1</span>
+      <span class="box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="task-label">Get eBay developer's ID set up</span>
+    </div>
+
+    <div class="task" data-task="2" onclick="toggleTask(this)">
+      <span class="task-num">2</span>
+      <span class="box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="task-label">Drop off cards to Jason to scan</span>
+    </div>
+
+    <div class="task" data-task="3" onclick="toggleTask(this)">
+      <span class="task-num">3</span>
+      <span class="box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="task-label">Do the laundry</span>
+    </div>
+
+    <div class="task" data-task="4" onclick="toggleTask(this)">
+      <span class="task-num">4</span>
+      <span class="box"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="task-label">Scan cards for Natasha</span>
+    </div>
+
+    <div class="progress-row">
+      <span>PROGRESS</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span id="progressPct">0%</span>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-inner">
+      <div class="big">When these are done,<br>you will get a site<br>and scanner.</div>
+    </div>
+  </div>
+
+  <footer>No pressure. Take your time.<br>(The laundry one has been sitting there a while.)</footer>
+</div>
+
+<script>
+function toggleTask(el){
+  el.classList.toggle('done');
+  const total = document.querySelectorAll('.task').length;
+  const done = document.querySelectorAll('.task.done').length;
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('progressFill').style.width = (done/total*100) + '%';
+  document.getElementById('progressPct').textContent = Math.round(done/total*100) + '%';
+}
+</script>
+</body>
+</html>
