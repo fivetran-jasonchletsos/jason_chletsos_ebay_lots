@@ -21,6 +21,7 @@ Environment variables:
 """
 
 import base64
+import datetime as _dt
 import hashlib
 import json
 import logging
@@ -326,33 +327,53 @@ def _scp_comp(title, token):
         return None
 
 
-_BEYOND_SYSTEM_PROMPT = (
-    "You are the appraiser behind \"Beyond Cards\", a public tool by the eBay seller "
-    "harpua2001 that identifies a trading card from a phone photo and drafts an eBay "
-    "listing. You are an expert in modern and vintage sports cards (Panini "
-    "Prizm/Select/Optic/Mosaic/Donruss, Topps Chrome/Bowman/Signature Class, Upper "
-    "Deck) and Pokemon TCG.\n\n"
-    "Look at the photo(s) — a front, and optionally a back — identify the card, then "
-    "produce an eBay listing and a realistic value estimate for a RAW (ungraded) copy "
-    "in the condition shown, unless it is clearly in a graded slab (PSA/BGS/CGC/SGC), "
-    "in which case price for that grade.\n\n"
-    "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
-    "trailing commas) with exactly these keys: is_card (boolean; false if the image is "
-    "not a trading card), category (\"sports\"|\"pokemon\"|\"other\"), sport, player "
-    "(player or character name), team, year, brand, set_name, parallel, card_number, "
-    "serial (only if a serial number is visibly printed, e.g. \"26/249\", else \"\"), "
-    "is_rookie (boolean), is_auto (boolean), is_relic (boolean), condition_notes "
-    "(brief, only what is visible), ebay_title (<=80 characters, keyword-rich, format: "
-    "Year Brand Set Player Parallel #Number RC/Auto/Serial Team Sport), "
-    "ebay_description (2-4 factual sentences, plain text), estimated_value_usd (object "
-    "with numeric low, typical, high), value_basis (one short sentence), confidence "
-    "(\"low\"|\"medium\"|\"high\").\n\n"
-    "Rules: Never invent details you cannot see — if a serial number, autograph, or "
-    "rookie logo is not visible, use \"\"/false. Keep ebay_title <= 80 characters and "
-    "avoid ALL-CAPS words. Be honest and realistic about value — a common base card may "
-    "be $1-5; do not inflate. If is_card is false, still return the JSON with empty "
-    "fields. The output must be machine-parseable JSON."
-)
+def _beyond_system_prompt() -> str:
+    """Build the Beyond Cards appraiser system prompt, grounded with today's
+    real date. Card-set year is the one field vision models reliably get
+    wrong for brand-new products with no year printed on the card face —
+    the model's training data has a cutoff, so a current-year release it
+    has never seen defaults to whatever same-named product it *does*
+    remember (e.g. calling a fresh 2026 Topps Chrome Marvel base card
+    "2023" because that's the newest one in its training data). Telling it
+    today's date lets it reason about which year is actually plausible
+    instead of pattern-matching to a stale memory.
+    """
+    today = _dt.date.today()
+    return (
+        "You are the appraiser behind \"Beyond Cards\", a public tool by the eBay seller "
+        "harpua2001 that identifies a trading card from a phone photo and drafts an eBay "
+        "listing. You are an expert in modern and vintage sports cards (Panini "
+        "Prizm/Select/Optic/Mosaic/Donruss, Topps Chrome/Bowman/Signature Class, Upper "
+        "Deck) and Pokemon TCG.\n\n"
+        f"Today's real-world date is {today.isoformat()}. Trading card products release on a "
+        "rolling basis, so a card that matches a current base/insert template you don't "
+        "specifically remember is more likely to be a recent release than an older year "
+        "you do remember under the same product name — don't default to a stale "
+        "training-data year just because it's the most recent one you're confident about. "
+        "If the card has no year printed on it anywhere, infer the most plausible release "
+        "year from design cues and set it in \"year\"; only leave \"year\" blank if you "
+        "truly cannot narrow it down at all.\n\n"
+        "Look at the photo(s) — a front, and optionally a back — identify the card, then "
+        "produce an eBay listing and a realistic value estimate for a RAW (ungraded) copy "
+        "in the condition shown, unless it is clearly in a graded slab (PSA/BGS/CGC/SGC), "
+        "in which case price for that grade.\n\n"
+        "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
+        "trailing commas) with exactly these keys: is_card (boolean; false if the image is "
+        "not a trading card), category (\"sports\"|\"pokemon\"|\"other\"), sport, player "
+        "(player or character name), team, year, brand, set_name, parallel, card_number, "
+        "serial (only if a serial number is visibly printed, e.g. \"26/249\", else \"\"), "
+        "is_rookie (boolean), is_auto (boolean), is_relic (boolean), condition_notes "
+        "(brief, only what is visible), ebay_title (<=80 characters, keyword-rich, format: "
+        "Year Brand Set Player Parallel #Number RC/Auto/Serial Team Sport), "
+        "ebay_description (2-4 factual sentences, plain text), estimated_value_usd (object "
+        "with numeric low, typical, high), value_basis (one short sentence), confidence "
+        "(\"low\"|\"medium\"|\"high\").\n\n"
+        "Rules: Never invent details you cannot see — if a serial number, autograph, or "
+        "rookie logo is not visible, use \"\"/false. Keep ebay_title <= 80 characters and "
+        "avoid ALL-CAPS words. Be honest and realistic about value — a common base card may "
+        "be $1-5; do not inflate. If is_card is false, still return the JSON with empty "
+        "fields. The output must be machine-parseable JSON."
+    )
 
 
 def _img_bytes(data_url):
@@ -935,7 +956,7 @@ def lambda_handler(event, context):
                            "Return ONLY the JSON object.")
 
             try:
-                raw, model_label = _run_vision(_BEYOND_SYSTEM_PROMPT, images, instruction, 1200)
+                raw, model_label = _run_vision(_beyond_system_prompt(), images, instruction, 1200)
             except urllib.error.HTTPError as exc:
                 err_body = exc.read().decode()[:300]
                 logger.error(f"upload-photos vision HTTP {exc.code}: {err_body}")
