@@ -30,6 +30,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import xml.etree.ElementTree as ET
+from collections import Counter
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -51,6 +52,16 @@ SEWER_BOARDS = {
     "live":     "docs/the_sewer/live",
     "football": "docs/the_sewer/football",
     "baseball": "docs/the_sewer/baseball",
+}
+
+# "The Vault" boards (JC's personal Marvel collection) — new scans land on
+# "marvel" first via the scanner, then get sorted onto their own sport pages
+# via the select + move UI, same pattern as SEWER_BOARDS above.
+VAULT_BOARDS = {
+    "marvel":     "docs/marvel_vault",
+    "football":   "docs/marvel_vault/football",
+    "baseball":   "docs/marvel_vault/baseball",
+    "basketball": "docs/marvel_vault/basketball",
 }
 TOKEN_URL          = "https://api.ebay.com/identity/v1/oauth2/token"
 TRADING_API_URL    = "https://api.ebay.com/ws/api.dll"
@@ -1883,6 +1894,372 @@ def lambda_handler(event, context):
     if method == "OPTIONS" and path.endswith("/ebay/eagles-delete"):
         return _cors_preflight(event)
 
+    # ------------------------------------------------------------------
+    # POST /ebay/vault-save — "The Vault Scanner" auto-save (JC's personal
+    # Marvel collection). Same read-modify-write shape as sewer-save, always
+    # against the "marvel" board (docs/marvel_vault/cards.json + images/) —
+    # JC sorts stray sports cards onto football/baseball/basketball via the
+    # select + move UI afterward. Recomputes the "copies" (doubles/triples)
+    # field across the whole board on every save.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/vault-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("vault-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            card       = body.get("card") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            board_dir = VAULT_BOARDS["marvel"]
+            cards_path = f"{board_dir}/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            if current_raw.strip():
+                try:
+                    cards = json.loads(current_raw.decode("utf-8"))
+                except Exception as exc:
+                    logger.error(f"vault-save: cards.json unparseable, aborting: {exc}")
+                    return _cors_response(502, {
+                        "success": False,
+                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                    }, event)
+            else:
+                cards = []
+            if not isinstance(cards, list):
+                logger.error("vault-save: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
+            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
+
+            image_path = f"{board_dir}/images/card{next_id}.jpg"
+            try:
+                _github_put_file(image_path, raw, message=f"The Vault: add card {next_id} image (auto-save)")
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not upload card image (HTTP {exc.code})",
+                }, event)
+
+            est = card.get("estimated_value_usd") or {}
+            try:
+                est_value = round(float((est or {}).get("typical") or 0))
+            except (TypeError, ValueError):
+                est_value = 0
+
+            record = {
+                "id":              next_id,
+                "name":            card.get("player"),
+                "image":           f"images/card{next_id}.jpg",
+                "brand":           card.get("brand") or card.get("set_name"),
+                "series":          card.get("set_name"),
+                "cardType":        card.get("parallel") or "Base",
+                "firstAppearance": bool(card.get("is_rookie")),
+                "serial":          card.get("serial") or None,
+                "alignment":       None,
+                "team":            card.get("team"),
+                "estValue":        est_value,
+                "scannedAt":       scanned_at,
+            }
+            cards.append(record)
+            _recompute_copies(cards)
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
+                    message=f"The Vault: add card {next_id} ({record.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"vault-save: added card id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":   True,
+                "id":        next_id,
+                "vault_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/marvel_vault/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"vault-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/vault-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/vault-delete — remove a Vault card from any of its boards.
+    # Same shape as sewer-delete, against docs/marvel_vault/<board>/cards.json
+    # + images/. Recomputes "copies" on the affected board after removal.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/vault-delete"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("vault-delete: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            try:
+                card_id = int(body.get("id"))
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "id required"}, event)
+
+            board = str(body.get("board") or "marvel").strip()
+            if board not in VAULT_BOARDS:
+                return _cors_response(400, {"success": False, "error": f"unknown board '{board}'"}, event)
+            board_dir = VAULT_BOARDS[board]
+
+            cards_path = f"{board_dir}/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-delete cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            try:
+                cards = json.loads(current_raw.decode("utf-8")) if current_raw.strip() else []
+            except Exception as exc:
+                logger.error(f"vault-delete: cards.json unparseable, aborting: {exc}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                }, event)
+            if not isinstance(cards, list):
+                logger.error("vault-delete: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            target = next((c for c in cards if isinstance(c, dict) and c.get("id") == card_id), None)
+            if target is None:
+                return _cors_response(404, {"success": False, "error": "card not found"}, event)
+
+            remaining = [c for c in cards if not (isinstance(c, dict) and c.get("id") == card_id)]
+            _recompute_copies(remaining)
+
+            image_rel = str(target.get("image") or "").strip()
+            if image_rel:
+                image_path = f"{board_dir}/{image_rel}"
+                try:
+                    img_sha = _github_get_sha(image_path)
+                    _github_delete_file(
+                        image_path, img_sha,
+                        message=f"The Vault: remove card {card_id} image ({target.get('name') or 'unknown'})",
+                    )
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"vault-delete image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
+                except Exception as exc:
+                    logger.error(f"vault-delete image DELETE error: {exc}")
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(remaining, indent=2).encode("utf-8"),
+                    message=f"The Vault: remove card {card_id} ({target.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-delete cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not update cards.json (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"vault-delete: removed card id={card_id} name={target.get('name')} board={board}")
+            return _cors_response(200, {"success": True, "id": card_id}, event)
+
+        except Exception as exc:
+            logger.error(f"vault-delete error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/vault-delete"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/vault-move — move one or more cards between Vault boards
+    # (marvel -> football/baseball/basketball, or back). Same shape as
+    # sewer-move. Body: {"ids": [1,2,3], "from": "marvel", "to": "football"}.
+    # Recomputes "copies" on both the source and destination board after the
+    # move. Never raises — always {success, moved, errors} via _cors_response.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/vault-move"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("vault-move: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            raw_ids = body.get("ids")
+            if not isinstance(raw_ids, list) or not raw_ids:
+                return _cors_response(400, {"success": False, "error": "ids (non-empty array) required"}, event)
+            try:
+                ids = [int(i) for i in raw_ids]
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "ids must all be integers"}, event)
+
+            src_board = str(body.get("from") or "").strip()
+            dst_board = str(body.get("to") or "").strip()
+            if src_board not in VAULT_BOARDS:
+                return _cors_response(400, {"success": False, "error": f"unknown 'from' board '{src_board}'"}, event)
+            if dst_board not in VAULT_BOARDS:
+                return _cors_response(400, {"success": False, "error": f"unknown 'to' board '{dst_board}'"}, event)
+            if src_board == dst_board:
+                return _cors_response(400, {"success": False, "error": "'from' and 'to' must differ"}, event)
+
+            src_dir, dst_dir = VAULT_BOARDS[src_board], VAULT_BOARDS[dst_board]
+            src_path, dst_path = f"{src_dir}/cards.json", f"{dst_dir}/cards.json"
+
+            try:
+                src_raw, src_sha = _github_get_json_file(src_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-move src cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Could not read source cards.json (HTTP {exc.code})"}, event)
+            try:
+                dst_raw, dst_sha = _github_get_json_file(dst_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-move dst cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Could not read destination cards.json (HTTP {exc.code})"}, event)
+
+            try:
+                src_cards = json.loads(src_raw.decode("utf-8")) if src_raw.strip() else []
+                dst_cards = json.loads(dst_raw.decode("utf-8")) if dst_raw.strip() else []
+            except Exception as exc:
+                logger.error(f"vault-move: cards.json unparseable, aborting: {exc}")
+                return _cors_response(502, {"success": False, "error": "cards.json on GitHub is not valid JSON — aborting to avoid data loss"}, event)
+            if not isinstance(src_cards, list) or not isinstance(dst_cards, list):
+                logger.error("vault-move: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {"success": False, "error": "cards.json on GitHub is not a JSON array — aborting to avoid data loss"}, event)
+
+            dst_existing_ids = [c.get("id") for c in dst_cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
+            next_id = int(max(dst_existing_ids)) + 1 if dst_existing_ids else 1
+
+            moved, errors, images_to_delete = [], [], []
+            for card_id in ids:
+                target = next((c for c in src_cards if isinstance(c, dict) and c.get("id") == card_id), None)
+                if target is None:
+                    errors.append({"id": card_id, "error": "not found on source board"})
+                    continue
+
+                image_rel = str(target.get("image") or "").strip()
+                new_image_rel = image_rel
+                if image_rel:
+                    src_image_path = f"{src_dir}/{image_rel}"
+                    try:
+                        img_bytes, _img_sha = _github_get_json_file(src_image_path)
+                    except urllib.error.HTTPError as exc:
+                        errors.append({"id": card_id, "error": f"could not read source image (HTTP {exc.code})"})
+                        continue
+                    new_image_rel = f"images/card{next_id}.jpg"
+                    dst_image_path = f"{dst_dir}/{new_image_rel}"
+                    try:
+                        _github_put_file(dst_image_path, img_bytes, message=f"The Vault: move card {card_id} image {src_board} -> {dst_board}")
+                    except urllib.error.HTTPError as exc:
+                        errors.append({"id": card_id, "error": f"could not write destination image (HTTP {exc.code})"})
+                        continue
+                    images_to_delete.append(src_image_path)
+
+                new_record = dict(target)
+                new_record["id"] = next_id
+                new_record["image"] = new_image_rel
+                dst_cards.append(new_record)
+                moved.append({"oldId": card_id, "newId": next_id})
+                next_id += 1
+
+            if not moved:
+                return _cors_response(200, {"success": True, "moved": [], "errors": errors}, event)
+
+            moved_ids = {m["oldId"] for m in moved}
+            remaining_src = [c for c in src_cards if not (isinstance(c, dict) and c.get("id") in moved_ids)]
+            _recompute_copies(dst_cards)
+            _recompute_copies(remaining_src)
+
+            try:
+                _github_put_file(
+                    dst_path, json.dumps(dst_cards, indent=2).encode("utf-8"),
+                    message=f"The Vault: move {len(moved)} card(s) {src_board} -> {dst_board}",
+                    sha=dst_sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-move dst cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Images copied but destination cards.json update failed (HTTP {exc.code})"}, event)
+
+            try:
+                _github_put_file(
+                    src_path, json.dumps(remaining_src, indent=2).encode("utf-8"),
+                    message=f"The Vault: remove {len(moved)} moved card(s) from {src_board}",
+                    sha=src_sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"vault-move src cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Cards copied to {dst_board} but could not remove them from {src_board} (HTTP {exc.code}) — they'll appear on both boards until this is retried",
+                    "moved":   moved,
+                }, event)
+
+            # Best-effort source image cleanup — never blocks a successful move.
+            for src_image_path in images_to_delete:
+                try:
+                    img_sha = _github_get_sha(src_image_path)
+                    _github_delete_file(src_image_path, img_sha, message=f"The Vault: delete moved image {src_board} -> {dst_board}")
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"vault-move source image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
+                except Exception as exc:
+                    logger.error(f"vault-move source image DELETE error: {exc}")
+
+            logger.info(f"vault-move: moved {len(moved)} card(s) {src_board} -> {dst_board}")
+            return _cors_response(200, {"success": True, "moved": moved, "errors": errors}, event)
+
+        except Exception as exc:
+            logger.error(f"vault-move error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/vault-move"):
+        return _cors_preflight(event)
+
     if method == "POST" and path.endswith("/ebay/ai-chat"):
         try:
             api_key = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -2594,6 +2971,19 @@ def _github_delete_file(path: str, sha: str, message: str):
     )
     resp = urllib.request.urlopen(req, timeout=20)
     return json.loads(resp.read().decode())
+
+
+def _recompute_copies(cards: list) -> list:
+    """Set each card's "copies" field to how many cards on this same board
+    share its name (case-sensitive exact match). Used by The Vault's
+    doubles/triples badge — recomputed after every save/delete/move so it
+    never goes stale relative to what's actually on the board.
+    """
+    counts = Counter(c.get("name") for c in cards if isinstance(c, dict))
+    for c in cards:
+        if isinstance(c, dict):
+            c["copies"] = counts.get(c.get("name"), 1)
+    return cards
 
 
 # ---------------------------------------------------------------------------

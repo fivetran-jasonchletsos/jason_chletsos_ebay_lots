@@ -410,6 +410,9 @@ locals {
     "eagles-save",
     "eagles-delete",
     "sewer-move",
+    "vault-save",
+    "vault-delete",
+    "vault-move",
   ]
 }
 
