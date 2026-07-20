@@ -3,38 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#140a2e">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Lola's Lot Scanner — AI Card Appraiser</title>
 <meta name="description" content="Snap a photo of any card and get its estimated value plus a ready-to-post eBay title and description. Straight into Lola's Lot.">
 <style>
   :root {
-    --bg:      #140a2e;
-    --panel:   #1f1240;
-    --panel2:  #2a1a52;
-    --panel3:  #33205f;
-    --border:  #3d2870;
-    --border-strong: #4f3492;
-    --red:     #a80f0f;
-    --red-br:  #e5201f;
-    --gold:    #d4a017;
-    --gold-br: #ffd700;
-    --lav:     #d9cdf0;
-    --text:    #f5f0ff;
-    --sub:     #b3a3d9;
-    --sub-dim: #7f6fa8;
+    --bg:      #0a0a0a;
+    --panel:   #141414;
+    --panel2:  #1c1c1c;
+    --panel3:  #242424;
+    --border:  #2c2c2c;
+    --border-strong: #3a3a3a;
+    --red:     #8f0d0d;
+    --red-br:  #ff1f3a;
+    --steel:   #d8d8dc;
+    --steel-br: #ffffff;
+    --text:    #f0f0f0;
+    --sub:     #8f8f95;
+    --sub-dim: #5c5c62;
     --success: #3fbf6f;
     --warn:    #e0b54a;
-    --danger:  #e5201f;
+    --danger:  #ff1f3a;
     --r-sm:8px; --r-md:12px; --r-lg:16px;
     --container:min(94vw,680px);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background:
-      radial-gradient(circle at 12% 0%, rgba(255,215,0,0.14), transparent 40%),
-      radial-gradient(circle at 88% 10%, rgba(168,15,15,0.12), transparent 38%),
+      radial-gradient(circle at 12% 0%, rgba(255,31,58,0.14), transparent 40%),
+      radial-gradient(circle at 88% 10%, rgba(216,216,220,0.06), transparent 38%),
       var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -45,14 +44,13 @@
   .top { padding: 28px 0 8px; text-align: center; }
   h1.brand {
     font-size: clamp(28px,8vw,40px); font-weight: 900; font-style: italic;
-    letter-spacing: -0.5px; margin: 0;
-    background: linear-gradient(180deg, var(--gold-br) 0%, #fff 45%, var(--gold) 100%);
+    letter-spacing: -0.5px; text-transform: uppercase; margin: 0;
+    background: linear-gradient(180deg, var(--steel-br) 0%, var(--steel) 45%, #9a9a9e 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  h1.brand .lot { color: var(--red-br); -webkit-text-fill-color: var(--red-br); }
-  .tag { color: var(--lav); font-size: 11px; letter-spacing: .28em; text-transform: uppercase; margin-top: 10px; font-weight: 700; }
+  h1.brand .lot { color: var(--red-br); -webkit-text-fill-color: var(--red-br); text-shadow: 0 0 14px rgba(255,31,58,0.5); }
+  .tag { color: var(--sub); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; margin-top: 10px; font-weight: 800; }
   .lede { color: var(--sub); font-size: 14px; margin: 14px auto 0; max-width: 30em; }
-  .lyric { color: var(--sub); font-size: 13px; font-style: italic; margin: 12px auto 0; max-width: 30em; }
 
   .navlinks { display: flex; justify-content: center; gap: 6px; margin-top: 16px; flex-wrap: wrap; }
   .navlinks a {
@@ -75,8 +73,8 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
     color: var(--sub); transition: border-color .2s, background .2s; text-align: center; padding: 10px;
   }
-  .shot:active { border-color: var(--gold-br); background: #3a2760; }
-  .shot.filled { border-style: solid; border-color: var(--gold-br); }
+  .shot:active { border-color: var(--red-br); background: #2a1414; }
+  .shot.filled { border-style: solid; border-color: var(--red-br); }
   .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .shot .badge {
     position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.7);
@@ -87,7 +85,7 @@
   .shot .ph-t { font-size: 13px; font-weight: 700; color: var(--text); }
   .shot .ph-s { font-size: 11px; color: var(--sub-dim); }
   .shot input { display: none; }
-  .req { color: var(--gold-br); }
+  .req { color: var(--red-br); }
 
   .btn {
     display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
@@ -95,16 +93,16 @@
     font-family: inherit; font-size: 16px; font-weight: 800; letter-spacing: .01em;
     transition: transform .2s, opacity .2s;
   }
-  .btn-gold { background: linear-gradient(150deg, var(--gold-br), var(--gold)); color: #1a1300; box-shadow: 0 8px 24px rgba(255,215,0,.28); }
-  .btn-gold:active { transform: translateY(1px); }
+  .btn-red { background: linear-gradient(150deg, var(--red-br), var(--red)); color: #fff; box-shadow: 0 8px 24px rgba(255,31,58,.3); }
+  .btn-red:active { transform: translateY(1px); }
   .btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
   .btn-ghost { background: var(--panel3); color: var(--text); border: 1px solid var(--border); font-weight: 700; font-size: 14px; padding: 12px; }
 
   .toast {
     position: fixed; top: 14px; right: 14px; z-index: 30; max-width: 230px;
-    background: var(--panel3); border: 1px solid var(--gold); color: var(--gold-br);
+    background: var(--panel3); border: 1px solid var(--steel); color: var(--steel-br);
     font-size: 12.5px; line-height: 1.45; padding: 11px 15px; border-radius: 10px;
-    box-shadow: 0 10px 28px rgba(0,0,0,.5); opacity: 0; transform: translateY(-6px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.6); opacity: 0; transform: translateY(-6px);
     pointer-events: none; transition: opacity .22s ease, transform .22s ease;
   }
   .toast.on { opacity: 1; transform: none; }
@@ -112,7 +110,7 @@
   .loading { display: none; text-align: center; padding: 34px 10px; }
   .loading.on { display: block; }
   .spin { width: 42px; height: 42px; margin: 0 auto 16px; border-radius: 50%;
-    border: 3px solid var(--border-strong); border-top-color: var(--gold-br); animation: sp 800ms linear infinite; }
+    border: 3px solid var(--border-strong); border-top-color: var(--red-br); animation: sp 800ms linear infinite; }
   @keyframes sp { to { transform: rotate(360deg); } }
   .loading p { color: var(--sub); font-size: 14px; margin: 0; }
 
@@ -124,44 +122,44 @@
   .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
   .chip {
     font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
-    padding: 4px 10px; border-radius: 20px; background: rgba(255,215,0,.14); color: var(--gold-br); border: 1px solid rgba(255,215,0,.35);
+    padding: 4px 10px; border-radius: 20px; background: rgba(216,216,220,.12); color: var(--steel); border: 1px solid rgba(216,216,220,.3);
   }
-  .chip.blue { background: rgba(229,32,31,.14); color: #ff8b8b; border-color: rgba(229,32,31,.35); }
+  .chip.blue { background: rgba(255,31,58,.14); color: #ff8b8b; border-color: rgba(255,31,58,.35); }
 
   .value { text-align: center; padding: 22px 14px; background: var(--panel3); border-radius: var(--r-md); margin: 16px 0; }
   .value .lab { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--sub-dim); font-weight: 700; }
-  .value .amt { font-weight: 900; font-size: clamp(30px,10vw,42px); line-height: 1; margin: 8px 0 6px; color: var(--gold-br); }
+  .value .amt { font-weight: 900; font-size: clamp(30px,10vw,42px); line-height: 1; margin: 8px 0 6px; color: var(--steel-br); }
   .value .typ { color: var(--sub); font-size: 14px; }
   .value .basis { color: var(--sub-dim); font-size: 12.5px; margin-top: 10px; font-style: italic; }
   .conf { display: inline-block; margin-top: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 4px 11px; border-radius: 20px; }
   .conf.high { background: rgba(63,191,111,.16); color: var(--success); }
   .conf.medium { background: rgba(224,181,74,.16); color: var(--warn); }
-  .conf.low { background: rgba(229,32,31,.16); color: var(--danger); }
+  .conf.low { background: rgba(255,31,58,.16); color: var(--danger); }
 
   .comp { background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; margin-bottom: 16px; font-size: 13px; }
   .comp .ct { color: var(--sub-dim); text-transform: uppercase; letter-spacing: .14em; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
   .comp .row { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
-  .comp .row b { color: var(--gold-br); }
-  .comp a { color: var(--gold-br); font-size: 12px; }
+  .comp .row b { color: var(--steel-br); }
+  .comp a { color: var(--steel-br); font-size: 12px; }
 
   .field { margin-top: 16px; }
   .field .fh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
   .field .fl { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--sub-dim); font-weight: 800; }
   .copy {
-    background: var(--panel3); border: 1px solid var(--border-strong); color: var(--gold-br);
+    background: var(--panel3); border: 1px solid var(--border-strong); color: var(--steel-br);
     font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-family: inherit; transition: all .2s;
   }
   .copy.done { background: var(--success); color: #06231a; border-color: var(--success); }
-  .box { background: #0e0820; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; font-size: 14px; line-height: 1.5; }
+  .box { background: #0a0a0a; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; font-size: 14px; line-height: 1.5; }
   .box.mono { font-family: ui-monospace, 'SF Mono', monospace; font-size: 13px; word-break: break-word; }
   .cc { font-size: 11px; color: var(--sub-dim); margin-top: 5px; text-align: right; }
   .cc.over { color: var(--danger); }
 
   .note { color: var(--sub-dim); font-size: 12px; text-align: center; margin-top: 18px; line-height: 1.55; }
   .lot-link { display: none; text-align: center; margin-top: 14px; }
-  .lot-link a { color: var(--gold-br); font-size: 12.5px; font-weight: 700; text-decoration: none; }
+  .lot-link a { color: var(--steel-br); font-size: 12.5px; font-weight: 700; text-decoration: none; }
 
-  .err { display: none; background: rgba(229,32,31,.12); border: 1px solid rgba(229,32,31,.35);
+  .err { display: none; background: rgba(255,31,58,.12); border: 1px solid rgba(255,31,58,.35);
     color: #ffb3b3; border-radius: var(--r-md); padding: 14px 16px; margin-top: 16px; font-size: 14px; }
   .err.on { display: block; }
 
@@ -180,7 +178,6 @@
     <h1 class="brand">Lola's <span class="lot">Lot</span></h1>
     <div class="tag">AI Card Appraiser</div>
     <p class="lede">Snap a photo of any card. Get its estimated value plus a ready-to-post eBay title &amp; description &mdash; straight into Lola's Lot.</p>
-    <p class="lyric">&ldquo;She walks like a woman but doesn't talk like a man.&rdquo;</p>
     <div class="navlinks">
       <a href="index.html">Lola's Lot</a>
     </div>
@@ -204,8 +201,8 @@
         <input type="file" accept="image/*" capture="environment" id="in-back">
       </label>
     </div>
-    <button class="btn btn-gold" id="go" disabled>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="#1a1300" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" fill="#1a1300"/></svg>
+    <button class="btn btn-red" id="go" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" fill="#fff"/></svg>
       <span>Appraise card</span>
     </button>
   </section>

@@ -6,17 +6,17 @@
 <title>Lola's Lot</title>
 <style>
   :root {
-    --bg:      #140a2e;
-    --panel:   #1f1240;
-    --panel2:  #2a1a52;
-    --border:  #3d2870;
-    --red:     #a80f0f;
-    --red-br:  #e5201f;
-    --gold:    #d4a017;
-    --gold-br: #ffd700;
-    --lav:     #d9cdf0;
-    --text:    #f5f0ff;
-    --sub:     #b3a3d9;
+    --bg:      #0a0a0a;
+    --panel:   #141414;
+    --panel2:  #1c1c1c;
+    --panel3:  #242424;
+    --border:  #2c2c2c;
+    --red:     #8f0d0d;
+    --red-br:  #ff1f3a;
+    --steel:   #d8d8dc;
+    --steel-br: #ffffff;
+    --text:    #f0f0f0;
+    --sub:     #8f8f95;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -25,19 +25,18 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
     background-image:
-      radial-gradient(circle at 12% 0%, rgba(255,215,0,0.10), transparent 40%),
-      radial-gradient(circle at 88% 8%, rgba(168,15,15,0.12), transparent 38%),
-      radial-gradient(circle at 50% 100%, rgba(90,50,180,0.14), transparent 45%);
+      radial-gradient(circle at 12% 0%, rgba(255,31,58,0.12), transparent 40%),
+      radial-gradient(circle at 88% 8%, rgba(216,216,220,0.05), transparent 35%);
   }
 
-  /* ── SPARKLE DIVIDER ── */
-  .sparkle-divider { height: 6px; position: relative; background: var(--bg); overflow: hidden; }
-  .sparkle-divider::before {
+  /* ── SLASH DIVIDER ── */
+  .slash-divider { height: 6px; position: relative; background: var(--bg); overflow: hidden; }
+  .slash-divider::before {
     content: ""; position: absolute; inset: 0;
     background: repeating-linear-gradient(
       100deg,
       transparent 0 40px,
-      var(--gold-br) 40px 43px,
+      var(--steel) 40px 43px,
       transparent 43px 58px,
       var(--red-br) 58px 61px,
       transparent 61px 90px
@@ -47,65 +46,63 @@
 
   /* ── HEADER ── */
   header {
-    background: linear-gradient(160deg, #100823 0%, #2b1152 55%, #1a0a30 100%);
+    background: linear-gradient(160deg, #050505 0%, #200606 55%, #0a0a0a 100%);
     padding: 16px 16px 12px;
     position: sticky; top: 0; z-index: 100;
     border-bottom: 1px solid #000;
   }
   .header-top { display: flex; align-items: center; gap: 14px; }
-  .sparkle-mark { flex-shrink: 0; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5)); }
+  .flash-mark { flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(255,31,58,0.45)); }
   .header-brand { flex-shrink: 0; }
   .logo {
-    font-size: 1.55rem; font-weight: 900; letter-spacing: -0.5px;
-    font-style: italic;
-    background: linear-gradient(180deg, var(--gold-br) 0%, #fff 45%, var(--gold) 100%);
+    font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px;
+    font-style: italic; text-transform: uppercase;
+    background: linear-gradient(180deg, var(--steel-br) 0%, var(--steel) 45%, #9a9a9e 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
   }
-  .logo .lot { color: var(--red-br); -webkit-text-fill-color: var(--red-br); }
-  .tagline { font-size: 0.66rem; color: var(--lav); letter-spacing: 1.6px; text-transform: uppercase; margin-top: 2px; font-weight: 700; }
+  .logo .lot { color: var(--red-br); -webkit-text-fill-color: var(--red-br); text-shadow: 0 0 12px rgba(255,31,58,0.5); }
+  .tagline { font-size: 0.64rem; color: var(--sub); letter-spacing: 2.2px; text-transform: uppercase; margin-top: 2px; font-weight: 800; }
   .not-for-sale {
     margin-left: auto; flex-shrink: 0;
     font-size: 0.62rem; background: var(--red); color: #fff;
-    padding: 3px 9px; border-radius: 3px; font-weight: 800; letter-spacing: 0.6px;
+    padding: 3px 9px; font-weight: 800; letter-spacing: 0.6px;
     border: 1px solid var(--red-br);
     clip-path: polygon(6% 0, 100% 0, 94% 100%, 0% 100%);
   }
-  .lyric {
-    font-size: 0.78rem; color: var(--sub); font-style: italic; margin-top: 10px;
-    padding: 8px 12px; background: rgba(255,215,0,0.06); border-left: 2px solid var(--gold);
-    border-radius: 0 6px 6px 0;
-  }
-  .hero-strip { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; }
+  .hero-strip { display: flex; gap: 6px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; }
   .hero-strip::-webkit-scrollbar { display: none; }
   .hero-chip {
-    flex-shrink: 0; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.4px;
-    padding: 4px 10px; border-radius: 3px; text-transform: uppercase;
+    flex-shrink: 0; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.6px;
+    padding: 4px 11px; text-transform: uppercase;
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 0% 100%);
   }
-  .hero-chip.dust    { background: rgba(255,215,0,0.14); color: var(--gold-br); border: 1px solid rgba(255,215,0,0.4); }
-  .hero-chip.vibr    { background: rgba(216,216,220,0.10); color: var(--lav); border: 1px solid rgba(216,216,220,0.3); }
-  .hero-chip.tale    { background: rgba(229,32,31,0.14); color: #ff6b6b; border: 1px solid rgba(229,32,31,0.4); }
+  .hero-chip.ink    { background: rgba(216,216,220,0.10); color: var(--steel); border: 1px solid rgba(216,216,220,0.3); }
+  .hero-chip.chrome { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+  .hero-chip.vibr   { background: rgba(255,31,58,0.12); color: #ff6b7d; border: 1px solid rgba(255,31,58,0.4); }
   .scan-link {
     display: inline-block; margin-top: 12px; font-size: 0.72rem; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none;
-    background: var(--gold); color: #1a1300; padding: 7px 14px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.6px; text-decoration: none;
+    background: linear-gradient(135deg, var(--red-br), var(--red)); color: #fff;
+    padding: 8px 16px; clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%);
+    box-shadow: 0 4px 16px rgba(255,31,58,0.25);
   }
 
   /* ── STATS BAR ── */
   .stats-bar { background: var(--panel); padding: 11px 16px; display: flex; gap: 22px; border-bottom: 1px solid var(--border); }
   .stat { text-align: center; }
-  .stat-val { font-size: 1.15rem; font-weight: 800; color: var(--gold-br); }
+  .stat-val { font-size: 1.15rem; font-weight: 800; color: var(--steel-br); }
   .stat-lbl { font-size: 0.63rem; color: var(--sub); text-transform: uppercase; letter-spacing: 0.8px; }
 
   /* ── FILTER BAR ── */
-  .filter-bar { background: #170c30; padding: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 118px; z-index: 99; }
+  .filter-bar { background: #0d0d0d; padding: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 124px; z-index: 99; }
   .search-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
   .search-input {
     flex: 1 1 180px; background: var(--panel2); border: 1px solid var(--border); color: var(--text);
     border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; outline: none;
   }
   .search-input::placeholder { color: var(--sub); }
-  .search-input:focus { border-color: var(--gold-br); }
+  .search-input:focus { border-color: var(--red-br); }
   select.filter-select {
     background: var(--panel2); border: 1px solid var(--border); color: var(--text);
     border-radius: 6px; padding: 8px 8px; font-size: 0.76rem; outline: none; cursor: pointer;
@@ -151,12 +148,12 @@
   @media (min-width: 1000px) { .card-grid.size-l { grid-template-columns: repeat(4, 1fr); } }
 
   .card-tile {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
     overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   }
   .card-tile:active { transform: scale(0.97); }
   @media (hover: hover) {
-    .card-tile:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(255,215,0,0.2); border-color: var(--gold-br); }
+    .card-tile:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(255,31,58,0.22); border-color: var(--red-br); }
   }
   .card-tile.hidden { display: none; }
 
@@ -164,13 +161,13 @@
   .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .badges { position: absolute; top: 5px; left: 5px; display: flex; flex-direction: column; gap: 3px; }
   .badge { font-size: 0.56rem; font-weight: 800; padding: 2px 5px; border-radius: 2px; letter-spacing: 0.3px; text-transform: uppercase; }
-  .badge.numbered { background: var(--gold); color: #1a1300; }
+  .badge.numbered { background: var(--steel); color: #111; }
   .badge.firstapp { background: var(--red); color: #fff; }
-  .badge.refractor { background: linear-gradient(90deg,#7b2fa0,#2f7ba0,#a0902f); color: #fff; }
-  .badge.insert { background: #1a3a1a; color: #7fff7f; }
+  .badge.refractor { background: linear-gradient(90deg,#3a3a3a,#6b6b6b,#3a3a3a); color: #fff; }
+  .badge.insert { background: #1a1a1a; color: var(--steel); border: 1px solid var(--border); }
   .val-badge {
     position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.82);
-    border: 1px solid var(--gold); color: var(--gold-br); font-size: 0.65rem; font-weight: 800;
+    border: 1px solid var(--steel); color: var(--steel-br); font-size: 0.65rem; font-weight: 800;
     padding: 2px 6px; border-radius: 3px;
   }
   .card-grid.size-s .val-badge { display: none; }
@@ -182,18 +179,18 @@
   .delete-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
   .delete-btn {
     width: 100%; padding: 11px; border-radius: 8px; border: 1px solid var(--red-br);
-    background: rgba(168,15,15,0.14); color: #ff8b8b; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    background: rgba(143,13,13,0.16); color: #ff8b8b; font-weight: 700; font-size: 0.82rem; cursor: pointer;
   }
   .delete-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
   .delete-status { font-size: 0.72rem; margin-top: 8px; text-align: center; }
   .delete-status.err { color: #ff8b8b; }
 
   /* ── MODAL ── */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 999; align-items: flex-end; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; align-items: flex-end; }
   .modal-overlay.open { display: flex; }
   @media (min-width: 600px) { .modal-overlay { align-items: center; justify-content: center; } }
   .modal {
-    background: var(--panel); border-top: 3px solid var(--gold-br); border-radius: 14px 14px 0 0;
+    background: var(--panel); border-top: 3px solid var(--red-br); border-radius: 14px 14px 0 0;
     width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.22s ease;
   }
   @media (min-width: 600px) { .modal { border-radius: 14px; } }
@@ -212,41 +209,39 @@
   .modal-row:last-child { border-bottom: none; }
   .modal-label { color: var(--sub); }
   .modal-value { font-weight: 700; color: var(--text); text-align: right; }
-  .modal-value.highlight { color: var(--gold-br); }
+  .modal-value.highlight { color: var(--steel-br); }
   .price-note { font-size: 0.66rem; color: var(--sub); margin-top: 10px; line-height: 1.4; font-style: italic; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--sub); }
   .empty-state.hidden { display: none; }
-  .empty-state a { color: var(--gold-br); }
+  .empty-state a { color: var(--red-br); }
 
   footer { text-align: center; padding: 22px 16px 34px; font-size: 0.68rem; color: var(--sub); }
-  footer .mark { color: var(--gold-br); font-weight: 700; }
+  footer .mark { color: var(--red-br); font-weight: 700; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-top">
-    <svg class="sparkle-mark" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 1.5l1.8 6.2a3 3 0 002 2L22 11.5l-6.2 1.8a3 3 0 00-2 2L12 21.5l-1.8-6.2a3 3 0 00-2-2L2 11.5l6.2-1.8a3 3 0 002-2z" fill="#ffd700" stroke="#f4c430" stroke-width="0.6"/>
-      <circle cx="19.5" cy="4.5" r="1.4" fill="#ff6b6b"/>
-      <circle cx="4" cy="19" r="1" fill="#ff6b6b"/>
+    <svg class="flash-mark" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 1.5l2.6 6.9 7.4.5-5.7 4.8 2 7.2-6.3-4-6.3 4 2-7.2-5.7-4.8 7.4-.5z" fill="#0a0a0a" stroke="#d8d8dc" stroke-width="1.4"/>
+      <circle cx="12" cy="11.5" r="1.6" fill="#ff1f3a"/>
     </svg>
     <div class="header-brand">
       <div class="logo">Lola's <span class="lot">Lot</span></div>
-      <div class="tagline">Disney &middot; Marvel &middot; Happily Ever After</div>
+      <div class="tagline">Personal Marvel Collection</div>
     </div>
     <div class="not-for-sale">Not For Sale</div>
   </div>
-  <div class="lyric">&ldquo;She walks like a woman but doesn't talk like a man.&rdquo;</div>
   <div class="hero-strip">
-    <div class="hero-chip dust">Pixie Dust</div>
+    <div class="hero-chip ink">Ink</div>
+    <div class="hero-chip chrome">Chrome</div>
     <div class="hero-chip vibr">Vibranium</div>
-    <div class="hero-chip tale">Fairy Tale</div>
   </div>
   <a class="scan-link" href="scanner.html">+ Scan a Card</a>
 </header>
-<div class="sparkle-divider"></div>
+<div class="slash-divider"></div>
 
 <div class="stats-bar" id="statsBar">
   <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Cards</div></div>
