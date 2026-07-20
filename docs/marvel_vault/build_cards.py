@@ -9,6 +9,7 @@ estValue is intentionally 0 across this catalog (2026-07 full reload) -- no
 comps were pulled, so nothing here is a guess. Fill in real numbers once priced.
 """
 import json
+from collections import Counter
 
 # (scan, row, col, name, brand, series, cardType, firstApp, serial, alignment, team, estValue)
 CARDS = [
@@ -207,13 +208,32 @@ CARDS = [
     ("scan35", 1, 1, "Spider-Man Noir", "Topps Chrome", "Base", "Base", False, None, "Hero", "Spider-Verse", 0),
     ("scan35", 1, 2, "Elbecca Voss", "Topps Chrome", "Purple Lava Parallel", "Parallel", True, "55/75", "Villain", "Unaffiliated", 0),
     ("scan35", 2, 0, "A Point in Time", "Upper Deck", "Marvel Beginnings", "Insert", False, None, "Anti-Hero", "Avengers Adjacent", 0),
-    ("scan35", 2, 1, "Patch", "Topps Chrome", "Purple Mosaic Parallel", "Parallel", False, "?/250", "Anti-Hero", "X-Men", 0),
+    ("scan35", 2, 1, "Patch", "Topps Chrome", "Purple Mosaic Parallel", "Parallel", False, "160/250", "Anti-Hero", "X-Men", 0),
 
     # ── scan36 : PSA-graded 2023 Marvel Platinum slabs (3 cards) ─────────────
     ("scan36", 0, 0, "Elektra", "Upper Deck", "2023 Marvel Platinum #103 - Rainbow Parallel", "Parallel", False, "PSA 10 GEM MT - Cert #148946789", "Anti-Hero", "Unaffiliated", 0),
     ("scan36", 0, 1, "Wolverine", "Upper Deck", "2023 Marvel Platinum #182 - Yellow Rainbow Parallel", "Parallel", False, "PSA 10 GEM MT - Cert #146117312", "Anti-Hero", "X-Men", 0),
     ("scan36", 1, 0, "Wolverine", "Upper Deck", "2023 Marvel Platinum #182 - Rainbow Color Wheel Parallel", "Parallel", False, "PSA 10 GEM MT - Cert #103306390", "Anti-Hero", "X-Men", 0),
+
+    # ── scan37 : Magneto / Leader / Gamora page ───────────────────────────────
+    ("scan37", 0, 0, "Magneto", "Topps Chrome", "Base", "Base", False, None, "Anti-Hero", "Brotherhood of Mutants", 0),
+    ("scan37", 0, 1, "Mysterio", "Topps Chrome", "Base", "Base", False, None, "Villain", "Spider-Man Villains", 0),
+    ("scan37", 0, 2, "Mister Fantastic", "Topps Chrome", "Base", "Base", False, None, "Hero", "Fantastic Four", 0),
+    ("scan37", 1, 0, "Agatha Harkness", "Topps Chrome", "Base", "Base", False, None, "Villain", "Scarlet Witch Adjacent", 0),
+    ("scan37", 1, 1, "Leader", "Topps Chrome", "Base", "Base", False, None, "Villain", "Hulk Villains", 0),
+    ("scan37", 1, 2, "Thena", "Topps Chrome", "Base", "Base", False, None, "Hero", "Eternals", 0),
+    ("scan37", 2, 0, "Iron Man", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 0),
+    ("scan37", 2, 1, "Hope Summers", "Topps Chrome", "Base", "Base", False, None, "Hero", "X-Men", 0),
+    ("scan37", 2, 2, "Gamora", "Topps Chrome", "Base", "Base", False, None, "Hero", "Guardians of the Galaxy", 0),
+
+    # ── scan38 : Doctor Doom / Mephisto / Quicksilver / Professor X (4 cards) ─
+    ("scan38", 0, 0, "Doctor Doom", "Topps Chrome", "One World Under Doom", "Insert", False, None, "Villain", "Fantastic Four Villains", 0),
+    ("scan38", 0, 1, "Mephisto", "Topps Chrome", "Base", "Base", False, None, "Villain", "Cosmic / Mystic", 0),
+    ("scan38", 1, 0, "Quicksilver", "Topps Chrome", "Base", "Base", False, None, "Hero", "Avengers", 0),
+    ("scan38", 1, 1, "Professor X", "Topps Chrome", "Base", "Base", False, None, "Hero", "X-Men", 0),
 ]
+
+name_counts = Counter(name for (_, _, _, name, *_rest) in CARDS)
 
 out = []
 for i, (scan, row, col, name, brand, series, cardType, firstApp, serial, alignment, team, value) in enumerate(CARDS, start=1):
@@ -229,6 +249,7 @@ for i, (scan, row, col, name, brand, series, cardType, firstApp, serial, alignme
         "alignment": alignment,
         "team": team,
         "estValue": value,
+        "copies": name_counts[name],
     })
 
 with open("cards.json", "w") as f:

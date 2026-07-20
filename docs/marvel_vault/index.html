@@ -163,6 +163,11 @@
     padding: 2px 6px; border-radius: 3px;
   }
   .card-grid.size-s .val-badge { display: none; }
+  .copy-badge {
+    position: absolute; top: 5px; right: 5px; background: rgba(168,15,15,0.92);
+    border: 1px solid var(--red-br); color: #fff; font-size: 0.66rem; font-weight: 800;
+    padding: 2px 6px; border-radius: 3px; letter-spacing: 0.3px;
+  }
 
   .card-info { padding: 7px 8px 9px; }
   .card-name { font-size: 0.82rem; font-weight: 800; color: var(--text); line-height: 1.2; }
@@ -262,6 +267,7 @@
     <div class="chip" data-filter="hero" onclick="setChip(this)">Hero</div>
     <div class="chip" data-filter="villain" onclick="setChip(this)">Villain</div>
     <div class="chip" data-filter="anti-hero" onclick="setChip(this)">Anti-Hero</div>
+    <div class="chip" data-filter="dupes" onclick="setChip(this)">Doubles/Triples</div>
   </div>
 </div>
 
@@ -320,6 +326,7 @@ function renderGrid(cards) {
       <div class="thumb-wrap">
         <img src="${c.image}" alt="${c.name}" loading="lazy">
         <div class="badges">${badgeHTML(c)}</div>
+        ${c.copies > 1 ? `<div class="copy-badge">×${c.copies}</div>` : ''}
         <div class="val-badge">$${c.estValue}</div>
       </div>
       <div class="card-info">
@@ -360,6 +367,7 @@ function applyFilters() {
     if (activeFilter === 'hero' && c.alignment !== 'Hero') return false;
     if (activeFilter === 'villain' && c.alignment !== 'Villain') return false;
     if (activeFilter === 'anti-hero' && c.alignment !== 'Anti-Hero') return false;
+    if (activeFilter === 'dupes' && !(c.copies > 1)) return false;
     if (brand && c.brand !== brand) return false;
     if (series && c.series !== series) return false;
     if (type && c.cardType !== type) return false;
@@ -405,6 +413,7 @@ function openModal(c) {
     ['Team', c.team],
     ['1st Appearance', c.firstAppearance ? 'Yes' : 'No'],
     ['Serial', c.serial || 'Not numbered'],
+    ['Copies in Collection', c.copies > 1 ? `×${c.copies}` : '1 (no dupes)'],
     ['Est. eBay Value', '$' + c.estValue],
   ];
   document.getElementById('modalRows').innerHTML = rows.map(([l,v]) =>
