@@ -43,6 +43,15 @@ DEV_ID             = os.environ.get("EBAY_DEV_ID", "")
 RU_NAME            = os.environ.get("EBAY_RU_NAME", "")
 GITHUB_TOKEN       = os.environ.get("GITHUB_TOKEN", "")
 GITHUB_REPO        = "fivetran-jasonchletsos/jason_chletsos_ebay_lots"
+
+# "The Sewer" boards a card can live on — Amanda scans everything into "live"
+# first, then sorts football/baseball pulls onto their own pages via the
+# select + move UI. Keys are the "board" value the frontend sends.
+SEWER_BOARDS = {
+    "live":     "docs/the_sewer/live",
+    "football": "docs/the_sewer/football",
+    "baseball": "docs/the_sewer/baseball",
+}
 TOKEN_URL          = "https://api.ebay.com/identity/v1/oauth2/token"
 TRADING_API_URL    = "https://api.ebay.com/ws/api.dll"
 NS_URI             = "urn:ebay:apis:eBLBaseComponents"
@@ -1437,7 +1446,12 @@ def lambda_handler(event, context):
             except (TypeError, ValueError):
                 return _cors_response(400, {"success": False, "error": "id required"}, event)
 
-            cards_path = "docs/the_sewer/live/cards.json"
+            board = str(body.get("board") or "live").strip()
+            if board not in SEWER_BOARDS:
+                return _cors_response(400, {"success": False, "error": f"unknown board '{board}'"}, event)
+            board_dir = SEWER_BOARDS[board]
+
+            cards_path = f"{board_dir}/cards.json"
             try:
                 current_raw, sha = _github_get_json_file(cards_path)
             except urllib.error.HTTPError as exc:
@@ -1470,7 +1484,7 @@ def lambda_handler(event, context):
 
             image_rel = str(target.get("image") or "").strip()
             if image_rel:
-                image_path = f"docs/the_sewer/live/{image_rel}"
+                image_path = f"{board_dir}/{image_rel}"
                 try:
                     img_sha = _github_get_sha(image_path)
                     _github_delete_file(
@@ -1503,6 +1517,154 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/sewer-delete"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/sewer-move — move one or more cards from one Sewer board
+    # to another (e.g. Amanda scans everything into "live", then sorts
+    # football/baseball pulls onto their own pages). Body:
+    # {"ids": [1,2,3], "from": "live", "to": "football"}
+    # Copies each card's image to the destination board (re-IDing it to
+    # the destination's next available id), appends the re-mapped record
+    # to the destination cards.json, removes the moved records from the
+    # source cards.json, then best-effort deletes the now-orphaned source
+    # images. Never raises - always {success, moved, errors} via
+    # _cors_response.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/sewer-move"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("sewer-move: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            raw_ids = body.get("ids")
+            if not isinstance(raw_ids, list) or not raw_ids:
+                return _cors_response(400, {"success": False, "error": "ids (non-empty array) required"}, event)
+            try:
+                ids = [int(i) for i in raw_ids]
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "ids must all be integers"}, event)
+
+            src_board = str(body.get("from") or "").strip()
+            dst_board = str(body.get("to") or "").strip()
+            if src_board not in SEWER_BOARDS:
+                return _cors_response(400, {"success": False, "error": f"unknown 'from' board '{src_board}'"}, event)
+            if dst_board not in SEWER_BOARDS:
+                return _cors_response(400, {"success": False, "error": f"unknown 'to' board '{dst_board}'"}, event)
+            if src_board == dst_board:
+                return _cors_response(400, {"success": False, "error": "'from' and 'to' must differ"}, event)
+
+            src_dir, dst_dir = SEWER_BOARDS[src_board], SEWER_BOARDS[dst_board]
+            src_path, dst_path = f"{src_dir}/cards.json", f"{dst_dir}/cards.json"
+
+            try:
+                src_raw, src_sha = _github_get_json_file(src_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"sewer-move src cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Could not read source cards.json (HTTP {exc.code})"}, event)
+            try:
+                dst_raw, dst_sha = _github_get_json_file(dst_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"sewer-move dst cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Could not read destination cards.json (HTTP {exc.code})"}, event)
+
+            try:
+                src_cards = json.loads(src_raw.decode("utf-8")) if src_raw.strip() else []
+                dst_cards = json.loads(dst_raw.decode("utf-8")) if dst_raw.strip() else []
+            except Exception as exc:
+                logger.error(f"sewer-move: cards.json unparseable, aborting: {exc}")
+                return _cors_response(502, {"success": False, "error": "cards.json on GitHub is not valid JSON — aborting to avoid data loss"}, event)
+            if not isinstance(src_cards, list) or not isinstance(dst_cards, list):
+                logger.error("sewer-move: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {"success": False, "error": "cards.json on GitHub is not a JSON array — aborting to avoid data loss"}, event)
+
+            dst_existing_ids = [c.get("id") for c in dst_cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
+            next_id = int(max(dst_existing_ids)) + 1 if dst_existing_ids else 1
+
+            moved, errors, images_to_delete = [], [], []
+            for card_id in ids:
+                target = next((c for c in src_cards if isinstance(c, dict) and c.get("id") == card_id), None)
+                if target is None:
+                    errors.append({"id": card_id, "error": "not found on source board"})
+                    continue
+
+                image_rel = str(target.get("image") or "").strip()
+                new_image_rel = image_rel
+                if image_rel:
+                    src_image_path = f"{src_dir}/{image_rel}"
+                    try:
+                        img_bytes, _img_sha = _github_get_json_file(src_image_path)
+                    except urllib.error.HTTPError as exc:
+                        errors.append({"id": card_id, "error": f"could not read source image (HTTP {exc.code})"})
+                        continue
+                    new_image_rel = f"images/card{next_id}.jpg"
+                    dst_image_path = f"{dst_dir}/{new_image_rel}"
+                    try:
+                        _github_put_file(dst_image_path, img_bytes, message=f"The Sewer: move card {card_id} image {src_board} -> {dst_board}")
+                    except urllib.error.HTTPError as exc:
+                        errors.append({"id": card_id, "error": f"could not write destination image (HTTP {exc.code})"})
+                        continue
+                    images_to_delete.append(src_image_path)
+
+                new_record = dict(target)
+                new_record["id"] = next_id
+                new_record["image"] = new_image_rel
+                dst_cards.append(new_record)
+                moved.append({"oldId": card_id, "newId": next_id})
+                next_id += 1
+
+            if not moved:
+                return _cors_response(200, {"success": True, "moved": [], "errors": errors}, event)
+
+            moved_ids = {m["oldId"] for m in moved}
+            remaining_src = [c for c in src_cards if not (isinstance(c, dict) and c.get("id") in moved_ids)]
+
+            try:
+                _github_put_file(
+                    dst_path, json.dumps(dst_cards, indent=2).encode("utf-8"),
+                    message=f"The Sewer: move {len(moved)} card(s) {src_board} -> {dst_board}",
+                    sha=dst_sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"sewer-move dst cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Images copied but destination cards.json update failed (HTTP {exc.code})"}, event)
+
+            try:
+                _github_put_file(
+                    src_path, json.dumps(remaining_src, indent=2).encode("utf-8"),
+                    message=f"The Sewer: remove {len(moved)} moved card(s) from {src_board}",
+                    sha=src_sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"sewer-move src cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Cards copied to {dst_board} but could not remove them from {src_board} (HTTP {exc.code}) — they'll appear on both boards until this is retried",
+                    "moved":   moved,
+                }, event)
+
+            # Best-effort source image cleanup — never blocks a successful move.
+            for src_image_path in images_to_delete:
+                try:
+                    img_sha = _github_get_sha(src_image_path)
+                    _github_delete_file(src_image_path, img_sha, message=f"The Sewer: delete moved image {src_board} -> {dst_board}")
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"sewer-move source image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
+                except Exception as exc:
+                    logger.error(f"sewer-move source image DELETE error: {exc}")
+
+            logger.info(f"sewer-move: moved {len(moved)} card(s) {src_board} -> {dst_board}")
+            return _cors_response(200, {"success": True, "moved": moved, "errors": errors}, event)
+
+        except Exception as exc:
+            logger.error(f"sewer-move error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/sewer-move"):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------

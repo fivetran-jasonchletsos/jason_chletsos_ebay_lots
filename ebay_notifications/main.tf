@@ -409,6 +409,7 @@ locals {
     "sewer-delete",
     "eagles-save",
     "eagles-delete",
+    "sewer-move",
   ]
 }
 

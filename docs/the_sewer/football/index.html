@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Sewer — Fresh Pulls</title>
+<title>The Sewer — Football</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -230,37 +230,6 @@
   }
   .card-grid.size-s .val-badge { display: none; }
 
-  .select-check {
-    display: none; position: absolute; top: 6px; right: 6px; width: 24px; height: 24px;
-    border-radius: 50%; background: rgba(10,6,18,0.75); border: 2px solid var(--hairline);
-    align-items: center; justify-content: center; z-index: 3;
-  }
-  #cardGrid.select-mode .select-check { display: flex; }
-  #cardGrid.select-mode .val-badge { display: none; }
-  .select-check svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.12s ease; }
-  .card-tile.selected .select-check { background: var(--emerald); border-color: var(--emerald); }
-  .card-tile.selected .select-check svg { opacity: 1; }
-  #cardGrid.select-mode .card-tile.hover-disabled:hover { transform: none; box-shadow: none; }
-
-  .move-bar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
-    transform: translateY(100%); transition: transform 0.28s cubic-bezier(0.16,1,0.3,1);
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-    background: rgba(11,7,20,0.96); border-top: 1px solid var(--border); backdrop-filter: blur(10px);
-  }
-  .move-bar.open { transform: translateY(0); }
-  .move-bar-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .move-bar-inner > span { font-family: var(--font-mono); font-size: 0.78rem; color: var(--sub); flex-shrink: 0; }
-  .move-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .move-btn {
-    font-family: var(--font-body); font-weight: 700; font-size: 0.78rem;
-    background: var(--emerald); color: #06231a; border: none; border-radius: 999px;
-    padding: 10px 16px; cursor: pointer; transition: transform 0.15s ease;
-  }
-  .move-btn:active { transform: scale(0.96); }
-  .move-btn.ghost { background: transparent; color: var(--sub); border: 1px solid var(--border); }
-  .move-btn[disabled] { opacity: 0.5; cursor: wait; }
-
   .card-info { padding: 10px 11px 12px; }
   .card-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.2; }
   .card-set { font-family: var(--font-mono); font-size: 0.64rem; color: var(--sub); line-height: 1.3; margin-top: 3px; }
@@ -338,10 +307,10 @@
   <div class="header-top">
     <div>
       <div class="logo">The <em>Sewer</em></div>
-      <div class="tagline">Fresh Pulls &middot; Scanned Live</div>
+      <div class="tagline">Football Pulls</div>
     </div>
     <div class="nav-links">
-      <a class="nav-link" href="../scanner.html">Scan a card &rarr;</a>
+      <a class="nav-link" href="../live/index.html">Live Feed &rarr;</a>
       <a class="nav-link" href="../index.html">Full Collection &rarr;</a>
     </div>
   </div>
@@ -365,7 +334,6 @@
       <button class="size-btn" data-size="m" onclick="setSize('m')">M</button>
       <button class="size-btn" data-size="l" onclick="setSize('l')">L</button>
     </div>
-    <button class="filters-toggle" id="selectToggle" onclick="toggleSelectMode()">Select</button>
   </div>
 
   <div class="filters-panel" id="filtersPanel">
@@ -399,18 +367,7 @@
 <div class="grid-wrap">
   <div class="count-row" id="countRow"></div>
   <div class="card-grid" id="cardGrid"></div>
-  <div class="empty-state hidden" id="emptyState">Nothing scanned yet — go scan a card!</div>
-</div>
-
-<div class="move-bar" id="moveBar">
-  <div class="move-bar-inner">
-    <span id="moveCount">0 selected</span>
-    <div class="move-actions">
-      <button class="move-btn" onclick="moveSelected('football')">&rarr; Football</button>
-      <button class="move-btn" onclick="moveSelected('baseball')">&rarr; Baseball</button>
-      <button class="move-btn ghost" onclick="toggleSelectMode()">Cancel</button>
-    </div>
-  </div>
+  <div class="empty-state hidden" id="emptyState">Nothing here yet — move some football cards over from the Live Feed.</div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
@@ -433,14 +390,12 @@
   </div>
 </div>
 
-<footer>Every card here got scanned straight off her phone — <span class="mark">no curation, just pulls.</span></footer>
+<footer>Sorted out from the live feed — <span class="mark">the good stuff, organized.</span></footer>
 
 <script>
 const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
 let CARDS = [];
 let currentModalCard = null;
-let selectMode = false;
-let selectedIds = new Set();
 
 function badgeHTML(c) {
   let out = '';
@@ -465,7 +420,7 @@ function renderGrid(cards) {
   countRow.textContent = `${cards.length} card${cards.length !== 1 ? 's' : ''} shown`;
   cards.forEach((c, i) => {
     const tile = document.createElement('div');
-    tile.className = 'card-tile' + (selectedIds.has(c.id) ? ' selected' : '');
+    tile.className = 'card-tile';
     tile.style.animationDelay = `${Math.min(i * 22, 480)}ms`;
     const subParts = [c.brand, c.series].filter(Boolean);
     const sub = subParts.length ? subParts.join(' · ') : '—';
@@ -473,7 +428,6 @@ function renderGrid(cards) {
       <div class="thumb-wrap">
         <img src="${c.image}" alt="${c.name}" loading="lazy">
         <div class="badges">${badgeHTML(c)}</div>
-        <div class="select-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#06231a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="val-badge">$${c.estValue || 0}</div>
       </div>
       <div class="card-info">
@@ -483,71 +437,10 @@ function renderGrid(cards) {
     tile.tabIndex = 0;
     tile.setAttribute('role', 'button');
     tile.setAttribute('aria-label', `${c.name} card detail`);
-    tile.onclick = () => { if (selectMode) toggleSelect(c.id, tile); else openModal(c); };
-    tile.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (selectMode) toggleSelect(c.id, tile); else openModal(c); } };
+    tile.onclick = () => openModal(c);
+    tile.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(c); } };
     grid.appendChild(tile);
   });
-}
-
-function toggleSelectMode() {
-  selectMode = !selectMode;
-  const grid = document.getElementById('cardGrid');
-  const btn = document.getElementById('selectToggle');
-  grid.classList.toggle('select-mode', selectMode);
-  btn.textContent = selectMode ? 'Done' : 'Select';
-  if (!selectMode) {
-    selectedIds.clear();
-    updateMoveBar();
-    document.querySelectorAll('.card-tile.selected').forEach(t => t.classList.remove('selected'));
-  }
-}
-
-function toggleSelect(id, tile) {
-  if (selectedIds.has(id)) { selectedIds.delete(id); tile.classList.remove('selected'); }
-  else { selectedIds.add(id); tile.classList.add('selected'); }
-  updateMoveBar();
-}
-
-function updateMoveBar() {
-  const bar = document.getElementById('moveBar');
-  const count = selectedIds.size;
-  bar.classList.toggle('open', count > 0);
-  document.getElementById('moveCount').textContent = `${count} selected`;
-}
-
-async function moveSelected(destBoard) {
-  const ids = [...selectedIds];
-  if (!ids.length) return;
-  const label = destBoard === 'football' ? 'Football' : 'Baseball';
-  if (!confirm(`Move ${ids.length} card${ids.length !== 1 ? 's' : ''} to ${label}?`)) return;
-
-  const buttons = document.querySelectorAll('.move-btn');
-  buttons.forEach(b => b.disabled = true);
-
-  try {
-    const res = await fetch(LAMBDA + '/sewer-move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids, from: 'live', to: destBoard })
-    });
-    const out = await res.json();
-    if (out && out.success) {
-      const movedIds = new Set((out.moved || []).map(m => m.oldId));
-      CARDS = CARDS.filter(c => !movedIds.has(c.id));
-      selectedIds.clear();
-      toggleSelectMode();
-      updateStats();
-      applyFilters();
-      const failed = (out.errors || []).length;
-      if (failed) alert(`Moved ${movedIds.size} card(s) to ${label}. ${failed} couldn't be moved — try again for those.`);
-    } else {
-      alert((out && out.error) || 'Move failed — try again.');
-    }
-  } catch (e) {
-    alert('Network error — try again.');
-  } finally {
-    buttons.forEach(b => b.disabled = false);
-  }
 }
 
 let activeFilter = 'all';
@@ -690,7 +583,7 @@ async function deleteCurrentCard() {
     const res = await fetch(LAMBDA + '/sewer-delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: c.id, board: 'live' })
+      body: JSON.stringify({ id: c.id, board: 'football' })
     });
     const out = await res.json();
     if (out && out.success) {
@@ -722,7 +615,7 @@ function setSize(s) {
   grid.classList.remove('size-s', 'size-m', 'size-l');
   grid.classList.add('size-' + s);
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s));
-  try { localStorage.setItem('sewerLiveGridSize', s); } catch(e) {}
+  try { localStorage.setItem('sewerFootballGridSize', s); } catch(e) {}
 }
 
 async function init() {
@@ -734,7 +627,7 @@ async function init() {
   populateSelect('alignSelect', CARDS.map(c => c.alignment));
   populateSelect('teamSelect', CARDS.map(c => c.team));
   updateStats();
-  const initSize = (() => { try { return localStorage.getItem('sewerLiveGridSize') || 'm'; } catch(e) { return 'm'; } })();
+  const initSize = (() => { try { return localStorage.getItem('sewerFootballGridSize') || 'm'; } catch(e) { return 'm'; } })();
   setSize(initSize);
   applyFilters();
 }
