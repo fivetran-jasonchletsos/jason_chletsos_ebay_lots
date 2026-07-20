@@ -413,6 +413,8 @@ locals {
     "vault-save",
     "vault-delete",
     "vault-move",
+    "lola-save",
+    "lola-delete",
   ]
 }
 
