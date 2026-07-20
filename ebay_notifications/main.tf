@@ -405,6 +405,8 @@ locals {
     "marvelify",
     "pokedex-save",
     "pokedex-delete",
+    "sewer-save",
+    "sewer-delete",
   ]
 }
 

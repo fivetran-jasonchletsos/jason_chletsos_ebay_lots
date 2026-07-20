@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0714">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The Sewer Scanner — AI Card Appraiser</title>
+<meta name="description" content="Snap a photo of any card and get its estimated value plus a ready-to-post eBay title and description. Straight into The Sewer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0714; --surface:#16101f; --surface-2:#1e1530; --surface-3:#271b40;
+    --border:rgba(138,92,240,.16); --border-strong:rgba(138,92,240,.28);
+    --text:#f5f3f9; --text-muted:#a99bc4; --text-dim:#7a6f96;
+    --gold:#22c58b; --gold-bright:#4fe0a8; --gold-dim:#c1440e;
+    --success:#4fe0a8; --warn:#e0b54a; --danger:#e0651f;
+    --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:26px;
+    --container:min(94vw,680px);
+    --t:200ms cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(138,92,240,.16), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    font-size:16px; line-height:1.5; min-height:100vh;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .wrap{max-width:var(--container);margin-inline:auto;padding:0 18px 56px;position:relative;z-index:1}
+
+  .theme-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .theme-art{position:absolute;inset:0;width:100%;height:100%;opacity:.14}
+
+  .top{padding:30px 0 8px;text-align:center}
+  h1.brand{
+    font-family:'Fraunces',Georgia,serif;font-weight:600;font-style:italic;
+    font-size:clamp(30px,8vw,44px);line-height:1;margin:0;letter-spacing:-.01em;
+  }
+  .tag{color:var(--gold-bright);font-size:11px;letter-spacing:.28em;text-transform:uppercase;margin-top:10px;font-weight:600}
+  .lede{color:var(--text-muted);font-size:15px;margin:14px auto 0;max-width:30em}
+
+  .panel{
+    background:linear-gradient(180deg,var(--surface),var(--surface-2));
+    border:1px solid var(--border);border-radius:var(--r-lg);
+    padding:20px;margin-top:20px;
+  }
+  .panel h2{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin:0 0 14px}
+
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .shot{
+    position:relative;border:1.5px dashed var(--border-strong);border-radius:var(--r-md);
+    background:var(--surface-3);aspect-ratio:3/4;overflow:hidden;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    color:var(--text-muted);transition:border-color var(--t),background var(--t);
+    text-align:center;padding:10px;
+  }
+  .shot:active{border-color:var(--gold);background:#241a38}
+  .shot.filled{border-style:solid;border-color:var(--gold-dim)}
+  .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .shot .badge{
+    position:absolute;top:8px;left:8px;background:rgba(0,0,0,.66);
+    color:#fff;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.03em;
+  }
+  .shot .swap{
+    position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.66);color:#fff;
+    font-size:11px;padding:4px 9px;border-radius:20px;
+  }
+  .shot .ph-ic{width:30px;height:30px;opacity:.7}
+  .shot .ph-t{font-size:13px;font-weight:600;color:var(--text)}
+  .shot .ph-s{font-size:11px;color:var(--text-dim)}
+  .shot input{display:none}
+  .req{color:var(--gold-bright)}
+
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    border:none;border-radius:var(--r-md);padding:16px;margin-top:16px;cursor:pointer;
+    font-family:inherit;font-size:16px;font-weight:700;letter-spacing:.01em;
+    transition:transform var(--t),opacity var(--t),box-shadow var(--t);
+  }
+  .btn-gold{background:linear-gradient(150deg,var(--gold-bright),var(--gold));color:#06231a;box-shadow:0 8px 28px rgba(34,197,139,.28)}
+  .btn-gold:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .btn-ghost{background:var(--surface-3);color:var(--text);border:1px solid var(--border);font-weight:600;font-size:14px;padding:12px}
+
+  .toast{
+    position:fixed;top:14px;right:14px;z-index:30;max-width:230px;
+    background:var(--surface-3);border:1px solid var(--gold-dim);color:var(--gold-bright);
+    font-size:12.5px;line-height:1.45;padding:11px 15px;border-radius:12px;
+    box-shadow:0 10px 28px rgba(0,0,0,.4);opacity:0;transform:translateY(-6px);
+    pointer-events:none;transition:opacity 220ms ease,transform 220ms ease;
+  }
+  .toast.on{opacity:1;transform:none}
+
+  .loading{display:none;text-align:center;padding:34px 10px}
+  .loading.on{display:block}
+  .spin{width:42px;height:42px;margin:0 auto 16px;border-radius:50%;
+    border:3px solid var(--border-strong);border-top-color:var(--gold-bright);animation:sp 800ms linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .loading p{color:var(--text-muted);font-size:14px;margin:0}
+
+  #results{display:none}
+  #results.on{display:block;animation:rise 320ms cubic-bezier(.2,.7,.2,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .ident{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1.2;margin:0 0 4px}
+  .subident{color:var(--text-muted);font-size:14px;margin:0 0 12px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:4px 10px;border-radius:20px;background:rgba(34,197,139,.14);color:var(--gold-bright);border:1px solid rgba(34,197,139,.3)}
+  .chip.blue{background:rgba(138,92,240,.16);color:#c3aefc;border-color:rgba(138,92,240,.32)}
+
+  .value{text-align:center;padding:22px 14px;background:var(--surface-3);border-radius:var(--r-md);margin:16px 0}
+  .value .lab{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-dim);font-weight:600}
+  .value .amt{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(32px,10vw,46px);line-height:1;margin:8px 0 6px;color:var(--gold-bright)}
+  .value .typ{color:var(--text-muted);font-size:14px}
+  .value .basis{color:var(--text-dim);font-size:12.5px;margin-top:10px;font-style:italic}
+  .conf{display:inline-block;margin-top:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:4px 11px;border-radius:20px}
+  .conf.high{background:rgba(79,224,168,.16);color:var(--success)}
+  .conf.medium{background:rgba(224,181,74,.16);color:var(--warn)}
+  .conf.low{background:rgba(224,101,31,.16);color:var(--danger)}
+
+  .comp{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;margin-bottom:16px;font-size:13px}
+  .comp .ct{color:var(--text-dim);text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:700;margin-bottom:6px}
+  .comp .row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+  .comp .row b{color:var(--gold-bright)}
+  .comp a{color:var(--gold-bright);font-size:12px}
+
+  .field{margin-top:16px}
+  .field .fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+  .field .fl{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);font-weight:700}
+  .copy{background:var(--surface-3);border:1px solid var(--border-strong);color:var(--gold-bright);
+    font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:inherit;transition:all var(--t)}
+  .copy.done{background:var(--success);color:#06231a;border-color:var(--success)}
+  .box{background:#0d0a16;border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;font-size:14px;line-height:1.5}
+  .box.mono{font-family:'DM Mono',monospace;font-size:13px;word-break:break-word}
+  .cc{font-size:11px;color:var(--text-dim);margin-top:5px;text-align:right}
+  .cc.over{color:var(--danger)}
+
+  .note{color:var(--text-dim);font-size:12px;text-align:center;margin-top:18px;line-height:1.55}
+  .pokedex-link{display:none;text-align:center;margin-top:14px}
+  .pokedex-link a{color:var(--gold-bright);font-size:12.5px;font-weight:600;text-decoration:none}
+
+  .err{display:none;background:rgba(224,101,31,.12);border:1px solid rgba(224,101,31,.35);
+    color:#f6c9a8;border-radius:var(--r-md);padding:14px 16px;margin-top:16px;font-size:14px}
+  .err.on{display:block}
+
+  footer{margin-top:40px;text-align:center;color:var(--text-dim);font-size:12.5px;line-height:1.7}
+  footer .ded{color:var(--text-muted);font-style:italic;font-family:'Fraunces',serif;font-size:14px;margin-bottom:10px}
+  footer a{color:var(--gold-bright)}
+  .hr{height:1px;background:var(--border);margin:24px 0 18px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="toast" id="toast"></div>
+
+  <header class="top">
+    <h1 class="brand">The Sewer Scanner</h1>
+    <div class="tag">AI Card Appraiser</div>
+    <p class="lede">Snap a photo of any card. Get its estimated value plus a ready-to-post eBay title &amp; description &mdash; straight into The Sewer.</p>
+  </header>
+
+  <section class="panel">
+    <h2>1 &middot; Photograph the card</h2>
+    <div class="shots">
+      <label class="shot" id="shot-front">
+        <span class="badge">Front <span class="req">*</span></span>
+        <svg class="ph-ic" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 012-2h1.5l1-1.6a1 1 0 01.86-.4h5.28a1 1 0 01.86.4L21.5 6H22a2 2 0 012 2" stroke="currentColor" stroke-width="1.6"/><rect x="2" y="6" width="20" height="14" rx="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.6" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="ph-t">Take / choose</span>
+        <span class="ph-s">front of card</span>
+        <input type="file" accept="image/*" capture="environment" id="in-front">
+      </label>
+      <label class="shot" id="shot-back">
+        <span class="badge">Back <span style="color:var(--text-dim)">(optional)</span></span>
+        <svg class="ph-ic" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2.2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span class="ph-t">Add back</span>
+        <span class="ph-s">helps accuracy</span>
+        <input type="file" accept="image/*" capture="environment" id="in-back">
+      </label>
+    </div>
+    <button class="btn btn-gold" id="go" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="#06231a" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" fill="#06231a"/></svg>
+      <span>Appraise card</span>
+    </button>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="spin"></div>
+    <p id="loadmsg">Reading the card&hellip;</p>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <section id="results">
+    <div class="panel">
+      <h2 style="margin-bottom:8px">Appraisal</h2>
+      <div class="chips" id="chips"></div>
+      <p class="ident" id="ident"></p>
+      <p class="subident" id="subident"></p>
+
+      <div class="value">
+        <div class="lab">Estimated value</div>
+        <div class="amt" id="amt">&mdash;</div>
+        <div class="typ" id="typ"></div>
+        <div class="basis" id="basis"></div>
+        <div class="conf" id="conf"></div>
+      </div>
+
+      <div class="comp" id="comp" style="display:none">
+        <div class="ct">Live market comp</div>
+        <div id="comprows"></div>
+      </div>
+
+      <div class="field">
+        <div class="fh"><span class="fl">eBay title</span><button class="copy" data-src="title">Copy</button></div>
+        <div class="box mono" id="title"></div>
+        <div class="cc" id="cc"></div>
+      </div>
+
+      <div class="field">
+        <div class="fh"><span class="fl">eBay description</span><button class="copy" data-src="desc">Copy</button></div>
+        <div class="box" id="desc"></div>
+      </div>
+
+      <p class="note">Estimate only &mdash; actual sale price varies with condition, timing &amp; grading. Not a formal appraisal.</p>
+      <div class="pokedex-link" id="pokedexLink"><a href="live/index.html" target="_blank" rel="noopener">View The Sewer &rarr;</a></div>
+    </div>
+    <button class="btn btn-ghost" id="again">Appraise another card</button>
+  </section>
+
+  <footer>
+    <div class="hr"></div>
+    <div class="ded">Made for Amanda &mdash; every pull goes straight to The Sewer.</div>
+    <div style="margin-top:12px">Powered by <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener">Harpua2001</a> card intelligence</div>
+  </footer>
+
+</div>
+
+<script>
+const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
+const state = { front:null, back:null };
+let lastData = null;
+
+const $ = id => document.getElementById(id);
+const LOAD_MSGS = ['Reading the card…','Identifying the set & character…','Checking recent values…','Writing your eBay listing…'];
+let loadMsgIdx = 0;
+
+let toastTimer = null;
+function showToast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('on'), 3400);
+}
+
+function downscale(file, maxDim=1280, quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let {width:w, height:h} = img;
+      if (Math.max(w,h) > maxDim){
+        const s = maxDim/Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s);
+      }
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+    img.src = url;
+  });
+}
+
+function wireShot(inputId, shotId, key){
+  const input = $(inputId), shot = $(shotId);
+  input.addEventListener('change', async ()=>{
+    const f = input.files && input.files[0];
+    if (!f) return;
+    try{
+      const data = await downscale(f);
+      state[key] = data;
+      shot.classList.add('filled');
+      shot.querySelectorAll('.ph-ic,.ph-t,.ph-s').forEach(e=>e.style.display='none');
+      let prev = shot.querySelector('img'); if(!prev){ prev=document.createElement('img'); shot.appendChild(prev); }
+      prev.src = data;
+      let swap = shot.querySelector('.swap'); if(!swap){ swap=document.createElement('span'); swap.className='swap'; swap.textContent='Retake'; shot.appendChild(swap); }
+      $('go').disabled = !state.front;
+    }catch(e){ showErr(e.message || 'Could not read that image.'); }
+  });
+}
+wireShot('in-front','shot-front','front');
+wireShot('in-back','shot-back','back');
+
+function showErr(msg){ const e=$('err'); e.textContent=msg; e.classList.add('on'); }
+function clearErr(){ $('err').classList.remove('on'); }
+
+$('go').addEventListener('click', appraise);
+$('again').addEventListener('click', ()=>{
+  $('results').classList.remove('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+async function appraise(){
+  if (!state.front) return;
+  clearErr();
+  $('results').classList.remove('on');
+  $('pokedexLink').style.display = 'none';
+  $('go').disabled = true;
+  const load = $('loading'); load.classList.add('on');
+  loadMsgIdx=0; $('loadmsg').textContent=LOAD_MSGS[0];
+  const cycle = setInterval(()=>{ loadMsgIdx=(loadMsgIdx+1)%LOAD_MSGS.length; $('loadmsg').textContent=LOAD_MSGS[loadMsgIdx]; }, 2200);
+
+  try{
+    const res = await fetch(LAMBDA + '/upload-photos', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: state.front, back: state.back || undefined })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Something went wrong.');
+    if (!data.identified || !data.card){
+      throw new Error(data.message || "Couldn't read the card clearly — try a straight, well-lit photo of the front.");
+    }
+    lastData = data;
+    render(data);
+    saveToSewer(data);
+  }catch(e){
+    showErr(e.message || 'Network error — please try again.');
+  }finally{
+    clearInterval(cycle);
+    load.classList.remove('on');
+    $('go').disabled = false;
+  }
+}
+
+async function saveToSewer(data){
+  try{
+    const res = await fetch(LAMBDA + '/sewer-save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        image: state.front,
+        card: data.card,
+        scannedAt: new Date().toISOString().slice(0,10)
+      })
+    });
+    const out = await res.json();
+    if (out && out.success){
+      showToast('Added to The Sewer!');
+      $('pokedexLink').style.display = 'block';
+    } else {
+      console.warn('Sewer save did not succeed:', out && out.error);
+    }
+  }catch(e){
+    console.warn('Sewer save failed:', e);
+  }
+}
+
+function money(n){ return (typeof n==='number' && isFinite(n)) ? '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : null; }
+
+function render(data){
+  const c = data.card;
+
+  const chips = $('chips'); chips.innerHTML='';
+  const add=(txt,cls)=>{ const s=document.createElement('span'); s.className='chip'+(cls?' '+cls:''); s.textContent=txt; chips.appendChild(s); };
+  if (c.is_rookie) add('Rookie');
+  if (c.is_auto) add('Autograph');
+  if (c.is_relic) add('Relic / Patch');
+  if (c.serial) add('# '+c.serial);
+  if (c.parallel) add(c.parallel,'blue');
+  if (c.category==='pokemon') add('Pokemon','blue');
+
+  const idBits = [c.year, c.brand, c.set_name, c.player].filter(Boolean).join(' ');
+  $('ident').textContent = idBits || (c.player || 'Card identified');
+  $('subident').textContent = [c.team, c.card_number?('#'+c.card_number):'', c.sport].filter(Boolean).join(' · ');
+
+  const v = c.estimated_value_usd || {};
+  const lo=money(v.low), hi=money(v.high), typ=money(v.typical);
+  $('amt').textContent = (lo&&hi) ? (lo+' – '+hi) : (typ || '—');
+  $('typ').textContent = typ ? ('Typical: '+typ) : '';
+  $('basis').textContent = c.value_basis || '';
+  const conf=$('conf'); const cf=(c.confidence||'').toLowerCase();
+  conf.textContent = cf ? (cf+' confidence') : '';
+  conf.className = 'conf '+(cf||'');
+
+  const comp=$('comp'), rows=$('comprows');
+  if (data.comp && (data.comp.raw||data.comp.psa9||data.comp.psa10)){
+    rows.innerHTML='';
+    const r=(label,val)=>{ if(!val) return; const d=document.createElement('div'); d.className='row'; d.innerHTML='<span>'+label+'</span><b>'+money(val)+'</b>'; rows.appendChild(d); };
+    r('Raw / ungraded', data.comp.raw);
+    r('PSA 9', data.comp.psa9);
+    r('PSA 10', data.comp.psa10);
+    if (data.comp.url){ const a=document.createElement('a'); a.href=data.comp.url; a.target='_blank'; a.rel='noopener'; a.textContent='View on '+(data.comp.source||'SportsCardsPro')+' →'; rows.appendChild(a); }
+    comp.style.display='block';
+  } else { comp.style.display='none'; }
+
+  const title=(c.ebay_title||'').trim();
+  $('title').textContent = title;
+  const cc=$('cc'); cc.textContent = title.length+' / 80'; cc.classList.toggle('over', title.length>80);
+  $('desc').textContent = (c.ebay_description||'').trim();
+
+  $('results').classList.add('on');
+  setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}), 60);
+}
+
+document.querySelectorAll('.copy').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const txt = $(btn.dataset.src).textContent;
+    try{ await navigator.clipboard.writeText(txt); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    btn.textContent='Copied'; btn.classList.add('done');
+    setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('done'); }, 1400);
+  });
+});
+</script>
+</body>
+</html>
