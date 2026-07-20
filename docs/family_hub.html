@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Collection — Family Card Sites</title>
+<meta name="description" content="One page, four collections: Jason, Natasha, Amanda, and Mike.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141414; --panel2:#1a1a1a; --border:rgba(255,255,255,0.08);
+    --text:#f1efe9; --sub:#9a9388;
+    --jason:#c9a542; --jason-br:#e0c168;
+    --natasha:#ee1515; --natasha-b:#2a75bb; --natasha-y:#ffcb05;
+    --amanda:#c1440e; --amanda-br:#e0651f; --amanda-em:#22c58b;
+    --mike:#004c54; --mike-br:#00a86b; --mike-brb:#39d698;
+    --font-display:'Fredoka','Nunito',sans-serif;
+    --font-body:'Nunito',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 10% -5%, rgba(201,165,66,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 95% 5%, rgba(238,21,21,0.08), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 90% 100%, rgba(0,168,107,0.08), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 5% 100%, rgba(193,68,14,0.09), transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:64px 24px 80px;}
+  header{text-align:center;margin-bottom:56px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--sub); margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(32px,5vw,52px);
+    line-height:1.08; letter-spacing:-0.01em;
+    background:linear-gradient(90deg, var(--jason-br), #fff 40%, var(--amanda-br) 70%, var(--mike-brb));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .tag{color:var(--sub); font-size:16px; margin-top:14px; max-width:520px; margin-left:auto; margin-right:auto;}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:22px;
+  }
+  @media (max-width:720px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    position:relative; display:block; text-decoration:none; color:inherit;
+    background:var(--panel); border:1px solid var(--border); border-radius:20px;
+    padding:30px 28px 26px; overflow:hidden; isolation:isolate;
+    transition:transform .28s cubic-bezier(.2,.8,.3,1), border-color .28s ease, box-shadow .28s ease;
+  }
+  .card::before{
+    content:''; position:absolute; inset:0; z-index:-1; opacity:0.16;
+    background:radial-gradient(560px 320px at var(--gx,80%) var(--gy,-10%), var(--glow,#c9a542), transparent 65%);
+    transition:opacity .3s ease;
+  }
+  .card:hover{ transform:translateY(-5px); }
+  .card:hover::before{ opacity:0.30; }
+
+  .card.jason  { --glow:var(--jason);  border-color:rgba(201,165,66,0.25); }
+  .card.natasha{ --glow:var(--natasha);border-color:rgba(238,21,21,0.22); }
+  .card.amanda { --glow:var(--amanda); border-color:rgba(193,68,14,0.25); }
+  .card.mike   { --glow:var(--mike-br);border-color:rgba(0,168,107,0.25); }
+
+  .card:hover.jason  { box-shadow:0 14px 40px -12px rgba(201,165,66,0.35); }
+  .card:hover.natasha{ box-shadow:0 14px 40px -12px rgba(238,21,21,0.30); }
+  .card:hover.amanda { box-shadow:0 14px 40px -12px rgba(193,68,14,0.32); }
+  .card:hover.mike   { box-shadow:0 14px 40px -12px rgba(0,168,107,0.32); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    padding:5px 12px; border-radius:100px; margin-bottom:16px;
+    background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--sub);
+  }
+  .dot{width:7px;height:7px;border-radius:50%;}
+  .jason .dot{background:var(--jason);}
+  .natasha .dot{background:var(--natasha);}
+  .amanda .dot{background:var(--amanda-br);}
+  .mike .dot{background:var(--mike-br);}
+
+  .card h2{
+    font-family:var(--font-display); font-weight:600; font-size:26px; margin-bottom:6px;
+  }
+  .card .who{ color:var(--sub); font-size:14px; margin-bottom:14px; }
+  .card p{ color:var(--sub); font-size:14.5px; line-height:1.55; margin-bottom:20px; }
+  .go{
+    font-family:var(--font-mono); font-size:12.5px; font-weight:600; letter-spacing:.04em;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .jason .go{ color:var(--jason-br); }
+  .natasha .go{ color:var(--natasha-y); }
+  .amanda .go{ color:var(--amanda-br); }
+  .mike .go{ color:var(--mike-brb); }
+  .go .arrow{ transition:transform .25s ease; }
+  .card:hover .arrow{ transform:translateX(4px); }
+
+  footer{
+    text-align:center; margin-top:56px; color:var(--sub); font-size:12.5px;
+    font-family:var(--font-mono); letter-spacing:.03em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">The Collection · Family Card Sites</div>
+    <h1>Four collectors.<br>One family.</h1>
+    <p class="tag">Every scanner, binder, and bad joke lives here. Pick a name.</p>
+  </header>
+
+  <div class="grid">
+    <a class="card jason" href="index.html">
+      <span class="badge"><span class="dot"></span>Jason</span>
+      <h2>Harpua2001</h2>
+      <div class="who">Sports &amp; Pokémon cards on eBay</div>
+      <p>The full store — live listings, deals, and the daily seller dashboard behind it all.</p>
+      <span class="go">Enter the store <span class="arrow">→</span></span>
+    </a>
+
+    <a class="card natasha" href="natasha_pokedex/index.html">
+      <span class="badge"><span class="dot"></span>Natasha</span>
+      <h2>Natasha's Pokédex</h2>
+      <div class="who">Pokémon card collection</div>
+      <p>Every Pokémon card scanned in and catalogued, gym-badge style.</p>
+      <span class="go">Open the Pokédex <span class="arrow">→</span></span>
+    </a>
+
+    <a class="card amanda" href="the_sewer/index.html">
+      <span class="badge"><span class="dot"></span>Amanda</span>
+      <h2>The Sewer</h2>
+      <div class="who">Marvel card collection</div>
+      <p>Amanda's Marvel pulls, sorted by hero — football, baseball, and the occasional surprise.</p>
+      <span class="go">Climb down <span class="arrow">→</span></span>
+    </a>
+
+    <a class="card mike" href="eagles_nest/index.html">
+      <span class="badge"><span class="dot"></span>Mike</span>
+      <h2>The Eagles Nest</h2>
+      <div class="who">Mike's collection</div>
+      <p>Strictly midnight green. Everything else is just noise.</p>
+      <span class="go">Fly in <span class="arrow">→</span></span>
+    </a>
+  </div>
+
+  <footer>Family scan-to-site network · built on the same GitHub Pages pipeline</footer>
+</div>
+</body>
+</html>
