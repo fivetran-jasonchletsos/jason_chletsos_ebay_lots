@@ -165,6 +165,8 @@ BRAND_TOKENS: list[tuple[str, str]] = [
     ("sage",              "SAGE"),
     ("leaf",              "Leaf"),
     ("upper deck",        "Upper Deck"),
+    ("bo jackson battle arena", "Koei Tecmo"),
+    ("tecmo bowl",        "Koei Tecmo"),
 ]
 
 # Matches "092/225" and bare "/225" (e.g. "Teal /225") but not dates like 2024-25.
@@ -211,15 +213,19 @@ def infer_specifics(title: str) -> dict[str, str] | None:
     return specifics
 
 
-def build_xml(title: str, price: float, picture_url: str, token: str) -> str:
+def build_xml(title: str, price: float, picture_url: str, token: str,
+              category: str = CATEGORY_ID, condition: str = CONDITION_ID) -> str:
     description = build_description(title)
+    # The "Ungraded" ConditionDescriptor sub-value only applies to the
+    # Trading Card Singles schema -- other categories (e.g. Trading Card
+    # Lots) reject it outright.
     descriptors_xml = (
         "<ConditionDescriptors>"
         "<ConditionDescriptor>"
         "<Name>40001</Name><Value>400010</Value>"
         "</ConditionDescriptor>"
         "</ConditionDescriptors>"
-    )
+    ) if category == CATEGORY_ID else ""
     specifics = infer_specifics(title)
     if specifics is None:
         raise ValueError(
@@ -236,9 +242,9 @@ def build_xml(title: str, price: float, picture_url: str, token: str) -> str:
   <Item>
     <Title>{xml_escape(title[:80])}</Title>
     <Description><![CDATA[{description}]]></Description>
-    <PrimaryCategory><CategoryID>{CATEGORY_ID}</CategoryID></PrimaryCategory>
+    <PrimaryCategory><CategoryID>{category}</CategoryID></PrimaryCategory>
     <StartPrice currencyID="USD">{price:.2f}</StartPrice>
-    <ConditionID>{CONDITION_ID}</ConditionID>
+    <ConditionID>{condition}</ConditionID>
     {descriptors_xml}
     <Country>US</Country>
     <Currency>USD</Currency>
@@ -289,7 +295,8 @@ def _find_live_duplicate(title: str) -> dict | None:
 
 
 def post_card(image_path: Path, title: str, price: float,
-              cfg: dict, token: str, apply: bool) -> dict:
+              cfg: dict, token: str, apply: bool, category: str = CATEGORY_ID,
+              condition: str = CONDITION_ID) -> dict:
     print(f"\n  Card: {title[:60]}")
     print(f"  Image: {image_path.name}  Price: ${price:.2f}")
 
@@ -308,7 +315,7 @@ def post_card(image_path: Path, title: str, price: float,
     picture_url = upload_image(image_path, token, cfg)
     print(f"  Picture URL: {picture_url}")
 
-    xml = build_xml(title, price, picture_url, token)
+    xml = build_xml(title, price, picture_url, token, category, condition)
 
     if not apply:
         print("  [dry-run] would post listing")
@@ -370,7 +377,8 @@ def main():
             print(f"  Image not found: {img}")
             results.append({"error": "image not found", "title": c["title"]})
             continue
-        r = post_card(img, c["title"], float(c["price"]), cfg, token, args.apply)
+        r = post_card(img, c["title"], float(c["price"]), cfg, token, args.apply,
+                      c.get("category", CATEGORY_ID), c.get("condition", CONDITION_ID))
         results.append(r)
         time.sleep(0.5)
 
