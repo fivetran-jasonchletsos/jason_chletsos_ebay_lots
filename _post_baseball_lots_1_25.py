@@ -88,7 +88,9 @@ LOTS = {
  "braves2": ("2025 Topps 75 Chris Sale Braves Crystal Parallel Baseball", 2.99, [
     (410,6,"Chris Sale"),
  ]),
- "brewers2": ("2025 Topps 75 Brandon Sproat Brewers Purple Parallel RC Baseball", 3.49, [
+ "brewers2": ("2025 Topps 75 Brandon Sproat Purple Parallel #246/250 Brewers RC", 4.99, [
+    # POSTED then REVISED 2026-07-22: JC confirmed serial 246/250 — title+price updated live
+    # on item 307077973371 (was $3.49 unnumbered, now $4.99 with serial in title).
     (396,6,"Brandon Sproat"),
  ]),
  "cubs2": ("2025 Topps Cubs 2 Card Lot Suzuki Swanson Baseball", 4.49, [

@@ -91,7 +91,7 @@ GROUPS = {
   ("Royce Lewis","Twins · star insert",1,2,4,""),
   ("Corbin Carroll","Diamondbacks · graffiti insert",1,3,5,""),
   ("Owen Caissie","Marlins · graffiti insert RC",2,4,7,""),
-  ("Brandon Sproat","Brewers · Topps 75 purple parallel RC",1,3,6,""),
+  ("Brandon Sproat","Brewers · Topps 75 purple parallel #246/250 RC",2,5,7,"POSTED $4.99 (revised after JC confirmed serial) — item 307077973371"),
   ("Brooks Lee","Twins · star insert RC (copy 2, duplicate)",1,2,4,"DUPLICATE — see copy 1 above"),
   ("Kyle Teel","White Sox · graffiti insert RC",2,4,7,""),
   ("Vladimir Guerrero Jr.","Topps 75 All-Star NL (2nd design)",1,3,5,""),
