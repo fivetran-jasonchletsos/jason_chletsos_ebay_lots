@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sewer — Suggested Lots</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange:   #c1440e;
+    --orange-br:#e0651f;
+    --emerald:  #22c58b;
+    --emerald-br: #4fe0a8;
+    --purple:   #8a5cf0;
+    --bg:       #0b0714;
+    --bg2:      #100b1d;
+    --panel:    #16101f;
+    --panel2:   #1e1530;
+    --border:   #2f2140;
+    --hairline: rgba(244,242,248,0.09);
+    --text:     #f5f3f9;
+    --sub:      #a99bc4;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 1200px 900px at 8% -5%, rgba(138,92,240,.28), transparent 60%),
+      radial-gradient(ellipse 1000px 800px at 100% 8%, rgba(34,197,139,.16), transparent 60%);
+    background-attachment: fixed;
+  }
+  .top-stripe { height: 3px; background: linear-gradient(90deg, var(--emerald-br), var(--purple) 50%, var(--orange-br)); }
+
+  header { text-align: center; padding: 36px 20px 8px; }
+  .logo { font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: clamp(1.7rem, 5vw, 2.3rem); }
+  .logo em { font-style: normal; color: var(--emerald-br); }
+  .tagline { font-family: var(--font-mono); font-size: 0.68rem; color: var(--sub); letter-spacing: 2px; text-transform: uppercase; margin-top: 8px; font-weight: 600; }
+  .lede { color: var(--sub); font-size: 0.92rem; margin: 16px auto 0; max-width: 34em; line-height: 1.6; }
+  .navlinks { display: flex; justify-content: center; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+  .navlinks a {
+    font-family: var(--font-mono); font-size: 0.72rem; color: var(--emerald-br); text-decoration: none;
+    border: 1px solid rgba(34,197,139,0.35); border-radius: 999px; padding: 6px 14px; letter-spacing: 0.4px;
+  }
+
+  .stats-bar { display: flex; gap: 0; justify-content: center; max-width: 640px; margin: 26px auto 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .stat { flex: 1; text-align: center; padding: 12px; border-left: 1px solid var(--hairline); }
+  .stat:first-child { border-left: none; }
+  .stat-val { font-family: var(--font-mono); font-size: 1.3rem; color: var(--emerald-br); }
+  .stat-lbl { font-size: 0.62rem; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 30px 16px 60px; }
+  .section-title {
+    font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 1.3rem;
+    margin: 34px 0 6px;
+  }
+  .section-sub { color: var(--sub); font-size: 0.82rem; margin-bottom: 14px; }
+
+  .indiv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+  .indiv-tile { background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+  .indiv-tile img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: #000; }
+  .indiv-info { padding: 7px 8px 8px; }
+  .indiv-name { font-size: 0.78rem; font-weight: 700; line-height: 1.2; }
+  .indiv-sub { font-family: var(--font-mono); font-size: 0.62rem; color: var(--sub); margin-top: 3px; }
+  .indiv-val { font-family: var(--font-mono); font-size: 0.7rem; color: var(--emerald-br); margin-top: 3px; font-weight: 600; }
+
+  .lot-card {
+    background: linear-gradient(180deg, var(--panel), var(--panel2)); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+  }
+  .lot-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .lot-title { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; }
+  .lot-price { font-family: var(--font-mono); color: var(--emerald-br); font-weight: 600; font-size: 0.95rem; }
+  .lot-thumbs { display: flex; gap: 6px; margin-top: 12px; overflow-x: auto; }
+  .lot-thumbs img { width: 56px; height: 74px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #000; }
+  .lot-names { font-size: 0.82rem; color: var(--sub); margin-top: 10px; line-height: 1.7; }
+  .lot-names b { color: var(--text); font-weight: 600; }
+  .copy-btn {
+    font-family: var(--font-mono); font-size: 0.68rem; background: var(--panel2); border: 1px solid var(--border);
+    color: var(--emerald-br); border-radius: 999px; padding: 5px 12px; cursor: pointer; margin-top: 10px;
+  }
+  .copy-btn.done { background: var(--emerald); color: #04140d; border-color: var(--emerald); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--sub); font-family: var(--font-display); font-style: italic; }
+  footer { text-align: center; padding: 30px 16px 40px; font-size: 0.7rem; color: var(--sub); font-family: var(--font-mono); border-top: 1px solid var(--hairline); margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="top-stripe"></div>
+
+<header>
+  <div class="logo">The <em>Sewer</em></div>
+  <div class="tagline">Suggested Lots</div>
+  <p class="lede">Looks at everything scanned in across the whole collection and groups the ordinary pulls into team-based lots of 5 cards or fewer, alphabetized for easy pulling. Anything worth more gets flagged to list on its own instead.</p>
+  <div class="navlinks">
+    <a href="live/index.html">Live Feed</a>
+    <a href="football/index.html">Football</a>
+    <a href="baseball/index.html">Baseball</a>
+    <a href="scanner.html">+ Scan a Card</a>
+  </div>
+</header>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Cards Analyzed</div></div>
+  <div class="stat"><div class="stat-val" id="statIndividuals">—</div><div class="stat-lbl">Individual Candidates</div></div>
+  <div class="stat"><div class="stat-val" id="statLots">—</div><div class="stat-lbl">Suggested Lots</div></div>
+  <div class="stat"><div class="stat-val" id="statValue">—</div><div class="stat-lbl">Total Suggested Value</div></div>
+</div>
+
+<div class="wrap" id="wrap">
+  <div class="section-title">Individual listings</div>
+  <div class="section-sub">Numbered, first-appearance, or high-value cards — worth more listed solo than folded into a lot.</div>
+  <div class="indiv-grid" id="indivGrid"></div>
+
+  <div class="section-title">Team lots (5 cards or fewer)</div>
+  <div class="section-sub">Grouped by team, alphabetized within each lot so it pulls straight off a sorted stack.</div>
+  <div id="lotsWrap"></div>
+</div>
+
+<footer>Suggestions only — nothing here is posted. Review, then say the word.</footer>
+
+<script>
+const LOTS_PER = 5;
+const INDIVIDUAL_THRESHOLD = 10;
+
+function money(n) { return '$' + (n || 0).toLocaleString(); }
+
+async function loadBoard(folder) {
+  const path = folder ? `${folder}/cards.json` : 'cards.json';
+  try {
+    const r = await fetch(`${path}?t=` + Date.now());
+    if (!r.ok) return [];
+    const cards = await r.json();
+    const prefix = folder ? `${folder}/` : '';
+    return cards.map(c => ({ ...c, image: prefix + c.image, _board: folder || 'root' }));
+  } catch (e) { return []; }
+}
+
+function suggestLots(cards, groupKeyFn) {
+  const individuals = [];
+  const lotCards = [];
+  cards.forEach(c => {
+    const val = c.estValue || 0;
+    const numbered = !!c.serial;
+    const first = !!c.firstAppearance;
+    if (val >= INDIVIDUAL_THRESHOLD || ((numbered || first) && val >= 6)) {
+      individuals.push(c);
+    } else {
+      lotCards.push(c);
+    }
+  });
+
+  const groups = {};
+  lotCards.forEach(c => {
+    const key = (c.team && c.team.trim()) || 'Multi-team / Other';
+    (groups[key] = groups[key] || []).push(c);
+  });
+
+  const lots = [];
+  Object.keys(groups).sort().forEach(key => {
+    const list = groups[key].slice().sort((a,b) => (a.name||'').localeCompare(b.name||''));
+    const nSub = Math.ceil(list.length / LOTS_PER);
+    for (let i = 0; i < nSub; i++) {
+      const chunk = list.slice(i*LOTS_PER, (i+1)*LOTS_PER);
+      lots.push({
+        group: key, idx: i+1, total: nSub, cards: chunk,
+        suggestedPrice: chunk.reduce((s,c) => s + (c.estValue||0), 0),
+      });
+    }
+  });
+
+  return { individuals, lots };
+}
+
+function render(cards) {
+  const { individuals, lots } = suggestLots(cards, c => c.team);
+
+  document.getElementById('statTotal').textContent = cards.length;
+  document.getElementById('statIndividuals').textContent = individuals.length;
+  document.getElementById('statLots').textContent = lots.length;
+  const totalVal = individuals.reduce((s,c) => s + (c.estValue||0), 0) + lots.reduce((s,l) => s + l.suggestedPrice, 0);
+  document.getElementById('statValue').textContent = money(totalVal);
+
+  const indivGrid = document.getElementById('indivGrid');
+  if (!individuals.length) {
+    indivGrid.innerHTML = '<div class="empty-state">Nothing flagged yet — every card looks lot-sized.</div>';
+  } else {
+    indivGrid.innerHTML = individuals
+      .sort((a,b) => (b.estValue||0) - (a.estValue||0))
+      .map(c => `
+        <div class="indiv-tile">
+          <img src="${c.image}" alt="${c.name}" loading="lazy">
+          <div class="indiv-info">
+            <div class="indiv-name">${c.name || 'Unknown'}</div>
+            <div class="indiv-sub">${c.team || ''}${c.serial ? ' · #'+c.serial : ''}</div>
+            <div class="indiv-val">${money(c.estValue)}</div>
+          </div>
+        </div>`).join('');
+  }
+
+  const lotsWrap = document.getElementById('lotsWrap');
+  if (!lots.length) {
+    lotsWrap.innerHTML = '<div class="empty-state">Nothing to lot up yet — scan some cards first.</div>';
+    return;
+  }
+  lotsWrap.innerHTML = lots.map((lot, i) => {
+    const title = lot.total > 1 ? `${lot.group} — lot ${lot.idx} of ${lot.total}` : lot.group;
+    const names = lot.cards.map(c => `<b>${c.name || 'Unknown'}</b>${c.team ? ' — ' + c.team : ''}`).join('<br>');
+    const thumbs = lot.cards.map(c => `<img src="${c.image}" alt="${c.name}" loading="lazy">`).join('');
+    return `
+      <div class="lot-card">
+        <div class="lot-head">
+          <div class="lot-title">${title}</div>
+          <div class="lot-price">List at ${money(lot.suggestedPrice)}</div>
+        </div>
+        <div class="lot-thumbs">${thumbs}</div>
+        <div class="lot-names">${names}</div>
+        <button class="copy-btn" data-idx="${i}" onclick="copyLot(this, ${i})">Copy card list</button>
+      </div>`;
+  }).join('');
+
+  window._LOTS = lots;
+}
+
+function copyLot(btn, i) {
+  const lot = window._LOTS[i];
+  const title = lot.total > 1 ? `${lot.group} lot ${lot.idx} of ${lot.total}` : `${lot.group} lot`;
+  const text = `${title} — list at $${lot.suggestedPrice}\n` + lot.cards.map(c => `- ${c.name}${c.team ? ' (' + c.team + ')' : ''}`).join('\n');
+  navigator.clipboard.writeText(text).catch(() => {});
+  btn.textContent = 'Copied!';
+  btn.classList.add('done');
+  setTimeout(() => { btn.textContent = 'Copy card list'; btn.classList.remove('done'); }, 1400);
+}
+
+async function init() {
+  const [root, live, football, baseball] = await Promise.all([
+    loadBoard(''), loadBoard('live'), loadBoard('football'), loadBoard('baseball'),
+  ]);
+  const all = [...root, ...live, ...football, ...baseball];
+  render(all);
+}
+init();
+</script>
+</body>
+</html>
