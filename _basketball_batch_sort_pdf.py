@@ -79,7 +79,7 @@ SELL = {
  ],
  "Detroit Pistons": [
   ("Cade Cunningham","base (x2 copies)",1,3,5,""),
-  ("Isaiah Thomas","base (x2 copies)",1,2,3,""),
+  ("Isaiah Thomas","base",1,2,3,""),
   ("Jaden Ivey","base (x2 copies)",1,2,3,""),
   ("Jalen Duren","base",1,2,3,""),
  ],
@@ -138,14 +138,14 @@ SELL = {
  ],
  "Charlotte Hornets": [
   ("LaMelo Ball","base + Chrome (x2 copies)",1,3,5,""),
-  ("Tidjane Salaun","base (x2 copies)",1,2,3,""),
+  ("Tidjane Salaun","base",1,2,3,""),
  ],
  "Golden State Warriors": [
   ("Quinten Post","base",1,2,3,""),
   ("Jonathan Kuminga","base",1,2,4,""),
  ],
  "Memphis Grizzlies": [
-  ("Desmond Bane","base + Chrome (x4 copies)",1,2,4,""),
+  ("Desmond Bane","base + Chrome (x3 copies)",1,2,4,""),
   ("Jaren Jackson Jr.","Chrome",1,2,4,""),
   ("Trey Murphy III","Chrome",1,2,3,""),
   ("Grizzlies 'Grit and Grind' duo insert","team card",1,2,3,""),
@@ -158,21 +158,21 @@ SELL = {
  "Denver Nuggets": [
   ("Jamal Murray","base",1,2,4,""),
   ("Christian Braun","Chrome (x2 copies)",1,2,3,""),
-  ("Peyton Watson","Chrome (x2 copies)",1,2,3,""),
+  ("Peyton Watson","Chrome",1,2,3,""),
  ],
  "Phoenix Suns": [
-  ("Oso Ighodaro","base + Chrome (x3 copies)",1,2,3,""),
+  ("Oso Ighodaro","base + Chrome (x2 copies)",1,2,3,""),
   ("Grayson Allen","base",1,2,3,""),
  ],
  "Dallas Mavericks": [
   ("Max Christie","base",1,2,3,""),
   ("Kyrie Irving","base",1,3,5,""),
-  ("PJ Washington Jr.","base (x2 copies)",1,2,3,""),
+  ("PJ Washington Jr.","base",1,2,3,""),
   ("Brandon Williams","base",1,2,3,""),
   ("Mavericks duo insert","team card",1,2,3,""),
  ],
  "Toronto Raptors": [
-  ("Ochai Agbaji","base (x3 copies)",1,2,3,""),
+  ("Ochai Agbaji","base (x2 copies)",1,2,3,""),
   ("Immanuel Quickley","base (x3 copies)",1,2,4,""),
   ("Gradey Dick","base",1,2,4,""),
   ("Raptors duo insert","team card",1,2,3,""),
@@ -271,11 +271,11 @@ n_sell, g_sell = build(
     "<b>Sort verdict: lot material, organized by team for easy bundling.</b> Base 2025-26 Topps/Chrome "
     "commons run $1-4 raw even for current stars (confirmed via comps: LeBron $1.50-4, Giannis $0.99-2.24, "
     "Jokic $1.15-2, Kawhi/Harden $0.99-1.59) &mdash; nothing here individually clears a singles threshold. "
-    "Flagged duplicate: <b>Scan 436 and Scan 442 appear to be the exact same 9 cards in the same layout</b> "
+    "Confirmed duplicate: <b>Scan 436 and Scan 442 were the same 9-card scan taken twice</b> "
     "(Tidjane Sala&uuml;n, PJ Washington Jr., Ighodaro, Monk, Isaiah Joe, Agbaji, Watson, Bane, Isaiah Thomas) "
-    "&mdash; counted once here; confirm before assuming you have two physical copies of each. Team groups "
-    "with 6+ cards (Pistons, Pacers, Grizzlies, Mavericks, Raptors) split cleanly into two 5-card-or-fewer "
-    "lots each. HOLD: nothing posted, more scans pending.")
+    "&mdash; the extra copy from each has been removed from this total. Team groups with 6+ cards "
+    "(Pistons, Pacers, Grizzlies, Mavericks, Raptors) split cleanly into two 5-card-or-fewer lots each. "
+    "HOLD: nothing posted, more scans pending.")
 
 json.dump({"keep":{"count":n_keep,"total":g_keep},"sell":{"count":n_sell,"total":g_sell}},
           open("output/_basketball_batch.json","w"), indent=1)
