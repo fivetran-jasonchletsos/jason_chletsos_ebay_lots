@@ -20,10 +20,10 @@ BLACK = colors.black
 WHITE = colors.white
 
 # Individual listings — real numbered/certified autos, pulled out of the alphabetical run
+# NOTE: Paul O'Neill Topps Certified Auto is a GIFT to JC's best friend — excluded from sale entirely.
 INDIVIDUALS = [
  ("Roenis Elias II","Mariners · Topps Certified Autograph /45",8,12,18,"list ~$13-15, OBO on"),
  ("Juan Morillo","Diamondbacks · Topps Chrome auto RC #031/199",8,13,18,"list ~$14-16, OBO on"),
- ("Paul O'Neill","Yankees · Topps Certified Autograph Issue, legend",20,28,38,"list ~$28-30, OBO on"),
 ]
 
 # (last_name_sort_key, display name, variant, low, typ, high, note)
@@ -218,25 +218,41 @@ cardp=ParagraphStyle("cardp",parent=st["Normal"],fontSize=10,leading=12,textColo
 
 def money(x): return f"${x:,.2f}" if x%1 else f"${int(x)}"
 
-# sort alphabetically by last-name key (already the sort order in the list above; re-sort defensively)
-sorted_cards = sorted(CARDS, key=lambda c: c[0])
-LOTS_PER = 5
-n_lots = math.ceil(len(sorted_cards) / LOTS_PER)
-lots = [sorted_cards[i*LOTS_PER:(i+1)*LOTS_PER] for i in range(n_lots)]
+# Group by TEAM first (so lots make sense as a bundle), then alphabetize by last name
+# WITHIN each team/lot so the cards are easy to pull off JC's physically-sorted A-Z stack.
+NO_TEAM = "Multi-team / Legends inserts"
+def team_of(variant):
+    if " · " in variant:
+        return variant.split(" · ", 1)[0].strip()
+    return NO_TEAM
 
-def lot_title(lot):
-    first = lot[0][0]; last = lot[-1][0]
-    return f"{first}–{last}" if first != last else first
+by_team = {}
+for row in CARDS:
+    t = team_of(row[2])
+    by_team.setdefault(t, []).append(row)
+
+LOTS_PER = 5
+lots = []          # list of (team, sublot_index, total_sublots, cards)
+for team in sorted(by_team.keys()):
+    cards = sorted(by_team[team], key=lambda c: c[0])  # alphabetize within team
+    n_sub = math.ceil(len(cards) / LOTS_PER)
+    for i in range(n_sub):
+        chunk = cards[i*LOTS_PER:(i+1)*LOTS_PER]
+        lots.append((team, i+1, n_sub, chunk))
+
+def lot_title(team, idx, n_sub):
+    return f"{team} lot {idx} of {n_sub}" if n_sub > 1 else f"{team}"
 
 out=Path("docs/baseball_posting_plan.pdf")
 doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
 flow=[Paragraph("Baseball batch &mdash; POSTING PLAN",h1),
-      Paragraph(f"179 cards &middot; Scans 391-411 &middot; alphabetized to match your physical A-Z sort",sub),
-      Paragraph("<b>Not yet posted &mdash; review this plan first.</b> 3 individuals (real autos) + "
-                f"{n_lots} alphabetical lots of 5 cards or fewer. Say the word and I'll push these live.",grp)]
+      Paragraph(f"178 cards &middot; Scans 391-411 &middot; lots grouped by team, alphabetized within each lot to match your physical A-Z sort",sub),
+      Paragraph("<b>Not yet posted &mdash; review this plan first.</b> 2 individuals (real autos) + "
+                f"{len(lots)} team lots of 5 cards or fewer. Paul O'Neill's signed auto is excluded &mdash; "
+                "that one's a gift, not for sale. Say the word and I'll push these live.",grp)]
 
 # Individuals table
-flow.append(Paragraph("Individual listings (pull these 3 first)",grp))
+flow.append(Paragraph("Individual listings (pull these first)",grp))
 data=[["", "Card", "Variant", "List Price"]]
 for n,v,lo,ty,hi,nt in INDIVIDUALS:
     data.append(["☐", Paragraph(f"<b>{n}</b>",cardp), Paragraph(f"<font size=8.5>{v}</font>",cardp), Paragraph(f"<b>{nt}</b>",cardp)])
@@ -248,15 +264,16 @@ t.setStyle(TableStyle([("FONTSIZE",(0,0),(-1,-1),9),("FONTNAME",(0,0),(-1,0),"He
     ("TOPPADDING",(0,0),(-1,-1),3.5),("BOTTOMPADDING",(0,0),(-1,-1),3.5)]))
 flow.append(t)
 
-# Lots
-flow.append(Paragraph(f"Alphabetical lots ({n_lots} lots, {LOTS_PER} cards or fewer each)",grp))
+# Lots — grouped by team, alphabetized within each lot
+flow.append(Paragraph(f"Team lots ({len(lots)} lots, {LOTS_PER} cards or fewer each)",grp))
 lot_summaries=[]
-for i, lot in enumerate(lots, 1):
+for i, (team, idx, n_sub, lot) in enumerate(lots, 1):
     lot_typ = round(sum(c[4] for c in lot), 2)
     lot_low = round(sum(c[3] for c in lot), 2)
     lot_high = round(sum(c[5] for c in lot), 2)
-    lot_summaries.append({"lot":i,"range":lot_title(lot),"cards":[c[1] for c in lot],"suggested_price":lot_typ})
-    flow.append(Paragraph(f"Lot {i}: {lot_title(lot)} &mdash; list at {money(lot_typ)}",
+    title = lot_title(team, idx, n_sub)
+    lot_summaries.append({"lot":i,"team":title,"cards":[c[1] for c in lot],"suggested_price":lot_typ})
+    flow.append(Paragraph(f"Lot {i}: {title} &mdash; list at {money(lot_typ)}",
                 ParagraphStyle("lotgrp",parent=grp,fontSize=11,spaceBefore=8,spaceAfter=2)))
     data=[["", "Card", "Variant"]]
     for last, n, v, lo, ty, hi, nt in lot:
@@ -299,5 +316,5 @@ Path("output/_baseball_posting_plan.json").write_text(json.dumps(
   "team_inserts":{"cards":[c[0] for c in TEAM_INSERTS],"suggested_price":ti_typ},
   "status":"PLAN ONLY - not posted, pending JC review"},indent=1))
 
-print(f"{len(INDIVIDUALS)} individuals + {n_lots} lots ({len(sorted_cards)} cards) + 1 team-insert lot ({len(TEAM_INSERTS)} cards)")
+print(f"{len(INDIVIDUALS)} individuals + {len(lots)} team lots ({len(CARDS)} cards) + 1 team-insert lot ({len(TEAM_INSERTS)} cards)")
 print(f"wrote {out} -> {dl} + output/_baseball_posting_plan.json")
