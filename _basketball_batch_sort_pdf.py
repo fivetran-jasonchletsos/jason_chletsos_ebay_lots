@@ -1,4 +1,4 @@
-"""Basketball batch sort/valuation — Scans 433-447 (135 cards, 2025-26 Topps/Chrome).
+"""Basketball batch sort/valuation — Scans 433-475 (~360 cards, 2025-26 Topps/Chrome).
 Splits into KEEP (Knicks, 76ers, LeBron, Giannis, and other notable/star players per
 JC's criteria) vs SELL (lots + individuals). Raw/ungraded July 2026 eBay-comp estimates.
 Black-and-white print. HOLD — not for posting. More scans to come.
@@ -61,7 +61,31 @@ KEEP = {
   ("Trae Young","Hawks base",1,3,5,""),
   ("Klay Thompson","Mavericks base",1,3,5,""),
   ("Dwyane Wade","Heat legend insert",2,5,8,""),
-  ("Tyrese Haliburton","Pacers base",1,2,4,""),
+  ("Tyrese Haliburton","Pacers base (x2 copies)",1,2,4,""),
+ ],
+ "Scans 451-475 additions": [
+  ("Karl-Anthony Towns","Knicks base",1,2,4,""),
+  ("Jalen Brunson","Knicks base",1,3,5,""),
+  ("Josh Hart","Knicks base (x2 copies)",1,2,3,""),
+  ("Mikal Bridges","Knicks base",1,2,4,""),
+  ("Miles McBride","Knicks base (x2 copies)",1,2,3,""),
+  ("OG Anunoby","Knicks base (2nd copy, see earlier group)",1,3,5,""),
+  ("Bam Adebayo","Heat base (2nd copy)",1,2,4,""),
+  ("Nikola Jokic","Nuggets 'Championship Duo' insert (2nd copy) + Allen & Ginter throwback",1,3,5,""),
+  ("Kevin Durant","Rockets base (x2 copies)",1,3,5,""),
+  ("Kevin Garnett","Timberwolves legend base (2nd copy)",2,4,6,""),
+  ("Klay Thompson","Mavericks base (2nd copy)",1,3,5,""),
+  ("Victor Wembanyama","Spurs solo base (Chrome)",2,5,9,""),
+  ("Dirk Nowitzki","Mavericks legend base",2,4,7,""),
+  ("Bill Russell","Celtics legend base",2,5,8,""),
+  ("Rick Barry","Warriors legend base",2,4,6,""),
+  ("Steve Kerr","Spurs legend base",1,2,4,""),
+  ("Ja Morant","Grizzlies base (x2 copies)",1,3,5,""),
+  ("Domantas Sabonis","Kings base",1,2,4,""),
+  ("Donovan Mitchell","Cavaliers base",1,2,4,""),
+  ("Jrue Holiday","Celtics base",1,2,4,""),
+  ("Russell Westbrook","Nuggets base",1,2,4,""),
+  ("Devin Booker","Suns base",1,3,5,""),
  ],
 }
 
@@ -192,6 +216,9 @@ SELL = {
   ("Jabari Smith Jr.","base",1,2,4,""),
   ("Kevin Durant","base",1,3,5,""),
  ],
+ "Scans 451-475 — remaining commons (approx., pending full team sort)": [
+  ("Mixed base/Chrome/team-insert cards","~199 cards across Cavaliers, Suns, Grizzlies, Mavericks, Pistons, Wizards, Nuggets, Hawks, Heat, Nets, Rockets, Trail Blazers, Warriors, Bulls, Kings, Hornets, Pacers, Timberwolves, Magic, Raptors, Spurs, Jazz, Bucks, Pelicans, plus assorted team-duo insert cards (x199 copies)",1,2,3,"count is an estimate from this pass — will firm up to exact team lots once physically sorted, same as the rest of this project"),
+ ],
 }
 
 st=getSampleStyleSheet()
@@ -253,7 +280,7 @@ sell_out = Path("docs/basketball_sell.pdf")
 
 n_keep, g_keep = build(
     "Basketball keepers &mdash; personal collection",
-    "&middot; Scans 433-447",
+    "&middot; Scans 433-475",
     KEEP, keep_out,
     "Kept per your criteria: Knicks, 76ers, LeBron, Giannis, and other notable/star players "
     "(Jokic, Wembanyama, Kawhi, Harden, Durant, DeRozan, Edwards, Haliburton, Adebayo, Trae Young, "
@@ -266,7 +293,7 @@ n_keep, g_keep = build(
 
 n_sell, g_sell = build(
     "Basketball sell/lots &mdash; sort by team",
-    "&middot; Scans 433-447 &middot; HOLD, not posted",
+    "&middot; Scans 433-475 &middot; HOLD, not posted",
     SELL, sell_out,
     "<b>Sort verdict: lot material, organized by team for easy bundling.</b> Base 2025-26 Topps/Chrome "
     "commons run $1-4 raw even for current stars (confirmed via comps: LeBron $1.50-4, Giannis $0.99-2.24, "
@@ -275,7 +302,9 @@ n_sell, g_sell = build(
     "(Tidjane Sala&uuml;n, PJ Washington Jr., Ighodaro, Monk, Isaiah Joe, Agbaji, Watson, Bane, Isaiah Thomas) "
     "&mdash; the extra copy from each has been removed from this total. Team groups with 6+ cards "
     "(Pistons, Pacers, Grizzlies, Mavericks, Raptors) split cleanly into two 5-card-or-fewer lots each. "
-    "HOLD: nothing posted, more scans pending.")
+    "<b>Scans 451-475 (~199 cards) are counted as one estimated bulk line for now</b> rather than itemized "
+    "by team &mdash; that batch was large enough that a card-by-card team re-sort will follow once it's "
+    "physically organized; the running total already reflects the full count. HOLD: nothing posted, more scans pending.")
 
 json.dump({"keep":{"count":n_keep,"total":g_keep},"sell":{"count":n_sell,"total":g_sell}},
           open("output/_basketball_batch.json","w"), indent=1)
