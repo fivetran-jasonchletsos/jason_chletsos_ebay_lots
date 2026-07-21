@@ -21,9 +21,10 @@ WHITE = colors.white
 
 # Individual listings — real numbered/certified autos, pulled out of the alphabetical run
 # NOTE: Paul O'Neill Topps Certified Auto is a GIFT to JC's best friend — excluded from sale entirely.
+# Both POSTED LIVE 2026-07-21 (see item IDs in note field).
 INDIVIDUALS = [
- ("Roenis Elias II","Mariners · Topps Certified Autograph /45",8,12,18,"list ~$13-15, OBO on"),
- ("Juan Morillo","Diamondbacks · Topps Chrome auto RC #031/199",8,13,18,"list ~$14-16, OBO on"),
+ ("Roenis Elias II","Mariners · Topps Certified Autograph /45",8,12,18,"POSTED $14.99 — item 307077710546"),
+ ("Juan Morillo","Diamondbacks · Topps Chrome auto RC #031/199",8,13,18,"POSTED $15.99 — item 307077711037"),
 ]
 
 # (last_name_sort_key, display name, variant, low, typ, high, note)
@@ -252,7 +253,7 @@ flow=[Paragraph("Baseball batch &mdash; POSTING PLAN",h1),
                 "that one's a gift, not for sale. Say the word and I'll push these live.",grp)]
 
 # Individuals table
-flow.append(Paragraph("Individual listings (pull these first)",grp))
+flow.append(Paragraph("Individual listings — LIVE as of 2026-07-21",grp))
 data=[["", "Card", "Variant", "List Price"]]
 for n,v,lo,ty,hi,nt in INDIVIDUALS:
     data.append(["☐", Paragraph(f"<b>{n}</b>",cardp), Paragraph(f"<font size=8.5>{v}</font>",cardp), Paragraph(f"<b>{nt}</b>",cardp)])
