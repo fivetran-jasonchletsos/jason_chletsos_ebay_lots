@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn to Play — The Collection</title>
+<meta name="description" content="Beginner's guides to Pokémon TCG and Magic: The Gathering for the whole family.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141414; --panel2:#1a1a1a; --border:rgba(255,255,255,0.08);
+    --text:#f1efe9; --sub:#9a9388;
+    --shared:#8a6cff; --shared-br:#a98bff;
+    --pokemon:#ffcb05; --pokemon-br:#ee1515;
+    --magic:#7c5cff; --magic-br:#e0651f;
+    --font-display:'Fredoka','Nunito',sans-serif;
+    --font-body:'Nunito',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 10% -5%, rgba(138,108,255,0.12), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 95% 5%, rgba(255,203,5,0.08), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 90% 100%, rgba(124,92,255,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 5% 100%, rgba(238,21,21,0.07), transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:48px 24px 80px;}
+  .back{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--sub); font-family:var(--font-mono); font-size:12.5px; letter-spacing:.04em;
+    margin-bottom:36px; transition:color .2s ease;
+  }
+  .back:hover{ color:var(--text); }
+  header{text-align:center;margin-bottom:52px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--sub); margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.6vw,46px);
+    line-height:1.1; letter-spacing:-0.01em;
+    background:linear-gradient(90deg, var(--shared-br), #fff 45%, var(--pokemon));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .tag{color:var(--sub); font-size:16px; margin-top:16px; max-width:560px; margin-left:auto; margin-right:auto; line-height:1.6;}
+
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; margin-bottom:40px; }
+  @media (max-width:680px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    position:relative; display:block; text-decoration:none; color:inherit;
+    background:var(--panel); border:1px solid var(--border); border-radius:20px;
+    padding:32px 28px 28px; overflow:hidden; isolation:isolate;
+    transition:transform .28s cubic-bezier(.2,.8,.3,1), border-color .28s ease, box-shadow .28s ease;
+  }
+  .card::before{
+    content:''; position:absolute; inset:0; z-index:-1; opacity:0.18;
+    background:radial-gradient(560px 320px at var(--gx,80%) var(--gy,-10%), var(--glow,#8a6cff), transparent 65%);
+    transition:opacity .3s ease;
+  }
+  .card:hover{ transform:translateY(-5px); }
+  .card:hover::before{ opacity:0.32; }
+  .card.poke  { --glow:var(--pokemon-br); border-color:rgba(238,21,21,0.25); }
+  .card.magic { --glow:var(--magic);      border-color:rgba(124,92,255,0.28); }
+  .card:hover.poke  { box-shadow:0 14px 40px -12px rgba(238,21,21,0.30); }
+  .card:hover.magic { box-shadow:0 14px 40px -12px rgba(124,92,255,0.35); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    padding:5px 12px; border-radius:100px; margin-bottom:16px;
+    background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--sub);
+  }
+  .dot{width:7px;height:7px;border-radius:50%;}
+  .poke .dot{background:var(--pokemon-br);}
+  .magic .dot{background:var(--magic);}
+  .card h2{ font-family:var(--font-display); font-weight:600; font-size:26px; margin-bottom:6px; }
+  .card .who{ color:var(--sub); font-size:14px; margin-bottom:14px; }
+  .card p{ color:var(--sub); font-size:14.5px; line-height:1.55; margin-bottom:20px; }
+  .go{ font-family:var(--font-mono); font-size:12.5px; font-weight:600; letter-spacing:.04em; display:inline-flex; align-items:center; gap:6px; }
+  .poke .go{ color:var(--pokemon-br); }
+  .magic .go{ color:var(--magic-br); }
+  .go .arrow{ transition:transform .25s ease; }
+  .card:hover .arrow{ transform:translateX(4px); }
+
+  .panel{
+    background:var(--panel2); border:1px solid var(--border); border-radius:20px;
+    padding:28px 30px; margin-bottom:20px;
+  }
+  .panel h3{ font-family:var(--font-display); font-size:18px; margin-bottom:12px; color:var(--text); }
+  .panel p, .panel li{ color:var(--sub); font-size:14.5px; line-height:1.7; }
+  .panel ul{ padding-left:20px; }
+  .panel ul li{ margin-bottom:6px; }
+  .panel strong{ color:var(--text); }
+
+  footer{
+    text-align:center; margin-top:48px; color:var(--sub); font-size:12.5px;
+    font-family:var(--font-mono); letter-spacing:.03em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../family_hub.html">&larr; Back to The Collection</a>
+  <header>
+    <div class="eyebrow">The Collection · Learn to Play</div>
+    <h1>You've got the cards.<br>Now play the game.</h1>
+    <p class="tag">Two beginner tracks, written for four people who are learning together and building decks straight out of the binder. Pick one to start — you can switch anytime.</p>
+  </header>
+
+  <div class="grid">
+    <a class="card poke" href="pokemon.html">
+      <span class="badge"><span class="dot"></span>Track 1</span>
+      <h2>Pokémon TCG</h2>
+      <div class="who">Fastest way to a first game</div>
+      <p>Simple win condition, short turns, and you probably already have enough basics and energy to play tonight.</p>
+      <span class="go">Start the Pokémon guide <span class="arrow">→</span></span>
+    </a>
+
+    <a class="card magic" href="magic.html">
+      <span class="badge"><span class="dot"></span>Track 2</span>
+      <h2>Magic: The Gathering</h2>
+      <div class="who">Deeper game, more ways to play together</div>
+      <p>More rules up front, but way more room to grow — and it scales to all four of you at one table.</p>
+      <span class="go">Start the Magic guide <span class="arrow">→</span></span>
+    </a>
+  </div>
+
+  <div class="panel">
+    <h3>How to use these two pages</h3>
+    <ul>
+      <li>Each guide covers the same five things in the same order: <strong>the goal</strong>, <strong>what's in a deck</strong>, <strong>how a turn works</strong>, <strong>the terms you'll actually hear</strong>, and <strong>a checklist for your first real game</strong>.</li>
+      <li>Both end with a section on building a starter deck out of whatever you've already pulled and scanned — no need to buy anything to try your first game.</li>
+      <li>Neither guide covers every rule. They cover enough to play a fun, legal-ish kitchen-table game. Look up edge cases as they come up — they will, and that's normal.</li>
+    </ul>
+  </div>
+
+  <footer>Learn to Play · part of the family scan-to-site network</footer>
+</div>
+</body>
+</html>

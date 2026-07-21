@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn Magic: The Gathering — The Collection</title>
+<meta name="description" content="Beginner's guide to playing Magic: The Gathering.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141414; --panel2:#1a1a1a; --border:rgba(255,255,255,0.08);
+    --text:#f1efe9; --sub:#9a9388;
+    --w:#f8f6d8; --u:#4fa8e0; --b:#8b7bb5; --r:#e0651f; --g:#5cb37a; --accent:#a98bff;
+    --font-display:'Fredoka','Nunito',sans-serif;
+    --font-body:'Nunito',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 10% -5%, rgba(124,92,255,0.12), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 95% 5%, rgba(224,101,31,0.09), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 50% 100%, rgba(92,179,122,0.08), transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:48px 24px 80px;}
+  .nav{ display:flex; justify-content:space-between; align-items:center; margin-bottom:36px; flex-wrap:wrap; gap:10px; }
+  .back{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--sub); font-family:var(--font-mono); font-size:12.5px; letter-spacing:.04em;
+    transition:color .2s ease;
+  }
+  .back:hover{ color:var(--text); }
+  .switch{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--accent); font-family:var(--font-mono); font-size:12.5px; letter-spacing:.04em;
+    border:1px solid rgba(169,139,255,0.3); padding:6px 14px; border-radius:100px;
+    transition:background .2s ease;
+  }
+  .switch:hover{ background:rgba(169,139,255,0.08); }
+
+  header{margin-bottom:44px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.6vw,44px);
+    line-height:1.1; letter-spacing:-0.01em; color:var(--text); margin-bottom:14px;
+  }
+  .tag{color:var(--sub); font-size:16px; line-height:1.65; max-width:640px;}
+
+  section{ margin-bottom:40px; }
+  h2{
+    font-family:var(--font-display); font-weight:600; font-size:22px; margin-bottom:16px;
+    display:flex; align-items:center; color:var(--text);
+  }
+  .panel{
+    background:var(--panel2); border:1px solid var(--border); border-radius:18px;
+    padding:24px 26px; margin-bottom:14px;
+  }
+  p{ color:var(--sub); font-size:15px; line-height:1.7; margin-bottom:12px; }
+  p:last-child{ margin-bottom:0; }
+  strong{ color:var(--text); }
+  ul, ol{ padding-left:22px; color:var(--sub); font-size:15px; line-height:1.8; }
+  ul li, ol li{ margin-bottom:8px; }
+  ul li::marker{ color:var(--accent); }
+  ol{ counter-reset:item; list-style:none; padding-left:0; }
+  ol li{ counter-increment:item; position:relative; padding-left:38px; margin-bottom:14px; }
+  ol li::before{
+    content:counter(item); position:absolute; left:0; top:0;
+    width:26px; height:26px; border-radius:50%; background:rgba(169,139,255,0.15);
+    color:var(--accent); font-family:var(--font-mono); font-size:13px; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .checklist{ list-style:none; padding-left:0; }
+  .checklist li{ padding-left:32px; position:relative; margin-bottom:10px; }
+  .checklist li::before{ content:'\2610'; position:absolute; left:0; top:0; color:var(--accent); font-size:16px; }
+
+  .colors{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:6px; }
+  @media (max-width:640px){ .colors{ grid-template-columns:repeat(2,1fr); } }
+  .cchip{ border-radius:14px; padding:14px; border:1px solid var(--border); background:rgba(255,255,255,0.02); }
+  .cchip .cname{ font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; margin-bottom:6px; font-weight:600; }
+  .cchip .cdesc{ color:var(--sub); font-size:13px; line-height:1.5; }
+  .cchip.w .cname{ color:var(--w); } .cchip.u .cname{ color:var(--u); }
+  .cchip.b .cname{ color:var(--b); } .cchip.r .cname{ color:var(--r); } .cchip.g .cname{ color:var(--g); }
+
+  .glossary{ display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  @media (max-width:600px){ .glossary{ grid-template-columns:1fr; } }
+  .gterm{ padding:14px 0; border-bottom:1px solid var(--border); }
+  .glossary > .gterm:nth-child(odd){ padding-right:20px; }
+  .glossary > .gterm:nth-child(even){ padding-left:20px; }
+  @media (max-width:600px){ .glossary > .gterm{ padding-left:0 !important; padding-right:0 !important; } }
+  .gterm b{ color:var(--accent); font-family:var(--font-mono); font-size:13px; letter-spacing:.02em; display:block; margin-bottom:4px; }
+  .gterm span{ color:var(--sub); font-size:14px; line-height:1.6; }
+
+  .callout{
+    border-left:3px solid var(--accent); background:rgba(169,139,255,0.06);
+    padding:16px 20px; border-radius:0 12px 12px 0; margin-bottom:14px;
+  }
+  .callout p{ color:var(--text); font-size:14.5px; margin:0; }
+
+  .phaserow{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .phase{
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.03em;
+    background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:8px;
+    padding:6px 10px; color:var(--sub);
+  }
+
+  .pagenav{
+    display:flex; justify-content:space-between; margin-top:56px; padding-top:24px;
+    border-top:1px solid var(--border); flex-wrap:wrap; gap:12px;
+  }
+  .pagenav a{ color:var(--sub); text-decoration:none; font-family:var(--font-mono); font-size:13px; transition:color .2s ease; }
+  .pagenav a:hover{ color:var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a class="back" href="index.html">&larr; Learn to Play</a>
+    <a class="switch" href="pokemon.html">Switch to Pokémon TCG →</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Track 2 · Magic: The Gathering</div>
+    <h1>Magic: The Gathering for beginners</h1>
+    <p class="tag">Magic has more moving parts than Pokémon, but you don't need all of them for a fun first game. This covers the kitchen-table version — enough to actually play, with the deeper rules waiting for when you want them.</p>
+  </header>
+
+  <section>
+    <h2>The goal</h2>
+    <div class="panel">
+      <p>Each player starts at <strong>20 life</strong>. Deal damage with creatures and spells to bring your opponent to <strong>0 or below</strong> and you win. (There are a couple of alternate ways to lose — drawing from an empty library, or certain rare card effects — but life total is the one that matters for your first games.)</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>The five colors</h2>
+    <div class="panel">
+      <p>Every card belongs to one or more of 5 colors (or none, for "colorless" cards like most Artifacts). Colors aren't teams you're locked into — they're flavors of strategy, and most decks mix 1-2.</p>
+      <div class="colors">
+        <div class="cchip w"><div class="cname">White</div><div class="cdesc">Teamwork, small efficient creatures, protection</div></div>
+        <div class="cchip u"><div class="cname">Blue</div><div class="cdesc">Card draw, countering spells, tricky plays</div></div>
+        <div class="cchip b"><div class="cname">Black</div><div class="cdesc">Removal, sacrifice, drain life for value</div></div>
+        <div class="cchip r"><div class="cname">Red</div><div class="cdesc">Aggression, direct damage, fast decks</div></div>
+        <div class="cchip g"><div class="cname">Green</div><div class="cdesc">Big creatures, extra mana, raw size</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What's in a deck</h2>
+    <div class="panel">
+      <p><strong>Constructed (regular play):</strong> minimum 60 cards, no more than 4 copies of any card (basic Lands excepted). Roughly 40% of your deck should be <strong>Lands</strong> — about 17 out of 60.</p>
+      <p><strong>Limited (Draft/Sealed) — easiest way to start with what you're pulling:</strong> just 40 cards minimum, built only from packs you've opened. This is the natural on-ramp for a family that's collecting from packs rather than buying full playsets.</p>
+      <ul>
+        <li><strong>Lands</strong> — tap for mana. Basic Lands (Plains=White, Island=Blue, Swamp=Black, Mountain=Red, Forest=Green) are the mana engine of every deck.</li>
+        <li><strong>Creatures</strong> — attack and block. Have Power (damage dealt) and Toughness (damage they can take).</li>
+        <li><strong>Instants / Sorceries</strong> — one-time effects. Sorceries only on your own main phase; Instants any time, including on your opponent's turn.</li>
+        <li><strong>Artifacts / Enchantments</strong> — stick around and provide an ongoing effect.</li>
+        <li><strong>Planeswalkers</strong> — powerful permanents with their own abilities and loyalty counters, can be attacked like a player.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>How a turn works</h2>
+    <div class="panel">
+      <div class="phaserow">
+        <span class="phase">1. Untap</span><span class="phase">2. Upkeep</span><span class="phase">3. Draw</span>
+        <span class="phase">4. Main Phase 1</span><span class="phase">5. Combat</span><span class="phase">6. Main Phase 2</span><span class="phase">7. End step</span>
+      </div>
+      <p style="margin-top:16px;">In plain terms: untap everything you had tapped, draw a card, play a Land (1 per turn) and any creatures/spells you can afford, then decide whether to attack. If you attack, your opponent chooses which of their untapped creatures block. Damage happens, then you get a second main phase to play more spells before passing the turn.</p>
+      <div class="callout"><p><strong>Mana cost:</strong> the symbols in a card's top-right corner. Tap that many matching Lands to pay for it. A card costing <em>2RR</em> needs 2 of any land plus 2 Mountains.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Terms you'll actually hear</h2>
+    <div class="panel">
+      <div class="glossary">
+        <div class="gterm"><b>Tap / Untap</b><span>Turning a card sideways to use it (mana, attacking); it untaps next turn.</span></div>
+        <div class="gterm"><b>Mana / CMC</b><span>The colored energy Lands produce; a card's total cost is its "converted mana cost."</span></div>
+        <div class="gterm"><b>Summoning sickness</b><span>A creature can't attack or tap for an ability the turn it enters play.</span></div>
+        <div class="gterm"><b>The stack</b><span>When spells are cast in response to each other, the most recent one resolves first — like a stack of plates.</span></div>
+        <div class="gterm"><b>Flying</b><span>Can only be blocked by creatures with Flying or Reach.</span></div>
+        <div class="gterm"><b>First strike / Deathtouch</b><span>First strike deals combat damage before normal creatures; Deathtouch destroys anything it damages.</span></div>
+        <div class="gterm"><b>Trample</b><span>Excess combat damage past a blocker spills over to the defending player.</span></div>
+        <div class="gterm"><b>Removal</b><span>Any spell whose job is to destroy, exile, or otherwise get rid of a creature.</span></div>
+        <div class="gterm"><b>Mulligan</b><span>Shuffle a bad opening hand back in and draw a new 7 (modern rule: draw 7, put 1 back for each mulligan taken).</span></div>
+        <div class="gterm"><b>Commander / EDH</b><span>A popular multiplayer format — 100-card deck, 40 life, built around one legendary creature. Good format once all 4 of you want to play at one table.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Your first game — checklist</h2>
+    <div class="panel">
+      <ul class="checklist">
+        <li>Shuffle your deck (60-card constructed, or 40-card if playing Limited from your own packs).</li>
+        <li>Both players draw an opening hand of 7 cards; mulligan if it's unplayable (no lands, or all lands).</li>
+        <li>Flip a coin — winner chooses who goes first. The player going first skips their very first draw step.</li>
+        <li>Each turn: untap, draw, play a land if you have one, cast what you can afford, decide whether to attack, pass.</li>
+        <li>Track life total starting at 20 each (dice, a phone notes app, or paper all work fine).</li>
+        <li>First player to 0 life (or an agreed alternate loss condition) loses.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Building your first deck from what you've already pulled</h2>
+    <div class="panel">
+      <p>Since you're pulling from packs rather than buying singles, start in <strong>Limited</strong> mode — build straight from what's actually in the binder, 40 cards minimum.</p>
+      <ol>
+        <li><strong>Sort by color.</strong> Spread out your creatures and spells and see which 1-2 colors you have the most playable cards in.</li>
+        <li><strong>Pick your 2 colors.</strong> Two-color decks are the sweet spot for beginners — enough variety, not so much you're stuck holding uncastable cards.</li>
+        <li><strong>Count your creatures.</strong> Aim for roughly 15-17 creatures plus a handful of removal/tricks in your 40, the rest lands.</li>
+        <li><strong>Add basic Lands to hit ~17 lands</strong> (for 40 cards, more like 16-17; scale up for 60). Split lands to roughly match how many cards need each color.</li>
+        <li><strong>Playtest solo</strong> — deal yourself 7 cards, "play" a few turns against nobody, and see if the deck feels smooth before your first real match.</li>
+      </ol>
+      <div class="callout"><p>Since there are 4 of you: Magic is normally 1v1, so pair off and rotate, or once everyone knows the basics, try a free-for-all multiplayer game (everyone starts at 20 life, last player standing wins) — it's slower but genuinely built for more than 2 players at once.</p></div>
+    </div>
+  </section>
+
+  <div class="pagenav">
+    <a href="index.html">&larr; Back to Learn to Play</a>
+    <a href="pokemon.html">Try Pokémon TCG instead →</a>
+  </div>
+</div>
+</body>
+</html>

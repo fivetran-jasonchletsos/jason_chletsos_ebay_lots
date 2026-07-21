@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn Pokémon TCG — The Collection</title>
+<meta name="description" content="Beginner's guide to playing the Pokémon Trading Card Game.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141414; --panel2:#1a1a1a; --border:rgba(255,255,255,0.08);
+    --text:#f1efe9; --sub:#9a9388;
+    --poke-r:#ee1515; --poke-b:#2a75bb; --poke-y:#ffcb05;
+    --font-display:'Fredoka','Nunito',sans-serif;
+    --font-body:'Nunito',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 10% -5%, rgba(238,21,21,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 95% 5%, rgba(255,203,5,0.09), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 50% 100%, rgba(42,117,187,0.08), transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:48px 24px 80px;}
+  .nav{ display:flex; justify-content:space-between; align-items:center; margin-bottom:36px; flex-wrap:wrap; gap:10px; }
+  .back{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--sub); font-family:var(--font-mono); font-size:12.5px; letter-spacing:.04em;
+    transition:color .2s ease;
+  }
+  .back:hover{ color:var(--text); }
+  .switch{
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    color:var(--poke-y); font-family:var(--font-mono); font-size:12.5px; letter-spacing:.04em;
+    border:1px solid rgba(255,203,5,0.3); padding:6px 14px; border-radius:100px;
+    transition:background .2s ease;
+  }
+  .switch:hover{ background:rgba(255,203,5,0.08); }
+
+  header{margin-bottom:44px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--poke-y); margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.6vw,44px);
+    line-height:1.1; letter-spacing:-0.01em; color:var(--text); margin-bottom:14px;
+  }
+  .tag{color:var(--sub); font-size:16px; line-height:1.65; max-width:640px;}
+
+  section{ margin-bottom:40px; }
+  .stepnum{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:rgba(238,21,21,0.15);
+    color:var(--poke-y); font-family:var(--font-mono); font-size:13px; font-weight:600;
+    margin-right:10px; flex-shrink:0;
+  }
+  h2{
+    font-family:var(--font-display); font-weight:600; font-size:22px; margin-bottom:16px;
+    display:flex; align-items:center; color:var(--text);
+  }
+  .panel{
+    background:var(--panel2); border:1px solid var(--border); border-radius:18px;
+    padding:24px 26px; margin-bottom:14px;
+  }
+  p{ color:var(--sub); font-size:15px; line-height:1.7; margin-bottom:12px; }
+  p:last-child{ margin-bottom:0; }
+  strong{ color:var(--text); }
+  ul, ol{ padding-left:22px; color:var(--sub); font-size:15px; line-height:1.8; }
+  ul li, ol li{ margin-bottom:8px; }
+  ul li::marker{ color:var(--poke-r); }
+  ol{ counter-reset:item; list-style:none; padding-left:0; }
+  ol li{
+    counter-increment:item; position:relative; padding-left:38px; margin-bottom:14px;
+  }
+  ol li::before{
+    content:counter(item); position:absolute; left:0; top:0;
+    width:26px; height:26px; border-radius:50%; background:rgba(238,21,21,0.15);
+    color:var(--poke-y); font-family:var(--font-mono); font-size:13px; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .checklist{ list-style:none; padding-left:0; }
+  .checklist li{
+    padding-left:32px; position:relative; margin-bottom:10px;
+  }
+  .checklist li::before{
+    content:'\2610'; position:absolute; left:0; top:0; color:var(--poke-y); font-size:16px;
+  }
+  .glossary{ display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  @media (max-width:600px){ .glossary{ grid-template-columns:1fr; } }
+  .gterm{ padding:14px 0; border-bottom:1px solid var(--border); }
+  .glossary > .gterm:nth-child(odd){ padding-right:20px; }
+  .glossary > .gterm:nth-child(even){ padding-left:20px; }
+  @media (max-width:600px){ .glossary > .gterm{ padding-left:0 !important; padding-right:0 !important; } }
+  .gterm b{ color:var(--poke-y); font-family:var(--font-mono); font-size:13px; letter-spacing:.02em; display:block; margin-bottom:4px; }
+  .gterm span{ color:var(--sub); font-size:14px; line-height:1.6; }
+
+  .callout{
+    border-left:3px solid var(--poke-y); background:rgba(255,203,5,0.06);
+    padding:16px 20px; border-radius:0 12px 12px 0; margin-bottom:14px;
+  }
+  .callout p{ color:var(--text); font-size:14.5px; margin:0; }
+
+  .pagenav{
+    display:flex; justify-content:space-between; margin-top:56px; padding-top:24px;
+    border-top:1px solid var(--border); flex-wrap:wrap; gap:12px;
+  }
+  .pagenav a{
+    color:var(--sub); text-decoration:none; font-family:var(--font-mono); font-size:13px;
+    transition:color .2s ease;
+  }
+  .pagenav a:hover{ color:var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <a class="back" href="index.html">&larr; Learn to Play</a>
+    <a class="switch" href="magic.html">Switch to Magic: The Gathering →</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Track 1 · Pokémon Trading Card Game</div>
+    <h1>Pokémon TCG for beginners</h1>
+    <p class="tag">This covers enough to sit down tonight and play a real, legal-ish game — not every ruling in the book. Read it once, keep it open during your first game, and you'll have it memorized by game three.</p>
+  </header>
+
+  <section>
+    <h2>The goal</h2>
+    <div class="panel">
+      <p>Each player starts with <strong>6 Prize cards</strong> set face-down. Every time you knock out one of your opponent's Pokémon, you take one Prize card (some rare Pokémon give you 2 at once). <strong>First player to take all 6 Prizes wins.</strong></p>
+      <p>You also win if your opponent has no Pokémon left in play, or if they're forced to draw from an empty deck on their turn.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>What's in a deck</h2>
+    <div class="panel">
+      <p>A legal deck is exactly <strong>60 cards</strong>, built from three kinds of cards:</p>
+      <ul>
+        <li><strong>Pokémon</strong> — Basic Pokémon (played straight from your hand) and Evolutions (Stage 1, Stage 2) that you place on top of a matching Basic once it's been in play since the start of your turn.</li>
+        <li><strong>Trainers</strong> — Items (play as many as you want), Supporters (only 1 per turn), and Stadiums (1 in play at a time, affects both players).</li>
+        <li><strong>Energy</strong> — attach 1 per turn to a Pokémon to power its attacks. Basic Energy matches a type (Fire, Water, Grass, Lightning, Psychic, Fighting, Darkness, Metal, Fairy, Colorless).</li>
+      </ul>
+      <div class="callout"><p>A common beginner ratio: roughly 15-20 Pokémon, 15-20 Trainers, 10-15 Energy — but there's no fixed rule. If your attacks need 2 Water energy, run enough Water energy that you're not stuck waiting.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How a turn works</h2>
+    <ol>
+      <li><strong>Draw a card.</strong> (Not on the very first turn of the game.)</li>
+      <li><strong>Do stuff, in any order, as many times as the rules allow:</strong> play Basic Pokémon to your Bench (up to 5), evolve a Pokémon that's been in play since your last turn started, play Item cards, play 1 Supporter, attach 1 Energy card, retreat your Active Pokémon (once per turn, pay its retreat cost by discarding that many Energy from it).</li>
+      <li><strong>Attack</strong> — if your Active Pokémon has enough attached Energy to pay an attack's cost, use it. Attacking always ends your turn.</li>
+      <li><strong>Pass</strong> — you can also just end your turn without attacking if you're setting up.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Terms you'll actually hear</h2>
+    <div class="panel">
+      <div class="glossary">
+        <div class="gterm"><b>Active Pokémon</b><span>The one Pokémon in the "front" spot that attacks and can be attacked.</span></div>
+        <div class="gterm"><b>Bench</b><span>Up to 5 Pokémon waiting behind your Active one, safe from most attacks.</span></div>
+        <div class="gterm"><b>Prize card</b><span>One of the 6 cards set aside at the start; take one each time you KO an opposing Pokémon.</span></div>
+        <div class="gterm"><b>Weakness</b><span>Printed on the card — if the attacker's type matches, damage is usually doubled.</span></div>
+        <div class="gterm"><b>Resistance</b><span>Printed on the card — if it matches, subtract from incoming damage (usually -30).</span></div>
+        <div class="gterm"><b>Retreat cost</b><span>Energy you discard from your Active Pokémon to swap it with a Bench Pokémon.</span></div>
+        <div class="gterm"><b>Knockout (KO)</b><span>Damage counters equal or exceed a Pokémon's HP — it's discarded and you take a Prize.</span></div>
+        <div class="gterm"><b>Status conditions</b><span>Asleep, Paralyzed, Confused, Poisoned, Burned — printed effects that limit or hurt a Pokémon on future turns.</span></div>
+        <div class="gterm"><b>GX / EX / V / VMAX</b><span>Rare, more powerful Pokémon. Rule of thumb: if it says one of these on the card, it usually gives your opponent 2 Prizes instead of 1 when KO'd.</span></div>
+        <div class="gterm"><b>Mulligan</b><span>If your opening hand has no Basic Pokémon, you show your opponent, reshuffle, and draw 7 again.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Your first game — checklist</h2>
+    <div class="panel">
+      <ul class="checklist">
+        <li>Each player shuffles their 60-card deck and draws 7 cards.</li>
+        <li>If you have no Basic Pokémon in hand, mulligan (show your hand, reshuffle, draw again).</li>
+        <li>Each player sets 1 Basic Pokémon face-down as their Active Pokémon, and can place more Basics face-down on their Bench.</li>
+        <li>Flip all face-down Pokémon up at the same time.</li>
+        <li>Each player counts out 6 cards from the top of their deck, sets them aside face-down as Prizes — don't look at them.</li>
+        <li>Flip a coin — winner picks who goes first. The first player does NOT draw a card or attack on turn 1.</li>
+        <li>Play turns back and forth using the turn structure above until someone takes all 6 Prizes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Building your first deck from what you've already pulled</h2>
+    <div class="panel">
+      <p>You don't need to buy anything to try this. Pull out your collection and sort by <strong>Energy type</strong> first — pick the one type you have the most Basic Pokémon in (Fire, Water, whatever). That's your deck's core.</p>
+      <ol>
+        <li><strong>Pick a type, pick your Basics.</strong> Grab every Basic Pokémon of that type, plus any Stage 1/Stage 2 evolutions that build on them.</li>
+        <li><strong>Add Colorless attackers.</strong> Pokémon with Colorless-type attacks can go in any deck — use them to round out the numbers.</li>
+        <li><strong>Add Trainers you have.</strong> Even a handful of Item and Supporter cards makes the deck feel more real; don't worry about the "perfect" build yet.</li>
+        <li><strong>Fill to 60 with Basic Energy</strong> matching your main type. If you're short on real deck size, a scaled-down <strong>20-30 card "quick play" deck</strong> (same ratios, smaller Prize count of 3-4) is a totally fine way to learn the flow before committing to a real 60-card deck.</li>
+        <li><strong>Play a practice hand solo</strong> — just deal yourself 7 cards and see if you understand your own board before playing against someone else.</li>
+      </ol>
+      <div class="callout"><p>Since there are 4 of you: it's easiest to start 1v1 while everyone learns the flow, then rotate opponents. Once everyone's comfortable, a casual "everyone brings their best 20 Pokémon" battle royale (last Active Pokémon standing wins, no real Prizes) is a fun way to get all 4 playing at once.</p></div>
+    </div>
+  </section>
+
+  <div class="pagenav">
+    <a href="index.html">&larr; Back to Learn to Play</a>
+    <a href="magic.html">Try Magic: The Gathering instead →</a>
+  </div>
+</div>
+</body>
+</html>
