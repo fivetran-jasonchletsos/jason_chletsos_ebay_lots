@@ -27,6 +27,7 @@ import json
 import logging
 import os
 import random
+import time
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -1149,85 +1150,37 @@ def lambda_handler(event, context):
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
-            cards_path = "docs/natasha_pokedex/cards.json"
-            try:
-                current_raw, sha = _github_get_json_file(cards_path)
-            except urllib.error.HTTPError as exc:
-                logger.error(f"pokedex-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not read cards.json (HTTP {exc.code})",
-                }, event)
-
-            if current_raw.strip():
-                try:
-                    cards = json.loads(current_raw.decode("utf-8"))
-                except Exception as exc:
-                    logger.error(f"pokedex-save: cards.json unparseable, aborting: {exc}")
-                    return _cors_response(502, {
-                        "success": False,
-                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
-                    }, event)
-            else:
-                cards = []
-            if not isinstance(cards, list):
-                logger.error("pokedex-save: cards.json is not a JSON array, aborting")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
-                }, event)
-
-            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
-            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
-
-            image_path = f"docs/natasha_pokedex/images/card{next_id}.jpg"
-            try:
-                _github_put_file(image_path, raw, message=f"Natasha's Pokedex: add card {next_id} image (auto-save)")
-            except urllib.error.HTTPError as exc:
-                logger.error(f"pokedex-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not upload card image (HTTP {exc.code})",
-                }, event)
-
             est = card.get("estimated_value_usd") or {}
             try:
                 est_value = round(float((est or {}).get("typical") or 0))
             except (TypeError, ValueError):
                 est_value = 0
 
-            record = {
-                "id":          next_id,
-                "name":        card.get("player"),
-                "image":       f"images/card{next_id}.jpg",
-                "dexNo":       None,
-                "hp":          None,
-                "type":        None,
-                "language":    None,
-                "set":         card.get("set_name") or card.get("brand"),
-                "cardNumber":  card.get("card_number"),
-                "rarity":      None,
-                "stage":       None,
-                "attacks":     [],
-                "illustrator": None,
-                "year":        card.get("year") or None,
-                "estValue":    est_value,
-                "scannedAt":   scanned_at,
-            }
-            cards.append(record)
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "name":        card.get("player"),
+                    "dexNo":       None,
+                    "hp":          None,
+                    "type":        None,
+                    "language":    None,
+                    "set":         card.get("set_name") or card.get("brand"),
+                    "cardNumber":  card.get("card_number"),
+                    "rarity":      None,
+                    "stage":       None,
+                    "attacks":     [],
+                    "illustrator": None,
+                    "year":        card.get("year") or None,
+                    "estValue":    est_value,
+                    "scannedAt":   scanned_at,
+                }
 
             try:
-                _github_put_file(
-                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
-                    message=f"Natasha's Pokedex: add card {next_id} ({record.get('name') or 'unknown'})",
-                    sha=sha,
+                next_id, record = _save_card_with_retry(
+                    "docs/natasha_pokedex", raw, build_record, "Natasha's Pokedex"
                 )
-            except urllib.error.HTTPError as exc:
-                logger.error(f"pokedex-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
-                }, event)
+            except RuntimeError as exc:
+                logger.error(f"pokedex-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
 
             logger.info(f"pokedex-save: added card id={next_id} name={record.get('name')}")
             return _cors_response(200, {
@@ -1366,85 +1319,37 @@ def lambda_handler(event, context):
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
-            cards_path = "docs/claire_pokedex/cards.json"
-            try:
-                current_raw, sha = _github_get_json_file(cards_path)
-            except urllib.error.HTTPError as exc:
-                logger.error(f"claire-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not read cards.json (HTTP {exc.code})",
-                }, event)
-
-            if current_raw.strip():
-                try:
-                    cards = json.loads(current_raw.decode("utf-8"))
-                except Exception as exc:
-                    logger.error(f"claire-save: cards.json unparseable, aborting: {exc}")
-                    return _cors_response(502, {
-                        "success": False,
-                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
-                    }, event)
-            else:
-                cards = []
-            if not isinstance(cards, list):
-                logger.error("claire-save: cards.json is not a JSON array, aborting")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
-                }, event)
-
-            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
-            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
-
-            image_path = f"docs/claire_pokedex/images/card{next_id}.jpg"
-            try:
-                _github_put_file(image_path, raw, message=f"Catch 'em all Claire: add card {next_id} image (auto-save)")
-            except urllib.error.HTTPError as exc:
-                logger.error(f"claire-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not upload card image (HTTP {exc.code})",
-                }, event)
-
             est = card.get("estimated_value_usd") or {}
             try:
                 est_value = round(float((est or {}).get("typical") or 0))
             except (TypeError, ValueError):
                 est_value = 0
 
-            record = {
-                "id":          next_id,
-                "name":        card.get("player"),
-                "image":       f"images/card{next_id}.jpg",
-                "dexNo":       None,
-                "hp":          None,
-                "type":        None,
-                "language":    None,
-                "set":         card.get("set_name") or card.get("brand"),
-                "cardNumber":  card.get("card_number"),
-                "rarity":      None,
-                "stage":       None,
-                "attacks":     [],
-                "illustrator": None,
-                "year":        card.get("year") or None,
-                "estValue":    est_value,
-                "scannedAt":   scanned_at,
-            }
-            cards.append(record)
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "name":        card.get("player"),
+                    "dexNo":       None,
+                    "hp":          None,
+                    "type":        None,
+                    "language":    None,
+                    "set":         card.get("set_name") or card.get("brand"),
+                    "cardNumber":  card.get("card_number"),
+                    "rarity":      None,
+                    "stage":       None,
+                    "attacks":     [],
+                    "illustrator": None,
+                    "year":        card.get("year") or None,
+                    "estValue":    est_value,
+                    "scannedAt":   scanned_at,
+                }
 
             try:
-                _github_put_file(
-                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
-                    message=f"Catch 'em all Claire: add card {next_id} ({record.get('name') or 'unknown'})",
-                    sha=sha,
+                next_id, record = _save_card_with_retry(
+                    "docs/claire_pokedex", raw, build_record, "Catch 'em all Claire"
                 )
-            except urllib.error.HTTPError as exc:
-                logger.error(f"claire-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
-                }, event)
+            except RuntimeError as exc:
+                logger.error(f"claire-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
 
             logger.info(f"claire-save: added card id={next_id} name={record.get('name')}")
             return _cors_response(200, {
@@ -1581,81 +1486,33 @@ def lambda_handler(event, context):
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
-            cards_path = "docs/the_sewer/live/cards.json"
-            try:
-                current_raw, sha = _github_get_json_file(cards_path)
-            except urllib.error.HTTPError as exc:
-                logger.error(f"sewer-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not read cards.json (HTTP {exc.code})",
-                }, event)
-
-            if current_raw.strip():
-                try:
-                    cards = json.loads(current_raw.decode("utf-8"))
-                except Exception as exc:
-                    logger.error(f"sewer-save: cards.json unparseable, aborting: {exc}")
-                    return _cors_response(502, {
-                        "success": False,
-                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
-                    }, event)
-            else:
-                cards = []
-            if not isinstance(cards, list):
-                logger.error("sewer-save: cards.json is not a JSON array, aborting")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
-                }, event)
-
-            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
-            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
-
-            image_path = f"docs/the_sewer/live/images/card{next_id}.jpg"
-            try:
-                _github_put_file(image_path, raw, message=f"The Sewer: add card {next_id} image (auto-save)")
-            except urllib.error.HTTPError as exc:
-                logger.error(f"sewer-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not upload card image (HTTP {exc.code})",
-                }, event)
-
             est = card.get("estimated_value_usd") or {}
             try:
                 est_value = round(float((est or {}).get("typical") or 0))
             except (TypeError, ValueError):
                 est_value = 0
 
-            record = {
-                "id":              next_id,
-                "name":            card.get("player"),
-                "image":           f"images/card{next_id}.jpg",
-                "brand":           card.get("brand") or card.get("set_name"),
-                "series":          card.get("set_name"),
-                "cardType":        card.get("parallel"),
-                "firstAppearance": False,
-                "serial":          card.get("serial"),
-                "alignment":       None,
-                "team":            card.get("team"),
-                "estValue":        est_value,
-                "scannedAt":       scanned_at,
-            }
-            cards.append(record)
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "name":            card.get("player"),
+                    "brand":           card.get("brand") or card.get("set_name"),
+                    "series":          card.get("set_name"),
+                    "cardType":        card.get("parallel"),
+                    "firstAppearance": False,
+                    "serial":          card.get("serial"),
+                    "alignment":       None,
+                    "team":            card.get("team"),
+                    "estValue":        est_value,
+                    "scannedAt":       scanned_at,
+                }
 
             try:
-                _github_put_file(
-                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
-                    message=f"The Sewer: add card {next_id} ({record.get('name') or 'unknown'})",
-                    sha=sha,
+                next_id, record = _save_card_with_retry(
+                    "docs/the_sewer/live", raw, build_record, "The Sewer"
                 )
-            except urllib.error.HTTPError as exc:
-                logger.error(f"sewer-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
-                }, event)
+            except RuntimeError as exc:
+                logger.error(f"sewer-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
 
             logger.info(f"sewer-save: added card id={next_id} name={record.get('name')}")
             return _cors_response(200, {
@@ -1946,84 +1803,36 @@ def lambda_handler(event, context):
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
-            cards_path = "docs/eagles_nest/cards.json"
-            try:
-                current_raw, sha = _github_get_json_file(cards_path)
-            except urllib.error.HTTPError as exc:
-                logger.error(f"eagles-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not read cards.json (HTTP {exc.code})",
-                }, event)
-
-            if current_raw.strip():
-                try:
-                    cards = json.loads(current_raw.decode("utf-8"))
-                except Exception as exc:
-                    logger.error(f"eagles-save: cards.json unparseable, aborting: {exc}")
-                    return _cors_response(502, {
-                        "success": False,
-                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
-                    }, event)
-            else:
-                cards = []
-            if not isinstance(cards, list):
-                logger.error("eagles-save: cards.json is not a JSON array, aborting")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
-                }, event)
-
-            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
-            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
-
-            image_path = f"docs/eagles_nest/images/card{next_id}.jpg"
-            try:
-                _github_put_file(image_path, raw, message=f"The Eagles Nest: add card {next_id} image (auto-save)")
-            except urllib.error.HTTPError as exc:
-                logger.error(f"eagles-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not upload card image (HTTP {exc.code})",
-                }, event)
-
             est = card.get("estimated_value_usd") or {}
             try:
                 est_value = round(float((est or {}).get("typical") or 0))
             except (TypeError, ValueError):
                 est_value = 0
 
-            record = {
-                "id":         next_id,
-                "name":       card.get("player"),
-                "image":      f"images/card{next_id}.jpg",
-                "sport":      card.get("sport"),
-                "team":       card.get("team"),
-                "brand":      card.get("brand"),
-                "set":        card.get("set_name"),
-                "cardNumber": card.get("card_number"),
-                "parallel":   card.get("parallel"),
-                "serial":     card.get("serial"),
-                "isRookie":   bool(card.get("is_rookie")),
-                "isAuto":     bool(card.get("is_auto")),
-                "isRelic":    bool(card.get("is_relic")),
-                "estValue":   est_value,
-                "scannedAt":  scanned_at,
-            }
-            cards.append(record)
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "sport":      card.get("sport"),
+                    "name":       card.get("player"),
+                    "team":       card.get("team"),
+                    "brand":      card.get("brand"),
+                    "set":        card.get("set_name"),
+                    "cardNumber": card.get("card_number"),
+                    "parallel":   card.get("parallel"),
+                    "serial":     card.get("serial"),
+                    "isRookie":   bool(card.get("is_rookie")),
+                    "isAuto":     bool(card.get("is_auto")),
+                    "isRelic":    bool(card.get("is_relic")),
+                    "estValue":   est_value,
+                    "scannedAt":  scanned_at,
+                }
 
             try:
-                _github_put_file(
-                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
-                    message=f"The Eagles Nest: add card {next_id} ({record.get('name') or 'unknown'})",
-                    sha=sha,
+                next_id, record = _save_card_with_retry(
+                    "docs/eagles_nest", raw, build_record, "The Eagles Nest"
                 )
-            except urllib.error.HTTPError as exc:
-                logger.error(f"eagles-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
-                }, event)
+            except RuntimeError as exc:
+                logger.error(f"eagles-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
 
             logger.info(f"eagles-save: added card id={next_id} name={record.get('name')}")
             return _cors_response(200, {
@@ -2163,46 +1972,6 @@ def lambda_handler(event, context):
                 }, event)
 
             board_dir = VAULT_BOARDS["marvel"]
-            cards_path = f"{board_dir}/cards.json"
-            try:
-                current_raw, sha = _github_get_json_file(cards_path)
-            except urllib.error.HTTPError as exc:
-                logger.error(f"vault-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not read cards.json (HTTP {exc.code})",
-                }, event)
-
-            if current_raw.strip():
-                try:
-                    cards = json.loads(current_raw.decode("utf-8"))
-                except Exception as exc:
-                    logger.error(f"vault-save: cards.json unparseable, aborting: {exc}")
-                    return _cors_response(502, {
-                        "success": False,
-                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
-                    }, event)
-            else:
-                cards = []
-            if not isinstance(cards, list):
-                logger.error("vault-save: cards.json is not a JSON array, aborting")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
-                }, event)
-
-            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
-            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
-
-            image_path = f"{board_dir}/images/card{next_id}.jpg"
-            try:
-                _github_put_file(image_path, raw, message=f"The Vault: add card {next_id} image (auto-save)")
-            except urllib.error.HTTPError as exc:
-                logger.error(f"vault-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not upload card image (HTTP {exc.code})",
-                }, event)
 
             est = card.get("estimated_value_usd") or {}
             try:
@@ -2210,35 +1979,27 @@ def lambda_handler(event, context):
             except (TypeError, ValueError):
                 est_value = 0
 
-            record = {
-                "id":              next_id,
-                "name":            card.get("player"),
-                "image":           f"images/card{next_id}.jpg",
-                "brand":           card.get("brand") or card.get("set_name"),
-                "series":          card.get("set_name"),
-                "cardType":        card.get("parallel") or "Base",
-                "firstAppearance": bool(card.get("is_rookie")),
-                "serial":          card.get("serial") or None,
-                "alignment":       None,
-                "team":            card.get("team"),
-                "estValue":        est_value,
-                "scannedAt":       scanned_at,
-            }
-            cards.append(record)
-            _recompute_copies(cards)
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "name":            card.get("player"),
+                    "brand":           card.get("brand") or card.get("set_name"),
+                    "series":          card.get("set_name"),
+                    "cardType":        card.get("parallel") or "Base",
+                    "firstAppearance": bool(card.get("is_rookie")),
+                    "serial":          card.get("serial") or None,
+                    "alignment":       None,
+                    "team":            card.get("team"),
+                    "estValue":        est_value,
+                    "scannedAt":       scanned_at,
+                }
 
             try:
-                _github_put_file(
-                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
-                    message=f"The Vault: add card {next_id} ({record.get('name') or 'unknown'})",
-                    sha=sha,
+                next_id, record = _save_card_with_retry(
+                    board_dir, raw, build_record, "The Vault"
                 )
-            except urllib.error.HTTPError as exc:
-                logger.error(f"vault-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
-                }, event)
+            except RuntimeError as exc:
+                logger.error(f"vault-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
 
             logger.info(f"vault-save: added card id={next_id} name={record.get('name')}")
             return _cors_response(200, {
@@ -2525,81 +2286,33 @@ def lambda_handler(event, context):
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
-            cards_path = "docs/lolas_lot/cards.json"
-            try:
-                current_raw, sha = _github_get_json_file(cards_path)
-            except urllib.error.HTTPError as exc:
-                logger.error(f"lola-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not read cards.json (HTTP {exc.code})",
-                }, event)
-
-            if current_raw.strip():
-                try:
-                    cards = json.loads(current_raw.decode("utf-8"))
-                except Exception as exc:
-                    logger.error(f"lola-save: cards.json unparseable, aborting: {exc}")
-                    return _cors_response(502, {
-                        "success": False,
-                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
-                    }, event)
-            else:
-                cards = []
-            if not isinstance(cards, list):
-                logger.error("lola-save: cards.json is not a JSON array, aborting")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
-                }, event)
-
-            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
-            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
-
-            image_path = f"docs/lolas_lot/images/card{next_id}.jpg"
-            try:
-                _github_put_file(image_path, raw, message=f"Lola's Lot: add card {next_id} image (auto-save)")
-            except urllib.error.HTTPError as exc:
-                logger.error(f"lola-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Could not upload card image (HTTP {exc.code})",
-                }, event)
-
             est = card.get("estimated_value_usd") or {}
             try:
                 est_value = round(float((est or {}).get("typical") or 0))
             except (TypeError, ValueError):
                 est_value = 0
 
-            record = {
-                "id":              next_id,
-                "name":            card.get("player"),
-                "image":           f"images/card{next_id}.jpg",
-                "brand":           card.get("brand") or card.get("set_name"),
-                "series":          card.get("set_name"),
-                "cardType":        card.get("parallel") or "Base",
-                "firstAppearance": bool(card.get("is_rookie")),
-                "serial":          card.get("serial") or None,
-                "alignment":       None,
-                "team":            card.get("team"),
-                "estValue":        est_value,
-                "scannedAt":       scanned_at,
-            }
-            cards.append(record)
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "name":            card.get("player"),
+                    "brand":           card.get("brand") or card.get("set_name"),
+                    "series":          card.get("set_name"),
+                    "cardType":        card.get("parallel") or "Base",
+                    "firstAppearance": bool(card.get("is_rookie")),
+                    "serial":          card.get("serial") or None,
+                    "alignment":       None,
+                    "team":            card.get("team"),
+                    "estValue":        est_value,
+                    "scannedAt":       scanned_at,
+                }
 
             try:
-                _github_put_file(
-                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
-                    message=f"Lola's Lot: add card {next_id} ({record.get('name') or 'unknown'})",
-                    sha=sha,
+                next_id, record = _save_card_with_retry(
+                    "docs/lolas_lot", raw, build_record, "Lola's Lot"
                 )
-            except urllib.error.HTTPError as exc:
-                logger.error(f"lola-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
-                return _cors_response(502, {
-                    "success": False,
-                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
-                }, event)
+            except RuntimeError as exc:
+                logger.error(f"lola-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
 
             logger.info(f"lola-save: added card id={next_id} name={record.get('name')}")
             return _cors_response(200, {
@@ -3426,6 +3139,113 @@ def _recompute_copies(cards: list) -> list:
         if isinstance(c, dict):
             c["copies"] = counts.get(c.get("name"), 1)
     return cards
+
+
+_CONFLICT_HTTP_CODES = (409, 412, 422)
+
+
+def _save_card_with_retry(board_dir: str, raw_image: bytes, build_record, commit_label: str, max_attempts: int = 6):
+    """Read-modify-write a board's cards.json to append one new scanned card,
+    retrying on GitHub's optimistic-concurrency conflicts (HTTP 409/412/422)
+    at EITHER step that can race: the image PUT (two invocations computing
+    the same next_id from the same stale read both try to *create* the same
+    new file) or the cards.json PUT (a stale `sha` once another save landed
+    first).
+
+    Why this exists: every *-save endpoint does GET cards.json (+ sha) ->
+    compute next_id -> PUT image -> PUT cards.json (with that sha). If two
+    scans land close together (exactly Amanda's rapid-fire scanning
+    pattern), either PUT can be rejected by GitHub mid-flight. Without a
+    retry, that card silently never makes it into cards.json (the frontend
+    only console.warns) even though its image may have partially uploaded —
+    the card "disappears" with no error surfaced to whoever scanned it.
+    Worse: a naive blind retry that reused the same next_id could overwrite
+    the FIRST card's image with the second card's photo.
+
+    This retries the *entire* GET -> next_id -> image-upload -> PUT
+    sequence on each attempt, so a retry always computes a fresh next_id
+    from the latest cards.json and uploads its image under that new id —
+    it can never collide with a save that succeeded in the meantime. A
+    short random jitter before each retry gives whichever concurrent
+    request is ahead a chance to finish, rather than every contender
+    re-colliding on the same id in lockstep. Any image uploaded during a
+    failed attempt is orphaned (harmless, nothing references it) and
+    best-effort cleaned up before the next attempt.
+
+    build_record(next_id) -> dict; must NOT set "id" or "image", those are
+    added here. Returns (next_id, record) on success. Raises RuntimeError
+    with a caller-friendly message on exhausted retries or a hard failure.
+    """
+    cards_path = f"{board_dir}/cards.json"
+    orphaned_image_path = None
+    last_err = None
+
+    for attempt in range(1, max_attempts + 1):
+        if attempt > 1:
+            # Capped so total worst-case sleep across all retries stays well
+            # under the Lambda's 40s timeout even at max_attempts.
+            time.sleep(min(2.0, random.uniform(0.15, 0.4) * attempt))
+
+        try:
+            current_raw, sha = _github_get_json_file(cards_path)
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(f"Could not read cards.json (HTTP {exc.code})")
+
+        if current_raw.strip():
+            try:
+                cards = json.loads(current_raw.decode("utf-8"))
+            except Exception:
+                raise RuntimeError("cards.json on GitHub is not valid JSON — aborting to avoid data loss")
+        else:
+            cards = []
+        if not isinstance(cards, list):
+            raise RuntimeError("cards.json on GitHub is not a JSON array — aborting to avoid data loss")
+
+        existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
+        next_id = int(max(existing_ids)) + 1 if existing_ids else 1
+
+        image_rel = f"images/card{next_id}.jpg"
+        image_path = f"{board_dir}/{image_rel}"
+        try:
+            _github_put_file(image_path, raw_image, message=f"{commit_label}: add card {next_id} image (auto-save)")
+        except urllib.error.HTTPError as exc:
+            last_err = exc
+            if exc.code in _CONFLICT_HTTP_CODES and attempt < max_attempts:
+                logger.warning(f"{commit_label}: image PUT conflict on card{next_id}.jpg (HTTP {exc.code}), retrying (attempt {attempt+1}/{max_attempts})")
+                continue
+            raise RuntimeError(f"Could not upload card image (HTTP {exc.code})")
+
+        # Best-effort: clean up the previous attempt's now-orphaned image.
+        if orphaned_image_path and orphaned_image_path != image_path:
+            try:
+                orphan_sha = _github_get_sha(orphaned_image_path)
+                _github_delete_file(orphaned_image_path, orphan_sha, message=f"{commit_label}: clean up orphaned retry image")
+            except Exception as exc:
+                logger.info(f"{commit_label}: orphaned image cleanup skipped: {exc}")
+        orphaned_image_path = image_path
+
+        record = build_record(next_id)
+        record["id"] = next_id
+        record["image"] = image_rel
+        cards.append(record)
+        if any(isinstance(c, dict) and "copies" in c for c in cards):
+            _recompute_copies(cards)
+
+        try:
+            _github_put_file(
+                cards_path, json.dumps(cards, indent=2).encode("utf-8"),
+                message=f"{commit_label}: add card {next_id} ({record.get('name') or 'unknown'})",
+                sha=sha,
+            )
+            return next_id, record
+        except urllib.error.HTTPError as exc:
+            last_err = exc
+            if exc.code in _CONFLICT_HTTP_CODES and attempt < max_attempts:
+                logger.warning(f"{commit_label}: cards.json PUT conflict (HTTP {exc.code}), retrying (attempt {attempt+1}/{max_attempts})")
+                continue
+            raise RuntimeError(f"Card image saved but cards.json update failed (HTTP {exc.code})")
+
+    raise RuntimeError(f"cards.json update failed after {max_attempts} attempts: {last_err}")
 
 
 # ---------------------------------------------------------------------------
