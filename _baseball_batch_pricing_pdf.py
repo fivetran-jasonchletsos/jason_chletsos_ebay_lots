@@ -72,7 +72,7 @@ GROUPS = {
   ("Vladimir Guerrero Jr.","Blue Jays · sparkle parallel",1,3,5,""),
   ("Ryan Helsley","Orioles · Topps 75 crystal parallel",1,2,3,""),
   ("Kyle Tucker","Dodgers · Topps 75 crystal parallel",1,3,6,""),
-  ("Xander Bogaerts","Padres · gold parallel",1,2,4,""),
+  ("Xander Bogaerts","Padres · gold parallel #0201/2025",2,3,5,"confirmed serialized by JC — but /2025 is a year-tie-in print run (large), so modest bump only, not scarce like a true low-numbered parallel"),
  ],
  "Scan 395 — mixed inserts (Power Players / Bowman / Gameday Drip)": [
   ("Samuel Basallo","Orioles · baseballs insert RC",2,5,10,""),

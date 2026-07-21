@@ -25,6 +25,8 @@ WHITE = colors.white
 INDIVIDUALS = [
  ("Roenis Elias II","Mariners · Topps Certified Autograph /45",8,12,18,"POSTED $14.99 — item 307077710546"),
  ("Juan Morillo","Diamondbacks · Topps Chrome auto RC #031/199",8,13,18,"POSTED $15.99 — item 307077711037"),
+ ("Randy Johnson","Mariners (not Diamondbacks — corrected) · Panini Crusade Numbers Green #025/249",6,10,15,"POSTED $9.99 — item 307077912239"),
+ ("Randy Johnson","Mariners · Panini Crusade Numbers Blue parallel (2nd copy, non-green)",1,3,5,"POSTED $3.99 — item 307077912619"),
 ]
 
 # (last_name_sort_key, display name, variant, low, typ, high, note)
@@ -42,7 +44,7 @@ CARDS = [
  ("Beltre","Adrian Beltre","Rangers · Topps 'Glove Work' insert, legend",2,4,6,""),
  ("Betts","Mookie Betts","Dodgers · Glove Work insert",2,4,6,""),
  ("Betts","Mookie Betts","Dodgers · Titans of the Game insert (2nd design)",2,4,6,""),
- ("Bogaerts","Xander Bogaerts","Padres · gold parallel",1,2,4,""),
+ ("Bogaerts","Xander Bogaerts","Padres · gold parallel #0201/2025",2,3,5,""),
  ("Burger","Jake Burger","Rangers · Topps 75 crystal parallel",1,2,3,""),
  ("Burns","Chase Burns","Guardians · baseballs insert RC",2,4,6,""),
  ("Buxton","Byron Buxton","Twins · star insert",1,3,5,""),
@@ -95,8 +97,6 @@ CARDS = [
  ("House","Brady House","Nationals · graffiti insert RC",1,2,4,""),
  ("Janek","Hunter Janek","Astros · Panini Crusade #230/299",2,4,7,""),
  ("Jackson","Reggie Jackson","Athletics · Topps 75 All-Star AL, legend",2,4,6,""),
- ("Johnson","Randy Johnson","Diamondbacks · Panini Crusade 'Numbers' Green parallel #025/249",6,10,15,"CANDIDATE FOR INDIVIDUAL LISTING — real numbered legend insert, worth more than lot value"),
- ("Johnson","Randy Johnson","Diamondbacks · Panini Crusade jersey-numeral insert, different (non-green, unnumbered) parallel",1,2,4,""),
  ("Jolly","Dave Jolly","Braves · Topps 75 vintage tribute, legend",1,2,4,""),
  ("Jones","Chipper Jones","Braves · Panini Crusade, legend",2,4,6,""),
  ("Jones","Jahmai Jones","Tigers · Topps 75 crystal parallel",1,2,3,""),
@@ -247,10 +247,10 @@ def lot_title(team, idx, n_sub):
 out=Path("docs/baseball_posting_plan.pdf")
 doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
 flow=[Paragraph("Baseball batch &mdash; POSTING PLAN",h1),
-      Paragraph(f"178 cards &middot; Scans 391-411 &middot; lots grouped by team, alphabetized within each lot to match your physical A-Z sort",sub),
-      Paragraph("<b>Not yet posted &mdash; review this plan first.</b> 2 individuals (real autos) + "
-                f"{len(lots)} team lots of 5 cards or fewer. Paul O'Neill's signed auto is excluded &mdash; "
-                "that one's a gift, not for sale. Say the word and I'll push these live.",grp)]
+      Paragraph(f"174 cards remaining in lots &middot; Scans 391-411 &middot; lots grouped by team, alphabetized within each lot to match your physical A-Z sort",sub),
+      Paragraph("<b>4 individuals now LIVE</b> (Roenis Elias II, Juan Morillo, and both Randy Johnson "
+                f"Panini Crusade Numbers parallels) + {len(lots)} team lots of 5 cards or fewer remain to post. "
+                "Paul O'Neill's signed auto is excluded &mdash; that one's a gift, not for sale.",grp)]
 
 # Individuals table
 flow.append(Paragraph("Individual listings — LIVE as of 2026-07-21",grp))
