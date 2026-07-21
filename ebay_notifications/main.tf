@@ -415,6 +415,8 @@ locals {
     "vault-move",
     "lola-save",
     "lola-delete",
+    "claire-save",
+    "claire-delete",
   ]
 }
 

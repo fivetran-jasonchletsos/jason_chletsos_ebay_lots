@@ -1336,6 +1336,218 @@ def lambda_handler(event, context):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
+    # POST /ebay/claire-save — "Catch 'em all Claire" auto-save. Identical
+    # shape and schema to pokedex-save, just against docs/claire_pokedex/.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/claire-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("claire-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            card       = body.get("card") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            cards_path = "docs/claire_pokedex/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"claire-save cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            if current_raw.strip():
+                try:
+                    cards = json.loads(current_raw.decode("utf-8"))
+                except Exception as exc:
+                    logger.error(f"claire-save: cards.json unparseable, aborting: {exc}")
+                    return _cors_response(502, {
+                        "success": False,
+                        "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                    }, event)
+            else:
+                cards = []
+            if not isinstance(cards, list):
+                logger.error("claire-save: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
+            next_id = int(max(existing_ids)) + 1 if existing_ids else 1
+
+            image_path = f"docs/claire_pokedex/images/card{next_id}.jpg"
+            try:
+                _github_put_file(image_path, raw, message=f"Catch 'em all Claire: add card {next_id} image (auto-save)")
+            except urllib.error.HTTPError as exc:
+                logger.error(f"claire-save image PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not upload card image (HTTP {exc.code})",
+                }, event)
+
+            est = card.get("estimated_value_usd") or {}
+            try:
+                est_value = round(float((est or {}).get("typical") or 0))
+            except (TypeError, ValueError):
+                est_value = 0
+
+            record = {
+                "id":          next_id,
+                "name":        card.get("player"),
+                "image":       f"images/card{next_id}.jpg",
+                "dexNo":       None,
+                "hp":          None,
+                "type":        None,
+                "language":    None,
+                "set":         card.get("set_name") or card.get("brand"),
+                "cardNumber":  card.get("card_number"),
+                "rarity":      None,
+                "stage":       None,
+                "attacks":     [],
+                "illustrator": None,
+                "year":        card.get("year") or None,
+                "estValue":    est_value,
+                "scannedAt":   scanned_at,
+            }
+            cards.append(record)
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(cards, indent=2).encode("utf-8"),
+                    message=f"Catch 'em all Claire: add card {next_id} ({record.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"claire-save cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Card image saved but cards.json update failed (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"claire-save: added card id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":     True,
+                "id":          next_id,
+                "pokedex_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/claire_pokedex/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"claire-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/claire-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/claire-delete — remove a card Claire scanned. Identical
+    # shape to pokedex-delete, against docs/claire_pokedex/.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/claire-delete"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("claire-delete: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            try:
+                card_id = int(body.get("id"))
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "id required"}, event)
+
+            cards_path = "docs/claire_pokedex/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"claire-delete cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            try:
+                cards = json.loads(current_raw.decode("utf-8")) if current_raw.strip() else []
+            except Exception as exc:
+                logger.error(f"claire-delete: cards.json unparseable, aborting: {exc}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                }, event)
+            if not isinstance(cards, list):
+                logger.error("claire-delete: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            target = next((c for c in cards if isinstance(c, dict) and c.get("id") == card_id), None)
+            if target is None:
+                return _cors_response(404, {"success": False, "error": "card not found"}, event)
+
+            remaining = [c for c in cards if not (isinstance(c, dict) and c.get("id") == card_id)]
+
+            image_rel = str(target.get("image") or "").strip()
+            if image_rel:
+                image_path = f"docs/claire_pokedex/{image_rel}"
+                try:
+                    img_sha = _github_get_sha(image_path)
+                    _github_delete_file(
+                        image_path, img_sha,
+                        message=f"Catch 'em all Claire: remove card {card_id} image ({target.get('name') or 'unknown'})",
+                    )
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"claire-delete image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
+                except Exception as exc:
+                    logger.error(f"claire-delete image DELETE error: {exc}")
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(remaining, indent=2).encode("utf-8"),
+                    message=f"Catch 'em all Claire: remove card {card_id} ({target.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"claire-delete cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not update cards.json (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"claire-delete: removed card id={card_id} name={target.get('name')}")
+            return _cors_response(200, {"success": True, "id": card_id}, event)
+
+        except Exception as exc:
+            logger.error(f"claire-delete error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/claire-delete"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
     # POST /ebay/sewer-save — "The Sewer Scanner" auto-save (Amanda's Marvel
     # showcase). Same read-modify-write shape as pokedex-save, just against
     # docs/the_sewer/live/cards.json + docs/the_sewer/live/images/, and
