@@ -111,7 +111,7 @@ GROUPS = {
   ("Jesus Made","Brewers · Panini Crusade",1,3,6,""),
   ("Paul Skenes","Pirates · Panini Crusade base insert",3,5,8,"star power premium even on common insert tier"),
   ("Rhett Lowder","Reds · Panini Crusade Certified Stars RC",1,3,5,""),
-  ("Randy Johnson","Diamondbacks · Panini Crusade jersey-numeral insert (copy 1)",1,2,4,"check vs copy 2 in Scan 405 — may be same design"),
+  ("Randy Johnson","Diamondbacks · Panini Crusade 'Numbers' Green parallel #025/249",6,10,15,"confirmed by JC: green-background copy is serialized 025/249 — real numbered legend insert, not a scan duplicate"),
   ("Luis Castillo","Mariners · Topps Holiday-style insert",1,2,3,""),
   ("Masyn Winn","Cardinals · Panini Crusade",1,3,5,""),
   ("Owen Caissie","Cubs · Panini Crusade Certified Prospects",1,3,6,""),
@@ -150,7 +150,7 @@ GROUPS = {
  ],
  "Scan 405 — Panini Crusade + Topps 75 team card": [
   ("Luis Aparicio","White Sox · Panini Crusade, legend",1,2,4,""),
-  ("Randy Johnson","Diamondbacks · Panini Crusade jersey-numeral insert (copy 2)",1,2,4,"check vs copy 1 in Scan 408 — may be same design"),
+  ("Randy Johnson","Diamondbacks · Panini Crusade jersey-numeral insert, different (non-green, unnumbered) parallel",1,2,4,"confirmed different from the green /249 copy in Scan 408 — not a duplicate"),
   ("Frank Thomas","White Sox · Panini Crusade, legend",2,4,6,""),
   ("Chipper Jones","Braves · Panini Crusade, legend",2,4,6,""),
   ("Aaron Judge","Yankees · Panini Crusade 'Call to Arms' insert",2,4,7,""),
