@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Sewer — Football</title>
+<title>The Sewer — Music</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -308,13 +308,13 @@
   <div class="header-top">
     <div>
       <div class="logo">The <em>Sewer</em></div>
-      <div class="tagline">Football Pulls</div>
+      <div class="tagline">Music Pulls</div>
     </div>
     <div class="nav-links">
       <a class="nav-link" href="../live/index.html">Marvel</a>
-      <a class="nav-link active" href="../football/index.html">Football</a>
+      <a class="nav-link" href="../football/index.html">Football</a>
       <a class="nav-link" href="../baseball/index.html">Baseball</a>
-      <a class="nav-link" href="../music/index.html">Music</a>
+      <a class="nav-link active" href="../music/index.html">Music</a>
       <a class="nav-link" href="../pokemon/index.html">Pokemon</a>
       <a class="nav-link" href="../scanner.html">+ Scan a Card</a>
       <a class="nav-link" href="../lots.html">Suggested Lots</a>
@@ -373,7 +373,7 @@
 <div class="grid-wrap">
   <div class="count-row" id="countRow"></div>
   <div class="card-grid" id="cardGrid"></div>
-  <div class="empty-state hidden" id="emptyState">Nothing here yet — move some football cards over from the Live Feed.</div>
+  <div class="empty-state hidden" id="emptyState">Nothing here yet — move some music cards over from the Marvel board.</div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
@@ -396,7 +396,7 @@
   </div>
 </div>
 
-<footer>Sorted out from the live feed — <span class="mark">the good stuff, organized.</span></footer>
+<footer>Sorted out from the live feed — <span class="mark">the good music cards, organized.</span></footer>
 
 <script>
 const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
@@ -589,7 +589,7 @@ async function deleteCurrentCard() {
     const res = await fetch(LAMBDA + '/sewer-delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: c.id, board: 'football' })
+      body: JSON.stringify({ id: c.id, board: 'music' })
     });
     const out = await res.json();
     if (out && out.success) {
@@ -621,7 +621,7 @@ function setSize(s) {
   grid.classList.remove('size-s', 'size-m', 'size-l');
   grid.classList.add('size-' + s);
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s));
-  try { localStorage.setItem('sewerFootballGridSize', s); } catch(e) {}
+  try { localStorage.setItem('sewerMusicGridSize', s); } catch(e) {}
 }
 
 async function init() {
@@ -633,7 +633,7 @@ async function init() {
   populateSelect('alignSelect', CARDS.map(c => c.alignment));
   populateSelect('teamSelect', CARDS.map(c => c.team));
   updateStats();
-  const initSize = (() => { try { return localStorage.getItem('sewerFootballGridSize') || 'm'; } catch(e) { return 'm'; } })();
+  const initSize = (() => { try { return localStorage.getItem('sewerMusicGridSize') || 'm'; } catch(e) { return 'm'; } })();
   setSize(initSize);
   applyFilters();
 }

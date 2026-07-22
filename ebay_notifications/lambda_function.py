@@ -54,6 +54,8 @@ SEWER_BOARDS = {
     "live":     "docs/the_sewer/live",
     "football": "docs/the_sewer/football",
     "baseball": "docs/the_sewer/baseball",
+    "music":    "docs/the_sewer/music",
+    "pokemon":  "docs/the_sewer/pokemon",
 }
 
 # "The Vault" boards (JC's personal Marvel collection) — new scans land on
