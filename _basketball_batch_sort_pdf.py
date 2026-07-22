@@ -103,7 +103,7 @@ SELL = {
  ],
  "Detroit Pistons": [
   ("Cade Cunningham","base (x2 copies)",1,3,5,""),
-  ("Isaiah Thomas","base",1,2,3,""),
+  ("Isaiah Thomas","base (x2 copies) — corrected after re-verifying scans (found in 2 scans, not 1)",1,2,3,""),
   ("Jaden Ivey","base (x2 copies)",1,2,3,""),
   ("Jalen Duren","base",1,2,3,""),
  ],
@@ -153,7 +153,7 @@ SELL = {
  "Indiana Pacers": [
   ("TJ McConnell","Chrome",1,2,3,""),
   ("Bennedict Mathurin","Chrome",1,2,4,""),
-  ("Andrew Nembhard","base (x4 copies)",1,2,3,""),
+  ("Andrew Nembhard","base (x3 copies) — corrected after re-verifying scans (found in 3 scans, not 4)",1,2,3,""),
   ("Obi Toppin","base",1,2,3,""),
  ],
  "Charlotte Hornets": [
@@ -176,11 +176,12 @@ SELL = {
  ],
  "Denver Nuggets": [
   ("Jamal Murray","base",1,2,4,""),
-  ("Christian Braun","Chrome (x2 copies)",1,2,3,""),
-  ("Peyton Watson","Chrome",1,2,3,""),
+  ("Christian Braun","Chrome (copy 1)",1,2,3,""),
+  ("Christian Braun","base (copy 2, re-verified — not Chrome as originally labeled)",1,2,3,""),
+  ("Peyton Watson","base (x2 copies) — re-verified: not Chrome as originally labeled, and found in 2 scans not 1",1,2,3,""),
  ],
  "Phoenix Suns": [
-  ("Oso Ighodaro","base + Chrome (x2 copies)",1,2,3,""),
+  ("Oso Ighodaro","base + Chrome (x3 copies) — corrected after re-verifying scans (found in 3 scans, not 2)",1,2,3,""),
   ("Grayson Allen","base",1,2,3,""),
  ],
  "Dallas Mavericks": [
@@ -290,9 +291,12 @@ n_sell, g_sell = build(
     "<b>Sort verdict: lot material, organized by team for easy bundling.</b> Base 2025-26 Topps/Chrome "
     "commons run $1-4 raw even for current stars (confirmed via comps: LeBron $1.50-4, Giannis $0.99-2.24, "
     "Jokic $1.15-2, Kawhi/Harden $0.99-1.59) &mdash; nothing here individually clears a singles threshold. "
-    "Confirmed duplicate: <b>Scan 436 and Scan 442 were the same 9-card scan taken twice</b> "
-    "(Tidjane Sala&uuml;n, PJ Washington Jr., Ighodaro, Monk, Isaiah Joe, Agbaji, Watson, Bane, Isaiah Thomas) "
-    "&mdash; the extra copy from each has been removed from this total. Team groups with 6+ cards "
+    "<b>Correction 2026-07-22:</b> the earlier note claiming Scan 436 and Scan 442 were a duplicate 9-card scan "
+    "was wrong &mdash; re-verified all 15 original scans directly and that Sala&uuml;n/Washington/Ighodaro/Monk/"
+    "Isaiah Joe/Agbaji/Watson/Bane/Isaiah Thomas set is really Scan 433, a single unique scan with no duplicate. "
+    "Scans 436 and 442 are two other, different real scans (Kyrie/Garnett/Kerr/Durant/Castle and DeRozan/"
+    "Haliburton/Kuminga respectively). Quantities have been corrected accordingly (Isaiah Thomas x2, Nembhard x3, "
+    "Ighodaro x3, Peyton Watson x2 base &mdash; not Chrome as first labeled). Team groups with 6+ cards "
     "(Pistons, Pacers, Grizzlies, Mavericks, Raptors) split cleanly into two 5-card-or-fewer lots each. "
     "<b>Scans 451-475 (~199 cards) are counted as one estimated bulk line for now</b> rather than itemized "
     "by team &mdash; that batch was large enough that a card-by-card team re-sort will follow once it's "
