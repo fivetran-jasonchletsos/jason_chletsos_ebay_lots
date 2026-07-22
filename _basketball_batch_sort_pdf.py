@@ -12,6 +12,14 @@ QTY_RE = re.compile(r"x(\d+)\s*cop(?:y|ies)", re.IGNORECASE)
 def qty_of(variant):
     m = QTY_RE.search(variant)
     return int(m.group(1)) if m else 1
+
+NAME_WORD_RE = re.compile(r"[A-Za-z']+")
+SUFFIXES = {"jr","sr","ii","iii","iv","v"}
+def last_name_key(name):
+    words = NAME_WORD_RE.findall(name)
+    while words and words[-1].lower() in SUFFIXES:
+        words.pop()
+    return (words[-1].lower() if words else name.lower(), name.lower())
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
@@ -109,7 +117,7 @@ cardp=ParagraphStyle("cardp",parent=st["Normal"],fontSize=10,leading=12,textColo
 
 def money(x): return f"${x:,.2f}" if x%1 else f"${int(x)}"
 
-def build(title, subtitle_extra, groups, out_path, verdict_html):
+def build(title, subtitle_extra, groups, out_path, verdict_html, alpha=False):
     all_rows=[]
     total_cards=0
     for grp_name,cards in groups.items():
@@ -130,7 +138,7 @@ def build(title, subtitle_extra, groups, out_path, verdict_html):
           Paragraph(verdict_html,note)]
 
     def tbl(grp_name,cards):
-        flow.append(Paragraph(grp_name,grp))
+        if grp_name: flow.append(Paragraph(grp_name,grp))
         sub_ty=round(sum(c[3]*qty_of(c[1]) for c in cards),2)
         data=[["", "Card", "Variant", "Qty", "Low ea", "Typ ea", "High ea"]]
         for n,v,lo,ty,hi,nt in cards:
@@ -149,7 +157,12 @@ def build(title, subtitle_extra, groups, out_path, verdict_html):
             ("GRID",(0,0),(-1,-2),.4,GRAY_MD),("TOPPADDING",(0,0),(-1,-1),3.5),("BOTTOMPADDING",(0,0),(-1,-1),3.5)]))
         flow.append(t)
 
-    for grp_name,cards in groups.items(): tbl(grp_name,cards)
+    if alpha:
+        flat = [c for cards in groups.values() for c in cards]
+        flat.sort(key=lambda c: last_name_key(c[0]))
+        tbl(None, flat)
+    else:
+        for grp_name,cards in groups.items(): tbl(grp_name,cards)
     doc.build(flow)
     dl=Path.home()/"Downloads"/out_path.name; shutil.copy(out_path,dl)
     return total_cards, grand
@@ -159,7 +172,7 @@ sell_out = Path("docs/basketball_sell.pdf")
 
 n_keep, g_keep = build(
     "Basketball keepers &mdash; personal collection",
-    "&middot; Scans 433-475",
+    "&middot; Scans 433-475 &middot; A-Z by last name for easy physical pulling",
     KEEP, keep_out,
     "Kept per your criteria: Knicks, 76ers, LeBron, Giannis, and other notable/star players "
     "(Jokic, Wembanyama, Kawhi, Harden, Durant, DeRozan, Edwards, Haliburton, Adebayo, Trae Young, "
@@ -168,7 +181,11 @@ n_keep, g_keep = build(
     "Two calls worth double-checking: the Bucks 'Fear the Deer' team insert appears twice (confirm two "
     "real copies vs a re-scan), and I used a moderate bar for 'notable' &mdash; Cade Cunningham, Paolo "
     "Banchero, LaMelo Ball, Tyler Herro, Chet Holmgren, and Jamal Murray are all near-All-Star-caliber "
-    "names I put in SELL by default since you didn't name them explicitly; flag any you want moved over.")
+    "names I put in SELL by default since you didn't name them explicitly; flag any you want moved over. "
+    "<b>Sorted A-Z by last name</b> below (team groupings dropped) to match a physical pull straight off "
+    "an alphabetized stack &mdash; the handful of team-insert/duo cards (no single player name) sort by "
+    "whatever word lands last, so double check those land where you'd expect.",
+    alpha=True)
 
 n_sell, g_sell = build(
     "Basketball sell/lots &mdash; sort by team",
