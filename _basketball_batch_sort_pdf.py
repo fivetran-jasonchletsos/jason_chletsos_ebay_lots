@@ -112,11 +112,9 @@ SELL = {
  ],
  "Boston Celtics": [
   ("Kristaps Porzingis","base",1,2,4,""),
-  ("Celtics duo insert","team card",1,2,3,""),
  ],
  "Chicago Bulls": [
   ("Coby White","base (x3 copies)",1,2,3,""),
-  ("Windy City Wonder (Bulls duo insert)","Giddey/Vucevic",1,2,3,""),
   ("Josh Giddey","base",1,2,4,""),
   ("Lonzo Ball","base",1,2,3,""),
   ("Patrick Williams","base",1,2,3,""),
@@ -128,7 +126,6 @@ SELL = {
   ("Isaiah Joe","base",1,2,3,""),
  ],
  "Washington Wizards": [
-  ("DC Duo Dazzles insert","Wizards team card",1,2,3,""),
   ("Bilal Coulibaly","base (x2 copies)",1,2,3,""),
   ("Richaun Holmes","Chrome",1,2,3,""),
   ("Alex Sarr","base",1,2,4,""),
@@ -138,7 +135,6 @@ SELL = {
   ("Paolo Banchero","base",1,3,5,""),
  ],
  "Portland Trail Blazers": [
-  ("POR duo insert (Rip City Duo)","team card (x4 copies)",1,2,3,""),
   ("Deni Avdija","base",1,2,4,""),
  ],
  "Cleveland Cavaliers": [
@@ -172,7 +168,6 @@ SELL = {
   ("Desmond Bane","base + Chrome (x3 copies)",1,2,4,""),
   ("Jaren Jackson Jr.","Chrome",1,2,4,""),
   ("Trey Murphy III","Chrome",1,2,3,""),
-  ("Grizzlies 'Grit and Grind' duo insert","team card",1,2,3,""),
  ],
  "Miami Heat": [
   ("Tyler Herro","base",1,3,5,""),
@@ -193,13 +188,11 @@ SELL = {
   ("Kyrie Irving","base",1,3,5,""),
   ("PJ Washington Jr.","base",1,2,3,""),
   ("Brandon Williams","base",1,2,3,""),
-  ("Mavericks duo insert","team card",1,2,3,""),
  ],
  "Toronto Raptors": [
   ("Ochai Agbaji","base (x2 copies)",1,2,3,""),
   ("Immanuel Quickley","base (x3 copies)",1,2,4,""),
   ("Gradey Dick","base",1,2,4,""),
-  ("Raptors duo insert","team card",1,2,3,""),
  ],
  "Sacramento Kings": [
   ("Malik Monk","base",1,2,3,""),
@@ -209,7 +202,6 @@ SELL = {
   ("Spud Webb","legend base",1,2,4,""),
   ("Jalen Johnson","base",1,2,4,""),
   ("Clint Capela","base",1,2,3,""),
-  ("Hawks 'Ballers Show Out' duo insert","team card",1,2,3,""),
  ],
  "Houston Rockets": [
   ("Fred VanVleet","base",1,2,4,""),
@@ -217,7 +209,7 @@ SELL = {
   ("Kevin Durant","base",1,3,5,""),
  ],
  "Scans 451-475 — remaining commons (approx., pending full team sort)": [
-  ("Mixed base/Chrome/team-insert cards","~199 cards across Cavaliers, Suns, Grizzlies, Mavericks, Pistons, Wizards, Nuggets, Hawks, Heat, Nets, Rockets, Trail Blazers, Warriors, Bulls, Kings, Hornets, Pacers, Timberwolves, Magic, Raptors, Spurs, Jazz, Bucks, Pelicans, plus assorted team-duo insert cards (x199 copies)",1,2,3,"count is an estimate from this pass — will firm up to exact team lots once physically sorted, same as the rest of this project"),
+  ("Mixed base/Chrome cards","across Cavaliers, Suns, Grizzlies, Mavericks, Pistons, Wizards, Nuggets, Hawks, Heat, Nets, Rockets, Trail Blazers, Warriors, Bulls, Kings, Hornets, Pacers, Timberwolves, Magic, Raptors, Spurs, Jazz, Bucks, Pelicans (x199 copies)",1,2,3,"count is an estimate from this pass — will firm up to exact team lots once physically sorted, same as the rest of this project. NOT yet purged of team-duo/team-insert cards (unlike the itemized teams above) — this pile hasn't been individually sorted, so any team cards mixed in here still count toward the 199 for now."),
  ],
 }
 
@@ -304,7 +296,10 @@ n_sell, g_sell = build(
     "(Pistons, Pacers, Grizzlies, Mavericks, Raptors) split cleanly into two 5-card-or-fewer lots each. "
     "<b>Scans 451-475 (~199 cards) are counted as one estimated bulk line for now</b> rather than itemized "
     "by team &mdash; that batch was large enough that a card-by-card team re-sort will follow once it's "
-    "physically organized; the running total already reflects the full count. HOLD: nothing posted, more scans pending.")
+    "physically organized; the running total already reflects the full count. "
+    "<b>Team/multi-player insert cards (duo inserts, team celebration cards) have been pulled OUT of every "
+    "lot below</b> per JC's call &mdash; he's setting those aside to decide on separately later, so they no "
+    "longer count toward any team's lot total or this sheet's grand total. HOLD: nothing posted, more scans pending.")
 
 json.dump({"keep":{"count":n_keep,"total":g_keep},"sell":{"count":n_sell,"total":g_sell}},
           open("output/_basketball_batch.json","w"), indent=1)
