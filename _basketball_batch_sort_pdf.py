@@ -90,40 +90,10 @@ KEEP = {
 }
 
 SELL = {
- "Denver Nuggets": [
-  ("Jamal Murray","base",1,2,4,""),
-  ("Christian Braun","Chrome (copy 1)",1,2,3,""),
-  ("Christian Braun","base (copy 2, re-verified — not Chrome as originally labeled)",1,2,3,""),
-  ("Peyton Watson","base (x2 copies) — re-verified: not Chrome as originally labeled, and found in 2 scans not 1",1,2,3,""),
- ],
- "Phoenix Suns": [
-  ("Oso Ighodaro","base + Chrome (x3 copies) — corrected after re-verifying scans (found in 3 scans, not 2)",1,2,3,""),
-  ("Grayson Allen","base",1,2,3,""),
- ],
- "Dallas Mavericks": [
-  ("Max Christie","base",1,2,3,""),
-  ("Kyrie Irving","base",1,3,5,""),
-  ("PJ Washington Jr.","base",1,2,3,""),
-  ("Brandon Williams","base",1,2,3,""),
- ],
- "Toronto Raptors": [
-  ("Ochai Agbaji","base (x2 copies)",1,2,3,""),
-  ("Immanuel Quickley","base (x3 copies)",1,2,4,""),
-  ("Gradey Dick","base",1,2,4,""),
- ],
- "Sacramento Kings": [
-  ("Malik Monk","base",1,2,3,""),
-  ("Zach LaVine","Chrome",1,2,4,""),
- ],
- "Atlanta Hawks": [
-  ("Spud Webb","legend base",1,2,4,""),
-  ("Jalen Johnson","base",1,2,4,""),
-  ("Clint Capela","base",1,2,3,""),
- ],
- "Houston Rockets": [
-  ("Fred VanVleet","base",1,2,4,""),
-  ("Jabari Smith Jr.","base",1,2,4,""),
-  ("Kevin Durant","base",1,3,5,""),
+ "Held back — needs JC to locate the physical card": [
+  ("Kevin Durant","Rockets base — sheet listed 1 for sale on top of the 2 KEEP copies, but no 3rd physical "
+   "Durant appearance turned up anywhere in scans 433-450 during posting verification 2026-07-22 — dropped "
+   "from the Rockets lot pending JC confirming which scan/card this actually is",1,3,5,""),
  ],
  "Scans 451-475 — remaining commons (approx., pending full team sort)": [
   ("Mixed base/Chrome cards","across Cavaliers, Suns, Grizzlies, Mavericks, Pistons, Wizards, Nuggets, Hawks, Heat, Nets, Rockets, Trail Blazers, Warriors, Bulls, Kings, Hornets, Pacers, Timberwolves, Magic, Raptors, Spurs, Jazz, Bucks, Pelicans (x199 copies)",1,2,3,"count is an estimate from this pass — will firm up to exact team lots once physically sorted, same as the rest of this project. NOT yet purged of team-duo/team-insert cards (unlike the itemized teams above) — this pile hasn't been individually sorted, so any team cards mixed in here still count toward the 199 for now."),
@@ -202,14 +172,21 @@ n_keep, g_keep = build(
 
 n_sell, g_sell = build(
     "Basketball sell/lots &mdash; sort by team",
-    "&middot; Scans 433-475 &middot; Spurs&ndash;Heat now LIVE, rest still HOLD",
+    "&middot; Scans 433-475 &middot; Spurs&ndash;Rockets now LIVE (29 lots), only the 451-475 bulk pile left on HOLD",
     SELL, sell_out,
-    "<b>POSTED 2026-07-22:</b> all 18 teams from San Antonio Spurs through Miami Heat (22 lots/singles, "
-    "67 cards, $150.37 combined list price) are now LIVE on eBay &mdash; pulled from this sheet and removed "
-    "below. During final crop verification, Trey Murphy III (a Pelicans player) was found miscategorized "
-    "under the Grizzlies lot &mdash; moved into the Pelicans lot before posting so the Grizzlies title stays "
-    "accurate. <b>Denver Nuggets is next up</b> (JC: physically confirmed Braun is 1 Chrome + 1 base, not "
-    "2 Chrome; Watson is base not Chrome as originally labeled &mdash; both corrected in the table below). "
+    "<b>POSTED 2026-07-22 (round 1):</b> Spurs through Miami Heat (22 lots/singles, 67 cards, $150.37). "
+    "During crop verification, Trey Murphy III (a Pelicans player) was found miscategorized under the "
+    "Grizzlies lot &mdash; moved into the Pelicans lot before posting. "
+    "<b>POSTED 2026-07-22 (round 2):</b> Denver Nuggets through Houston Rockets (7 lots, 25 cards, $49.43) "
+    "&mdash; JC physically confirmed Braun is 1 Chrome + 1 base (not 2 Chrome) and Watson is base (not "
+    "Chrome), both already corrected below before this round. JC also flagged a Rockets card labeled base "
+    "that was actually Chrome &mdash; that was Fred VanVleet (confirmed Topps Chrome by direct re-check of "
+    "the scan); while on that same scan, Jalen Johnson (Hawks) was also found to be Chrome despite being "
+    "labeled base, so that got corrected too. Immanuel Quickley (Raptors) was listed as 3 copies but only "
+    "2 physical appearances could be found across every scan in this itemized batch (433-450) &mdash; posted "
+    "as 2, flagged. Kevin Durant's Rockets \"base\" listing was dropped entirely &mdash; no 3rd physical "
+    "Durant card turned up anywhere in scans 433-450 beyond the 2 already reserved for KEEP; see the held-back "
+    "note at the top of the table below. "
     "<b>Sort verdict: lot material, organized by team for easy bundling.</b> Base 2025-26 Topps/Chrome "
     "commons run $1-4 raw even for current stars (confirmed via comps: LeBron $1.50-4, Giannis $0.99-2.24, "
     "Jokic $1.15-2, Kawhi/Harden $0.99-1.59) &mdash; nothing here individually clears a singles threshold. "
