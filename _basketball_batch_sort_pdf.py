@@ -90,90 +90,6 @@ KEEP = {
 }
 
 SELL = {
- "San Antonio Spurs": [
-  ("Jeremy Sochan","base (x2 copies)",1,2,3,""),
-  ("Harrison Barnes","Chrome",1,2,3,""),
-  ("Stephon Castle","Chrome",1,2,4,""),
-  ("Chris Paul","base",1,3,5,""),
-  ("Steve Kerr","legend/player-era insert",1,2,4,""),
- ],
- "LA Clippers": [
-  ("Norman Powell","base (x3 copies)",1,2,3,""),
-  ("Derrick Jones Jr.","base",1,2,3,""),
- ],
- "Detroit Pistons": [
-  ("Cade Cunningham","base (x2 copies)",1,3,5,""),
-  ("Isaiah Thomas","base (x2 copies) — corrected after re-verifying scans (found in 2 scans, not 1)",1,2,3,""),
-  ("Jaden Ivey","base (x2 copies)",1,2,3,""),
-  ("Jalen Duren","base",1,2,3,""),
- ],
- "Brooklyn Nets": [
-  ("Nic Claxton","base",1,2,3,""),
- ],
- "Boston Celtics": [
-  ("Kristaps Porzingis","base",1,2,4,""),
- ],
- "Chicago Bulls": [
-  ("Coby White","base (x3 copies)",1,2,3,""),
-  ("Josh Giddey","base",1,2,4,""),
-  ("Lonzo Ball","base",1,2,3,""),
-  ("Patrick Williams","base",1,2,3,""),
- ],
- "OKC Thunder": [
-  ("Isaiah Hartenstein","base (x2 copies)",1,2,3,""),
-  ("Aaron Wiggins","Chrome",1,2,3,""),
-  ("Chet Holmgren","base",1,3,5,""),
-  ("Isaiah Joe","base",1,2,3,""),
- ],
- "Washington Wizards": [
-  ("Bilal Coulibaly","base (x2 copies)",1,2,3,""),
-  ("Richaun Holmes","Chrome",1,2,3,""),
-  ("Alex Sarr","base",1,2,4,""),
- ],
- "Orlando Magic": [
-  ("Anthony Black","base (x2 copies)",1,2,3,""),
-  ("Paolo Banchero","base",1,3,5,""),
- ],
- "Portland Trail Blazers": [
-  ("Deni Avdija","base",1,2,4,""),
- ],
- "Cleveland Cavaliers": [
-  ("Evan Mobley","Chrome",1,3,5,""),
-  ("Darius Garland","base",1,2,4,""),
-  ("Ty Jerome","base",1,2,3,""),
- ],
- "New Orleans Pelicans": [
-  ("Yves Missi","base",1,2,3,""),
-  ("Herbert Jones","base",1,2,3,""),
- ],
- "Minnesota Timberwolves": [
-  ("Naz Reid","base (x3 copies)",1,2,3,""),
-  ("Kevin Garnett","legend insert",2,4,6,""),
- ],
- "Indiana Pacers": [
-  ("TJ McConnell","Chrome",1,2,3,""),
-  ("Bennedict Mathurin","Chrome",1,2,4,""),
-  ("Andrew Nembhard","base (x3 copies) — corrected after re-verifying scans (found in 3 scans, not 4)",1,2,3,""),
-  ("Obi Toppin","base",1,2,3,""),
- ],
- "Charlotte Hornets": [
-  ("LaMelo Ball","base + Chrome (x2 copies)",1,3,5,""),
-  ("Tidjane Salaun","base",1,2,3,""),
- ],
- "Golden State Warriors": [
-  ("Quinten Post","base",1,2,3,""),
-  ("Jonathan Kuminga","base",1,2,4,""),
- ],
- "Memphis Grizzlies": [
-  ("Desmond Bane","base + Chrome (x3 copies)",1,2,4,""),
-  ("Jaren Jackson Jr.","Chrome",1,2,4,""),
-  ("Trey Murphy III","Chrome",1,2,3,""),
- ],
- "Miami Heat": [
-  ("Tyler Herro","base",1,3,5,""),
-  ("Jaime Jaquez Jr.","base + Chrome (x2 copies)",1,2,3,""),
-  ("Bam Adebayo","base",1,2,4,""),
- ],
  "Denver Nuggets": [
   ("Jamal Murray","base",1,2,4,""),
   ("Christian Braun","Chrome (copy 1)",1,2,3,""),
@@ -286,8 +202,14 @@ n_keep, g_keep = build(
 
 n_sell, g_sell = build(
     "Basketball sell/lots &mdash; sort by team",
-    "&middot; Scans 433-475 &middot; HOLD, not posted",
+    "&middot; Scans 433-475 &middot; Spurs&ndash;Heat now LIVE, rest still HOLD",
     SELL, sell_out,
+    "<b>POSTED 2026-07-22:</b> all 18 teams from San Antonio Spurs through Miami Heat (22 lots/singles, "
+    "67 cards, $150.37 combined list price) are now LIVE on eBay &mdash; pulled from this sheet and removed "
+    "below. During final crop verification, Trey Murphy III (a Pelicans player) was found miscategorized "
+    "under the Grizzlies lot &mdash; moved into the Pelicans lot before posting so the Grizzlies title stays "
+    "accurate. <b>Denver Nuggets is next up</b> (JC: physically confirmed Braun is 1 Chrome + 1 base, not "
+    "2 Chrome; Watson is base not Chrome as originally labeled &mdash; both corrected in the table below). "
     "<b>Sort verdict: lot material, organized by team for easy bundling.</b> Base 2025-26 Topps/Chrome "
     "commons run $1-4 raw even for current stars (confirmed via comps: LeBron $1.50-4, Giannis $0.99-2.24, "
     "Jokic $1.15-2, Kawhi/Harden $0.99-1.59) &mdash; nothing here individually clears a singles threshold. "
@@ -303,7 +225,7 @@ n_sell, g_sell = build(
     "physically organized; the running total already reflects the full count. "
     "<b>Team/multi-player insert cards (duo inserts, team celebration cards) have been pulled OUT of every "
     "lot below</b> per JC's call &mdash; he's setting those aside to decide on separately later, so they no "
-    "longer count toward any team's lot total or this sheet's grand total. HOLD: nothing posted, more scans pending.")
+    "longer count toward any team's lot total or this sheet's grand total.")
 
 json.dump({"keep":{"count":n_keep,"total":g_keep},"sell":{"count":n_sell,"total":g_sell}},
           open("output/_basketball_batch.json","w"), indent=1)
