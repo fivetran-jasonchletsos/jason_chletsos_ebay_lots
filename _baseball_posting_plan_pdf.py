@@ -31,82 +31,6 @@ INDIVIDUALS = [
 
 # (last_name_sort_key, display name, variant, low, typ, high, note)
 CARDS = [
- ("Abbott","Andrew Abbott","Reds · Topps 75 checkerboard parallel",1,2,3,""),
- ("Aparicio","Luis Aparicio","White Sox · Panini Crusade, legend",1,2,4,""),
- ("Beltre","Adrian Beltre","Rangers · Topps 'Glove Work' insert, legend",2,4,6,""),
- ("Bogaerts","Xander Bogaerts","Padres · gold parallel #0201/2025",2,3,5,""),
- ("Burger","Jake Burger","Rangers · Topps 75 crystal parallel",1,2,3,""),
- ("Buxton","Byron Buxton","Twins · star insert",1,3,5,""),
- ("Caminero","Junior Caminero","Rays · star insert",1,3,5,""),
- ("Chandler","Bubba Chandler","Pirates · baseballs insert RC (copy 1)",2,4,7,"confirm 2 real copies, not a re-scan"),
- ("Chandler","Bubba Chandler","Pirates · baseballs insert RC (copy 2)",2,4,7,"confirm 2 real copies, not a re-scan"),
- ("Clemente","Roberto Clemente","Pirates · Topps Heritage NL All-Stars, legend",2,5,8,""),
- ("Crochet","Garrett Crochet","Red Sox · Topps Heritage pink sparkle parallel",1,3,5,""),
- ("Cruz","Oneil Cruz","Pirates · Power Players insert",1,3,5,""),
- ("deGrom","Jacob deGrom","Rangers · Topps Heritage",1,3,5,""),
- ("De La Cruz","Elly De La Cruz","Reds · RC",1,3,5,""),
- ("De La Cruz","Elly De La Cruz","Reds · Topps Heritage",1,3,5,""),
- ("Devers","Rafael Devers","Red Sox · Topps 75 Grapefruit League",1,2,4,""),
- ("Duran","Jarren Duran","Red Sox · Future Stars graffiti insert",1,2,4,""),
- ("Duran","Jarren Duran","Red Sox · graffiti insert (2nd design)",1,2,4,""),
- ("Goldschmidt","Paul Goldschmidt","Yankees · star insert",1,2,4,""),
- ("Gonzales","Nick Gonzales","Pirates · Topps 75 checkerboard parallel",1,2,3,""),
- ("Greene","Riley Greene","Tigers · 2025 Record Breaker insert",1,2,4,""),
- ("Hess","Ben Hess","White Sox · Panini Crusade",1,2,4,""),
- ("Jones","Jahmai Jones","Tigers · Topps 75 crystal parallel",1,2,3,""),
- ("Judge","Aaron Judge","Yankees · Topps 75 Grapefruit League",1,3,5,""),
- ("Judge","Aaron Judge","Yankees · Panini Crusade 'Call to Arms' insert",2,4,7,""),
- ("Judge","Aaron Judge","Yankees · Topps Chrome '62 Home Runs' insert",2,4,7,""),
- ("Judge","Aaron Judge","Yankees · Topps '144 RBI' insert",2,4,7,""),
- ("Langford","Wyatt Langford","Rangers · graffiti insert",1,2,4,""),
- ("Lewis","Royce Lewis","Twins · star insert",1,2,4,""),
- ("Lee","Brooks Lee","Twins · star insert RC (copy 1)",1,2,4,"confirm 2 real copies vs copy 2 below"),
- ("Lee","Brooks Lee","Twins · star insert RC (copy 2)",1,2,4,"confirm 2 real copies vs copy 1 above"),
- ("Lee","Brooks Lee","Twins · Topps 75 Future Stars RC (different design)",1,2,4,""),
- ("Lowder","Rhett Lowder","Reds · RC",1,2,3,""),
- ("Lowder","Rhett Lowder","Reds · Panini Crusade Certified Stars RC",1,3,5,""),
- ("Lowder","Rhett Lowder","Reds · Topps 75 Future Stars",1,2,4,""),
- ("Lowder","Rhett Lowder","Reds · Topps Chrome jersey-graphic RC",1,3,5,""),
- ("Lowder","Rhett Lowder","Reds · Panini Crusade 'Call to Arms' insert",1,3,5,""),
- ("Machado","Manny Machado","Padres · Power Players insert",1,3,5,""),
- ("Mayer","Marcelo Mayer","Red Sox · Fortune 15 RC",1,3,6,""),
- ("Melton","Troy Melton","Tigers · Topps 75 camo parallel RC",1,2,4,""),
- ("Merrill","Jackson Merrill","Padres · baseballs insert RC",2,4,7,""),
- ("Merrill","Jackson Merrill","Padres · graffiti insert (2nd design)",1,3,5,""),
- ("Montgomery","Braden Montgomery","White Sox · Panini Crusade Certified Prospects",1,3,5,""),
- ("Murakami","Munetaka Murakami","White Sox · baseballs insert RC",2,5,10,""),
- ("Murakami","Munetaka Murakami","White Sox · graffiti insert RC (2nd design)",2,4,7,""),
- ("Olson","Karl Olson","Red Sox · Topps 75 vintage tribute, legend",1,2,4,""),
- ("Pascual","Camilo Pascual","Senators · Topps 75 vintage tribute, legend",1,2,4,""),
- ("Purkey","Bob Purkey","Pirates · Topps 75 vintage tribute, legend",1,3,5,""),
- ("Quero","Edgar Quero","White Sox · Future Stars RC",1,2,3,""),
- ("Rodon","Carlos Rodon","Yankees · Topps Chrome geometric parallel",1,2,4,""),
- ("Rodriguez","Ivan Rodriguez","Rangers · Glove Work insert, legend",2,4,6,""),
- ("Schlittler","Cam Schlittler","Yankees · baseballs insert RC",2,4,7,""),
- ("Schlittler","Cam Schlittler","Yankees · graffiti insert RC (2nd design)",2,4,6,""),
- ("Schwarber","Kyle Schwarber","Phillies · graffiti insert",1,2,4,""),
- ("Seager","Corey Seager","Rangers · star insert (copy 1)",1,2,3,"confirm 2 real copies vs copy 2"),
- ("Seager","Corey Seager","Rangers · star insert (copy 2)",1,2,3,"confirm 2 real copies vs copy 1"),
- ("Skenes","Paul Skenes","Pirates · Panini Crusade base insert",3,5,8,""),
- ("Skubal","Tarik Skubal","Tigers · baseballs insert RC",1,3,5,""),
- ("Skubal","Tarik Skubal","Tigers · star insert (2nd design)",1,3,5,""),
- ("Sommers","Drew Sommers","Tigers · Topps 75 crystal parallel RC",1,2,3,""),
- ("Stanton","Giancarlo Stanton","Yankees · sparkle parallel",1,2,3,""),
- ("Stewart","Sal Stewart","Reds · Topps 75 gold sunburst RC",1,3,6,""),
- ("Tatis","Fernando Tatis Jr.","Padres · graffiti insert",1,3,5,""),
- ("Tatis","Fernando Tatis Jr.","Padres · baseballs insert",1,3,5,""),
- ("Tatis","Fernando Tatis Jr.","Padres · Topps Chrome 1990-inspired design",1,3,5,""),
- ("Taylor","Brayden Taylor","Rays · Panini Crusade",1,2,4,""),
- ("Teel","Kyle Teel","White Sox · graffiti insert RC",2,4,7,""),
- ("Thomas","Frank Thomas","White Sox · Panini Crusade, legend",2,4,6,""),
- ("Tolle","Payton Tolle","Red Sox · graffiti insert RC",1,2,4,""),
- ("Torkelson","Spencer Torkelson","Tigers · Topps 75 sunburst gold parallel",1,2,4,""),
- ("Turner","Trea Turner","Phillies · star insert",1,3,5,""),
- ("Veen","Zac Veen","Rockies · Topps 75 chrome parallel",1,2,3,""),
- ("Wagner","Honus Wagner","Pirates · Topps 75 vintage tribute, legend",2,5,9,""),
- ("Witt","Bobby Witt Jr.","Royals · Gameday Drip insert",1,3,6,""),
- ("Witt","Bobby Witt Jr.","Royals · Topps Chrome 'Terrors' insert",1,3,5,""),
- ("Yastrzemski","Carl Yastrzemski","Red Sox · Glove Work insert, legend",2,4,7,""),
 ]
 
 TEAM_INSERTS = [
@@ -158,13 +82,13 @@ def lot_title(team, idx, n_sub):
 out=Path("docs/baseball_posting_plan.pdf")
 doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
 flow=[Paragraph("Baseball batch &mdash; POSTING PLAN",h1),
-      Paragraph(f"{len(CARDS)} cards remaining in lots &middot; Scans 391-411 &middot; lots grouped by team, alphabetized within each lot to match your physical A-Z sort",sub),
-      Paragraph("<b>29 items now LIVE</b> &mdash; 4 individuals (Roenis Elias II, Juan Morillo, both Randy Johnson "
-                "Panini Crusade Numbers parallels) + the first 25 team lots (17 teams fully cleared: Angels, "
+      Paragraph("ALL 47 team lots + 4 individuals now LIVE &middot; Scans 391-411 &middot; only the team-insert bundle remains",sub),
+      Paragraph("<b>51 items now LIVE</b> &mdash; 4 individuals (Roenis Elias II, Juan Morillo, both Randy Johnson "
+                "Panini Crusade Numbers parallels) + all 47 team lots across every team in this batch (Angels, "
                 "Astros, Athletics, Blue Jays, Braves, Brewers, Cardinals, Cubs, Diamondbacks, Dodgers, Giants, "
-                "Guardians, Mariners, Marlins, Multi-team/Legends, Nationals, Orioles). "
-                f"{len(lots)} team lots remain to post (Padres, Phillies, Pirates, Rangers, Rays, Reds, Red Sox, "
-                "Rockies, Royals, Senators, Tigers, Twins, White Sox, Yankees), plus the team-insert lot below. "
+                "Guardians, Mariners, Marlins, Multi-team/Legends, Nationals, Orioles, Padres, Phillies, Pirates, "
+                "Rangers, Rays, Red Sox, Reds, Rockies, Royals, Senators, Tigers, Twins, White Sox, Yankees). "
+                "<b>Only the 9-card team-insert bundle below is still unposted</b> (JC: hold on the team cards). "
                 "Paul O'Neill's signed auto is excluded &mdash; that one's a gift, not for sale.",grp)]
 
 # Individuals table
