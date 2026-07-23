@@ -1114,7 +1114,7 @@ def lambda_handler(event, context):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
-    # POST /ebay/pokedex-save — "Natasha's Pokedex" auto-save.
+    # POST /ebay/pokedex-save — "Cool Natasha's Pokedex" auto-save.
     # Body: {"image": <data-url>, "card": {...fields from /upload-photos'
     #        "card" object}, "scannedAt": "YYYY-MM-DD" (computed client-side)}
     # Uses the GitHub Contents API (read-modify-write, two commits) to:
@@ -1178,7 +1178,7 @@ def lambda_handler(event, context):
 
             try:
                 next_id, record = _save_card_with_retry(
-                    "docs/natasha_pokedex", raw, build_record, "Natasha's Pokedex"
+                    "docs/natasha_pokedex", raw, build_record, "Cool Natasha's Pokedex"
                 )
             except RuntimeError as exc:
                 logger.error(f"pokedex-save: {exc}")
@@ -1199,7 +1199,7 @@ def lambda_handler(event, context):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
-    # POST /ebay/pokedex-delete — remove a card Natasha scanned, so she
+    # POST /ebay/pokedex-delete — remove a card Cool Natasha scanned, so she
     # can re-scan it (bad photo, wrong card, etc). Body: {"id": <int>}.
     # Removes the record from cards.json and deletes its image (best
     # effort — a missing/already-gone image doesn't block the json update).
@@ -1260,7 +1260,7 @@ def lambda_handler(event, context):
                     img_sha = _github_get_sha(image_path)
                     _github_delete_file(
                         image_path, img_sha,
-                        message=f"Natasha's Pokedex: remove card {card_id} image ({target.get('name') or 'unknown'})",
+                        message=f"Cool Natasha's Pokedex: remove card {card_id} image ({target.get('name') or 'unknown'})",
                     )
                 except urllib.error.HTTPError as exc:
                     logger.error(f"pokedex-delete image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
@@ -1270,7 +1270,7 @@ def lambda_handler(event, context):
             try:
                 _github_put_file(
                     cards_path, json.dumps(remaining, indent=2).encode("utf-8"),
-                    message=f"Natasha's Pokedex: remove card {card_id} ({target.get('name') or 'unknown'})",
+                    message=f"Cool Natasha's Pokedex: remove card {card_id} ({target.get('name') or 'unknown'})",
                     sha=sha,
                 )
             except urllib.error.HTTPError as exc:
@@ -3049,7 +3049,7 @@ def _reddit_submit(subreddit: str, title: str, text: str):
 
 
 # ---------------------------------------------------------------------------
-# Natasha's Pokedex — GitHub Contents API helpers (read-modify-write of
+# Cool Natasha's Pokedex — GitHub Contents API helpers (read-modify-write of
 # docs/natasha_pokedex/cards.json + creating docs/natasha_pokedex/images/*.jpg)
 # ---------------------------------------------------------------------------
 def _github_headers() -> dict:
