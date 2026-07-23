@@ -46,9 +46,8 @@ INDIVIDUALS = [
  ("Kevin Alcantara","Topps Chrome RC (copy 1 of 2) · Cubs",2,3,4,""),
  ("Brooks Lee","Topps Chrome RC · Twins",2,3,4,""),
  ("Eury Perez","Panini Prizm · Marlins electric arm",2,3,5,""),
- ("Mike Trout / Shohei Ohtani","Topps Chrome 'Fortune 15' insert · Angels",3,4,6,""),
+ ("Mike Trout","Topps Chrome 'Fortune 15' insert (Trout only, not Trout/Ohtani as first labeled) · Angels",3,4,6,""),
  ("Vladimir Guerrero Jr.","Topps Chrome All-Star Game parallel · Blue Jays",3,4,6,""),
- ("Giancarlo Stanton","Topps Holiday insert · Yankees",2,3,5,""),
  ("Mason Miller","Topps Chrome (Future Star trophy) · Padres, elite closer",2,3,5,""),
  ("Jeremy Pena","Topps Chrome · Astros starting SS",2,3,4,""),
  ("Aroldis Chapman","Topps Chrome (copy 1 of 2) · Red Sox",1,2,3,""),
@@ -205,7 +204,7 @@ doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.
 flow=[
  Paragraph("Baseball batch 2 &mdash; sort worksheet",h1),
  Paragraph(f"{total_cards} cards &middot; Scans 476-486 &middot; raw/ungraded July 2026 eBay-comp estimate "
-           f"&middot; ALL {total_cards} cards LIVE on eBay (25 individuals + 73 in {len(LOTS)} team lots)",sub),
+           f"&middot; {len(INDIVIDUALS)} individuals + 73 in {len(LOTS)} team lots, all LIVE on eBay",sub),
  Paragraph(f"<b>Total: {money(grand_low)} &ndash; {money(grand_high)}</b> (typical ~{money(grand_typ)})",grp),
  Paragraph(
   "<b>Sort verdict:</b> mostly 2025 Topps Chrome rookies/prospects plus a run of base Panini Prizm "
@@ -213,16 +212,20 @@ flow=[
   f"<b>{len(INDIVIDUALS)} cards posted individually 2026-07-23</b> &mdash; real chase-prospect names "
   "(Marcelo Mayer, Jackson Jobe, Chase Dollander, Cam Smith, Dylan Crews, Cade Horton, Chandler Simpson, "
   "Hyeseong Kim, Kevin Alcantara, Brooks Lee, Eury Perez), established stars/legends with search-friendly "
-  "names (Trout/Ohtani insert, Vladimir Jr., Giancarlo Stanton, Mason Miller, Jeremy Pe&ntilde;a, the five "
+  "names (Trout Fortune 15 insert, Vladimir Jr., Mason Miller, Jeremy Pe&ntilde;a, the five "
   "Prizm legends), and the better copy of a few duplicated cards (Aroldis Chapman, Dustin May, David Bednar, "
   "Bryan Woo). Extra copies of those same cards were routed to the team lots instead of double-listing as "
-  "singles. <b>Everything else bundles into team lots of 5 cards or fewer</b> &mdash; mostly org-depth "
+  "singles. <b>Two corrections after JC physically pulled the batch (2026-07-23):</b> the Trout 'Fortune 15' "
+  "insert is Trout only, not Trout/Ohtani as the title first said &mdash; title fixed on the live listing. "
+  "Giancarlo Stanton's holiday insert card couldn't be located physically &mdash; that listing was ended "
+  "rather than left up for a card that isn't in hand. "
+  "<b>Everything else bundles into team lots of 5 cards or fewer</b> &mdash; mostly org-depth "
   "prospects and journeyman veterans without individual chase demand. Three small multi-team lots mop up "
   "leftover 1-2 card teams (Marlins, Nationals, Rockies, Mariners, Brewers, Cardinals, Diamondbacks, "
   "Orioles, Mets, Guardians, Phillies) rather than posting single-team lots too thin to bundle. "
-  "<b>Flag before pulling:</b> Colton Gordon, Jake Mangum, and Chandler Simpson each showed up twice "
-  "<i>within the same scan photo</i> (not two different scans) &mdash; worth confirming these are really "
-  "2 physical copies in hand and not a re-scanned card, same lesson as the basketball batch mix-up. "
+  "Colton Gordon, Jake Mangum, and Chandler Simpson each showed up twice "
+  "<i>within the same scan photo</i> (not two different scans) &mdash; confirmed as 2 real physical "
+  "copies during pulling. "
   "Mike Yastrzemski's card prints a Royals uniform (he's a longtime Giant) &mdash; likely a Topps "
   "photo-variation quirk, not a misprint to correct.",
   note),
@@ -241,52 +244,41 @@ for team, cards in LOTS.items():
 doc.build(flow)
 dl=Path.home()/"Downloads"/out.name; shutil.copy(out,dl)
 
-# Pull-list companion doc -- ALL 98 posted cards (individuals + lots), flattened
-# and sorted A-Z by last name so JC can pull them straight off a sorted stack.
-# Not grouped by team/lot -- he hasn't physically pulled any of these yet.
+# Posted-status companion doc -- JC has physically pulled everything now, so
+# this goes back to showing individuals and lots as separate sections (what's
+# posted individually vs. what's in each team lot), rather than a flat A-Z
+# pull list. Individuals sorted A-Z by last name within their section too.
 lots_out=Path("docs/baseball_batch2_lots.pdf")
 lots_doc=SimpleDocTemplate(str(lots_out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
 
-def money_tag(low,ty,hi): return f"{money(low)}-{money(hi)} (typ {money(ty)})"
-
-pull_rows = []
-for n,v,lo,ty,hi,nt in INDIVIDUALS:
-    pull_rows.append((n, v, lo, ty, hi, nt, f"Individual listing &middot; posted alone"))
-for team, cards in LOTS.items():
-    for n,v,lo,ty,hi,nt in cards:
-        pull_rows.append((n, v, lo, ty, hi, nt, f"Lot &middot; {team}"))
-pull_rows.sort(key=lambda r: last_name_key(r[0]))
-
-data=[["", "Card", "Variant", "Qty", "Which listing"]]
-for n,v,lo,ty,hi,nt,listing in pull_rows:
-    q = qty_of(v)
-    vv = v + (f" &middot; <i>{nt}</i>" if nt else "")
-    data.append(["☐", Paragraph(f"<b>{n}</b>",cardp), Paragraph(f"<font size=8.5>{vv}</font>",cardp),
-                 str(q), Paragraph(f"<font size=8>{listing}</font>",cardp)])
-t=Table(data,colWidths=[0.24*inch,1.5*inch,2.5*inch,0.4*inch,2.4*inch])
-t.setStyle(TableStyle([("FONTSIZE",(0,0),(-1,-1),9),("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
-    ("BACKGROUND",(0,0),(-1,0),GRAY_DK),("TEXTCOLOR",(0,0),(-1,0),WHITE),
-    ("ROWBACKGROUNDS",(0,1),(-1,-1),[WHITE,GRAY_LT]),
-    ("ALIGN",(3,0),(3,-1),"RIGHT"),("ALIGN",(0,0),(0,-1),"CENTER"),("FONTSIZE",(0,1),(0,-1),13),
-    ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
-    ("GRID",(0,0),(-1,-1),.4,GRAY_MD),("TOPPADDING",(0,0),(-1,-1),3.5),("BOTTOMPADDING",(0,0),(-1,-1),3.5)]))
+individuals_sorted = sorted(INDIVIDUALS, key=lambda c: last_name_key(c[0]))
 
 lots_flow=[
- Paragraph("Baseball batch 2 &mdash; pull list (A-Z, all POSTED)",h1),
+ Paragraph("Baseball batch 2 &mdash; posted (individuals + lots)",h1),
  Paragraph(f"{total_cards} cards &middot; Scans 476-486 &middot; all LIVE on eBay 2026-07-23 "
-           f"&middot; {len(INDIVIDUALS)} individuals + {n_lots} lot cards, sorted A-Z by last name for pulling",sub),
+           f"&middot; {len(INDIVIDUALS)} individuals, {n_lots} cards across {len(LOTS)} team lots",sub),
  Paragraph(f"<b>Total: {money(grand_low)} &ndash; {money(grand_high)}</b> (typical ~{money(grand_typ)})",grp),
  Paragraph(
-  "Every posted card from this batch, alphabetical by last name to match a physical A-Z pull -- not yet "
-  "pulled, so individuals and lot cards are mixed together rather than split into separate sections. "
-  "The 'Which listing' column tells you where each card needs to end up once pulled: either its own "
-  "individual listing, or which team lot it's part of. Colton Gordon, Jake Mangum, and Chandler Simpson "
-  "each showed up twice within the same scan photo (not two different scans) and were confirmed as 2 real "
-  "physical copies before posting. Mike Yastrzemski's card prints a Royals uniform (he's a longtime Giant) "
-  "&mdash; a Topps photo-variation quirk, not a misprint.",
+  "<b>Corrections after JC physically pulled the batch (2026-07-23):</b> the Trout 'Fortune 15' insert is "
+  "Trout only, not Trout/Ohtani as the title first said &mdash; fixed on the live listing. Giancarlo "
+  "Stanton's holiday insert card couldn't be located physically, so that listing was ended rather than "
+  "left up for a card that isn't in hand. Colton Gordon, Jake Mangum, and Chandler Simpson each showed up "
+  "twice within the same scan photo (not two different scans) &mdash; confirmed as 2 real physical copies "
+  "during pulling. Mike Yastrzemski's card prints a Royals uniform (he's a longtime Giant) &mdash; a Topps "
+  "photo-variation quirk, not a misprint.",
   note),
- t,
 ]
+
+lots_flow.append(Paragraph(f"Individual listings ({len(individuals_sorted)} cards)",grp))
+t,_ = table_for(individuals_sorted)
+lots_flow.append(t)
+
+lots_flow.append(Paragraph(f"Team lots ({len(LOTS)} lots, {n_lots} cards, 5 cards or fewer each)",grp))
+for team, cards in LOTS.items():
+    lots_flow.append(Paragraph(f"{team} &mdash; {sum(qty_of(c[1]) for c in cards)} cards", ParagraphStyle("lotgrp2",parent=grp,fontSize=11,spaceBefore=8,spaceAfter=2)))
+    t,_ = table_for(cards)
+    lots_flow.append(t)
+
 lots_doc.build(lots_flow)
 lots_dl=Path.home()/"Downloads"/lots_out.name; shutil.copy(lots_out,lots_dl)
 
@@ -294,7 +286,7 @@ Path("output/_baseball_batch2_sort.json").write_text(json.dumps(
  {"individuals":{"count":n_individuals,"cards":[c[0] for c in INDIVIDUALS]},
   "lots":{"count":n_lots,"teams":{k:sum(qty_of(c[1]) for c in v) for k,v in LOTS.items()}},
   "total_cards":total_cards,"grand_total":{"low":grand_low,"typical":grand_typ,"high":grand_high},
-  "status":"POSTED - all 98 cards live on eBay as of 2026-07-23"},indent=1))
+  "status":"POSTED - 97 cards live on eBay as of 2026-07-23 (Stanton pulled, card not found; Trout title corrected to remove Ohtani)"},indent=1))
 
 print(f"Individuals: {n_individuals} cards  ·  Lots: {n_lots} cards across {len(LOTS)} lots  ·  Total: {total_cards}")
 print(f"Grand total: {money(grand_low)}-{money(grand_high)} (typ {money(grand_typ)}) -> {out} -> {dl}")
