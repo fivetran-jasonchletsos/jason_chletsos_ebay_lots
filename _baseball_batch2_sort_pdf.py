@@ -19,6 +19,14 @@ def qty_of(variant):
     m = QTY_RE.search(variant)
     return int(m.group(1)) if m else 1
 
+NAME_WORD_RE = re.compile(r"[A-Za-z']+")
+SUFFIXES = {"jr","sr","ii","iii","iv","v"}
+def last_name_key(name):
+    words = NAME_WORD_RE.findall(name)
+    while words and words[-1].lower() in SUFFIXES:
+        words.pop()
+    return (words[-1].lower() if words else name.lower(), name.lower())
+
 GRAY_DK = colors.HexColor("#222222")
 GRAY_MD = colors.HexColor("#555555")
 GRAY_LT = colors.HexColor("#e8e8e8")
@@ -233,31 +241,52 @@ for team, cards in LOTS.items():
 doc.build(flow)
 dl=Path.home()/"Downloads"/out.name; shutil.copy(out,dl)
 
-# Lots-only companion doc -- individuals are posted, JC is pulling the lots
-# physically off the sorted stack, so this trims to just what he needs on hand.
+# Pull-list companion doc -- ALL 98 posted cards (individuals + lots), flattened
+# and sorted A-Z by last name so JC can pull them straight off a sorted stack.
+# Not grouped by team/lot -- he hasn't physically pulled any of these yet.
 lots_out=Path("docs/baseball_batch2_lots.pdf")
 lots_doc=SimpleDocTemplate(str(lots_out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
-lots_grand_low = sum(tot(cards,2) for cards in LOTS.values())
-lots_grand_typ = sum(tot(cards,3) for cards in LOTS.values())
-lots_grand_high = sum(tot(cards,4) for cards in LOTS.values())
+
+def money_tag(low,ty,hi): return f"{money(low)}-{money(hi)} (typ {money(ty)})"
+
+pull_rows = []
+for n,v,lo,ty,hi,nt in INDIVIDUALS:
+    pull_rows.append((n, v, lo, ty, hi, nt, f"Individual listing &middot; posted alone"))
+for team, cards in LOTS.items():
+    for n,v,lo,ty,hi,nt in cards:
+        pull_rows.append((n, v, lo, ty, hi, nt, f"Lot &middot; {team}"))
+pull_rows.sort(key=lambda r: last_name_key(r[0]))
+
+data=[["", "Card", "Variant", "Qty", "Which listing"]]
+for n,v,lo,ty,hi,nt,listing in pull_rows:
+    q = qty_of(v)
+    vv = v + (f" &middot; <i>{nt}</i>" if nt else "")
+    data.append(["☐", Paragraph(f"<b>{n}</b>",cardp), Paragraph(f"<font size=8.5>{vv}</font>",cardp),
+                 str(q), Paragraph(f"<font size=8>{listing}</font>",cardp)])
+t=Table(data,colWidths=[0.24*inch,1.5*inch,2.5*inch,0.4*inch,2.4*inch])
+t.setStyle(TableStyle([("FONTSIZE",(0,0),(-1,-1),9),("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
+    ("BACKGROUND",(0,0),(-1,0),GRAY_DK),("TEXTCOLOR",(0,0),(-1,0),WHITE),
+    ("ROWBACKGROUNDS",(0,1),(-1,-1),[WHITE,GRAY_LT]),
+    ("ALIGN",(3,0),(3,-1),"RIGHT"),("ALIGN",(0,0),(0,-1),"CENTER"),("FONTSIZE",(0,1),(0,-1),13),
+    ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+    ("GRID",(0,0),(-1,-1),.4,GRAY_MD),("TOPPADDING",(0,0),(-1,-1),3.5),("BOTTOMPADDING",(0,0),(-1,-1),3.5)]))
+
 lots_flow=[
- Paragraph("Baseball batch 2 &mdash; lots (POSTED)",h1),
- Paragraph(f"{n_lots} cards across {len(LOTS)} lot groups (19 listings, Angels split into 2) &middot; "
-           f"Scans 476-486 &middot; all LIVE on eBay 2026-07-23 &middot; "
-           f"the {len(INDIVIDUALS)} individual cards were posted separately, not included here",sub),
- Paragraph(f"<b>Lots total: {money(lots_grand_low)} &ndash; {money(lots_grand_high)}</b> "
-           f"(typical ~{money(lots_grand_typ)})",grp),
+ Paragraph("Baseball batch 2 &mdash; pull list (A-Z, all POSTED)",h1),
+ Paragraph(f"{total_cards} cards &middot; Scans 476-486 &middot; all LIVE on eBay 2026-07-23 "
+           f"&middot; {len(INDIVIDUALS)} individuals + {n_lots} lot cards, sorted A-Z by last name for pulling",sub),
+ Paragraph(f"<b>Total: {money(grand_low)} &ndash; {money(grand_high)}</b> (typical ~{money(grand_typ)})",grp),
  Paragraph(
-  "Reference copy of what got posted, organized by team. Colton Gordon, Jake Mangum, and Chandler Simpson "
+  "Every posted card from this batch, alphabetical by last name to match a physical A-Z pull -- not yet "
+  "pulled, so individuals and lot cards are mixed together rather than split into separate sections. "
+  "The 'Which listing' column tells you where each card needs to end up once pulled: either its own "
+  "individual listing, or which team lot it's part of. Colton Gordon, Jake Mangum, and Chandler Simpson "
   "each showed up twice within the same scan photo (not two different scans) and were confirmed as 2 real "
   "physical copies before posting. Mike Yastrzemski's card prints a Royals uniform (he's a longtime Giant) "
   "&mdash; a Topps photo-variation quirk, not a misprint.",
   note),
+ t,
 ]
-for team, cards in LOTS.items():
-    lots_flow.append(Paragraph(f"{team} &mdash; {sum(qty_of(c[1]) for c in cards)} cards", ParagraphStyle("lotgrp2",parent=grp,fontSize=11,spaceBefore=8,spaceAfter=2)))
-    t,_ = table_for(cards)
-    lots_flow.append(t)
 lots_doc.build(lots_flow)
 lots_dl=Path.home()/"Downloads"/lots_out.name; shutil.copy(lots_out,lots_dl)
 
