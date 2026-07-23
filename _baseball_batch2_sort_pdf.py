@@ -236,7 +236,7 @@ t,_ = table_for(INDIVIDUALS)
 flow.append(t)
 
 flow.append(Paragraph(f"Team lots ({sum(1 for _ in LOTS)} lots, {n_lots} cards, 5 cards or fewer each)",grp))
-for team, cards in LOTS.items():
+for team, cards in sorted(LOTS.items(), key=lambda kv: kv[0].lower()):
     flow.append(Paragraph(f"{team} &mdash; {sum(qty_of(c[1]) for c in cards)} cards", ParagraphStyle("lotgrp",parent=grp,fontSize=11,spaceBefore=8,spaceAfter=2)))
     t,_ = table_for(cards)
     flow.append(t)
@@ -274,7 +274,7 @@ t,_ = table_for(individuals_sorted)
 lots_flow.append(t)
 
 lots_flow.append(Paragraph(f"Team lots ({len(LOTS)} lots, {n_lots} cards, 5 cards or fewer each)",grp))
-for team, cards in LOTS.items():
+for team, cards in sorted(LOTS.items(), key=lambda kv: kv[0].lower()):
     lots_flow.append(Paragraph(f"{team} &mdash; {sum(qty_of(c[1]) for c in cards)} cards", ParagraphStyle("lotgrp2",parent=grp,fontSize=11,spaceBefore=8,spaceAfter=2)))
     t,_ = table_for(cards)
     lots_flow.append(t)
