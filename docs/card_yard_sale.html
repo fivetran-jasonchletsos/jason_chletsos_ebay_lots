@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Card Yard Sale — The Collection</title>
+<meta name="description" content="Plan for a one-weekend all-cards yard sale at Jason's house in Wynnewood, PA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141414; --panel2:#1a1a1a; --border:rgba(255,255,255,0.08);
+    --text:#f1efe9; --sub:#9a9388;
+    --natasha-y:#ffcb05;
+    --mike-brb:#39d698;
+    --gold:#d4af37;
+    --font-display:'Fredoka','Nunito',sans-serif;
+    --font-body:'Nunito',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 10% -5%, rgba(201,165,66,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 95% 5%, rgba(238,21,21,0.08), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 90% 100%, rgba(0,168,107,0.08), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 5% 100%, rgba(193,68,14,0.09), transparent 60%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:56px 24px 80px;}
+  .back{
+    font-family:var(--font-mono); font-size:12.5px; color:var(--sub); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:28px;
+  }
+  .back:hover{ color:var(--text); }
+  header{margin-bottom:36px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--sub); margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(30px,6vw,44px);
+    line-height:1.08; letter-spacing:-0.01em;
+    background:linear-gradient(90deg, var(--gold), #fff 45%, var(--mike-brb));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .tag{color:var(--sub); font-size:15.5px; margin-top:14px; max-width:560px; line-height:1.55;}
+
+  .verdict{
+    background:var(--panel); border:1px solid rgba(212,175,55,0.3); border-radius:16px;
+    padding:22px 24px; margin-bottom:8px;
+  }
+  .verdict .vlabel{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:10px;
+  }
+  .verdict p{ font-size:14.5px; line-height:1.6; color:var(--text); }
+  .verdict p+p{ margin-top:10px; }
+
+  section{margin-top:40px;}
+  section h2{
+    font-family:var(--font-display); font-weight:600; font-size:19px; margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  section h2 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .s-compare .dot{background:#a98bff;}
+  .s-permits .dot{background:#e0651f;}
+  .s-marketing .dot{background:var(--gold);}
+  .s-setup .dot{background:var(--mike-brb);}
+  .s-pricing .dot{background:var(--natasha-y);}
+  .s-timeline .dot{background:var(--sub);}
+
+  .compare-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  }
+  @media (max-width:960px){ .compare-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .compare-grid{grid-template-columns:1fr;} }
+  .fmt{
+    background:var(--panel); border:1px solid var(--border); border-radius:16px;
+    padding:20px 20px 8px;
+  }
+  .fmt.pick{ border-color:rgba(212,175,55,0.4); }
+  .fmt h3{
+    font-family:var(--font-display); font-weight:600; font-size:16px; margin-bottom:2px;
+  }
+  .fmt .fsub{ color:var(--sub); font-size:12px; margin-bottom:14px; }
+  .fmt .plabel{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    margin:12px 0 6px;
+  }
+  .fmt .plabel.pro{ color:var(--mike-brb); }
+  .fmt .plabel.con{ color:#f0a15e; }
+  .fmt ul{ margin-bottom:4px; }
+  .fmt li{ padding:6px 0 6px 16px; font-size:13px; border-bottom:none; }
+  .fmt li::before{ content:'+'; color:var(--mike-brb); }
+  .fmt li.con::before{ content:'–'; color:#f0a15e; }
+
+  ul{list-style:none;}
+  li{
+    position:relative; padding:10px 0 10px 20px; font-size:14.5px; line-height:1.55; color:var(--text);
+    border-bottom:1px solid var(--border);
+  }
+  li:last-child{border-bottom:none;}
+  li::before{
+    content:'—'; position:absolute; left:0; color:var(--sub);
+  }
+  li b{font-weight:700;}
+
+  .box{
+    background:var(--panel); border:1px solid rgba(255,255,255,0.1); border-radius:14px;
+    padding:18px 20px; margin-top:6px;
+  }
+  .box p{font-size:13.5px; color:var(--sub); line-height:1.6; margin-top:6px;}
+  .box p:first-child{margin-top:0;}
+  .box.warn{ border-color:rgba(224,101,31,0.35); }
+  .box.warn .wlabel{ color:#f0a15e; font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; }
+
+  .flyer{
+    background:var(--panel2); border:1px dashed rgba(212,175,55,0.4); border-radius:14px;
+    padding:20px 22px; margin-top:14px; font-family:var(--font-mono); font-size:13px; line-height:1.7;
+    color:var(--text); white-space:pre-wrap;
+  }
+
+  footer{
+    text-align:center; margin-top:56px; color:var(--sub); font-size:12.5px;
+    font-family:var(--font-mono); letter-spacing:.03em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="family_hub.html">← Back to The Collection</a>
+  <header>
+    <div class="eyebrow">The Collection · Planning</div>
+    <h1>The Card Yard Sale</h1>
+    <p class="tag">Thousands of cards that never made it to eBay — plus overflow from every family collection — cleared out in one weekend at 236 Crosshill Road, Wynnewood. Here's the plan: verdict first, then marketing, setup, pricing, and a day-of checklist.</p>
+  </header>
+
+  <div class="verdict">
+    <div class="vlabel">The Verdict</div>
+    <p><b>Do the yard sale.</b> The goal for the four of you is quick cash and fast inventory offload on everything that never made it to eBay — and nothing beats a driveway table for that: instant cash or Venmo, buyer walks away with the card, no shipping, no eBay fees, no platform cut, no packing labor. Whatnot was the original plan with Mike and Moo, but it needs gear, an on-camera host, months to build an audience, and every sale still has to be packed and shipped — that's the opposite of "quick cash." A card show is a bigger commitment to organize than the crew (4 adults, kids only every other weekend) can casually take on right now.</p>
+    <p>The bonus: this doubles as a lead-gen funnel, not just a clearance sale. Neighborhood kids are already into Pokémon and local card shops are scarce and overpriced, so a fair-priced table builds goodwill and repeat foot traffic fast — and gives you a natural in-person moment to upsell interested buyers/parents toward the better stuff in the premium case (or point them to the eBay store for anything you didn't bring).</p>
+    <p><b>Since the real end goal is a recurring garage-based side business,</b> not just one weekend, treat this first sale as the shakedown run: prove out pricing, staffing, and turnout on a single low-stakes date, then call the township about what's actually required to do it regularly before you commit to a repeat schedule — see the permits section below.</p>
+  </div>
+
+  <section class="s-compare">
+    <h2><span class="dot"></span>Yard sale vs. eBay vs. Whatnot vs. a card show table</h2>
+    <p class="tag" style="margin-top:0;margin-bottom:16px;">Four formats, side by side. eBay is what Jason already runs (harpua2001) for the cards that are worth it; Whatnot was the original plan with Mike and Moo — still worth revisiting later, just not the right first move.</p>
+    <div class="compare-grid">
+      <div class="fmt pick">
+        <h3>Yard Sale</h3>
+        <div class="fsub">Driveway, one weekend, cash-and-carry</div>
+        <div class="plabel pro">Pros</div>
+        <ul>
+          <li>Zero cost — no venue, table, or platform fee</li>
+          <li>Instant cash/Venmo, buyer walks away with the card — no packing, no shipping, no late-ship refund risk</li>
+          <li>Fits the crew as-is: no gear to buy, no on-camera skills needed</li>
+          <li>Great fit for clearing bulk overflow that isn't eBay-worthy — Pokemon especially, since neighborhood kids are already into it</li>
+        </ul>
+        <div class="plabel con">Cons</div>
+        <ul>
+          <li class="con">Local-only reach — browsers, not dedicated collectors</li>
+          <li class="con">Near-junk pricing on anything actually valuable</li>
+          <li class="con">Weather-dependent, one shot, no easy reschedule</li>
+          <li class="con">Low revenue ceiling</li>
+        </ul>
+      </div>
+      <div class="fmt">
+        <h3>eBay (harpua2001)</h3>
+        <div class="fsub">Already running — the default channel for anything worth listing</div>
+        <div class="plabel pro">Pros</div>
+        <ul>
+          <li>Biggest possible audience, best prices for genuinely valuable singles with real comps</li>
+          <li>No physical crowd to host — list on your own schedule</li>
+          <li>Already built out: store, promoted listings, repricing tools all in place</li>
+        </ul>
+        <div class="plabel con">Cons</div>
+        <ul>
+          <li class="con">Final value fee (~12-13% in most categories, check current trading-card rate in Seller Hub) plus payment processing eats into every sale — a yard sale/show buyer pays that same card in cash, fee-free</li>
+          <li class="con">Every sale needs a box, label, and a trip to ship — real time cost per order that a driveway sale skips entirely</li>
+          <li class="con">Bulk/junk-wax commons aren't worth the listing time or fees at all — that's exactly the inventory this yard sale exists to clear</li>
+          <li class="con">Cash isn't instant — held/pending payouts, no same-day cash in hand</li>
+        </ul>
+      </div>
+      <div class="fmt">
+        <h3>Whatnot Live Auctions</h3>
+        <div class="fsub">Live-streamed bidding, national audience</div>
+        <div class="plabel pro">Pros</div>
+        <ul>
+          <li>Biggest built-in card-collector audience, approved in days</li>
+          <li>Real prices for good singles via live bidding, not flat yard-sale rates</li>
+          <li>Chat buyers spend ~2x; bundled shipping makes multi-win baskets profitable</li>
+        </ul>
+        <div class="plabel con">Cons</div>
+        <ul>
+          <li class="con">Roughly 11% in commission + payment processing (8% + 2.9%) plus a flat $0.30/order — solo cheap singles lose money unless bundled</li>
+          <li class="con">~$450 gear kit, a host who's comfortable on camera, real prep per show</li>
+          <li class="con">2-4 fixed shows/week, months to build a stable room (early-seller drop-off is reportedly steep in the first couple months — treat as a rough estimate, not a verified stat)</li>
+          <li class="con">Every sale still gets packed and shipped in 24-48h — the shipping SLA is the whole grind</li>
+          <li class="con">Business/tax overhead — LLC+EIN, cost-basis tracking, 1099-K</li>
+        </ul>
+      </div>
+      <div class="fmt">
+        <h3>Card Show Table</h3>
+        <div class="fsub">Rented hall, folding tables, walk-in collectors</div>
+        <div class="plabel pro">Pros</div>
+        <ul>
+          <li>Self-selecting audience — buyers already know card values, higher-value trades actually happen</li>
+          <li>Indoor, not weather-dependent</li>
+          <li>Cash-and-carry in person, no shipping at all — same upside as the yard sale and eBay's shipping cost is avoided too</li>
+          <li>Builds real relationships with local collectors and other sellers over time</li>
+        </ul>
+        <div class="plabel con">Cons</div>
+        <ul>
+          <li class="con">Real cost to organize a full show — venue rental $150-500+, table fees $20-40/vendor</li>
+          <li class="con">Needs its own promotion to get both sellers and buyers there</li>
+          <li class="con">Bigger time/logistics lift than a driveway sale — closer to running an event than attending one</li>
+          <li class="con">A skeleton crew (4 adults, kids part-time) is stretched running a whole show vs. just working one table</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="s-permits">
+    <h2><span class="dot"></span>Lower Merion Township — permits &amp; rules</h2>
+    <div class="box warn">
+      <div class="wlabel">Verify by phone before printing signs</div>
+      <p>I couldn't find a dedicated "garage sale permit" in Lower Merion's code — a one-weekend private residential sale selling personal property isn't treated as a business or as peddling/soliciting, so it most likely needs no permit. But their permit pages blocked automated access, so this isn't 100% confirmed from a primary source.</p>
+    </div>
+    <div class="box warn">
+      <div class="wlabel">If this becomes a real recurring garage business, ask differently</div>
+      <p>Jason's said the real end goal is a side business selling from the garage regularly, not a single one-off weekend. That's a different question than "can I have a yard sale" — residential zoning in Lower Merion (and most Main Line townships) restricts ongoing commercial/retail activity out of a home, and a recurring public sale with regular customer traffic is the kind of thing that can trigger home-occupation rules (customer visit limits, signage restrictions, sometimes a permit or zoning review). When you call, ask the real question directly: "we'd like to sell cards from the garage on a regular basis — what does that require?" rather than just clearing one weekend.</p>
+    </div>
+    <ul>
+      <li><b>Call to confirm:</b> Building &amp; Planning Dept, 610-645-6200, or Township Secretary's Office, 610-645-6145. Ask specifically: (1) does a one-time residential yard sale need a permit, (2) any limit on how many you can run per year, and (3) what's required if you want to do this as a recurring garage-based sale.</li>
+      <li><b>Signs:</b> a temporary sign (yard-sale sign at your own property) can stay up to 45 days and can't exceed 6 sq ft. Don't place any sign in the public right-of-way (street/sidewalk strip) without permission, and don't put a sign on a neighbor's property without asking them first.</li>
+      <li><b>This first one, keep it to one weekend.</b> A single, occasional sale is the safest read of "not a business" and the cleanest way to trial the format before you ask the township about doing it regularly.</li>
+      <li><b>Street/parking:</b> narrow Main Line streets — keep the driveway open for 2-3 visitor cars, direct overflow to one side of the street only, never block a neighbor's driveway, hydrant, or the sidewalk.</li>
+    </ul>
+  </section>
+
+  <section class="s-marketing">
+    <h2><span class="dot"></span>Marketing — flyers &amp; local promotion</h2>
+    <ul>
+      <li><b>Lead with Pokémon and kids, not generic "cards."</b> Neighborhood kids are already into Pokémon, and local card shops are both hard to find and marked up — that's the sharpest hook you have. Put a real number on the flyer, not just a claim: "Local shops charge $4-8 for a single holo — ours start at $1." Sports cards can still be there, but as a secondary line, not the headline.</li>
+      <li><b>Say it's kid-friendly, out loud.</b> A parent scanning a flyer for two seconds needs to see "kid-friendly" instantly — mention the Kids' Card Table by name and that both cash and Venmo work (don't say "cash preferred," it reads as a soft no to anyone who doesn't carry bills).</li>
+      <li><b>Parks near the house (236 Crosshill Rd):</b> Penn Wynne Park (1214 E Manoa Rd) and Wynnewood Valley Park (1505 Remington Rd) are the two closest Wynnewood-named parks and the best bet for bulletin boards near playgrounds — that's where card-collecting kids' parents are. Wynnewood Station Park (Penn &amp; Station Rd) is smaller but close. Worth a quick map-check to confirm exact walking distance from the house before printing a batch for each.</li>
+      <li><b>Other physical spots:</b> Ludington Library (Bryn Mawr) and the local library branch, the Wynnewood SEPTA station board (commuter foot traffic), Lower Merion Township building, coffee shops/Wawa near Suburban Square (Ardmore).</li>
+      <li><b>Skip the card-shop cross-promotion idea</b> — local card stores are hard to find near Wynnewood to begin with, so this isn't worth chasing. Word-of-mouth through neighborhood parent groups will do more work than a shop that may not even be nearby.</li>
+      <li><b>Online, free:</b> Facebook Marketplace ("Garage Sale" category), Facebook groups (Lower Merion Community, Main Line yard-sale/Buy Nothing groups), Nextdoor (post under both "yard sale" and mention "sports cards/Pokémon" so it surfaces in search), Craigslist garage-sale + collectibles sections.</li>
+      <li><b>Timing:</b> post flyers 10-14 days out, refresh online posts 2-3 days before and morning-of. Run the sale Saturday, 8:00 AM-1:00 PM — publish the exact start time since serious collectors like to line up early for first pick.</li>
+    </ul>
+    <div class="flyer">POKÉMON CARDS FOR KIDS — 10¢ Commons, $1 Holos, $2 Grab Bags
+Local shops charge $4-8 for a single holo — ours start at $1
+Plus sports cards, Marvel & more — thousands of cards, all ages
+Kid-friendly · Kids' Card Table · Cash or Venmo both fine
+Saturday [DATE] — 8:00 AM to 1:00 PM
+236 Crosshill Road, Wynnewood PA
+Collectors welcome early for first pick!</div>
+  </section>
+
+  <section class="s-setup">
+    <h2><span class="dot"></span>Setup &amp; logistics</h2>
+    <ul>
+      <li><b>Table layout:</b> 6-8 folding tables in an L or U, backs to the house. Dollar-bin zone (loose commons, hand-written price signs), mid-tier tables (sleeved/boxed, team dividers), and one small premium table with a locking case for 15-20 "hero" cards that draw people in.</li>
+      <li><b>Materials:</b> penny sleeves + toploaders for anything mid-tier and up, plastic bins for bulk commons, a locking/lidded case for the hero cards, cash box, plastic tablecloths, a 10x10 pop-up canopy over the premium table and cash station (non-negotiable outdoors), tarps folded nearby in case of sudden rain, yard-sale arrow signs at the corner and end of the block.</li>
+      <li><b>Payment:</b> cash box for bills/change, plus one laminated sign with Venmo/CashApp/PayPal.me QR codes — no card reader needed at this scale.</li>
+      <li><b>Staffing:</b> Jason floats and runs the premium case + cash reconciliation. Amanda co-runs the cash box and restocks bins. Mike greets/parks cars and helps carry. Cool Natasha runs the Pokémon table or floats as a second greeter. Whichever kids are there that weekend run a "Kids' Card Table" — cheap commons only, they set the price and make change from a small kids-only jar. Fun, no real cash/security duty.</li>
+      <li><b>Weather:</b> outdoor and one weekend only — no easy reschedule if it rains. Have a rain-day fallback (garage/carport) in mind, or pick a date with a stable forecast if possible.</li>
+    </ul>
+  </section>
+
+  <section class="s-pricing">
+    <h2><span class="dot"></span>Pricing &amp; merchandising</h2>
+    <ul>
+      <li><b>Quarter bin:</b> plain commons, junk-wax overflow — 25¢ each or 5/$1.</li>
+      <li><b>Dollar box:</b> recognizable-but-not-star rookies, minor parallels, rough-condition vintage — $1 each or 3/$2.</li>
+      <li><b>$3-5 box:</b> name-brand veterans, decent vintage, minor Prizm/Chrome base.</li>
+      <li><b>Premium case (Jason prices these individually off his own eBay comps, roughly comp minus 10-15% for cash-in-hand):</b> colored parallels, current-star rookies, autos, patches, graded slabs.</li>
+      <li><b>Bulk junk-wax:</b> pre-bag "50 cards - $5" / "100 cards - $8," mixed sports, no sorting by player. Kids' grab-bags at $2 (Cool Natasha and the kids can assemble these).</li>
+      <li><b>Pokémon stays on its own table</b> — different buyer than sports. Commons 10¢ or 10/$1, holos $1-2, anything with real TCGplayer value ($5+) goes in the premium case instead.</li>
+      <li><b>Haggling rule:</b> 10% off any single bin purchase over $10, 20% off for a whole box/bin, round down to the nearest dollar. Premium case floor is 70% of the marked (already comp-minus-10-15%) price — worst case that's roughly 60% of the true eBay comp, so Jason approves anything past the first haggle, not just anything below the floor.</li>
+      <li><b>What stays home:</b> anything worth $8+ on eBay per his own comps (real parallels, current-star rookies, anything autographed/graded) does <b>not</b> go to the sale — back into the eBay pipeline instead. Same for anything already flagged do-not-relist.</li>
+      <li><b>End of day:</b> final hour is half-off everything except the premium case. Leftover bulk bins go to a local library/Boys &amp; Girls Club donation; leftover $3-5 box and Pokémon get boxed for a second date rather than dumped.</li>
+    </ul>
+  </section>
+
+  <section class="s-timeline">
+    <h2><span class="dot"></span>Day-of checklist</h2>
+    <div class="box">
+      <p><b>Night before:</b> sort/box everything into the price tiers above, print signs and flyers, charge phones, stage tables and bins in the garage.</p>
+      <p><b>Morning of:</b> canopy first, then tables, then bins/cases last so nothing sits exposed overnight. Post yard-sale arrow signs by 8:00 AM.</p>
+      <p><b>During:</b> rotate breaks so the cash table is never unattended; restock bins hourly from the garage reserve.</p>
+      <p><b>Teardown:</b> box unsold cards back by the same tier labels for next time, count the cash box twice, pull every sign the same day.</p>
+    </div>
+  </section>
+
+  <footer>The Collection · card yard sale plan</footer>
+</div>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Collection — Family Card Sites</title>
-<meta name="description" content="One page, four collections: Jason, Natasha, Amanda, and Mike.">
+<meta name="description" content="One page, four collections: Jason, Cool Natasha, Amanda, and Mike.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
     --natasha:#ee1515; --natasha-b:#2a75bb; --natasha-y:#ffcb05;
     --amanda:#c1440e; --amanda-br:#e0651f; --amanda-em:#22c58b;
     --mike:#004c54; --mike-br:#00a86b; --mike-brb:#39d698;
+    --gold:#d4af37;
     --font-display:'Fredoka','Nunito',sans-serif;
     --font-body:'Nunito',-apple-system,sans-serif;
     --font-mono:'JetBrains Mono',ui-monospace,monospace;
@@ -156,42 +157,51 @@
   .bars .go .arrow{ transition:transform .25s ease; }
   .bars:hover .go .arrow{ transform:translateX(4px); }
 
-  .whats-new{
-    --glow:#39d698; position:relative; display:flex; align-items:center; justify-content:space-between;
-    gap:16px; flex-wrap:wrap; text-decoration:none; color:inherit;
-    background:var(--panel); border:1px solid rgba(57,214,152,0.28); border-radius:16px;
-    padding:16px 20px; margin-bottom:36px; overflow:hidden; isolation:isolate;
-    transition:transform .28s cubic-bezier(.2,.8,.3,1), box-shadow .28s ease;
+  @keyframes pulse-glow{
+    0%,100%{ box-shadow:0 0 0 1px rgba(212,175,55,0.35), 0 14px 40px -12px rgba(212,175,55,0.4); }
+    50%{ box-shadow:0 0 0 1px rgba(212,175,55,0.6), 0 18px 50px -10px rgba(212,175,55,0.65); }
   }
-  .whats-new::before{
-    content:''; position:absolute; inset:0; z-index:-1; opacity:0.16;
-    background:radial-gradient(560px 220px at 10% 0%, var(--glow), transparent 65%);
+  .must-read{
+    --glow:#d4af37; position:relative; display:flex; align-items:center; justify-content:space-between;
+    gap:18px; flex-wrap:wrap; text-decoration:none; color:inherit;
+    background:var(--panel); border:2px solid rgba(212,175,55,0.55); border-radius:18px;
+    padding:22px 26px; margin-bottom:40px; overflow:hidden; isolation:isolate;
+    transition:transform .28s cubic-bezier(.2,.8,.3,1);
+    animation:pulse-glow 2.6s ease-in-out infinite;
+  }
+  .must-read::before{
+    content:''; position:absolute; inset:0; z-index:-1; opacity:0.22;
+    background:radial-gradient(620px 260px at 10% 0%, var(--glow), transparent 65%);
     transition:opacity .3s ease;
   }
-  .whats-new:hover{ transform:translateY(-3px); }
-  .whats-new:hover::before{ opacity:0.28; }
-  .whats-new:hover{ box-shadow:0 12px 32px -12px rgba(57,214,152,0.32); }
-  .whats-new .wn-eyebrow{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--mike-brb); margin-bottom:4px;
+  .must-read:hover{ transform:translateY(-3px); }
+  .must-read:hover::before{ opacity:0.36; }
+  .must-read .mr-eyebrow{
+    font-family:var(--font-mono); font-size:12.5px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:6px;
   }
-  .whats-new .wn-text{ font-size:14px; color:var(--text); max-width:520px; line-height:1.5; }
-  .whats-new .wn-go{
-    font-family:var(--font-mono); font-size:12.5px; font-weight:600; letter-spacing:.04em;
-    color:var(--mike-brb); display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;
+  .must-read .mr-title{
+    font-family:var(--font-display); font-weight:700; font-size:22px; margin-bottom:6px;
   }
-  .whats-new .wn-go .arrow{ transition:transform .25s ease; }
-  .whats-new:hover .wn-go .arrow{ transform:translateX(4px); }
+  .must-read .mr-text{ font-size:14.5px; color:var(--text); max-width:540px; line-height:1.5; }
+  .must-read .mr-go{
+    font-family:var(--font-mono); font-size:13.5px; font-weight:700; letter-spacing:.04em;
+    color:var(--gold); display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;
+    background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.4); border-radius:100px; padding:10px 18px;
+  }
+  .must-read .mr-go .arrow{ transition:transform .25s ease; }
+  .must-read:hover .mr-go .arrow{ transform:translateX(4px); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a class="whats-new" href="whats_new.html">
+  <a class="must-read" href="card_yard_sale.html">
     <div>
-      <div class="wn-eyebrow">What's new</div>
-      <div class="wn-text">Ten Card Commandments dropped, a card-vanishing bug got fixed across all 6 sites, ~90 basketball cards went live, and The Vault + Lola's Lot got a design glow-up.</div>
+      <div class="mr-eyebrow">Must read</div>
+      <div class="mr-title">The Card Yard Sale is happening</div>
+      <div class="mr-text">One weekend, 236 Crosshill Road — the full plan: marketing, setup, pricing, and the Lower Merion permit rules. Read it before the date.</div>
     </div>
-    <span class="wn-go">See everything <span class="arrow">→</span></span>
+    <span class="mr-go">Read the plan <span class="arrow">→</span></span>
   </a>
   <header>
     <div class="eyebrow">The Collection · Family Card Sites</div>
@@ -209,8 +219,8 @@
     </a>
 
     <a class="card natasha" href="natasha_pokedex/index.html">
-      <span class="badge"><span class="dot"></span>Natasha</span>
-      <h2>Natasha's Pokédex</h2>
+      <span class="badge"><span class="dot"></span>Cool Natasha</span>
+      <h2>Cool Natasha's Pokédex</h2>
       <div class="who">Pokémon card collection</div>
       <p>Every Pokémon card scanned in and catalogued, gym-badge style.</p>
       <span class="go">Open the Pokédex <span class="arrow">→</span></span>
