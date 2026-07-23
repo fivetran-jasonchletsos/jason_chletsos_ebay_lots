@@ -194,13 +194,14 @@ grand_high = tot(INDIVIDUALS,4) + sum(tot(cards,4) for cards in LOTS.values())
 out=Path("docs/baseball_batch2_sort.pdf")
 doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
 flow=[
- Paragraph("Baseball batch 2 &mdash; sort worksheet (HOLD, not posted)",h1),
- Paragraph(f"{total_cards} cards &middot; Scans 476-486 &middot; raw/ungraded July 2026 eBay-comp estimate",sub),
+ Paragraph("Baseball batch 2 &mdash; sort worksheet",h1),
+ Paragraph(f"{total_cards} cards &middot; Scans 476-486 &middot; raw/ungraded July 2026 eBay-comp estimate "
+           f"&middot; {len(INDIVIDUALS)} individuals POSTED, lots still HOLD (JC pulling)",sub),
  Paragraph(f"<b>Total: {money(grand_low)} &ndash; {money(grand_high)}</b> (typical ~{money(grand_typ)})",grp),
  Paragraph(
   "<b>Sort verdict:</b> mostly 2025 Topps Chrome rookies/prospects plus a run of base Panini Prizm "
   "legends (Nomar Garciaparra, Omar Vizquel, Jim Edmonds, Tim Salmon, Paul Molitor). "
-  f"<b>{len(INDIVIDUALS)} cards recommended as individual listings</b> &mdash; real chase-prospect names "
+  f"<b>{len(INDIVIDUALS)} cards posted individually 2026-07-23</b> &mdash; real chase-prospect names "
   "(Marcelo Mayer, Jackson Jobe, Chase Dollander, Cam Smith, Dylan Crews, Cade Horton, Chandler Simpson, "
   "Hyeseong Kim, Kevin Alcantara, Brooks Lee, Eury Perez), established stars/legends with search-friendly "
   "names (Trout/Ohtani insert, Vladimir Jr., Giancarlo Stanton, Mason Miller, Jeremy Pe&ntilde;a, the five "
@@ -230,6 +231,33 @@ for team, cards in LOTS.items():
 
 doc.build(flow)
 dl=Path.home()/"Downloads"/out.name; shutil.copy(out,dl)
+
+# Lots-only companion doc -- individuals are posted, JC is pulling the lots
+# physically off the sorted stack, so this trims to just what he needs on hand.
+lots_out=Path("docs/baseball_batch2_lots.pdf")
+lots_doc=SimpleDocTemplate(str(lots_out),pagesize=letter,topMargin=.55*inch,bottomMargin=.55*inch,leftMargin=.6*inch,rightMargin=.6*inch)
+lots_grand_low = sum(tot(cards,2) for cards in LOTS.values())
+lots_grand_typ = sum(tot(cards,3) for cards in LOTS.values())
+lots_grand_high = sum(tot(cards,4) for cards in LOTS.values())
+lots_flow=[
+ Paragraph("Baseball batch 2 &mdash; lots to pull",h1),
+ Paragraph(f"{n_lots} cards across {len(LOTS)} lots &middot; Scans 476-486 &middot; "
+           f"the {len(INDIVIDUALS)} individual cards are already posted, not included here",sub),
+ Paragraph(f"<b>Lots total: {money(lots_grand_low)} &ndash; {money(lots_grand_high)}</b> "
+           f"(typical ~{money(lots_grand_typ)})",grp),
+ Paragraph(
+  "Pull these by team, 5 cards or fewer per lot. <b>Flag before pulling:</b> Colton Gordon, Jake Mangum, "
+  "and Chandler Simpson each showed up twice <i>within the same scan photo</i> (not two different scans) "
+  "&mdash; confirm you actually have 2 physical copies of each before bundling. Mike Yastrzemski's card "
+  "prints a Royals uniform (he's a longtime Giant) &mdash; a Topps photo-variation quirk, not a misprint.",
+  note),
+]
+for team, cards in LOTS.items():
+    lots_flow.append(Paragraph(f"{team} &mdash; {sum(qty_of(c[1]) for c in cards)} cards", ParagraphStyle("lotgrp2",parent=grp,fontSize=11,spaceBefore=8,spaceAfter=2)))
+    t,_ = table_for(cards)
+    lots_flow.append(t)
+lots_doc.build(lots_flow)
+lots_dl=Path.home()/"Downloads"/lots_out.name; shutil.copy(lots_out,lots_dl)
 
 Path("output/_baseball_batch2_sort.json").write_text(json.dumps(
  {"individuals":{"count":n_individuals,"cards":[c[0] for c in INDIVIDUALS]},
