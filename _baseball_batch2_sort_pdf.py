@@ -1,8 +1,9 @@
 """Baseball batch 2 sort/valuation — Scans 476-486 (98 cards, 2025 Topps Chrome +
 Panini Prizm, mostly rookies/prospects + a run of Panini Prizm legends). Splits into
 INDIVIDUALS (worth listing as singles) vs LOTS (bundle by team, 5 cards or fewer).
-Raw/ungraded July 2026 eBay-comp estimates. HOLD — not for posting, per JC's request
-to sort only this round.
+Raw/ungraded July 2026 eBay-comp estimates. Both individuals and lots are now
+LIVE on eBay (2026-07-23) -- see _post_baseball_batch2_individuals.py and
+_post_baseball_batch2_lots.py for the posting scripts.
 Writes docs/baseball_batch2_sort.pdf (+ ~/Downloads) and output/_baseball_batch2_sort.json.
 """
 import json, re, shutil, math
@@ -196,7 +197,7 @@ doc=SimpleDocTemplate(str(out),pagesize=letter,topMargin=.55*inch,bottomMargin=.
 flow=[
  Paragraph("Baseball batch 2 &mdash; sort worksheet",h1),
  Paragraph(f"{total_cards} cards &middot; Scans 476-486 &middot; raw/ungraded July 2026 eBay-comp estimate "
-           f"&middot; {len(INDIVIDUALS)} individuals POSTED, lots still HOLD (JC pulling)",sub),
+           f"&middot; ALL {total_cards} cards LIVE on eBay (25 individuals + 73 in {len(LOTS)} team lots)",sub),
  Paragraph(f"<b>Total: {money(grand_low)} &ndash; {money(grand_high)}</b> (typical ~{money(grand_typ)})",grp),
  Paragraph(
   "<b>Sort verdict:</b> mostly 2025 Topps Chrome rookies/prospects plus a run of base Panini Prizm "
@@ -240,16 +241,17 @@ lots_grand_low = sum(tot(cards,2) for cards in LOTS.values())
 lots_grand_typ = sum(tot(cards,3) for cards in LOTS.values())
 lots_grand_high = sum(tot(cards,4) for cards in LOTS.values())
 lots_flow=[
- Paragraph("Baseball batch 2 &mdash; lots to pull",h1),
- Paragraph(f"{n_lots} cards across {len(LOTS)} lots &middot; Scans 476-486 &middot; "
-           f"the {len(INDIVIDUALS)} individual cards are already posted, not included here",sub),
+ Paragraph("Baseball batch 2 &mdash; lots (POSTED)",h1),
+ Paragraph(f"{n_lots} cards across {len(LOTS)} lot groups (19 listings, Angels split into 2) &middot; "
+           f"Scans 476-486 &middot; all LIVE on eBay 2026-07-23 &middot; "
+           f"the {len(INDIVIDUALS)} individual cards were posted separately, not included here",sub),
  Paragraph(f"<b>Lots total: {money(lots_grand_low)} &ndash; {money(lots_grand_high)}</b> "
            f"(typical ~{money(lots_grand_typ)})",grp),
  Paragraph(
-  "Pull these by team, 5 cards or fewer per lot. <b>Flag before pulling:</b> Colton Gordon, Jake Mangum, "
-  "and Chandler Simpson each showed up twice <i>within the same scan photo</i> (not two different scans) "
-  "&mdash; confirm you actually have 2 physical copies of each before bundling. Mike Yastrzemski's card "
-  "prints a Royals uniform (he's a longtime Giant) &mdash; a Topps photo-variation quirk, not a misprint.",
+  "Reference copy of what got posted, organized by team. Colton Gordon, Jake Mangum, and Chandler Simpson "
+  "each showed up twice within the same scan photo (not two different scans) and were confirmed as 2 real "
+  "physical copies before posting. Mike Yastrzemski's card prints a Royals uniform (he's a longtime Giant) "
+  "&mdash; a Topps photo-variation quirk, not a misprint.",
   note),
 ]
 for team, cards in LOTS.items():
@@ -263,7 +265,7 @@ Path("output/_baseball_batch2_sort.json").write_text(json.dumps(
  {"individuals":{"count":n_individuals,"cards":[c[0] for c in INDIVIDUALS]},
   "lots":{"count":n_lots,"teams":{k:sum(qty_of(c[1]) for c in v) for k,v in LOTS.items()}},
   "total_cards":total_cards,"grand_total":{"low":grand_low,"typical":grand_typ,"high":grand_high},
-  "status":"HOLD - sort only, not posted, per JC's request"},indent=1))
+  "status":"POSTED - all 98 cards live on eBay as of 2026-07-23"},indent=1))
 
 print(f"Individuals: {n_individuals} cards  ·  Lots: {n_lots} cards across {len(LOTS)} lots  ·  Total: {total_cards}")
 print(f"Grand total: {money(grand_low)}-{money(grand_high)} (typ {money(grand_typ)}) -> {out} -> {dl}")
