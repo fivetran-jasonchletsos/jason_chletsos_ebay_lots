@@ -93,6 +93,10 @@ GROUPS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
          "2026-07-05"),
     ]),
     ("Pricing & valuation", [
+        ("scan493_507_candidates.pdf",
+         "Scans 493-507 — individual-posting candidates",
+         "33 cards pulled from a 15-scan batch as worth listing individually (Ohtani x2, Acuna Jr, Skenes x2, Betts, Freeman, Posey, Mayer x3, and more) — HOLD, pull and confirm before posting.",
+         "2026-07-25"),
         ("pull_list_valuation.pdf",
          "Pull list valuation",
          "Priced pull list with checkboxes for physically pulling + confirming each card.",
