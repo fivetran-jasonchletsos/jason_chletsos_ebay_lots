@@ -3067,7 +3067,7 @@ _NAV_ITEMS = [
     ("price_consistency.html","Price Gate",    False, "More"),
     ("best_offer.html",       "Best Offer",    False, "More"),
     ("lots.html",             "Lots",          False, "More"),
-    ("pdf_library.html",      "PDF Library",   False, "More"),
+    ("pdf_library.html",      "PDF Library",   True,  "Browse"),
     ("relist.html",           "Relist Unsold", False, "More"),
     ("collect.html",          "My Wants",      False, "More"),
     ("top_sellers.html",      "Top Sellers",   False, "More"),
