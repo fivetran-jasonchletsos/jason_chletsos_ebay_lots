@@ -444,12 +444,12 @@ def build_decision(listing: dict, sold_idx: dict[str, list[dict]],
     decision["rate"] = rate
     decision["reasons"].extend(reasons)
 
-    # Floor: promote every eligible listing at minimum LOW rate (3%).
-    # Blocked listings (wrong category, zero price) are exempt.
-    if decision["tier"] == "no_ad" and not decision["blocked"]:
-        decision["tier"] = "low"
-        decision["rate"] = cfg["tiers"]["low"]["rate"]
-        decision["reasons"].append("floored to LOW — minimum promotion on all eligible listings")
+    # No floor here: every no_ad this function produces is a genuine
+    # "don't spend here" signal (proven mover via sold_7d, or already
+    # unprofitable via the margin guard above) — there's no case where
+    # overriding it back up to LOW is correct. A prior floor unconditionally
+    # re-promoted every no_ad decision, which silently defeated both of
+    # those protections for every listing that qualified for either.
 
     # Project 30-day ad spend = price × rate × prob(sells in 30d).
     p_sell_30d = 1.0 if sold_30d >= 1 else cfg.get("default_30d_sellthrough", 0.25)

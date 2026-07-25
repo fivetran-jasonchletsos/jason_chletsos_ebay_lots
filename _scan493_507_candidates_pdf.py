@@ -30,7 +30,7 @@ WHITE = colors.white
 # (name, variant, pos, low, typ, high, note)
 GROUPS = {
  "Scan 493": [
-  ("Shohei Ohtani", "Dodgers pitcher · rainbow insert (pos 1)", 1, 15, 22, 40, "*biggest name in the batch — get a real comp before pricing, automated data was wildly inconsistent ($12-172 depending on query)"),
+  ("Shohei Ohtani", "Dodgers pitcher · base card, not an insert (pos 1)", 1, 2, 3, 5, "JC confirmed in-hand: plain base card, not a special parallel — priced accordingly despite the name"),
   ("Jackson Merrill", "Padres · rainbow insert, 2nd copy (pos 3)", 3, 5, 8, 12, ""),
   ("Chase Burns", "rainbow insert RC (pos 5)", 5, 3, 5, 8, "hyped 2025 pitching prospect debut"),
   ("Jose Ramirez", "Guardians · rainbow insert, 2nd copy (pos 6)", 6, 5, 7, 10, ""),
@@ -123,12 +123,14 @@ flow = [
               "raw/ungraded eBay-comp estimate &middot; NOT posted &mdash; pull each and confirm", sub),
     Paragraph(f"<b>Batch total: {money(grand['low'])} &ndash; {money(grand['high'])}</b> "
               f"(typical ~{money(grand['typical'])})", grp),
-    Paragraph("<b>Two Shohei Ohtani cards (Scans 493 &amp; 499) are the wild cards here.</b> "
-              "He's the single biggest name in the batch, but the automated pricing data was "
-              "genuinely unreliable &mdash; the same product code returned prices from $12 to $172 "
-              "depending on query phrasing. Get a real eBay sold-comp on these two specifically "
-              "before setting a price; everything else below is a more confident reasoned estimate "
-              "off player standing and card scarcity, not a hard comp.", note),
+    Paragraph("<b>Two Shohei Ohtani cards in this batch, priced very differently.</b> "
+              "The Scan 493 copy is confirmed in-hand as a plain base card (not the special parallel it "
+              "looked like from the scan), so it's priced modestly. The Scan 499 copy (Topps 75 insert) "
+              "is still the wild card &mdash; he's the single biggest name in the batch, but the automated "
+              "pricing data was genuinely unreliable for it (the same product code returned prices from "
+              "$12 to $172 depending on query phrasing). Get a real eBay sold-comp on that one specifically "
+              "before setting a price; everything else below is a more confident reasoned estimate off "
+              "player standing and card scarcity, not a hard comp.", note),
 ]
 
 
@@ -164,7 +166,7 @@ flow.append(Paragraph(
     "How to read this: prices are RAW/ungraded July 2026 eBay-comp estimates (asks, sold runs a bit "
     "under). Rows marked * had a plausible automated PriceCharting hit; everything else is a reasoned "
     "estimate off player standing and card scarcity &mdash; verify before finalizing an ask, especially "
-    "the two Ohtani cards. Several players repeat across scans (Cal Raleigh x3 in this candidate list "
+    "the Scan 499 Ohtani. Several players repeat across scans (Cal Raleigh x3 in this candidate list "
     "alone, Jackson Merrill x2, Jose Ramirez x2, Marcelo Mayer x3, Paul Skenes x2, Ohtani x2, Junior "
     "Caminero x2) &mdash; confirm each is a genuine second physical copy before listing both.", note))
 doc.build(flow)
