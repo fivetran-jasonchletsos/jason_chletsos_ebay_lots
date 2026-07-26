@@ -1,6 +1,20 @@
-"""Crop batch-2 Bo Jackson Battle Arena pages: four 3x3 binder pages (one
+"""Crop ALL Bo Jackson Battle Arena binder-page photos into individual named
+card images, for eBay listing use and the lots PDF.
+
+Batch 1 (Scans 373-376) + batch 2 (Scans 377-384): seven 3x3 binder pages (one
 skipped as an exact re-scan duplicate) plus three 2x3 toploader/foil-parallel
-sleeve pages (different aspect ratio, different physical cards).
+sleeve pages (different aspect ratio, different physical cards). Batch 1
+previously lived in _crop_bojackson.py — that file was a strict special case
+(hardcoded 3x3) of this script's parameterized cropper and was merged in so
+the gap-detection engine only exists once here.
+
+Copy-numbering caveats to reconcile against the physical cards (labels feed
+output image filenames and any lot plan built from them):
+  - "Shrouded (2, foil)" is the THIRD Shrouded (batch 1 already has base + (2)).
+  - "Cannon (2)" and "Cannon (2, foil)" both claim copy 2, and no plain
+    "Cannon" exists anywhere.
+  - "Shepherd (foil)" and "Furnest (foil)" are unnumbered despite batch-1
+    copies of both names (every other repeat-name foil is "(2, foil)").
 """
 from pathlib import Path
 from PIL import Image
@@ -12,6 +26,28 @@ Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
 THUMB_W = 600
 
 GRID_3X3 = {
+    # ── Batch 1 (formerly _crop_bojackson.py) ──
+    "Scan 373.jpeg": [
+        ["Billiard", "Myracle", "Chanesaw"],
+        ["Criscross", "Slaughterhouse", "Hot Sauce"],
+        ["Dart-Board", "Muffin Man", "Bayou"],
+    ],
+    "Scan 374.jpeg": [
+        ["Majik Man", "Shrouded", "Phoenix"],
+        ["Golden Bullet", "Shrouded (2)", "Devaulta"],
+        ["Judkernaught", "Warden", "Furnest"],
+    ],
+    "Scan 375.jpeg": [
+        ["J-Jetts", "Mcarmyknife", "Youngblood"],
+        ["Bison", "Shepherd", "Youngblood (2)"],
+        ["Mr. Irrelevant", "Darn Old", "Switchblade"],
+    ],
+    "Scan 376.jpeg": [
+        ["Jax-in-the-Box", "Muffin Man (2)", "Joe Cool"],
+        ["Myracle (2)", "First Leap", "Skatter"],
+        ["Hammer", "Scary", "Friday"],
+    ],
+    # ── Batch 2 ──
     "Scan 377.jpeg": [
         ["Reindeer Hunter", "Swervin'", "Jeanetic"],
         ["Merlomes", "Devaulta (2)", "Moose"],

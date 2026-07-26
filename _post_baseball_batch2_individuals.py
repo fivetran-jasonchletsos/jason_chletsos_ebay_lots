@@ -15,7 +15,6 @@ from PIL import Image
 
 SCANS_DIR = Path("/Users/jason.chletsos/Downloads")
 CROP_DIR = Path("/tmp/bb2_individuals")
-CROP_DIR.mkdir(exist_ok=True)
 
 CARDS = [
  (483,1,"2025 Panini Prizm Marcelo Mayer RC Red Sox Baseball",5.99),
@@ -42,7 +41,11 @@ CARDS = [
  (483,4,"Panini Prizm Jim Edmonds Cardinals Legend Baseball",1.99),
  (483,7,"Panini Prizm Tim Salmon Angels Legend Baseball",1.99),
  (480,3,"Panini Prizm Paul Molitor Brewers Legend Baseball",1.99),
- (484,7,"2025 Topps Chrome Dustin May RC Red Sox Baseball",2.99),
+ # Corrected 2026-07-25: "RC" removed — Dustin May debuted in 2019 (RC year
+ # 2020); the Red Sox card is a post-trade veteran card, not a rookie card.
+ # Listing 307080372573 went live with the old "RC" title and still needs an
+ # eBay title revision (mislabel came from _baseball_batch2_sort_pdf.py).
+ (484,7,"2025 Topps Chrome Dustin May Red Sox Baseball",2.99),
  (484,5,"2025 Topps Chrome David Bednar Yankees Baseball",1.99),
  (479,3,"2025 Topps Chrome Bryan Woo Mariners Baseball",1.99),
 ]
@@ -66,13 +69,22 @@ def crop_position(scan_num, pos):
     box = (int(col*cw), int(row*ch), int((col+1)*cw), int((row+1)*ch))
     return im.crop(box)
 
-batch = []
-for i, (scan, pos, title, price) in enumerate(CARDS, 1):
-    crop = crop_position(scan, pos)
-    out = CROP_DIR / f"{i:02d}_{title[:30].replace(' ','_').replace('/','-')}.jpg"
-    crop.save(out, quality=92)
-    batch.append({"image": str(out), "title": title, "price": price, "category": "261328", "condition": "4000"})
-    print(f"{i:02d}. Scan{scan} pos{pos} -> {out.name}  ${price}")
+def main():
+    # Guarded so importing this module (e.g. to read CARDS as the record of
+    # what was posted) doesn't re-crop scans or overwrite the /tmp batch file.
+    CROP_DIR.mkdir(exist_ok=True)
+    batch = []
+    for i, (scan, pos, title, price) in enumerate(CARDS, 1):
+        # convert("RGB") so a non-JPEG source (RGBA/P) can't fail the JPEG save
+        crop = crop_position(scan, pos).convert("RGB")
+        out = CROP_DIR / f"{i:02d}_{title[:30].replace(' ','_').replace('/','-')}.jpg"
+        crop.save(out, quality=92)
+        batch.append({"image": str(out), "title": title, "price": price, "category": "261328", "condition": "4000"})
+        print(f"{i:02d}. Scan{scan} pos{pos} -> {out.name}  ${price}")
 
-Path("/tmp/bb2_individuals_batch.json").write_text(json.dumps(batch, indent=1))
-print(f"\nWrote batch of {len(batch)} individual listings to /tmp/bb2_individuals_batch.json")
+    Path("/tmp/bb2_individuals_batch.json").write_text(json.dumps(batch, indent=1))
+    print(f"\nWrote batch of {len(batch)} individual listings to /tmp/bb2_individuals_batch.json")
+
+
+if __name__ == "__main__":
+    main()

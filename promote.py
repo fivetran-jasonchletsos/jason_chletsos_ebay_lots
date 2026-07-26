@@ -3058,6 +3058,13 @@ _NAV_ITEMS = [
     ("by_player.html",        "By Player",     True,  "Browse"),
     ("under_10.html",         "Under $10",     True,  "Browse"),
     ("pokemon.html",          "Pokemon",       True,  "Browse"),
+    # Public page, but pricing/valuation PDFs inside it are wrapped in
+    # data-admin="1" so anonymous buyers only see checklists/sort/pull sheets
+    # — the low/typ/high floor worksheets stay admin-only (JC decision
+    # 2026-07-25: split, after review flagged the Best Offer sniping risk).
+    # Must sit WITH the Browse block: a group tuple placed mid-"More" makes
+    # the mobile drawer emit duplicate group headers.
+    ("pdf_library.html",      "PDF Library",   True,  "Browse"),
 
     # ── Admin: hidden behind auth gate ──
     ("daily.html",            "Daily",         False, None),
@@ -3067,7 +3074,6 @@ _NAV_ITEMS = [
     ("price_consistency.html","Price Gate",    False, "More"),
     ("best_offer.html",       "Best Offer",    False, "More"),
     ("lots.html",             "Lots",          False, "More"),
-    ("pdf_library.html",      "PDF Library",   True,  "Browse"),
     ("relist.html",           "Relist Unsold", False, "More"),
     ("collect.html",          "My Wants",      False, "More"),
     ("top_sellers.html",      "Top Sellers",   False, "More"),
@@ -8205,13 +8211,16 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
 
     # Item pages live in /items/ — adjust nav links to relative
     html_doc = html_shell(l['title'], body, extra_head=extra_head, active_page="../index.html")
-    # Patch nav hrefs to point one directory up
-    html_doc = html_doc.replace('href="index.html"', 'href="../index.html"')
-    html_doc = html_doc.replace('href="quality.html"', 'href="../quality.html"')
-    html_doc = html_doc.replace('href="price_review.html"', 'href="../price_review.html"')
-    html_doc = html_doc.replace('href="title_review.html"', 'href="../title_review.html"')
-    html_doc = html_doc.replace('href="craigslist.html"', 'href="../craigslist.html"')
-    html_doc = html_doc.replace('href="google_feed.xml"', 'href="../google_feed.xml"')
+    # Patch nav + body hrefs to point one directory up. Derive the nav targets
+    # from _NAV_ITEMS so a new nav entry can never ship a broken /items/ link
+    # again (pdf_library.html, steals.html, by_set.html etc. used to 404 here
+    # because this was a hand-maintained list that lagged the nav).
+    _rel_targets = [h for h, _l, _p, _g in _NAV_ITEMS] + [
+        "quality.html", "price_review.html", "title_review.html",
+        "craigslist.html", "google_feed.xml",
+    ]
+    for _t in _rel_targets:
+        html_doc = html_doc.replace(f'href="{_t}"', f'href="../{_t}"')
 
     (items_dir / f"{l['item_id']}.html").write_text(html_doc, encoding="utf-8")
 
@@ -10678,6 +10687,10 @@ def main():
         ("Relist unsold: docs/relist.html",          "relist_agent.py",           120),
         ("Price Drops: docs/price_drops.html",       "price_drops_agent.py",      120),
         ("Price consistency: docs/price_consistency.html", "price_consistency_agent.py", 180),
+        # PDF Library is in _NAV_ITEMS, so the integrity gate requires the
+        # page to exist — regenerate it every build or its baked-in shell/nav
+        # goes stale (it used to be generated only by hand).
+        ("PDF Library: docs/pdf_library.html",       "build_pdf_library.py",      60),
         # Daily Digest MUST run last — it reads orders_watch_plan.json for
         # its 30-day sparkline.
         ("Daily Digest: docs/daily.html",            "daily_digest_agent.py",     120),

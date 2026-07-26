@@ -9,8 +9,31 @@ from __future__ import annotations
 
 import promote
 
-DOCS_DIR = promote.__file__.rsplit("/", 1)[0] + "/docs"
-HTML_PATH = f"{DOCS_DIR}/pdf_library.html"
+DOCS_DIR = promote.OUTPUT_DIR  # canonical docs/ path, shared with the site build
+HTML_PATH = DOCS_DIR / "pdf_library.html"
+
+# PDFs that live in docs/ but are deliberately NOT in the library
+# (they have their own nav entry or aren't worksheet-style documents).
+KNOWN_UNLISTED = {"harpua_ai_overview.pdf"}
+
+# Admin-only PDFs (JC decision 2026-07-25: split the library). These carry the
+# seller's own low/typ/high price floors, Best-Offer floors, keeper piles, or
+# internal strategy — public linking would let buyers anchor Best Offers at
+# our own "low" estimates (2,000+ listings have auto-accept). Their cards are
+# wrapped in data-admin="1" so only a logged-in admin sees them; checklists,
+# sort lists, and plain pull sheets stay public.
+GATED = {
+    "baseball_batch_pricing.pdf",     # low/typ/high per card
+    "basketball_keep.pdf",            # internal keeper pile
+    "numbered_review.pdf",            # value estimates + review flags
+    "pull_sheet_batch250.pdf",        # includes Best-Offer floor prices
+    "scan493_507_candidates.pdf",     # low/typ/high per card
+    "pull_list_valuation.pdf",        # low/typ/high per card
+    "relics_pricing.pdf",             # low/typ/high per card
+    "marvel_valuation.pdf",           # raw value estimates
+    "sales_plan_june14.pdf",          # internal pricing strategy
+    "session_report.pdf",             # internal ops recap
+}
 
 # (filename, title, description, updated)
 GROUPS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
@@ -142,17 +165,25 @@ a.pdf-card .pdf-date { font-size: 11px; color: var(--muted, #8a94a6); opacity: .
 
 def build_body() -> str:
     total = sum(len(items) for _, items in GROUPS)
+    n_gated = sum(1 for _g, items in GROUPS for (f, _t, _d, _u) in items if f in GATED)
+    n_public = total - n_gated
     parts = [
         '<div class="pdf-wrap">',
         "<h1>PDF Library</h1>",
-        f'<p class="sub">Every pull sheet, lot plan, and pricing worksheet the store has produced &mdash; {total} PDFs.</p>',
+        f'<p class="sub">{n_public} pull sheets, sort lists &amp; checklists'
+        f'<span data-admin="1"> &middot; plus {n_gated} internal pricing worksheets (admin)</span>.</p>',
     ]
     for group_name, items in GROUPS:
-        parts.append('<div class="pdf-group">')
+        # Hide the whole group (header included) from anonymous visitors when
+        # every PDF in it is admin-only; otherwise gate card-by-card.
+        group_gated = all(f in GATED for (f, _t, _d, _u) in items)
+        grp_attr = ' data-admin="1"' if group_gated else ""
+        parts.append(f'<div class="pdf-group"{grp_attr}>')
         parts.append(f"<h2>{group_name}</h2>")
         for fname, title, desc, updated in items:
+            card_attr = ' data-admin="1"' if (fname in GATED and not group_gated) else ""
             parts.append(
-                f'<a class="pdf-card" href="{fname}">'
+                f'<a class="pdf-card" href="{fname}"{card_attr}>'
                 f'<div class="pdf-title">{title}</div>'
                 f'<div class="pdf-desc">{desc}</div>'
                 f'<div class="pdf-date">Updated {updated}</div>'
@@ -161,6 +192,21 @@ def build_body() -> str:
         parts.append("</div>")
     parts.append("</div>")
     return "\n".join(parts)
+
+
+def check_orphans() -> None:
+    """Warn (never fail — this runs inside the site build) when docs/ holds a
+    PDF that isn't registered in GROUPS, so the library's 'every PDF the store
+    has ever produced' promise stays self-enforcing instead of hand-enforced."""
+    listed = {fname for _g, items in GROUPS for (fname, _t, _d, _u) in items}
+    on_disk = {p.name for p in DOCS_DIR.glob("*.pdf")}
+    orphans = sorted(on_disk - listed - KNOWN_UNLISTED)
+    for name in orphans:
+        print(f"  WARNING: docs/{name} is not listed in the PDF Library — "
+              f"add it to GROUPS in build_pdf_library.py")
+    missing = sorted(listed - on_disk)
+    for name in missing:
+        print(f"  WARNING: PDF Library links docs/{name}, which does not exist")
 
 
 def main() -> int:
@@ -174,6 +220,7 @@ def main() -> int:
     with open(HTML_PATH, "w", encoding="utf-8") as fh:
         fh.write(page)
     print(f"  Wrote {HTML_PATH}")
+    check_orphans()
     return 0
 
 

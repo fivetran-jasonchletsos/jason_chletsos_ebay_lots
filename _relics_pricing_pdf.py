@@ -88,16 +88,20 @@ def tbl(grp_name,cards):
     for n,v,lo,ty,hi,nt in cards:
         cardcell=f"<b>{n}</b>"
         vv=v + (f" &middot; <i>{nt}</i>" if nt else "")
-        data.append(["☐", Paragraph(cardcell,cardp), Paragraph(f"<font size=8.5>{vv}</font>",cardp),
+        data.append(["", Paragraph(cardcell,cardp), Paragraph(f"<font size=8.5>{vv}</font>",cardp),
                      money(lo),money(ty),money(hi)])
-    data.append(["","",Paragraph("<b>group typical</b>",cardp),"","",Paragraph(f"<b>{money(sub_ty)}</b>",cardp)])
+    data.append(["","",Paragraph("<b>group typical</b>",cardp),"",Paragraph(f"<b>{money(sub_ty)}</b>",cardp),""])
     t=Table(data,colWidths=[0.28*inch,1.55*inch,3.15*inch,0.6*inch,0.6*inch,0.6*inch])
+    # Empty checkboxes drawn as per-row BOX borders on column 0 — a raw '☐'
+    # string cell is outside WinAnsi and renders as a FILLED black square
+    # (ZapfDingbats notdef), which can't be checked off on paper.
+    box_style=[("BOX",(0,r),(0,r),1,GRAY_DK) for r in range(1,len(data)-1)]
     t.setStyle(TableStyle([("FONTSIZE",(0,0),(-1,-1),9),("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
         ("BACKGROUND",(0,0),(-1,0),GRAY_DK),("TEXTCOLOR",(0,0),(-1,0),WHITE),
         ("ROWBACKGROUNDS",(0,1),(-1,-2),[WHITE,GRAY_LT]),
-        ("ALIGN",(3,0),(-1,-1),"RIGHT"),("ALIGN",(0,0),(0,-1),"CENTER"),("FONTSIZE",(0,1),(0,-1),13),
+        ("ALIGN",(3,0),(-1,-1),"RIGHT"),("ALIGN",(0,0),(0,-1),"CENTER"),
         ("VALIGN",(0,0),(-1,-1),"MIDDLE"),("LINEABOVE",(0,-1),(-1,-1),0.6,GRAY_DK),
-        ("GRID",(0,0),(-1,-2),.4,GRAY_MD),("TOPPADDING",(0,0),(-1,-1),3.5),("BOTTOMPADDING",(0,0),(-1,-1),3.5)]))
+        ("GRID",(1,0),(-1,-2),.4,GRAY_MD),("TOPPADDING",(0,0),(-1,-1),3.5),("BOTTOMPADDING",(0,0),(-1,-1),3.5)]+box_style))
     flow.append(t)
 
 for grp_name,cards in GROUPS.items(): tbl(grp_name,cards)
