@@ -28,6 +28,7 @@ GATED = {
     "numbered_review.pdf",            # value estimates + review flags
     "pull_sheet_batch250.pdf",        # includes Best-Offer floor prices
     "scan493_507_candidates.pdf",     # low/typ/high per card
+    "scan509_542_collision_check.pdf",# collision list + low/typ/high per card
     "pull_list_valuation.pdf",        # low/typ/high per card
     "relics_pricing.pdf",             # low/typ/high per card
     "marvel_valuation.pdf",           # raw value estimates
@@ -116,6 +117,10 @@ GROUPS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
          "2026-07-05"),
     ]),
     ("Pricing & valuation", [
+        ("scan509_542_collision_check.pdf",
+         "Scans 509-542 — eBay collision check + candidates",
+         "119 cards in this batch are the physical copies of live listings ($723 of listings — set aside, don't resell); 47 clean posting candidates priced low/typ/high.",
+         "2026-07-26"),
         ("scan493_507_candidates.pdf",
          "Scans 493-507 — individual-posting candidates",
          "33 cards pulled from a 15-scan batch as worth listing individually (Ohtani x2, Acuna Jr, Skenes x2, Betts, Freeman, Posey, Mayer x3, and more) — HOLD, pull and confirm before posting.",
