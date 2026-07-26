@@ -207,3 +207,6 @@ That keeps the store optimized daily. ~5 minutes total over coffee.
 ---
 
 CC out. Enjoy dinner JC.
+
+## 2026-10-20 — Basketball season re-push
+NBA tipoff week: re-promote the ~52 basketball listings (ads to 8-10%, fresh markdown event, re-share socials). They were title-fixed + repriced + put on 15% sale during the July offseason lull; whatever remains needs the tipoff demand wave.
