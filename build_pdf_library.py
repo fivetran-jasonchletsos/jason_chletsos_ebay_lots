@@ -16,25 +16,13 @@ HTML_PATH = DOCS_DIR / "pdf_library.html"
 # (they have their own nav entry or aren't worksheet-style documents).
 KNOWN_UNLISTED = {"harpua_ai_overview.pdf"}
 
-# Admin-only PDFs (JC decision 2026-07-25: split the library). These carry the
-# seller's own low/typ/high price floors, Best-Offer floors, keeper piles, or
-# internal strategy — public linking would let buyers anchor Best Offers at
-# our own "low" estimates (2,000+ listings have auto-accept). Their cards are
-# wrapped in data-admin="1" so only a logged-in admin sees them; checklists,
-# sort lists, and plain pull sheets stay public.
-GATED = {
-    "baseball_batch_pricing.pdf",     # low/typ/high per card
-    "basketball_keep.pdf",            # internal keeper pile
-    "numbered_review.pdf",            # value estimates + review flags
-    "pull_sheet_batch250.pdf",        # includes Best-Offer floor prices
-    "scan493_507_candidates.pdf",     # low/typ/high per card
-    "scan509_542_collision_check.pdf",# collision list + low/typ/high per card
-    "pull_list_valuation.pdf",        # low/typ/high per card
-    "relics_pricing.pdf",             # low/typ/high per card
-    "marvel_valuation.pdf",           # raw value estimates
-    "sales_plan_june14.pdf",          # internal pricing strategy
-    "session_report.pdf",             # internal ops recap
-}
+# Admin-only PDFs, wrapped in data-admin="1" on the page. EMPTY as of
+# 2026-07-26: JC explicitly approved un-gating the whole library ("just easier
+# for me"), accepting the known trade-off that pricing worksheets expose his
+# own low/typ/high floors to buyers who could anchor Best Offers at them
+# (2,000+ listings have auto-accept). To re-gate any PDF later, add its
+# filename back to this set and rerun this script.
+GATED: set[str] = set()
 
 # (filename, title, description, updated)
 GROUPS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
