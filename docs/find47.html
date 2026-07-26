@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Find the 47</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:700px;margin:0 auto;padding:16px 14px 80px}
+ h1{font-size:24px;margin:6px 0 2px}
+ .sub{color:#667;font-size:14px;margin:0 0 12px}
+ #q{width:100%;box-sizing:border-box;font-size:18px;padding:12px 14px;border:1px solid #ccd;border-radius:12px;margin-bottom:12px}
+ .card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #dde;border-radius:14px;
+       padding:14px;margin:8px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .box{flex:0 0 30px;height:30px;border:2.5px solid #345;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}
+ .card.done .box::after{content:"\2713";color:#1a7f1a;font-weight:800}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:700;font-size:18px}
+ .ds{color:#556;font-size:13.5px;line-height:1.35;margin-top:2px}
+ .loc{flex:0 0 auto;text-align:center;background:#123;color:#fff;border-radius:10px;padding:8px 12px}
+ .loc b{display:block;font-size:20px}
+ .loc span{font-size:11px;opacity:.8}
+ .prc{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:16px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;
+      padding:12px;font-size:16px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:4px 10px;font-size:13px;margin-right:8px}
+</style></head><body><div class="wrap">
+<h1>Find the 47</h1>
+<p class="sub">Scans 509-542 posting candidates &middot; tap a row when you pull the card &middot; Scan/Pos: pos 1 = top-left, 9 = bottom-right</p>
+<input id="q" type="search" placeholder="Search player, set, scan number...">
+<div id="list"></div>
+</div>
+<div id="bar"><button id="reset">reset</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "Aikman", "p": "Troy Aikman", "d": "Topps Chrome Legends of the Gridiron \u2014 Cowboys legend", "s": 521, "o": 1, "t": 6}, {"k": "Allen (1)", "p": "Josh Allen", "d": "Panini Prizm base", "s": 517, "o": 3, "t": 6}, {"k": "Allen (2)", "p": "Josh Allen", "d": "Topps Chrome All-Chrome insert", "s": 526, "o": 5, "t": 6}, {"k": "Auto-Bosma", "p": "Blake Bosma", "d": "SAGE certified AUTO \u2014 real certified autograph", "s": 533, "o": 3, "t": 5}, {"k": "Auto-Hurst", "p": "Ted Hurst", "d": "SAGE certified AUTO \u2014 real certified autograph", "s": 533, "o": 6, "t": 5}, {"k": "Auto-Matsuzawa", "p": "Kansei Matsuzawa", "d": "SAGE certified AUTO \u2014 real certified autograph \u2014 Japan pipeline story", "s": 534, "o": 4, "t": 5}, {"k": "Auto-Morton", "p": "Behren Morton", "d": "SAGE certified AUTO \u2014 real certified autograph", "s": 534, "o": 7, "t": 5}, {"k": "Bowers (1)", "p": "Brock Bowers", "d": "Donruss Optic stars border", "s": 514, "o": 9, "t": 5}, {"k": "Bowers (2)", "p": "Brock Bowers", "d": "Panini Revolution", "s": 516, "o": 5, "t": 5}, {"k": "Bowers (3)", "p": "Brock Bowers", "d": "Panini Prizm base", "s": 520, "o": 8, "t": 5}, {"k": "Bowers (4)", "p": "Brock Bowers", "d": "Select Flash multicolor RC", "s": 532, "o": 9, "t": 6}, {"k": "Burrow (1)", "p": "Joe Burrow", "d": "Panini Prizm base", "s": 532, "o": 7, "t": 6}, {"k": "Burrow (2)", "p": "Joe Burrow", "d": "Topps IC Sunday Showcase", "s": 527, "o": 8, "t": 6}, {"k": "Burrow (3)", "p": "Joe Burrow", "d": "2020 Leaf Draft First Overall \u2014 draft-year issue", "s": 534, "o": 8, "t": 5}, {"k": "Campbell", "p": "Earl Campbell", "d": "Mosaic Hall of Fame \u2014 HOF legend", "s": 521, "o": 3, "t": 5}, {"k": "Chase", "p": "Ja'Marr Chase", "d": "Topps Chrome Power Players", "s": 536, "o": 1, "t": 6}, {"k": "Daniels", "p": "Jayden Daniels", "d": "Panini Mosaic base", "s": 522, "o": 4, "t": 6}, {"k": "Gibbs (1)", "p": "Jahmyr Gibbs", "d": "Panini Prizm base \u2014 2nd Prizm copy at 532/5 \u2014 confirm distinct", "s": 517, "o": 1, "t": 6}, {"k": "Gibbs (2)", "p": "Jahmyr Gibbs", "d": "Panini Mosaic base", "s": 535, "o": 8, "t": 5}, {"k": "Henderson (1)", "p": "TreVeyon Henderson", "d": "Chrome Fortune GOLD X-Fractor RC \u2014 gold x-fractors usually serialed \u2014 CHECK BACK for /50", "s": 528, "o": 7, "t": 12}, {"k": "Henderson (2)", "p": "TreVeyon Henderson", "d": "Select Flash multicolor RC", "s": 516, "o": 7, "t": 6}, {"k": "Henderson (3)", "p": "TreVeyon Henderson", "d": "Topps IC The Pick RC", "s": 530, "o": 5, "t": 5}, {"k": "Henry", "p": "Derrick Henry", "d": "Topps Chrome All-Chrome insert", "s": 520, "o": 9, "t": 6}, {"k": "Hunter", "p": "Travis Hunter", "d": "Panini Mosaic RC \u2014 top-2 pick hype", "s": 520, "o": 1, "t": 7}, {"k": "Hurts (1)", "p": "Jalen Hurts", "d": "Topps IC Sunday Showcase", "s": 527, "o": 3, "t": 6}, {"k": "Hurts (2)", "p": "Jalen Hurts / Saquon Barkley", "d": "Topps IC Paramount Pairings \u2014 2nd copy at 530/1 \u2014 confirm distinct", "s": 526, "o": 9, "t": 6}, {"k": "Irvin (1)", "p": "Michael Irvin", "d": "Panini Mosaic base \u2014 Cowboys legend", "s": 522, "o": 1, "t": 4}, {"k": "Irvin (2)", "p": "Michael Irvin", "d": "Mosaic Touchdown Masters", "s": 525, "o": 1, "t": 5}, {"k": "Johnson", "p": "Calvin Johnson", "d": "Panini Mosaic base \u2014 HOF legend", "s": 522, "o": 7, "t": 5}, {"k": "Judkins", "p": "Quinshon Judkins", "d": "Panini Mosaic RC", "s": 523, "o": 8, "t": 5}, {"k": "Lamb (1)", "p": "CeeDee Lamb", "d": "Topps IC The Pick", "s": 514, "o": 5, "t": 5}, {"k": "Lamb (2)", "p": "CeeDee Lamb", "d": "Select Flash multicolor", "s": 522, "o": 3, "t": 6}, {"k": "Mahomes (1)", "p": "Patrick Mahomes II", "d": "Panini Prizm base", "s": 518, "o": 3, "t": 9}, {"k": "Mahomes (2)", "p": "Patrick Mahomes II", "d": "Select Red/Blue Flash", "s": 528, "o": 3, "t": 9}, {"k": "Mahomes (3)", "p": "Patrick Mahomes II / Xavier Worthy", "d": "Donruss Optic Best Buddys", "s": 510, "o": 3, "t": 6}, {"k": "Manning", "p": "Peyton Manning", "d": "Leaf Draft First Overall 1998", "s": 511, "o": 7, "t": 5}, {"k": "Maye (1)", "p": "Drake Maye", "d": "Mosaic Notoriety \u2014 2nd copy at 535/3 \u2014 confirm distinct", "s": 524, "o": 2, "t": 6}, {"k": "McCaffrey", "p": "Christian McCaffrey", "d": "Phoenix hyper red/teal", "s": 515, "o": 8, "t": 6}, {"k": "Nacua", "p": "Puka Nacua", "d": "Panini Prizm base", "s": 519, "o": 8, "t": 6}, {"k": "Rice", "p": "Jerry Rice", "d": "Panini Select (Valley State) \u2014 GOAT nostalgia", "s": 511, "o": 2, "t": 7}, {"k": "Sanders (1)", "p": "Shedeur Sanders", "d": "Donruss Optic Rated Rookie RC \u2014 hype name", "s": 511, "o": 1, "t": 7}, {"k": "Sanders (2)", "p": "Shedeur Sanders", "d": "Donruss Optic Passing Grade RC", "s": 511, "o": 5, "t": 7}, {"k": "Sanders (3)", "p": "Shedeur Sanders", "d": "Prizm Red White & Blue RC", "s": 541, "o": 4, "t": 8}, {"k": "Smith-Njigba", "p": "Jaxon Smith-Njigba", "d": "Panini Prizm base", "s": 532, "o": 2, "t": 6}, {"k": "Ward", "p": "Cam Ward", "d": "Donruss Optic My House RC", "s": 511, "o": 4, "t": 7}, {"k": "Warner", "p": "Kurt Warner", "d": "Mosaic Touchdown Masters \u2014 HOF legend", "s": 524, "o": 9, "t": 5}, {"k": "Watt (1)", "p": "T.J. Watt", "d": "Panini Contours gold \u2014 2nd copy at 512/7 \u2014 confirm distinct", "s": 512, "o": 2, "t": 5}];
+const KEY = "find47_done";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const list = document.getElementById("list");
+function render(){
+  const q = document.getElementById("q").value.toLowerCase();
+  list.innerHTML = "";
+  for (const r of DATA){
+    const hay = (r.p + " " + r.d + " " + r.s).toLowerCase();
+    if (q && !hay.includes(q)) continue;
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    el.innerHTML = `<div class="box"></div><div class="info"><div class="nm">${r.p}</div>` +
+      `<div class="ds">${r.d}</div></div><div class="prc">~$${r.t}</div>` +
+      `<div class="loc"><b>${r.s}</b><span>pos ${r.o}</span></div>`;
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("q").oninput = render;
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
