@@ -13,8 +13,9 @@ DOCS_DIR = promote.OUTPUT_DIR  # canonical docs/ path, shared with the site buil
 HTML_PATH = DOCS_DIR / "pdf_library.html"
 
 # PDFs that live in docs/ but are deliberately NOT in the library
-# (they have their own nav entry or aren't worksheet-style documents).
-KNOWN_UNLISTED = {"harpua_ai_overview.pdf"}
+# (they have their own nav entry or aren't worksheet-style documents;
+# latest.pdf is the rolling copy of the newest PDF, not a distinct doc).
+KNOWN_UNLISTED = {"harpua_ai_overview.pdf", "latest.pdf"}
 
 # Admin-only PDFs, wrapped in data-admin="1" on the page. EMPTY as of
 # 2026-07-26: JC explicitly approved un-gating the whole library ("just easier
@@ -156,8 +157,26 @@ a.pdf-card .pdf-date { font-size: 11px; color: var(--muted, #8a94a6); opacity: .
 """
 
 
+def _auto_discovered() -> list[tuple[str, str, str, str]]:
+    """PDFs sitting in docs/ that nobody registered in GROUPS yet. They land
+    on the page automatically (newest first) so a fresh worksheet is visible
+    the moment the next site build runs — no hand-editing required. Move them
+    into a proper GROUPS entry later for a nicer title/description."""
+    from datetime import datetime
+    listed = {f for _g, items in GROUPS for (f, _t, _d, _u) in items}
+    out = []
+    for p in sorted(DOCS_DIR.glob("*.pdf"), key=lambda p: -p.stat().st_mtime):
+        if p.name in listed or p.name in KNOWN_UNLISTED:
+            continue
+        title = p.stem.replace("_", " ").replace("-", " ").strip().title()
+        updated = datetime.fromtimestamp(p.stat().st_mtime).strftime("%Y-%m-%d")
+        out.append((p.name, title, "New PDF — not yet categorized.", updated))
+    return out
+
+
 def build_body() -> str:
-    total = sum(len(items) for _, items in GROUPS)
+    auto = _auto_discovered()
+    total = sum(len(items) for _, items in GROUPS) + len(auto)
     n_gated = sum(1 for _g, items in GROUPS for (f, _t, _d, _u) in items if f in GATED)
     n_public = total - n_gated
     parts = [
@@ -165,7 +184,23 @@ def build_body() -> str:
         "<h1>PDF Library</h1>",
         f'<p class="sub">{n_public} pull sheets, sort lists &amp; checklists'
         f'<span data-admin="1"> &middot; plus {n_gated} internal pricing worksheets (admin)</span>.</p>',
+        '<a class="pdf-card" href="latest.pdf" style="border-width:2px;border-color:rgba(212,175,55,.6);">'
+        '<div class="pdf-title">&#9733; Latest PDF &mdash; permanent link</div>'
+        '<div class="pdf-desc">Always opens the newest worksheet. Bookmark this one: the URL never changes, the content updates every time a new PDF is produced.</div>'
+        "</a>",
     ]
+    if auto:
+        parts.append('<div class="pdf-group">')
+        parts.append("<h2>Just added</h2>")
+        for fname, title, desc, updated in auto:
+            parts.append(
+                f'<a class="pdf-card" href="{fname}">'
+                f'<div class="pdf-title">{title}</div>'
+                f'<div class="pdf-desc">{desc}</div>'
+                f'<div class="pdf-date">Updated {updated}</div>'
+                f"</a>"
+            )
+        parts.append("</div>")
     for group_name, items in GROUPS:
         # Hide the whole group (header included) from anonymous visitors when
         # every PDF in it is admin-only; otherwise gate card-by-card.
@@ -202,7 +237,36 @@ def check_orphans() -> None:
         print(f"  WARNING: PDF Library links docs/{name}, which does not exist")
 
 
+def _refresh_latest_pdf() -> str | None:
+    """Copy the most recently produced PDF to docs/latest.pdf so JC has ONE
+    stable bookmark (…/latest.pdf) that always opens the newest worksheet.
+    Recency = last git commit touching the file (mtime is unreliable after a
+    fresh checkout), falling back to mtime for not-yet-committed PDFs."""
+    import shutil, subprocess
+    best, best_ts = None, -1.0
+    for p in DOCS_DIR.glob("*.pdf"):
+        if p.name == "latest.pdf":
+            continue
+        try:
+            out = subprocess.run(
+                ["git", "log", "-1", "--format=%ct", "--", str(p)],
+                capture_output=True, text=True, cwd=str(DOCS_DIR.parent), timeout=10,
+            ).stdout.strip()
+            # a locally regenerated (uncommitted) PDF is newer than its last commit
+            ts = max(float(out), p.stat().st_mtime) if out else p.stat().st_mtime
+        except Exception:
+            ts = p.stat().st_mtime
+        if ts > best_ts:
+            best, best_ts = p, ts
+    if best:
+        shutil.copy(best, DOCS_DIR / "latest.pdf")
+        print(f"  latest.pdf -> {best.name}")
+        return best.name
+    return None
+
+
 def main() -> int:
+    _refresh_latest_pdf()
     body = build_body()
     page = promote.html_shell(
         "PDF Library · Harpua2001",
