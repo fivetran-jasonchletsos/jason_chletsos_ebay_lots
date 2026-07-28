@@ -28,7 +28,7 @@
 </style></head><body><div class="wrap">
 <h1>Rip Hits — pull &amp; protect</h1>
 <p class="sub">Valuable cards from the $250 rip (scans 543-579), sorted by value &middot; tap a row when you pull it &middot; pos 1 = top-left, 9 = bottom-right. Frank Thomas first!</p>
-<input id="q" type="search" placeholder="Search player, set, scan number...">
+<div style="display:flex;gap:8px;margin-bottom:12px"><select id="srt" style="font-size:16px;padding:10px;border:1px solid #ccd;border-radius:12px;background:#fff"><option value="v">Sort: value</option><option value="n">Sort: last name A-Z</option><option value="s">Sort: scan order</option></select><input id="q" type="search" placeholder="Search player, set, scan..." style="flex:1;font-size:18px;padding:12px 14px;border:1px solid #ccd;border-radius:12px;margin:0"></div>
 <div id="list"></div>
 </div>
 <div id="bar"><button id="reset">reset</button><span id="cnt"></span></div>
@@ -39,8 +39,13 @@ let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
 const list = document.getElementById("list");
 function render(){
   const q = document.getElementById("q").value.toLowerCase();
+  const srt = document.getElementById("srt").value;
+  const lastName = p => { const w = p.replace(/["\'.]/g,"").split(/[\s/]+/).filter(x => !/^(jr|sr|ii|iii|iv)$/i.test(x)); return (w[w.length-1]||p).toLowerCase(); };
+  let rows = [...DATA];
+  if (srt === "n") rows.sort((a,b) => lastName(a.p).localeCompare(lastName(b.p)));
+  else if (srt === "s") rows.sort((a,b) => a.s - b.s || a.o - b.o);
   list.innerHTML = "";
-  for (const r of DATA){
+  for (const r of rows){
     const hay = (r.p + " " + r.d + " " + r.s).toLowerCase();
     if (q && !hay.includes(q)) continue;
     const el = document.createElement("div");
@@ -55,6 +60,7 @@ function render(){
   document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
 }
 document.getElementById("q").oninput = render;
+document.getElementById("srt").oninput = render;
 document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
 render();
 </script></body></html>

@@ -54,7 +54,7 @@
 <div class="ctrl">
  <select id="fsport"><option value="">All sports</option><option>Baseball</option><option>Football</option></select>
  <select id="fcat"><option value="">All types</option><option>Rookie</option><option>Insert</option><option>Parallel</option><option>Serial #</option><option>Base</option></select>
- <select id="fsort"><option value="v">Sort: value</option><option value="a">Sort: player A-Z</option><option value="s">Sort: scan order</option></select>
+ <select id="fsort"><option value="v">Sort: value</option><option value="a">Sort: last name A-Z</option><option value="s">Sort: scan order</option></select>
  <input id="q" type="search" placeholder="Search player, team, set...">
 </div>
 <div id="stat"></div>
@@ -73,8 +73,12 @@ function render(){
   let rows = CARDS.filter(c =>
     (!sp || c.sport === sp) && (!ct || c.category === ct) &&
     (!q || (c.player + " " + c.team + " " + c.brand + " " + c.insert + " " + c.parallel).toLowerCase().includes(q)));
-  if (so === "v") rows.sort((a,b) => b.typ - a.typ || a.player.localeCompare(b.player));
-  else if (so === "a") rows.sort((a,b) => a.player.localeCompare(b.player));
+  const lastName = p => {
+    const parts = p.replace(/["'.]/g, "").split(/[\s/]+/).filter(w => !/^(jr|sr|ii|iii|iv)$/i.test(w));
+    return (parts[parts.length - 1] || p).toLowerCase();
+  };
+  if (so === "v") rows.sort((a,b) => b.typ - a.typ || lastName(a.player).localeCompare(lastName(b.player)));
+  else if (so === "a") rows.sort((a,b) => lastName(a.player).localeCompare(lastName(b.player)) || a.player.localeCompare(b.player));
   else rows.sort((a,b) => a.scan - b.scan || a.pos - b.pos);
   const t = rows.reduce((s,c) => s + c.typ, 0);
   stat.textContent = rows.length + " cards · est. value ~" + money(Math.round(t*100)/100);
