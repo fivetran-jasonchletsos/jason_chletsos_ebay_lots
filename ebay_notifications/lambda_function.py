@@ -2104,6 +2104,174 @@ def lambda_handler(event, context):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
+    # POST /ebay/chris-save — "Chris' Scanner" auto-save (Chris's vintage
+    # collection). Same shape as kids-save/eagles-save, against
+    # docs/chris_scanner/cards.json + docs/chris_scanner/images/. Unlike
+    # the other family boards this one also persists the card "year" —
+    # Chris collects old cards, so the showcase surfaces and filters on it.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/chris-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("chris-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            card       = body.get("card") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            est = card.get("estimated_value_usd") or {}
+            try:
+                est_value = round(float((est or {}).get("typical") or 0))
+            except (TypeError, ValueError):
+                est_value = 0
+
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "sport":      card.get("sport"),
+                    "name":       card.get("player"),
+                    "team":       card.get("team"),
+                    "year":       card.get("year"),
+                    "brand":      card.get("brand"),
+                    "set":        card.get("set_name"),
+                    "cardNumber": card.get("card_number"),
+                    "parallel":   card.get("parallel"),
+                    "serial":     card.get("serial"),
+                    "isRookie":   bool(card.get("is_rookie")),
+                    "isAuto":     bool(card.get("is_auto")),
+                    "isRelic":    bool(card.get("is_relic")),
+                    "estValue":   est_value,
+                    "scannedAt":  scanned_at,
+                }
+
+            try:
+                next_id, record = _save_card_with_retry(
+                    "docs/chris_scanner", raw, build_record, "Chris' Scanner"
+                )
+            except RuntimeError as exc:
+                logger.error(f"chris-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
+
+            logger.info(f"chris-save: added card id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":   True,
+                "id":        next_id,
+                "chris_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/chris_scanner/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"chris-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/chris-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/chris-delete — remove a Chris' Scanner card. Same shape
+    # as kids-delete/eagles-delete, against docs/chris_scanner/cards.json
+    # + images/.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/chris-delete"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("chris-delete: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body = json.loads(event.get("body") or "{}")
+            try:
+                card_id = int(body.get("id"))
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "id required"}, event)
+
+            cards_path = "docs/chris_scanner/cards.json"
+            try:
+                current_raw, sha = _github_get_json_file(cards_path)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"chris-delete cards.json GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not read cards.json (HTTP {exc.code})",
+                }, event)
+
+            try:
+                cards = json.loads(current_raw.decode("utf-8")) if current_raw.strip() else []
+            except Exception as exc:
+                logger.error(f"chris-delete: cards.json unparseable, aborting: {exc}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not valid JSON — aborting to avoid data loss",
+                }, event)
+            if not isinstance(cards, list):
+                logger.error("chris-delete: cards.json is not a JSON array, aborting")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   "cards.json on GitHub is not a JSON array — aborting to avoid data loss",
+                }, event)
+
+            target = next((c for c in cards if isinstance(c, dict) and c.get("id") == card_id), None)
+            if target is None:
+                return _cors_response(404, {"success": False, "error": "card not found"}, event)
+
+            remaining = [c for c in cards if not (isinstance(c, dict) and c.get("id") == card_id)]
+
+            image_rel = str(target.get("image") or "").strip()
+            if image_rel:
+                image_path = f"docs/chris_scanner/{image_rel}"
+                try:
+                    img_sha = _github_get_sha(image_path)
+                    _github_delete_file(
+                        image_path, img_sha,
+                        message=f"Chris' Scanner: remove card {card_id} image ({target.get('name') or 'unknown'})",
+                    )
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"chris-delete image DELETE HTTP {exc.code}: {exc.read().decode()[:300]}")
+                except Exception as exc:
+                    logger.error(f"chris-delete image DELETE error: {exc}")
+
+            try:
+                _github_put_file(
+                    cards_path, json.dumps(remaining, indent=2).encode("utf-8"),
+                    message=f"Chris' Scanner: remove card {card_id} ({target.get('name') or 'unknown'})",
+                    sha=sha,
+                )
+            except urllib.error.HTTPError as exc:
+                logger.error(f"chris-delete cards.json PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {
+                    "success": False,
+                    "error":   f"Could not update cards.json (HTTP {exc.code})",
+                }, event)
+
+            logger.info(f"chris-delete: removed card id={card_id} name={target.get('name')}")
+            return _cors_response(200, {"success": True, "id": card_id}, event)
+
+        except Exception as exc:
+            logger.error(f"chris-delete error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/chris-delete"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
     # POST /ebay/vault-save — "The Vault Scanner" auto-save (JC's personal
     # Marvel collection). Same read-modify-write shape as sewer-save, always
     # against the "marvel" board (docs/marvel_vault/cards.json + images/) —
