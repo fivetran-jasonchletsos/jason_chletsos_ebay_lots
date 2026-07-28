@@ -91,7 +91,14 @@ def load_locks() -> dict:
         return {}
     try:
         data = json.loads(LOCKS_FILE.read_text())
-        return data.get("items", {}) if isinstance(data, dict) else {}
+        if not isinstance(data, dict):
+            return {}
+        # locks.json is stored FLAT ({item_id: {...}}), but a legacy writer
+        # once nested entries under an "items" wrapper — merge both shapes so
+        # no lock is ever silently dropped. Callers get one flat items dict.
+        nested = data.pop("items", {}) if isinstance(data.get("items"), dict) else {}
+        data.update(nested)
+        return data
     except Exception:
         return {}
 

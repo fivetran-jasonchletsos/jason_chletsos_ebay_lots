@@ -456,8 +456,10 @@ def apply_best_offer(token: str, plan: list[dict], ebay_cfg: dict,
     # was ignoring it, which let BO floors get set on locked lots and
     # blocked subsequent price reverts (errors 22003/23004).
     try:
-        locks = promote.load_locks() or {}
-        locked_ids = set((locks.get("items") or {}).keys())
+        # load_locks() returns the flat {item_id: {...}} dict; the old
+        # double-unwrap (locks.get("items")) always yielded an empty set,
+        # silently disabling every lock here.
+        locked_ids = set((promote.load_locks() or {}).keys())
     except Exception:
         locked_ids = set()
     if locked_ids:

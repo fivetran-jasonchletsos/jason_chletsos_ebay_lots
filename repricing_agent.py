@@ -197,8 +197,10 @@ def decide(listing: dict, market_row: dict, pricing_sources: dict,
     }
 
     # ---- Hard blocks ------------------------------------------------------- #
-    if item_id in (locks.get("items") or {}):
-        lock = locks["items"][item_id]
+    # locks is the flat {item_id: {...}} dict from promote.load_locks(); the
+    # old locks.get("items") lookup never matched, silently disabling locks.
+    if item_id in locks:
+        lock = locks[item_id]
         decision["decision"] = "blocked"
         decision["reasons"].append(f"locked ({lock.get('reason', 'manual lock')})")
         return decision
