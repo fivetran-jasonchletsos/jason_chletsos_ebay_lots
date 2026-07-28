@@ -417,6 +417,8 @@ locals {
     "lola-delete",
     "claire-save",
     "claire-delete",
+    "kids-save",
+    "kids-delete",
   ]
 }
 
