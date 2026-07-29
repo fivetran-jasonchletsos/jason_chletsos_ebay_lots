@@ -59,6 +59,7 @@ html = """<!DOCTYPE html>
  .c-Base{background:#eee;color:#555}.c-Rookie{background:#fde8e8;color:#a02020}
  .c-Insert{background:#e8f0fd;color:#1a4fa0}.c-Parallel{background:#f3e8fd;color:#7020a0}
  .c-SerialNo{background:#fff3d6;color:#8a6d00}
+ .c-Hit{background:#123;color:#ffd700}
  .val{text-align:right;flex:0 0 auto}
  .val b{font-size:17px;color:var(--grn)}
  .val span{display:block;font-size:11px;color:var(--mut)}
@@ -80,8 +81,8 @@ html = """<!DOCTYPE html>
 </div>
 __EXPERIMENTS__
 <div class="ctrl">
- <select id="fsport"><option value="">All sports</option><option>Baseball</option><option>Football</option></select>
- <select id="fcat"><option value="">All types</option><option>Rookie</option><option>Insert</option><option>Parallel</option><option>Serial #</option><option>Base</option></select>
+ <select id="fsport"><option value="">All sports</option><option>Baseball</option><option>Football</option><option>Basketball</option></select>
+ <select id="fcat"><option value="">All types</option><option>Hit</option><option>Rookie</option><option>Insert</option><option>Parallel</option><option>Base</option></select>
  <select id="fsort"><option value="v">Sort: value</option><option value="a">Sort: last name A-Z</option><option value="s">Sort: scan order</option></select>
  <input id="q" type="search" placeholder="Search player, team, set...">
 </div>
