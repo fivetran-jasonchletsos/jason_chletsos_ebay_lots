@@ -76,8 +76,9 @@ html = """<!DOCTYPE html>
   <div class="cell"><b>__PCT__%</b><span>gross recovery</span></div>
   <div class="cell"><b>__NETPCT__%</b><span>after ~15% selling fees</span></div>
  </div>
- <div class="verdict">Verdict so far: __VERDICT__</div>
+ <div class="verdict">Overall verdict: __VERDICT__</div>
 </div>
+__EXPERIMENTS__
 <div class="ctrl">
  <select id="fsport"><option value="">All sports</option><option>Baseball</option><option>Football</option></select>
  <select id="fcat"><option value="">All types</option><option>Rookie</option><option>Insert</option><option>Parallel</option><option>Serial #</option><option>Base</option></select>
@@ -126,6 +127,32 @@ for (const id of ["fsport","fcat","fsort","q"]) document.getElementById(id).onin
 render();
 </script></body></html>"""
 
+# per-experiment cards
+exps = DATA.get("experiments", {})
+exp_html = ""
+if len(exps) > 1 or any(b.get("exp") for b in batches):
+    exp_html = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px">'
+    for eid, meta in sorted(exps.items()):
+        e_batches = [b["id"] for b in batches if str(b.get("exp")) == str(eid)]
+        e_cards = [c for c in cards if c["batch"] in e_batches]
+        if not e_cards:
+            continue
+        e_typ = round(sum(c["typ"] for c in e_cards), 2)
+        e_cost = meta["cost"]
+        e_rec = e_typ / e_cost * 100 if e_cost else 0
+        e_net = e_rec * (1 - FEE)
+        if e_net >= 110: ev = "WINNING"
+        elif e_net >= 90: ev = "break-even"
+        else: ev = "losing"
+        exp_html += (f'<div style="flex:1;min-width:250px;background:#fff;border:2px solid '
+                     f'{"#1a7f1a" if e_net>=110 else ("#b8860b" if e_net>=90 else "#a02020")};'
+                     f'border-radius:12px;padding:12px 14px">'
+                     f'<div style="font-weight:800;font-size:14px">{meta["label"]}</div>'
+                     f'<div style="font-size:13px;color:#556;margin-top:4px">{len(e_cards)} cards &middot; '
+                     f'${e_cost:,.0f} &rarr; ~${e_typ:,.0f} &middot; {e_rec:.0f}% gross / {e_net:.0f}% net '
+                     f'&mdash; <b>{ev}</b></div></div>')
+    exp_html += "</div>"
+
 html = (html
         .replace("__SPENT__", f"{spent:,.0f}")
         .replace("__TYP__", f"{tot['typ']:,.0f}")
@@ -136,6 +163,7 @@ html = (html
         .replace("__NCARDS__", str(len(cards)))
         .replace("__VERDICT__", verdict)
         .replace("__METHOD__", DATA.get("methodology", ""))
+        .replace("__EXPERIMENTS__", exp_html)
         .replace("__DATA__", json.dumps(cards)))
 
 Path("docs/rip_report.html").write_text(html)
