@@ -11,8 +11,8 @@ DATA = json.load(open("output/bball_select.json"))
 cards = DATA["cards"]
 tot = DATA["totals"]
 
-KEEP_FLAG = {"LeBron James", "Karl-Anthony Towns", "Jalen Brunson",
-             "Pacome Dadiet", "Ariel Hukporti"}
+# 2026-07-29 (second ruling): sell the LeBrons and Knicks too; ONLY 76ers held.
+KEEP_FLAG = set()
 
 
 def is_sixers(c):
@@ -26,7 +26,7 @@ def par_group(c):
         return "Blue"
     if "Flash" in p:
         return "Orange Flash"
-    if p in ("Tri-Color", "Silver", "Green", "Purple", "Yellow", "Mezzanine"):
+    if p in ("Tri-Color", "Silver", "Green", "Purple", "Yellow", "Mezzanine", "Die-Cut"):
         return p
     return "Base"
 
@@ -67,7 +67,7 @@ PRICE_HTML = """<!DOCTYPE html>
  .g-OrangeFlash{background:#ffe8d6;color:#a04a00}.g-TriColor{background:#f3e8fd;color:#7020a0}
  .g-Silver{background:#e8e8ee;color:#445}.g-Green{background:#e2f5e2;color:#186818}
  .g-Purple{background:#efe2f7;color:#6a1b9a}.g-Yellow{background:#fff3c4;color:#8a6d00}
- .g-Mezzanine{background:#e0f2f1;color:#00695c}
+ .g-Mezzanine{background:#e0f2f1;color:#00695c}.g-DieCut{background:#e8e8ee;color:#445}
  .val{text-align:right;flex:0 0 auto}
  .val b{font-size:17px;color:var(--grn)}
  .val span{display:block;font-size:11px;color:var(--mut)}
@@ -152,10 +152,8 @@ price_html = (PRICE_HTML
 Path("docs/bball_select.html").write_text(price_html)
 
 # ---------------------------------------------------------------- pick list
-# 2026-07-29: JC ruled — LeBrons + Knicks are KEEPS (stay home), 76ers to his
-# son, and the pull list is now exactly the posting batch: typ >= $2.
-pull = [c for c in cards
-        if not c["sixers"] and not c["keep"] and c["typ"] >= 2]
+# 2026-07-29: pull list = posting batch (typ >= $2). Only 76ers held.
+pull = [c for c in cards if not c["sixers"] and c["typ"] >= 2]
 pull.sort(key=lambda c: -c["typ"])
 pull_typ = round(sum(c["typ"] for c in pull), 2)
 sixers = [c for c in cards if c["sixers"]]
@@ -196,8 +194,8 @@ PULL_HTML = """<!DOCTYPE html>
 </style></head><body><div class="wrap">
 <h1>Select Basketball Pull List</h1>
 <p class="sub">__NPULL__ cards to pull for posting (of __NCARDS__ ripped) &middot; est. value ~$__PULLTYP__. This IS the posting batch. Scan badge = scan/position (1 = top-left, 9 = bottom-right). Tap a row to check it off &mdash; progress saves on this device.</p>
-<div class="warn"><b>Keep at home (not on this list):</b> the 3 LeBrons + the Knicks (Towns, Brunson, Dadiet, Hukporti) &mdash; your call 2026-07-29 &mdash; and __SIXERS__ (76ers go to your son's box).<br>
-<b>Also not listed:</b> everything under ~$2 typ (mostly Blue commons) stays in the repository pile for future lots.</div>
+<div class="warn"><b>Keep at home (not on this list):</b> __SIXERS__ &mdash; 76ers go to your son's box. Everything else sells, LeBrons and Knicks included (your call 2026-07-29).<br>
+<b>Also not listed:</b> everything under ~$2 typ (mostly Blue commons, incl. Dadiet + Hukporti) stays in the repository pile for future lots.</div>
 <div class="chips" id="chips"></div>
 <div class="ctrl">
  <select id="fsort"><option value="v">Sort: value</option><option value="a">Sort: last name A-Z</option><option value="s">Sort: scan order</option></select>
