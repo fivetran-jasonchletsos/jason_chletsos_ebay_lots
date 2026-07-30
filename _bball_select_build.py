@@ -31,10 +31,17 @@ def par_group(c):
     return "Base"
 
 
+posted_path = Path("output/bball_select_posted.json")
+POSTED = {}
+if posted_path.exists():
+    POSTED = {(p["scan"], p["pos"]): p["item_id"]
+              for p in json.loads(posted_path.read_text())}
+
 for c in cards:
     c["grp"] = par_group(c)
     c["keep"] = c["player"] in KEEP_FLAG
     c["sixers"] = is_sixers(c)
+    c["ebay"] = POSTED.get((c["scan"], c["pos"]), "")
 
 # ---------------------------------------------------------------- pricing site
 PRICE_HTML = """<!DOCTYPE html>
@@ -185,6 +192,8 @@ PULL_HTML = """<!DOCTYPE html>
  .nm .rc{color:#a02020;font-size:11px;font-weight:800;vertical-align:2px}
  .nm .keep{background:#a02020;color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:7px;vertical-align:2px;margin-left:4px}
  .ds{color:#667;font-size:12.5px;margin-top:1px}
+ .ds a{color:#1a4fa0;font-weight:700}
+ .od{color:#8a6d00;font-weight:600}
  .val{flex:0 0 auto;text-align:right;font-weight:700;color:#1a7f1a;font-size:15px}
  .loc{flex:0 0 auto;text-align:center;background:#123;color:#fff;border-radius:8px;padding:5px 9px;font-size:12px}
  .bar{position:fixed;bottom:0;left:0;right:0;background:#0b1b3a;color:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14px}
@@ -261,7 +270,10 @@ function render(){
     el.className = "row" + (done.has(id(c)) ? " done" : "");
     el.innerHTML = `<div class="cb">${done.has(id(c)) ? "&#10003;" : ""}</div>` +
       `<div class="info"><div class="nm">${c.player}${c.rc ? ' <span class="rc">RC</span>' : ""}${c.keep ? ' <span class="keep">KEEP?</span>' : ""}</div>` +
-      `<div class="ds">${c.parallel} &middot; ${c.team}</div></div>` +
+      `<div class="ds">${c.parallel} &middot; ${c.team}` +
+      (c.ebay ? ` &middot; <a href="https://www.ebay.com/itm/${c.ebay}" target="_blank" onclick="event.stopPropagation()">eBay</a>`
+              : ' &middot; <span class="od">2nd copy — on deck, not listed yet</span>') +
+      `</div></div>` +
       `<div class="val">${money(c.typ)}</div>` +
       `<div class="loc">${c.scan}/${c.pos}</div>`;
     el.onclick = () => {
