@@ -152,8 +152,10 @@ price_html = (PRICE_HTML
 Path("docs/bball_select.html").write_text(price_html)
 
 # ---------------------------------------------------------------- pick list
+# 2026-07-29: JC ruled — LeBrons + Knicks are KEEPS (stay home), 76ers to his
+# son, and the pull list is now exactly the posting batch: typ >= $2.
 pull = [c for c in cards
-        if not c["sixers"] and (c["typ"] >= 1.5 or c["grp"] not in ("Blue", "Base"))]
+        if not c["sixers"] and not c["keep"] and c["typ"] >= 2]
 pull.sort(key=lambda c: -c["typ"])
 pull_typ = round(sum(c["typ"] for c in pull), 2)
 sixers = [c for c in cards if c["sixers"]]
@@ -193,9 +195,9 @@ PULL_HTML = """<!DOCTYPE html>
  .bar button.rst{background:transparent;color:#fbb;border:1px solid #a55;margin-left:8px}
 </style></head><body><div class="wrap">
 <h1>Select Basketball Pull List</h1>
-<p class="sub">__NPULL__ cards worth pulling (of __NCARDS__ ripped) &middot; est. value ~$__PULLTYP__. Scan badge = scan/position (1 = top-left, 9 = bottom-right). Tap a row to check it off &mdash; progress saves on this device.</p>
-<div class="warn"><b>Not on this list:</b> __SIXERS__ &mdash; 76ers go to your son's box, never listed.<br>
-<b>KEEP? tags:</b> the 3 LeBrons and the Knicks cards (Towns, Brunson, Dadiet, Hukporti) were keeper categories in your last basketball sort. They're listed here with a red KEEP? tag &mdash; give me a keep-or-sell call before any of them get posted.</div>
+<p class="sub">__NPULL__ cards to pull for posting (of __NCARDS__ ripped) &middot; est. value ~$__PULLTYP__. This IS the posting batch. Scan badge = scan/position (1 = top-left, 9 = bottom-right). Tap a row to check it off &mdash; progress saves on this device.</p>
+<div class="warn"><b>Keep at home (not on this list):</b> the 3 LeBrons + the Knicks (Towns, Brunson, Dadiet, Hukporti) &mdash; your call 2026-07-29 &mdash; and __SIXERS__ (76ers go to your son's box).<br>
+<b>Also not listed:</b> everything under ~$2 typ (mostly Blue commons) stays in the repository pile for future lots.</div>
 <div class="chips" id="chips"></div>
 <div class="ctrl">
  <select id="fsort"><option value="v">Sort: value</option><option value="a">Sort: last name A-Z</option><option value="s">Sort: scan order</option></select>
