@@ -8,7 +8,7 @@ import argparse, json, requests
 from pathlib import Path
 import post_from_scan as pfs, ebay_client
 
-CATEGORY_ID = "261324"  # Non-Sport Trading Cards
+CATEGORY_ID = "183050"  # Non-Sport Trading Card Singles (261324 is a parent/non-leaf category, rejected by AddItem)
 
 
 def build_and_post(crop, title, price, specs, cfg, tok, apply):
@@ -30,6 +30,7 @@ def build_and_post(crop, title, price, specs, cfg, tok, apply):
            f'<Description><![CDATA[{desc}]]></Description>'
            f'<PrimaryCategory><CategoryID>{CATEGORY_ID}</CategoryID></PrimaryCategory>'
            f'<StartPrice>{price}</StartPrice><ConditionID>4000</ConditionID>'
+           f'<ConditionDescriptors><ConditionDescriptor><Name>40001</Name><Value>400010</Value></ConditionDescriptor></ConditionDescriptors>'
            f'<Country>US</Country><Currency>USD</Currency><DispatchTimeMax>3</DispatchTimeMax>'
            f'<ListingDuration>GTC</ListingDuration><ListingType>FixedPriceItem</ListingType>'
            f'<Location>Wynnewood, PA</Location><PostalCode>19096</PostalCode>'
@@ -65,7 +66,7 @@ def main():
     for c in batch:
         assert len(c["title"]) <= 80, (len(c["title"]), c["title"])
         specs = {"Character": c.get("character", ""), "Manufacturer": c.get("manufacturer", "Topps"),
-                  "Set": c.get("set", ""), "Year": c.get("year", "2024")}
+                  "Set": c.get("set", ""), "Year": c.get("year", "2024"), "Franchise": "Marvel"}
         if c.get("insert"):
             specs["Insert Set"] = c["insert"]
         if c.get("parallel"):
