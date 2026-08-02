@@ -40,6 +40,17 @@ CATEGORY_ID  = "261328"    # Trading Card Singles
 CONDITION_ID = "4000"      # Ungraded
 SPORT        = "Football"  # overridable via --sport (e.g. Basketball)
 
+# House shipping default for single cards -- eBay's discounted trading-card
+# envelope rate. Real postage runs under this, so $1.32 nets a small margin.
+# Any custom/one-off posting script MUST import these rather than hardcoding
+# a shipping service -- USPSFirstClass costs $4.50+ in real postage and will
+# silently lose money if charged at card-envelope rates (2026-08-02 incident:
+# 79 listings undercharged this way before being caught pre-sale).
+SHIPPING_SERVICE      = "US_eBayStandardEnvelope"
+SHIPPING_SERVICE_COST = "1.32"
+LOT_SHIPPING_SERVICE      = "US_eBayStandardEnvelope"
+LOT_SHIPPING_SERVICE_COST = "1.32"
+
 
 def xml_escape(s: str) -> str:
     return (s.replace("&", "&amp;").replace("<", "&lt;")

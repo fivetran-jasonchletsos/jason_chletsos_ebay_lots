@@ -37,8 +37,8 @@ def build_and_post(crop, title, price, specs, cfg, tok, apply):
            f'<PictureDetails><PictureURL>{pfs.xml_escape(picture_url)}</PictureURL></PictureDetails>'
            f'<Quantity>1</Quantity><ItemSpecifics>{specs_xml}</ItemSpecifics>'
            f'<ShippingDetails><ShippingType>Flat</ShippingType><ShippingServiceOptions>'
-           f'<ShippingServicePriority>1</ShippingServicePriority><ShippingService>USPSFirstClass</ShippingService>'
-           f'<ShippingServiceCost>0.99</ShippingServiceCost></ShippingServiceOptions></ShippingDetails>'
+           f'<ShippingServicePriority>1</ShippingServicePriority><ShippingService>{pfs.SHIPPING_SERVICE}</ShippingService>'
+           f'<ShippingServiceCost>{pfs.SHIPPING_SERVICE_COST}</ShippingServiceCost></ShippingServiceOptions></ShippingDetails>'
            f'<ReturnPolicy><ReturnsAcceptedOption>ReturnsNotAccepted</ReturnsAcceptedOption></ReturnPolicy>'
            f'</Item></AddItemRequest>')
     h = ebay_client.trading_headers("AddItem", cfg, tok)
