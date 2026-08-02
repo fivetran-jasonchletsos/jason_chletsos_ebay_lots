@@ -421,6 +421,8 @@ locals {
     "kids-delete",
     "chris-save",
     "chris-delete",
+    "rick-save",
+    "rick-delete",
   ]
 }
 
