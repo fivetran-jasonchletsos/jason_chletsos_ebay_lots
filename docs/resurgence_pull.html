@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Topps Resurgence Football — Live Listings</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f6f7fa;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 12px 110px}
+ h1{font-size:22px;margin:6px 0 2px}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px}
+ .warn{background:#fff8dc;border:1px solid #d4b106;border-radius:10px;padding:10px 12px;font-size:13.5px;margin:0 0 12px;line-height:1.5}
+ .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+ .chips button{font-size:13px;padding:7px 11px;border:1px solid #ccd;border-radius:16px;background:#fff;cursor:pointer}
+ .chips button.on{background:#7b1fa2;color:#fff;border-color:#7b1fa2}
+ .ctrl{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+ .ctrl select,.ctrl input{font-size:15px;padding:8px 10px;border:1px solid #ccd;border-radius:10px;background:#fff}
+ .ctrl input{flex:1;min-width:140px}
+ .ghdr{font-weight:800;font-size:14px;color:#334;margin:14px 0 4px}
+ .row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;padding:10px 12px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .row.done{opacity:.55}.row.done .nm{text-decoration:line-through;color:#1a7f1a}
+ .cb{flex:0 0 26px;height:26px;border:2px solid #99a;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff}
+ .row.done .cb{background:#1a7f1a;border-color:#1a7f1a}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:700;font-size:16px}
+ .ds{color:#667;font-size:12.5px;margin-top:1px}
+ .val{flex:0 0 auto;text-align:right;font-weight:700;color:#7b1fa2;font-size:15px}
+ .loc{flex:0 0 auto;text-align:center;background:#2d1b3d;color:#fff;border-radius:8px;padding:5px 9px;font-size:12px}
+ .bar{position:fixed;bottom:0;left:0;right:0;background:#2d1b3d;color:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14px}
+ .bar b{font-size:17px}
+ .bar button{margin-left:auto;font-size:13px;padding:8px 12px;border:0;border-radius:9px;background:#fff;color:#2d1b3d;font-weight:700;cursor:pointer}
+ .bar button.rst{background:transparent;color:#fbb;border:1px solid #a55;margin-left:8px}
+</style></head><body><div class="wrap">
+<h1>Topps Resurgence Football</h1>
+<p class="sub">14 listings, ALL LIVE on eBay ($32 box → $68.86 total list value) &middot; 10 singles + 4 five-card lots. Tap a row to check it off once sold/shipped &mdash; progress saves on this device.</p>
+<div class="warn"><b>These cards look great and should move fast.</b> Verified by a 5-agent pricing pass (star valuation, rookie valuation, product research, image verification, final synthesis) plus CC crop-checking every single card against the raw scans before posting. Malaki Starks is a real numbered 167/275 parallel; Jared Goff and Woody Marks are confirmed Refractors; the two De'Von Achane copies are genuine duplicates, bundled together in the Backfield lot rather than competing as two singles.</div>
+<div class="chips" id="chips"></div>
+<div class="ctrl">
+ <select id="fsort"><option value="v">Sort: value</option><option value="a">Sort: name A-Z</option><option value="s">Sort: scan order</option></select>
+ <input id="q" type="search" placeholder="Search character, set...">
+</div>
+<div id="list"></div>
+</div>
+<div class="bar"><span><b id="done">0</b>/52 pulled</span>
+<button id="copy">Copy report</button><button class="rst" id="reset">Reset</button></div>
+<script>
+const DATA = [{"scan": 0, "pos": 0, "player": "2025 Topps Resurgence QB Room 5-Card Lot: Rodgers, Murray, Fields +2", "team": "Aaron Rodgers, Kyler Murray, Justin Fields, Jordan Love, J.J. McCarthy", "parallel": "", "rc": false, "tier": "lot", "low": 5.39, "typ": 8.99, "high": 16.18, "grp": "Lot", "keep": false, "sixers": false, "ebay": "307101295606"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence WR Corps 5-Card Lot: Waddle, Brown, London +2", "team": "Jaylen Waddle, A.J. Brown, Drake London, Tory Horton RC, Tai Felton RC", "parallel": "", "rc": false, "tier": "lot", "low": 5.09, "typ": 8.49, "high": 15.28, "grp": "Lot", "keep": false, "sixers": false, "ebay": "307101295886"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Backfield 5-Card Lot: Cook, Swift, Achane x2 +1", "team": "James Cook, D'Andre Swift, De'Von Achane (x2), Bhayshul Tuten RC", "parallel": "", "rc": false, "tier": "lot", "low": 4.79, "typ": 7.99, "high": 14.38, "grp": "Lot", "keep": false, "sixers": false, "ebay": "307101296063"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Circuit Breakers CeeDee Lamb Cowboys Insert", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 3.59, "typ": 5.99, "high": 10.78, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101226634"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Trenches 4-Card Lot: Chris Jones, T.J. Watt +2", "team": "Chris Jones, T.J. Watt, Jack Sawyer RC, Donovan Jackson RC", "parallel": "", "rc": false, "tier": "lot", "low": 3.29, "typ": 5.49, "high": 9.88, "grp": "Lot", "keep": false, "sixers": false, "ebay": "307101296457"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Ja'Marr Chase Cincinnati Bengals Football", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 2.99, "typ": 4.99, "high": 8.98, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101226822"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Protonyx Derrick Henry Ravens Insert PT-22", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 2.99, "typ": 4.99, "high": 8.98, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101226966"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Conductors Dak Prescott Cowboys Insert C-5", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 2.09, "typ": 3.49, "high": 6.28, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101227141"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Malaki Starks RC Blue Parallel 167/275", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 2.09, "typ": 3.49, "high": 6.28, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101227281"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Caleb Williams Chicago Bears Football", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 2.09, "typ": 3.49, "high": 6.28, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101227459"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Jared Goff Refractor Detroit Lions Football", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 1.79, "typ": 2.99, "high": 5.38, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101227627"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Voltaic Luther Burden III RC Bears VT-11", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 1.79, "typ": 2.99, "high": 5.38, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101227766"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Jaxon Smith-Njigba Seattle Seahawks Football", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 1.79, "typ": 2.99, "high": 5.38, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101227872"}, {"scan": 0, "pos": 0, "player": "2025 Topps Resurgence Woody Marks Refractor RC Houston Texans", "team": "", "parallel": "", "rc": false, "tier": "single", "low": 1.49, "typ": 2.49, "high": 4.48, "grp": "Single", "keep": false, "sixers": false, "ebay": "307101228036"}];
+const KEY = "resurgencepull_done";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let chip = "";
+const groups = [...new Set(DATA.map(c => c.grp))];
+const chipbox = document.getElementById("chips");
+const lastName = p => {
+  const parts = p.replace(/["'.]/g, "").split(/[\s/-]+/);
+  return (parts[parts.length - 1] || p).toLowerCase();
+};
+function id(c){return c.scan + "/" + c.pos}
+function money(x){return "$" + (x % 1 ? x.toFixed(2) : x)}
+function drawChips(){
+  chipbox.innerHTML = "";
+  const all = document.createElement("button");
+  all.textContent = "All " + done.size + "/" + DATA.length;
+  all.className = chip === "" ? "on" : "";
+  all.onclick = () => { chip = ""; render(); };
+  chipbox.appendChild(all);
+  for (const g of groups){
+    const rows = DATA.filter(c => c.grp === g);
+    const d = rows.filter(c => done.has(id(c))).length;
+    const b = document.createElement("button");
+    b.textContent = g + " " + d + "/" + rows.length;
+    b.className = chip === g ? "on" : "";
+    b.onclick = () => { chip = chip === g ? "" : g; render(); };
+    chipbox.appendChild(b);
+  }
+}
+function render(){
+  drawChips();
+  const so = document.getElementById("fsort").value;
+  const q = document.getElementById("q").value.toLowerCase();
+  let rows = DATA.filter(c => (!chip || c.grp === chip) &&
+    (!q || (c.player + " " + c.team + " " + c.parallel).toLowerCase().includes(q)));
+  if (so === "v") rows.sort((a,b) => b.typ - a.typ || lastName(a.player).localeCompare(lastName(b.player)));
+  else if (so === "a") rows.sort((a,b) => lastName(a.player).localeCompare(lastName(b.player)) || a.player.localeCompare(b.player));
+  else rows.sort((a,b) => a.scan - b.scan || a.pos - b.pos);
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  let hdr = null;
+  for (const c of rows){
+    if (!chip && so === "v"){
+      const band = c.typ >= 5 ? "Headliners ($5+)" : c.typ >= 3 ? "Solid ($3+)" : "Worth pulling";
+      if (band !== hdr){
+        hdr = band;
+        const h = document.createElement("div");
+        h.className = "ghdr"; h.textContent = band;
+        list.appendChild(h);
+      }
+    }
+    const el = document.createElement("div");
+    el.className = "row" + (done.has(id(c)) ? " done" : "");
+    el.innerHTML = `<div class="cb">${done.has(id(c)) ? "&#10003;" : ""}</div>` +
+      `<div class="info"><div class="nm">${c.player}</div>` +
+      `<div class="ds">${c.team}</div></div>` +
+      `<div class="val">${money(c.typ)}</div>` +
+      `<div class="loc">${c.scan}/${c.pos}</div>`;
+    el.onclick = () => {
+      done.has(id(c)) ? done.delete(id(c)) : done.add(id(c));
+      localStorage.setItem(KEY, JSON.stringify([...done]));
+      render();
+    };
+    list.appendChild(el);
+  }
+  document.getElementById("done").textContent = done.size;
+}
+document.getElementById("copy").onclick = () => {
+  const un = DATA.filter(c => !done.has(id(c)));
+  const txt = "RESURGENCE LISTINGS REPORT: " + done.size + "/" + DATA.length + " pulled. " +
+    "NOT PULLED (" + un.length + "): " +
+    un.map(c => id(c) + " " + c.player + " " + c.parallel).join(" | ");
+  navigator.clipboard.writeText(txt).then(() => alert("Report copied — paste it to CC."));
+};
+document.getElementById("reset").onclick = () => {
+  if (confirm("Clear all checkmarks?")){ done.clear(); localStorage.setItem(KEY, "[]"); render(); }
+};
+document.getElementById("fsort").oninput = render;
+document.getElementById("q").oninput = render;
+render();
+</script></body></html>
