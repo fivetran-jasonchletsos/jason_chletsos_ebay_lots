@@ -454,6 +454,55 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)})
 
     # ------------------------------------------------------------------
+    # POST /mike/request — Mike (mikeboy-40) requests dead-stock cards from
+    # docs/mike_dead_stock.html. Writes a pending entry to
+    # output/mike_requests.json via the GitHub Contents API (same pattern as
+    # the other admin routes) — no eBay write happens here. JC reviews and
+    # approves separately; approval pushes the cards to Mike's account.
+    # Body: { "item_ids": ["...", ...], "note": "..." }
+    # ------------------------------------------------------------------
+    if method == "OPTIONS" and path.endswith("/mike/request"):
+        return _cors_preflight(event)
+
+    if method == "POST" and path.endswith("/mike/request"):
+        try:
+            body = json.loads(event.get("body") or "{}")
+            item_ids = [str(i).strip() for i in body.get("item_ids", []) if str(i).strip()]
+            note = str(body.get("note", "")).strip()[:500]
+            if not item_ids:
+                return _cors_response(400, {"success": False, "error": "No item_ids provided"}, event)
+
+            path_in_repo = "output/mike_requests.json"
+            try:
+                raw, sha = _github_get_json_file(path_in_repo)
+                requests_list = json.loads(raw.decode()) if raw else []
+            except urllib.error.HTTPError as exc:
+                if exc.code == 404:
+                    requests_list, sha = [], None
+                else:
+                    raise
+
+            next_id = (max((r.get("id", 0) for r in requests_list), default=0) + 1)
+            requests_list.append({
+                "id": next_id,
+                "requested_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds") + "Z",
+                "item_ids": item_ids,
+                "note": note,
+                "status": "pending",
+            })
+            _github_put_file(
+                path_in_repo,
+                json.dumps(requests_list, indent=2).encode(),
+                f"Mike request #{next_id}: {len(item_ids)} card(s)",
+                sha,
+            )
+            return _cors_response(200, {"success": True, "request_id": next_id,
+                                         "count": len(item_ids)}, event)
+        except Exception as exc:
+            logger.error(f"Mike request error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    # ------------------------------------------------------------------
     # POST /ebay/reprice — update a single listing's price
     # Body: { "item_id": "...", "price": 9.99 }
     # ------------------------------------------------------------------
