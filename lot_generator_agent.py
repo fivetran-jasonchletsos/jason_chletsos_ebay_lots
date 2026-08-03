@@ -33,6 +33,7 @@ import argparse
 import csv
 import html
 import json
+import math
 import re
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -48,9 +49,13 @@ PLAN_PATH = REPO_ROOT / "output" / "lot_generator_plan.json"
 REPORT    = REPO_ROOT / "docs"   / "lots.html"
 
 # Candidate thresholds.
+# House rule (confirmed w/ Jason): bundle lots are 5 cards or fewer, no
+# exceptions. Chunking below uses math.ceil(len/MAX_LOT_SIZE) bucket counts
+# with an even split so no lot ever exceeds this cap and no tail chunk is
+# left undersized.
 SUB_ECONOMIC_PRICE = 3.00   # cards under this don't net after fees+shipping
 MIN_LOT_SIZE       = 3
-MAX_LOT_SIZE       = 25
+MAX_LOT_SIZE       = 5
 LOT_FLOOR_PRICE    = 9.99
 
 # Bulk vs focused pricing multipliers (against sum of CollX market).
@@ -171,6 +176,30 @@ def _clip_title(t: str) -> str:
     return re.sub(r"\s+", " ", t).strip()[:80]
 
 
+def _chunk_lots(cards: list[dict], max_size: int = MAX_LOT_SIZE) -> list[list[dict]]:
+    """Split `cards` into lots of at most `max_size`, using
+    math.ceil(len/max_size) to pick the bucket count and then spreading
+    cards evenly across those buckets (rather than naive fixed-size
+    slicing). Naive slicing can leave a small orphan tail chunk (e.g. 6
+    cards -> [5, 1]) that either violates MIN_LOT_SIZE or, if folded back
+    into the prior chunk, blows past MAX_LOT_SIZE. Even distribution
+    guarantees every chunk is within [max_size - 1ish, max_size] and never
+    produces an undersized tail.
+    """
+    n = len(cards)
+    if n == 0:
+        return []
+    num_chunks = math.ceil(n / max_size)
+    base, remainder = divmod(n, num_chunks)
+    chunks: list[list[dict]] = []
+    i = 0
+    for c in range(num_chunks):
+        size = base + (1 if c < remainder else 0)
+        chunks.append(cards[i:i + size])
+        i += size
+    return chunks
+
+
 # --------------------------------------------------------------------------- #
 # Theme proposers                                                              #
 # --------------------------------------------------------------------------- #
@@ -185,18 +214,14 @@ def propose_team_lots(candidates: list[dict]) -> list[dict]:
     for team, cards in sorted(by_team.items()):
         if len(cards) < MIN_LOT_SIZE:
             continue
-        # Cap lot size — split into multiple lots if oversized.
-        chunks = [cards[i:i+MAX_LOT_SIZE] for i in range(0, len(cards), MAX_LOT_SIZE)]
+        # Cap lot size — split into multiple evenly-sized lots if oversized.
+        # (Even split via _chunk_lots means every chunk is already within
+        # [MIN_LOT_SIZE, MAX_LOT_SIZE]; this check is just a defensive
+        # guard, not a fold-back — folding an undersized tail into the
+        # prior chunk would risk pushing it past MAX_LOT_SIZE.)
+        chunks = _chunk_lots(cards)
         for idx, chunk in enumerate(chunks, start=1):
             if len(chunk) < MIN_LOT_SIZE:
-                # tail chunk too small — fold back into prior lot if possible
-                if lots and lots[-1]["theme"] == "team" and lots[-1]["_team"] == team:
-                    prior = lots[-1]
-                    prior["collx_ids"].extend(c["collx_id"] for c in chunk)
-                    prior["card_count"] = len(prior["collx_ids"])
-                    prior["_cards"].extend(chunk)
-                    prior["total_collx_market"] = round(sum(x["_collx_market"] for x in prior["_cards"]), 2)
-                    prior["suggested_price"] = _price_bulk(prior["_cards"])
                 continue
             count = len(chunk)
             years = sorted({c.get("year") for c in chunk if c.get("year")})
@@ -231,7 +256,7 @@ def propose_player_lots(candidates: list[dict]) -> list[dict]:
     for player, cards in sorted(by_player.items()):
         if len(cards) < MIN_LOT_SIZE:
             continue
-        chunks = [cards[i:i+10] for i in range(0, len(cards), 10)]
+        chunks = _chunk_lots(cards)
         for idx, chunk in enumerate(chunks, start=1):
             if len(chunk) < MIN_LOT_SIZE:
                 continue
@@ -273,11 +298,11 @@ def propose_set_year_lots(candidates: list[dict]) -> list[dict]:
 
     lots: list[dict] = []
     for (year, sb), cards in sorted(by_key.items()):
-        if len(cards) < 4:  # bulk lots want at least 4 to feel like a "lot"
+        if len(cards) < MIN_LOT_SIZE:
             continue
-        chunks = [cards[i:i+MAX_LOT_SIZE] for i in range(0, len(cards), MAX_LOT_SIZE)]
+        chunks = _chunk_lots(cards)
         for idx, chunk in enumerate(chunks, start=1):
-            if len(chunk) < 4:
+            if len(chunk) < MIN_LOT_SIZE:
                 continue
             count = len(chunk)
             # CollX set names like "2025 Panini Select" already lead with the
@@ -324,7 +349,7 @@ def propose_rookie_class_lots(candidates: list[dict]) -> list[dict]:
     for year, cards in sorted(by_year.items()):
         if len(cards) < MIN_LOT_SIZE:
             continue
-        chunks = [cards[i:i+MAX_LOT_SIZE] for i in range(0, len(cards), MAX_LOT_SIZE)]
+        chunks = _chunk_lots(cards)
         for idx, chunk in enumerate(chunks, start=1):
             if len(chunk) < MIN_LOT_SIZE:
                 continue
@@ -359,7 +384,7 @@ def propose_parallel_lots(candidates: list[dict]) -> list[dict]:
             shiny.append(c)
     if len(shiny) < MIN_LOT_SIZE:
         return []
-    chunks = [shiny[i:i+12] for i in range(0, len(shiny), 12)]
+    chunks = _chunk_lots(shiny)
     lots: list[dict] = []
     for idx, chunk in enumerate(chunks, start=1):
         if len(chunk) < MIN_LOT_SIZE:
