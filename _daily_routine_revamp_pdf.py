@@ -70,18 +70,19 @@ def build():
 
     story.append(Paragraph("At a glance", H2))
     story.append(stat_block([
-        ("4 fixes shipped", "sold_reconciler, sell_inventory_reprice, shipping_audit, listing_performance"),
+        ("9 agents", "added or fixed across two rounds"),
         ("1025 listings", "audited for shipping cost"),
-        ("3 mismatches", "found, 2 fixed live"),
-        ("25/26 clean", "full pipeline smoke test"),
+        ("3 shipping mismatches", "found, 2 fixed live"),
+        ("31/31 clean", "final full-pipeline smoke test"),
     ]))
     story.append(Spacer(1, 8))
     story.append(Paragraph(
-        "Five specialist agents reviewed the daily pipeline end to end. Four concrete "
-        "fixes shipped tonight, each tested against live data rather than just read "
-        "and trusted. One real financial gap was caught (3 more shipping-undercharged "
-        "listings, 2 already corrected) and one stale, silently-failing step was found "
-        "and removed.", BODY))
+        "Ten specialist agents across two rounds reviewed and rebuilt the daily "
+        "pipeline end to end. Every fix was tested against live data rather than "
+        "just read and trusted. Real financial gaps were caught and closed "
+        "(shipping undercharges, a lot-sizing rule violation, an ended promotion), "
+        "a two-month-old silent failure was found and removed, and two flagged "
+        "concerns turned out to be false alarms once actually tested.", BODY))
 
     story.append(Paragraph("1. The 5-agent review -- what each lens found", H2))
     story.append(Paragraph(
@@ -197,28 +198,92 @@ def build():
         "diagnosed, fixed by removing the stale reference, and the pipeline is now "
         "clean end to end.", BODY))
 
-    story.append(Paragraph("4. Current state / what's still open", H2))
+    story.append(Paragraph("4. Round 2 -- clearing the rest of the backlog", H2))
+    story.append(Paragraph(
+        "Same night, second pass: 5 more specialist agents took on everything queued "
+        "from Round 1's review that hadn't shipped yet. Every item below was tested "
+        "live, not just implemented and assumed.", BODY))
+
+    story.append(Paragraph("Added to Step 1 dry-run (all verified safe)", H3))
+    story.extend(bullets([
+        "<b>promotions_agent.py</b> -- markdown ladder + volume discount, ~8s "
+        "runtime, one harmless read-only Marketing-API call. Real run: 526/1025 "
+        "listings due a markdown ($600.83 total discount impact). Separately "
+        "surfaced a real, pre-existing gap: the live volume-discount promotion "
+        "(buy 2/3/4 tiers) is currently <b>ENDED</b> on eBay's side -- not caused by "
+        "anything tonight, but it means that discount hasn't been active. Recreating "
+        "it needs --apply and your explicit go-ahead, not an automatic fix.",
+        "<b>message_responder_agent.py</b> and <b>tracking_responder_agent.py</b> -- "
+        "both confirmed draft-only by default (2-3s runtime each); both have a real "
+        "--apply mode that posts a live reply, gated behind confirmation exactly like "
+        "repricing_agent.py. Current state: inbox zero on both (0 unanswered "
+        "messages, 0 tracking-related messages) -- good news, not a test artifact.",
+        "<b>feedback_agent.py</b> -- dry-run by default, 96 buyers currently eligible "
+        "for feedback right now.",
+        "<b>email_campaign_agent.py</b> -- confirmed pure local computation in "
+        "dry-run (zero live API calls, <1s), so it now runs every day instead of "
+        "sitting unscheduled waiting for someone to remember it. A ready draft "
+        "exists right now: \"This week's steals from Harpua2001 -- up to 20% off,\" "
+        "6 items $17.99-$152.50. Only sending still needs your confirmation.",
+    ]))
+
+    story.append(Paragraph("Fixed: lot_generator_agent.py's 5-card violation", H3))
+    story.append(Paragraph(
+        "The flagship AI Lot Generator was capping lots at 25 cards in code "
+        "(MAX_LOT_SIZE = 25), directly violating the standing 5-card rule -- which is "
+        "why it was never added to daily automation. Fixed with a proper "
+        "math.ceil-based even-distribution chunker replacing naive slicing at all 5 "
+        "lot-type call sites. Verified with a real run: 756 lots generated, "
+        "<b>100% sized 3-5 cards</b>, zero violations. It's a manually-triggered "
+        "authoring tool, not a daily-cadence agent, so it stays on-demand -- but it's "
+        "no longer broken.", BODY))
+
+    story.append(Paragraph("Corrected: two flagged concerns that weren't real", H3))
+    story.extend(bullets([
+        "The Round 1 review flagged a possible conflict between price_drops_agent.py "
+        "and repricing_agent.py both proposing prices for the same listing. "
+        "Investigation found the premise was wrong: price_drops_agent.py is a "
+        "buyer-facing deal dashboard that tracks OTHER sellers' listings, not this "
+        "store's own inventory -- it has no --apply and no eBay-write path at all. "
+        "Verified 0 item_id overlap across two live runs. It cannot conflict with "
+        "repricing_agent.py. No fix was needed because there was nothing to fix.",
+        "specifics_agent.py was deliberately <b>not</b> added. Live-testing it "
+        "exposed a real problem: it makes an uncached Trading API call per active "
+        "listing with no TTL cache (unlike shipping_audit_agent.py's pattern) -- the "
+        "test hung at 217/1025 listings after 10+ minutes with the process barely "
+        "consuming CPU. It needs a caching layer before it's safe for daily use.",
+    ]))
+
+    story.append(Paragraph("Round 2 full-pipeline smoke test", H2))
+    story.append(Paragraph(
+        "Re-ran the entire revised Step 1 pipeline end to end with all 5 new agents "
+        "in their new positions (31 agents total) to catch any breakage from the "
+        "additions themselves. <b>31/31 ran clean.</b>", BODY))
+
+    story.append(Paragraph("5. Current state / what's still open", H2))
     story.extend(bullets([
         "<b>Needs your action:</b> the Frank Thomas $152.50 bat relic auto still has "
-        "wrong shipping (USPSPriority @ $0.00) -- fix it directly in Seller Hub, since "
-        "the automated ReviseItem path rejected it for a reason that wasn't Best "
-        "Offer, a bid, or an ending-soon lock.",
-        "<b>Daily pipeline is ready to run</b> with tonight's four additions/fixes "
-        "plus the vault_eligibility.py removal -- no further setup needed.",
-        "<b>Queued for later, not done tonight:</b> specifics_agent.py / "
-        "feedback_agent.py additions, message_responder_agent.py / "
-        "tracking_responder_agent.py for buyer-message visibility, a weekly "
-        "email_campaign_agent.py preview, promotions_agent.py addition, resolving the "
-        "price_drops_agent/repricing_agent overlap, and fixing the 5-card cap bug in "
-        "lot_generator_agent.py before it's ever added to the daily routine.",
+        "wrong shipping (USPSPriority @ $0.00) -- fix it directly in Seller Hub.",
+        "<b>Needs your decision:</b> the volume-discount promotion (buy 2/3/4) is "
+        "ended on eBay's side -- recreate it via promotions_agent.py --apply whenever "
+        "you're ready, no rush.",
+        "<b>Daily pipeline is fully ready to run</b> -- 9 fixes/additions across two "
+        "rounds tonight, 31/31 agents verified clean end to end.",
+        "<b>Still open, lower priority:</b> giving specifics_agent.py a caching layer "
+        "before it can join the daily routine; wiring email_campaign_agent.py's "
+        "hardcoded 50-follower placeholder to a live count.",
     ]))
 
     story.append(Spacer(1, 14))
     story.append(HRFlowable(width="100%", color=colors.HexColor("#dde"), thickness=1))
     story.append(Paragraph(
         "Everything above was tested against live data, not just read and assumed -- "
-        "every fix has a real run's output behind it, and the smoke test caught a "
-        "two-month-old silent failure the original skill doc never mentioned.",
+        "every fix has a real run's output behind it. Two rounds tonight caught a "
+        "two-month-old silent failure, a live financial gap (shipping), a code bug "
+        "violating a house rule (lot sizing), a stale-but-plausible-sounding concern "
+        "that turned out to be false (price_drops/repricing), and a script that "
+        "looked fine on paper but hung the moment it was actually run "
+        "(specifics_agent.py).",
         CAPTION))
 
     doc.build(story)
