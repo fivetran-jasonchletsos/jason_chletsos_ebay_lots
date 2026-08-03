@@ -115,9 +115,11 @@ def fetch_traffic_report(token: str, days_back: int = 30) -> dict[str, Any]:
         "raw":         <full response json or None>,
       }
     """
-    today  = _dt.date.today()
-    start  = today - _dt.timedelta(days=days_back)
-    date_range = f"{start.strftime('%Y%m%d')}..{today.strftime('%Y%m%d')}"
+    # Analytics reporting data lags live eBay data by ~1 day; requesting a
+    # range through "today" gets rejected as "end date in the future".
+    end    = _dt.date.today() - _dt.timedelta(days=1)
+    start  = end - _dt.timedelta(days=days_back)
+    date_range = f"{start.strftime('%Y%m%d')}..{end.strftime('%Y%m%d')}"
 
     # All scoping params live inside `filter=` per the analytics API spec.
     flt = f"marketplace_ids:{{EBAY_US}},date_range:[{date_range}]"
