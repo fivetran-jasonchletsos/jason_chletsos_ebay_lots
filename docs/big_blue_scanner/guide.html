@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050914">
+<title>Big Blue Playbook — How to Sell Your Cards on eBay</title>
+<meta name="description" content="A simple, step-by-step guide for Rick and Ryan to start selling cards on eBay using the Big Blue Scanner.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:     #0b2265;
+    --blue-2:   #163a7a;
+    --red:      #a71930;
+    --red-2:    #c9273f;
+    --silver:   #a5acaf;
+    --bg:       #050914;
+    --panel:    #0d1530;
+    --panel2:   #111c3f;
+    --panel3:   #152350;
+    --border:   rgba(165,172,175,0.22);
+    --hairline: rgba(165,172,175,0.14);
+    --text:     #f4f6fa;
+    --sub:      #a9b2c6;
+    --success:  #2ea86b;
+    --header-h: 76px;
+    --font-display: 'Anton', sans-serif;
+    --font-body: 'Oswald', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.55;
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0px, transparent 38px, rgba(165,172,175,0.05) 38px, rgba(165,172,175,0.05) 40px),
+      radial-gradient(ellipse 1100px 800px at 8% -5%, rgba(167,25,48,.20), transparent 60%),
+      radial-gradient(ellipse 1000px 800px at 100% 5%, rgba(22,58,122,.32), transparent 60%),
+      radial-gradient(ellipse 1200px 900px at 40% 105%, rgba(11,34,101,.4), transparent 58%);
+    background-attachment: fixed;
+  }
+
+  .top-stripe { height: 5px; background: linear-gradient(90deg, var(--blue), var(--silver) 50%, var(--red)); }
+
+  header {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+    padding: 18px 24px 14px;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; max-width: 1080px; margin: 0 auto; flex-wrap: wrap; }
+  .logo { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.5rem, 4vw, 2.1rem); letter-spacing: 1px; line-height: 1; color: #fff; text-shadow: 2px 2px 0 var(--red); text-transform: uppercase; }
+  .tagline { font-family: var(--font-body); font-weight: 500; font-size: 0.86rem; color: var(--silver); margin-top: 8px; font-style: italic; }
+  .nav-links { display: flex; gap: 10px; flex-wrap: wrap; }
+  .nav-link {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--silver);
+    text-decoration: none; border: 1.5px solid var(--border); border-radius: 4px;
+    padding: 8px 13px; letter-spacing: 0.4px; white-space: nowrap; transition: all 0.2s ease;
+    background: var(--panel2);
+  }
+  .nav-link:hover, .nav-link:focus-visible { border-color: var(--red); background: rgba(167,25,48,0.14); color: #fff; }
+  .nav-link.current { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 18px 64px; }
+
+  .hero { text-align: center; padding: 10px 0 26px; }
+  .hero h1 {
+    font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: clamp(1.8rem, 6vw, 2.7rem); line-height: 1.1; color: #fff; text-shadow: 2px 2px 0 var(--red);
+  }
+  .hero p { font-size: 1.05rem; color: var(--silver); margin-top: 12px; max-width: 34em; margin-inline: auto; }
+
+  .progress-wrap { margin: 22px 0 8px; }
+  .progress-label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--sub); text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 8px; }
+  .progress-track { height: 10px; background: var(--panel2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue-2), var(--red)); width: 0%; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 20px 22px;
+    margin-top: 18px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.35);
+  }
+  .panel h2 { font-family: var(--font-body); font-weight: 700; font-size: 1.1rem; color: var(--silver); margin-bottom: 10px; }
+  .panel ul { padding-left: 22px; }
+  .panel li { margin-bottom: 8px; }
+
+  .checklist-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .checklist-item input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--red); flex-shrink: 0; }
+  .checklist-item label { font-size: 0.98rem; color: var(--text); }
+
+  .step {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 22px 24px;
+    margin-top: 22px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+    transition: border-color 0.25s ease, opacity 0.25s ease;
+    position: relative;
+  }
+  .step.done { border-color: rgba(46,168,107,0.55); }
+  .step.done::before { content: '✓ DONE'; position: absolute; top: -11px; right: 18px; background: var(--success); color: #04160c; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 1px; padding: 3px 9px; border-radius: 999px; }
+
+  .step-head { display: flex; align-items: center; gap: 14px; }
+  .step-num {
+    font-family: var(--font-display); font-size: 1.5rem; color: #fff;
+    background: linear-gradient(150deg, var(--red-2), var(--red)); width: 46px; height: 46px;
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+  .step-title { font-family: var(--font-body); font-weight: 700; font-size: 1.28rem; color: #fff; line-height: 1.25; }
+  .step-sub { font-family: var(--font-mono); font-size: 0.66rem; color: var(--sub); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px; }
+
+  .step-body { margin-top: 16px; font-size: 1rem; color: var(--text); }
+  .step-body p { margin-bottom: 12px; }
+  .step-body ol, .step-body ul { padding-left: 24px; margin-bottom: 12px; }
+  .step-body li { margin-bottom: 9px; }
+  .step-body strong { color: var(--silver); }
+
+  .callout {
+    background: var(--panel2); border: 1px solid var(--border); border-left: 4px solid var(--red);
+    border-radius: 8px; padding: 12px 14px; margin: 14px 0; font-size: 0.94rem; color: var(--silver);
+  }
+  .callout.tip { border-left-color: var(--blue-2); }
+  .callout strong { color: #fff; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-body); font-weight: 700; font-size: 0.95rem; text-decoration: none;
+    padding: 13px 20px; border-radius: 10px; transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: linear-gradient(150deg, var(--red-2), var(--red)); color: #fff; box-shadow: 0 6px 20px rgba(167,25,48,.35); }
+  .btn-secondary { background: var(--panel2); border: 1.5px solid var(--border); color: var(--silver); }
+
+  .mark-done {
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hairline);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mark-done input { width: 22px; height: 22px; accent-color: var(--success); flex-shrink: 0; }
+  .mark-done label { font-family: var(--font-mono); font-size: 0.82rem; color: var(--sub); cursor: pointer; }
+  .step.done .mark-done label { color: var(--success); }
+
+  .glossary dt { font-family: var(--font-mono); font-weight: 700; color: #fff; margin-top: 10px; font-size: 0.9rem; }
+  .glossary dd { color: var(--sub); font-size: 0.92rem; margin-left: 0; margin-top: 2px; }
+
+  footer { text-align: center; padding: 32px 16px 40px; font-size: 0.78rem; color: var(--sub); font-family: var(--font-mono); border-top: 1px solid var(--hairline); margin-top: 24px; }
+  footer .mark { color: var(--red-2); }
+
+  @media (max-width: 480px) {
+    .step-title { font-size: 1.12rem; }
+    .step-num { width: 40px; height: 40px; font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-stripe"></div>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="logo">Big Blue Playbook</div>
+      <div class="tagline">How to sell your cards on eBay</div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">My Collection</a>
+      <a class="nav-link" href="scanner.html">Scan a Card</a>
+      <a class="nav-link current" href="guide.html">How to Sell</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Ready to Sell a Card?</h1>
+    <p>Here's the whole game plan, start to finish — no computer experience needed. Six steps. Take your time on each one.</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="progressText">0 of 6 steps done</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Before You Start</h2>
+    <div class="checklist-item"><input type="checkbox" id="pre1"><label for="pre1">A phone with a camera (for scanning cards and taking listing photos)</label></div>
+    <div class="checklist-item"><input type="checkbox" id="pre2"><label for="pre2">The card(s) you want to sell, in front of you</label></div>
+    <div class="checklist-item"><input type="checkbox" id="pre3"><label for="pre3">A bank account or debit card (this is how eBay pays you)</label></div>
+    <div class="checklist-item"><input type="checkbox" id="pre4"><label for="pre4">A little patience — the first listing is the slowest one, it gets much faster after that</label></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step" data-step="1">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Create Your eBay Account</div>
+        <div class="step-sub">5 minutes</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>If you already have an eBay account you use for buying, you can use that same one to sell — you don't need a separate account.</p>
+      <p>If you don't have one yet:</p>
+      <ol>
+        <li>Go to <strong>eBay.com</strong> (or open the eBay app).</li>
+        <li>Look for the button that says <strong>Register</strong> or <strong>Sign Up</strong>, usually top-right of the screen.</li>
+        <li>Enter your name, email, and a password. eBay will send a confirmation email — click the link inside it.</li>
+      </ol>
+      <div class="callout tip"><strong>Tip:</strong> Use an email address you check often — this is how eBay tells you when someone buys, messages, or pays.</div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://www.ebay.com" target="_blank" rel="noopener">Go to eBay.com &rarr;</a>
+      </div>
+    </div>
+    <div class="mark-done"><input type="checkbox" id="done1"><label for="done1">Mark Step 1 as done</label></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" data-step="2">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Set Up How You Get Paid</div>
+        <div class="step-sub">5 minutes</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>Before your first listing, eBay wants to know where to send your money. This is a one-time setup.</p>
+      <ol>
+        <li>On eBay.com, go to your <strong>Account</strong> or <strong>Seller Hub</strong> settings.</li>
+        <li>Look for a section about <strong>getting paid</strong> or <strong>payout options</strong>.</li>
+        <li>Add your bank account or debit card details. eBay may ask you to confirm your identity — this is normal and just protects you.</li>
+      </ol>
+      <div class="callout"><strong>Don't worry:</strong> eBay walks you through this with its own on-screen instructions. If a screen looks confusing, look for a "Learn more" or "?" link right on that page — eBay explains everything as you go.</div>
+    </div>
+    <div class="mark-done"><input type="checkbox" id="done2"><label for="done2">Mark Step 2 as done</label></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" data-step="3">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Scan the Card</div>
+        <div class="step-sub">1 minute per card</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>This is where the <strong>Big Blue Scanner</strong> does the hard part for you. It looks at your card and writes the listing title, the description, and even suggests a price — you don't have to write any of it yourself.</p>
+      <ol>
+        <li>Open the <strong>Scanner</strong> page (button below).</li>
+        <li>Tap the <strong>Front</strong> box and take a clear, well-lit photo of the front of the card.</li>
+        <li>Optional: tap the <strong>Back</strong> box too — it helps accuracy.</li>
+        <li>Tap <strong>Appraise Card</strong> and wait a few seconds.</li>
+      </ol>
+      <div class="callout tip"><strong>Tip:</strong> Lay the card flat on a plain surface (a table works fine) with good light. Avoid glare and shadows across the card.</div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="scanner.html">Open the Scanner &rarr;</a>
+      </div>
+    </div>
+    <div class="mark-done"><input type="checkbox" id="done3"><label for="done3">Mark Step 3 as done</label></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" data-step="4">
+    <div class="step-head">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Copy the Title &amp; Description</div>
+        <div class="step-sub">30 seconds</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>After the scanner finishes, it shows you an <strong>eBay title</strong> box and an <strong>eBay description</strong> box, each with a small <strong>Copy</strong> button next to it.</p>
+      <ol>
+        <li>Tap <strong>Copy</strong> next to the title. It's now saved on your phone, ready to paste.</li>
+        <li>Tap <strong>Copy</strong> next to the description too.</li>
+        <li>Also note the <strong>Estimated Value</strong> shown — you'll use that as a starting price in the next step.</li>
+      </ol>
+      <div class="callout">You'll paste these into eBay's listing form in the next step — no typing required.</div>
+    </div>
+    <div class="mark-done"><input type="checkbox" id="done4"><label for="done4">Mark Step 4 as done</label></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" data-step="5">
+    <div class="step-head">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Create the Listing on eBay</div>
+        <div class="step-sub">5 minutes</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>Now switch over to the eBay app or eBay.com to actually put the card up for sale.</p>
+      <ol>
+        <li>Tap the button that says <strong>Sell</strong> (usually a big button in the eBay app, or in the menu on eBay.com).</li>
+        <li>When it asks for a title, <strong>paste</strong> the title you copied in Step 4 (press and hold the text box, then tap <strong>Paste</strong>).</li>
+        <li>Do the same for the description.</li>
+        <li>Take 2&ndash;4 real photos of the card directly in the eBay listing form — front, back, and a close-up of any scratches or wear. Good photos matter more than anything else for selling fast.</li>
+        <li>Set your price. The scanner's <strong>Estimated Value</strong> is a solid starting point — you can price at that number or slightly below if you want it to sell quicker.</li>
+        <li>Choose a shipping option. A cheap, trackable option (eBay will suggest one) works well for single cards.</li>
+        <li>Review everything, then tap <strong>List Item</strong> (or <strong>Publish</strong>).</li>
+      </ol>
+      <div class="callout tip"><strong>Tip:</strong> Slide the card into a penny sleeve before photographing it — it looks more professional and protects it right away.</div>
+    </div>
+    <div class="mark-done"><input type="checkbox" id="done5"><label for="done5">Mark Step 5 as done</label></div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step" data-step="6">
+    <div class="step-head">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Ship It &amp; Get Paid</div>
+        <div class="step-sub">once it sells</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>eBay will send you an email or app notification the moment someone buys your card. Here's what happens next:</p>
+      <ol>
+        <li>eBay will let you <strong>print a shipping label</strong> right from the app or website — this is usually the easiest, cheapest way to ship.</li>
+        <li>Pack the card safely: a penny sleeve, then a rigid card holder or a few pieces of cardboard, in a small envelope or bubble mailer. Cards should never bend.</li>
+        <li>Drop the package off at the post office (or your carrier's drop box) and mark the order as <strong>shipped</strong> in the eBay app.</li>
+        <li>Once the buyer receives it with no issues, eBay deposits the money into the bank account you set up in Step 2 &mdash; usually within a couple of business days.</li>
+      </ol>
+      <div class="callout">That's it &mdash; you just made your first sale. Every card after this one gets faster and easier.</div>
+    </div>
+    <div class="mark-done"><input type="checkbox" id="done6"><label for="done6">Mark Step 6 as done</label></div>
+  </div>
+
+  <div class="panel">
+    <h2>Quick Words to Know</h2>
+    <dl class="glossary">
+      <dt>Listing</dt><dd>The page you create that shows your card for sale — title, photos, description, and price.</dd>
+      <dt>Buyer</dt><dd>The person who purchases your card.</dd>
+      <dt>Shipping Label</dt><dd>A sticker you print and put on the package — it tells the carrier where to send it.</dd>
+      <dt>Tracking Number</dt><dd>A code that lets you and the buyer see where the package is on its way.</dd>
+      <dt>Feedback</dt><dd>A short rating a buyer can leave after a purchase — good feedback helps future buyers trust you.</dd>
+    </dl>
+  </div>
+
+  <div class="panel">
+    <h2>A Few Tips for Faster Sales</h2>
+    <ul>
+      <li><strong>Good photos sell cards.</strong> Natural light near a window, plain background, no glare.</li>
+      <li><strong>Be honest about condition.</strong> If there's a bent corner or a scratch, say so and show it in a photo — buyers trust honest listings and it avoids returns.</li>
+      <li><strong>Price close to the scanner's estimate.</strong> Pricing far above it means it may sit unsold; pricing well below it means leaving money on the table.</li>
+      <li><strong>Answer buyer questions quickly.</strong> A fast reply often turns a question into a sale.</li>
+      <li><strong>Never share your eBay password with anyone</strong>, even someone claiming to be eBay support.</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>Made for Rick and Ryan — <span class="mark">every card's a first down.</span></footer>
+
+<script>
+const STEP_KEY = 'bigBlueGuideDone';
+function loadDone() {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveDone(done) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(done)); } catch(e) {}
+}
+function updateProgress() {
+  const done = loadDone();
+  const total = 6;
+  const count = Object.values(done).filter(Boolean).length;
+  document.getElementById('progressText').textContent = `${count} of ${total} steps done`;
+  document.getElementById('progressFill').style.width = (count / total * 100) + '%';
+}
+function wireSteps() {
+  const done = loadDone();
+  for (let i = 1; i <= 6; i++) {
+    const cb = document.getElementById('done' + i);
+    const stepEl = document.querySelector(`.step[data-step="${i}"]`);
+    if (!cb || !stepEl) continue;
+    cb.checked = !!done[i];
+    stepEl.classList.toggle('done', !!done[i]);
+    cb.addEventListener('change', () => {
+      const d = loadDone();
+      d[i] = cb.checked;
+      saveDone(d);
+      stepEl.classList.toggle('done', cb.checked);
+      updateProgress();
+    });
+  }
+}
+wireSteps();
+updateProgress();
+</script>
+</body>
+</html>
