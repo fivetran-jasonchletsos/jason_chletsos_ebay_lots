@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Revolution pull list</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+ h1{font-size:22px;margin:6px 0 2px}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #345;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:48px;height:64px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 48px}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#99a;font-size:11px}
+ .badge{display:inline-block;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 6px;margin-right:4px;vertical-align:1px}
+ .b-auto{background:#d4af37;color:#123}
+ .b-ser{background:#7a2e8f;color:#fff}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:14px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#d4af37;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+</style></head><body><div class="wrap">
+<h1>Revolution pull list</h1>
+<p class="sub">2025 Panini Revolution Football &mdash; the cards worth pulling and posting individually ($2+ or a real serial/auto). Everything else from this box goes to lot fodder, not here. Tap what you've pulled.</p>
+<div id="list"></div>
+</div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "731_06", "p": "Mykel Williams", "team": "San Francisco 49ers", "pr": 18.99, "rc": true, "auto": true, "serial": "55/99", "img": "revolution_imgs/731_06.jpg"}, {"k": "728_09", "p": "Jack Sawyer", "team": "Pittsburgh Steelers", "pr": 14.99, "rc": true, "auto": false, "serial": "18/75", "img": "revolution_imgs/728_09.jpg"}, {"k": "731_03", "p": "Barrett Carter", "team": "Cincinnati Bengals", "pr": 12.99, "rc": true, "auto": true, "serial": "114/125", "img": "revolution_imgs/731_03.jpg"}, {"k": "728_01", "p": "Tommy Mellott", "team": "Las Vegas Raiders", "pr": 5.99, "rc": true, "auto": false, "serial": "158/299", "img": "revolution_imgs/728_01.jpg"}, {"k": "732_08", "p": "Alfred Collins", "team": "San Francisco 49ers", "pr": 5.99, "rc": true, "auto": false, "serial": "045/299", "img": "revolution_imgs/732_08.jpg"}, {"k": "731_08", "p": "Jerry Jeudy", "team": "Cleveland Browns", "pr": 3.49, "rc": false, "auto": false, "serial": "139/425", "img": "revolution_imgs/731_08.jpg"}, {"k": "736_09", "p": "Tyler Shough", "team": "New Orleans Saints", "pr": 2.73, "rc": true, "auto": false, "serial": null, "img": "revolution_imgs/736_09.jpg"}, {"k": "737_08", "p": "Tetairoa McMillan", "team": "Carolina Panthers", "pr": 2.33, "rc": true, "auto": false, "serial": null, "img": "revolution_imgs/737_08.jpg"}, {"k": "733_09", "p": "Tony Pollard", "team": "Tennessee Titans", "pr": 2.24, "rc": false, "auto": false, "serial": null, "img": "revolution_imgs/733_09.jpg"}, {"k": "734_05", "p": "Will Howard", "team": "Pittsburgh Steelers", "pr": 2.1, "rc": true, "auto": false, "serial": null, "img": "revolution_imgs/734_05.jpg"}, {"k": "728_06", "p": "Benjamin Morrison", "team": "Tampa Bay Buccaneers", "pr": 2.05, "rc": true, "auto": false, "serial": null, "img": "revolution_imgs/728_06.jpg"}, {"k": "736_05", "p": "Bo Nix", "team": "Denver Broncos", "pr": 2.0, "rc": false, "auto": false, "serial": null, "img": "revolution_imgs/736_05.jpg"}];
+const KEY = "revolution_pull";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const list = document.getElementById("list");
+function render(){
+  list.innerHTML = "";
+  for (const r of DATA){
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    const badges = (r.auto?'<span class="badge b-auto">AUTO</span>':'') +
+                   (r.serial?`<span class="badge b-ser">${r.serial}</span>`:'');
+    el.innerHTML = `<div class="box"></div>` +
+      (r.img ? `<img class="th" loading="lazy" src="${r.img}">` : `<div class="th"></div>`) +
+      `<div class="info"><div class="nm">${badges}${r.p}</div><div class="tm">${r.team}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `REVOLUTION PULL: ${done.size}/${DATA.length} pulled. ` + DATA.map(r => `${r.p} $${r.pr.toFixed(2)}`).join(" | ");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
