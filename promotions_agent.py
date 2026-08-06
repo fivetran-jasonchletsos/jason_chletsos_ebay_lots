@@ -438,11 +438,16 @@ def plan_markdown(listing: dict, age_days: int, age_source: str,
     # the report/history match what the buyer sees (the prior code sent the raw
     # tier pct and logged target_price, so it silently sold below the floor).
     pct_off_int = int((current - target) / current * 100)  # truncate = floor for positive
-    if pct_off_int < 1:
+    # eBay's item_price_markdown (MARKDOWN_SALE) rejects percentageOffItem
+    # below 5 (errorId 38248, allowedValues 5-75) — a floor-protected discount
+    # that truncates to 1-4% isn't a "small markdown", it's an API call eBay
+    # will always reject, so skip it here instead of failing on every run.
+    if pct_off_int < 5:
         decision["decision"] = "skip"
         decision["reasons"].append(
-            f"discount {(current - target) / current * 100:.1f}% rounds below 1% — "
-            "not representable as an integer markdown without breaching the floor"
+            f"discount {(current - target) / current * 100:.1f}% rounds to {pct_off_int}%, "
+            "below eBay's 5% minimum for a markdown promotion — not representable "
+            "without breaching the floor"
         )
         return decision
     applied_price = round(current * (1 - pct_off_int / 100.0), 2)
