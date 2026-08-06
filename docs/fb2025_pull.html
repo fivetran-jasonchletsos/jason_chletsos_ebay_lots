@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>2025 Football pull list</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 80px}
+ h1{font-size:22px;margin:6px 0 2px}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #345;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:48px;height:64px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 48px}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#99a;font-size:11px}
+ .badge{display:inline-block;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 6px;margin-right:4px;vertical-align:1px}
+ .b-rc{background:#123;color:#fff}
+ .b-ser{background:#7a2e8f;color:#fff}
+ .b-est{background:#c96;color:#fff}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:14px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#d4af37;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+</style></head><body><div class="wrap">
+<h1>2025 Football pull list</h1>
+<p class="sub">2025 Panini Prizm / Select / Mosaic Football &mdash; the cards worth pulling and posting individually ($2+). Everything else from this batch goes to lot fodder, not here. Cards marked <span class="badge b-est">EST</span> use a documented conservative estimate since PriceCharting had no exact comp for that variant. Tap what you've pulled.</p>
+<div id="list"></div>
+</div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "789_02", "p": "Kaleb Johnson", "team": "Steelers", "pr": 39.02, "rc": true, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/789_02.jpg"}, {"k": "789_05", "p": "Michael Penix Jr.", "team": "Falcons", "pr": 15.76, "rc": false, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/789_05.jpg"}, {"k": "789_08", "p": "Jihaad Campbell", "team": "Eagles", "pr": 7.47, "rc": true, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/789_08.jpg"}, {"k": "791_07", "p": "T.J. Sanders", "team": "Bills", "pr": 7.0, "rc": true, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/791_07.jpg"}, {"k": "788_06", "p": "Jack Bech", "team": "Raiders", "pr": 2.35, "rc": true, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/788_06.jpg"}, {"k": "787_07", "p": "Brad Johnson", "team": "Buccaneers", "pr": 2.29, "rc": false, "serial": null, "par": "Base (Legends)", "est": false, "img": "fb2025_imgs/787_07.jpg"}, {"k": "791_05", "p": "Bhayshul Tuten", "team": "Jaguars", "pr": 2.25, "rc": true, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/791_05.jpg"}, {"k": "791_09", "p": "Kendre Miller", "team": "Saints", "pr": 2.06, "rc": false, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/791_09.jpg"}, {"k": "788_09", "p": "Mason Taylor", "team": "Jets", "pr": 2.0, "rc": true, "serial": null, "par": "Base", "est": false, "img": "fb2025_imgs/788_09.jpg"}];
+const KEY = "fb2025_pull";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const list = document.getElementById("list");
+function render(){
+  list.innerHTML = "";
+  for (const r of DATA){
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    const badges = (r.rc?'<span class="badge b-rc">RC</span>':'') +
+                   (r.serial?`<span class="badge b-ser">${r.serial}</span>`:'') +
+                   (r.est?'<span class="badge b-est">EST</span>':'');
+    el.innerHTML = `<div class="box"></div>` +
+      (r.img ? `<img class="th" loading="lazy" src="${r.img}">` : `<div class="th"></div>`) +
+      `<div class="info"><div class="nm">${badges}${r.p}</div><div class="tm">${r.team} &middot; ${r.par}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `2025 FOOTBALL PULL: ${done.size}/${DATA.length} pulled. ` + DATA.map(r => `${r.p} $${r.pr.toFixed(2)}`).join(" | ");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
