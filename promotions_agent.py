@@ -866,15 +866,16 @@ def build_report(plan: dict, history: list[dict], cfg: dict) -> Path:
         ) + "</ul>"
     ) if flagged else "<p class='empty'>Nothing flagged.</p>"
 
+    tier_pcts = {f"{t['min_age_days']}-{t['max_age_days']}d": t["pct"] for t in cfg["markdown_tiers"]}
     body = f"""
 <section class='hero'>
   <h1>Promotions Agent</h1>
   <p class='sub'>Last run: <code>{run_ts}</code> · Mode: <code>{plan.get('mode','dry-run')}</code></p>
   <div class='stat-grid'>
     <div class='stat'><div class='stat-n'>{len(by_decision['apply'])}</div><div class='stat-l'>markdowns to apply</div></div>
-    <div class='stat'><div class='stat-n'>{tier_counts['61-120d']}</div><div class='stat-l'>tier 5%</div></div>
-    <div class='stat'><div class='stat-n'>{tier_counts['121-180d']}</div><div class='stat-l'>tier 12%</div></div>
-    <div class='stat'><div class='stat-n'>{tier_counts['181-9999d']}</div><div class='stat-l'>tier 22%</div></div>
+    <div class='stat'><div class='stat-n'>{tier_counts['61-120d']}</div><div class='stat-l'>tier {tier_pcts.get('61-120d', 0)*100:.0f}%</div></div>
+    <div class='stat'><div class='stat-n'>{tier_counts['121-180d']}</div><div class='stat-l'>tier {tier_pcts.get('121-180d', 0)*100:.0f}%</div></div>
+    <div class='stat'><div class='stat-n'>{tier_counts['181-9999d']}</div><div class='stat-l'>tier {tier_pcts.get('181-9999d', 0)*100:.0f}%</div></div>
     <div class='stat'><div class='stat-n'>{_fmt_money(total_discount)}</div><div class='stat-l'>total discount</div></div>
     <div class='stat'><div class='stat-n'>{len(flagged)}</div><div class='stat-l'>flagged for review</div></div>
   </div>
@@ -1127,8 +1128,11 @@ def run(args: argparse.Namespace) -> int:
         by[d["decision"]] = by.get(d["decision"], 0) + 1
         if d["decision"] == "apply" and d.get("tier") in tier_counts:
             tier_counts[d["tier"]] += 1
+    tier_pcts = {f"{t['min_age_days']}-{t['max_age_days']}d": t["pct"] for t in cfg["markdown_tiers"]}
     print(f"\n  Markdown plan: {by['apply']} to apply · {by['skip']} skip · {by['blocked']} blocked")
-    print(f"    tiers: 5%→{tier_counts['61-120d']} · 12%→{tier_counts['121-180d']} · 22%→{tier_counts['181-9999d']}")
+    print("    tiers: " + " · ".join(
+        f"{tier_pcts.get(k, 0) * 100:.0f}%→{v}" for k, v in tier_counts.items()
+    ))
     print(f"  Volume discount: {vd_result.get('action')}")
     if vd_result.get("drift"):
         for d in vd_result["drift"]:

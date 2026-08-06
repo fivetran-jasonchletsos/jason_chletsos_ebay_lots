@@ -632,17 +632,117 @@ def create_campaign(token: str, cfg_default: dict) -> dict:
     return {"campaignId": campaign_id, "raw": r.text}
 
 
-def bulk_set_bids(token: str, campaign_id: str,
-                  decisions: list[dict]) -> list[dict]:
-    """
-    POST /sell/marketing/v1/ad_campaign/{campaignId}/bulk_create_listings_by_inventory_reference
-    to set per-listing bid percentages.
+def list_ads(token: str, campaign_id: str) -> list[dict]:
+    """GET /sell/marketing/v1/ad_campaign/{campaignId}/ad — every ad currently
+    live in the campaign. Needed because eBay has no bid-UPDATE endpoint; the
+    only way to know whether a listing's bid already matches the plan (and
+    thus needs no API call) or is stuck at an old rate (and needs delete +
+    recreate) is to diff against what's actually enrolled."""
+    url = f"{EBAY_MARKETING_BASE}/ad_campaign/{campaign_id}/ad"
+    out: list[dict] = []
+    params = {"limit": 200}
+    while True:
+        r = requests.get(url, headers=_marketing_headers(token), params=params, timeout=30)
+        if r.status_code >= 400:
+            raise RuntimeError(f"list_ads failed: {r.status_code} {r.text[:300]}")
+        body = r.json()
+        out.extend(body.get("ads", []) or [])
+        nxt = body.get("next")
+        if not nxt:
+            break
+        url, params = nxt, None
+    return out
 
-    eBay expects bid percentages as strings like "3.0" not floats.
-    Returns the API responses (one per chunked call), plus per-listing results.
+
+def delete_ad(token: str, campaign_id: str, ad_id: str) -> bool:
+    """DELETE /sell/marketing/v1/ad_campaign/{campaignId}/ad/{adId}."""
+    url = f"{EBAY_MARKETING_BASE}/ad_campaign/{campaign_id}/ad/{ad_id}"
+    r = requests.delete(url, headers=_marketing_headers(token), timeout=30)
+    return r.status_code in (200, 204)
+
+
+def bulk_set_bids(token: str, campaign_id: str,
+                  decisions: list[dict]) -> tuple[list[dict], list[str], list[str]]:
+    """
+    Push per-listing bid percentages via the eBay Marketing API.
+
+    eBay's "Promoted Listings General" campaign type has no bid-UPDATE
+    endpoint — only bulk_create_ads_by_listing_id, which 35036s ("ad already
+    exists") for a listing that's already enrolled. Changing a bid therefore
+    means DELETE the existing ad, then re-CREATE it at the new rate. We diff
+    against the live campaign here so a config rate change actually lands on
+    eBay instead of silently no-op'ing: the 2026-07-07 promo-burst revert only
+    ever touched the local config for exactly this reason, leaving ~222
+    listings enrolled at the old 7-15% burst bids for weeks.
+
+    eBay expects bid percentages as strings like "3.0" not floats. A decision
+    with rate 0 (NO_AD) whose listing still has a live ad gets that ad deleted
+    outright rather than recreated at 0% — that's the actual "turn ads off"
+    case, e.g. a listing that starts selling on its own after being enrolled.
+
+    Returns (api_call_results, skipped_item_ids, removed_item_ids). Skipped
+    items were already at the desired bid (including "no ad, and none
+    exists"), so no API call was made for them. Removed items had their ad
+    deleted outright because the plan now calls for NO_AD.
     """
     if not decisions:
-        return []
+        return [], [], []
+
+    existing_by_listing = {}
+    for ad in list_ads(token, campaign_id):
+        lid = ad.get("listingId")
+        if lid:
+            existing_by_listing[str(lid)] = ad
+
+    def _norm(bid) -> str:
+        return f"{float(bid):.1f}"
+
+    to_create: list[dict] = []
+    removed: list[str] = []
+    skipped: list[str] = []
+    for d in decisions:
+        lid = d["item_id"]
+        current_ad = existing_by_listing.get(lid)
+
+        if d["rate"] <= 0:
+            if current_ad is None:
+                skipped.append(lid)
+                continue
+            ad_id = current_ad.get("adId")
+            if ad_id and delete_ad(token, campaign_id, ad_id):
+                removed.append(lid)
+            else:
+                print(f"    [bulk_set_bids] couldn't delete ad for now-NO_AD listing {lid}")
+                skipped.append(lid)
+            continue
+
+        desired = _norm(d["rate"] * 100)
+        if current_ad is None:
+            to_create.append(d)
+            continue
+        try:
+            current = _norm(current_ad.get("bidPercentage", 0))
+        except (TypeError, ValueError):
+            current = None
+        if current == desired:
+            skipped.append(lid)
+            continue
+        ad_id = current_ad.get("adId")
+        if ad_id and delete_ad(token, campaign_id, ad_id):
+            to_create.append(d)
+        else:
+            print(f"    [bulk_set_bids] couldn't delete existing ad for listing {lid} "
+                  f"({current}% -> {desired}%) — bid change skipped")
+            skipped.append(lid)
+
+    if removed:
+        print(f"    [bulk_set_bids] removed ads for {len(removed)} listings now classified NO_AD")
+    if skipped:
+        print(f"    [bulk_set_bids] {len(skipped)} listings already at the target bid — skipped")
+    if not to_create:
+        return [], skipped, removed
+
+    decisions = to_create
     results: list[dict] = []
     # eBay caps bulk operations at 500 per call; we chunk conservatively.
     CHUNK = 200
@@ -667,12 +767,11 @@ def bulk_set_bids(token: str, campaign_id: str,
         except Exception:
             payload = {"raw": r.text[:1000]}
 
-        # eBay's "Promoted Listings General" campaigns have no bulk-update bid
-        # endpoint — only bulk_create_ads_by_listing_id. After the first run,
-        # all subsequent calls return errorId 35036 ("an ad already exists").
-        # That's not a real failure: the listing IS promoted, just at the
-        # existing bid. Rewrite those responses to a synthetic 200 so the
-        # 0/N summary stops looking like a disaster.
+        # We already diffed against list_ads() above and only send listings
+        # that are new or had their old ad deleted, so 35036 ("ad already
+        # exists") here means a race (something else enrolled the listing
+        # between our list_ads() call and this one) rather than the routine
+        # no-op it used to mask. Still not worth failing the whole chunk over.
         if isinstance(payload, dict):
             for resp in (payload.get("responses") or []):
                 errs = resp.get("errors") or []
@@ -704,7 +803,7 @@ def bulk_set_bids(token: str, campaign_id: str,
             "chunk_size": len(chunk),
         })
         time.sleep(0.5)
-    return results
+    return results, skipped, removed
 
 
 # --------------------------------------------------------------------------- #
@@ -982,10 +1081,15 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
         print("  No campaigns exist. Re-run with --create-campaign to bootstrap one.")
         return []
 
-    # Only push items that should actually run an ad.
-    to_push = [d for d in plan if d["rate"] > 0 and not d["blocked"]]
-    print(f"  Pushing {len(to_push)} per-listing bid percentages...")
-    api_results = bulk_set_bids(token, campaign_id, to_push)
+    # Every non-blocked decision, including NO_AD — a listing can carry a
+    # stuck ad from an old rate even after it graduates to NO_AD (e.g. it
+    # starts selling on its own), and only bulk_set_bids's diff against the
+    # live campaign can catch that.
+    to_push = [d for d in plan if not d["blocked"]]
+    print(f"  Checking {len(to_push)} listings against the live campaign...")
+    api_results, skipped_ids, removed_ids = bulk_set_bids(token, campaign_id, to_push)
+    skipped_ids = set(skipped_ids)
+    removed_ids = set(removed_ids)
 
     # Flatten per-listing results into history records.
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -1003,11 +1107,29 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
 
     history: list[dict] = []
     for d in to_push:
-        st = by_listing_status.get(d["item_id"])
+        item_id = d["item_id"]
+        if item_id in skipped_ids:
+            continue  # already at the desired bid — nothing changed on eBay
+        if item_id in removed_ids:
+            history.append({
+                "applied_at": now_iso,
+                "item_id":    item_id,
+                "title":      d["title"],
+                "tier":       d["tier"],
+                "rate":       0.0,
+                "campaign_id": campaign_id,
+                "ok":          True,
+                "status":      204,
+                "errors":      None,
+                "url":         d.get("url"),
+                "_note":       "ad removed — listing now classified NO_AD",
+            })
+            continue
+        st = by_listing_status.get(item_id)
         ok = bool(st["ok"]) if st else any(r["ok"] for r in api_results)
         history.append({
             "applied_at": now_iso,
-            "item_id":    d["item_id"],
+            "item_id":    item_id,
             "title":      d["title"],
             "tier":       d["tier"],
             "rate":       d["rate"],
@@ -1018,7 +1140,8 @@ def apply_plan(plan: list[dict], ebay_cfg: dict, cfg: dict,
             "url":         d.get("url"),
         })
     ok_count = sum(1 for h in history if h["ok"])
-    print(f"  Result: {ok_count}/{len(history)} bids accepted.")
+    print(f"  Result: {ok_count}/{len(history)} bid changes applied "
+          f"({len(skipped_ids)} already correct, {len(removed_ids)} ads removed).")
     return history
 
 
