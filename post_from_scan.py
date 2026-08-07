@@ -225,7 +225,8 @@ def infer_specifics(title: str) -> dict[str, str] | None:
 
 
 def build_xml(title: str, price: float, picture_url: str, token: str,
-              category: str = CATEGORY_ID, condition: str = CONDITION_ID) -> str:
+              category: str = CATEGORY_ID, condition: str = CONDITION_ID,
+              listing_type: str = "FixedPriceItem", duration: str = "GTC") -> str:
     description = build_description(title)
     # The "Ungraded" ConditionDescriptor sub-value only applies to the
     # Trading Card Singles schema -- other categories (e.g. Trading Card
@@ -260,8 +261,8 @@ def build_xml(title: str, price: float, picture_url: str, token: str,
     <Country>US</Country>
     <Currency>USD</Currency>
     <DispatchTimeMax>3</DispatchTimeMax>
-    <ListingDuration>GTC</ListingDuration>
-    <ListingType>FixedPriceItem</ListingType>
+    <ListingDuration>{duration}</ListingDuration>
+    <ListingType>{listing_type}</ListingType>
     <Quantity>1</Quantity>
     <Location>United States</Location>
     <PostalCode>19096</PostalCode>
@@ -307,9 +308,12 @@ def _find_live_duplicate(title: str) -> dict | None:
 
 def post_card(image_path: Path, title: str, price: float,
               cfg: dict, token: str, apply: bool, category: str = CATEGORY_ID,
-              condition: str = CONDITION_ID) -> dict:
+              condition: str = CONDITION_ID, listing_type: str = "FixedPriceItem",
+              duration: str = "GTC") -> dict:
     print(f"\n  Card: {title[:60]}")
-    print(f"  Image: {image_path.name}  Price: ${price:.2f}")
+    label = "starting bid" if listing_type == "Chinese" else "Price"
+    print(f"  Image: {image_path.name}  {label}: ${price:.2f}"
+          + (f"  ({duration}, auction)" if listing_type == "Chinese" else ""))
 
     serial = SERIAL_RE.search(title)
     if serial and price < 10:
@@ -326,7 +330,8 @@ def post_card(image_path: Path, title: str, price: float,
     picture_url = upload_image(image_path, token, cfg)
     print(f"  Picture URL: {picture_url}")
 
-    xml = build_xml(title, price, picture_url, token, category, condition)
+    xml = build_xml(title, price, picture_url, token, category, condition,
+                     listing_type, duration)
 
     if not apply:
         print("  [dry-run] would post listing")
@@ -389,7 +394,8 @@ def main():
             results.append({"error": "image not found", "title": c["title"]})
             continue
         r = post_card(img, c["title"], float(c["price"]), cfg, token, args.apply,
-                      c.get("category", CATEGORY_ID), c.get("condition", CONDITION_ID))
+                      c.get("category", CATEGORY_ID), c.get("condition", CONDITION_ID),
+                      c.get("listing_type", "FixedPriceItem"), c.get("duration", "GTC"))
         results.append(r)
         time.sleep(0.5)
 
