@@ -155,6 +155,7 @@ BRAND_TOKENS: list[tuple[str, str]] = [
     ("rookies and stars", "Panini"),
     ("rookies",           "Panini"),
     ("revolution",        "Panini"),
+    ("resurgence",        "Topps"),
     ("prestige",          "Panini"),
     ("illusions",         "Panini"),
     ("certified",         "Panini"),
