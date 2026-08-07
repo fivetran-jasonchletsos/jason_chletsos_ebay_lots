@@ -885,18 +885,11 @@ def main() -> int:
     ap.add_argument("--apply", action="store_true", help="Actually push price changes to eBay (default: dry run)")
     ap.add_argument("--no-fetch", action="store_true", help="Reuse cached listings snapshot instead of refetching")
     ap.add_argument("--item", help="Limit apply to a single item_id (plan is still computed for all)")
-    ap.add_argument("--report-only", action="store_true", help="Rebuild docs/repricing.html from last plan + history")
     args = ap.parse_args()
 
     cfg = load_config()
     if not cfg.get("enabled", True):
         print("Repricing agent is disabled in repricing_config.json (set 'enabled': true).")
-        return 0
-
-    if args.report_only:
-        plan = json.loads(PLAN_PATH.read_text()) if PLAN_PATH.exists() else []
-        path = build_report(plan, load_history(), cfg)
-        print(f"  Wrote {path}")
         return 0
 
     ebay_cfg, listings, market, pricing_by_id, _sold = gather_inputs(use_cache=args.no_fetch)
@@ -921,8 +914,6 @@ def main() -> int:
     else:
         print("\n  Dry run only. Re-run with --apply to push changes.")
 
-    report = build_report(plan, load_history(), cfg)
-    print(f"  Report: {report}")
     return 0
 
 

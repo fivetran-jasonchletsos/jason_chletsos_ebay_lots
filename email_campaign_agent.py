@@ -431,123 +431,6 @@ def send_campaign(token: str, campaign: dict, dry_run: bool = True) -> dict:
 
 
 # --------------------------------------------------------------------------- #
-# HTML admin report                                                            #
-# --------------------------------------------------------------------------- #
-
-def build_report(plan: dict, history: list[dict]) -> Path:
-    run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    steals = plan.get("steals", [])
-    seller_name = plan.get("seller_name", promote.SELLER_NAME)
-
-    # Past sends table
-    recent = list(reversed(history))[:25]
-    hist_rows = "\n".join(
-        f"<tr><td>{h.get('sent_at','')}</td>"
-        f"<td>{h.get('subject','')[:80]}</td>"
-        f"<td class='num'>{h.get('sent_to', '—')}</td>"
-        f"<td>{h.get('campaign_id') or '—'}</td>"
-        f"<td>{'OK' if h.get('ok') else 'FAIL: ' + str(h.get('errors',''))[:120]}</td></tr>"
-        for h in recent
-    )
-    history_block = (
-        f"<div class='tbl-wrap'><table class='reprice-tbl'><thead><tr>"
-        f"<th>Sent</th><th>Subject</th><th>Reach</th><th>Campaign ID</th><th>Result</th>"
-        f"</tr></thead><tbody>{hist_rows}</tbody></table></div>"
-        if recent else "<p class='empty'>No campaigns sent yet.</p>"
-    )
-
-    steal_chips = "".join(
-        f"<li><a href='{s['url']}' target='_blank' rel='noopener'>"
-        f"<code>{s['item_id']}</code> · {s['title'][:80]}</a> "
-        f"<span class='pill'>${s['price']:.2f} <s>${s['was_price']:.2f}</s> −{s['save_pct']}%</span></li>"
-        for s in steals
-    )
-
-    body = f"""
-<section class='hero'>
-  <h1>Email Campaign Agent</h1>
-  <p class='sub'>Last run: <code>{run_ts}</code> · Mode: <code>{plan.get('mode','dry-run')}</code></p>
-  <div class='stat-grid'>
-    <div class='stat'><div class='stat-n'>{len(steals)}</div><div class='stat-l'>steals in next email</div></div>
-    <div class='stat'><div class='stat-n'>{plan.get('projected_reach', ASSUMED_FOLLOWERS)}</div><div class='stat-l'>projected reach (assumed)</div></div>
-    <div class='stat'><div class='stat-n'>{len(history)}</div><div class='stat-l'>total campaigns sent</div></div>
-    <div class='stat'><div class='stat-n'>1×/wk</div><div class='stat-l'>cadence</div></div>
-  </div>
-  <p class='hint'>{plan.get('projected_reach_note','')}</p>
-</section>
-
-<section class='cfg'>
-  <h3>Next email — subject</h3>
-  <p style='font-size:18px;color:var(--gold);font-weight:600;margin:6px 0 14px;'>{plan.get('subject','—')}</p>
-  <h3>Featured steals</h3>
-  <ul class='cfg-list steals-list'>{steal_chips or "<li class='empty'>No steals selected.</li>"}</ul>
-</section>
-
-<section class='cfg'>
-  <h3>Send now</h3>
-  <p>
-    <button class='send-btn' disabled title='Lambda route /ebay/send-email-campaign not yet deployed'>
-      Send this campaign
-    </button>
-    <span class='hint' style='margin-left:12px;'>
-      Disabled — the <code>/ebay/send-email-campaign</code> Lambda route hasn't been deployed yet.
-      Until then, run <code>python email_campaign_agent.py --apply</code> from the dev box.
-    </span>
-  </p>
-</section>
-
-<section>
-  <h3>Email preview</h3>
-  <div class='preview-frame'>
-    <iframe srcdoc="{(plan.get('html_preview') or '').replace('"','&quot;')}"
-            style='width:100%;height:1100px;border:0;background:#f4f4f4;border-radius:8px;'></iframe>
-  </div>
-</section>
-
-<section>
-  <h3>Past campaigns</h3>
-  {history_block}
-</section>
-"""
-
-    extra_css = (
-        "<style>"
-        ".hero{padding:24px 0 12px}"
-        ".hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}"
-        ".hero .sub{color:var(--text-muted)}.hero .hint{color:var(--text-dim);font-size:12px;margin-top:10px}"
-        ".stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}"
-        ".stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}"
-        ".stat-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:36px;color:var(--gold);line-height:1}"
-        ".stat-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}"
-        ".cfg{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:18px 0}"
-        ".cfg h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}"
-        ".cfg-list{list-style:none;padding:0;margin:0}.cfg-list li{padding:6px 0;border-bottom:1px solid var(--border)}"
-        ".cfg-list li:last-child{border-bottom:0}.cfg-list a{color:var(--text);text-decoration:none}"
-        ".cfg-list a:hover{color:var(--gold)}"
-        ".cfg-list .pill{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:11px;margin-left:10px}"
-        ".cfg-list .pill s{opacity:.55}"
-        ".send-btn{background:var(--gold);color:#0a0a0a;border:0;padding:10px 22px;border-radius:6px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:not-allowed;opacity:.6}"
-        ".hint{color:var(--text-muted);font-size:13px}"
-        ".preview-frame{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#f4f4f4}"
-        ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}"
-        "table.reprice-tbl{width:100%;border-collapse:collapse;font-size:13px}"
-        ".reprice-tbl th,.reprice-tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}"
-        ".reprice-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}"
-        ".reprice-tbl .num{text-align:right;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace}"
-        ".empty{color:var(--text-muted);padding:14px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md)}"
-        "</style>"
-    )
-    html = promote.html_shell(
-        f"Email Campaign · {promote.SELLER_NAME}",
-        body,
-        extra_head=extra_css,
-        active_page="email_campaign.html",
-    )
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
-
-
-# --------------------------------------------------------------------------- #
 # Nav registration                                                            #
 # --------------------------------------------------------------------------- #
 
@@ -621,9 +504,6 @@ def run(args: argparse.Namespace) -> int:
     else:
         print("  Dry run only. Preview written. Re-run with --apply to send.")
 
-    history = load_history()
-    report = build_report(campaign, history)
-    print(f"  Report: {report}")
     return 0
 
 

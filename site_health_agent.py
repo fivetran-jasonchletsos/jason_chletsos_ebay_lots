@@ -2,19 +2,17 @@
 site_health_agent.py — Site health monitor for Harpua2001 / jason_chletsos_ebay_lots.
 
 Checks:
-  1. GitHub Pages index.html responds 200
-  2. Key pages (daily.html, browse.html, deals.html) load without error
-  3. listings_snapshot.json freshness — warn if older than 24 h
-  4. docs/daily.html freshness — warn if not regenerated today
-  5. Lambda /health endpoint responds 200
-  6. eBay OAuth token validity — lightweight sell/account call, check for 401
-  7. output/ plan files freshness — warn if any core plan older than 48 h
-  8. Active listing count — warn if dropped >10% from previous run
-  9. sold_history.json — warn if last entry older than 3 days
+  1. GitHub Pages dashboard.html responds 200
+  2. listings_snapshot.json freshness — warn if older than 24 h
+  3. docs/dashboard.html freshness — warn if not regenerated today
+  4. Lambda /health endpoint responds 200
+  5. eBay OAuth token validity — lightweight sell/account call, check for 401
+  6. output/ plan files freshness — warn if any core plan older than 48 h
+  7. Active listing count — warn if dropped >10% from previous run
+  8. sold_history.json — warn if last entry older than 3 days
 
 Outputs:
   output/site_health_report.json
-  docs/health.html
 
 Exit code 0 if all green, 1 if any red.
 
@@ -35,7 +33,6 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta, timezone
-from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -52,9 +49,8 @@ DOCS_DIR     = REPO_ROOT / "docs"
 CFG_PATH     = REPO_ROOT / "configuration.json"
 SNAP_PATH    = OUTPUT_DIR / "listings_snapshot.json"
 SOLD_PATH    = REPO_ROOT / "sold_history.json"
-DAILY_PATH   = DOCS_DIR  / "daily.html"
+DASHBOARD_PATH = DOCS_DIR / "dashboard.html"
 REPORT_JSON  = OUTPUT_DIR / "site_health_report.json"
-REPORT_HTML  = DOCS_DIR   / "health.html"
 PREV_SNAP    = OUTPUT_DIR / "site_health_listing_count.json"
 
 SITE_BASE    = promote.SITE_URL   # "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots"
@@ -69,7 +65,6 @@ CORE_PLANS = [
     "cassini_score_plan.json",
     "price_drops_plan.json",
     "price_consistency_report.json",
-    "browse_index_plan.json",
 ]
 
 TIMEOUT = 12  # seconds per HTTP request
@@ -102,30 +97,14 @@ def _load_json(path: Path, default: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 def check_site_index() -> dict:
-    url = f"{SITE_BASE}/index.html"
+    url = f"{SITE_BASE}/dashboard.html"
     try:
         r = requests.get(url, timeout=TIMEOUT)
         if r.status_code == 200:
-            return _ok("GitHub Pages index", f"HTTP {r.status_code} — {url}")
-        return _fail("GitHub Pages index", f"HTTP {r.status_code} — {url}")
+            return _ok("GitHub Pages dashboard", f"HTTP {r.status_code} — {url}")
+        return _fail("GitHub Pages dashboard", f"HTTP {r.status_code} — {url}")
     except requests.RequestException as e:
-        return _fail("GitHub Pages index", str(e)[:120])
-
-
-def check_key_pages() -> dict:
-    pages = ["daily.html", "browse.html", "deals.html"]
-    bad = []
-    for page in pages:
-        url = f"{SITE_BASE}/{page}"
-        try:
-            r = requests.get(url, timeout=TIMEOUT)
-            if r.status_code != 200:
-                bad.append(f"{page} HTTP {r.status_code}")
-        except requests.RequestException as e:
-            bad.append(f"{page} error: {str(e)[:60]}")
-    if not bad:
-        return _ok("Key pages", f"daily, browse, deals — all 200")
-    return _fail("Key pages", "; ".join(bad))
+        return _fail("GitHub Pages dashboard", str(e)[:120])
 
 
 def check_snapshot_freshness() -> dict:
@@ -143,14 +122,14 @@ def check_snapshot_freshness() -> dict:
 
 
 def check_daily_freshness() -> dict:
-    if not DAILY_PATH.exists():
-        return _warn("Daily digest freshness", "docs/daily.html not found")
-    mtime   = datetime.fromtimestamp(DAILY_PATH.stat().st_mtime, tz=timezone.utc)
+    if not DASHBOARD_PATH.exists():
+        return _warn("Dashboard freshness", "docs/dashboard.html not found")
+    mtime   = datetime.fromtimestamp(DASHBOARD_PATH.stat().st_mtime, tz=timezone.utc)
     today   = datetime.now(timezone.utc).date()
     if mtime.date() >= today:
-        return _ok("Daily digest freshness", f"regenerated today at {mtime.strftime('%H:%M UTC')}")
+        return _ok("Dashboard freshness", f"regenerated today at {mtime.strftime('%H:%M UTC')}")
     age_h = (datetime.now(timezone.utc) - mtime).total_seconds() / 3600
-    return _warn("Daily digest freshness", f"{age_h:.1f}h old — run daily_digest_agent.py")
+    return _warn("Dashboard freshness", f"{age_h:.1f}h old — run dashboard_agent.py")
 
 
 def check_lambda_health() -> dict:
@@ -311,7 +290,6 @@ def check_sold_history() -> dict:
 def run_checks() -> list[dict]:
     checks = [
         check_site_index,
-        check_key_pages,
         check_snapshot_freshness,
         check_daily_freshness,
         check_lambda_health,
@@ -352,82 +330,6 @@ def print_table(results: list[dict]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# HTML dashboard
-# ---------------------------------------------------------------------------
-
-_CSS = """<style>
-.sh-hero{padding:28px 0 12px;border-bottom:1px solid var(--border);margin-bottom:24px}
-.sh-hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:52px;letter-spacing:.02em;color:var(--text)}
-.sh-hero .sub{color:var(--text-muted);font-size:14px;margin:6px 0 0}
-.sh-summary{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0 28px}
-.sh-pill{padding:8px 18px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;border:1px solid transparent}
-.sh-pill-green{background:rgba(60,180,90,.15);color:var(--success);border-color:rgba(60,180,90,.3)}
-.sh-pill-yellow{background:rgba(220,170,60,.12);color:var(--warning);border-color:rgba(220,170,60,.3)}
-.sh-pill-red{background:rgba(220,60,60,.12);color:var(--danger);border-color:rgba(220,60,60,.3)}
-.sh-tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:32px}
-.sh-tbl{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface)}
-.sh-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:10px 16px;text-align:left;border-bottom:1px solid var(--border)}
-.sh-tbl td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
-.sh-tbl tr:last-child td{border-bottom:none}
-.sh-tbl tr:hover td{background:var(--surface-2)}
-.sh-badge{display:inline-block;padding:3px 10px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;min-width:48px;text-align:center}
-.sh-badge-green{background:var(--success);color:#fff}
-.sh-badge-yellow{background:var(--warning);color:#1a1a1a}
-.sh-badge-red{background:var(--danger);color:#fff}
-.sh-detail{color:var(--text-muted);font-size:12px;font-family:'JetBrains Mono',monospace}
-.sh-foot{margin:24px 0 8px;padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-align:center;letter-spacing:.06em}
-.sh-foot code{color:var(--gold);background:var(--surface);padding:2px 6px;border-radius:3px}
-</style>"""
-
-
-def build_html(results: list[dict], ts: str) -> str:
-    counts = {"green": 0, "yellow": 0, "red": 0}
-    for r in results:
-        counts[r["status"]] = counts.get(r["status"], 0) + 1
-
-    overall = "All systems nominal" if counts["red"] == 0 and counts["yellow"] == 0 \
-        else ("Issues detected" if counts["red"] > 0 else "Warnings")
-
-    pills = (
-        f"<span class='sh-pill sh-pill-green'>{counts['green']} green</span>"
-        f"<span class='sh-pill sh-pill-yellow'>{counts['yellow']} warning{'s' if counts['yellow'] != 1 else ''}</span>"
-        f"<span class='sh-pill sh-pill-red'>{counts['red']} red</span>"
-    )
-
-    def _row(r: dict) -> str:
-        st = r["status"]
-        return (
-            f"<tr>"
-            f"<td>{escape(r['check'])}</td>"
-            f"<td><span class='sh-badge sh-badge-{st}'>{st.upper()}</span></td>"
-            f"<td class='sh-detail'>{escape(r['detail'])}</td>"
-            f"</tr>"
-        )
-    rows_html = "".join(_row(r) for r in results)
-
-    body = (
-        f"<section class='sh-hero'>"
-        f"<h1>Site Health</h1>"
-        f"<p class='sub'>{escape(overall)} &middot; last checked {escape(ts)}</p>"
-        f"</section>"
-        f"<div class='sh-summary'>{pills}</div>"
-        f"<div class='sh-tbl-wrap'><table class='sh-tbl'>"
-        f"<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead>"
-        f"<tbody>{rows_html}</tbody></table></div>"
-        f"<div class='sh-foot'>Filed by <strong>{escape(AGENT_NAME)}</strong> "
-        f"({escape(AGENT_ROLE)}) &middot; {escape(ts)} &middot; "
-        f"run <code>python3 site_health_agent.py</code> to refresh.</div>"
-    )
-
-    return promote.html_shell(
-        f"Site Health · {promote.SELLER_NAME}",
-        body,
-        extra_head=_CSS,
-        active_page="health.html",
-    )
-
-
-# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -453,11 +355,6 @@ def main() -> int:
     }
     REPORT_JSON.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"  Report JSON: {REPORT_JSON}")
-
-    # Write HTML dashboard.
-    DOCS_DIR.mkdir(exist_ok=True)
-    REPORT_HTML.write_text(build_html(results, ts), encoding="utf-8")
-    print(f"  Report HTML: {REPORT_HTML}")
 
     any_red = any(r["status"] == "red" for r in results)
     exit_code = 1 if any_red else 0

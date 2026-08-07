@@ -46,7 +46,6 @@ HISTORY_PATH       = REPO_ROOT / "promoted_listings_history.json"
 LISTINGS_SNAPSHOT  = REPO_ROOT / "output" / "listings_snapshot.json"
 MARKET_HISTORY     = REPO_ROOT / "market_history.json"
 PLAN_PATH          = REPO_ROOT / "output" / "promoted_listings_plan.json"
-REPORT_PATH        = promote.OUTPUT_DIR / "promoted_listings.html"
 
 EBAY_TOKEN_URL     = "https://api.ebay.com/identity/v1/oauth2/token"
 EBAY_MARKETING_BASE = "https://api.ebay.com/sell/marketing/v1"
@@ -806,22 +805,6 @@ def bulk_set_bids(token: str, campaign_id: str,
     return results, skipped, removed
 
 
-# --------------------------------------------------------------------------- #
-# HTML report                                                                 #
-# --------------------------------------------------------------------------- #
-
-def _fmt_money(n) -> str:
-    if n is None:
-        return "—"
-    return f"${n:,.2f}"
-
-
-def _fmt_pct(n) -> str:
-    if n is None:
-        return "—"
-    return f"{n * 100:.1f}%"
-
-
 TIER_DISPLAY = {
     "no_ad":      ("NO_AD",      "tier-no-ad"),
     "low":        ("LOW",        "tier-low"),
@@ -829,197 +812,6 @@ TIER_DISPLAY = {
     "aggressive": ("AGGRESSIVE", "tier-aggressive"),
     "max":        ("MAX",        "tier-max"),
 }
-
-
-def build_report(plan: list[dict], history: list[dict], cfg: dict,
-                 demoted_ids: list[str]) -> Path:
-    run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-    by_tier: dict[str, list[dict]] = {k: [] for k in TIER_ORDER}
-    for d in plan:
-        by_tier.setdefault(d["tier"] or "no_ad", []).append(d)
-
-    total_spend = sum(d.get("projected_30d_spend", 0.0) for d in plan)
-    total_lift  = sum(d.get("projected_30d_lift_usd", 0.0) for d in plan)
-    cap_usd     = cfg.get("max_total_30d_ad_spend_usd")
-
-    # Tier summary table
-    summary_rows = []
-    for tier in TIER_ORDER:
-        items = by_tier.get(tier, [])
-        rate = cfg["tiers"][tier]["rate"]
-        tier_spend = sum(d.get("projected_30d_spend", 0.0) for d in items)
-        tier_lift  = sum(d.get("projected_30d_lift_usd", 0.0) for d in items)
-        label, klass = TIER_DISPLAY[tier]
-        summary_rows.append(f"""
-        <tr class="{klass}">
-          <td class="tier-label">{label}</td>
-          <td class="num">{_fmt_pct(rate)}</td>
-          <td class="num">{len(items)}</td>
-          <td class="num">{_fmt_money(tier_spend)}</td>
-          <td class="num gold">{_fmt_money(tier_lift)}</td>
-          <td class="criteria">{cfg['tiers'][tier]['criteria']}</td>
-        </tr>""")
-
-    def _row(d: dict) -> str:
-        label, klass = TIER_DISPLAY.get(d["tier"], ("?", ""))
-        reasons = "<br>".join(d.get("reasons", []) or [])
-        age = d.get("age_days")
-        age_str = f"{age}d" if age is not None else "—"
-        return f"""
-        <tr class="row-{klass}">
-          <td class="item">
-            <a href="{d['url']}" target="_blank" rel="noopener">
-              <span class="title">{(d['title'] or '')[:90]}</span>
-              <span class="item-id">{d['item_id']}</span>
-            </a>
-          </td>
-          <td class="num">{_fmt_money(d['price'])}</td>
-          <td class="num">{age_str}</td>
-          <td class="num">{d.get('watchers', 0)}</td>
-          <td class="num">{d.get('sold_30d', 0)}</td>
-          <td class="tier-cell {klass}">{label}</td>
-          <td class="num gold">{_fmt_pct(d['rate'])}</td>
-          <td class="num">{_fmt_money(d.get('projected_30d_spend'))}</td>
-          <td class="reasons">{reasons}</td>
-        </tr>"""
-
-    detail_rows = "\n".join(_row(d) for d in plan)
-
-    recent_history = list(reversed(history))[:50]
-    hist_rows = "\n".join(
-        f"<tr><td>{h.get('applied_at','')}</td>"
-        f"<td><a href='{h.get('url','#')}' target='_blank'>{h.get('item_id')}</a></td>"
-        f"<td>{h.get('tier','')}</td>"
-        f"<td class='num'>{_fmt_pct(h.get('rate', 0))}</td>"
-        f"<td>{'OK' if h.get('ok') else 'FAIL'}</td></tr>"
-        for h in recent_history
-    )
-    history_block = (
-        f"<div class='tbl-wrap'><table class='promo-tbl'>"
-        f"<thead><tr><th>Applied</th><th>Item</th><th>Tier</th><th>Rate</th><th>Result</th></tr></thead>"
-        f"<tbody>{hist_rows}</tbody></table></div>"
-        if recent_history else "<p class='empty'>No bid changes applied yet.</p>"
-    )
-
-    cap_note = ""
-    if cap_usd:
-        over = total_spend > cap_usd
-        cap_note = (
-            f"<div class='cap-note {'cap-hit' if over else 'cap-ok'}'>"
-            f"Projected 30d ad spend: <b>{_fmt_money(total_spend)}</b> of cap "
-            f"<b>{_fmt_money(cap_usd)}</b>. "
-            f"{'Cap was hit — demoted items below.' if demoted_ids else 'Within cap.'}"
-            f"</div>"
-        )
-
-    demoted_block = ""
-    if demoted_ids:
-        items = [d for d in plan if d["item_id"] in set(demoted_ids)]
-        rows = "\n".join(
-            f"<li><a href='{d['url']}' target='_blank'>{d['item_id']}</a> — "
-            f"{(d['title'] or '')[:80]} (now {TIER_DISPLAY[d['tier']][0]})</li>"
-            for d in items
-        )
-        demoted_block = (
-            "<section><h3>Demoted to fit budget cap</h3>"
-            f"<ul class='demoted'>{rows}</ul></section>"
-        )
-
-    body = f"""
-<section class="hero">
-  <h1>Promoted Listings Agent</h1>
-  <p class="sub">Last run: <code>{run_ts}</code> · {len(plan)} listings classified</p>
-  <div class="stat-grid">
-    <div class="stat"><div class="stat-n">{len([d for d in plan if d['rate'] > 0])}</div><div class="stat-l">Promoted</div></div>
-    <div class="stat"><div class="stat-n">{len(by_tier.get('no_ad', []))}</div><div class="stat-l">Self-selling</div></div>
-    <div class="stat"><div class="stat-n">{_fmt_money(total_spend)}</div><div class="stat-l">30d ad spend</div></div>
-    <div class="stat"><div class="stat-n">{_fmt_money(total_lift)}</div><div class="stat-l">Est. lift</div></div>
-  </div>
-  {cap_note}
-</section>
-
-<section class="cfg">
-  <h3>Tier breakdown</h3>
-  <div class="tbl-wrap">
-    <table class="promo-tbl summary">
-      <thead><tr><th>Tier</th><th>Rate</th><th>Listings</th><th>30d spend</th><th>Est. lift</th><th>Criteria</th></tr></thead>
-      <tbody>{''.join(summary_rows)}</tbody>
-    </table>
-  </div>
-  <p class='hint'>Edit <code>promoted_listings_config.json</code> to retune. Run with <code>--apply</code> to push bids via the Marketing API.</p>
-</section>
-
-{demoted_block}
-
-<section>
-  <h3>Per-listing decisions</h3>
-  <div class='tbl-wrap'>
-    <table class='promo-tbl'>
-      <thead><tr>
-        <th>Listing</th><th>Price</th><th>Age</th><th>Watchers</th>
-        <th>Sold 30d</th><th>Tier</th><th>Bid %</th><th>30d $</th><th>Reasoning</th>
-      </tr></thead>
-      <tbody>{detail_rows}</tbody>
-    </table>
-  </div>
-</section>
-
-<section>
-  <h3>Recent applied bid changes</h3>
-  {history_block}
-</section>
-"""
-
-    extra_css = """
-<style>
-  .hero { padding: 24px 0 12px; }
-  .hero h1 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 56px; letter-spacing: .02em; }
-  .hero .sub { color: var(--text-muted); }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 18px 0; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; }
-  .stat-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 36px; color: var(--gold); line-height: 1; }
-  .stat-l { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
-  .cap-note { padding: 10px 14px; border-radius: var(--r-md); margin: 10px 0; }
-  .cap-ok { background: rgba(127,199,122,0.07); border: 1px solid rgba(127,199,122,0.25); color: var(--text); }
-  .cap-hit { background: rgba(220,89,89,0.08); border: 1px solid rgba(220,89,89,0.30); color: var(--text); }
-  .cfg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 18px; margin: 18px 0; }
-  .cfg h3 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); }
-  .cfg .hint { color: var(--text-muted); font-size: 13px; margin: 10px 0 0; }
-  .tbl-wrap { overflow-x: auto; border-radius: var(--r-md); border: 1px solid var(--border); margin: 8px 0 24px; }
-  table.promo-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .promo-tbl th, .promo-tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
-  .promo-tbl th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-  .promo-tbl tr:hover td { background: var(--surface-2); }
-  .promo-tbl .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
-  .promo-tbl .gold { color: var(--gold); font-weight: 600; }
-  .promo-tbl .item .title { display: block; color: var(--text); }
-  .promo-tbl .item .item-id { display: block; color: var(--text-dim); font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
-  .promo-tbl .item a { text-decoration: none; }
-  .promo-tbl .item a:hover .title { color: var(--gold); }
-  .promo-tbl .reasons { color: var(--text-muted); font-size: 12px; max-width: 360px; }
-  .promo-tbl .criteria { color: var(--text-dim); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
-  .tier-label, .tier-cell { font-weight: 700; font-size: 11px; letter-spacing: .1em; }
-  .tier-no-ad      { color: var(--text-muted); }
-  .tier-low        { color: #79b9ff; }
-  .tier-standard   { color: var(--gold); }
-  .tier-aggressive { color: #ffae5e; }
-  .tier-max        { color: var(--danger); }
-  .row-tier-aggressive td { background: linear-gradient(to right, rgba(255,174,94,0.05), transparent); }
-  .row-tier-max td { background: linear-gradient(to right, rgba(220,89,89,0.07), transparent); }
-  .demoted { color: var(--text-muted); font-size: 13px; }
-  .empty { color: var(--text-muted); padding: 20px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r-md); }
-</style>
-"""
-
-    html = promote.html_shell(
-        "Promoted Listings Agent · Harpua2001",
-        body,
-        extra_head=extra_css,
-        active_page="promoted_listings.html",
-    )
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
 
 
 # --------------------------------------------------------------------------- #
@@ -1164,14 +956,7 @@ def main() -> int:
         return 0
 
     if args.report_only:
-        plan = []
-        if PLAN_PATH.exists():
-            try:
-                plan = json.loads(PLAN_PATH.read_text()).get("decisions", [])
-            except Exception:
-                plan = []
-        path = build_report(plan, load_history(), cfg, [])
-        print(f"  Wrote {path}")
+        print("  --report-only is a no-op: the docs/promoted_listings.html report was retired.")
         return 0
 
     plan, demoted = plan_all(cfg)
@@ -1196,8 +981,6 @@ def main() -> int:
     else:
         print("\n  Dry run only. Re-run with --apply to push bids to eBay.")
 
-    report = build_report(plan, load_history(), cfg, demoted)
-    print(f"  Report: {report}")
     return 0
 
 

@@ -412,103 +412,6 @@ def _leader_cards(rows: list[dict], tone: str) -> str:
     return f"<div class='leaders-grid'>{''.join(cards)}</div>"
 
 
-def render_html(
-    rows: list[dict],
-    months: list[dict],
-    cats: list[dict],
-    winners: list[dict],
-    losers: list[dict],
-) -> str:
-    rev_total  = round(sum(r["sale_price"]    for r in rows), 2)
-    fees_total = round(sum(r["fvf"] + r["ad_spend"] for r in rows), 2)
-    ship_total = round(sum(r["ship_cost"]     for r in rows), 2)
-    cost_total = round(sum(r["acquired_cost"] for r in rows), 2)
-    prof_total = round(sum(r["net_profit"]    for r in rows), 2)
-    avg_margin = round((prof_total / rev_total) * 100.0, 2) if rev_total else 0.0
-    missing    = [r for r in rows if not r["acquired_matched"]]
-
-    kpis = "".join([
-        _kpi_card("Lifetime Revenue",  _fmt_money(rev_total)),
-        _kpi_card("Fees + Ads",        _fmt_money(fees_total), "warn"),
-        _kpi_card("Shipping",          _fmt_money(ship_total), "warn"),
-        _kpi_card("Acquired Cost",     _fmt_money(cost_total), "warn"),
-        _kpi_card("Net Profit",        _fmt_money(prof_total),
-                  "pos" if prof_total >= 0 else "neg"),
-        _kpi_card("Avg Margin",        f"{avg_margin}%",
-                  "pos" if avg_margin >= 0 else "neg"),
-        _kpi_card("Orders",            str(len(rows))),
-    ])
-
-    extra_css = (
-      ".kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 28px}"
-      ".kpi-card{background:var(--card,#141414);border:1px solid var(--border,#262626);border-radius:14px;padding:14px 16px}"
-      ".kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted,#888)}"
-      ".kpi-value{font-size:22px;font-weight:700;margin-top:4px}"
-      ".kpi-pos .kpi-value{color:#34d399}.kpi-neg .kpi-value{color:#f87171}.kpi-warn .kpi-value{color:#fbbf24}"
-      ".pnl-section{margin:30px 0}.pnl-section h2{margin-bottom:10px;font-size:18px;letter-spacing:.04em;text-transform:uppercase}"
-      ".chart-wrap{background:var(--card,#141414);border:1px solid var(--border,#262626);border-radius:14px;padding:16px}"
-      ".month-row{display:flex;gap:6px;align-items:flex-end;overflow-x:auto;padding-bottom:6px}"
-      ".month-col{flex:1;min-width:60px;text-align:center}"
-      ".bars{display:flex;gap:2px;align-items:flex-end;height:220px;justify-content:center}"
-      ".bar{width:10px;border-radius:3px 3px 0 0}"
-      ".bar-rev{background:#60a5fa}.bar-cost{background:#fbbf24}.bar-profit{background:#34d399}.bar-loss{background:#f87171}"
-      ".month-label{font-size:10px;color:var(--muted,#888);margin-top:6px}"
-      ".month-net{font-size:11px;font-weight:600;margin-top:2px}"
-      ".legend{margin-top:10px;font-size:12px;color:var(--muted,#888);display:flex;gap:14px;align-items:center}"
-      ".lg-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}"
-      ".cat-chart{display:flex;flex-direction:column;gap:8px}"
-      ".cat-row{background:var(--card,#141414);border:1px solid var(--border,#262626);border-radius:10px;padding:10px 14px}"
-      ".cat-name{font-weight:700;margin-bottom:6px}"
-      ".cat-bars{position:relative;height:14px;background:#1f1f1f;border-radius:6px;overflow:hidden;margin-bottom:6px}"
-      ".cat-bar{position:absolute;top:0;left:0;height:100%}"
-      ".cat-bar-rev{background:#60a5fa;opacity:.45}.cat-bar-prof{background:#34d399}"
-      ".cat-nums{display:flex;gap:14px;font-size:12px;color:var(--muted,#888);flex-wrap:wrap}"
-      ".table-wrap{overflow-x:auto;background:var(--card,#141414);border:1px solid var(--border,#262626);border-radius:14px;padding:8px}"
-      ".pnl-table{width:100%;border-collapse:collapse;font-size:13px}"
-      ".pnl-table th,.pnl-table td{padding:8px 10px;border-bottom:1px solid #222;text-align:left;white-space:nowrap}"
-      ".pnl-table th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted,#888)}"
-      ".pnl-table a{color:inherit;text-decoration:none}"
-      ".pos{color:#34d399}.neg{color:#f87171}"
-      ".leaders-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}"
-      ".leader{display:flex;gap:10px;background:var(--card,#141414);border:1px solid var(--border,#262626);border-radius:12px;padding:10px;text-decoration:none;color:inherit}"
-      ".leader-pic{width:64px;height:64px;flex:0 0 64px;border-radius:8px;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center}"
-      ".leader-pic img{width:100%;height:100%;object-fit:cover}"
-      ".no-pic{font-size:10px;color:#555}.leader-meta{flex:1;min-width:0}"
-      ".leader-title{font-size:12px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}"
-      ".leader-line{margin-top:6px;display:flex;justify-content:space-between;font-size:12px;gap:6px}"
-      ".muted{color:var(--muted,#888)}.small{font-size:12px}"
-      ".footer-note{margin-top:30px;padding:14px;border-radius:12px;background:#1c1500;border:1px solid #5a4400;color:#fbbf24;font-size:13px}"
-    )
-
-    note = (
-      f"<b>{len(missing)} orders missing acquired_cost.</b> Add their rows to "
-      "<code>inventory.csv</code> (set <code>ebay_item_id</code> + "
-      "<code>acquired_price</code>) to make these margins truthful — until then "
-      "they assume $0 cost basis and overstate profit."
-    )
-    body = (
-      '<main class="container">'
-      '<h1>P&amp;L Tracker</h1>'
-      '<p class="muted">Real take-home per order — sale minus FVF, ads, shipping, '
-      'and acquired cost. Margins update each build.</p>'
-      f'<div class="kpi-row">{kpis}</div>'
-      f'<div class="pnl-section"><h2>Monthly P&amp;L (last 12)</h2>{_monthly_chart(months)}</div>'
-      f'<div class="pnl-section"><h2>By Category</h2>{_category_chart(cats)}</div>'
-      f'<div class="pnl-section"><h2>Profit Leaders</h2>{_leader_cards(winners, "win")}</div>'
-      f'<div class="pnl-section"><h2>Loss Leaders &amp; Thin Margins</h2>{_leader_cards(losers, "loss")}</div>'
-      f'<div class="pnl-section"><h2>Recent 30 Orders</h2>{_orders_table(rows, 30)}</div>'
-      f'<div class="footer-note">{note}</div>'
-      '</main>'
-    )
-
-    return promote.html_shell(
-        f"P&L · {promote.SELLER_NAME}",
-        body,
-        extra_head=f"<style>{extra_css}</style>",
-        active_page="pnl.html",
-    )
-
-
 # ----------------------------- entrypoint ---------------------------------- #
 
 def run() -> dict:
@@ -521,11 +424,6 @@ def run() -> dict:
     months  = rollup_by_month(rows)
     cats    = rollup_by_category(rows)
     winners, losers = identify_winners_losers(rows, top_n=5)
-
-    DOCS_DIR.mkdir(exist_ok=True)
-    OUTPUT_HTML.write_text(
-        render_html(rows, months, cats, winners, losers), encoding="utf-8"
-    )
 
     rev   = round(sum(r["sale_price"] for r in rows), 2)
     prof  = round(sum(r["net_profit"]  for r in rows), 2)

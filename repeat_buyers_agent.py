@@ -48,7 +48,6 @@ REPO_ROOT    = Path(__file__).parent
 OUTPUT_DIR   = REPO_ROOT / "output"
 PLAN_PATH    = OUTPUT_DIR / "repeat_buyers_plan.json"
 SENT_PATH    = OUTPUT_DIR / "repeat_buyers_sent.json"
-REPORT_PATH  = promote.OUTPUT_DIR / "buyers.html"
 
 TRADING_URL  = "https://api.ebay.com/ws/api.dll"
 EBAY_NS      = "urn:ebay:apis:eBLBaseComponents"
@@ -424,132 +423,11 @@ def send_promo_message(token: str, buyer: dict, body: str,
     return record
 
 
-# ---------------------------------------------------------------------------
-# Reporting — docs/buyers.html
-# ---------------------------------------------------------------------------
-
-_PAGE_CSS = (
-    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
-    ".bk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0 28px}"
-    ".bk-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}"
-    ".bk-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}"
-    ".bk-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:40px;color:var(--gold);line-height:1}"
-    ".bk-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
-    ".bk-section-title{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:28px;margin:28px 0 10px;letter-spacing:.04em}"
-    ".bk-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 18px;color:var(--text-muted);font-size:13px}"
-    ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}"
-    "table.bk-tbl{width:100%;border-collapse:collapse;font-size:13px}"
-    ".bk-tbl th,.bk-tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}"
-    ".bk-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}"
-    ".bk-tbl .num{text-align:right;font-variant-numeric:tabular-nums}.bk-tbl .buyer{font-weight:600;color:var(--text)}"
-    ".bk-tbl textarea{width:100%;min-width:280px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-family:inherit;font-size:12px;line-height:1.45;resize:vertical}"
-    ".badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}"
-    ".badge.vip{background:rgba(234,179,8,.18);color:var(--gold,#facc15);border:1px solid rgba(234,179,8,.55)}"
-    ".badge.rep{background:rgba(34,197,94,.12);color:var(--success,#22c55e);border:1px solid rgba(34,197,94,.4)}"
-    ".badge.one{background:rgba(148,163,184,.12);color:var(--text-muted);border:1px solid var(--border)}"
-    ".btn-send{background:var(--gold);color:#111;border:0;border-radius:var(--r-sm);padding:7px 13px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;font-size:11px;margin-top:6px}"
-    ".btn-send:hover{filter:brightness(1.08)}"
-    ".empty{color:var(--text-muted);padding:28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md)}"
-)
-_PAGE_JS = (
-    "document.addEventListener('click',function(e){var b=e.target.closest('.btn-send');if(!b)return;"
-    "var id=b.getAttribute('data-buyer');var t=document.querySelector('textarea[data-buyer=\"'+id+'\"]');"
-    "if(!t)return;b.disabled=true;b.textContent='Sending…';"
-    "fetch('/ebay/send-promo',{method:'POST',headers:{'Content-Type':'application/json'},"
-    "body:JSON.stringify({buyer:id,body:t.value})}).then(function(r){return r.json();})"
-    ".then(function(d){b.textContent=d&&d.ok?'Sent ✓':'Failed';})"
-    ".catch(function(){b.disabled=false;b.textContent='Send message';});});"
-)
-_PAGE_HEAD = f"<style>{_PAGE_CSS}</style><script>{_PAGE_JS}</script>"
-
-
-def _tier_badge(tier: str) -> str:
-    cls = {"VIP": "vip", "Repeat": "rep"}.get(tier, "one")
-    return f"<span class='badge {cls}'>{_esc(tier)}</span>"
-
-
 def _money(x: float) -> str:
     try:
         return f"${float(x):,.2f}"
     except (TypeError, ValueError):
         return "$0.00"
-
-
-def _row(b: dict, with_message: bool) -> str:
-    buyer = _esc(b.get("buyer") or "")
-    days  = b.get("days_since_last")
-    days_str = f"{days}d" if isinstance(days, int) else "—"
-    if with_message:
-        msg = _esc(draft_thanks_message(b))
-        msg_cell = (f"<td><textarea data-buyer=\"{buyer}\" rows='4'>{msg}</textarea>"
-                    f"<button class='btn-send' data-buyer=\"{buyer}\">Send message</button></td>")
-    else:
-        msg_cell = "<td><span style='color:var(--text-dim)'>—</span></td>"
-    return (f"<tr><td>{_tier_badge(b.get('tier') or '')}</td>"
-            f"<td class='buyer'>{buyer}</td>"
-            f"<td class='num'>{b.get('order_count', 0)}</td>"
-            f"<td class='num'>{_money(b.get('lifetime_spend', 0))}</td>"
-            f"<td class='num'>{days_str}</td>"
-            f"<td>{_esc((b.get('top_category') or '')[:60]) or '—'}</td>"
-            f"{msg_cell}</tr>")
-
-
-def _table(buyers: list[dict], with_message: bool) -> str:
-    if not buyers:
-        return "<p class='empty'>No buyers in this segment yet.</p>"
-    msg_th = "Draft message" if with_message else "Message"
-    head = ("<tr><th>Tier</th><th>Buyer</th><th class='num'>Orders</th>"
-            "<th class='num'>Lifetime</th><th class='num'>Last seen</th>"
-            f"<th>Top category</th><th>{msg_th}</th></tr>")
-    body = "".join(_row(b, with_message) for b in buyers)
-    return (f"<div class='tbl-wrap'><table class='bk-tbl'>"
-            f"<thead>{head}</thead><tbody>{body}</tbody></table></div>")
-
-
-def _kpi(n: str, l: str) -> str:
-    return f"<div class='bk-kpi'><div class='n'>{n}</div><div class='l'>{l}</div></div>"
-
-
-def build_report(buyers_map: dict[str, dict]) -> Path:
-    run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    all_buyers = sorted(buyers_map.values(),
-                        key=lambda b: (-(b.get("lifetime_spend") or 0),
-                                       -(b.get("order_count") or 0)))
-    vip     = [b for b in all_buyers if b.get("tier") == "VIP"]
-    repeat  = [b for b in all_buyers if b.get("tier") == "Repeat"]
-    onetime = [b for b in all_buyers if b.get("tier") == "One-and-done"]
-    repeat_rev = sum((b.get("lifetime_spend") or 0) for b in all_buyers
-                     if b.get("tier") in ("VIP", "Repeat"))
-    total_rev  = sum((b.get("lifetime_spend") or 0) for b in all_buyers)
-    n_top = max(1, round(len(all_buyers) * 0.10))
-    top_rev = sum((b.get("lifetime_spend") or 0) for b in all_buyers[:n_top])
-    pct_top = (top_rev / total_rev * 100.0) if total_rev > 0 else 0.0
-
-    kpis = "".join([
-        _kpi(str(len(all_buyers)), "Unique buyers"),
-        _kpi(str(len(vip)),        "VIP (5+ orders or $200+)"),
-        _kpi(str(len(repeat)),     "Repeat (2–4 orders)"),
-        _kpi(str(len(onetime)),    "One-and-done"),
-        _kpi(_money(repeat_rev),   "Revenue from repeats"),
-        _kpi(f"{pct_top:.0f}%",    "Revenue from top 10%"),
-    ])
-    body = (
-        f"<section class='hero'><h1>Repeat Buyers</h1>"
-        f"<p class='sub'>Last run: <code>{run_ts}</code> · 365-day window · "
-        f"grouped by <code>buyer_user_id</code></p>"
-        f"<div class='bk-kpis'>{kpis}</div></section>"
-        f"<section class='bk-note'>VIP+Repeat buyers each get a one-time "
-        f"thank-you / first-look message. Code <code>{THANK_CODE}</code> is "
-        f"generic — set up the coupon in eBay Seller Hub → Marketing → "
-        f"Promotions before sending.</section>"
-        f"<h2 class='bk-section-title'>VIP buyers</h2>{_table(vip, True)}"
-        f"<h2 class='bk-section-title'>Repeat buyers</h2>{_table(repeat, True)}"
-        f"<h2 class='bk-section-title'>One-and-done</h2>{_table(onetime, False)}"
-    )
-    html = promote.html_shell(f"Repeat Buyers · {promote.SELLER_NAME}", body,
-                              extra_head=_PAGE_HEAD, active_page="buyers.html")
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
 
 
 # ---------------------------------------------------------------------------
@@ -618,9 +496,7 @@ def main() -> int:
     })
 
     _print_summary(grouped)
-    report = build_report(grouped)
-    print(f"\n  Report: {report}")
-    print(f"  Plan:   {PLAN_PATH}")
+    print(f"\n  Plan:   {PLAN_PATH}")
 
     if args.apply:
         # Kill switch — Jason disabled outbound promo messages on 2026-05-23

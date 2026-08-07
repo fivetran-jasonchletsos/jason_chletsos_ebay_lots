@@ -17,7 +17,7 @@ Reads:
     output/listing_performance_plan.json   (optional, for rank-killer)
 
 Writes:
-    docs/daily.html
+    output/daily_digest.json
 
 Usage:
     python3 daily_digest_agent.py
@@ -62,8 +62,7 @@ import chart_helpers
 
 REPO_ROOT = Path(__file__).parent
 OUTPUT_DIR = REPO_ROOT / "output"
-DOCS_DIR = REPO_ROOT / "docs"
-REPORT_PATH = DOCS_DIR / "daily.html"
+REPORT_PATH = REPO_ROOT / "output" / "daily_digest.json"
 
 SOLD_PATH = REPO_ROOT / "sold_history.json"
 LISTINGS_PATH = OUTPUT_DIR / "listings_snapshot.json"
@@ -243,9 +242,6 @@ def build_todo(*, photo_fail: int, msgs_pending: int,
                offers_pending: int, repriced: int, specifics: int,
                active: int, yesterday_orders: int) -> list[str]:
     todo: list[str] = []
-    if photo_fail:
-        todo.append(f"{photo_fail} listing{'s' if photo_fail != 1 else ''} "
-                    f"need reshoot (Cassini wants 8+ photos at 1600px+).")
     if msgs_pending:
         todo.append(f"{msgs_pending} buyer message"
                     f"{'s' if msgs_pending != 1 else ''} waiting on a reply.")
@@ -631,12 +627,16 @@ def main() -> int:
         specifics=spec_today, active=active,
         yesterday_orders=rev["yesterday_orders"],
     )
-    top_html = _top_earner_card(rev["top_earner"], snapshot_by_id)
-    attention_html = _attention_list(rk, photo_fail_listings)
-
-    html = render(metrics, todo, top_html, attention_html, now)
-    DOCS_DIR.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html, encoding="utf-8")
+    digest = {
+        "generated_at": now.isoformat(),
+        "metrics": metrics,
+        "todo": todo,
+        "top_earner": rev["top_earner"],
+        "rank_killer": rk,
+        "photo_fail_listings": photo_fail_listings,
+    }
+    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    REPORT_PATH.write_text(json.dumps(digest, indent=2, default=str), encoding="utf-8")
 
     print(f"  Yesterday: {_money(rev['yesterday_rev'])} on "
           f"{rev['yesterday_orders']} order(s)")

@@ -1,10 +1,10 @@
 """
-sales_trends_agent.py — analytics page over all completed sales.
+sales_trends_agent.py — analytics over all completed sales.
 
-Reads sold_history.json and renders docs/sales_trends.html: headline KPIs,
-revenue-over-time, what's selling by set/brand, price-band mix, top sales,
-day-of-week pattern, and repeat buyers. Admin-only page; wired into the shared
-nav via promote._NAV_ITEMS ("Sales Trends").
+Reads sold_history.json and computes headline KPIs, revenue-over-time,
+what's selling by set/brand, price-band mix, top sales, day-of-week pattern,
+and repeat buyers. Writes output/sales_trends.json for the personal dashboard
+to consume (docs/sales_trends.html was retired along with the old admin site).
 
 Usage: python3 sales_trends_agent.py
 """
@@ -17,11 +17,9 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-import promote
-
 REPO = Path(__file__).parent
 SOLD = REPO / "sold_history.json"
-OUT  = REPO / "docs" / "sales_trends.html"
+OUT  = REPO / "output" / "sales_trends.json"
 
 # Ordered brand detection — check multi-word / specific tokens before generic.
 BRANDS = [
@@ -162,157 +160,40 @@ def main() -> None:
 
     def money(x): return f"${x:,.2f}"
 
-    top_rows = "\n".join(
-        f'<tr><td class="rank">{i+1}</td><td><a href="{s["url"]}" target="_blank" rel="noopener">{s["title"][:74]}</a></td>'
-        f'<td><span class="chip">{s["brand"]}</span></td><td class="num">{money(s["price"])}</td>'
-        f'<td class="dt">{s["date"].strftime("%b %-d")}</td></tr>'
-        for i, s in enumerate(top))
-
-    brand_rows = "\n".join(
-        f'<tr><td>{b}</td><td class="num">{brand_cnt[b]}</td><td class="num">{money(brand_rev[b])}</td>'
-        f'<td class="num">{money(brand_rev[b]/brand_cnt[b])}</td>'
-        f'<td class="num">{brand_rev[b]/total*100:.0f}%</td></tr>'
-        for b in brands_sorted)
-
-    buyer_rows = "\n".join(
-        f'<tr><td>{b}</td><td class="num">{c}</td><td class="num">{money(sp)}</td></tr>'
-        for b, c, sp in repeat[:12]) or '<tr><td colspan="3" class="muted">No repeat buyers yet</td></tr>'
-
     best_week_txt = (f'{week_labels[best_week_i]} · {money(by_week_rev[weeks[best_week_i]])}'
                      if best_week_i is not None else "—")
 
-    body = f"""
-<main class="st-wrap">
-  <header class="st-head">
-    <h1>Sales Trends</h1>
-    <p class="muted">All completed orders · {first.strftime('%b %-d, %Y') if first else '—'} → {last.strftime('%b %-d, %Y') if last else '—'} ({span_days} days)</p>
-  </header>
-
-  <section class="st-kpis">
-    <div class="stat-card"><div class="num">{money(total)}</div><div class="lbl">Total revenue</div></div>
-    <div class="stat-card"><div class="num">{n}</div><div class="lbl">Cards sold</div></div>
-    <div class="stat-card"><div class="num">{money(avg)}</div><div class="lbl">Avg sale</div></div>
-    <div class="stat-card"><div class="num">{money(med)}</div><div class="lbl">Median sale</div></div>
-    <div class="stat-card"><div class="num">{money(total/span_days*7)}</div><div class="lbl">Rev / week</div></div>
-    <div class="stat-card"><div class="num">{best_week_txt}</div><div class="lbl">Best week</div></div>
-  </section>
-
-  <section class="panel">
-    <h2>Revenue over time <span class="muted">(weekly)</span></h2>
-    <canvas id="revChart" height="120"></canvas>
-  </section>
-
-  <div class="st-two">
-    <section class="panel">
-      <h2>What's selling — by set</h2>
-      <canvas id="brandChart" height="200"></canvas>
-    </section>
-    <section class="panel">
-      <h2>Price-band mix</h2>
-      <canvas id="bandChart" height="200"></canvas>
-    </section>
-  </div>
-
-  <section class="panel">
-    <h2>Sales by set</h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Set</th><th class="num">Sold</th><th class="num">Revenue</th><th class="num">Avg</th><th class="num">% rev</th></tr></thead>
-      <tbody>{brand_rows}</tbody>
-    </table></div>
-  </section>
-
-  <div class="st-two">
-    <section class="panel">
-      <h2>Top 15 sales</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>#</th><th>Card</th><th>Set</th><th class="num">Price</th><th>Date</th></tr></thead>
-        <tbody>{top_rows}</tbody>
-      </table></div>
-    </section>
-    <section class="panel">
-      <h2>Repeat buyers</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Buyer</th><th class="num">Orders</th><th class="num">Spend</th></tr></thead>
-        <tbody>{buyer_rows}</tbody>
-      </table></div>
-      <h2 style="margin-top:22px">When buyers buy</h2>
-      <canvas id="dowChart" height="120"></canvas>
-    </section>
-  </div>
-</main>
-<script>window.__SALES = {json.dumps(payload)};</script>
-<script>{_PAGE_JS}</script>
-""".strip()
-
-    html = promote.html_shell(
-        f"Sales Trends · {getattr(promote, 'SELLER_NAME', 'harpua2001')}",
-        body, extra_head=f"<style>{_PAGE_CSS}</style>", active_page="sales_trends.html")
-    OUT.write_text(html, encoding="utf-8")
+    summary = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "first_sale": first.isoformat() if first else None,
+        "last_sale": last.isoformat() if last else None,
+        "span_days": span_days,
+        "total_revenue": round(total, 2),
+        "cards_sold": n,
+        "avg_sale": round(avg, 2),
+        "median_sale": round(med, 2),
+        "revenue_per_week": round(total / span_days * 7, 2),
+        "best_week": best_week_txt,
+        **payload,
+        "by_set": [
+            {"set": b, "sold": brand_cnt[b], "revenue": round(brand_rev[b], 2),
+             "avg": round(brand_rev[b] / brand_cnt[b], 2), "pct_of_revenue": round(brand_rev[b] / total * 100, 1) if total else 0}
+            for b in brands_sorted
+        ],
+        "top_sales": [
+            {"title": s["title"], "set": s["brand"], "price": s["price"],
+             "date": s["date"].isoformat(), "url": s["url"]}
+            for s in top
+        ],
+        "repeat_buyers": [
+            {"buyer": b, "orders": c, "spend": round(sp, 2)} for b, c, sp in repeat[:12]
+        ],
+    }
+    OUT.parent.mkdir(exist_ok=True)
+    OUT.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(f"  Sales Trends: {n} sales · {money(total)} total · {len(brands_sorted)} sets")
     print(f"  Wrote {OUT}")
 
-
-_PAGE_CSS = """
-.st-wrap { max-width: 1100px; margin: 0 auto; }
-.st-head h1 { font-family: 'Fraunces', serif; font-size: 34px; margin: 0 0 2px; }
-.st-kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 18px 0 24px; }
-.st-kpis .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-.st-kpis .num { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: var(--gold); }
-.st-kpis .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin-top: 4px; }
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 18px; }
-.panel h2 { font-size: 16px; margin: 0 0 14px; }
-.st-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-th.num, td.num { text-align: right; font-family: 'JetBrains Mono', monospace; }
-td.rank { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
-td.dt { color: var(--text-dim); white-space: nowrap; }
-.chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-dim); }
-.muted { color: var(--text-dim); }
-@media (max-width: 820px) { .st-kpis { grid-template-columns: repeat(2, 1fr); } .st-two { grid-template-columns: 1fr; } }
-"""
-
-_PAGE_JS = """
-(function(){
-  const S = window.__SALES; if(!S || !window.Chart) return;
-  const css = getComputedStyle(document.documentElement);
-  const gold = css.getPropertyValue('--gold').trim() || '#d4af37';
-  const dim  = css.getPropertyValue('--text-dim').trim() || '#9aa';
-  const grid = 'rgba(255,255,255,.06)';
-  Chart.defaults.color = dim; Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
-  const money = v => '$' + Number(v).toLocaleString(undefined,{maximumFractionDigits:0});
-
-  new Chart(document.getElementById('revChart'), {
-    data: { labels: S.weekLabels, datasets: [
-      { type:'bar', label:'Revenue', data:S.weekRev, backgroundColor:gold, borderRadius:4, yAxisID:'y', order:2 },
-      { type:'line', label:'Cards sold', data:S.weekCnt, borderColor:'#7db7ff', backgroundColor:'#7db7ff',
-        tension:.3, yAxisID:'y1', order:1, pointRadius:2 } ] },
-    options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-      plugins:{ legend:{labels:{boxWidth:12}}, tooltip:{ callbacks:{ label:c=> c.dataset.yAxisID==='y' ? ' '+money(c.parsed.y) : ' '+c.parsed.y+' cards' } } },
-      scales:{ y:{position:'left',grid:{color:grid},ticks:{callback:money}}, y1:{position:'right',grid:{display:false}}, x:{grid:{display:false}} } }
-  });
-
-  new Chart(document.getElementById('brandChart'), {
-    type:'bar', data:{ labels:S.brandLabels, datasets:[{ label:'Revenue', data:S.brandRev, backgroundColor:gold, borderRadius:4 }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>' '+money(c.parsed.x)+' · '+S.brandCnt[c.dataIndex]+' sold'}}},
-      scales:{ x:{grid:{color:grid},ticks:{callback:money}}, y:{grid:{display:false}} } }
-  });
-
-  const palette = ['#5b8def','#49b675','#e0b13a','#e0773a','#d4553a','#a05ad4'];
-  new Chart(document.getElementById('bandChart'), {
-    type:'doughnut', data:{ labels:S.bandLabels, datasets:[{ data:S.bandCnt, backgroundColor:palette, borderWidth:0 }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'58%', plugins:{ legend:{position:'right',labels:{boxWidth:12}} } }
-  });
-
-  new Chart(document.getElementById('dowChart'), {
-    type:'bar', data:{ labels:S.dowNames, datasets:[{ data:S.dowCnt, backgroundColor:'#5b8def', borderRadius:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ y:{grid:{color:grid}}, x:{grid:{display:false}} } }
-  });
-})();
-"""
 
 if __name__ == "__main__":
     main()

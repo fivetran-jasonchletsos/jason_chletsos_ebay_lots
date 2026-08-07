@@ -387,150 +387,6 @@ def _kpi(cls: str, n: str, label: str, foot: str) -> str:
             f'<div class="sh-kpi-foot">{foot}</div></div>')
 
 
-def build_report(plan: dict) -> Path:
-    s = plan["summary"]
-    rows = plan["rows"]
-    run_ts = plan["generated_at"]
-
-    mover = s.get("biggest_mover")
-    mover_n = (f'{mover["delta"]:+d}' if mover and mover["delta"] is not None else "—")
-    mover_foot = (html.escape(mover["title"][:60]) if mover else "no prior snapshot yet")
-
-    kpis = (
-        _kpi("green",  str(s["green"]),  "Green",  f"&ge;{GREEN_AT} · ranking strong")
-        + _kpi("yellow", str(s["yellow"]), "Yellow", f"{YELLOW_AT}-{GREEN_AT - 1} · optimizable")
-        + _kpi("red",    str(s["red"]),    "Red",    f"&lt;{YELLOW_AT} · rescue")
-        + _kpi("avg",    f'{s["avg_score"]}',         "Avg score", f"{s['total']} listings scored")
-        + _kpi("mover",  mover_n, "Biggest mover", mover_foot)
-    )
-
-    red_rows = [r for r in rows if r["bucket"] == "red"]
-    # Top 5 RED listings by price (highest-margin rescue candidates).
-    red_rescue = sorted(red_rows, key=lambda r: r["price"], reverse=True)[:5]
-    rescue_html = "".join(_row_html(r) for r in red_rescue) or (
-        '<tr><td colspan="6" class="cas-empty">No RED listings — every active listing scored '
-        f'{YELLOW_AT}+.</td></tr>')
-
-    body_rows = "".join(_row_html(r) for r in rows) or (
-        '<tr><td colspan="6" class="cas-empty">No active listings scored. '
-        'Run promote.py to refresh output/listings_snapshot.json.</td></tr>')
-
-    table_head = (
-        '<thead><tr><th></th><th>Listing</th>'
-        '<th class="cas-sortable" data-sort="score">Score</th>'
-        '<th class="cas-sortable" data-sort="delta">Delta</th>'
-        '<th>Signals</th><th>Fix</th></tr></thead>')
-
-    health_segments = [
-        ("Green", s["green"], chart_helpers.GREEN),
-        ("Yellow", s["yellow"], chart_helpers.AMBER),
-        ("Red", s["red"], chart_helpers.RED),
-    ]
-    health_chart = chart_helpers.card_wrapper(
-        "Listing health mix",
-        f"{s['total']} listings · avg score {s['avg_score']}",
-        chart_helpers.stacked_proportion_bar(health_segments),
-    )
-
-    # Score-band histogram: bucket scores into 10-point bands.
-    # Score is capped at 100 (sum of fixed weights), so we fold a perfect 100
-    # into the 90–100 band instead of inventing a phantom 100–109 band.
-    band_dict = {b: 0 for b in range(0, 100, 10)}
-    for r in rows:
-        sc = max(0, min(100, int(r.get("score", 0))))
-        band = min(90, (sc // 10) * 10)  # 100 → 90 bucket
-        band_dict[band] = band_dict.get(band, 0) + 1
-
-    def _band_label(b: int) -> str:
-        # Top band is inclusive of 100; lower bands are inclusive of both ends
-        # (eg. "30–39") to match how readers expect histogram bins to read.
-        return "90–100" if b == 90 else f"{b}–{b+9}"
-
-    band_rows = [(_band_label(b), v) for b, v in sorted(band_dict.items())]
-    score_chart = chart_helpers.card_wrapper(
-        "Score distribution",
-        "Listings per 10-point band",
-        chart_helpers.bar_chart_vertical(
-            band_rows, height=170, value_fmt=chart_helpers._fmt_int, y_label="LISTINGS",
-        ),
-    )
-
-    body = (
-        f'<section class="hero"><h1>Cassini Health Score</h1>'
-        f'<p class="sub">Last run: <code>{html.escape(run_ts)}</code> · '
-        f'synthesized from 7 ranking signals across <strong>{s["total"]}</strong> active listings.</p>'
-        f'<div class="sh-kpis">{kpis}</div>'
-        f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0 0.6rem;">'
-        f'{health_chart}{score_chart}</div>'
-        f'<p class="sh-hint">No public "Cassini score" exists — this is a synthesis of '
-        f'photos, item-specifics, title hygiene, impressions, CTR, recent sales, and '
-        f'offer eligibility. Move RED &rarr; YELLOW first; YELLOW &rarr; GREEN compounds.</p></section>'
-        f'<section class="sh-section"><div class="sh-section-head">'
-        f'<h2>Worst rescue candidates</h2><span class="sh-count">top 5 RED by price</span></div>'
-        f'<p class="sh-hint">Highest-margin RED listings — fix these first. '
-        f'Each $1 of impressions lift here outweighs 10x on a low-margin card.</p>'
-        f'<div class="cas-tbl-wrap"><table class="sh-tbl">{table_head}'
-        f'<tbody>{rescue_html}</tbody></table></div></section>'
-        f'<section class="sh-section"><div class="sh-section-head">'
-        f'<h2>All listings</h2><span class="sh-count">{len(rows)} scored, lowest first</span></div>'
-        f'<div class="cas-tbl-wrap"><table class="sh-tbl" id="cas-all">{table_head}'
-        f'<tbody>{body_rows}</tbody></table></div></section>'
-    )
-
-    extra_css = "<style>" + (
-        ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
-        ".sh-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0 28px}"
-        ".sh-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}"
-        ".sh-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}"
-        ".sh-kpi-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1}"
-        ".sh-kpi-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
-        ".sh-kpi-foot{color:var(--text-dim);font-size:11px;margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}"
-        ".cas-kpi-green::before{background:var(--success)}.cas-kpi-green .sh-kpi-n{color:var(--success)}"
-        ".cas-kpi-yellow::before{background:var(--warning)}.cas-kpi-yellow .sh-kpi-n{color:var(--warning)}"
-        ".cas-kpi-red::before{background:var(--danger)}.cas-kpi-red .sh-kpi-n{color:var(--danger)}"
-        ".sh-section{margin:36px 0}.sh-section-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}"
-        ".sh-section-head h2{margin:0;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:28px;letter-spacing:.02em}"
-        ".sh-count{color:var(--text-muted);font-weight:400;font-size:18px;margin-left:6px}.sh-hint{color:var(--text-muted);font-size:13px}"
-        ".cas-tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)}"
-        ".sh-tbl{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface)}"
-        ".sh-tbl th,.sh-tbl td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:middle}"
-        ".sh-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}"
-        ".sh-tbl tr:last-child td{border-bottom:none}.sh-tbl tr:hover td{background:var(--surface-2)}"
-        ".cas-sortable{cursor:pointer;user-select:none}.cas-sortable:hover{color:var(--gold)}"
-        ".cas-thumb img{width:48px;height:48px;object-fit:cover;border-radius:4px;display:block}.cas-thumb-empty{width:48px;height:48px;background:var(--surface-2);border-radius:4px}"
-        ".cas-item a{text-decoration:none;color:var(--text)}.cas-item a:hover .cas-title{color:var(--gold)}.cas-title{display:block}"
-        ".cas-iid{display:block;color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:2px}"
-        ".cas-chip{display:inline-block;padding:5px 10px;border-radius:4px;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:13px;min-width:36px;text-align:center}"
-        ".cas-chip-green{background:var(--success);color:#fff}.cas-chip-yellow{background:var(--warning);color:#1a1a1a}.cas-chip-red{background:var(--danger);color:#fff}"
-        ".cas-row-red td{background:linear-gradient(to right,rgba(220,60,60,.06),transparent)}.cas-row-yellow td{background:linear-gradient(to right,rgba(220,170,60,.04),transparent)}"
-        ".cas-delta{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}.cas-delta-up{color:var(--success)}.cas-delta-down{color:var(--danger)}"
-        ".cas-delta-flat{color:var(--text-dim)}.cas-delta-new{color:var(--text-muted);font-style:italic;font-weight:400}"
-        ".cas-pill{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;letter-spacing:.04em;margin:1px 2px 1px 0;border:1px solid var(--border)}"
-        ".cas-pill-on{background:rgba(60,180,90,.12);color:var(--success);border-color:rgba(60,180,90,.3)}.cas-pill-off{background:transparent;color:var(--text-dim);opacity:.55}"
-        ".cas-actions{white-space:nowrap}.cas-fix{display:inline-block;padding:3px 8px;margin-right:4px;border:1px solid var(--border);border-radius:4px;color:var(--gold);text-decoration:none;font-size:11px}"
-        ".cas-fix:hover{background:var(--gold);color:#1a1a1a}.cas-empty{color:var(--text-muted);padding:20px;text-align:center}"
-    ) + "</style>"
-
-    sort_js = (
-        "<script>(function(){var t=document.getElementById('cas-all');if(!t)return;"
-        "var b=t.querySelector('tbody');t.querySelectorAll('.cas-sortable').forEach(function(th){"
-        "var k=th.dataset.sort,a=true;th.addEventListener('click',function(){"
-        "var r=Array.prototype.slice.call(b.querySelectorAll('tr'));"
-        "r.sort(function(x,y){var xv=parseFloat(x.dataset[k]||0),yv=parseFloat(y.dataset[k]||0);"
-        "return a?xv-yv:yv-xv;});a=!a;r.forEach(function(z){b.appendChild(z);});});});})();</script>"
-    )
-
-    html_doc = promote.html_shell(
-        f"Cassini Health Score · {promote.SELLER_NAME}",
-        body,
-        extra_head=extra_css + sort_js,
-        active_page="cassini.html",
-    )
-    REPORT_PATH.parent.mkdir(exist_ok=True)
-    REPORT_PATH.write_text(html_doc, encoding="utf-8")
-    return REPORT_PATH
-
-
 # --- Entry point ---
 
 def main() -> int:
@@ -542,8 +398,7 @@ def main() -> int:
 
     if args.report_only and PLAN_PATH.exists():
         plan = json.loads(PLAN_PATH.read_text())
-        path = build_report(plan)
-        print(f"  Report: {path}")
+        print(f"  Plan already at {PLAN_PATH} (HTML report generation removed).")
         return 0
 
     plan = build_plan()
@@ -569,8 +424,6 @@ def main() -> int:
             print(f"    ${r['price']:>6.2f}  score={r['score']:>2}  "
                   f"{r['item_id']}  {r['title'][:55]}")
 
-    path = build_report(plan)
-    print(f"\n  Report: {path}")
     print(f"  Plan:   {PLAN_PATH}")
     print(f"  Snap:   {PRIOR_SNAPSHOT}")
     return 0

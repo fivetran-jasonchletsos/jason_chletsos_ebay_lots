@@ -681,7 +681,6 @@ def main():
 
     plan = build_plan()
     save_plan(plan)
-    out = render_report(plan)
 
     print(f"  Lot Generator")
     print(f"  Candidates:        {plan['candidate_count']}")
@@ -691,7 +690,6 @@ def main():
     print(f"  Total lot value:   ${plan['total_lot_value']:,.2f}")
     print(f"  Average lot price: ${plan['avg_lot_price']:.2f}")
     print(f"  Plan:   {PLAN_PATH}")
-    print(f"  Report: {out}")
     if args.apply:
         print("  --apply is a no-op for v1. Lot push agent (push_lots_to_ebay.py)"
               " is the next milestone.")

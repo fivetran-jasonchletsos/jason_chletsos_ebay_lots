@@ -404,72 +404,6 @@ def _table(rows: list[dict], *, with_hint: bool = False,
     )
 
 
-def render_html(plan: dict) -> str:
-    kpis     = plan.get("kpis") or {}
-    buckets  = plan.get("buckets") or {}
-    error    = plan.get("error")
-    status   = plan.get("status")
-    fetched  = plan.get("fetched_at") or ""
-    days     = plan.get("window_days", 30)
-
-    alert = ""
-    if error:
-        alert = (
-            f"<div class='alert'><b>Sell Analytics unavailable.</b><br>"
-            f"{_esc(error)}<br>"
-            f"<span class='hint'>Run <code>oauth_remint_helper.py</code> to "
-            f"re-mint your refresh token with the "
-            f"<code>sell.analytics.readonly</code> scope, then re-run this agent.</span>"
-            f"</div>"
-        )
-
-    kpi_strip = (
-        "<div class='kpis'>"
-        f"<div class='kpi'><div class='label'>Impressions (30d)</div>"
-        f"<div class='value'>{kpis.get('total_impressions', 0):,}</div></div>"
-        f"<div class='kpi'><div class='label'>Search Impressions</div>"
-        f"<div class='value'>{kpis.get('total_search_impressions', 0):,}</div></div>"
-        f"<div class='kpi'><div class='label'>Clicks (est.)</div>"
-        f"<div class='value'>{kpis.get('total_clicks', 0):,}</div></div>"
-        f"<div class='kpi'><div class='label'>Avg CTR</div>"
-        f"<div class='value'>{kpis.get('avg_ctr_pct', 0.0):.2f}%</div></div>"
-        f"<div class='kpi'><div class='label'>Sold Qty</div>"
-        f"<div class='value'>{kpis.get('total_sold_qty', 0):,}</div></div>"
-        f"<div class='kpi'><div class='label'>Listings Tracked</div>"
-        f"<div class='value'>{kpis.get('listing_count', 0):,}</div></div>"
-        "</div>"
-    )
-
-    body = f"""
-<h1>Listing Performance</h1>
-<div class="sub">Sell Analytics traffic_report · last {days} days · generated {_esc(fetched)} · HTTP {_esc(status)}</div>
-{alert}
-{kpi_strip}
-
-<h2>Impression Leaders</h2>
-<p class="hint">Which listings are eBay actually surfacing? Big numbers here mean the
-seller-side work (specifics, categories, repricing) is moving these into search results.</p>
-{_table(buckets.get('impression_leaders') or [],
-        empty_msg='No traffic data yet — re-mint OAuth with sell.analytics.readonly.')}
-
-<h2>CTR Leaders <span class="hint" style="font-size:12px">(min 50 impressions)</span></h2>
-<p class="hint">High CTR = title + thumbnail are doing their job. Promote these via promoted listings; clone their title pattern onto laggards.</p>
-{_table(buckets.get('ctr_leaders') or [],
-        empty_msg='No qualifying listings yet (need at least 50 impressions).')}
-
-<h2>Needs Help · Zero / Low Traffic</h2>
-<p class="hint">Fewer than 10 impressions in 30 days. Almost always a title, category, or Item Specifics problem.</p>
-{_table(buckets.get('needs_help') or [], with_hint=True,
-        empty_msg='Nothing under 10 impressions — your specifics work paid off.')}
-"""
-    return promote.html_shell(
-        "Listing Performance · Harpua2001",
-        body,
-        extra_head=f"<style>{CSS}</style>",
-        active_page="listing_performance.html",
-    )
-
-
 # --------------------------------------------------------------------------- #
 # Orchestration                                                               #
 # --------------------------------------------------------------------------- #
@@ -517,11 +451,9 @@ def main() -> int:
     plan = build_plan()
 
     PLAN_PATH.write_text(json.dumps(plan, indent=2))
-    HTML_PATH.write_text(render_html(plan))
 
     kpis = plan.get("kpis", {})
     print(f"  Plan written -> {PLAN_PATH}")
-    print(f"  HTML written -> {HTML_PATH}")
     print(f"  Status: {plan.get('status')}")
     if plan.get("error"):
         print(f"  Error:  {plan['error'][:200]}")

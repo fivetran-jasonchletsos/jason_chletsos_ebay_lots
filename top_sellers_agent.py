@@ -155,143 +155,6 @@ def _esc(s: Any) -> str:
     return html.escape(str(s or ""))
 
 
-def render_report(plan: dict) -> Path:
-    sellers = plan["sellers"]
-    total_items = sum(s["n"] for s in sellers)
-
-    sections = []
-    for s in sellers:
-        cards = []
-        for it in s["items"]:
-            buying = " · ".join(
-                "BIN" if x == "FIXED_PRICE" else
-                "Auction" if x == "AUCTION" else
-                "Best Offer" if x == "BEST_OFFER" else _esc(x)
-                for x in it["buying"]
-            )
-            cards.append(f"""
-            <a class="ts-card" href="{_esc(it['url'])}" target="_blank" rel="noopener">
-              <div class="ts-img" style="background-image:url('{_esc(it['image'])}');"></div>
-              <div class="ts-meta">
-                <div class="ts-price">${it['price']:.2f}</div>
-                <div class="ts-title">{_esc(it['title'][:80])}</div>
-                <div class="ts-buying">{buying}</div>
-              </div>
-            </a>""")
-        cheapest = f"${s['cheapest']:.2f}" if s.get("cheapest") else "—"
-        # Marketplace-Pulse-style rank badge
-        rank_html = ""
-        if s.get("rank_global"):
-            rank_html = f'<span class="ts-rank">#{s["rank_global"]} GLOBAL</span>'
-        elif s.get("rank_sports"):
-            rank_html = f'<span class="ts-rank ts-rank-sports">#{s["rank_sports"]} SPORTS</span>'
-
-        # Stats blocks (only render the metrics we have)
-        stat_tiles = []
-        if s.get("active_listings"):
-            v = s["active_listings"]
-            disp = f"{v/1_000_000:.1f}M" if v >= 1_000_000 else (f"{v/1000:.0f}K" if v >= 1000 else str(v))
-            stat_tiles.append(f'<div class="ts-stat"><div class="ts-n">{disp}</div><div class="ts-l">Active listings</div></div>')
-        if s.get("lifetime_sales"):
-            v = s["lifetime_sales"]
-            disp = f"{v/1_000_000:.1f}M"
-            stat_tiles.append(f'<div class="ts-stat"><div class="ts-n">{disp}</div><div class="ts-l">Lifetime sales</div></div>')
-        if s.get("monthly_feedback"):
-            v = s["monthly_feedback"]
-            disp = f"{v/1000:.0f}K"
-            stat_tiles.append(f'<div class="ts-stat"><div class="ts-n">{disp}</div><div class="ts-l">Monthly feedback</div></div>')
-        stat_tiles.append(f'<div class="ts-stat"><div class="ts-n">{s["n"]}</div><div class="ts-l">Indexed today</div></div>')
-        stat_tiles.append(f'<div class="ts-stat"><div class="ts-n">{cheapest}</div><div class="ts-l">Cheapest now</div></div>')
-
-        sections.append(f"""
-        <section class="ts-section">
-          <header class="ts-head">
-            <div class="ts-head-main">
-              <h2><a href="{_esc(s['url'])}" target="_blank" rel="noopener">{_esc(s['name'])}</a>
-                <span class="ts-kind ts-kind-{s['kind']}">{_esc(s['kind'].upper())}</span>
-                {rank_html}</h2>
-              <p class="ts-tag">{_esc(s['tag'])}</p>
-            </div>
-            <div class="ts-stats">{''.join(stat_tiles)}</div>
-          </header>
-          <div class="ts-strip">{''.join(cards) or '<div class="ts-empty">No live listings matched the search filter.</div>'}</div>
-          <a class="ts-more" href="{_esc(s['url'])}" target="_blank" rel="noopener">More from this seller &rarr;</a>
-        </section>""")
-
-    body = f"""
-    <div class="section-head section-head--inline">
-      <div class="sh-title">
-        <div class="eyebrow">Hobby giants · the houses that move volume</div>
-        <h1 class="section-title">Top <span class="accent">Sellers</span></h1>
-      </div>
-      <div class="section-sub sh-sub">
-        Probstein, DCSports, Burbank, Greg Morris, COMC — the consignment + volume
-        houses where serious collectors hunt. Penny-start auctions, combined shipping,
-        massive turnover. Every link below carries our EPN affiliate ID so the site
-        earns commission on clicks that convert.
-      </div>
-    </div>
-
-    <div class="stat-grid">
-      <div class="stat-card"><div class="num">{len(sellers)}</div><div class="lbl">Sellers tracked</div></div>
-      <div class="stat-card"><div class="num">{total_items}</div><div class="lbl">Live listings indexed</div></div>
-    </div>
-
-    <div class="ts-sellers-grid">{''.join(sections)}</div>
-    """
-
-    extra_css = """
-<style>
-  /* Compact seller tiles — fits 2-3 sellers per row on desktop instead of one
-     full-width section each. Listings strip horizontally rather than wrapping. */
-  .ts-sellers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 14px; margin-top: 18px; }
-  .ts-section { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); margin: 0; }
-  .ts-section:hover { border-color: rgba(212,175,55,.35); }
-  .ts-head { display: flex; flex-direction: column; gap: 6px; }
-  .ts-head-main { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-  .ts-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 19px; display: inline; }
-  .ts-head h2 a { color: var(--text); text-decoration: none; }
-  .ts-head h2 a:hover { color: var(--gold); }
-  .ts-kind { font-size: 9px; padding: 2px 7px; border-radius: 999px; margin-left: 4px; letter-spacing: .12em; font-weight: 700; vertical-align: 2px; }
-  .ts-kind-consignment { color: #d4af37; background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.4); }
-  .ts-kind-volume      { color: #6cb0ff; background: rgba(108,176,255,.12); border: 1px solid rgba(108,176,255,.35); }
-  .ts-kind-vintage     { color: #c98a4d; background: rgba(201,138,77,.12); border: 1px solid rgba(201,138,77,.35); }
-  .ts-kind-pokemon     { color: #ffcc00; background: rgba(255,204,0,.1);   border: 1px solid rgba(255,204,0,.3); }
-  .ts-rank { display: inline-block; font-size: 9px; color: #fff; background: linear-gradient(135deg, #d4af37, #b8860b); padding: 2px 7px; border-radius: 999px; margin-left: 4px; letter-spacing: .12em; font-weight: 800; vertical-align: 2px; }
-  .ts-rank-sports { background: linear-gradient(135deg, #6cb0ff, #4a8fd6); }
-  .ts-tag { color: var(--text-muted); font-size: 11.5px; margin: 0; line-height: 1.4; max-height: 1.4em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ts-stats { display: flex; gap: 14px; flex-wrap: wrap; padding-top: 4px; border-top: 1px dashed var(--border); padding-bottom: 2px; }
-  .ts-stat { flex: 0 1 auto; }
-  .ts-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--gold); line-height: 1; }
-  .ts-l { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: 3px; }
-  /* Horizontal-scrolling listings strip — keeps each seller card a fixed height */
-  .ts-strip { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
-  .ts-strip::-webkit-scrollbar { height: 6px; }
-  .ts-strip::-webkit-scrollbar-track { background: transparent; }
-  .ts-strip::-webkit-scrollbar-thumb { background: rgba(212,175,55,.25); border-radius: 999px; }
-  .ts-card { flex: 0 0 124px; scroll-snap-align: start; display: block; background: var(--surface-2, rgba(255,255,255,.02)); border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
-  .ts-card:hover { transform: translateY(-2px); border-color: var(--gold); }
-  .ts-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2, rgba(255,255,255,.04)); }
-  .ts-meta { padding: 6px 8px 8px; }
-  .ts-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--gold); }
-  .ts-title { font-size: 10.5px; line-height: 1.3; color: var(--text); max-height: 27px; overflow: hidden; margin-top: 2px; }
-  .ts-buying { font-size: 9px; color: var(--text-muted); margin-top: 3px; letter-spacing: .04em; }
-  .ts-empty { padding: 16px; color: var(--text-muted); font-size: 12px; }
-  .ts-more { display: inline-block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); text-decoration: none; margin-top: 2px; font-weight: 700; }
-  .ts-more:hover { text-decoration: underline; }
-  @media (max-width: 640px) {
-    .ts-sellers-grid { grid-template-columns: 1fr; }
-  }
-</style>
-"""
-    html_doc = promote.html_shell("Top Sellers · Hobby Giants", body,
-                                  extra_head=extra_css,
-                                  active_page="top_sellers.html")
-    REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text(html_doc, encoding="utf-8")
-    return REPORT
-
-
 def ensure_nav_entry() -> None:
     entry = ("top_sellers.html", "Top Sellers", True, "For Us")
     if entry in promote._NAV_ITEMS:
@@ -313,11 +176,9 @@ def main():
     ensure_nav_entry()
     plan = build_plan()
     save_plan(plan)
-    out = render_report(plan)
     n = sum(s["n"] for s in plan["sellers"])
     print(f"  Sellers: {len(plan['sellers'])}  ·  Listings indexed: {n}")
     print(f"  Plan:   {PLAN_PATH}")
-    print(f"  Report: {out}")
 
 
 if __name__ == "__main__":

@@ -352,157 +352,6 @@ def _render_calendar(sets: list[dict]) -> str:
     </section>"""
 
 
-def render_report(plan: dict) -> Path:
-    sets = plan["sets"]
-    featured = next((s for s in sets if s["slug"] == plan.get("featured_slug")), None)
-    total_listings = sum(s["n"] for s in sets)
-    total_preorders = sum(s["n_preorder"] for s in sets)
-
-    kpis = f"""
-    <div class="pn-kpis">
-      <div class="pn-kpi"><div class="pn-kpi-n">{len(sets)}</div><div class="pn-kpi-l">Sets tracked</div></div>
-      <div class="pn-kpi"><div class="pn-kpi-n">{total_listings}</div><div class="pn-kpi-l">Live listings</div></div>
-      <div class="pn-kpi"><div class="pn-kpi-n">{total_preorders}</div><div class="pn-kpi-l">Pre-orders found</div></div>
-      <div class="pn-kpi"><div class="pn-kpi-n">{datetime.now().strftime('%H:%M')}</div><div class="pn-kpi-l">Last refreshed</div></div>
-    </div>
-    """
-
-    set_sections = "".join(_render_set_section(s) for s in sets)
-    hero_html = _render_hero(featured)
-    calendar_html = _render_calendar(sets)
-
-    body = f"""
-    <div class="section-head">
-      <div>
-        <div class="eyebrow">Pokemon TCG · release radar</div>
-        <h1 class="section-title">Pokemon <span class="accent">News</span></h1>
-        <div class="section-sub">
-          Upcoming and recent Pokemon TCG sets — handpicked for my son. Each set is scanned live
-          against eBay for pre-orders, ETBs, booster boxes, and chase singles.
-          Edit <code>pokemon_news_config.json</code> to add or tweak sets.
-        </div>
-      </div>
-    </div>
-
-    {kpis}
-    {hero_html}
-    {calendar_html}
-
-    <h2 class="pn-h2">Every Set · Live eBay Scan</h2>
-    {set_sections}
-    """
-
-    extra_css = """
-<style>
-  :root {
-    --pn-red: #ee1515;
-    --pn-blue: #3b4cca;
-    --pn-yellow: #ffcb05;
-    --pn-yellow-dim: rgba(255,203,5,.18);
-  }
-  .pn-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 22px 0; }
-  .pn-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px 18px; border-left: 3px solid var(--pn-yellow); }
-  .pn-kpi-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 40px; color: var(--pn-yellow); line-height: 1; }
-  .pn-kpi-l { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; margin-top: 6px; }
-
-  /* Hero — Reshiram red / Zekrom blue */
-  .pn-hero { position: relative; margin: 22px 0 28px; border-radius: var(--r-md); overflow: hidden; border: 1px solid rgba(255,203,5,.25); }
-  .pn-hero-bg {
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 18% 35%, rgba(238,21,21,.55), transparent 55%),
-      radial-gradient(circle at 82% 65%, rgba(59,76,202,.55), transparent 55%),
-      linear-gradient(135deg, #1a0f0f 0%, #0f0f1a 100%);
-  }
-  .pn-hero-inner { position: relative; padding: 32px 28px; }
-  .pn-hero-eyebrow { font-size: 11px; letter-spacing: .25em; color: var(--pn-yellow); font-weight: 700; }
-  .pn-hero-title { margin: 6px 0 8px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 56px; line-height: 1.05; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.55); letter-spacing: .02em; }
-  .pn-hero-blurb { color: #f3eedb; font-size: 15px; max-width: 720px; margin: 0 0 14px; }
-  .pn-hero-stats { display: flex; flex-wrap: wrap; gap: 18px; color: #ddd; font-size: 13px; margin-bottom: 14px; }
-  .pn-hero-stats b { color: var(--pn-yellow); font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 18px; }
-  .pn-hero-chases { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-  .pn-hero-chase { background: rgba(0,0,0,.35); color: var(--pn-yellow); border: 1px solid rgba(255,203,5,.35); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
-  .pn-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-
-  /* Release Calendar */
-  .pn-cal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px; margin: 22px 0 32px; }
-  .pn-cal-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-  .pn-cal-head h2 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 30px; color: var(--pn-yellow); letter-spacing: .03em; }
-  .pn-cal-sub { color: var(--text-muted); font-size: 12px; }
-  .pn-cal-list { display: flex; flex-direction: column; gap: 4px; }
-  .pn-cal-row { display: grid; grid-template-columns: 130px 1fr 100px 100px 130px; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 8px; text-decoration: none; color: var(--text); background: var(--surface-2); border-left: 3px solid var(--border); transition: background .12s, border-color .12s; font-size: 13px; }
-  .pn-cal-row:hover { background: rgba(255,203,5,.05); border-left-color: var(--pn-yellow); }
-  .pn-cal-fut { border-left-color: var(--pn-red); }
-  .pn-cal-past { border-left-color: var(--pn-blue); opacity: .85; }
-  .pn-cal-date { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 16px; color: var(--pn-yellow); }
-  .pn-cal-name { font-weight: 600; }
-  .pn-cal-lang { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
-  .pn-cal-status { font-size: 10px; letter-spacing: .15em; color: var(--text-muted); }
-  .pn-cal-cta a { color: var(--pn-yellow); text-decoration: none; font-weight: 700; font-size: 12px; }
-  .pn-cal-cta a:hover { text-decoration: underline; }
-
-  /* Section heading between hero and per-set blocks */
-  .pn-h2 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 32px; color: var(--pn-yellow); margin: 28px 0 12px; letter-spacing: .03em; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-
-  /* Per-set */
-  .pn-set { margin: 30px 0 36px; }
-  .pn-set-head { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-  .pn-set-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-  .pn-tag { font-size: 10px; padding: 3px 9px; border-radius: 999px; letter-spacing: .12em; font-weight: 700; }
-  .pn-tag-japanese { background: rgba(238,21,21,.18); color: #ff6b6b; border: 1px solid rgba(238,21,21,.4); }
-  .pn-tag-english { background: rgba(59,76,202,.22); color: #8ea1ff; border: 1px solid rgba(59,76,202,.4); }
-  .pn-set-date { color: var(--text-muted); font-size: 12px; }
-  .pn-set-head h2 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 32px; color: #fff; letter-spacing: .02em; }
-  .pn-blurb { color: var(--text-muted); font-size: 13px; margin: 4px 0 8px; max-width: 760px; }
-  .pn-set-stats { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .pn-type-chip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted); padding: 3px 9px; font-size: 11px; border-radius: 999px; }
-  .pn-type-chip b { color: var(--pn-yellow); }
-  .pn-cta { margin-left: auto; background: var(--pn-red); color: #fff; padding: 7px 14px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: .04em; transition: background .12s; }
-  .pn-cta:hover { background: #ff3838; }
-
-  /* Card grid */
-  .pn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-  .pn-grid-sm { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 6px; }
-  .pn-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
-  .pn-card:hover { transform: translateY(-2px); border-color: var(--pn-yellow); box-shadow: 0 6px 20px rgba(255,203,5,.18); }
-  .pn-img { aspect-ratio: 1 / 1; background-size: cover; background-position: center; background-color: var(--surface-2); }
-  .pn-meta { padding: 10px 12px; }
-  .pn-price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px; }
-  .pn-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 22px; color: var(--pn-yellow); }
-  .pn-chip { font-size: 9px; letter-spacing: .12em; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
-  .pn-chip-pre { background: rgba(238,21,21,.2); color: #ff8b8b; border: 1px solid rgba(238,21,21,.45); }
-  .pn-chip-type { background: rgba(59,76,202,.2); color: #9eb0ff; border: 1px solid rgba(59,76,202,.4); }
-  .pn-title { font-size: 12px; line-height: 1.4; color: var(--text); min-height: 32px; }
-  .pn-foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 6px; }
-  .pn-buy { font-size: 10px; color: var(--text-muted); letter-spacing: .04em; }
-
-  /* Chase mini-sections */
-  .pn-chase { margin-top: 18px; padding: 12px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r-md); }
-  .pn-chase-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-  .pn-chase-head h4 { margin: 0; font-size: 14px; color: var(--pn-yellow); font-weight: 700; letter-spacing: .04em; }
-  .pn-chase-sub { color: var(--text-muted); font-size: 11px; }
-
-  .pn-empty { padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r-md); }
-
-  @media (max-width: 760px) {
-    .pn-hero-title { font-size: 38px; }
-    .pn-cal-row { grid-template-columns: 1fr; gap: 4px; }
-    .pn-cal-status, .pn-cal-lang { display: none; }
-    .pn-cta { margin-left: 0; }
-    .pn-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-    .pn-hero-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-  }
-</style>
-"""
-
-    html_doc = promote.html_shell("Pokemon News · Release Radar", body,
-                                  extra_head=extra_css,
-                                  active_page="pokemon_news.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html_doc, encoding="utf-8")
-    return REPORT_PATH
-
-
 # --------------------------------------------------------------------------- #
 # Nav registration (runtime only — persist in promote.py separately)          #
 # --------------------------------------------------------------------------- #
@@ -535,13 +384,11 @@ def main() -> None:
     ensure_nav_entry()
     plan = build_plan(only_slug=args.slug)
     save_plan(plan)
-    out = render_report(plan)
 
     total = sum(s["n"] for s in plan["sets"])
     pre   = sum(s["n_preorder"] for s in plan["sets"])
     print(f"  Sets: {len(plan['sets'])}  ·  Listings: {total}  ·  Pre-orders: {pre}")
     print(f"  Plan:   {PLAN_PATH}")
-    print(f"  Report: {out}")
 
 
 if __name__ == "__main__":

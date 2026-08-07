@@ -575,10 +575,8 @@ def ensure_nav_entry() -> None:
 def main():
     ap = argparse.ArgumentParser(description=__doc__.strip())
     ap.add_argument("--report-only", action="store_true",
-                    help="Re-render docs/seller_hub.html from the cached plan.")
+                    help="No-op — docs/seller_hub.html was retired along with the old admin site.")
     args = ap.parse_args()
-
-    ensure_nav_entry()
 
     if args.report_only:
         plan = _load_json(PLAN_PATH)
@@ -591,8 +589,6 @@ def main():
         save_plan(plan)
         print(f"  Plan written: {PLAN_PATH}")
 
-    out = render_report(plan)
-    print(f"  Report written: {out}")
     print(f"  Categories: {len(plan['categories'])}  · Listings: {plan['listings_total']}")
     print(f"  Featured: {len(plan['featured'])}  · PL queued: {plan['promotions']['promoted_listings']['queued']}")
 

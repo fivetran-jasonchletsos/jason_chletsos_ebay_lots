@@ -43,7 +43,6 @@ REPO_ROOT    = Path(__file__).parent
 OUTPUT_DIR   = REPO_ROOT / "output"
 PLAN_PATH    = OUTPUT_DIR / "tracking_plan.json"
 HISTORY_PATH = OUTPUT_DIR / "tracking_history.json"
-REPORT_PATH  = promote.OUTPUT_DIR / "tracking.html"
 
 TRADING_URL = "https://api.ebay.com/ws/api.dll"
 EBAY_NS     = "urn:ebay:apis:eBLBaseComponents"
@@ -67,18 +66,6 @@ CARRIER_URLS = {
     "dhl":   "https://www.dhl.com/en/express/tracking.html?AWB={tracking}",
     "ontrac":"https://www.ontrac.com/tracking?number={tracking}",
 }
-
-_PAGE_CSS = (".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
-    ".trk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:18px 0 28px}.trk-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}.trk-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}.trk-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1}.trk-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
-    ".trk-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 24px}.trk-note h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}.trk-note ul{margin:0;padding-left:18px;color:var(--text)}"
-    ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}table.trk-tbl{width:100%;border-collapse:collapse;font-size:13px}.trk-tbl th,.trk-tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}.trk-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}"
-    ".trk-tbl .from{width:180px}.trk-tbl .from .sender{color:var(--text);font-weight:600}.trk-tbl .from .recv{color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:2px}.trk-tbl .msg .subj{color:var(--text);font-weight:600;margin-bottom:6px}.trk-tbl .msg .excerpt{color:var(--text-muted);white-space:pre-wrap;line-height:1.45}"
-    ".trk-tbl .ord{width:240px}.trk-tbl .ord .title{color:var(--text);font-weight:600;margin-bottom:4px}.trk-tbl .ord .meta{color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;line-height:1.55}.trk-tbl .ord a{color:var(--gold);text-decoration:none}.trk-tbl .ord a:hover{text-decoration:underline}"
-    ".badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;text-transform:uppercase;letter-spacing:.08em}.badge.matched{background:rgba(34,197,94,.12);color:var(--success,#22c55e);border:1px solid rgba(34,197,94,.4)}.badge.unmatched{background:rgba(234,179,8,.12);color:var(--gold,#facc15);border:1px solid rgba(234,179,8,.4)}"
-    ".trk-tbl .reply{width:36%}.trk-tbl textarea{width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-family:inherit;font-size:13px;line-height:1.5;resize:vertical}.row-actions{display:flex;align-items:center;gap:10px;margin-top:8px}.row-actions .hint{color:var(--text-dim);font-size:11px}.btn-send{background:var(--gold);color:#111;border:0;border-radius:var(--r-sm);padding:8px 14px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;font-size:12px}.btn-send:hover{filter:brightness(1.08)}.btn-send:disabled{opacity:.6;cursor:default}"
-    ".empty{color:var(--text-muted);padding:28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md)}")
-_PAGE_JS = ("document.addEventListener('click',function(e){var b=e.target.closest('.btn-send');if(!b)return;var id=b.getAttribute('data-msg-id');var t=document.querySelector('textarea[data-msg-id=\"'+id+'\"]');if(!t)return;b.disabled=true;b.textContent='Sending…';fetch('/ebay/send-reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message_id:id,body:t.value})}).then(function(r){return r.json();}).then(function(d){b.textContent=d&&d.ok?'Sent ✓':'Failed';}).catch(function(){b.disabled=false;b.textContent='Send via eBay';});});")
-_PAGE_HEAD = f"<style>{_PAGE_CSS}</style><script>{_PAGE_JS}</script>"
 
 def _read_json(path: Path, default):
     if not path.exists(): return default
@@ -371,79 +358,6 @@ def send_reply(token: str, msg: dict, body: str, ebay_cfg: dict,
     time.sleep(PACE_SEC)
     return record
 
-def _esc(s: str) -> str:
-    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-def _row_html(d: dict) -> str:
-    mid   = _esc(d.get("message_id") or "")
-    order = d.get("order") or {}
-    badge = ("<span class='badge matched'>matched</span>" if d.get("matched")
-             else "<span class='badge unmatched'>no order found</span>")
-    url   = d.get("carrier_url") or ""
-    track = (f"<a href='{_esc(url)}' target='_blank' rel='noopener'>"
-             f"{_esc(order.get('tracking_number') or '')}</a>" if url
-             else _esc(order.get('tracking_number') or '—'))
-    ord_block = (
-        f"<div class='title'>{_esc((order.get('item_title') or '')[:90])}</div>"
-        f"<div class='meta'>order {_esc(order.get('order_id') or '—')}<br>"
-        f"carrier {_esc(order.get('ship_carrier') or '—')}<br>"
-        f"tracking {track}<br>"
-        f"shipped {_esc(_fmt_date(order.get('shipped_at') or '') or '—')}<br>"
-        f"status {_esc(order.get('current_status') or '—')}</div>"
-    ) if order else "<div class='meta'>No matching recent order for this buyer.</div>"
-    return (
-        f"<tr><td class='from'><div class='sender'>{_esc(d.get('sender') or '')}</div>"
-        f"<div class='recv'>{_esc(d.get('received_at') or '')}</div></td>"
-        f"<td class='msg'><div class='subj'>{_esc(d.get('subject') or '(no subject)')}</div>"
-        f"<div class='excerpt'>{_esc((d.get('body') or '')[:280])}</div>"
-        f"<div style='margin-top:8px'>{badge}</div></td>"
-        f"<td class='ord'>{ord_block}</td>"
-        f"<td class='reply'><textarea data-msg-id=\"{mid}\" rows='7'>"
-        f"{_esc(d.get('draft_reply') or '')}</textarea>"
-        f"<div class='row-actions'><button class='btn-send' data-msg-id=\"{mid}\">"
-        f"Send via eBay</button><span class='hint'>Stub — wire to /ebay/send-reply Lambda.</span>"
-        f"</div></td></tr>")
-
-def build_report(drafts: list[dict], order_count: int) -> Path:
-    run_ts  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    total   = len(drafts)
-    matched = sum(1 for d in drafts if d.get("matched"))
-    pending = total - matched
-    if not drafts:
-        rows_html = ("<p class='empty'>No tracking-related buyer messages in the "
-                     "last 30 days. When a buyer asks \"where's my order?\" their "
-                     "message will appear here with the tracking lookup pre-filled.</p>")
-    else:
-        rows_html = ("<div class='tbl-wrap'><table class='trk-tbl'><thead><tr>"
-                     "<th>From</th><th>Message</th><th>Matched Order</th>"
-                     "<th>Drafted Reply</th></tr></thead>"
-                     f"<tbody>{''.join(_row_html(d) for d in drafts)}</tbody></table></div>")
-    body = (
-        f"<section class='hero'><h1>Order Tracking Replies</h1>"
-        f"<p class='sub'>Last run: <code>{run_ts}</code> · "
-        f"{order_count} order(s) indexed from the last 30 days</p>"
-        f"<div class='trk-kpis'>"
-        f"<div class='trk-kpi'><div class='n'>{total}</div><div class='l'>Tracking msgs</div></div>"
-        f"<div class='trk-kpi'><div class='n'>{matched}</div><div class='l'>Auto-matched</div></div>"
-        f"<div class='trk-kpi'><div class='n'>{pending}</div><div class='l'>Need lookup</div></div>"
-        f"<div class='trk-kpi'><div class='n'>{order_count}</div><div class='l'>Orders indexed</div></div>"
-        f"</div></section>"
-        f"<section class='trk-note'><h3>How this works</h3><ul>"
-        f"<li>Pulls recent orders via GetOrders (last 30 days) keyed by buyer.</li>"
-        f"<li>Filters unanswered messages to tracking keywords "
-        f"(<code>track</code>, <code>where</code>, <code>shipped</code>, "
-        f"<code>delivery</code>, <code>lost</code>, …).</li>"
-        f"<li>Matches each message to the buyer's most recent order, then "
-        f"drafts a reply with carrier + tracking number + a one-click "
-        f"carrier tracking link.</li>"
-        f"<li>Review the draft, edit if needed, click Send via eBay.</li>"
-        f"</ul></section>{rows_html}")
-    html = promote.html_shell("Order Tracking · Harpua2001", body,
-                              extra_head=_PAGE_HEAD, active_page="tracking.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
-
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Auto-respond to where's-my-order messages with tracking info.")
@@ -509,8 +423,6 @@ def main() -> int:
     else:
         print("\n  Dry run only. Re-run with --apply to send replies.")
 
-    report = build_report(drafts, order_count)
-    print(f"  Report: {report}")
     print(f"  Plan:   {PLAN_PATH}")
     return 0
 

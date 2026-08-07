@@ -59,7 +59,6 @@ CONFIG_PATH   = REPO_ROOT / "watcher_offers_config.json"
 HISTORY_PATH  = REPO_ROOT / "output" / "watcher_offers_history.json"
 PLAN_PATH     = REPO_ROOT / "output" / "watcher_offers_plan.json"
 SNAPSHOT_PATH = REPO_ROOT / "output" / "listings_snapshot.json"
-REPORT_PATH   = promote.OUTPUT_DIR / "watchers.html"
 SOLD_PATH     = REPO_ROOT / "sold_history.json"
 
 DEFAULT_CONFIG: dict = {
@@ -455,235 +454,6 @@ def send_offer(item_id: str, discount_pct_int: int, message: str,
 
 
 # --------------------------------------------------------------------------- #
-# HTML report                                                                 #
-# --------------------------------------------------------------------------- #
-
-def _fmt_money(n) -> str:
-    if n is None:
-        return "—"
-    return f"${n:,.2f}"
-
-
-def _sparkline(values: list[int]) -> str:
-    """Tiny inline SVG sparkline of cumulative offers over the last 30 days."""
-    if not values:
-        return ""
-    w, h, pad = 240, 36, 2
-    vmax = max(values) or 1
-    n = len(values)
-    pts = []
-    for i, v in enumerate(values):
-        x = pad + (i / max(1, n - 1)) * (w - pad * 2)
-        y = h - pad - (v / vmax) * (h - pad * 2)
-        pts.append(f"{x:.1f},{y:.1f}")
-    poly = " ".join(pts)
-    return (
-        f'<svg viewBox="0 0 {w} {h}" width="{w}" height="{h}" aria-hidden="true" '
-        f'style="display:block">'
-        f'<polyline fill="none" stroke="var(--gold)" stroke-width="1.8" points="{poly}"/>'
-        f'</svg>'
-    )
-
-
-def _cumulative_30d(history: list[dict]) -> list[int]:
-    """Cumulative offer count for each of the last 30 days, ending today."""
-    today = datetime.now(timezone.utc).date()
-    buckets = [0] * 30
-    for h in history:
-        ts = h.get("offered_at") or ""
-        try:
-            d = datetime.fromisoformat(ts.replace("Z", "+00:00")).date()
-        except (TypeError, ValueError):
-            continue
-        delta = (today - d).days
-        if 0 <= delta < 30:
-            buckets[29 - delta] += 1
-    # Make cumulative
-    running = 0
-    cum = []
-    for b in buckets:
-        running += b
-        cum.append(running)
-    return cum
-
-
-def build_report(plan: dict, history: list[dict], cfg: dict) -> Path:
-    run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    decisions = plan.get("decisions", []) if isinstance(plan, dict) else (plan or [])
-
-    by_dec: dict[str, list[dict]] = {"apply": [], "skip": [], "blocked": []}
-    for d in decisions:
-        by_dec.setdefault(d["decision"], []).append(d)
-
-    total_uplift = sum(d.get("expected_uplift") or 0 for d in by_dec["apply"])
-    total_watchers = sum(d.get("watchers") or 0 for d in by_dec["apply"])
-    spark = _sparkline(_cumulative_30d(history))
-    sent_total = len(history)
-    sent_30d = sum(1 for h in history if _within_days(h.get("offered_at"), 30))
-
-    def _row(d: dict) -> str:
-        thumb = (
-            f'<img src="{d.get("pic","")}" alt="" loading="lazy" '
-            f'style="width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">'
-            if d.get("pic") else ""
-        )
-        reasons = "<br>".join(d.get("reasons", []) or [])
-        return f"""
-        <tr class="row-{d['decision']}">
-          <td class="thumb">{thumb}</td>
-          <td class="item">
-            <a href="{d.get('url','#')}" target="_blank" rel="noopener">
-              <span class="title">{(d.get('title') or '')[:90]}</span>
-              <span class="item-id">{d['item_id']}</span>
-            </a>
-          </td>
-          <td class="num">{d.get('watchers', 0)}</td>
-          <td class="num">{_fmt_money(d.get('current_price'))}</td>
-          <td class="num target">{_fmt_money(d.get('offer_price'))}</td>
-          <td class="num">{d.get('discount_pct',0):.1f}%</td>
-          <td class="num">{_fmt_money(d.get('floor_price'))}</td>
-          <td class="num uplift">{_fmt_money(d.get('expected_uplift'))}</td>
-          <td class="reasons">{reasons}</td>
-          <td class="decision decision-{d['decision']}">{d['decision'].upper()}</td>
-        </tr>"""
-
-    def _section(title: str, items: list[dict]) -> str:
-        if not items:
-            return f"<h3>{title} <span class='count'>(0)</span></h3><p class='empty'>None.</p>"
-        rows = "\n".join(_row(d) for d in items)
-        return f"""
-        <h3>{title} <span class='count'>({len(items)})</span></h3>
-        <div class="tbl-wrap">
-          <table class="watchers-tbl">
-            <thead><tr>
-              <th></th><th>Listing</th><th>Watch</th><th>Now</th><th>Offer</th>
-              <th>%</th><th>Floor</th><th>Exp Uplift</th><th>Reasoning</th><th>Decision</th>
-            </tr></thead>
-            <tbody>{rows}</tbody>
-          </table>
-        </div>"""
-
-    recent_hist = list(reversed(history))[:50]
-    hist_rows = "\n".join(
-        f"<tr><td>{h.get('offered_at','')[:19]}</td>"
-        f"<td><a href='{h.get('url','#')}' target='_blank'>{h.get('item_id')}</a></td>"
-        f"<td>{h.get('watchers',0)}</td>"
-        f"<td class='num'>{_fmt_money(h.get('current_price'))}</td>"
-        f"<td class='num'>{_fmt_money(h.get('offer_price'))}</td>"
-        f"<td>{h.get('discount_pct',0):.1f}%</td>"
-        f"<td>{'OK' if h.get('ok') else 'FAIL: ' + (h.get('error') or '')[:60]}</td></tr>"
-        for h in recent_hist
-    )
-    history_block = (
-        f"<div class='tbl-wrap'><table class='watchers-tbl'>"
-        f"<thead><tr><th>Sent</th><th>Item</th><th>Watch</th><th>Was</th>"
-        f"<th>Offer</th><th>%</th><th>Result</th></tr></thead>"
-        f"<tbody>{hist_rows}</tbody></table></div>"
-        if recent_hist else "<p class='empty'>No offers sent yet.</p>"
-    )
-
-    body = f"""
-<section class="hero">
-  <h1>Watcher Offers</h1>
-  <p class="sub">Last run: <code>{run_ts}</code> · Anyone who hits Watch is 80% sold — we close the other 20%.</p>
-  <div class="stat-grid">
-    <div class="stat"><div class="stat-n">{len(by_dec['apply'])}</div><div class="stat-l">offers queued</div></div>
-    <div class="stat"><div class="stat-n">{total_watchers}</div><div class="stat-l">total watchers</div></div>
-    <div class="stat"><div class="stat-n">{_fmt_money(total_uplift)}</div><div class="stat-l">expected uplift</div></div>
-    <div class="stat"><div class="stat-n">{len(by_dec['blocked'])}</div><div class="stat-l">blocked</div></div>
-  </div>
-</section>
-
-<section class="cfg">
-  <h3>Active config</h3>
-  <ul class="cfg-list">
-    <li>Discount: {cfg['discount_pct']*100:.1f}% (max {cfg['max_discount_pct']*100:.1f}%)</li>
-    <li>Floor multiplier: {cfg['min_floor_multiplier']*100:.0f}% of price · sold floor ×{cfg['sold_floor_multiplier']:.2f}</li>
-    <li>Min watchers: {cfg['min_watchers_to_offer']} · Cooldown: {cfg['cooldown_days']}d</li>
-    <li>Offer duration: {cfg['offer_duration_days']}d · Max per run: {cfg['max_offers_per_run']}</li>
-    <li>Take-rate baseline: {cfg['take_rate_baseline']*100:.0f}%</li>
-  </ul>
-  <p class="hint">Edit <code>watcher_offers_config.json</code> at repo root. Run: <code>python watchers_offer_agent.py</code> (dry) or <code>--apply</code>.</p>
-</section>
-
-<section class="spark-card">
-  <div class="spark-meta">
-    <div class="spark-n">{sent_total}</div>
-    <div class="spark-l">offers sent all-time · <strong>{sent_30d}</strong> in last 30d</div>
-  </div>
-  <div class="spark-svg">{spark}</div>
-</section>
-
-{_section('🎯 Will send', by_dec['apply'])}
-{_section('⊝ Skipped (no watchers)', by_dec['skip'])}
-{_section('⛔ Blocked', by_dec['blocked'])}
-
-<section>
-  <h3>Recent offer history</h3>
-  {history_block}
-</section>
-"""
-
-    extra_css = """
-<style>
-  .hero { padding: 24px 0 12px; }
-  .hero h1 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 56px; letter-spacing: .02em; }
-  .hero .sub { color: var(--text-muted); }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 18px 0; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; }
-  .stat-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 36px; color: var(--gold); line-height: 1; }
-  .stat-l { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
-  .cfg { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 18px; margin: 18px 0; }
-  .cfg h3 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); }
-  .cfg-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 18px; }
-  .cfg .hint { color: var(--text-muted); font-size: 13px; margin: 10px 0 0; }
-  .spark-card { display: flex; align-items: center; gap: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 18px; margin: 18px 0; }
-  .spark-n { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; letter-spacing: -0.005em; font-size: 42px; color: var(--gold); line-height: 1; }
-  .spark-l { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
-  .spark-svg { margin-left: auto; }
-  h3 .count { color: var(--text-muted); font-weight: 400; font-size: .7em; }
-  .tbl-wrap { overflow-x: auto; border-radius: var(--r-md); border: 1px solid var(--border); margin: 8px 0 24px; }
-  table.watchers-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .watchers-tbl th, .watchers-tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .watchers-tbl th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-  .watchers-tbl tr:hover td { background: var(--surface-2); }
-  .watchers-tbl .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
-  .watchers-tbl .target { color: var(--gold); font-weight: 600; }
-  .watchers-tbl .uplift { color: var(--success); font-weight: 600; }
-  .watchers-tbl .thumb { width: 64px; }
-  .watchers-tbl .item .title { display: block; color: var(--text); }
-  .watchers-tbl .item .item-id { display: block; color: var(--text-dim); font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
-  .watchers-tbl .item a { text-decoration: none; }
-  .watchers-tbl .item a:hover .title { color: var(--gold); }
-  .watchers-tbl .reasons { color: var(--text-muted); font-size: 12px; max-width: 300px; }
-  .decision { font-weight: 700; font-size: 11px; letter-spacing: .1em; }
-  .decision-apply { color: var(--success); }
-  .decision-skip { color: var(--text-muted); }
-  .decision-blocked { color: var(--danger); }
-  .row-apply { background: linear-gradient(to right, rgba(127,199,122,0.05), transparent); }
-  .empty { color: var(--text-muted); padding: 20px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r-md); }
-</style>
-"""
-    html = promote.html_shell(
-        "Watcher Offers · Harpua2001", body,
-        extra_head=extra_css, active_page="watchers.html",
-    )
-    REPORT_PATH.parent.mkdir(exist_ok=True)
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
-
-
-def _within_days(ts: str | None, days: int) -> bool:
-    if not ts:
-        return False
-    try:
-        t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-    except (TypeError, ValueError):
-        return False
-    return t >= datetime.now(timezone.utc) - timedelta(days=days)
-
-
-# --------------------------------------------------------------------------- #
 # Orchestration                                                               #
 # --------------------------------------------------------------------------- #
 
@@ -819,9 +589,7 @@ def main() -> int:
         return 0
 
     if args.report_only:
-        plan = json.loads(PLAN_PATH.read_text()) if PLAN_PATH.exists() else {}
-        path = build_report(plan, load_history(), cfg)
-        print(f"  Wrote {path}")
+        print("  --report-only is a no-op: the docs/watchers.html report was retired.")
         return 0
 
     ebay_cfg, listings, sold = gather_inputs(use_cache=args.no_fetch)
@@ -856,8 +624,6 @@ def main() -> int:
     else:
         print("\n  Dry run only. Re-run with --apply to send offers.")
 
-    path = build_report(plan_doc, load_history(), cfg)
-    print(f"  Report: {path}")
     return 0
 
 

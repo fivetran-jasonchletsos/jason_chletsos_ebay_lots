@@ -354,94 +354,6 @@ h1{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-v
 """
 
 
-def render_html(plan: Dict[str, Any], first_run: bool) -> None:
-    drops = plan.get("drops", [])
-    new_today = plan.get("new_today", [])
-    gone_today = plan.get("gone_today", [])
-    generated_at = plan.get("generated_at", "")
-    # Render the ISO timestamp in friendly Eastern time, e.g. "4:06 PM ET, May 25".
-    try:
-        from datetime import datetime as _dt, timezone as _tz, timedelta as _td
-        _parsed = _dt.fromisoformat(generated_at.replace("Z", "+00:00")) if generated_at else None
-        if _parsed:
-            # Eastern Time without pulling in zoneinfo (US/EDT in May 2026 is UTC-4).
-            _et = _parsed.astimezone(_tz(_td(hours=-4)))
-            generated_at_human = _et.strftime("%-I:%M %p ET, %b %-d")
-        else:
-            generated_at_human = "just now"
-    except Exception:
-        generated_at_human = generated_at or "just now"
-
-    if first_run:
-        hero_note = (
-            "Just turned this feature on — nothing to compare against yet. "
-            "Check back tomorrow; any card whose price dropped overnight will land here."
-        )
-    else:
-        hero_note = (
-            "Cards whose price dropped since yesterday, plus brand-new listings. "
-            f"A card has to be at least {DROP_PCT_MIN:.0f}% off and ${DROP_DOLLAR_MIN:.2f} cheaper to make this page."
-        )
-
-    drops_html = "\n".join(_card_drop(r) for r in drops[:60])
-    new_html = "\n".join(_card_basic(r, "new") for r in new_today[:60])
-    gone_html = "\n".join(_card_basic(r, "gone") for r in gone_today[:60])
-
-    os.makedirs(DOCS_DIR, exist_ok=True)
-    body = f"""
-    <h1>Today's Steals</h1>
-    <p class="pd-sub">Prices that dropped overnight, fresh listings, and what just sold · updated <b>{_esc(generated_at_human)}</b><br>{hero_note}</p>
-
-    <div class="pk-kpis">
-      <div class="pk-kpi kpi-drop">
-        <div class="pk-n">{len(drops)}</div>
-        <div class="pk-l">Price drops</div>
-      </div>
-      <div class="pk-kpi kpi-new">
-        <div class="pk-n">{len(new_today)}</div>
-        <div class="pk-l">New today</div>
-      </div>
-      <div class="pk-kpi kpi-gone">
-        <div class="pk-n">{len(gone_today)}</div>
-        <div class="pk-l">Just sold / pulled</div>
-      </div>
-      <div class="pk-kpi">
-        <div class="pk-n">{len(drops) + len(new_today)}</div>
-        <div class="pk-l">Worth a look</div>
-      </div>
-    </div>
-
-    {_section(
-        "Biggest drops",
-        "Cards that got cheaper overnight. Sorted by how much you'd save.",
-        drops_html,
-        "No price drops today. Tomorrow's another day — check back in the morning.",
-    )}
-
-    {_section(
-        "New today",
-        "Cards we just listed in the last 24 hours. Fresh from the shoebox.",
-        new_html,
-        "No new listings hit the store today.",
-    )}
-
-    {_section(
-        "Gone today",
-        "Cards that just sold or were pulled. Hot ones move fast — peek here to see what got grabbed.",
-        gone_html,
-        "Nothing's left the store today.",
-    )}
-"""
-    page = promote.html_shell(
-        "Today's Steals · Harpua2001",
-        body,
-        extra_head=f"<style>{_CSS}</style>",
-        active_page="price_drops.html",
-    )
-    with open(HTML_PATH, "w", encoding="utf-8") as fh:
-        fh.write(page)
-
-
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -466,18 +378,15 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if prior is None:
         save_snapshot(current)
-        plan = write_plan([], [], [], first_run=True)
-        render_html(plan, first_run=True)
+        write_plan([], [], [], first_run=True)
         print("[first-run] no prior snapshot — wrote baseline, nothing to diff.")
         print(f"[wrote] {SNAPSHOT_PATH}")
         print(f"[wrote] {PLAN_PATH}")
-        print(f"[wrote] {HTML_PATH}")
         return 0
 
     drops, new_today, gone_today = diff(prior, current)
     save_snapshot(current)
-    plan = write_plan(drops, new_today, gone_today, first_run=False)
-    render_html(plan, first_run=False)
+    write_plan(drops, new_today, gone_today, first_run=False)
 
     print(
         f"[diff] drops={len(drops)} new={len(new_today)} gone={len(gone_today)} "
@@ -492,7 +401,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     print(f"[wrote] {SNAPSHOT_PATH}")
     print(f"[wrote] {PLAN_PATH}")
-    print(f"[wrote] {HTML_PATH}")
     return 0
 
 

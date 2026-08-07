@@ -270,106 +270,6 @@ def _fmt_money(n) -> str:
     except (TypeError, ValueError):
         return "—"
 
-def _offer_row(o: dict, d: dict) -> str:
-    label, klass = _BADGE.get(d["action"], ("?", "mute"))
-    counter = _fmt_money(d.get("counter_price")) if d["action"] == "counter" else "—"
-    msg = escape((o.get("message") or "")[:140])
-    msg_html = f"<div class=msg>{msg}</div>" if msg else ""
-    return (
-        "<tr>"
-        f"<td class='item'><span class='title'>{escape((o.get('title') or '')[:90])}</span>"
-        f"<span class='item-id'>item {escape(str(o.get('item_id') or ''))}"
-        f" · offer {escape(str(o.get('offer_id') or ''))}</span></td>"
-        f"<td class='buyer'>{escape(o.get('buyer_id') or '')}</td>"
-        f"<td class='num'>{_fmt_money(o.get('current_price'))}</td>"
-        f"<td class='num offered'>{_fmt_money(o.get('offered_price'))}</td>"
-        f"<td class='num'>{_fmt_money(d.get('accept_thresh'))}</td>"
-        f"<td class='num'>{_fmt_money(d.get('decline_thresh'))}</td>"
-        f"<td><span class='pill {klass}'>{label}</span></td>"
-        f"<td class='num'>{counter}</td>"
-        f"<td class='reason'>{escape(d.get('reason') or '')}{msg_html}</td>"
-        f"</tr>"
-    )
-
-_CSS = (
-    "<style>"
-    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
-    ".bo-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:18px 0 28px}"
-    ".bo-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}"
-    ".bo-kpi::before{content:\"\";position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}"
-    ".bo-kpi-n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:40px;color:var(--gold);line-height:1}"
-    ".bo-kpi-l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
-    ".bo-kpi-foot{color:var(--text-dim);font-size:11px;margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}"
-    ".bo-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 24px}"
-    ".bo-note h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}.bo-note ul{margin:0;padding-left:18px;color:var(--text)}"
-    "h3 .count{color:var(--text-muted);font-weight:400;font-size:.7em}"
-    ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}"
-    "table.bo-tbl{width:100%;border-collapse:collapse;font-size:13px}"
-    ".bo-tbl th,.bo-tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}"
-    ".bo-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}"
-    ".bo-tbl tr:hover td{background:var(--surface-2)}.bo-tbl .num{text-align:right;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace}"
-    ".bo-tbl .offered{color:var(--gold);font-weight:600}.bo-tbl .item .title{display:block;color:var(--text)}"
-    ".bo-tbl .item .item-id{display:block;color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:2px}"
-    ".bo-tbl .buyer{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted)}.bo-tbl .reason{color:var(--text-muted);font-size:12px;max-width:320px}"
-    ".bo-tbl .reason .msg{margin-top:4px;padding:4px 6px;background:var(--surface-2);border-radius:4px;color:var(--text);font-style:italic}"
-    ".pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}"
-    ".pill.ok{background:rgba(40,167,69,.15);color:var(--success)}.pill.no{background:rgba(220,53,69,.15);color:var(--danger)}"
-    ".pill.warn{background:rgba(255,193,7,.15);color:var(--gold)}.pill.mute{background:var(--surface-2);color:var(--text-muted)}"
-    ".empty{color:var(--text-muted);padding:28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md)}"
-    "</style>"
-)
-
-def build_report(decided: list[tuple[dict, dict]],
-                 summary: dict, dry_run: bool) -> Path:
-    run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    mode   = "Dry run" if dry_run else "Applied"
-    if decided:
-        rows = "\n".join(_offer_row(o, d) for o, d in decided)
-        table = (
-            "<div class='tbl-wrap'><table class='bo-tbl'>"
-            "<thead><tr><th>Listing</th><th>Buyer</th><th>List</th><th>Offered</th>"
-            "<th>Accept ≥</th><th>Decline ≤</th><th>Action</th>"
-            "<th>Counter</th><th>Reason</th></tr></thead>"
-            f"<tbody>{rows}</tbody></table></div>"
-        )
-    else:
-        table = ("<p class='empty'>No pending Best Offers right now. "
-                 "eBay's listing-level thresholds are doing the work — "
-                 "this inbox lights up when an offer lands in the review band.</p>")
-
-    def _kpi(n, lbl, foot):
-        return (f"<div class='bo-kpi'><div class='bo-kpi-n'>{n}</div>"
-                f"<div class='bo-kpi-l'>{lbl}</div>"
-                f"<div class='bo-kpi-foot'>{foot}</div></div>")
-    kpis = (
-        _kpi(summary['total'],   "Reviewed",  "Pending offers polled this run") +
-        _kpi(summary['accept'],  "Accepted",  "Offer ≥ accept threshold") +
-        _kpi(summary['decline'], "Declined",  "Offer ≤ decline threshold") +
-        _kpi(summary['counter'], "Countered", "Midpoint counter") +
-        _kpi(_fmt_money(summary['uplift']), "Est. uplift",
-             "Accept revenue + counter delta")
-    )
-    body = (
-        f"<section class='hero'><h1>Best Offer Inbox</h1>"
-        f"<p class='sub'>Last poll: <code>{run_ts}</code> · "
-        f"Mode: <code>{mode}</code></p>"
-        f"<div class='bo-kpis'>{kpis}</div></section>"
-        "<section class='bo-note'><h3>How this works</h3><ul>"
-        "<li><strong>best_offer_agent.py</strong> sets eBay's per-listing "
-        "auto-accept (95% market) and auto-decline (75% market) thresholds.</li>"
-        "<li>eBay handles offers above/below those bands automatically.</li>"
-        "<li>Offers in the middle land here — we counter at the midpoint "
-        "between the buyer's offer and the accept threshold.</li>"
-        "<li>Listings without a plan entry are left for manual review.</li>"
-        "</ul></section>"
-        f"<h3>Inbox <span class='count'>({len(decided)})</span></h3>{table}"
-    )
-    html = promote.html_shell("Best Offer Inbox · Harpua2001",
-                              body, extra_head=_CSS,
-                              active_page="best_offer.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
 
 def _record(o: dict, d: dict, *, ack: str | None, ok: bool | None,
             errors: list[dict] | None = None) -> dict:
@@ -442,8 +342,6 @@ def main() -> int:
         print("\n  Dry run only. Re-run with --apply to send responses.")
         _append_history([_record(o, d, ack="DryRun", ok=None) for o, d in decided])
 
-    report = build_report(decided, summary, dry_run=not args.apply)
-    print(f"  Inbox:  {report}")
     return 0
 
 if __name__ == "__main__":

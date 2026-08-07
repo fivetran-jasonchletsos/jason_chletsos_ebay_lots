@@ -444,42 +444,6 @@ def _daily_revenue_chart(plan: dict[str, Any]) -> str:
     )
 
 
-def render_html(plan: dict[str, Any]) -> Path:
-    bootstrap = json.dumps(plan, default=str)
-    revenue_chart = _daily_revenue_chart(plan)
-    body = f"""
-<main class="ow-wrap">
-  <section class="ow-hero">
-    <div class="big" id="ow-hero-amount">$0.00</div>
-    <div class="sub" id="ow-hero-sub">Today &middot; 0 orders</div>
-    <div class="ow-stamp" id="ow-stamp"><span class="dot"></span>Live</div>
-  </section>
-
-  <section class="ow-kpis">
-    <div class="ow-kpi"><div class="n" id="ow-k-today-amt">$0.00</div><div class="l">Today $</div></div>
-    <div class="ow-kpi"><div class="n" id="ow-k-today-cnt">0</div><div class="l">Today orders</div></div>
-    <div class="ow-kpi"><div class="n" id="ow-k-7d-amt">$0.00</div><div class="l">7-day $</div></div>
-    <div class="ow-kpi"><div class="n" id="ow-k-30d-amt">$0.00</div><div class="l">30-day $</div></div>
-  </section>
-
-  {revenue_chart}
-
-  <h2 class="ow-section-title">Live orders</h2>
-  <div id="ow-cards" class="ow-cards"></div>
-</main>
-<script>window.__OW_BOOTSTRAP = {bootstrap};</script>
-<script>{_PAGE_JS}</script>
-""".strip()
-    html = promote.html_shell(
-        f"Orders Watch · {promote.SELLER_NAME}",
-        body,
-        extra_head=f"<style>{_PAGE_CSS}</style>",
-        active_page="orders_watch.html",
-    )
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
-
-
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -513,10 +477,8 @@ def main() -> int:
     totals = compute_totals(orders)
     plan = write_plan(orders, totals)
     _print_summary(plan)
-    report = render_html(plan)
     print(f"  Plan:   {PLAN_PATH}")
     print(f"  Live:   {DOCS_PLAN_PATH}")
-    print(f"  Page:   {report}")
     return 0
 
 

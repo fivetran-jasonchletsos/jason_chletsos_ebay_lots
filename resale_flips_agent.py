@@ -656,9 +656,6 @@ def main():
     PLAN_FILE.write_text(json.dumps(plan, indent=2, default=str), encoding="utf-8")
     print(f"Wrote {PLAN_FILE} ({len(flips)} candidates)")
 
-    out_html = build_page(plan)
-    print(f"Wrote {out_html} ({out_html.stat().st_size:,} bytes)")
-
 
 if __name__ == "__main__":
     main()

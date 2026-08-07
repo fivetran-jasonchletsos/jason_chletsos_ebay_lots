@@ -3056,39 +3056,10 @@ _CDN_FOOT = ""  # libs now load synchronously in <head> so body inline scripts c
 # Groups are admin-only if every item inside them is admin-only.
 _NAV_ITEMS = [
     # ── Public buyer-facing storefront ──
-    ("index.html",            "Shop",          True,  None),
-    ("steals.html",           "Steals",        True,  None),
-    ("sold.html",             "Recently Sold", True,  None),
-    ("harpua_ai_overview.pdf","AI Overview",   True,  None),
-    ("browse.html",           "All Sets & Players", True, "Browse"),
-    ("by_set.html",           "By Set",        True,  "Browse"),
-    ("by_player.html",        "By Player",     True,  "Browse"),
-    ("under_10.html",         "Under $10",     True,  "Browse"),
-    ("pokemon.html",          "Pokemon",       True,  "Browse"),
-    # Public page, but pricing/valuation PDFs inside it are wrapped in
-    # data-admin="1" so anonymous buyers only see checklists/sort/pull sheets
-    # — the low/typ/high floor worksheets stay admin-only (JC decision
-    # 2026-07-25: split, after review flagged the Best Offer sniping risk).
-    # Must sit WITH the Browse block: a group tuple placed mid-"More" makes
-    # the mobile drawer emit duplicate group headers.
-    ("pdf_library.html",      "PDF Library",   True,  "Browse"),
-
-    # ── Admin: hidden behind auth gate ──
-    ("daily.html",            "Daily",         False, None),
-    ("sales_trends.html",     "Sales Trends",  False, None),
-    ("collx_vs_ebay.html",    "CollX vs eBay", False, None),
-    ("seller_hub.html",       "Seller Hub",    False, "More"),
-    ("price_consistency.html","Price Gate",    False, "More"),
-    ("best_offer.html",       "Best Offer",    False, "More"),
-    ("lots.html",             "Lots",          False, "More"),
-    ("relist.html",           "Relist Unsold", False, "More"),
-    ("collect.html",          "My Wants",      False, "More"),
-    ("top_sellers.html",      "Top Sellers",   False, "More"),
-    ("pokemon_news.html",     "Pokemon News",  False, "More"),
-    ("price_drops.html",      "Price Drops",   False, "More"),
-    ("deals.html",            "Deal Hunter",   False, "More"),
-    ("resale_flips.html",     "Resale Flips",  False, "More"),
-    ("jack_pokemon.html",     "Jack's Pokemon",False, "More"),
+    # Buyer storefront + old admin report fleet retired 2026-08-06 (never
+    # got customer traffic; JC wanted one personal page instead). This is
+    # now the entire site: a single admin-gated dashboard.
+    ("dashboard.html",        "Dashboard",     False, None),
 ]
 _ADMIN_PAGES = {p for p, _, public, _ in _NAV_ITEMS if not public}
 
@@ -8344,15 +8315,11 @@ def build_sitemap_and_robots(listings: list[dict]) -> None:
         ("title_review.html",   "0.5", "daily"),
         ("reddit.html",         "0.4", "weekly"),
         ("craigslist.html",     "0.4", "weekly"),
-        ("return-policy.html",  "0.3", "monthly"),
     ]
     entries = []
     for path, prio, freq in urls:
         loc = f"{SITE_URL}/{path}".rstrip("/")
         entries.append(f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority></url>")
-    for l in listings:
-        if l.get("item_id"):
-            entries.append(f"  <url><loc>{SITE_URL}/items/{l['item_id']}.html</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>")
 
     sitemap = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
@@ -8365,6 +8332,7 @@ def build_sitemap_and_robots(listings: list[dict]) -> None:
         "Disallow: /price_review.html\n"
         "Disallow: /title_review.html\n"
         "Disallow: /quality.html\n"
+        "Disallow: /dashboard.html\n"
         f"Sitemap: {SITE_URL}/sitemap.xml\n"
     )
     (OUTPUT_DIR / "robots.txt").write_text(robots, encoding="utf-8")
@@ -10419,20 +10387,11 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
     HTML) carries the canonical admin hash. Returns a list of issue strings;
     empty list = passing."""
     issues: list[str] = []
-    # Derive the page list from _NAV_ITEMS so a future nav addition is
-    # automatically integrity-checked. We then add any specials that ship in
-    # every build but aren't in the nav (returns dashboard, return policy,
-    # repricing, cassini, photo_audit) plus the static assets.
+    # Derive the page list from _NAV_ITEMS — just dashboard.html since the
+    # buyer storefront + old admin fleet were retired 2026-08-06.
     _nav_pages = [h for (h, _l, _pub, _g) in _NAV_ITEMS if h.endswith(".html")]
-    _extra_specials = [
-        "returns.html",          # admin returns dashboard (not in nav)
-        "return-policy.html",    # public legal policy page (not in nav)
-        "repricing.html",        # admin repricing dashboard
-        "cassini.html",          # admin Cassini score dashboard
-        "photo_audit.html",      # admin photo audit dashboard
-    ]
-    _static_assets = ["sitemap.xml", "robots.txt", "google_feed.xml", "manifest.webmanifest"]
-    expected = sorted(set(_nav_pages + _extra_specials)) + _static_assets
+    _static_assets = ["sitemap.xml", "robots.txt", "manifest.webmanifest"]
+    expected = sorted(set(_nav_pages)) + _static_assets
     expected_hashes = set(load_admin_hashes())
     for f in expected:
         p = OUTPUT_DIR / f
@@ -10453,13 +10412,6 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
                     page_hashes = set(_r.findall(r'"([a-f0-9]+)"', m.group(1)))
                     if page_hashes != expected_hashes:
                         issues.append(f"stale admin hash in docs/{f} (likely built before recent salt/password change)")
-    # Verify item pages — count should match active listings with item_ids
-    expected_item_ids = {l["item_id"] for l in listings if l.get("item_id")}
-    items_dir = OUTPUT_DIR / "items"
-    actual_item_files = {p.stem for p in items_dir.glob("*.html")} if items_dir.exists() else set()
-    missing_items = expected_item_ids - actual_item_files
-    if missing_items:
-        issues.append(f"missing {len(missing_items)} item pages (e.g. {sorted(missing_items)[:3]})")
     return issues
 
 
@@ -10549,10 +10501,6 @@ def main():
         print(f"  OG card skipped — {_og_exc}")
     print("  Fetching sold listings (last 90 days; merged into all-time history)...")
     sold = fetch_sold_listings(token, cfg, days_back=90)
-    build_sold_page(sold)
-    print("  Scanning Deals watchlist...")
-    deals = fetch_deals(cfg)
-    build_deals_page(deals)
     print("  Fetching market price comps (this takes ~1 min)...")
     market = fetch_market_prices(listings, cfg)
     print("  Aggregating multi-source pricing (cached 24h)...")
@@ -10614,93 +10562,47 @@ def main():
             print(f"  SCP price agent timed out after 900s — see output/logs/card_price_agent.py.log")
         except Exception as e:
             print(f"  SCP price agent skipped: {e}")
-    # Buyer storefront — replaces the old build_dashboard() seller view.
-    # Lazy-import so older checkouts without storefront_agent still build.
+    # Personal dashboard — replaces the old buyer storefront (never got
+    # customer traffic) and the old seller.html / admin report fleet
+    # (torn down 2026-08-06). Refreshes sales_trends.json from the
+    # sold_history.json we just updated above, then renders dashboard.html.
     try:
-        import storefront_agent
-        storefront_agent.build_index()
-        print(f"  Storefront: docs/index.html  ({len(listings)} listings)")
+        import sales_trends_agent
+        sales_trends_agent.main()
+        import dashboard_agent
+        dashboard_agent.build()
+        print(f"  Dashboard: docs/dashboard.html")
     except Exception as _exc:
-        print(f"  Storefront skipped (falling back to build_dashboard): {_exc}")
-        build_dashboard(listings, market, seller=seller, pricing=pricing_by_id)
-
-    # Buyer-facing utility pages still in the live nav.
-    build_google_feed(listings, market=market, sold_history=sold, pricing=pricing_by_id)
-    build_return_policy()
-
-    # Buyer-facing Steals page — JC flagged 2026-05-27 that the nav link to
-    # "Steals" was pointing at price_drops.html (internal tracker) and the real
-    # Steals page wasn't being generated. Rewired the nav and re-enabled the build.
-    try:
-        build_steals_page(listings, market)
-    except Exception as _exc:
-        print(f"  build_steals_page skipped: {_exc}")
-
-    # NOTE: build_analytics_page, build_market_intel_page,
-    # build_quality_report, build_craigslist, build_reddit, build_price_review,
-    # build_title_review, build_make_money, write_analysis_views — all removed
-    # from the standard refresh. Their pages are no longer linked in the nav
-    # (see _NAV_ITEMS). Call them by hand if you ever need to regenerate.
-
-    # Sister agents — each is dry-run, idempotent, and produces a docs/*.html
-    # admin page from the snapshot we just wrote. Lazy import so older
-    # checkouts without these modules still build cleanly.
-    def _run_agent(label: str, fn):
-        try:
-            fn()
-            print(f"  {label}")
-        except Exception as _exc:
-            print(f"  {label} skipped: {_exc}")
-
-    try:
-        import seller_hub_agent
-        plan = seller_hub_agent.build_plan()
-        seller_hub_agent.save_plan(plan)
-        seller_hub_agent.render_report(plan)
-        print(f"  Seller Hub: docs/seller_hub.html  ({len(plan['categories'])} cats, {plan['listings_total']} listings)")
-    except Exception as _exc:
-        print(f"  Seller Hub skipped: {_exc}")
+        print(f"  Dashboard skipped: {_exc}")
 
     # Sister agents that don't hit per-item Trading APIs — fast, safe to chain
     # into every build. Each is invoked as a subprocess so its own argparse
-    # doesn't conflict with promote.py's sys.argv. Failures don't abort the
-    # build, but every run's stdout+stderr lands in output/logs/<script>.log
-    # so silent failures become diagnosable.
+    # doesn't conflict with promote.py's sys.argv, and each still does its
+    # real business work (plans, price checks, drafts) — only their retired
+    # docs/*.html report pages were removed (2026-08-06). Failures don't
+    # abort the build; stdout+stderr land in output/logs/<script>.log.
     import subprocess as _sp
     import time as _time
     _python   = sys.executable
     _here     = Path(__file__).parent
     _logs_dir = _here / "output" / "logs"
     _logs_dir.mkdir(parents=True, exist_ok=True)
-    # Only agents that:
-    #   (a) produce a page still linked in the nav, OR
-    #   (b) refresh data other pages depend on (orders_watch_agent feeds
-    #       daily_digest's sparkline + revenue chart),
-    #   (c) and don't make outbound promotional pushes.
-    # Dead/promo agents (email_campaign, inventory, pnl, listing_performance,
-    # repeat_buyers, pokemon_deals, set_completion, ai_assistant) intentionally
-    # removed — they crash, push promos, or render orphan pages.
     for label, script, timeout_s in [
-        ("Orders Watch: docs/orders_watch.html",     "orders_watch_agent.py",     180),
-        ("My Wants: docs/collect.html",              "buyer_watchlist_agent.py",  180),
-        ("Pokemon News: docs/pokemon_news.html",     "pokemon_news_agent.py",     180),
-        ("Under $10: docs/under_10.html",            "under_10_agent.py",         120),
-        ("Top Sellers: docs/top_sellers.html",       "top_sellers_agent.py",      120),
-        ("Returns: docs/returns.html",               "returns_agent.py",          120),
-        ("Lots: docs/lots.html",                     "lot_generator_agent.py",    120),
-        ("Cassini Score: docs/cassini.html",         "cassini_score_agent.py",    180),
-        ("Photo Audit: docs/photo_audit.html",       "photo_audit_agent.py",      300),
-        ("Browse index: docs/browse.html",           "browse_index_agent.py",     120),
-        ("Relist unsold: docs/relist.html",          "relist_agent.py",           120),
-        ("Price Drops: docs/price_drops.html",       "price_drops_agent.py",      120),
-        ("Price consistency: docs/price_consistency.html", "price_consistency_agent.py", 180),
-        # PDF Library is in _NAV_ITEMS, so the integrity gate requires the
-        # page to exist — regenerate it every build or its baked-in shell/nav
-        # goes stale (it used to be generated only by hand).
-        ("PDF Library: docs/pdf_library.html",       "build_pdf_library.py",      60),
+        ("Orders Watch",     "orders_watch_agent.py",     180),
+        ("Buyer Watchlist",  "buyer_watchlist_agent.py",  180),
+        ("Pokemon News",     "pokemon_news_agent.py",     180),
+        ("Under $10",        "under_10_agent.py",         120),
+        ("Top Sellers",      "top_sellers_agent.py",      120),
+        ("Returns",          "returns_agent.py",          120),
+        ("Lot Generator",    "lot_generator_agent.py",    120),
+        ("Cassini Score",    "cassini_score_agent.py",    180),
+        ("Photo Audit",      "photo_audit_agent.py",      300),
+        ("Relist unsold",    "relist_agent.py",           120),
+        ("Price Drops",      "price_drops_agent.py",      120),
+        ("Price consistency","price_consistency_agent.py", 180),
         # Daily Digest MUST run last — it reads orders_watch_plan.json for
         # its 30-day sparkline.
-        ("Daily Digest: docs/daily.html",            "daily_digest_agent.py",     120),
+        ("Daily Digest",     "daily_digest_agent.py",     120),
     ]:
         sp_path = _here / script
         if not sp_path.exists():
@@ -10727,9 +10629,11 @@ def main():
     # via their CLIs or wire to /ebay/rebuild later.
 
     # ------------------------------------------------------------------
-    # Repricing agent — plans (and optionally applies) price changes,
-    # writes docs/repricing.html. Imported lazily to keep this module
-    # importable even if the agent file is missing in older checkouts.
+    # Repricing agent — plans (and optionally applies) price changes.
+    # Its docs/repricing.html report was retired 2026-08-06; the pricing
+    # logic itself (plan/apply/history) is untouched. Imported lazily to
+    # keep this module importable even if the agent file is missing in
+    # older checkouts.
     # ------------------------------------------------------------------
     try:
         import repricing_agent
@@ -10749,28 +10653,10 @@ def main():
             repricing_agent.append_history(applied)
         elif reprice_dry:
             print("  (dry preview — re-run with --reprice-apply to push to eBay)")
-        repricing_agent.build_report(plan, repricing_agent.load_history(), rcfg)
     except Exception as e:
         print(f"  ⚠ Repricing agent skipped: {e}")
-        # Write a minimal placeholder so the integrity check passes
-        (OUTPUT_DIR / "repricing.html").write_text(
-            html_shell("Repricing Agent · Harpua2001",
-                       f"<section><h1>Repricing Agent</h1><p>Not run this cycle: {e}</p></section>",
-                       active_page="repricing.html"),
-            encoding="utf-8",
-        )
 
     build_sitemap_and_robots(listings)
-
-    # ------------------------------------------------------------------
-    # Admin hub pages — four consolidated dropdowns that replace the prior
-    # sprawl in the top nav.  Each hub links to its component pages, which
-    # all remain reachable at their original URLs.
-    # ------------------------------------------------------------------
-    # Admin hub pages (analytics_hub, listings_hub, cx_hub, photo_hub) are no
-    # longer in _NAV_ITEMS — they pointed at pages that have been removed.
-    # Skip the build to keep refresh time down and the docs/ tree clean.
-    # To re-enable, restore the relevant nav entries and re-add this block.
 
     # ------------------------------------------------------------------
     # Build integrity check — refuse to deploy if any expected page is
@@ -10821,19 +10707,9 @@ def main():
 Done.
 ---------------------------------------------------------
 Site URL (after ~60s build):
-  https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/
+  https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/dashboard.html
 
-Pages:
-  /             - Searchable listing dashboard (mobile-friendly)
-  /quality.html - Quality report, worst listings first
-  /craigslist.html - Ready-to-paste Craigslist ads
-  /google_feed.xml - Submit to merchants.google.com for free Google Shopping
-
-Next steps:
-  1. Submit google_feed.xml URL to merchants.google.com (free Google Shopping)
-  2. Open quality.html and fix red listings to improve eBay search rank
-  3. Use craigslist.html to post high-value items on Craigslist (free, collector buyers)
-  4. Run this script again anytime to refresh the site with current listings
+Run this script again anytime to refresh the dashboard with current listings.
 
 To preview title improvements without changing eBay:
   python3 promote.py --dry-fix

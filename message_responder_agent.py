@@ -40,7 +40,6 @@ OUTPUT_DIR     = REPO_ROOT / "output"
 PLAN_PATH      = OUTPUT_DIR / "messages_plan.json"
 HISTORY_PATH   = OUTPUT_DIR / "messages_history.json"
 SPECIFICS_PATH = OUTPUT_DIR / "specifics_plan.json"
-REPORT_PATH    = promote.OUTPUT_DIR / "messages.html"
 
 TRADING_URL = "https://api.ebay.com/ws/api.dll"
 EBAY_NS     = "urn:ebay:apis:eBLBaseComponents"
@@ -66,29 +65,6 @@ REPLY_RETURNS  = ("All sales are final — every card is photographed front and 
                   "inside a rigid mailer.")
 REPLY_PAYMENT  = ("Payment is handled by eBay's managed payments — all standard "
                   "methods work. I ship as soon as payment clears.")
-
-_PAGE_HEAD = "<style>" + (
-    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)} "
-    ".msg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:18px 0 28px} "
-    ".msg-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden} "
-    ".msg-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7} "
-    ".msg-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1} .msg-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px} "
-    ".msg-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 24px} .msg-note h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)} .msg-note ul{margin:0;padding-left:18px;color:var(--text)} "
-    ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px} table.msg-tbl{width:100%;border-collapse:collapse;font-size:13px} "
-    ".msg-tbl th,.msg-tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top} .msg-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em} "
-    ".msg-tbl .from{width:200px} .msg-tbl .from .sender{color:var(--text);font-weight:600} .msg-tbl .from .recv,.msg-tbl .from .iid{color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:2px} "
-    ".msg-tbl .msg .subj{color:var(--text);font-weight:600;margin-bottom:6px} .msg-tbl .msg .excerpt{color:var(--text-muted);white-space:pre-wrap;line-height:1.45} .msg-tbl .msg .cat{margin-top:8px} "
-    ".badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;text-transform:uppercase;letter-spacing:.08em} .badge.auto{background:rgba(34,197,94,.12);color:var(--success,#22c55e);border:1px solid rgba(34,197,94,.4)} .badge.manual{background:rgba(234,179,8,.12);color:var(--gold,#facc15);border:1px solid rgba(234,179,8,.4)} "
-    ".msg-tbl .reply{width:38%} .msg-tbl textarea{width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-family:inherit;font-size:13px;line-height:1.5;resize:vertical} "
-    ".row-actions{display:flex;align-items:center;gap:10px;margin-top:8px} .row-actions .hint{color:var(--text-dim);font-size:11px} "
-    ".btn-send{background:var(--gold);color:#111;border:0;border-radius:var(--r-sm);padding:8px 14px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;font-size:12px} .btn-send:hover{filter:brightness(1.08)} "
-    ".empty{color:var(--text-muted);padding:28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md)}"
-) + "</style><script>" + (
-    "document.addEventListener('click',function(e){var b=e.target.closest('.btn-send');if(!b)return;"
-    "var id=b.getAttribute('data-msg-id');var t=document.querySelector('textarea[data-msg-id=\"'+id+'\"]');if(!t)return;"
-    "b.disabled=true;b.textContent='Sending…';fetch('/ebay/send-reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message_id:id,body:t.value})})"
-    ".then(function(r){return r.json();}).then(function(d){b.textContent=d&&d.ok?'Sent ✓':'Failed';}).catch(function(){b.disabled=false;b.textContent='Send via eBay';});});"
-) + "</script>"
 
 def _read_json(path: Path, default):
     if not path.exists():
@@ -327,63 +303,6 @@ def send_reply(token: str, message: dict, body: str, ebay_cfg: dict,
     time.sleep(PACE_SEC)
     return record
 
-def _esc(s: str) -> str:
-    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-def build_report(drafts: list[dict]) -> Path:
-    run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    total  = len(drafts)
-    manual = sum(1 for d in drafts if d.get("needs_manual_review"))
-    auto   = total - manual
-
-    if not drafts:
-        rows_html = (
-            "<p class='empty'>Inbox zero — no unanswered buyer messages in the "
-            "last 30 days. New messages will appear here automatically.</p>"
-        )
-    else:
-        def _row(d: dict) -> str:
-            mid = _esc(d.get("message_id") or "")
-            badge = ("<span class='badge manual'>needs review</span>"
-                     if d.get("needs_manual_review")
-                     else f"<span class='badge auto'>{_esc(d['category'])}</span>")
-            return (
-                f"<tr><td class='from'><div class='sender'>{_esc(d.get('sender') or '')}</div>"
-                f"<div class='recv'>{_esc(d.get('received_at') or '')}</div>"
-                f"<div class='iid'>item {_esc(d.get('item_id') or '—')}</div></td>"
-                f"<td class='msg'><div class='subj'>{_esc(d.get('subject') or '(no subject)')}</div>"
-                f"<div class='excerpt'>{_esc((d.get('body') or '')[:280])}</div>"
-                f"<div class='cat'>{badge}</div></td>"
-                f"<td class='reply'><textarea data-msg-id=\"{mid}\" rows='6'>"
-                f"{_esc(d.get('draft_reply') or '')}</textarea>"
-                f"<div class='row-actions'><button class='btn-send' data-msg-id=\"{mid}\">"
-                f"Send via eBay</button><span class='hint'>Stub — wire to /ebay/send-reply Lambda.</span>"
-                f"</div></td></tr>")
-        rows_html = ("<div class='tbl-wrap'><table class='msg-tbl'><thead><tr>"
-                     "<th>From</th><th>Message</th><th>Drafted Reply</th></tr></thead>"
-                     f"<tbody>{''.join(_row(d) for d in drafts)}</tbody></table></div>")
-
-    body = (
-        f"<section class='hero'><h1>Buyer Messages</h1>"
-        f"<p class='sub'>Last run: <code>{run_ts}</code></p>"
-        f"<div class='msg-kpis'>"
-        f"<div class='msg-kpi'><div class='n'>{total}</div><div class='l'>Unanswered</div></div>"
-        f"<div class='msg-kpi'><div class='n'>{auto}</div><div class='l'>Auto-drafted</div></div>"
-        f"<div class='msg-kpi'><div class='n'>{manual}</div><div class='l'>Needs review</div></div>"
-        f"</div></section>"
-        f"<section class='msg-note'><h3>How this works</h3><ul>"
-        f"<li>Pulls unanswered messages from eBay (GetMyMessages, last 30 days).</li>"
-        f"<li>Classifies into shipping / combined / condition / returns / payment.</li>"
-        f"<li>Drafts a reply you can edit, then sends via AddMemberMessageAAQToPartner.</li>"
-        f"</ul></section>{rows_html}"
-    )
-
-    html = promote.html_shell("Buyer Messages · Harpua2001", body,
-                              extra_head=_PAGE_HEAD, active_page="messages.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
-
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Surface unanswered buyer messages + draft replies.")
@@ -439,8 +358,6 @@ def main() -> int:
     else:
         print("\n  Dry run only. Re-run with --apply to send replies.")
 
-    report = build_report(drafts)
-    print(f"  Report: {report}")
     print(f"  Plan:   {PLAN_PATH}")
     return 0
 

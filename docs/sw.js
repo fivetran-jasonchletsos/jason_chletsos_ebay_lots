@@ -6,23 +6,15 @@
 //   - CDN libs (cdn.jsdelivr.net, fonts.googleapis.com): cache-first
 //   - Lambda API calls (jw0hur2091.execute-api...): network-only, never cached
 
-const VERSION    = 'h2k-v2-pwa';
+const VERSION    = 'h2k-v3-dashboard';
 const STATIC_CACHE  = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const IMG_CACHE     = `${VERSION}-img`;
 
 const PRECACHE = [
   './',
-  'index.html',
-  'quality.html',
-  'price_review.html',
-  'title_review.html',
-  'reddit.html',
-  'craigslist.html',
-  'return-policy.html',
+  'dashboard.html',
   'manifest.webmanifest',
-  'banner.jpg',
-  'store_logo_512.png',
 ];
 
 self.addEventListener('install', (e) => {
@@ -103,7 +95,7 @@ async function networkFirst(req, cacheName) {
   } catch (e) {
     const cached = await cache.match(req);
     if (cached) return cached;
-    // Last resort: return cached homepage
-    return cache.match('index.html') || new Response('offline', { status: 503 });
+    // Last resort: return cached dashboard
+    return cache.match('dashboard.html') || new Response('offline', { status: 503 });
   }
 }

@@ -197,78 +197,7 @@ def run_check(strict: bool = False) -> dict:
     }
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(report, indent=2), encoding="utf-8")
-
-    # Render the admin page
-    _render_report(report)
     return report
-
-
-def _render_report(report: dict) -> Path:
-    drift = report["drift"]
-    by_item: dict[str, list[dict]] = defaultdict(list)
-    for d in drift:
-        by_item[d["item_id"]].append(d)
-
-    if drift:
-        status_html = f'<div class="pc-banner pc-banner-bad">DRIFT DETECTED — {len(drift)} occurrences across {len(by_item)} items. Build should fail until fixed.</div>'
-        rows = []
-        for iid, rows_for_item in sorted(by_item.items(), key=lambda kv: -len(kv[1])):
-            live = rows_for_item[0]["live_ebay"]
-            for d in rows_for_item:
-                rows.append(
-                    f"<tr><td><code>{d['item_id']}</code></td>"
-                    f"<td>{d['file']}</td>"
-                    f"<td class='num'>${d['rendered']:.2f}</td>"
-                    f"<td class='num'>${d['live_ebay']:.2f}</td>"
-                    f"<td class='num pc-delta'>{d['delta']:+.2f}</td>"
-                    f"<td class='num'>{d['occurrences']}x</td></tr>"
-                )
-        table = ("<table class='pc-tbl'><thead><tr><th>Item</th><th>File</th>"
-                 "<th class='num'>Rendered</th><th class='num'>Live eBay</th>"
-                 "<th class='num'>Δ</th><th class='num'>Hits</th></tr></thead>"
-                 f"<tbody>{''.join(rows)}</tbody></table>")
-    else:
-        status_html = '<div class="pc-banner pc-banner-ok">All clean. Every active listing\'s rendered price matches live eBay.</div>'
-        table = ""
-
-    body = f"""
-    <div class="section-head section-head--inline">
-      <div class="sh-title">
-        <div class="eyebrow">SRE consistency gate</div>
-        <h1 class="section-title">Price <span class="accent">Consistency</span></h1>
-      </div>
-      <div class="section-sub sh-sub">
-        Every page that displays an active listing's price must match the
-        live eBay price. Runs at the end of every full rebuild. If drift is
-        detected, the build should fail before pushing to GitHub Pages.
-      </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="num">{report['live_listings']}</div><div class="lbl">Live listings</div></div>
-      <div class="stat-card"><div class="num">{report['files_scanned']}</div><div class="lbl">Files scanned</div></div>
-      <div class="stat-card"><div class="num {'danger' if report['drift_count'] else 'success'}">{report['drift_count']}</div><div class="lbl">Drift occurrences</div></div>
-    </div>
-    {status_html}
-    {table}
-    """
-    extra_css = """
-<style>
-  .pc-banner { padding: 14px 18px; border-radius: var(--r-md, 8px); margin: 16px 0; font-weight: 600; letter-spacing: .04em; }
-  .pc-banner-ok  { background: rgba(127,199,122,.12); color: var(--success); border: 1px solid rgba(127,199,122,.35); }
-  .pc-banner-bad { background: rgba(224,123,111,.12); color: var(--danger);  border: 1px solid rgba(224,123,111,.35); }
-  .pc-tbl { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md, 8px); overflow: hidden; }
-  .pc-tbl th, .pc-tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .pc-tbl th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-  .pc-tbl .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
-  .pc-delta { color: var(--danger); font-weight: 700; }
-</style>
-"""
-    html_doc = promote.html_shell("Price Consistency · SRE Gate", body,
-                                  extra_head=extra_css,
-                                  active_page="price_consistency.html")
-    HTML_OUT.parent.mkdir(parents=True, exist_ok=True)
-    HTML_OUT.write_text(html_doc, encoding="utf-8")
-    return HTML_OUT
 
 
 def main() -> int:
@@ -282,7 +211,6 @@ def main() -> int:
         print(f"  DRIFT DETECTED: {report['drift_count']} occurrences across "
               f"{len({d['item_id'] for d in report['drift']})} items.")
         print(f"  Full report: {REPORT}")
-        print(f"  Admin page:  {HTML_OUT}")
         for d in report["drift"][:10]:
             print(f"    {d['file']}: {d['item_id']} rendered ${d['rendered']:.2f} vs live ${d['live_ebay']:.2f}")
         if args.strict:

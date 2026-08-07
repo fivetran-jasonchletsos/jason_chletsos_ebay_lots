@@ -241,125 +241,6 @@ def _days_ago(iso_dt: str) -> int:
             continue
     return 0
 
-_PAGE_CSS = (
-    ".hero{padding:24px 0 12px}.hero h1{margin:0 0 4px;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:56px;letter-spacing:.02em}.hero .sub{color:var(--text-muted)}"
-    ".rl-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0 28px}"
-    ".rl-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}"
-    ".rl-kpi::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--gold);opacity:.7}"
-    ".rl-kpi.bad::before{background:#ef4444}.rl-kpi.ok::before{background:#22c55e}.rl-kpi.warn::before{background:#facc15}"
-    ".rl-kpi .n{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:44px;color:var(--gold);line-height:1}"
-    ".rl-kpi .l{color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}"
-    ".rl-note{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;margin:0 0 24px}"
-    ".rl-note h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}"
-    ".rl-note ul{margin:0;padding-left:18px;color:var(--text)}"
-    ".tbl-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);margin:8px 0 24px}"
-    "table.rl-tbl{width:100%;border-collapse:collapse;font-size:13px}"
-    ".rl-tbl th,.rl-tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}"
-    ".rl-tbl th{background:var(--surface-2);color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}"
-    ".rl-tbl .item{width:280px}.rl-tbl .item img{width:64px;height:64px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);float:left;margin-right:10px;background:var(--surface-2)}"
-    ".rl-tbl .item .title{color:var(--text);font-weight:600;font-size:13px;line-height:1.35}"
-    ".rl-tbl .item .iid{color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:2px}"
-    ".rl-tbl .price{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:600}"
-    ".rl-tbl .suggest{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:700}"
-    ".rl-tbl .age{font-family:'JetBrains Mono',monospace;color:var(--text)}.rl-tbl .age.old{color:#ef4444}"
-    ".row-actions{display:flex;flex-wrap:wrap;gap:8px}"
-    ".btn{background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;text-decoration:none;display:inline-block}"
-    ".btn:hover{filter:brightness(1.1)}.btn.ok{background:#22c55e;color:#0a0a0a;border-color:#22c55e}"
-    ".btn.no{background:#ef4444;color:#fff;border-color:#ef4444}.btn.gold{background:var(--gold);color:#0a0a0a;border-color:var(--gold)}"
-    ".empty{color:var(--text-muted);padding:36px 28px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md);font-size:15px}"
-    ".empty .big{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;letter-spacing:-0.005em;font-size:36px;color:var(--gold);display:block;margin-bottom:6px}"
-)
-_PAGE_JS = (
-    "document.addEventListener('click',function(e){var b=e.target.closest('.btn[data-action]');if(!b)return;"
-    "var act=b.getAttribute('data-action');var iid=b.getAttribute('data-item-id');"
-    "if(!confirm('Confirm '+act+' on item '+iid+'?'))return;b.disabled=true;b.textContent='…';"
-    "fetch('/ebay/relist-action',{method:'POST',headers:{'Content-Type':'application/json'},"
-    "body:JSON.stringify({item_id:iid,action:act})}).then(function(r){return r.json();})"
-    ".then(function(d){b.textContent=d&&d.ok?'Done ✓':'Failed';})"
-    ".catch(function(){b.disabled=false;b.textContent=act;});});"
-)
-_PAGE_HEAD = f"<style>{_PAGE_CSS}</style><script>{_PAGE_JS}</script>"
-
-def _row_html(plan: dict) -> str:
-    iid     = _esc(plan.get("item_id") or "")
-    title   = _esc(plan.get("title") or "(no title)")
-    photos  = plan.get("photos") or []
-    thumb   = (photos[0] if photos else
-               (f"https://i.ebayimg.com/images/g/{iid}/s-l64.jpg" if iid else ""))
-    end     = plan.get("end_date") or ""
-    age     = _days_ago(end)
-    age_cls = "old" if age >= 7 else ""
-    orig    = float(plan.get("original_price") or 0)
-    suggest = float(plan.get("suggested_price") or 0)
-    ltype   = _esc(plan.get("listing_type") or "")
-    view    = f"https://www.ebay.com/itm/{iid}" if iid else "#"
-    img     = f'<img src="{_esc(thumb)}" alt="" loading="lazy">' if thumb else ""
-    return (
-        f"<tr><td class='item'>{img}<div class='title'>{title}</div>"
-        f"<div class='iid'>item {iid or '—'} · {ltype}</div></td>"
-        f"<td class='price'>${orig:.2f}</td>"
-        f"<td class='age'>{_esc(end[:10])}</td>"
-        f"<td class='age {age_cls}'>{age}d</td>"
-        f"<td class='suggest'>${suggest:.2f}</td>"
-        f"<td><div class='row-actions'>"
-        f"<button class='btn ok' data-action='relist' data-item-id=\"{iid}\">Relist as FP</button>"
-        f"<button class='btn gold' data-action='edit_relist' data-item-id=\"{iid}\">Edit then relist</button>"
-        f"<button class='btn no' data-action='skip_permanent' data-item-id=\"{iid}\">Skip (delist)</button>"
-        f"<a class='btn' href='{view}' target='_blank' rel='noopener'>View</a>"
-        f"</div></td></tr>"
-    )
-
-def build_report(plans: list[dict], window_days: int) -> Path:
-    run_ts    = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    count     = len(plans)
-    total_val = sum(float(p.get("original_price") or 0) for p in plans)
-    ages      = [_days_ago(p.get("end_date") or "") for p in plans]
-    oldest    = max(ages) if ages else 0
-    avg_age   = round(statistics.mean(ages), 1) if ages else 0.0
-
-    if count == 0:
-        body_rows = (
-            "<div class='empty'><span class='big'>Zero unsold listings</span>"
-            "Nothing to relist right now — every ended auction either sold "
-            "or is still active.<br>As auctions end without bids, they'll "
-            "surface here automatically.</div>"
-        )
-    else:
-        body_rows = (
-            "<div class='tbl-wrap'><table class='rl-tbl'><thead><tr>"
-            "<th>Item</th><th>Original</th><th>Ended</th><th>Days ago</th>"
-            "<th>Suggested FP</th><th>Action</th></tr></thead>"
-            f"<tbody>{''.join(_row_html(p) for p in plans)}</tbody></table></div>"
-        )
-
-    kpis = (
-        f"<div class='rl-kpi {'warn' if count else 'ok'}'><div class='n'>{count}</div><div class='l'>Unsold listings</div></div>"
-        f"<div class='rl-kpi'><div class='n'>${total_val:,.2f}</div><div class='l'>Total unsold value</div></div>"
-        f"<div class='rl-kpi {'bad' if oldest >= 7 else ''}'><div class='n'>{oldest}d</div><div class='l'>Oldest unsold</div></div>"
-        f"<div class='rl-kpi'><div class='n'>{avg_age}d</div><div class='l'>Average days unsold</div></div>"
-    )
-    note = (
-        f"<section class='rl-note'><h3>How this works</h3><ul>"
-        f"<li>Pulls all ended-without-bid auctions via Trading <code>GetMyeBaySelling</code> "
-        f"(<code>UnsoldList.Include=true</code>) for the past {window_days} days.</li>"
-        f"<li>Suggests a Fixed-Price relist price: original BIN if set, else 2× the starting "
-        f"bid (auctions usually open very low), else market median × 0.95.</li>"
-        f"<li><b>Relist as FP</b> calls Trading <code>RelistFixedPriceItem</code>, which "
-        f"takes the previous auction's ItemID and re-publishes it as a GTC Fixed-Price item "
-        f"— photos, store category, item specifics, condition, shipping & returns carry over.</li>"
-        f"<li>Run <code>python3 relist_agent.py --apply</code> to actually relist; otherwise "
-        f"everything is dry-run.</li></ul></section>"
-    )
-    body = (
-        f"<section class='hero'><h1>Relist Unsold</h1>"
-        f"<p class='sub'>Last run: <code>{run_ts}</code> · window: <code>{window_days}d</code></p>"
-        f"<div class='rl-kpis'>{kpis}</div></section>{note}{body_rows}"
-    )
-    html = promote.html_shell(f"Relist Unsold · {promote.SELLER_NAME}", body,
-                              extra_head=_PAGE_HEAD, active_page="relist.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html, encoding="utf-8")
-    return REPORT_PATH
 
 def main() -> int:
     print(f"  Mookie Wilson (Relist) reporting in.")
@@ -530,8 +411,6 @@ def main() -> int:
     })
     _append_history(history_entries)
 
-    report = build_report(plans, window_days=args.days)
-    print(f"  Report: {report}")
     print(f"  Plan:   {PLAN_PATH}")
     return 0
 

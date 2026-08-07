@@ -311,97 +311,6 @@ def audit_all(listings: list[dict], cache: dict, cfg: dict, token: str | None,
 # HTML report                                                                 #
 # --------------------------------------------------------------------------- #
 
-def _render_report(payload: dict) -> Path:
-    results = payload["results"]
-    mismatches = [r for r in results if r["mismatch_type"] and r["mismatch_type"] != "no_data"]
-    no_data = [r for r in results if r["mismatch_type"] == "no_data"]
-    clean_count = len(results) - len(mismatches) - len(no_data)
-
-    if mismatches:
-        status_html = (
-            f'<div class="sa-banner sa-banner-bad">SHIPPING MISMATCH DETECTED — '
-            f'{len(mismatches)} listing(s) not using the house default '
-            f'({HOUSE_SINGLE_SERVICE} @ ${HOUSE_SINGLE_COST:.2f}). '
-            f'Every mismatch is a listing potentially losing money on postage.</div>'
-        )
-        rows = []
-        for r in sorted(mismatches, key=lambda r: r["item_id"]):
-            title_esc = (r["title"] or "").replace("<", "&lt;").replace(">", "&gt;")[:90]
-            found_cost_s = f"${r['found_cost']:.2f}" if r["found_cost"] is not None else "—"
-            rows.append(
-                f"<tr><td><code>{r['item_id']}</code></td>"
-                f"<td><a href='{r['url']}' target='_blank' rel='noopener'>{title_esc}</a></td>"
-                f"<td>{r['category'] or ''}</td>"
-                f"<td class='bad'>{r['found_service'] or '—'}</td>"
-                f"<td>{r['expected_service']}</td>"
-                f"<td class='num bad'>{found_cost_s}</td>"
-                f"<td class='num'>${r['expected_cost']:.2f}</td>"
-                f"<td>{r['mismatch_type']}</td></tr>"
-            )
-        table = ("<table class='sa-tbl'><thead><tr><th>Item</th><th>Title</th><th>Category</th>"
-                 "<th>Found service</th><th>Expected service</th>"
-                 "<th class='num'>Found cost</th><th class='num'>Expected cost</th>"
-                 "<th>Type</th></tr></thead>"
-                 f"<tbody>{''.join(rows)}</tbody></table>")
-    else:
-        status_html = ('<div class="sa-banner sa-banner-ok">All clean. Every audited active '
-                       'listing is using the house shipping default.</div>')
-        table = ""
-
-    no_data_html = ""
-    if no_data:
-        no_data_html = (
-            f'<div class="sa-banner sa-banner-warn">{len(no_data)} listing(s) had no shipping '
-            f'data available (GetItem failed or returned no ShippingServiceOptions) — not counted '
-            f'as mismatches, but worth a look.</div>'
-        )
-
-    body = f"""
-    <div class="section-head section-head--inline">
-      <div class="sh-title">
-        <div class="eyebrow">SRE consistency gate</div>
-        <h1 class="section-title">Shipping <span class="accent">Audit</span></h1>
-      </div>
-      <div class="section-sub sh-sub">
-        Every active listing's shipping service/cost must match the house
-        default (<code>{HOUSE_SINGLE_SERVICE}</code> @ ${HOUSE_SINGLE_COST:.2f}).
-        A one-off posting script hardcoding USPS First Class ($4.50+ real
-        postage) at a $0.99-1.29 buyer rate silently loses money on every
-        sale — this caught 79 such listings on 2026-08-02. Report-only;
-        fixes are applied by hand or a separate ReviseItem pass.
-      </div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="num">{len(results)}</div><div class="lbl">Listings audited</div></div>
-      <div class="stat-card"><div class="num {'danger' if mismatches else 'success'}">{len(mismatches)}</div><div class="lbl">Mismatches</div></div>
-      <div class="stat-card"><div class="num">{clean_count}</div><div class="lbl">Clean</div></div>
-      <div class="stat-card"><div class="num">{len(no_data)}</div><div class="lbl">No data</div></div>
-    </div>
-    {status_html}
-    {no_data_html}
-    {table}
-    """
-    extra_css = """
-<style>
-  .sa-banner { padding: 14px 18px; border-radius: var(--r-md, 8px); margin: 16px 0; font-weight: 600; letter-spacing: .04em; }
-  .sa-banner-ok   { background: rgba(127,199,122,.12); color: var(--success); border: 1px solid rgba(127,199,122,.35); }
-  .sa-banner-bad  { background: rgba(224,123,111,.12); color: var(--danger);  border: 1px solid rgba(224,123,111,.35); }
-  .sa-banner-warn { background: rgba(224,180,111,.12); color: var(--warning); border: 1px solid rgba(224,180,111,.35); }
-  .sa-tbl { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md, 8px); overflow: hidden; }
-  .sa-tbl th, .sa-tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .sa-tbl th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-  .sa-tbl .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
-  .sa-tbl .bad { color: var(--danger); font-weight: 700; }
-</style>
-"""
-    html_doc = promote.html_shell("Shipping Audit · SRE Gate", body,
-                                  extra_head=extra_css,
-                                  active_page="shipping_audit.html")
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(html_doc, encoding="utf-8")
-    return REPORT_PATH
-
-
 # --------------------------------------------------------------------------- #
 # Entry point                                                                 #
 # --------------------------------------------------------------------------- #
@@ -421,9 +330,8 @@ def main() -> int:
         if not PLAN_PATH.exists():
             print(f"  No cached plan at {PLAN_PATH} — run without --report-only first.")
             return 1
-        payload = json.loads(PLAN_PATH.read_text())
-        path = _render_report(payload)
-        print(f"  Wrote {path}")
+        json.loads(PLAN_PATH.read_text())
+        print(f"  Plan already at {PLAN_PATH} (HTML report generation removed).")
         return 0
 
     listings = _load_listings()
@@ -484,9 +392,7 @@ def main() -> int:
     if no_data:
         print(f"  {len(no_data)} listing(s) had no shipping data (GetItem failure or no ShippingServiceOptions).")
 
-    path = _render_report(payload)
-    print(f"\n  Report: {path}")
-    print(f"  Plan:   {PLAN_PATH}")
+    print(f"\n  Plan:   {PLAN_PATH}")
     return 0
 
 

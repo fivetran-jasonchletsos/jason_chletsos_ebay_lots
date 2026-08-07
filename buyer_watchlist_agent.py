@@ -492,16 +492,13 @@ def main():
     ap.add_argument("--player", help="Narrow to a single player by name.")
     args = ap.parse_args()
 
-    ensure_nav_entry()
     plan = build_plan(only_player=args.player)
     save_plan(plan)
-    out = render_report(plan)
 
     total = sum(b["n"] for p in plan["players"] for b in p["buckets"])
     deals = sum(b.get("n_deals", 0) for p in plan["players"] for b in p["buckets"])
     print(f"  Players: {len(plan['players'])}  ·  Listings scanned: {total}  ·  Deals: {deals}")
     print(f"  Plan:   {PLAN_PATH}")
-    print(f"  Report: {out}")
 
 
 if __name__ == "__main__":
