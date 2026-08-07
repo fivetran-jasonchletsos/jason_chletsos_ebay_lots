@@ -423,6 +423,8 @@ locals {
     "chris-delete",
     "rick-save",
     "rick-delete",
+    "boiler-save",
+    "boiler-delete",
   ]
 }
 
