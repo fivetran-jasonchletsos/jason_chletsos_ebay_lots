@@ -3,8 +3,8 @@
 Replaces the old buyer-facing storefront (never used — zero customer
 traffic) and the old seller.html / admin report fleet (torn down 2026-08-06)
 with one page answering two questions: what's been selling, and what should
-I buy next. Admin-gated, dark theme, wired into promote.html_shell for
-visual consistency with the rest of the site.
+I buy next. Admin-gated, light data-tool theme (no storefront branding),
+wired into promote.html_shell for the OAuth gate + PWA boilerplate.
 
 Reads:
     output/sales_trends.json       (sales_trends_agent.py — run first)
@@ -233,7 +233,7 @@ def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
 _CSS = """
 <style>
 .dash-wrap { max-width: 1100px; margin: 0 auto; }
-.dash-head h1 { font-family: 'Fraunces', serif; font-size: 34px; margin: 0 0 2px; }
+.dash-head h1 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-weight: 800; font-size: 32px; margin: 0 0 2px; }
 .dash-kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 18px 0 24px; }
 .dash-kpis .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
 .dash-kpis .num { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: var(--gold); }
@@ -252,16 +252,16 @@ td.rank { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
 td.dt { color: var(--text-dim); white-space: nowrap; }
 .chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-dim); }
 .muted { color: var(--text-dim); }
-.good { color: var(--success, #7fc77a); }
-.bad { color: var(--danger, #e07b6f); }
+.good { color: var(--success); }
+.bad { color: var(--danger); }
 .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-dim); margin-right:4px; }
-.tag-gold { background: rgba(201,165,66,.15); color: var(--gold); font-weight:700; }
-.tag-warn { background: rgba(224,123,111,.12); color: var(--danger, #e07b6f); }
-tr.buy-yes { background: rgba(201,165,66,.05); }
+.tag-gold { background: rgba(79,70,229,.12); color: var(--gold); font-weight:700; }
+.tag-warn { background: rgba(220,38,38,.10); color: var(--danger); }
+tr.buy-yes { background: rgba(79,70,229,.05); }
 .son-rules { margin: 0 0 14px; }
 .son-rules summary { cursor: pointer; font-size: 13px; color: var(--text-dim); }
 .son-rules-body { font-size: 13px; margin-top: 8px; color: var(--text-muted); }
-.son-rules-body .skip { color: var(--danger, #e07b6f); }
+.son-rules-body .skip { color: var(--danger); }
 @media (max-width: 820px) { .dash-kpis { grid-template-columns: repeat(2, 1fr); } .dash-two { grid-template-columns: 1fr; } }
 </style>"""
 
@@ -273,7 +273,7 @@ def _js(payload: dict) -> str:
 (function(){{
   const S = window.__DASH; if(!S || !window.Chart) return;
   const css = getComputedStyle(document.documentElement);
-  const gold = css.getPropertyValue('--gold').trim() || '#d4af37';
+  const gold = css.getPropertyValue('--gold').trim() || '#4f46e5';
   const dim  = css.getPropertyValue('--text-dim').trim() || '#9aa';
   const grid = 'rgba(255,255,255,.06)';
   Chart.defaults.color = dim; Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";

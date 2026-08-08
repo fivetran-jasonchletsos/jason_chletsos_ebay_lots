@@ -834,7 +834,7 @@ def build_deals_page(deals_data: dict) -> Path:
       position: absolute; top: 6px; right: 6px;
       background: linear-gradient(135deg, var(--gold), var(--gold-dim));
       color: var(--brand-fg);
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 16px; letter-spacing: .02em;
       padding: 3px 8px;
       border-radius: var(--r-sm);
@@ -849,7 +849,7 @@ def build_deals_page(deals_data: dict) -> Path:
     .deal-feedback { font-size: 11px; color: var(--text-dim); margin-left: auto; }
     .deal-price-block { text-align: right; flex-shrink: 0; align-self: center; }
     .deal-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 30px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -1339,32 +1339,32 @@ LAMBDA_BASE = "https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay"
 
 _BASE_CSS = """
 :root {
-  /* Default: Dark Luxe (gold on black) — refined per Zeldman/Marcotte/Coyier */
-  --bg:          #0a0a0a;
-  --surface:     #141414;
-  --surface-2:   #1a1a1a;
-  --surface-3:   #232323;
-  --border:      rgba(201,165,66,0.10);
-  --border-mid:  rgba(201,165,66,0.22);
-  --border-hi:   rgba(201,165,66,0.42);
-  /* Slightly desaturated gold — calmer, more print-like */
-  --gold:        #c9a542;
-  --gold-bright: #e6c66a;
-  --gold-dim:    #8a7521;
-  --text:        #f1efe9;
-  --text-muted:  #9a9388;
-  --text-dim:    #7a7268;
-  --success:     #7fc77a;
-  --warning:     #e0b54a;
-  --danger:      #e07b6f;
+  /* Personal dashboard theme — clean data-tool look (light, one accent), 2026-08-08 */
+  --bg:          #f7f8fa;
+  --surface:     #ffffff;
+  --surface-2:   #f1f3f6;
+  --surface-3:   #e7eaef;
+  --border:      rgba(15,23,42,0.08);
+  --border-mid:  rgba(15,23,42,0.14);
+  --border-hi:   rgba(15,23,42,0.24);
+  /* Indigo accent — used sparingly for highlights + buy signals */
+  --gold:        #4f46e5;
+  --gold-bright: #6366f1;
+  --gold-dim:    #3730a3;
+  --text:        #0f172a;
+  --text-muted:  #475569;
+  --text-dim:    #94a3b8;
+  --success:     #16a34a;
+  --warning:     #d97706;
+  --danger:      #dc2626;
   --link:        var(--gold);
-  --shadow-lg:   0 18px 44px -16px rgba(0,0,0,.78);
-  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -10px rgba(201,165,66,.22);
-  --bg-radial-1: rgba(201,165,66,.06);
-  --bg-radial-2: rgba(201,165,66,.04);
-  --hero-tag-fg: #0a0a0a;       /* tag text on gold gradient */
-  --brand-fg:    #0a0a0a;       /* brand mark "H" on gold */
+  --shadow-lg:   0 16px 32px -16px rgba(15,23,42,.18);
+  --shadow-card: 0 1px 2px rgba(15,23,42,.05), 0 0 0 1px var(--border) inset;
+  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 20px -10px rgba(79,70,229,.25);
+  --bg-radial-1: rgba(79,70,229,.04);
+  --bg-radial-2: rgba(79,70,229,.03);
+  --hero-tag-fg: #ffffff;       /* tag text on accent background */
+  --brand-fg:    #ffffff;       /* brand mark "H" on accent */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
@@ -1408,375 +1408,6 @@ _BASE_CSS = """
   --lh-body:    1.65;
 }
 
-/* ============ ALT THEME: CREAM & NAVY ============ */
-[data-theme="cream"] {
-  --bg:          #f5f0e8;       /* warm cream */
-  --surface:     #e8e0d0;       /* light tan card */
-  --surface-2:   #ede5d6;       /* slightly lighter raised */
-  --surface-3:   #d8ccba;       /* darker for inputs / chips */
-  --border:      rgba(13,31,60,0.10);
-  --border-mid:  rgba(13,31,60,0.22);
-  --border-hi:   rgba(13,31,60,0.45);
-  --gold:        #c05a1a;       /* burnt orange (price/accent) */
-  --gold-bright: #e57228;
-  --gold-dim:    #8a3e10;
-  --text:        #0d1f3c;       /* deep navy */
-  --text-muted:  #5a6a7a;       /* steel gray */
-  --text-dim:    #8a98a8;
-  --success:     #2f7d4a;
-  --warning:     #b8860b;
-  --danger:      #b54a3e;
-  --link:        #0d1f3c;
-  --shadow-lg:   0 18px 48px -12px rgba(13,31,60,.18);
-  --shadow-card: 0 2px 10px rgba(13,31,60,.08), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(192,90,26,.22);
-  --bg-radial-1: rgba(192,90,26,.10);
-  --bg-radial-2: rgba(13,31,60,.06);
-  --hero-tag-fg: #f5f0e8;       /* cream text on orange tag */
-  --brand-fg:    #f5f0e8;       /* cream "H" on orange brand mark */
-}
-
-/* Cream-theme button overrides — primary becomes navy/cream, ghost+outline use navy */
-[data-theme="cream"] .btn-gold {
-  background: var(--text);
-  color: var(--bg);
-}
-[data-theme="cream"] .btn-gold:hover {
-  filter: brightness(1.15);
-  color: var(--bg);
-}
-[data-theme="cream"] .btn-ghost,
-[data-theme="cream"] .btn-outline {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--text);
-}
-[data-theme="cream"] .btn-ghost:hover,
-[data-theme="cream"] .btn-outline:hover {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
-}
-
-/* Cream-theme tag/badge — matches user spec exactly */
-[data-theme="cream"] .tag {
-  background: #e8d8c0;
-  color: #8a3e10;
-  border: 1px solid #c05a1a;
-}
-[data-theme="cream"] .tag-gold {
-  background: #c05a1a;
-  color: #f5f0e8;
-  border-color: #8a3e10;
-}
-[data-theme="cream"] .tag-danger,
-[data-theme="cream"] .badge-danger {
-  background: rgba(181,74,62,.14); color: #8a2c20; border-color: rgba(181,74,62,.4);
-}
-[data-theme="cream"] .tag-warn,
-[data-theme="cream"] .badge-warning {
-  background: rgba(184,134,11,.14); color: #7a5a07; border-color: rgba(184,134,11,.4);
-}
-[data-theme="cream"] .tag-success,
-[data-theme="cream"] .badge-success {
-  background: rgba(47,125,74,.14); color: #1f5230; border-color: rgba(47,125,74,.4);
-}
-[data-theme="cream"] .badge-gold {
-  background: rgba(192,90,26,.14); color: #8a3e10; border-color: rgba(192,90,26,.45);
-}
-
-/* Header glass effect needs different alpha on light */
-[data-theme="cream"] .app-header {
-  background: linear-gradient(180deg, rgba(245,240,232,.95), rgba(245,240,232,.85));
-}
-[data-theme="cream"] .nav-links a.active {
-  background: rgba(192,90,26,.10);
-  color: var(--gold);
-}
-
-/* Brand mark uses orange gradient w/ cream H letter */
-[data-theme="cream"] .brand-mark { color: var(--brand-fg); }
-
-/* Stat / hero glow tints — orange instead of gold halo */
-[data-theme="cream"] .stat-card .num,
-[data-theme="cream"] .hero-price,
-[data-theme="cream"] .product-price {
-  text-shadow: 0 0 22px rgba(192,90,26,.18);
-}
-
-/* Drawer + selection in cream */
-[data-theme="cream"] ::selection { background: var(--gold); color: var(--bg); }
-[data-theme="cream"] .drawer { background: var(--surface); }
-[data-theme="cream"] .drawer a { color: var(--text); }
-[data-theme="cream"] .drawer a:hover, [data-theme="cream"] .drawer a.active {
-  background: var(--surface-2); color: var(--gold); border-color: var(--border-mid);
-}
-
-/* Filter chip "active" state */
-[data-theme="cream"] .chip.active {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
-}
-
-/* Hero tag (Featured #1) keeps orange-gradient look but with cream text */
-[data-theme="cream"] .hero-tag { color: var(--hero-tag-fg); }
-
-/* Search-input magnifier icon needs darker stroke for cream bg */
-[data-theme="cream"] .search-input {
-  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%235a6a7a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
-  background-size: 18px;
-}
-
-/* Charts: Chart.js uses a hardcoded gray for grids/labels — re-tint via CSS for cream */
-[data-theme="cream"] .chart-panel { color: var(--text); }
-
-/* ============ MIDNIGHT LUXURY (Dark Black & Gold, refined) ============ */
-[data-theme="midnight"] {
-  --bg:          #0f0f0f;
-  --surface:     #1c1c1c;
-  --surface-2:   #232323;
-  --surface-3:   #2a2a2a;
-  --border:      rgba(212,168,50,0.10);
-  --border-mid:  rgba(212,168,50,0.22);
-  --border-hi:   rgba(212,168,50,0.45);
-  --gold:        #d4a832;
-  --gold-bright: #e5c050;
-  --gold-dim:    #b8922a;
-  --text:        #f0ead8;
-  --text-muted:  #6a5e3a;
-  --text-dim:    #4a4028;
-  --link:        #d4a832;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.45), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(212,168,50,.25);
-  --bg-radial-1: rgba(212,168,50,.08);
-  --bg-radial-2: rgba(212,168,50,.05);
-  --hero-tag-fg: #0f0f0f;
-  --brand-fg:    #0f0f0f;
-}
-[data-theme="midnight"] .tag { background: #1e1a0e; color: #b8922a; border: 1px solid #b8922a; }
-
-/* ============ CLEAN WHITE & COBALT ============ */
-[data-theme="cobalt"] {
-  --bg:          #ffffff;
-  --surface:     #f2f5fc;
-  --surface-2:   #f7f9fd;
-  --surface-3:   #e3eafa;
-  --border:      rgba(13,26,46,0.08);
-  --border-mid:  rgba(13,26,46,0.18);
-  --border-hi:   rgba(26,79,214,0.45);
-  --gold:        #1a4fd6;
-  --gold-bright: #3a6fef;
-  --gold-dim:    #1238a0;
-  --text:        #0d1a2e;
-  --text-muted:  #7a8fab;
-  --text-dim:    #a8b6cb;
-  --link:        #1a4fd6;
-  --shadow-lg:   0 18px 48px -12px rgba(13,26,46,.15);
-  --shadow-card: 0 2px 10px rgba(13,26,46,.06), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(26,79,214,.22);
-  --bg-radial-1: rgba(26,79,214,.06);
-  --bg-radial-2: rgba(26,79,214,.04);
-  --hero-tag-fg: #ffffff;
-  --brand-fg:    #ffffff;
-}
-[data-theme="cobalt"] .tag { background: #eaf0fd; color: #1238a0; border: 1px solid #1a4fd6; }
-[data-theme="cobalt"] ::selection { background: var(--gold); color: var(--bg); }
-[data-theme="cobalt"] .app-header { background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.85)); }
-[data-theme="cobalt"] .search-input {
-  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%237a8fab' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
-  background-size: 18px;
-}
-
-/* ============ FOREST & PARCHMENT ============ */
-[data-theme="forest"] {
-  --bg:          #f4f0e6;
-  --surface:     #e8e2d0;
-  --surface-2:   #ede8d8;
-  --surface-3:   #d8cfb8;
-  --border:      rgba(26,46,26,0.10);
-  --border-mid:  rgba(26,46,26,0.22);
-  --border-hi:   rgba(26,46,26,0.45);
-  --gold:        #3a6b2a;
-  --gold-bright: #4f8a3a;
-  --gold-dim:    #234018;
-  --text:        #1a2e1a;
-  --text-muted:  #6a7a5a;
-  --text-dim:    #8a9778;
-  --link:        #3a6b2a;
-  --shadow-lg:   0 18px 48px -12px rgba(26,46,26,.18);
-  --shadow-card: 0 2px 10px rgba(26,46,26,.08), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(58,107,42,.22);
-  --bg-radial-1: rgba(58,107,42,.08);
-  --bg-radial-2: rgba(26,46,26,.05);
-  --hero-tag-fg: #f4f0e6;
-  --brand-fg:    #f4f0e6;
-}
-[data-theme="forest"] .tag { background: #dde8d5; color: #234018; border: 1px solid #3a6b2a; }
-[data-theme="forest"] .btn-gold { background: var(--text); color: var(--bg); }
-[data-theme="forest"] .btn-gold:hover { filter: brightness(1.15); color: var(--bg); }
-[data-theme="forest"] .btn-ghost,
-[data-theme="forest"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
-[data-theme="forest"] .btn-ghost:hover,
-[data-theme="forest"] .btn-outline:hover { background: var(--gold); color: var(--bg); }
-[data-theme="forest"] ::selection { background: var(--gold); color: var(--bg); }
-[data-theme="forest"] .app-header { background: linear-gradient(180deg, rgba(244,240,230,.95), rgba(244,240,230,.85)); }
-[data-theme="forest"] .search-input {
-  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%236a7a5a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
-  background-size: 18px;
-}
-
-/* ============ CRIMSON & CHARCOAL ============ */
-[data-theme="crimson"] {
-  --bg:          #1c1c1e;
-  --surface:     #2a2a2c;
-  --surface-2:   #313134;
-  --surface-3:   #383838;
-  --border:      rgba(192,40,42,0.10);
-  --border-mid:  rgba(192,40,42,0.25);
-  --border-hi:   rgba(192,40,42,0.55);
-  --gold:        #c0282a;
-  --gold-bright: #e05050;
-  --gold-dim:    #8a1a1c;
-  --text:        #f5f5f5;
-  --text-muted:  #8a8a8a;
-  --text-dim:    #5a5a5a;
-  --link:        #e05050;
-  --shadow-lg:   0 24px 60px -12px rgba(0,0,0,.85);
-  --shadow-card: 0 2px 8px rgba(0,0,0,.5), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 8px 32px -8px rgba(192,40,42,.30);
-  --bg-radial-1: rgba(192,40,42,.10);
-  --bg-radial-2: rgba(192,40,42,.05);
-  --hero-tag-fg: #ffffff;
-  --brand-fg:    #ffffff;
-}
-[data-theme="crimson"] .tag { background: #2e1515; color: #e05050; border: 1px solid #c0282a; }
-
-/* ============ SOFT LAVENDER & PLUM ============ */
-[data-theme="lavender"] {
-  --bg:          #f5f3fb;
-  --surface:     #ede9f7;
-  --surface-2:   #f0ecf8;
-  --surface-3:   #ddd5ee;
-  --border:      rgba(42,26,74,0.10);
-  --border-mid:  rgba(42,26,74,0.22);
-  --border-hi:   rgba(107,63,160,0.45);
-  --gold:        #6b3fa0;
-  --gold-bright: #8a5cc0;
-  --gold-dim:    #4a1f80;
-  --text:        #2a1a4a;
-  --text-muted:  #7a6a9a;
-  --text-dim:    #a59ab8;
-  --link:        #6b3fa0;
-  --shadow-lg:   0 18px 48px -12px rgba(42,26,74,.18);
-  --shadow-card: 0 2px 10px rgba(42,26,74,.08), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(107,63,160,.22);
-  --bg-radial-1: rgba(107,63,160,.08);
-  --bg-radial-2: rgba(42,26,74,.05);
-  --hero-tag-fg: #f5f3fb;
-  --brand-fg:    #f5f3fb;
-}
-[data-theme="lavender"] .tag { background: #e2d8f5; color: #4a1f80; border: 1px solid #6b3fa0; }
-[data-theme="lavender"] .btn-gold { background: var(--text); color: var(--bg); }
-[data-theme="lavender"] .btn-gold:hover { filter: brightness(1.15); color: var(--bg); }
-[data-theme="lavender"] .btn-ghost,
-[data-theme="lavender"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
-[data-theme="lavender"] .btn-ghost:hover,
-[data-theme="lavender"] .btn-outline:hover { background: var(--gold); color: var(--bg); }
-[data-theme="lavender"] ::selection { background: var(--gold); color: var(--bg); }
-[data-theme="lavender"] .app-header { background: linear-gradient(180deg, rgba(245,243,251,.95), rgba(245,243,251,.85)); }
-[data-theme="lavender"] .search-input {
-  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%237a6a9a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
-  background-size: 18px;
-}
-
-/* ============ WARM SAND & TERRACOTTA ============ */
-[data-theme="terracotta"] {
-  --bg:          #faf6ef;
-  --surface:     #f0e8d8;
-  --surface-2:   #f4ede0;
-  --surface-3:   #e3d6bc;
-  --border:      rgba(46,30,14,0.10);
-  --border-mid:  rgba(46,30,14,0.22);
-  --border-hi:   rgba(184,76,26,0.45);
-  --gold:        #b84c1a;
-  --gold-bright: #d76a3a;
-  --gold-dim:    #7a2e0a;
-  --text:        #2e1e0e;
-  --text-muted:  #8a6a4a;
-  --text-dim:    #b8a085;
-  --link:        #b84c1a;
-  --shadow-lg:   0 18px 48px -12px rgba(46,30,14,.18);
-  --shadow-card: 0 2px 10px rgba(46,30,14,.08), 0 0 0 1px var(--border) inset;
-  --glow-gold:   0 0 0 1px var(--border-hi) inset, 0 6px 22px -8px rgba(184,76,26,.22);
-  --bg-radial-1: rgba(184,76,26,.08);
-  --bg-radial-2: rgba(46,30,14,.05);
-  --hero-tag-fg: #faf6ef;
-  --brand-fg:    #faf6ef;
-}
-[data-theme="terracotta"] .tag { background: #f0d8c8; color: #7a2e0a; border: 1px solid #b84c1a; }
-[data-theme="terracotta"] .btn-gold { background: var(--text); color: var(--bg); }
-[data-theme="terracotta"] .btn-gold:hover { filter: brightness(1.15); color: var(--bg); }
-[data-theme="terracotta"] .btn-ghost,
-[data-theme="terracotta"] .btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
-[data-theme="terracotta"] .btn-ghost:hover,
-[data-theme="terracotta"] .btn-outline:hover { background: var(--gold); color: var(--bg); }
-[data-theme="terracotta"] ::selection { background: var(--gold); color: var(--bg); }
-[data-theme="terracotta"] .app-header { background: linear-gradient(180deg, rgba(250,246,239,.95), rgba(250,246,239,.85)); }
-[data-theme="terracotta"] .search-input {
-  background: var(--surface-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%238a6a4a' stroke-width='2' viewBox='0 0 24 24'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>") no-repeat 14px center;
-  background-size: 18px;
-}
-
-/* ============ THEME PICKER POPOVER ============ */
-.theme-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border-mid);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
-  padding: 6px;
-  display: none;
-  z-index: 200;
-  width: 230px;
-}
-.theme-popover.open { display: block; }
-.theme-option {
-  display: grid;
-  grid-template-columns: 28px 1fr 16px;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  width: 100%;
-  font: inherit;
-  color: var(--text);
-  text-align: left;
-  transition: background var(--t-fast);
-}
-.theme-option:hover { background: var(--surface-2); }
-.theme-option.active { background: var(--surface-3); }
-.theme-swatch {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  overflow: hidden;
-  border: 1px solid var(--border-mid);
-  position: relative;
-}
-.theme-swatch span:first-child { background: var(--sw-bg); }
-.theme-swatch span:last-child  { background: var(--sw-acc); }
-.theme-name { font-size: 13px; font-weight: 600; }
-.theme-check { color: var(--gold); font-size: 14px; opacity: 0; }
-.theme-option.active .theme-check { opacity: 1; }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -1798,14 +1429,13 @@ body {
 
 /* Low-specificity heading defaults (Coyier :where) */
 :where(h1, h2, h3, h4, h5, h6) {
-  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
-  font-weight: 500;
-  font-style: italic;
-  font-variation-settings: "opsz" 96, "SOFT" 30, "WONK" 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif;
+  font-style: normal;
+  font-weight: 700;
   line-height: var(--lh-tight);
   color: var(--text);
   text-wrap: balance;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
 }
 :where(h1) { font-size: var(--fs-h1); line-height: var(--lh-display); letter-spacing: -0.01em; }
 :where(h2) { font-size: var(--fs-h2); letter-spacing: -0.005em; }
@@ -1813,7 +1443,7 @@ body {
 :where(h4) { font-size: var(--fs-h4); }
 :where(p)  { line-height: var(--lh-body); text-wrap: pretty; }
 
-::selection { background: var(--gold); color: #000; }
+::selection { background: var(--gold); color: #fff; }
 
 /* Inline links look like links again (Zeldman). Excludes nav, buttons, cards. */
 a { color: var(--link); text-decoration: none; transition: color var(--t-fast), text-decoration-color var(--t-fast); }
@@ -1837,7 +1467,7 @@ a:hover { color: var(--gold-bright); }
   border-radius: var(--r-sm);
 }
 
-.font-display { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1; letter-spacing: -0.01em; line-height: var(--lh-display); }
+.font-display { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; letter-spacing: -0.01em; line-height: var(--lh-display); }
 .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
 /* ============ HEADER + NAV ============ */
@@ -1868,17 +1498,14 @@ a:hover { color: var(--gold-bright); }
   border-radius: var(--r-md);
   background: linear-gradient(135deg, var(--gold), var(--gold-dim));
   display: grid; place-items: center;
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1;
-  font-size: 24px; color: var(--brand-fg); font-weight: 700;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
+  font-size: 24px; color: var(--brand-fg);
   box-shadow: var(--glow-gold);
   flex-shrink: 0;
 }
 .brand-text { display: flex; flex-direction: column; min-width: 0; }
 .brand-name {
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-weight: 500;
-  font-variation-settings: "opsz" 96, "SOFT" 30, "WONK" 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 800;
   font-size: 22px; line-height: 1; letter-spacing: -0.01em;
   color: var(--text);
   white-space: nowrap;
@@ -2010,7 +1637,7 @@ html.pre-is-admin .gate-overlay { display: none !important; }
   text-align: center;
 }
 .gate-card h2 {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: 28px; letter-spacing: .04em;
   color: var(--text);
   margin-bottom: 8px;
@@ -2137,7 +1764,7 @@ main {
   gap: var(--space-sm); margin-block-end: var(--space-md); flex-wrap: wrap;
 }
 .section-title {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: var(--fs-display);
   letter-spacing: .03em; line-height: var(--lh-display);
   color: var(--text);
@@ -2173,7 +1800,7 @@ main {
 }
 .stat-card:hover { transform: translateY(-2px); border-color: var(--border-mid); }
 .stat-card .num {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: var(--fs-num); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
@@ -2215,7 +1842,7 @@ button.stat-card.active .num { filter: brightness(1.15); }
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: var(--fs-display-sm); letter-spacing: .03em;
   color: var(--text);
 }
@@ -2239,7 +1866,7 @@ button.stat-card.active .num { filter: brightness(1.15); }
   color: var(--brand-fg);
   letter-spacing: .04em;
 }
-.btn-gold:hover { color: #000; transform: translateY(-1px); filter: brightness(1.08); }
+.btn-gold:hover { color: var(--brand-fg); transform: translateY(-1px); filter: brightness(1.08); }
 .btn-ghost {
   background: var(--surface-2);
   color: var(--text);
@@ -2467,7 +2094,7 @@ input[type="checkbox"]:checked::after {
 .listing-card .info h3 a { color: inherit; text-decoration: none; }
 .listing-card .info h3 a:hover { color: var(--gold); }
 .listing-card .price {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: var(--fs-xl); line-height: var(--lh-display);
   color: var(--gold);
   letter-spacing: .02em;
@@ -2703,7 +2330,7 @@ tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
   border-radius: var(--r-lg);
 }
 #no-results .big {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
 }
 
@@ -2880,7 +2507,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
   animation: h2k-fade-up 600ms both;
 }
 .empty-state-title {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+  font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
   font-size: 28px; letter-spacing: .03em;
   color: var(--text);
 }
@@ -2975,7 +2602,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 /* ============ GLIGHTBOX OVERRIDES ============ */
 .glightbox-clean .gslide-description { background: var(--surface) !important; }
 .glightbox-clean .gdesc-inner { color: var(--text); }
-.glightbox-clean .gslide-title { color: var(--gold) !important; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; }
+.glightbox-clean .gslide-title { color: var(--gold) !important; font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 22px; }
 .gbtn { background: var(--surface-2) !important; }
 
 /* ============ RESPONSIVE ============ */
@@ -3039,7 +2666,7 @@ _CDN_HEAD = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Familjen+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -3159,7 +2786,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#f7f8fa">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -3176,9 +2803,9 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — on eBay since 1998, real photos, fast shipping.">
   <meta name="twitter:image" content="{SITE_URL}/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%230a0a0a'/><text x='90' y='128' font-family='Fraunces, Georgia, serif' font-style='italic' font-size='128' font-weight='500' fill='%23d4af37' text-anchor='middle'>H</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%23ffffff'/><rect width='180' height='180' rx='28' fill='none' stroke='%23e2e5ea' stroke-width='2'/><text x='90' y='122' font-family='Familjen Grotesk, -apple-system, sans-serif' font-weight='800' font-size='108' fill='%234f46e5' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
   <script>
     // Admin gate — Google OAuth (jchletsos@gmail.com only)
@@ -3236,7 +2863,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <aside class="drawer" id="drawer" aria-label="Mobile navigation">
     <div class="drawer-head">
       <div>
-        <div class="brand-name" style="font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;font-size:24px;letter-spacing:.04em;">{SELLER_NAME}</div>
+        <div class="brand-name" style="font-family:'Familjen Grotesk',-apple-system,sans-serif;font-weight:800;font-size:22px;letter-spacing:.01em;">{SELLER_NAME}</div>
         <div class="brand-tag" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:4px;">Seller Dashboard</div>
       </div>
       <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
@@ -3282,7 +2909,6 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 
   <footer class="app-footer">
     Updated {updated} · <a href="{STORE_URL}" class="seller-link" target="_blank" rel="noopener">{SELLER_NAME} on eBay</a>
-    · <a href="return-policy.html" class="seller-link">Returns &amp; Shipping</a>
   </footer>
 
   {_CDN_FOOT}
@@ -3578,7 +3204,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       Chart.defaults.scale.ticks = Object.assign({{}}, Chart.defaults.scale.ticks || {{}}, {{ padding: 8 }});
       // Default gold ramp for datasets that don't specify their own colors
       Chart.defaults.borderColor = s.getPropertyValue('--border').trim();
-      window.__H2K_CHART_PALETTE = ['#c9a542', '#e6c66a', '#8a7521', '#7fc77a', '#e07b6f', '#9a9388'];
+      window.__H2K_CHART_PALETTE = ['#4f46e5', '#6366f1', '#3730a3', '#16a34a', '#dc2626', '#94a3b8'];
     }}
   </script>
 </body>
@@ -4354,7 +3980,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       max-width: 880px;
     }
     .home-headline-h1 {
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-weight: 500;
       font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
       letter-spacing: -0.015em;
@@ -4404,7 +4030,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     }
     .cat-sidebar-head { padding: 0 6px 12px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
     .cat-sidebar-title {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px;
       letter-spacing: .04em;
       color: var(--text);
@@ -4447,7 +4073,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       flex: 1 1 auto; min-width: 0;
     }
     .cat-nav-count {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 15px;
       letter-spacing: .04em;
       color: var(--gold);
@@ -4461,7 +4087,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       display: flex; align-items: baseline; gap: 6px;
     }
     .cat-sidebar-foot-num {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px;
       color: var(--gold);
     }
@@ -4526,7 +4152,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     .topick-img { aspect-ratio: 1/1; background: #111; }
     .topick-img img { width: 100%; height: 100%; object-fit: cover; }
     .topick-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 20px; color: var(--gold);
       padding: 6px 10px;
       letter-spacing: .02em;
@@ -4563,7 +4189,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       color: var(--brand-fg);
     }
     .tab-btn .tab-count {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 15px;
       opacity: .8;
       margin-left: 4px;
@@ -4619,14 +4245,14 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       position: relative; z-index: 1;
     }
     .hero-title {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: clamp(28px, 3.5vw, 44px);
       line-height: 1.05; letter-spacing: .015em;
       color: var(--text);
       margin: 8px 0 14px;
     }
     .hero-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: clamp(36px, 5vw, 56px);
       color: var(--gold);
       line-height: 1;
@@ -4666,7 +4292,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       overflow: hidden;
     }
     .hero-runner-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px; color: var(--gold);
       margin-top: 4px;
       letter-spacing: .02em;
@@ -4710,7 +4336,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
     .trust-block:last-child { border-right: none; }
     .trust-block:hover { background: rgba(212,175,55,.05); }
     .trust-num {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 36px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -4768,7 +4394,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       margin-bottom: 12px;
     }
     .recent-head h3 {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px; letter-spacing: .03em;
       color: var(--text);
     }
@@ -4807,7 +4433,7 @@ def build_dashboard(listings: list[dict], market: dict | None = None,
       margin-bottom: 4px;
     }
     .recent-card-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 18px; color: var(--gold); letter-spacing: .02em;
     }
 
@@ -5544,7 +5170,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
       position: absolute; top: 8px; right: 8px;
       background: linear-gradient(135deg, #e07b6f, #b54a3e);
       color: #fff;
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 17px; letter-spacing: .02em;
       padding: 4px 9px;
       border-radius: var(--r-sm);
@@ -5564,7 +5190,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
     .steal-sub { font-size: 13px; color: var(--text-muted); }
     .steal-price-block { text-align: right; flex-shrink: 0; }
     .steal-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 34px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -5615,7 +5241,7 @@ def build_steals_page(listings: list[dict], market: dict) -> Path:
     .steals-wrap .push-bar .pb-max:focus { outline: none; border-color: var(--gold); }
     .steals-wrap .push-bar .pb-spacer { flex: 1; }
     .steals-wrap .push-bar .pb-count {
-        font-family: 'Fraunces', Georgia, serif; font-style: italic;
+        font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-style: italic;
         font-weight: 600; font-size: 16px; color: var(--text);
     }
     .steals-wrap .push-bar .pb-count .pb-visible { color: var(--gold); }
@@ -5908,7 +5534,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
     .mi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     .mi-grid.cols-1 { grid-template-columns: 1fr; }
     .mi-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .mi-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .mi-panel h3 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
     .mi-panel .mi-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
     .mi-chart-wrap { position: relative; height: 280px; }
     .mi-rec-table { width: 100%; }
@@ -5923,7 +5549,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
     .mi-action.maintain          { background: rgba(108,176,255,.16); color: var(--link); }
     .mi-action.hold              { background: rgba(150,150,150,.18); color: var(--text-muted); }
     .mi-score {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px; color: var(--gold); letter-spacing: .02em;
     }
     .mi-verdict { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
@@ -5965,7 +5591,7 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       margin-bottom: 14px;
     }
     .mi-detail-title {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px; letter-spacing: .03em; color: var(--text);
     }
     .mi-detail-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
@@ -5990,13 +5616,13 @@ def build_market_intel_page(listings: list[dict], market: dict, sold: list[dict]
       position: absolute; top: 6px; right: 6px;
       background: linear-gradient(135deg, var(--gold), var(--gold-dim));
       color: var(--brand-fg);
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 14px; padding: 2px 7px;
       border-radius: var(--r-sm); line-height: 1;
     }
     .mi-deal-meta { padding: 8px 10px; }
     .mi-deal-title { font-size: 12px; color: var(--text); line-height: 1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom: 4px; }
-    .mi-deal-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; color: var(--gold); letter-spacing: .02em; }
+    .mi-deal-price { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 18px; color: var(--gold); letter-spacing: .02em; }
 
     .mi-query-row {
       font-size: 11px; color: var(--text-muted);
@@ -6314,7 +5940,7 @@ def build_sold_page(sold: list[dict]) -> Path:
     .sold-title:hover { color: var(--gold); }
     .sold-price-block { text-align: right; flex-shrink: 0; }
     .sold-price {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 28px; line-height: 1;
       color: var(--gold);
       letter-spacing: .02em;
@@ -6322,7 +5948,7 @@ def build_sold_page(sold: list[dict]) -> Path:
     .sold-ship { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
     .charts-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
     .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .chart-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
+    .chart-panel h3 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
     .chart-wrap { position: relative; height: 240px; }
     @media (max-width: 540px) {
       .sold-card { grid-template-columns: 56px 1fr; padding: 14px; }
@@ -6584,7 +6210,7 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
     .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
     .a-grid.cols-1 { grid-template-columns: 1fr; }
     .a-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .a-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
+    .a-panel h3 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 20px; letter-spacing: .03em; color: var(--text); margin-bottom: 4px; }
     .a-panel .a-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; letter-spacing: .02em; }
     .a-chart-wrap { position: relative; height: 280px; }
     .a-chart-wrap.tall { height: 340px; }
@@ -6612,7 +6238,7 @@ def build_analytics_page(listings: list[dict], market: dict, sold: list[dict]) -
       color: var(--text-muted); font-weight: 600; line-height: 1.1;
     }
     .kpi-value {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 34px; line-height: 1; letter-spacing: .01em;
       color: var(--text); margin-top: 8px;
     }
@@ -7146,7 +6772,7 @@ def build_quality_report(listings: list[dict]) -> Path:
       min-height: 280px;
     }
     .chart-panel h3 {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 18px; letter-spacing: .03em;
       color: var(--text); margin-bottom: 14px;
     }
@@ -7170,11 +6796,11 @@ def build_quality_report(listings: list[dict]) -> Path:
     .q-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
     .q-title-wrap { min-width: 0; flex: 1; }
     .q-score-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .q-score { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 24px; color: var(--stripe); line-height: 1; letter-spacing: .02em; }
+    .q-score { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 24px; color: var(--stripe); line-height: 1; letter-spacing: .02em; }
     .q-score-of { font-size: 11px; color: var(--text-dim); margin-right: 4px; }
     .q-title { display: block; font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.35; text-decoration: none; }
     .q-title:hover { color: var(--gold); }
-    .q-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; color: var(--gold); line-height: 1; letter-spacing: .02em; flex-shrink: 0; }
+    .q-price { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 22px; color: var(--gold); line-height: 1; letter-spacing: .02em; flex-shrink: 0; }
     .q-issues { list-style: none; padding: 0; margin: 6px 0 0; font-size: 12.5px; color: var(--text-muted); }
     .q-issues li { padding: 3px 0; padding-left: 14px; position: relative; }
     .q-issues li::before { content: '⚑'; position: absolute; left: 0; color: var(--stripe); font-size: 10px; }
@@ -7503,7 +7129,7 @@ def build_craigslist(listings: list[dict]) -> Path:
     .cl-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .cl-info { min-width: 0; }
     .cl-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); margin-bottom: 6px; }
-    .cl-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 24px; color: var(--gold); line-height: 1; letter-spacing: .02em; }
+    .cl-price { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 24px; color: var(--gold); line-height: 1; letter-spacing: .02em; }
     .cl-view { padding: 8px 14px; font-size: 12px; }
     .cl-ad-wrap { padding: 14px 18px; }
     .cl-ad-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -7941,14 +7567,14 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     .product-detail {{ display: flex; flex-direction: column; }}
     .product-detail .eyebrow {{ margin-bottom: 12px; }}
     .product-title {{
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: clamp(28px, 3vw, 40px);
       line-height: 1.1; letter-spacing: .015em;
       color: var(--text);
       margin-bottom: 14px;
     }}
     .product-price {{
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: clamp(46px, 5.5vw, 68px);
       color: var(--gold);
       line-height: 1;
@@ -7976,7 +7602,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
       border-radius: var(--r-lg);
       padding: 22px;
     }}
-    .product-desc h3 {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; color: var(--text); margin-bottom: 12px; letter-spacing: .03em; }}
+    .product-desc h3 {{ font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 22px; color: var(--text); margin-bottom: 12px; letter-spacing: .03em; }}
     .product-desc p {{ color: var(--text-muted); line-height: 1.7; font-size: 14px; }}
     .item-pricing-panel {{
       background: linear-gradient(180deg, var(--surface), var(--surface-2));
@@ -7991,7 +7617,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
       color: var(--gold); font-weight: 700; margin-bottom: 4px;
     }}
     .item-pricing-panel h3 {{
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px; letter-spacing: .03em; color: var(--text);
     }}
     .item-pricing-panel .ip-row {{
@@ -8035,7 +7661,7 @@ def _build_item_page(l: dict, items_dir: Path, all_listings: list[dict] | None =
     .rel-img img {{ width: 100%; height: 100%; object-fit: cover; }}
     .rel-meta {{ padding: 12px; }}
     .rel-title {{ font-size: 12px; line-height: 1.35; color: var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }}
-    .rel-price {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; color: var(--gold); font-size: 20px; margin-top: 6px; }}
+    .rel-price {{ font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; color: var(--gold); font-size: 20px; margin-top: 6px; }}
     @media (max-width: 880px) {{
       .product {{ grid-template-columns: 1fr; gap: 22px; }}
     }}
@@ -8656,7 +8282,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
     }
     .pr-cell-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
     .pr-current {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 26px; line-height: 1; color: var(--text);
       letter-spacing: .02em;
     }
@@ -8664,7 +8290,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
     .pr-arrow { color: var(--gold); font-size: 24px; line-height: 1; }
     .pr-new {
       display: flex; align-items: baseline; gap: 2px;
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 26px; line-height: 1; color: var(--gold);
       letter-spacing: .02em;
     }
@@ -8695,7 +8321,7 @@ def build_price_review(listings: list[dict], market: dict, pricing: dict | None 
       margin-bottom: 24px;
     }
     .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; }
-    .chart-panel h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
+    .chart-panel h3 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 14px; }
     .chart-wrap { position: relative; height: 220px; }
     @media (max-width: 880px) {
       .pr-card { grid-template-columns: 32px 64px 1fr; gap: 12px; padding: 14px; }
@@ -9049,7 +8675,7 @@ def build_reddit(listings: list[dict]) -> Path:
       overflow-y: auto;
       position: sticky; top: 90px;
     }
-    .rd-picker h3 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 12px; }
+    .rd-picker h3 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 18px; letter-spacing: .03em; color: var(--text); margin-bottom: 12px; }
     .rd-search { margin-bottom: 12px; }
     .rd-tiles { display: grid; gap: 8px; }
     .rd-tile {
@@ -9071,7 +8697,7 @@ def build_reddit(listings: list[dict]) -> Path:
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
       margin-bottom: 2px;
     }
-    .rd-tile-price { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 16px; color: var(--gold); }
+    .rd-tile-price { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 16px; color: var(--gold); }
 
     .rd-composer {
       background: var(--surface);
@@ -9085,7 +8711,7 @@ def build_reddit(listings: list[dict]) -> Path:
       border: 1px dashed var(--border-mid);
       border-radius: var(--r-md);
     }
-    .rd-empty .big { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 32px; color: var(--gold); margin-bottom: 6px; }
+    .rd-empty .big { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 32px; color: var(--gold); margin-bottom: 6px; }
     .rd-form { display: none; }
     .rd-form.show { display: block; }
     .rd-form-row { margin-bottom: 14px; }
@@ -9417,7 +9043,7 @@ def build_return_policy() -> Path:
       margin-bottom: 14px;
     }
     .policy-section h2 {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 22px;
       letter-spacing: .03em;
       color: var(--gold);
@@ -9766,7 +9392,7 @@ python3 promoted_listings_agent.py --apply
       color: var(--text-muted); font-weight: 600;
     }
     .mm-lift-value {
-      font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1;
+      font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700;
       font-size: 30px; line-height: 1;
       color: var(--card-accent, var(--gold));
       margin-top: 4px;
@@ -9779,7 +9405,7 @@ python3 promoted_listings_agent.py --apply
       border-radius: var(--r-lg);
       padding: 22px 24px;
     }
-    .mm-runbook h2 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500; font-variation-settings: 'opsz' 144, 'SOFT' 30, 'WONK' 1; font-size: 22px; letter-spacing: .03em; margin-bottom: 8px; }
+    .mm-runbook h2 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-style: normal; font-weight: 700; font-size: 22px; letter-spacing: .03em; margin-bottom: 8px; }
     .mm-runbook p { color: var(--text-muted); margin-bottom: 12px; font-size: 13px; }
     .mm-cmd {
       background: var(--surface-3);
