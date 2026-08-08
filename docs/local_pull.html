@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Local Sale Lot - Pilot 1</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ #listingBox{background:#fff;border:1px solid #dde;border-radius:12px;padding:12px 14px;margin:10px 0 16px}
+ #listingBox h2{font-size:14px;margin:0 0 6px;color:#345}
+ #listingBox .lt{font-weight:700;font-size:15px;margin-bottom:6px}
+ #listingBox .ld{white-space:pre-wrap;font-size:13px;color:#334;line-height:1.5;margin-bottom:10px}
+ #copyListing{background:#1a5c1a;border:none;color:#fff;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #345;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:48px;height:64px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 48px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#99a;font-size:11px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:14px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Local Sale &mdash; Pilot Lot 1</h1>
+<p class="sub">40 random base commons pulled from Prizm/Select/Phoenix/Optic (not on eBay). Reserved out of eBay automation via output/local_sale_reserved.json. For OfferUp + Facebook Marketplace, local pickup only. Tap a card to check it off as you physically pull it from your boxes; tap the image to zoom.</p>
+<div id="listingBox">
+  <h2>READY-TO-PASTE LISTING</h2>
+  <div class="lt">40 Assorted Football Cards Lot - Prizm, Select, Phoenix, Optic - LOCAL PICKUP ONLY</div>
+  <div class="ld">LOCAL PICKUP ONLY — no shipping, cash on pickup. Meet in Wynnewood / Main Line PA area (public spot).<br><br>40-card assorted lot of 2024-2025 base football cards: Panini Select, Panini Prizm, Panini Phoenix, Donruss Optic. Mix of veterans and rookies across multiple teams. Raw / ungraded, pack-fresh condition. Full list of players in photos.<br><br>$25 for all 40, or best offer. More assorted lots available — just ask.</div>
+  <button id="copyListing">Copy listing text</button>
+</div>
+<div id="stats" style="font-size:12.5px;color:#556;margin-bottom:8px"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "1082877131259729920", "p": "Bo Nix", "set": "2025 Panini Select", "num": "411", "val": 6.35, "img": "https://storage.googleapis.com/collx-product-images/1082877131259729920-1-4q9h.jpg"}, {"k": "1077243521534873600", "p": "Matthew Golden", "set": "2025 Panini Select", "num": "467", "val": 3.42, "img": "https://storage.googleapis.com/collx-product-images/1077243521534873600-1-4XSK.jpg"}, {"k": "1082892724665134080", "p": "Geno Smith", "set": "2025 Donruss Optic", "num": "144", "val": 3.0, "img": "https://storage.googleapis.com/collx-product-images/1082892724665134080-1-e1S8.jpg"}, {"k": "1077287400481050624", "p": "Steve Spurrier", "set": "2025 Panini Phoenix", "num": "74", "val": 3.0, "img": "https://storage.googleapis.com/collx-product-images/1077287400481050624-1-frg9.jpg"}, {"k": "1078388244219811840", "p": "Kyle Williams", "set": "2025 Panini Select", "num": "378", "val": 1.99, "img": "https://storage.googleapis.com/collx-product-images/1078388244219811840-1-O3Kv.jpg"}, {"k": "1082941365228481536", "p": "Trey McBride", "set": "2025 Panini Select", "num": "124", "val": 1.99, "img": "https://storage.googleapis.com/collx-product-images/1082941365228481536-1-tVCm.jpg"}, {"k": "1078440139462400000", "p": "Jalen Carter", "set": "2024 Panini Select", "num": "65", "val": 1.79, "img": "https://storage.googleapis.com/collx-product-images/1078440139462400000-1-eKON.jpg"}, {"k": "1078477396047157248", "p": "Adam Thielen", "set": "2024 Panini Select", "num": "202", "val": 1.79, "img": "https://storage.googleapis.com/collx-product-images/1078477396047157248-1-Wpfq.jpg"}, {"k": "1078538630259922944", "p": "Nakobe Dean", "set": "2024 Panini Select", "num": "185", "val": 1.69, "img": "https://storage.googleapis.com/collx-product-images/1078538630259922944-1-4pPE.jpg"}, {"k": "1077764691967364096", "p": "Charles Woodson", "set": "2025 Donruss Optic", "num": "103", "val": 1.6, "img": "https://storage.googleapis.com/collx-product-images/1077764691967364096-1-Aigr.jpg"}, {"k": "1078324781799823360", "p": "Christian McCaffrey", "set": "2025 Panini Prizm", "num": "156", "val": 1.5, "img": "https://storage.googleapis.com/collx-product-images/1078324781799823360-1-krxp.jpg"}, {"k": "1082974853491141632", "p": "Brock Bowers", "set": "2025 Panini Phoenix", "num": "146", "val": 1.5, "img": "https://storage.googleapis.com/collx-product-images/1082974853491141632-1-Q2V7.jpg"}, {"k": "1078500304001816576", "p": "Josh Allen", "set": "2025 Panini Phoenix", "num": "129", "val": 1.49, "img": "https://storage.googleapis.com/collx-product-images/1078500304001816576-1-QKrY.jpg"}, {"k": "1082618595913450496", "p": "Drake Maye", "set": "2025 Panini Phoenix", "num": "111", "val": 1.49, "img": "https://storage.googleapis.com/collx-product-images/1082618595913450496-1-6Ol.jpg"}, {"k": "1082619043714122752", "p": "Josh Allen", "set": "2025 Panini Phoenix", "num": "129", "val": 1.49, "img": "https://storage.googleapis.com/collx-product-images/1082619043714122752-1-UprY.jpg"}, {"k": "1078395919158597632", "p": "Woody Marks", "set": "2025 Panini Select", "num": "236", "val": 1.41, "img": "https://storage.googleapis.com/collx-product-images/1078395919158597632-1-ZCpX.jpg"}, {"k": "1076759931050862592", "p": "Joe Burrow", "set": "2025 Panini Prizm", "num": "62", "val": 1.29, "img": "https://storage.googleapis.com/collx-product-images/1076759931050862592-1-rg7q.jpg"}, {"k": "1078533851949422592", "p": "Joe Burrow", "set": "2024 Panini Select", "num": "39", "val": 1.24, "img": "https://storage.googleapis.com/collx-product-images/1078533851949422592-1-qXP.jpg"}, {"k": "1077241643157770240", "p": "Caleb Williams", "set": "2025 Panini Select", "num": "73", "val": 1.19, "img": "https://storage.googleapis.com/collx-product-images/1077241643157770240-1-GX4K.jpg"}, {"k": "1077246263913435136", "p": "Matthew Stafford", "set": "2025 Panini Select", "num": "219", "val": 1.19, "img": "https://storage.googleapis.com/collx-product-images/1077246263913435136-1-cBKi.jpg"}, {"k": "1078427169055430656", "p": "Kyle Hamilton", "set": "2024 Panini Select", "num": "78", "val": 1.11, "img": "https://storage.googleapis.com/collx-product-images/1078427169055430656-1-SWqG.jpg"}, {"k": "1082978605749054464", "p": "Emeka Egbuka", "set": "2025 Panini Select", "num": "37", "val": 1.07, "img": "https://storage.googleapis.com/collx-product-images/1082978605749054464-1-nKZC.jpg"}, {"k": "1078395932949469184", "p": "Emeka Egbuka", "set": "2025 Panini Select", "num": "37", "val": 1.07, "img": "https://storage.googleapis.com/collx-product-images/1078395932949469184-1-tuFo.jpg"}, {"k": "1077766166995028992", "p": "Evan Engram", "set": "2025 Panini Prizm", "num": "277", "val": 1.06, "img": "https://storage.googleapis.com/collx-product-images/1077766166995028992-1-kKfi.jpg"}, {"k": "1077824734150665216", "p": "CeeDee Lamb", "set": "2025 Panini Phoenix", "num": "125", "val": 1.0, "img": "https://storage.googleapis.com/collx-product-images/1077824734150665216-1-CIYw.jpg"}, {"k": "1075974909050034176", "p": "Dak Prescott", "set": "2025 Panini Prizm", "num": "57", "val": 1.0, "img": "https://storage.googleapis.com/collx-product-images/1075974909050034176-1-uFMf.jpg"}, {"k": "1077766213627300864", "p": "Kaden Elliss", "set": "2025 Panini Prizm", "num": "11", "val": 1.0, "img": "https://storage.googleapis.com/collx-product-images/1077766213627300864-1-np6o.jpg"}, {"k": "1076579035643453440", "p": "DeVonta Smith", "set": "2024 Panini Select", "num": "51", "val": 0.99, "img": "https://storage.googleapis.com/collx-product-images/1076579035643453440-1-5jEi.jpg"}, {"k": "1082877236192827392", "p": "Jameson Williams", "set": "2025 Panini Select", "num": "171", "val": 0.99, "img": "https://storage.googleapis.com/collx-product-images/1082877236192827392-1-Atyr.jpg"}, {"k": "1078429398160234496", "p": "Mike Alstott", "set": "2024 Panini Select", "num": "183", "val": 0.99, "img": "https://storage.googleapis.com/collx-product-images/1078429398160234496-1-A8LI.jpg"}, {"k": "1078494083664435200", "p": "Rachaad White", "set": "2024 Panini Select", "num": "88", "val": 0.99, "img": "https://storage.googleapis.com/collx-product-images/1078494083664435200-1-uYKW.jpg"}, {"k": "1077245551879999488", "p": "Jaylin Lane", "set": "2025 Panini Select", "num": "89", "val": 0.96, "img": "https://storage.googleapis.com/collx-product-images/1077245551879999488-1-OUFH.jpg"}, {"k": "1077770728938163200", "p": "Minkah Fitzpatrick", "set": "2024 Panini Select", "num": "84", "val": 0.56, "img": "https://storage.googleapis.com/collx-product-images/1077770728938163200-1-EeZ.jpg"}, {"k": "1077770962644782080", "p": "Pat Freiermuth", "set": "2025 Panini Prizm", "num": "243", "val": 0.44, "img": "https://storage.googleapis.com/collx-product-images/1077770962644782080-1-jveB.jpg"}, {"k": "1078444848566884352", "p": "DeMarcus Lawrence", "set": "2024 Panini Select", "num": "47", "val": 0.35, "img": "https://storage.googleapis.com/collx-product-images/1078444848566884352-1-M8ow.jpg"}, {"k": "1078420608710989824", "p": "Jake Ferguson", "set": "2024 Panini Select", "num": "64", "val": 0.3, "img": "https://storage.googleapis.com/collx-product-images/1078420608710989824-1-QW9N.jpg"}, {"k": "1082893008401411072", "p": "Trey Benson", "set": "2025 Panini Select", "num": "23", "val": 0.14, "img": "https://storage.googleapis.com/collx-product-images/1082893008401411072-1-eIt.jpg"}, {"k": "1078478144252270592", "p": "Amari Cooper", "set": "2024 Panini Select", "num": "5", "val": 0.11, "img": "https://storage.googleapis.com/collx-product-images/1078478144252270592-1-NO1s.jpg"}, {"k": "1078434278761420800", "p": "Gabriel Davis", "set": "2024 Panini Select", "num": "257", "val": 0.01, "img": "https://storage.googleapis.com/collx-product-images/1078434278761420800-1-nW63.jpg"}, {"k": "1076758780402280448", "p": "Tank Bigsby", "set": "2025 Donruss Optic", "num": "193", "val": 0.01, "img": "https://storage.googleapis.com/collx-product-images/1076758780402280448-1-lcDZ.jpg"}];
+const LISTING_TITLE = "40 Assorted Football Cards Lot - Prizm, Select, Phoenix, Optic - LOCAL PICKUP ONLY";
+const LISTING_DESC = "LOCAL PICKUP ONLY \u2014 no shipping, cash on pickup. Meet in Wynnewood / Main Line PA area (public spot).\n\n40-card assorted lot of 2024-2025 base football cards: Panini Select, Panini Prizm, Panini Phoenix, Donruss Optic. Mix of veterans and rookies across multiple teams. Raw / ungraded, pack-fresh condition. Full list of players in photos.\n\n$25 for all 40, or best offer. More assorted lots available \u2014 just ask.";
+const KEY = "local_pilot1_pull";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const list = document.getElementById("list");
+function render(){
+  list.innerHTML = "";
+  const totalVal = DATA.reduce((s,r)=>s+r.val,0);
+  document.getElementById("stats").textContent =
+    `${DATA.length} cards · $${totalVal.toFixed(2)} combined CollX value · asking $25 for the lot`;
+  for (const r of DATA){
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    el.innerHTML = `<div class="box"></div>` +
+      (r.img ? `<img class="th" loading="lazy" src="${r.img}">` : `<div class="th"></div>`) +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set} #${r.num}</div></div>` +
+      `<div class="pr">$${r.val.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    if (img) img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = r.img;
+      document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("copyListing").onclick = async (e) => {
+  const txt = LISTING_TITLE + "\n\n" + LISTING_DESC;
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy listing text", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = ()=>{if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>

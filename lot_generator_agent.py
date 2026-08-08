@@ -47,6 +47,7 @@ REPO_ROOT = Path(__file__).parent
 CSV_PATH  = REPO_ROOT / "inventory.csv"
 PLAN_PATH = REPO_ROOT / "output" / "lot_generator_plan.json"
 REPORT    = REPO_ROOT / "docs"   / "lots.html"
+LOCAL_RESERVED_PATH = REPO_ROOT / "output" / "local_sale_reserved.json"
 
 # Candidate thresholds.
 # House rule (confirmed w/ Jason): bundle lots are 5 cards or fewer, no
@@ -134,11 +135,23 @@ def select_candidates(rows: list[dict]) -> list[dict]:
     # silently skip the entire inventory.
     use_linkage = bool(unlisted) or bool(linkage_db.all_links())
 
+    reserved_for_local: set[str] = set()
+    if LOCAL_RESERVED_PATH.exists():
+        try:
+            reserved_for_local = {
+                str(x.get("collx_id") or "") for x in json.loads(LOCAL_RESERVED_PATH.read_text())
+            }
+        except (json.JSONDecodeError, AttributeError):
+            reserved_for_local = set()
+
     candidates: list[dict] = []
     for r in rows:
         cid = r.get("collx_id") or ""
         if use_linkage and cid and cid not in unlisted:
             # we have linkage data and this card is live/sold/etc — skip.
+            continue
+        if cid and cid in reserved_for_local:
+            # pulled aside for Mercari/OfferUp/FB local sale — never eBay.
             continue
         mv      = _as_float(r.get("collx_market_value"))
         asking  = _as_float(r.get("collx_asking_price"))
