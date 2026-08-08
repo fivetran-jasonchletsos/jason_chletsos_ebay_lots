@@ -3181,13 +3181,6 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Harpua2001">
   <script>
-    // Apply saved theme synchronously to avoid flash-of-wrong-theme.
-    (function() {{
-      try {{
-        var t = localStorage.getItem('h2k_theme');
-        if (t && t !== 'dark') document.documentElement.setAttribute('data-theme', t);
-      }} catch(e) {{}}
-    }})();
     // Admin gate — Google OAuth (jchletsos@gmail.com only)
     window.__ADMIN_EMAIL  = 'jchletsos@gmail.com';
     window.__IS_ADMIN_PAGE = {is_admin_page};
@@ -3213,7 +3206,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
 <body class="{'admin-page' if active_page in _ADMIN_PAGES else ''}">
   <header class="app-header">
     <div class="app-header-inner">
-      <a href="index.html" class="brand">
+      <a href="dashboard.html" class="brand">
         <div class="brand-mark">H</div>
         <div class="brand-text">
           <div class="brand-name">{SELLER_NAME}</div>
@@ -3224,12 +3217,6 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       <!-- Action buttons are grouped in a flex container that never shrinks,
            so they always remain visible alongside the brand. -->
       <div class="nav-actions">
-      <div style="position:relative;">
-        <button class="btn-theme" id="theme-picker-btn" onclick="toggleThemePicker(event)" title="Pick a theme" aria-label="Pick a theme" aria-haspopup="menu" aria-expanded="false">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1.5" fill="currentColor"/><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1 0 1.5-.5 1.5-1.5 0-.39-.13-.74-.36-1.05-.23-.31-.36-.66-.36-1.05 0-1 .5-1.5 1.5-1.5h1.79c2.69 0 4.97-2.04 4.97-4.94 0-5.51-4.48-9.96-10.04-9.96z"/></svg>
-        </button>
-        <div class="theme-popover" id="theme-popover" role="menu"></div>
-      </div>
       <button class="btn-login"  onclick="openGate()" title="Sign in to manage listings">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Sign in
@@ -3250,7 +3237,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
     <div class="drawer-head">
       <div>
         <div class="brand-name" style="font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:500;font-variation-settings:'opsz' 144,'SOFT' 30,'WONK' 1;font-size:24px;letter-spacing:.04em;">{SELLER_NAME}</div>
-        <div class="brand-tag" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:4px;">eBay Storefront</div>
+        <div class="brand-tag" style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:4px;">Seller Dashboard</div>
       </div>
       <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
@@ -3579,62 +3566,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
       }});
     }}
 
-    // ---- Theme picker (8 themes) ----
-    const THEMES = [
-      {{ id: 'dark',       name: 'Dark Luxe',         bg: '#0a0a0a', acc: '#d4af37', meta: '#0a0a0a' }},
-      {{ id: 'midnight',   name: 'Midnight Luxury',   bg: '#0f0f0f', acc: '#d4a832', meta: '#0f0f0f' }},
-      {{ id: 'crimson',    name: 'Crimson & Charcoal',bg: '#1c1c1e', acc: '#c0282a', meta: '#1c1c1e' }},
-      {{ id: 'cream',      name: 'Cream & Navy',      bg: '#f5f0e8', acc: '#c05a1a', meta: '#f5f0e8' }},
-      {{ id: 'cobalt',     name: 'White & Cobalt',    bg: '#ffffff', acc: '#1a4fd6', meta: '#ffffff' }},
-      {{ id: 'forest',     name: 'Forest & Parchment',bg: '#f4f0e6', acc: '#3a6b2a', meta: '#f4f0e6' }},
-      {{ id: 'lavender',   name: 'Lavender & Plum',   bg: '#f5f3fb', acc: '#6b3fa0', meta: '#f5f3fb' }},
-      {{ id: 'terracotta', name: 'Sand & Terracotta', bg: '#faf6ef', acc: '#b84c1a', meta: '#faf6ef' }},
-    ];
-    function applyTheme(id, persist) {{
-      const t = THEMES.find(x => x.id === id) || THEMES[0];
-      if (t.id === 'dark') document.documentElement.removeAttribute('data-theme');
-      else                 document.documentElement.setAttribute('data-theme', t.id);
-      if (persist) {{ try {{ localStorage.setItem('h2k_theme', t.id); }} catch(e) {{}} }}
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', t.meta);
-      // Refresh charts to pick up new CSS-var-driven colors
-      if (typeof Chart !== 'undefined') {{
-        const styles = getComputedStyle(document.documentElement);
-        Chart.defaults.color = styles.getPropertyValue('--text-muted').trim() || '#9a9388';
-        Chart.defaults.borderColor = styles.getPropertyValue('--border').trim();
-        Object.values(Chart.instances || {{}}).forEach(c => {{ try {{ c.update(); }} catch(e) {{}} }});
-      }}
-      // Update active state in popover
-      document.querySelectorAll('.theme-option').forEach(o => o.classList.toggle('active', o.dataset.theme === t.id));
-    }}
-    function buildThemePicker() {{
-      const pop = document.getElementById('theme-popover');
-      if (!pop) return;
-      const cur = (localStorage.getItem('h2k_theme') || 'dark');
-      pop.innerHTML = THEMES.map(t => `
-        <button class="theme-option${{t.id === cur ? ' active' : ''}}" data-theme="${{t.id}}" onclick="applyTheme('${{t.id}}', true)">
-          <span class="theme-swatch" style="--sw-bg:${{t.bg}}; --sw-acc:${{t.acc}};"><span></span><span></span></span>
-          <span class="theme-name">${{t.name}}</span>
-          <span class="theme-check">✓</span>
-        </button>`).join('');
-    }}
-    window.toggleThemePicker = function(ev) {{
-      ev?.stopPropagation?.();
-      const pop = document.getElementById('theme-popover');
-      const btn = document.getElementById('theme-picker-btn');
-      const open = pop.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open);
-    }};
-    window.applyTheme = applyTheme;
-    document.addEventListener('click', (e) => {{
-      const pop = document.getElementById('theme-popover');
-      if (pop && pop.classList.contains('open') && !pop.contains(e.target) && !e.target.closest('#theme-picker-btn')) {{
-        pop.classList.remove('open');
-        document.getElementById('theme-picker-btn')?.setAttribute('aria-expanded', false);
-      }}
-    }});
-    buildThemePicker();
-    // Sync chart defaults with whatever theme is active right now
+    // Sync chart defaults with the (single, fixed) dashboard theme
     if (typeof Chart !== 'undefined') {{
       const s = getComputedStyle(document.documentElement);
       Chart.defaults.color = s.getPropertyValue('--text-muted').trim() || '#9a9388';

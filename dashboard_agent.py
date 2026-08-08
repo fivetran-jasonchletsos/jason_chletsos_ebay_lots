@@ -129,16 +129,16 @@ def _selling_section_html(t: dict) -> str:
     return f"""
     <section class="panel">
       <h2>Revenue over time <span class="muted">(weekly &middot; {span})</span></h2>
-      <canvas id="revChart" height="120"></canvas>
+      <div class="chart-wrap chart-wrap-lg"><canvas id="revChart"></canvas></div>
     </section>
     <div class="dash-two">
       <section class="panel">
         <h2>What's selling &mdash; by set</h2>
-        <canvas id="setChart" height="200"></canvas>
+        <div class="chart-wrap"><canvas id="setChart"></canvas></div>
       </section>
       <section class="panel">
         <h2>Price-band mix</h2>
-        <canvas id="bandChart" height="200"></canvas>
+        <div class="chart-wrap"><canvas id="bandChart"></canvas></div>
       </section>
     </div>
     <section class="panel">
@@ -163,7 +163,7 @@ def _selling_section_html(t: dict) -> str:
           <tbody>{buyer_rows}</tbody>
         </table></div>
         <h2 style="margin-top:22px">When buyers buy</h2>
-        <canvas id="dowChart" height="120"></canvas>
+        <div class="chart-wrap"><canvas id="dowChart"></canvas></div>
       </section>
     </div>"""
 
@@ -239,6 +239,8 @@ _CSS = """
 .dash-kpis .num { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: var(--gold); }
 .dash-kpis .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin-top: 4px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 18px; }
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap-lg { height: 280px; }
 .panel h2 { font-size: 16px; margin: 0 0 14px; }
 .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .dash-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
