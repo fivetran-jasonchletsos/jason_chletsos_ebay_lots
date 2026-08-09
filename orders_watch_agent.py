@@ -91,7 +91,7 @@ def _trading_post(call_name: str, xml_body: str, ebay_cfg: dict) -> ET.Element:
 # Step 1 — fetch the most recent orders
 # ---------------------------------------------------------------------------
 
-def _xml_get_orders(token: str, start: datetime, end: datetime) -> str:
+def _xml_get_orders(token: str, start: datetime, end: datetime, page: int = 1) -> str:
     return (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         f'<GetOrdersRequest xmlns="{EBAY_NS}">\n'
@@ -101,30 +101,13 @@ def _xml_get_orders(token: str, start: datetime, end: datetime) -> str:
         f'  <OrderRole>Seller</OrderRole>\n'
         f'  <OrderStatus>All</OrderStatus>\n'
         f'  <Pagination><EntriesPerPage>{MAX_ORDERS}</EntriesPerPage>'
-        f'<PageNumber>1</PageNumber></Pagination>\n'
+        f'<PageNumber>{page}</PageNumber></Pagination>\n'
         f'  <DetailLevel>ReturnAll</DetailLevel>\n'
         f'</GetOrdersRequest>'
     )
 
 
-def fetch_recent_orders(token: str, ebay_cfg: dict) -> list[dict]:
-    """Pull the most recent ``MAX_ORDERS`` orders from the last ``DAYS_BACK`` days.
-
-    Returns one row per line-item, newest-first, with at most ``MAX_ORDERS``
-    rows in total.
-    """
-    now = datetime.now(timezone.utc)
-    start = now - timedelta(days=DAYS_BACK)
-    root = _trading_post("GetOrders",
-                         _xml_get_orders(token, start, now), ebay_cfg)
-    ack = root.findtext(f"{NS}Ack", "") or ""
-    if ack not in ("Success", "Warning"):
-        for err in root.findall(f".//{NS}Errors"):
-            print(f"  GetOrders error: "
-                  f"[{err.findtext(f'{NS}ErrorCode', '')}] "
-                  f"{err.findtext(f'{NS}ShortMessage', '')}")
-        return []
-
+def _parse_orders_page(root) -> list[dict]:
     rows: list[dict] = []
     for order in root.findall(f".//{NS}Order"):
         order_id = order.findtext(f"{NS}OrderID", "") or ""
@@ -158,9 +141,43 @@ def fetch_recent_orders(token: str, ebay_cfg: dict) -> list[dict]:
                 "created_at":  sold_at,
                 "ship_state":  state,
             })
+    return rows
+
+
+def fetch_recent_orders(token: str, ebay_cfg: dict) -> list[dict]:
+    """Pull every order from the last ``DAYS_BACK`` days (all pages -- eBay's
+    GetOrders has no documented sort control, and a single page silently
+    returns the OLDEST orders first once the window exceeds one page. Fetching
+    only page 1 previously made "today"/"7-day" totals miss recent sales
+    entirely whenever more than MAX_ORDERS orders existed in the window --
+    fixed 2026-08-09).
+
+    Returns one row per line-item, newest-first, with at most ``MAX_ORDERS``
+    rows kept for *display* -- totals are computed from the full fetched set
+    by the caller before any truncation happens.
+    """
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(days=DAYS_BACK)
+
+    rows: list[dict] = []
+    page = 1
+    total_pages = 1
+    while page <= total_pages:
+        root = _trading_post("GetOrders",
+                             _xml_get_orders(token, start, now, page), ebay_cfg)
+        ack = root.findtext(f"{NS}Ack", "") or ""
+        if ack not in ("Success", "Warning"):
+            for err in root.findall(f".//{NS}Errors"):
+                print(f"  GetOrders error: "
+                      f"[{err.findtext(f'{NS}ErrorCode', '')}] "
+                      f"{err.findtext(f'{NS}ShortMessage', '')}")
+            break
+        rows.extend(_parse_orders_page(root))
+        total_pages = int(root.findtext(f"{NS}PaginationResult/{NS}TotalNumberOfPages", "1") or "1")
+        page += 1
 
     rows.sort(key=lambda r: r.get("created_at") or "", reverse=True)
-    return rows[:MAX_ORDERS]
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -467,14 +484,16 @@ def main() -> int:
         ebay_cfg = json.loads(promote.CONFIG_FILE.read_text())
         print("  Getting eBay access token...")
         token = promote.get_access_token(ebay_cfg)
-        print(f"  Fetching most recent {MAX_ORDERS} orders (last {DAYS_BACK} days)...")
+        print(f"  Fetching all orders (last {DAYS_BACK} days)...")
         orders = fetch_recent_orders(token, ebay_cfg)
-        print(f"  Got {len(orders)} order row(s).")
+        print(f"  Got {len(orders)} order row(s) across the full window.")
     except Exception as exc:
         print(f"  Could not fetch orders ({exc}); rendering empty state.")
 
-    orders = enrich_with_images(orders)
+    # Totals must be computed from the FULL window before truncating for
+    # display, or "today"/"7-day" silently miss anything past MAX_ORDERS.
     totals = compute_totals(orders)
+    orders = enrich_with_images(orders[:MAX_ORDERS])
     plan = write_plan(orders, totals)
     _print_summary(plan)
     print(f"  Plan:   {PLAN_PATH}")
