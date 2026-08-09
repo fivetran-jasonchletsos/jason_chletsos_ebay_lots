@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Football Mix - Pull &amp; Lot List</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:20px;border:1.5px solid #bcd;
+       background:#fff;color:#345;cursor:pointer;white-space:nowrap}
+ .chip.on{color:#fff;border-color:transparent}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #345;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:48px;height:64px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 48px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#99a;font-size:11px}
+ .badge{display:inline-block;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 6px;margin-right:4px;vertical-align:1px;background:#123;color:#fff}
+ .lotpill{flex:0 0 auto;font-size:11px;font-weight:800;border-radius:8px;padding:4px 8px;color:#fff;text-align:center}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:14px;margin-right:6px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#d4af37;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Football Mix &mdash; Pull &amp; Lot List</h1>
+<p class="sub">96 cards, 5-card lots (house rule), grouped by rookies/team/product. Filter to one lot at a time (A-Z within), or view All (grouped by lot). Tap a card to check it off, tap the image to zoom.</p>
+<div id="chips"></div>
+<div id="stats" style="font-size:12.5px;color:#556;margin:8px 0 4px"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "812_05", "p": "Braelon Allen", "team": "New York Jets", "rc": true, "lot": 1, "img": "mix_imgs/812_05.jpg", "pr": 0.99}, {"k": "816_07", "p": "Brock Bowers", "team": "Las Vegas Raiders", "rc": true, "lot": 1, "img": "mix_imgs/816_07.jpg", "pr": 1.51}, {"k": "816_04", "p": "Caelen Carson", "team": "Dallas Cowboys", "rc": true, "lot": 1, "img": "mix_imgs/816_04.jpg", "pr": 1.08}, {"k": "810_09", "p": "Jayden Daniels", "team": "Washington Commanders", "rc": true, "lot": 1, "img": "mix_imgs/810_09.jpg", "pr": 1.59}, {"k": "815_04", "p": "Jayden Daniels", "team": "Washington Commanders", "rc": true, "lot": 1, "img": "mix_imgs/815_04.jpg", "pr": 1.59}, {"k": "819_09", "p": "Ray Davis", "team": "Buffalo Bills", "rc": true, "lot": 2, "img": "mix_imgs/819_09.jpg", "pr": 1.12}, {"k": "813_05", "p": "Olu Fashanu", "team": "New York Jets", "rc": true, "lot": 2, "img": "mix_imgs/813_05.jpg", "pr": 1.5}, {"k": "812_02", "p": "Troy Fautanu", "team": "Pittsburgh Steelers", "rc": true, "lot": 2, "img": "mix_imgs/812_02.jpg", "pr": 0.72}, {"k": "815_07", "p": "Braden Fiske", "team": "Los Angeles Rams", "rc": true, "lot": 2, "img": "mix_imgs/815_07.jpg", "pr": 1.25}, {"k": "820_02", "p": "Marcus Green", "team": "Atlanta Falcons", "rc": true, "lot": 2, "img": "mix_imgs/820_02.jpg", "pr": 1.0}, {"k": "814_08", "p": "Rodney Hampton", "team": "New York Giants", "rc": true, "lot": 3, "img": "mix_imgs/814_08.jpg", "pr": 0.99}, {"k": "814_09", "p": "Kamren Kinchens", "team": "Los Angeles Rams", "rc": true, "lot": 3, "img": "mix_imgs/814_09.jpg", "pr": 0.9}, {"k": "810_07", "p": "Kamari Lassiter", "team": "Houston Texans", "rc": true, "lot": 3, "img": "mix_imgs/810_07.jpg", "pr": 1.08}, {"k": "814_07", "p": "Kool-Aid McKinstry", "team": "New Orleans Saints", "rc": true, "lot": 3, "img": "mix_imgs/814_07.jpg", "pr": 2.33}, {"k": "818_04", "p": "Kool-Aid McKinstry", "team": "New Orleans Saints", "rc": true, "lot": 3, "img": "mix_imgs/818_04.jpg", "pr": 2.33}, {"k": "810_06", "p": "Jalen McMillan", "team": "Tampa Bay Buccaneers", "rc": true, "lot": 4, "img": "mix_imgs/810_06.jpg", "pr": 1.07}, {"k": "813_09", "p": "Jalen McMillan", "team": "Tampa Bay Buccaneers", "rc": true, "lot": 4, "img": "mix_imgs/813_09.jpg", "pr": 1.07}, {"k": "815_01", "p": "Jalen McMillan", "team": "Tampa Bay Buccaneers", "rc": true, "lot": 4, "img": "mix_imgs/815_01.jpg", "pr": 1.07}, {"k": "813_08", "p": "Max Melton", "team": "Arizona Cardinals", "rc": true, "lot": 4, "img": "mix_imgs/813_08.jpg", "pr": 1.32}, {"k": "812_07", "p": "Gabriel Murphy", "team": "Minnesota Vikings", "rc": true, "lot": 5, "img": "mix_imgs/812_07.jpg", "pr": 0.8}, {"k": "814_05", "p": "Bo Nix", "team": "Denver Broncos", "rc": true, "lot": 5, "img": "mix_imgs/814_05.jpg", "pr": 1.43}, {"k": "817_01", "p": "Bo Nix", "team": "Denver Broncos", "rc": true, "lot": 5, "img": "mix_imgs/817_01.jpg", "pr": 1.5}, {"k": "814_01", "p": "Rome Odunze", "team": "Chicago Bears", "rc": true, "lot": 5, "img": "mix_imgs/814_01.jpg", "pr": 1.12}, {"k": "821_02", "p": "Ricky Pearsall", "team": "San Francisco 49ers", "rc": true, "lot": 6, "img": "mix_imgs/821_02.jpg", "pr": 1.2}, {"k": "819_01", "p": "Adonai Mitchell/Ja'Lynn Polk", "team": "Multi", "rc": true, "lot": 6, "img": "mix_imgs/819_01.jpg", "pr": 2.5}, {"k": "816_01", "p": "Darius Robinson", "team": "Arizona Cardinals", "rc": true, "lot": 6, "img": "mix_imgs/816_01.jpg", "pr": 0.99}, {"k": "814_04", "p": "Ja'Tavion Sanders", "team": "Carolina Panthers", "rc": true, "lot": 6, "img": "mix_imgs/814_04.jpg", "pr": 0.99}, {"k": "818_07", "p": "Ja'Tavion Sanders", "team": "Carolina Panthers", "rc": true, "lot": 7, "img": "mix_imgs/818_07.jpg", "pr": 0.99}, {"k": "811_05", "p": "Malaki Starks", "team": "Baltimore Ravens", "rc": true, "lot": 7, "img": "mix_imgs/811_05.jpg", "pr": 1.08}, {"k": "815_03", "p": "Andre Ware", "team": "Detroit Lions", "rc": true, "lot": 7, "img": "mix_imgs/815_03.jpg", "pr": 1.39}, {"k": "818_01", "p": "Malik Washington", "team": "Miami Dolphins", "rc": true, "lot": 7, "img": "mix_imgs/818_01.jpg", "pr": 1.0}, {"k": "813_03", "p": "De'Von Achane", "team": "Miami Dolphins", "rc": false, "lot": 8, "img": "mix_imgs/813_03.jpg", "pr": 1.36}, {"k": "814_06", "p": "Marcus Allen", "team": "Los Angeles Raiders", "rc": false, "lot": 8, "img": "mix_imgs/814_06.jpg", "pr": 1.38}, {"k": "815_02", "p": "Josh Allen", "team": "Buffalo Bills", "rc": false, "lot": 8, "img": "mix_imgs/815_02.jpg", "pr": 2.88}, {"k": "819_03", "p": "Keenan Allen", "team": "Chicago Bears", "rc": false, "lot": 8, "img": "mix_imgs/819_03.jpg", "pr": 0.17}, {"k": "813_07", "p": "Tyson Bagent", "team": "Chicago Bears", "rc": false, "lot": 8, "img": "mix_imgs/813_07.jpg", "pr": 0.99}, {"k": "821_01", "p": "Travis Etienne Jr.", "team": "Jacksonville Jaguars", "rc": false, "lot": 9, "img": "mix_imgs/821_01.jpg", "pr": 0.12}, {"k": "819_06", "p": "Myles Garrett", "team": "Cleveland Browns", "rc": false, "lot": 9, "img": "mix_imgs/819_06.jpg", "pr": 1.32}, {"k": "810_03", "p": "Frank Gore", "team": "San Francisco 49ers", "rc": false, "lot": 9, "img": "mix_imgs/810_03.jpg", "pr": 0.99}, {"k": "812_01", "p": "Breece Hall", "team": "New York Jets", "rc": false, "lot": 9, "img": "mix_imgs/812_01.jpg", "pr": 0.64}, {"k": "811_09", "p": "Derrick Henry", "team": "Baltimore Ravens", "rc": false, "lot": 9, "img": "mix_imgs/811_09.jpg", "pr": 1.6}, {"k": "810_04", "p": "Aidan Hutchinson", "team": "Detroit Lions", "rc": false, "lot": 10, "img": "mix_imgs/810_04.jpg", "pr": 1.11}, {"k": "811_06", "p": "Pepper Johnson", "team": "Cleveland Browns", "rc": false, "lot": 10, "img": "mix_imgs/811_06.jpg", "pr": 0.25}, {"k": "813_06", "p": "Bijan Robinson/Lil'Jordan Humphrey/Roschon Johnson", "team": "Multi", "rc": false, "lot": 10, "img": "mix_imgs/813_06.jpg", "pr": 2.0}, {"k": "816_03", "p": "Johnny Manziel", "team": "Cleveland Browns", "rc": false, "lot": 10, "img": "mix_imgs/816_03.jpg", "pr": 2.11}, {"k": "813_04", "p": "Chris Olave/Garrett Wilson/Terry McLaurin", "team": "Multi", "rc": false, "lot": 10, "img": "mix_imgs/813_04.jpg", "pr": 2.0}, {"k": "810_02", "p": "D.J. Moore", "team": "Chicago Bears", "rc": false, "lot": 11, "img": "mix_imgs/810_02.jpg", "pr": 1.0}, {"k": "810_05", "p": "David Njoku", "team": "Cleveland Browns", "rc": false, "lot": 11, "img": "mix_imgs/810_05.jpg", "pr": 1.49}, {"k": "810_01", "p": "Dak Prescott", "team": "Dallas Cowboys", "rc": false, "lot": 11, "img": "mix_imgs/810_01.jpg", "pr": 0.73}, {"k": "820_06", "p": "Jaxon Smith-Njigba", "team": "Seattle Seahawks", "rc": false, "lot": 11, "img": "mix_imgs/820_06.jpg", "pr": 1.59}, {"k": "812_04", "p": "Jonathan Taylor", "team": "Indianapolis Colts", "rc": false, "lot": 12, "img": "mix_imgs/812_04.jpg", "pr": 1.49}, {"k": "810_08", "p": "Kenneth Walker III", "team": "Seattle Seahawks", "rc": false, "lot": 12, "img": "mix_imgs/810_08.jpg", "pr": 0.5}, {"k": "820_09", "p": "Travon Walker", "team": "Jacksonville Jaguars", "rc": false, "lot": 12, "img": "mix_imgs/820_09.jpg", "pr": 0.88}, {"k": "814_03", "p": "Jameson Williams", "team": "Detroit Lions", "rc": false, "lot": 12, "img": "mix_imgs/814_03.jpg", "pr": 1.05}, {"k": "811_01", "p": "Zach Ertz", "team": "Washington Commanders", "rc": false, "lot": 13, "img": "mix_imgs/811_01.jpg", "pr": 0.75}, {"k": "811_07", "p": "Trent McDuffie", "team": "Kansas City Chiefs", "rc": false, "lot": 13, "img": "mix_imgs/811_07.jpg", "pr": 1.99}, {"k": "811_03", "p": "DK Metcalf", "team": "Pittsburgh Steelers", "rc": false, "lot": 13, "img": "mix_imgs/811_03.jpg", "pr": 1.59}, {"k": "811_04", "p": "Chigoziem Okonkwo", "team": "Tennessee Titans", "rc": false, "lot": 14, "img": "mix_imgs/811_04.jpg", "pr": 1.26}, {"k": "811_08", "p": "Greg Rousseau", "team": "Buffalo Bills", "rc": false, "lot": 14, "img": "mix_imgs/811_08.jpg", "pr": 0.91}, {"k": "811_02", "p": "Danny White", "team": "Dallas Cowboys", "rc": false, "lot": 14, "img": "mix_imgs/811_02.jpg", "pr": 1.0}, {"k": "816_05", "p": "Josh Allen", "team": "Jacksonville Jaguars", "rc": false, "lot": 15, "img": "mix_imgs/816_05.jpg", "pr": 1.1}, {"k": "818_05", "p": "Jerome Bettis", "team": "Pittsburgh Steelers", "rc": false, "lot": 15, "img": "mix_imgs/818_05.jpg", "pr": 2.69}, {"k": "814_02", "p": "DaRon Bland", "team": "Dallas Cowboys", "rc": false, "lot": 15, "img": "mix_imgs/814_02.jpg", "pr": 1.64}, {"k": "812_06", "p": "Myles Garrett", "team": "Cleveland Browns", "rc": false, "lot": 15, "img": "mix_imgs/812_06.jpg", "pr": 1.66}, {"k": "812_03", "p": "Tyreek Hill", "team": "Miami Dolphins", "rc": false, "lot": 15, "img": "mix_imgs/812_03.jpg", "pr": 1.58}, {"k": "818_06", "p": "Chad Johnson", "team": "Cincinnati Bengals", "rc": false, "lot": 16, "img": "mix_imgs/818_06.jpg", "pr": 1.59}, {"k": "818_03", "p": "Isaiah Likely", "team": "Baltimore Ravens", "rc": false, "lot": 16, "img": "mix_imgs/818_03.jpg", "pr": 1.0}, {"k": "813_01", "p": "Howie Long", "team": "Los Angeles Raiders", "rc": false, "lot": 16, "img": "mix_imgs/813_01.jpg", "pr": 1.59}, {"k": "816_09", "p": "Christian McCaffrey", "team": "San Francisco 49ers", "rc": false, "lot": 16, "img": "mix_imgs/816_09.jpg", "pr": 1.25}, {"k": "816_06", "p": "Warren Moon", "team": "Seattle Seahawks", "rc": false, "lot": 16, "img": "mix_imgs/816_06.jpg", "pr": 1.27}, {"k": "818_08", "p": "Isiah Pacheco", "team": "Kansas City Chiefs", "rc": false, "lot": 17, "img": "mix_imgs/818_08.jpg", "pr": 0.99}, {"k": "818_02", "p": "Dak Prescott", "team": "Dallas Cowboys", "rc": false, "lot": 17, "img": "mix_imgs/818_02.jpg", "pr": 2.99}, {"k": "816_02", "p": "Mike Singletary", "team": "Chicago Bears", "rc": false, "lot": 17, "img": "mix_imgs/816_02.jpg", "pr": 1.38}, {"k": "812_08", "p": "Ryan Tannehill", "team": "Tennessee Titans", "rc": false, "lot": 17, "img": "mix_imgs/812_08.jpg", "pr": 0.62}, {"k": "816_08", "p": "Garrett Wilson", "team": "New York Jets", "rc": false, "lot": 17, "img": "mix_imgs/816_08.jpg", "pr": 0.99}, {"k": "815_08", "p": "Bobby Humphrey", "team": "Denver Broncos", "rc": false, "lot": 18, "img": "mix_imgs/815_08.jpg", "pr": 0.99}, {"k": "815_09", "p": "Wilber Marshall", "team": "Washington Redskins", "rc": false, "lot": 18, "img": "mix_imgs/815_09.jpg", "pr": 0.68}, {"k": "815_05", "p": "Barry Sanders", "team": "Detroit Lions", "rc": false, "lot": 18, "img": "mix_imgs/815_05.jpg", "pr": 1.5}, {"k": "819_04", "p": "James Cook", "team": "Buffalo Bills", "rc": false, "lot": 19, "img": "mix_imgs/819_04.jpg", "pr": 1.2}, {"k": "817_04", "p": "Stefon Diggs", "team": "Houston Texans", "rc": false, "lot": 19, "img": "mix_imgs/817_04.jpg", "pr": 1.49}, {"k": "817_05", "p": "Breece Hall", "team": "New York Jets", "rc": false, "lot": 19, "img": "mix_imgs/817_05.jpg", "pr": 1.2}, {"k": "819_05", "p": "Trey Hendrickson", "team": "Cincinnati Bengals", "rc": false, "lot": 19, "img": "mix_imgs/819_05.jpg", "pr": 1.2}, {"k": "817_02", "p": "Aidan Hutchinson", "team": "Detroit Lions", "rc": false, "lot": 20, "img": "mix_imgs/817_02.jpg", "pr": 1.59}, {"k": "817_07", "p": "Baker Mayfield", "team": "Tampa Bay Buccaneers", "rc": false, "lot": 20, "img": "mix_imgs/817_07.jpg", "pr": 0.6}, {"k": "818_09", "p": "Baker Mayfield", "team": "Tampa Bay Buccaneers", "rc": false, "lot": 20, "img": "mix_imgs/818_09.jpg", "pr": 0.6}, {"k": "819_02", "p": "Trey McBride", "team": "Arizona Cardinals", "rc": false, "lot": 20, "img": "mix_imgs/819_02.jpg", "pr": 0.99}, {"k": "817_08", "p": "D.J. Moore", "team": "Chicago Bears", "rc": false, "lot": 21, "img": "mix_imgs/817_08.jpg", "pr": 1.0}, {"k": "817_03", "p": "Puka Nacua", "team": "Los Angeles Rams", "rc": false, "lot": 21, "img": "mix_imgs/817_03.jpg", "pr": 1.49}, {"k": "819_07", "p": "Kyren Williams", "team": "Los Angeles Rams", "rc": false, "lot": 21, "img": "mix_imgs/819_07.jpg", "pr": 1.2}, {"k": "819_08", "p": "Garrett Wilson", "team": "New York Jets", "rc": false, "lot": 21, "img": "mix_imgs/819_08.jpg", "pr": 1.35}, {"k": "820_01", "p": "Steve Beuerlein", "team": "Jacksonville Jaguars", "rc": false, "lot": 22, "img": "mix_imgs/820_01.jpg", "pr": 2.65}, {"k": "820_08", "p": "Jeff George", "team": "Atlanta Falcons", "rc": false, "lot": 22, "img": "mix_imgs/820_08.jpg", "pr": 1.2}, {"k": "820_03", "p": "Steve Israel", "team": "Pittsburgh Panthers", "rc": false, "lot": 22, "img": "mix_imgs/820_03.jpg", "pr": 0.25}, {"k": "820_04", "p": "Andrew Luck", "team": "Indianapolis Colts", "rc": false, "lot": 23, "img": "mix_imgs/820_04.jpg", "pr": 4.77}, {"k": "820_07", "p": "Darius Slay Jr.", "team": "Philadelphia Eagles", "rc": false, "lot": 23, "img": "mix_imgs/820_07.jpg", "pr": 1.61}, {"k": "820_05", "p": "Jimmy Smith", "team": "Jacksonville Jaguars", "rc": false, "lot": 23, "img": "mix_imgs/820_05.jpg", "pr": 2.5}];
+const LOTS = [{"id": 1, "name": "Rookies 1", "count": 5, "color": "#123"}, {"id": 2, "name": "Rookies 2", "count": 5, "color": "#7a2e8f"}, {"id": 3, "name": "Rookies 3", "count": 5, "color": "#1a5c1a"}, {"id": 4, "name": "Rookies 4", "count": 4, "color": "#a35c00"}, {"id": 5, "name": "Rookies 5", "count": 4, "color": "#8a1c1c"}, {"id": 6, "name": "Rookies 6", "count": 4, "color": "#0e5f6b"}, {"id": 7, "name": "Rookies 7", "count": 4, "color": "#5b3a29"}, {"id": 8, "name": "2024 Prestige 1", "count": 5, "color": "#3c3c8a"}, {"id": 9, "name": "2024 Prestige 2", "count": 5, "color": "#2a7d6f"}, {"id": 10, "name": "2024 Prestige 3", "count": 5, "color": "#8a3c5b"}, {"id": 11, "name": "2024 Prestige 4", "count": 4, "color": "#123"}, {"id": 12, "name": "2024 Prestige 5", "count": 4, "color": "#7a2e8f"}, {"id": 13, "name": "2024 Mosaic 1", "count": 3, "color": "#1a5c1a"}, {"id": 14, "name": "2024 Mosaic 2", "count": 3, "color": "#a35c00"}, {"id": 15, "name": "2024 Score 1", "count": 5, "color": "#8a1c1c"}, {"id": 16, "name": "2024 Score 2", "count": 5, "color": "#0e5f6b"}, {"id": 17, "name": "2024 Score 3", "count": 5, "color": "#5b3a29"}, {"id": 18, "name": "1990 Score", "count": 3, "color": "#3c3c8a"}, {"id": 19, "name": "2024 Contenders 1", "count": 4, "color": "#2a7d6f"}, {"id": 20, "name": "2024 Contenders 2", "count": 4, "color": "#8a3c5b"}, {"id": 21, "name": "2024 Contenders 3", "count": 4, "color": "#123"}, {"id": 22, "name": "Odds & Ends 1", "count": 3, "color": "#7a2e8f"}, {"id": 23, "name": "Odds & Ends 2", "count": 3, "color": "#1a5c1a"}];
+const KEY = "mix_lots_pull";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let activeLot = null;
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+function renderChips(){
+  chips.innerHTML = "";
+  const mkChip = (id, label, color, count) => {
+    const b = document.createElement("button");
+    b.className = "chip" + (activeLot === id ? " on" : "");
+    if (activeLot === id) b.style.background = color;
+    b.textContent = count != null ? `${label} (${count})` : label;
+    b.onclick = () => { activeLot = (activeLot === id) ? null : id; renderChips(); render(); };
+    chips.appendChild(b);
+  };
+  mkChip(null, "All", "#123", DATA.length);
+  for (const lot of LOTS) mkChip(lot.id, `Lot ${lot.id}: ${lot.name}`, lot.color, lot.count);
+}
+function render(){
+  list.innerHTML = "";
+  const rows = activeLot === null ? DATA : DATA.filter(r => r.lot === activeLot);
+  document.getElementById("stats").textContent = `${rows.length} card${rows.length===1?'':'s'}` +
+    (activeLot === null ? " (grouped by lot, A-Z within each)" : " (A-Z)");
+  let curLot = null;
+  for (const r of rows){
+    if (activeLot === null && r.lot !== curLot) {
+      curLot = r.lot;
+      const lotInfo = LOTS.find(l => l.id === curLot);
+      const h = document.createElement("div");
+      h.style.cssText = `font-size:13px;font-weight:700;color:#fff;background:${lotInfo.color};padding:6px 10px;border-radius:8px;margin:14px 0 6px`;
+      h.textContent = `LOT ${curLot}: ${lotInfo.name}`;
+      list.appendChild(h);
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    const badges = (r.rc?'<span class="badge">RC</span>':'');
+    const lotInfo = LOTS.find(l => l.id === r.lot);
+    el.innerHTML = `<div class="box"></div>` +
+      (r.img ? `<img class="th" loading="lazy" src="${r.img}">` : `<div class="th"></div>`) +
+      `<div class="info"><div class="nm">${badges}${r.p}</div><div class="tm">${r.team}</div></div>` +
+      (`<div class="pr">$${{r.pr.toFixed(2)}}</div>`) +
+      (activeLot === null ? `<div class="lotpill" style="background:${lotInfo.color}">Lot ${r.lot}</div>` : '');
+    const img = el.querySelector("img.th");
+    if (img) img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = r.img;
+      document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const scope = activeLot === null ? "ALL" : `LOT ${activeLot}`;
+  const rows = activeLot === null ? DATA : DATA.filter(r => r.lot === activeLot);
+  const doneInScope = rows.filter(r => done.has(r.k)).length;
+  const txt = `Football Mix PULL (${scope}): ${doneInScope}/${rows.length} pulled.`;
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = ()=>{if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+renderChips(); render();
+</script></body></html>
