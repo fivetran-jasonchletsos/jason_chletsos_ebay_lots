@@ -19,12 +19,16 @@
  .copybtn{background:#1a5c1a;border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer}
  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:5px;margin-top:10px}
  .grid img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:5px;background:#eee;cursor:zoom-in}
+ .collage{width:100%;border-radius:10px;cursor:zoom-in;display:block;border:1px solid #dde}
+ .collagenote{font-size:11.5px;color:#789;margin:6px 0 0;text-align:center}
+ details.grid-toggle{margin-top:10px}
+ details.grid-toggle summary{font-size:12px;color:#678;cursor:pointer}
  #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
  #lightbox.on{display:flex}
  #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
 </style></head><body><div class="wrap">
 <h1>Topps Icon Collection &mdash; OfferUp Listings</h1>
-<p class="sub">10 ready-to-post lots. Tap "Copy listing" to grab the title+description for that lot, paste into OfferUp, then take your own photo of the physical pile (the thumbnails here are just for reference / tap to zoom and check a card). No real market comps exist for this product yet, so prices are conservative flat estimates &mdash; adjust if you get better offers.</p>
+<p class="sub">10 ready-to-post lots. Each lot has one combined image (all its cards in a grid) &mdash; save that and upload it as your OfferUp photo, no need to photograph the physical pile separately. Tap "Copy listing" for the title+description, paste into OfferUp. No real market comps exist for this product yet, so prices are conservative flat estimates &mdash; adjust if you get better offers.</p>
 <div id="lots"></div>
 </div>
 <div id="lightbox"><img id="lbimg" src=""></div>
@@ -35,24 +39,34 @@ for (const lot of LOTS) {
   const el = document.createElement("div");
   el.className = "lot";
   const cardsHtml = lot.cards.map(c => `<img src="${c.img}" title="${c.p}" loading="lazy">`).join("");
+  const collageSrc = `topps_ic_collages/lot_${String(lot.id).padStart(2,"0")}.jpg`;
   el.innerHTML = `
     <div class="lothead">
       <span class="lotbadge" style="background:${lot.color}">Lot ${lot.id}</span>
       <span class="lottitle">${lot.name} (${lot.count} cards)</span>
       <span class="lotprice">$${lot.price}</span>
     </div>
+    <img class="collage" src="${collageSrc}" loading="lazy">
+    <p class="collagenote">Tap to view full-size, then press-and-hold (or right-click) to save &mdash; upload this one image to OfferUp.</p>
     <div class="listingbox">
       <div class="lt">${lot.title}</div>
       <div class="ld">${lot.desc}</div>
       <button class="copybtn">Copy listing text</button>
     </div>
-    <div class="grid">${cardsHtml}</div>
+    <details class="grid-toggle">
+      <summary>Show individual cards (to double-check who's in this lot)</summary>
+      <div class="grid">${cardsHtml}</div>
+    </details>
   `;
   el.querySelector(".copybtn").onclick = async (e) => {
     const txt = lot.title + "\n\n" + lot.desc;
     try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
           setTimeout(()=>e.target.textContent="Copy listing text", 1500); }
     catch { prompt("Copy this:", txt); }
+  };
+  el.querySelector(".collage").onclick = () => {
+    document.getElementById("lbimg").src = collageSrc;
+    document.getElementById("lightbox").classList.add("on");
   };
   el.querySelectorAll(".grid img").forEach(img => {
     img.onclick = () => { document.getElementById("lbimg").src = img.src;
