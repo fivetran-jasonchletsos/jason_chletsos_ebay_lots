@@ -1151,6 +1151,7 @@ def _parse_listings(xml_items, ns):
         pic = item.find("e:PictureDetails/e:GalleryURL", ns)
         price_el = item.find("e:SellingStatus/e:CurrentPrice", ns)
         view_url = item.find("e:ListingDetails/e:ViewItemURL", ns)
+        start_time_el = item.find("e:ListingDetails/e:StartTime", ns)
 
         item_id = t("ItemID")
         # Upgrade eBay thumbnail URL from s-l140 to s-l500 for sharp images
@@ -1175,6 +1176,7 @@ def _parse_listings(xml_items, ns):
             "quantity":     t("QuantityAvailable") or t("Quantity") or "1",
             "desc":         t("Description"),
             "listing_type": ltype,
+            "start_time":   start_time_el.text.strip() if start_time_el is not None else "",
         }
 
 
