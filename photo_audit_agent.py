@@ -69,6 +69,7 @@ DEFAULT_CONFIG: dict = {
     "min_photos_for_good":           4,
     "min_file_bytes_per_megapixel":  30000,
     "max_listings_to_audit":         200,
+    "rotation_offset":               0,
     "low_priority_below_value_usd":  5.00,
     # Aspect ratio bounds (long edge / short edge). Most sports cards are 3:4
     # ≈ 1.33. Anything > 2.0 is panoramic; anything < 1.05 is square-cropped.
@@ -449,8 +450,24 @@ def run_audit(cfg: dict) -> dict:
     sold     = _load_sold_history()
     cap      = cfg["max_listings_to_audit"]
     if len(listings) > cap:
-        print(f"  Capping audit at {cap} of {len(listings)} listings")
-        listings = listings[:cap]
+        # Rotating slice, not a fixed [:cap] truncation -- otherwise the same
+        # first `cap` listings get re-audited every run forever and the rest
+        # of the catalog (98%+ of it, once the store grew past ~200 active
+        # listings) never gets checked at all. Mirrors repricing_agent.py's
+        # rotation_offset pattern. Fixed 2026-08-09.
+        off = int(cfg.get("rotation_offset", 0)) % len(listings)
+        sliced = listings[off:off + cap]
+        if len(sliced) < cap:
+            sliced += listings[:cap - len(sliced)]
+        print(f"  Auditing {cap} of {len(listings)} listings this run "
+              f"(rotating slice from offset {off})")
+        try:
+            raw = json.loads(CONFIG_PATH.read_text()) if CONFIG_PATH.exists() else {}
+            raw["rotation_offset"] = (off + cap) % len(listings)
+            CONFIG_PATH.write_text(json.dumps(raw, indent=2))
+        except Exception:
+            pass
+        listings = sliced
 
     ebay_cfg = json.loads(promote.CONFIG_FILE.read_text())
     print("  Getting eBay access token...")
