@@ -209,12 +209,32 @@ def _selling_section_html(t: dict) -> str:
     {dow_chart}"""
 
 
+STALE_FLIPS_DAYS = 3  # Browse API listing data older than this: prices/availability may be wrong
+
+
+def _flips_staleness(flips_plan: dict) -> tuple[str, int | None]:
+    """(source_generated_at, age_in_days). age is None if we can't tell."""
+    # source_generated_at is the listing DATA's age (added 2026-08-10); older
+    # cached plans only have generated_at, which is when the script last ran
+    # -- not necessarily when the underlying listings were fetched.
+    ts = flips_plan.get("source_generated_at") or flips_plan.get("generated_at", "")
+    if not ts:
+        return "", None
+    try:
+        age = (datetime.now(timezone.utc) - datetime.fromisoformat(ts)).days
+    except ValueError:
+        return ts, None
+    return ts, age
+
+
 def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
     flips_plan = flips_plan or {}
-    flips_generated = flips_plan.get("generated_at", "")
+    flips_generated, flips_age_days = _flips_staleness(flips_plan)
+    is_stale = flips_age_days is not None and flips_age_days > STALE_FLIPS_DAYS
 
     def _flip_row(f: dict) -> str:
-        meets_rule = (f.get("net_profit", 0) >= MIN_NET_PROFIT
+        meets_rule = (not is_stale
+                      and f.get("net_profit", 0) >= MIN_NET_PROFIT
                       and f.get("velocity_30d", 0) >= MIN_VELOCITY_30D
                       and not f.get("warnings"))
         warn_html = "".join(f'<span class="tag tag-warn">{_esc(w)}</span>' for w in f.get("warnings", []))
@@ -234,6 +254,16 @@ def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
         "\n".join(_flip_row(f) for f in flips_plan.get("flips", [])[:40]),
         7, 'No cached flip data — run <code>python3 resale_flips_agent.py</code> to refresh.',
     )
+
+    stale_banner = ""
+    if is_stale:
+        stale_banner = (
+            f'<div class="stale-warn">Listing data is <strong>{flips_age_days} days old</strong> '
+            f'(source: {_esc(flips_generated)}) &mdash; the eBay Browse API fetch failed or was '
+            f'rate-limited, so this ran on a stale cache. Specific listings below may be sold or '
+            f'ended already; treat prices as reference only, not a live buy signal, until you run '
+            f'<code>python3 resale_flips_agent.py</code> again successfully.</div>'
+        )
 
     restock_rows = _rows_or("\n".join(
         f'<tr><td>{_esc(r["set"])}</td><td class="num">{r["sold_90d_or_alltime"]}</td>'
@@ -257,8 +287,9 @@ def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
     <section class="panel">
       <div class="section-header">
         <h2>Buy Radar &mdash; resale flips</h2>
-        <span class="muted">{f"cached {_esc(flips_generated)}" if flips_generated else "no data yet"}</span>
+        <span class="muted">{"" if is_stale else (f"fetched {_esc(flips_generated)}" if flips_generated else "no data yet")}</span>
       </div>
+      {stale_banner}
       <details class="son-rules" open>
         <summary>Quick-buy rule</summary>
         <div class="son-rules-body">
@@ -307,6 +338,8 @@ tr.buy-yes { background: rgba(79,70,229,.05); }
 .son-rules summary { cursor: pointer; font-size: 13px; color: var(--text-dim); }
 .son-rules-body { font-size: 13px; margin-top: 8px; color: var(--text-muted); }
 .son-rules-body .skip { color: var(--danger); }
+.stale-warn { background: rgba(220,38,38,.06); border: 1px solid rgba(220,38,38,.25); border-radius: 4px; padding: 10px 14px; font-size: 13px; color: var(--text); margin-bottom: 14px; }
+.stale-warn code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 @media (max-width: 820px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .dash-two { grid-template-columns: 1fr; } }
 </style>"""
 

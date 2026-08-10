@@ -101,23 +101,30 @@ def load_sold_history() -> list[dict]:
         return []
 
 
-def get_source_listings(cfg: dict) -> dict:
-    """Try live fetch first, fall back to disk cache."""
+def get_source_listings(cfg: dict) -> tuple[dict, str]:
+    """Try live fetch first, fall back to disk cache.
+
+    Returns (data, source_generated_at) -- the second value is "now" on a
+    live fetch, but the cache FILE's mtime on a fallback, so callers can
+    tell listing data is actually months old even when the script itself
+    just ran (2026-08-10: a live-run "generated_at" on stale fallback data
+    made an ended $51.99 listing look like a fresh buy signal)."""
     try:
         print("Fetching fresh deals via promote.fetch_deals(cfg) ...")
         data = promote.fetch_deals(cfg)
         if data and data.get("queries"):
             SOURCE_CACHE.write_text(json.dumps(data, indent=2), encoding="utf-8")
             print(f"  ok — cached to {SOURCE_CACHE}")
-            return data
+            return data, datetime.now(timezone.utc).isoformat()
         print("  fetch returned no queries; trying disk fallback")
     except Exception as exc:
         print(f"  live fetch failed: {exc}; trying disk fallback")
     if SOURCE_CACHE.exists():
         print(f"Falling back to {SOURCE_CACHE}")
-        return json.loads(SOURCE_CACHE.read_text())
+        mtime = datetime.fromtimestamp(SOURCE_CACHE.stat().st_mtime, tz=timezone.utc)
+        return json.loads(SOURCE_CACHE.read_text()), mtime.isoformat()
     print("No cached source available. Returning empty payload.")
-    return {"queries": [], "threshold": 30, "total_deals": 0}
+    return {"queries": [], "threshold": 30, "total_deals": 0}, datetime.now(timezone.utc).isoformat()
 
 
 # ---------------------------------------------------------------------------
@@ -621,7 +628,7 @@ def build_page(plan: dict) -> Path:
 def main():
     cfg = load_cfg()
     sold = load_sold_history()
-    source = get_source_listings(cfg)
+    source, source_generated_at = get_source_listings(cfg)
 
     # Flatten the deals from the source payload, attach query meta.
     all_deals = []
@@ -640,6 +647,7 @@ def main():
 
     plan = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source_generated_at": source_generated_at,
         "source_queries": len(source.get("queries", [])),
         "source_deals": sum(len(q.get("deals", [])) for q in source.get("queries", [])),
         "total_candidates": len(flips),
@@ -655,6 +663,10 @@ def main():
     }
     PLAN_FILE.write_text(json.dumps(plan, indent=2, default=str), encoding="utf-8")
     print(f"Wrote {PLAN_FILE} ({len(flips)} candidates)")
+    src_age_days = (datetime.now(timezone.utc) - datetime.fromisoformat(source_generated_at)).days
+    if src_age_days > 3:
+        print(f"  ⚠ listing data is {src_age_days} days old (Browse API fetch failed/rate-limited) "
+              f"-- prices/availability below are NOT current, verify before buying")
 
 
 if __name__ == "__main__":
