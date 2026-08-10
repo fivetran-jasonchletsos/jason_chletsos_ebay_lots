@@ -194,6 +194,16 @@ def relist_as_fixed_price(token: str, item_id: str, ebay_cfg: dict,
     price_str = f"{float(new_price):.2f}" if new_price is not None else ""
     price_block = (f'      <StartPrice currencyID="USD">{price_str}</StartPrice>\n'
                    if price_str else "")
+    # A price cut on relist can drop the new price at/below a Best Offer
+    # auto-accept/auto-decline threshold carried over from the original
+    # listing, which eBay rejects outright (errors 22003/23004) -- that
+    # rejection used to be invisible because the parser below only reported
+    # the unrelated cosmetic "accept payment terms" Warning. Explicitly
+    # disabling Best Offer on relist sidesteps recomputing valid thresholds
+    # for an arbitrary new price; these are markdown backlog relists, not
+    # negotiated sales, so Best Offer isn't needed here anyway.
+    best_offer_block = ('<BestOfferDetails><BestOfferEnabled>false</BestOfferEnabled>'
+                         '</BestOfferDetails>' if price_str else "")
     xml = (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         f'<RelistFixedPriceItemRequest xmlns="{EBAY_NS}">\n'
@@ -201,7 +211,7 @@ def relist_as_fixed_price(token: str, item_id: str, ebay_cfg: dict,
         f'  <Item><ItemID>{item_id}</ItemID>'
         f'<ListingType>FixedPriceItem</ListingType>'
         f'<ListingDuration>GTC</ListingDuration>'
-        f'{price_block.strip()}</Item>\n'
+        f'{price_block.strip()}{best_offer_block}</Item>\n'
         f'  <ErrorLanguage>en_US</ErrorLanguage><WarningLevel>High</WarningLevel>\n'
         f'</RelistFixedPriceItemRequest>'
     )
@@ -222,7 +232,19 @@ def relist_as_fixed_price(token: str, item_id: str, ebay_cfg: dict,
             pass
     err_msg = ""
     if ack not in ("Success", "Warning"):
-        err = root.find(f".//{NS}Errors")
+        # eBay's RelistFixedPriceItem response nearly always carries a
+        # SeverityCode=Warning "accept automatic payment terms" node
+        # (ErrorCode 21919219) alongside the real, request-blocking
+        # SeverityCode=Error node -- taking the first <Errors> blindly
+        # reports that cosmetic warning as "the error" and hides the
+        # actual cause (e.g. duplicate-listing, Best Offer threshold
+        # violation) underneath it. Prefer Error severity; only fall back
+        # to Warning if no Error-severity node is present.
+        all_errs = root.findall(f".//{NS}Errors")
+        err = next((e for e in all_errs
+                    if (e.findtext(f"{NS}SeverityCode") or "") == "Error"), None)
+        if err is None and all_errs:
+            err = all_errs[0]
         if err is not None:
             err_msg = (f"[{err.findtext(f'{NS}ErrorCode')}] "
                        f"{err.findtext(f'{NS}LongMessage', '')[:200]}")
