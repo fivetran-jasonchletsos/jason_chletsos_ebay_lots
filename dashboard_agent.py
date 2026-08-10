@@ -3,11 +3,19 @@
 Replaces the old buyer-facing storefront (never used — zero customer
 traffic) and the old seller.html / admin report fleet (torn down 2026-08-06)
 with one page answering two questions: what's been selling, and what should
-I buy next. Admin-gated, light data-tool theme (no storefront branding),
-wired into promote.html_shell for the OAuth gate + PWA boilerplate.
+I buy next. Admin-gated, light data-tool theme, wired into promote.html_shell
+for the OAuth gate + PWA boilerplate.
 
-Reads:
-    output/sales_trends.json       (sales_trends_agent.py — run first)
+Charts are inline SVG via chart_helpers.py (Tufte redesign, 2026-08-09):
+no chart-JS dependency, no legends/tooltips to hover for a number you
+should just be able to read, no pie/doughnut (angle judgment is worse than
+length judgment), a sparkline per set showing its trend instead of one big
+combined line. High data-ink ratio: hairline rules, no card shadows, no
+decoration that isn't carrying a value.
+
+Reads (falls back to disk when the caller doesn't already have these in
+memory — see build()'s optional params):
+    output/sales_trends.json       (sales_trends_agent.py)
     output/resale_flips_plan.json  (resale_flips_agent.py — refresh by hand;
                                      hits live eBay Browse API so it isn't
                                      re-run on every promote.py cycle)
@@ -25,14 +33,15 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import chart_helpers
 import promote
 import sales_trends_agent
+import snapshot_store
 
 REPO       = Path(__file__).parent
 OUTPUT_DIR = REPO / "output"
 TRENDS_PATH = OUTPUT_DIR / "sales_trends.json"
 FLIPS_PATH  = OUTPUT_DIR / "resale_flips_plan.json"
-SNAPSHOT_PATH = OUTPUT_DIR / "listings_snapshot.json"
 OUT = REPO / "docs" / "dashboard.html"
 
 # Quick-buy rule thresholds (JC's rule of thumb, carried over from the old
@@ -41,6 +50,13 @@ MIN_NET_PROFIT = 15.0
 MIN_VELOCITY_30D = 10
 RESTOCK_SOLD_MIN = 5      # a set needs at least this many sales to count as "proven"
 RESTOCK_ACTIVE_MAX = 3    # ...and this few active listings to flag as low stock
+
+_BUY_BADGE = '<span class="tag tag-gold">BUY</span>'
+
+# Sequential indigo scale for the price-band bar — Tufte tolerates an ordered
+# scale (it encodes the $0-2 -> $50+ ordering); it's categorical rainbow
+# coloring he objected to.
+_BAND_SCALE = ["#e0e7ff", "#c7d2fe", "#a5b4fc", "#818cf8", "#6366f1", "#4338ca"]
 
 
 def _load_json(path: Path, default):
@@ -59,11 +75,8 @@ def _esc(s) -> str:
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def _load_active_listings() -> list[dict]:
-    raw = _load_json(SNAPSHOT_PATH, [])
-    if isinstance(raw, dict):
-        return raw.get("listings", [])
-    return raw if isinstance(raw, list) else []
+def _rows_or(rows_html: str, colspan: int, empty_msg: str) -> str:
+    return rows_html or f'<tr><td colspan="{colspan}" class="muted">{empty_msg}</td></tr>'
 
 
 def _restock_signals(trends: dict, listings: list[dict]) -> list[dict]:
@@ -92,59 +105,88 @@ def _restock_signals(trends: dict, listings: list[dict]) -> list[dict]:
 
 
 def _kpi_html(t: dict) -> str:
-    return f"""
-    <section class="dash-kpis">
-      <div class="stat-card"><div class="num">{_money(t.get('total_revenue', 0))}</div><div class="lbl">Total revenue</div></div>
-      <div class="stat-card"><div class="num">{t.get('cards_sold', 0)}</div><div class="lbl">Cards sold</div></div>
-      <div class="stat-card"><div class="num">{_money(t.get('avg_sale', 0))}</div><div class="lbl">Avg sale</div></div>
-      <div class="stat-card"><div class="num">{_money(t.get('median_sale', 0))}</div><div class="lbl">Median sale</div></div>
-      <div class="stat-card"><div class="num">{_money(t.get('revenue_per_week', 0))}</div><div class="lbl">Rev / week</div></div>
-      <div class="stat-card"><div class="num">{_esc(t.get('best_week', '—'))}</div><div class="lbl">Best week</div></div>
-    </section>"""
+    """A dense row of labeled numbers — no cards, no gradients, no icons.
+    Tufte: the numbers themselves are the graphic."""
+    stats = [
+        (_money(t.get("total_revenue", 0)), "Total revenue"),
+        (str(t.get("cards_sold", 0)), "Cards sold"),
+        (_money(t.get("avg_sale", 0)), "Avg sale"),
+        (_money(t.get("median_sale", 0)), "Median sale"),
+        (_money(t.get("revenue_per_week", 0)), "Rev / week"),
+        (_esc(t.get("best_week", "—")), "Best week"),
+    ]
+    cells = "".join(
+        f'<div class="kpi"><div class="kpi-num">{val}</div><div class="kpi-lbl">{lbl}</div></div>'
+        for val, lbl in stats
+    )
+    return f'<section class="kpi-row">{cells}</section>'
 
 
 def _selling_section_html(t: dict) -> str:
-    top_rows = "\n".join(
+    top_rows = _rows_or("\n".join(
         f'<tr><td class="rank">{i+1}</td>'
         f'<td><a href="{_esc(s["url"])}" target="_blank" rel="noopener">{_esc(s["title"][:74])}</a></td>'
         f'<td><span class="chip">{_esc(s["set"])}</span></td>'
         f'<td class="num">{_money(s["price"])}</td>'
         f'<td class="dt">{datetime.fromisoformat(s["date"]).strftime("%b %-d")}</td></tr>'
         for i, s in enumerate(t.get("top_sales", []))
-    ) or '<tr><td colspan="5" class="muted">No sales yet</td></tr>'
+    ), 5, "No sales yet")
 
-    set_rows = "\n".join(
+    set_rows = _rows_or("\n".join(
         f'<tr><td>{_esc(r["set"])}</td><td class="num">{r["sold"]}</td>'
         f'<td class="num">{_money(r["revenue"])}</td><td class="num">{_money(r["avg"])}</td>'
-        f'<td class="num">{r["pct_of_revenue"]:.0f}%</td></tr>'
+        f'<td class="num">{r["pct_of_revenue"]:.0f}%</td>'
+        f'<td class="spark">{chart_helpers.sparkline(r["trend"], width=110, height=28)}</td></tr>'
         for r in t.get("by_set", [])
-    ) or '<tr><td colspan="5" class="muted">No sales yet</td></tr>'
+    ), 6, "No sales yet")
 
-    buyer_rows = "\n".join(
+    buyer_rows = _rows_or("\n".join(
         f'<tr><td>{_esc(b["buyer"])}</td><td class="num">{b["orders"]}</td><td class="num">{_money(b["spend"])}</td></tr>'
         for b in t.get("repeat_buyers", [])
-    ) or '<tr><td colspan="3" class="muted">No repeat buyers yet</td></tr>'
+    ), 3, "No repeat buyers yet")
 
     span = f'{t.get("span_days", 0)} days' if t.get("span_days") else "—"
+
+    revenue_chart = chart_helpers.card_wrapper(
+        "Revenue over time", f"weekly · {span}",
+        chart_helpers.bar_chart_vertical(
+            list(zip(t.get("weekLabels", []), t.get("weekRev", []))),
+            height=200, y_label="revenue",
+        ),
+    )
+    by_set_chart = chart_helpers.card_wrapper(
+        "What's selling", "by set, ranked",
+        chart_helpers.bar_chart_horizontal(
+            [(label, rev, None) for label, rev in zip(t.get("brandLabels", []), t.get("brandRev", []))],
+            value_fmt=_money,
+        ),
+    )
+    band_segments = [
+        (label, cnt, _BAND_SCALE[i % len(_BAND_SCALE)])
+        for i, (label, cnt) in enumerate(zip(t.get("bandLabels", []), t.get("bandCnt", [])))
+    ]
+    band_chart = chart_helpers.card_wrapper(
+        "Price-band mix", "share of cards sold",
+        chart_helpers.stacked_proportion_bar(band_segments),
+    )
+    dow_chart = chart_helpers.card_wrapper(
+        "When buyers buy", "orders by day of week",
+        chart_helpers.bar_chart_vertical(
+            list(zip(t.get("dowNames", []), t.get("dowCnt", []))),
+            height=160, value_fmt=lambda v: str(int(v)), y_label="orders",
+        ),
+    )
+
     return f"""
-    <section class="panel">
-      <h2>Revenue over time <span class="muted">(weekly &middot; {span})</span></h2>
-      <div class="chart-wrap chart-wrap-lg"><canvas id="revChart"></canvas></div>
-    </section>
+    {revenue_chart}
     <div class="dash-two">
-      <section class="panel">
-        <h2>What's selling &mdash; by set</h2>
-        <div class="chart-wrap"><canvas id="setChart"></canvas></div>
-      </section>
-      <section class="panel">
-        <h2>Price-band mix</h2>
-        <div class="chart-wrap"><canvas id="bandChart"></canvas></div>
-      </section>
+      {by_set_chart}
+      {band_chart}
     </div>
     <section class="panel">
       <h2>Sales by set</h2>
       <div class="table-wrap"><table>
-        <thead><tr><th>Set</th><th class="num">Sold</th><th class="num">Revenue</th><th class="num">Avg</th><th class="num">% rev</th></tr></thead>
+        <thead><tr><th>Set</th><th class="num">Sold</th><th class="num">Revenue</th><th class="num">Avg</th><th class="num">% rev</th><th>Trend</th></tr></thead>
         <tbody>{set_rows}</tbody>
       </table></div>
     </section>
@@ -162,42 +204,43 @@ def _selling_section_html(t: dict) -> str:
           <thead><tr><th>Buyer</th><th class="num">Orders</th><th class="num">Spend</th></tr></thead>
           <tbody>{buyer_rows}</tbody>
         </table></div>
-        <h2 style="margin-top:22px">When buyers buy</h2>
-        <div class="chart-wrap"><canvas id="dowChart"></canvas></div>
       </section>
-    </div>"""
+    </div>
+    {dow_chart}"""
 
 
 def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
-    flips_generated = ""
-    flip_rows = ""
-    if flips_plan:
-        flips_generated = flips_plan.get("generated_at", "")
-        candidates = flips_plan.get("flips", [])
-        for f in candidates[:40]:
-            meets_rule = (f.get("net_profit", 0) >= MIN_NET_PROFIT
-                          and f.get("velocity_30d", 0) >= MIN_VELOCITY_30D
-                          and not f.get("warnings"))
-            warn_html = "".join(f'<span class="tag tag-warn">{_esc(w)}</span>' for w in f.get("warnings", []))
-            flip_rows += (
-                f'<tr class="{"buy-yes" if meets_rule else ""}">'
-                f'<td><a href="{_esc(f.get("url",""))}" target="_blank" rel="noopener">{_esc((f.get("title") or "")[:70])}</a></td>'
-                f'<td class="num">{_money(f.get("asking", 0))}</td>'
-                f'<td class="num">{_money(f.get("resale", 0))}</td>'
-                f'<td class="num {"good" if f.get("net_profit",0) > 0 else "bad"}">{_money(f.get("net_profit", 0))}</td>'
-                f'<td class="num">{f.get("velocity_30d", 0)}/mo</td>'
-                f'<td>{warn_html or "&mdash;"}</td>'
-                f'<td>{"<span class=\'tag tag-gold\'>BUY</span>" if meets_rule else ""}</td>'
-                f'</tr>'
-            )
-    flip_rows = flip_rows or '<tr><td colspan="7" class="muted">No cached flip data — run <code>python3 resale_flips_agent.py</code> to refresh.</td></tr>'
+    flips_plan = flips_plan or {}
+    flips_generated = flips_plan.get("generated_at", "")
 
-    restock_rows = "\n".join(
+    def _flip_row(f: dict) -> str:
+        meets_rule = (f.get("net_profit", 0) >= MIN_NET_PROFIT
+                      and f.get("velocity_30d", 0) >= MIN_VELOCITY_30D
+                      and not f.get("warnings"))
+        warn_html = "".join(f'<span class="tag tag-warn">{_esc(w)}</span>' for w in f.get("warnings", []))
+        return (
+            f'<tr class="{"buy-yes" if meets_rule else ""}">'
+            f'<td><a href="{_esc(f.get("url",""))}" target="_blank" rel="noopener">{_esc((f.get("title") or "")[:70])}</a></td>'
+            f'<td class="num">{_money(f.get("asking", 0))}</td>'
+            f'<td class="num">{_money(f.get("resale", 0))}</td>'
+            f'<td class="num {"good" if f.get("net_profit", 0) > 0 else "bad"}">{_money(f.get("net_profit", 0))}</td>'
+            f'<td class="num">{f.get("velocity_30d", 0)}/mo</td>'
+            f'<td>{warn_html or "&mdash;"}</td>'
+            f'<td>{_BUY_BADGE if meets_rule else ""}</td>'
+            f'</tr>'
+        )
+
+    flip_rows = _rows_or(
+        "\n".join(_flip_row(f) for f in flips_plan.get("flips", [])[:40]),
+        7, 'No cached flip data — run <code>python3 resale_flips_agent.py</code> to refresh.',
+    )
+
+    restock_rows = _rows_or("\n".join(
         f'<tr><td>{_esc(r["set"])}</td><td class="num">{r["sold_90d_or_alltime"]}</td>'
         f'<td class="num">{_money(r["revenue"])}</td><td class="num">{_money(r["avg_sale"])}</td>'
         f'<td class="num">{r["active_now"]}</td></tr>'
         for r in restock
-    ) or '<tr><td colspan="5" class="muted">Nothing flagged — inventory keeping pace with sales.</td></tr>'
+    ), 5, "Nothing flagged — inventory keeping pace with sales.")
 
     return f"""
     <section class="panel">
@@ -233,23 +276,25 @@ def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
 _CSS = """
 <style>
 .dash-wrap { max-width: 1100px; margin: 0 auto; }
-.dash-head h1 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-weight: 800; font-size: 32px; margin: 0 0 2px; }
-.dash-kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 18px 0 24px; }
-.dash-kpis .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-.dash-kpis .num { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: var(--gold); }
-.dash-kpis .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin-top: 4px; }
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 18px; }
-.chart-wrap { position: relative; height: 220px; }
-.chart-wrap-lg { height: 280px; }
-.panel h2 { font-size: 16px; margin: 0 0 14px; }
+.dash-head h1 { font-family: 'Familjen Grotesk', -apple-system, sans-serif; font-weight: 800; font-size: 28px; margin: 0 0 2px; letter-spacing: -0.01em; }
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); margin: 18px 0 26px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.kpi { padding: 14px 16px; border-left: 1px solid var(--border); }
+.kpi:first-child { border-left: none; }
+.kpi-num { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.kpi-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin-top: 3px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
+.panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
 .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-.dash-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.dash-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ch-card { margin-bottom: 16px !important; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-th.num, td.num { text-align: right; font-family: 'JetBrains Mono', monospace; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+th.num, td.num { text-align: right; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 td.rank { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
 td.dt { color: var(--text-dim); white-space: nowrap; }
+td.spark { width: 120px; }
 .chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-dim); }
 .muted { color: var(--text-dim); }
 .good { color: var(--success); }
@@ -262,60 +307,24 @@ tr.buy-yes { background: rgba(79,70,229,.05); }
 .son-rules summary { cursor: pointer; font-size: 13px; color: var(--text-dim); }
 .son-rules-body { font-size: 13px; margin-top: 8px; color: var(--text-muted); }
 .son-rules-body .skip { color: var(--danger); }
-@media (max-width: 820px) { .dash-kpis { grid-template-columns: repeat(2, 1fr); } .dash-two { grid-template-columns: 1fr; } }
+@media (max-width: 820px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .dash-two { grid-template-columns: 1fr; } }
 </style>"""
 
 
-def _js(payload: dict) -> str:
-    return f"""
-<script>window.__DASH = {json.dumps(payload)};</script>
-<script>
-(function(){{
-  const S = window.__DASH; if(!S || !window.Chart) return;
-  const css = getComputedStyle(document.documentElement);
-  const gold = css.getPropertyValue('--gold').trim() || '#4f46e5';
-  const dim  = css.getPropertyValue('--text-dim').trim() || '#9aa';
-  const grid = 'rgba(255,255,255,.06)';
-  Chart.defaults.color = dim; Chart.defaults.font.family = "'Familjen Grotesk', sans-serif";
-  const money = v => '$' + Number(v).toLocaleString(undefined,{{maximumFractionDigits:0}});
+def build(trends: dict | None = None, listings: list[dict] | None = None) -> Path:
+    """Renders docs/dashboard.html.
 
-  new Chart(document.getElementById('revChart'), {{
-    data: {{ labels: S.weekLabels, datasets: [
-      {{ type:'bar', label:'Revenue', data:S.weekRev, backgroundColor:gold, borderRadius:4, yAxisID:'y', order:2 }},
-      {{ type:'line', label:'Cards sold', data:S.weekCnt, borderColor:'#7db7ff', backgroundColor:'#7db7ff',
-        tension:.3, yAxisID:'y1', order:1, pointRadius:2 }} ] }},
-    options: {{ responsive:true, maintainAspectRatio:false, interaction:{{mode:'index',intersect:false}},
-      plugins:{{ legend:{{labels:{{boxWidth:12}}}}, tooltip:{{ callbacks:{{ label:c=> c.dataset.yAxisID==='y' ? ' '+money(c.parsed.y) : ' '+c.parsed.y+' cards' }} }} }},
-      scales:{{ y:{{position:'left',grid:{{color:grid}},ticks:{{callback:money}}}}, y1:{{position:'right',grid:{{display:false}}}}, x:{{grid:{{display:false}}}} }} }}
-  }});
-
-  new Chart(document.getElementById('setChart'), {{
-    type:'bar', data:{{ labels:S.brandLabels, datasets:[{{ label:'Revenue', data:S.brandRev, backgroundColor:gold, borderRadius:4 }}] }},
-    options:{{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{{legend:{{display:false}},
-      tooltip:{{callbacks:{{label:c=>' '+money(c.parsed.x)+' &middot; '+S.brandCnt[c.dataIndex]+' sold'}}}}}},
-      scales:{{ x:{{grid:{{color:grid}},ticks:{{callback:money}}}}, y:{{grid:{{display:false}}}} }} }}
-  }});
-
-  const palette = ['#5b8def','#49b675','#e0b13a','#e0773a','#d4553a','#a05ad4'];
-  new Chart(document.getElementById('bandChart'), {{
-    type:'doughnut', data:{{ labels:S.bandLabels, datasets:[{{ data:S.bandCnt, backgroundColor:palette, borderWidth:0 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, cutout:'58%', plugins:{{ legend:{{position:'right',labels:{{boxWidth:12}}}} }} }}
-  }});
-
-  new Chart(document.getElementById('dowChart'), {{
-    type:'bar', data:{{ labels:S.dowNames, datasets:[{{ data:S.dowCnt, backgroundColor:'#5b8def', borderRadius:4 }}] }},
-    options:{{ responsive:true, maintainAspectRatio:false, plugins:{{legend:{{display:false}}}},
-      scales:{{ y:{{grid:{{color:grid}}}}, x:{{grid:{{display:false}}}} }} }}
-  }});
-}})();
-</script>"""
-
-
-def build() -> Path:
-    trends = _load_json(TRENDS_PATH, {})
+    trends/listings let a caller that already has this data in memory
+    (promote.py, right after fetching/computing it) pass it straight
+    through instead of writing-then-re-reading a JSON round trip. Standalone
+    use (python3 dashboard_agent.py) leaves both None and loads from disk.
+    """
+    if trends is None:
+        trends = _load_json(TRENDS_PATH, {})
     flips_plan = _load_json(FLIPS_PATH, None)
-    listings = _load_active_listings()
-    restock = _restock_signals(trends, listings) if trends else []
+    if not listings:
+        listings = snapshot_store.load()
+    restock = _restock_signals(trends, listings)
 
     now = datetime.now(timezone.utc)
     hero = f"""
@@ -330,7 +339,6 @@ def build() -> Path:
         + (_selling_section_html(trends) if trends else "")
         + _buy_section_html(flips_plan, restock)
         + "</main>"
-        + _js(trends if trends else {})
     )
 
     html = promote.html_shell(

@@ -1666,29 +1666,6 @@ html.pre-is-admin .gate-overlay { display: none !important; }
   letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
   margin-top: 14px;
 }
-.btn-theme {
-  width: 38px; height: 38px;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border-mid);
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  transition: all var(--t-fast);
-}
-.btn-theme:hover { color: var(--gold); border-color: var(--gold); }
-.btn-theme .ic-moon { display: none; }
-.btn-theme .ic-sun  { display: block; }
-[data-theme="cream"] .btn-theme .ic-sun  { display: none; }
-[data-theme="cream"] .btn-theme .ic-moon { display: block; }
-[data-theme="cream"] .btn-theme {
-  color: var(--text);
-  border-color: var(--text);
-}
-[data-theme="cream"] .btn-theme:hover {
-  background: var(--text);
-  color: var(--bg);
-}
 .menu-toggle {
   display: none;
   width: 42px; height: 42px;
@@ -2336,33 +2313,6 @@ tr:hover td { background: color-mix(in srgb, var(--gold) 4%, transparent); }
   font-size: 36px; color: var(--gold); margin-bottom: 6px;
 }
 
-/* ============ POLISH LAYER — round 2 (design director feedback) ============ */
-
-/* Price treatment — gold gradient text fill with subtle glow + tabular nums.
-   Cream/light themes lose the gradient (text-fill-color: transparent + light background
-   becomes invisible) so we scope this to dark themes only. */
-.listing-card .price, .hero-price, .deal-price, .product-price, .sold-price, .pr-current, .pr-new {
-  font-feature-settings: 'tnum' 1, 'ss01' 1;
-  font-variant-numeric: tabular-nums;
-}
-html:not([data-theme]) .listing-card .price,
-html:not([data-theme]) .hero-price,
-html:not([data-theme]) .deal-price,
-html:not([data-theme]) .product-price,
-html[data-theme="midnight"] .listing-card .price,
-html[data-theme="midnight"] .hero-price,
-html[data-theme="midnight"] .deal-price,
-html[data-theme="midnight"] .product-price,
-html[data-theme="crimson"] .listing-card .price,
-html[data-theme="crimson"] .hero-price,
-html[data-theme="crimson"] .deal-price,
-html[data-theme="crimson"] .product-price {
-  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-dim) 100%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-  text-shadow: 0 0 20px rgba(212,175,55,.18);
-}
-
 /* Card hover — single, expensive-feeling move (no jittery translateY) */
 .listing-card { transition: border-color .35s ease, box-shadow .35s ease; }
 .listing-card:hover {
@@ -2667,13 +2617,7 @@ textarea:focus-visible, [contenteditable]:focus-visible, [role="button"]:focus-v
 _CDN_HEAD = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 """
 
@@ -2793,17 +2737,14 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="google-site-verification" content="_qz1v8JzZrRv8CPXWv1al3nMP4oyoWRnG-Pc-guRl5Q" />
-  <!-- Default social-share meta for all non-item pages; item pages override via extra_head. -->
+  <!-- Personal admin page, robots-disallowed -- no one should ever see a
+       social-share preview of this, but keep the tags minimally honest. -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{SELLER_NAME}">
   <meta property="og:title" content="{title}">
-  <meta property="og:description" content="Sports &amp; Pokemon cards from harpua2001 — an independent eBay shop on eBay since 1998. Live inventory, real photos, ships next business day.">
-  <meta property="og:image" content="{SITE_URL}/og-card.jpg">
   <meta property="og:url" content="{SITE_URL}/{active_page}">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="{title}">
-  <meta name="twitter:description" content="Sports &amp; Pokemon cards from harpua2001 — on eBay since 1998, real photos, fast shipping.">
-  <meta name="twitter:image" content="{SITE_URL}/og-card.jpg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='28' fill='%23ffffff'/><rect width='180' height='180' rx='28' fill='none' stroke='%23e2e5ea' stroke-width='2'/><text x='90' y='122' font-family='Familjen Grotesk, -apple-system, sans-serif' font-weight='800' font-size='108' fill='%234f46e5' text-anchor='middle'>H</text></svg>">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2839,7 +2780,7 @@ def html_shell(title: str, body: str, extra_head: str = "", active_page: str = "
         <div class="brand-mark">H</div>
         <div class="brand-text">
           <div class="brand-name">{SELLER_NAME}</div>
-          <div class="brand-tag">Sports &amp;<br>Pokemon<br>Cards</div>
+          <div class="brand-tag">Seller<br>Dashboard</div>
         </div>
       </a>
       <nav class="nav-links">{nav_html_desktop}</nav>
@@ -7866,32 +7807,18 @@ ORDER BY lifetime_value DESC;
 """
 
 def build_sitemap_and_robots(listings: list[dict]) -> None:
-    """Generate sitemap.xml + robots.txt for SEO."""
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    urls = [
-        ("",                    "1.0", "hourly"),
-        ("quality.html",        "0.6", "daily"),
-        ("price_review.html",   "0.6", "daily"),
-        ("title_review.html",   "0.5", "daily"),
-        ("reddit.html",         "0.4", "weekly"),
-        ("craigslist.html",     "0.4", "weekly"),
-    ]
-    entries = []
-    for path, prio, freq in urls:
-        loc = f"{SITE_URL}/{path}".rstrip("/")
-        entries.append(f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority></url>")
-
-    sitemap = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-               "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
-               + "\n".join(entries) + "\n</urlset>\n")
+    """Generate sitemap.xml + robots.txt. There's nothing public to index —
+    dashboard.html is the only page and it's admin-gated — so the sitemap is
+    intentionally empty (an empty urlset, not a list of fictional pages) and
+    robots.txt just disallows the one admin page."""
+    sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+               '</urlset>\n')
     (OUTPUT_DIR / "sitemap.xml").write_text(sitemap, encoding="utf-8")
 
     robots = (
         "User-agent: *\n"
         "Allow: /\n"
-        "Disallow: /price_review.html\n"
-        "Disallow: /title_review.html\n"
-        "Disallow: /quality.html\n"
         "Disallow: /dashboard.html\n"
         f"Sitemap: {SITE_URL}/sitemap.xml\n"
     )
@@ -9958,8 +9885,10 @@ def _verify_build_integrity(listings: list[dict]) -> list[str]:
         if not p.exists():
             issues.append(f"missing: docs/{f}")
             continue
-        # robots.txt is naturally small (~200B), HTML pages should be much larger
-        min_size = 100 if f.endswith((".txt", ".webmanifest")) else 1000
+        # robots.txt/sitemap.xml are naturally small (sitemap is intentionally
+        # an empty urlset — nothing public to index); HTML pages should be
+        # much larger.
+        min_size = 50 if f.endswith((".txt", ".webmanifest", ".xml")) else 1000
         if p.stat().st_size < min_size:
             issues.append(f"suspiciously small (<{min_size}B): docs/{f}")
             continue
@@ -10049,16 +9978,6 @@ def main():
         # picks up the fresh feedback_score / positive_pct on this very build.
         global _SELLER_PROFILE_CACHE
         _SELLER_PROFILE_CACHE = None
-    # Regenerate the Open Graph / Twitter Card image so social scrapers stay
-    # in sync with the current seller rating (no-op if Pillow is missing).
-    try:
-        from build_og_card import build as _build_og_card
-        _og_path = _build_og_card()
-        print(f"  OG card regenerated: {_og_path.name} ({_og_path.stat().st_size/1024:.1f} KB)")
-    except ImportError:
-        print("  OG card skipped — Pillow not installed (pip install Pillow)")
-    except Exception as _og_exc:
-        print(f"  OG card skipped — {_og_exc}")
     print("  Fetching sold listings (last 90 days; merged into all-time history)...")
     sold = fetch_sold_listings(token, cfg, days_back=90)
     print("  Fetching market price comps (this takes ~1 min)...")
@@ -10124,13 +10043,17 @@ def main():
             print(f"  SCP price agent skipped: {e}")
     # Personal dashboard — replaces the old buyer storefront (never got
     # customer traffic) and the old seller.html / admin report fleet
-    # (torn down 2026-08-06). Refreshes sales_trends.json from the
-    # sold_history.json we just updated above, then renders dashboard.html.
+    # (torn down 2026-08-06). `sold` and `listings` are already in memory
+    # from the fetches above, so pass them straight through instead of
+    # writing sales_trends.json and re-reading it (and re-reading
+    # listings_snapshot.json) a few lines later.
     try:
         import sales_trends_agent
-        sales_trends_agent.main()
+        trends = sales_trends_agent.compute(sold)
+        sales_trends_agent.OUT.parent.mkdir(exist_ok=True)
+        sales_trends_agent.OUT.write_text(json.dumps(trends, indent=2))
         import dashboard_agent
-        dashboard_agent.build()
+        dashboard_agent.build(trends=trends, listings=listings)
         print(f"  Dashboard: docs/dashboard.html")
     except Exception as _exc:
         print(f"  Dashboard skipped: {_exc}")

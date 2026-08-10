@@ -3,9 +3,9 @@ chart_helpers.py — inline SVG chart primitives for the dashboard pages.
 
 Design goals:
   - Zero JS dependencies; charts render with the HTML.
-  - Match the existing dark-gold dashboard theme (gold-on-near-black).
-  - Crisp typography via the JetBrains Mono / Fraunces stack already loaded
-    by the storefront. Pages that don't already load Fraunces fall back
+  - Match the personal dashboard's light data-tool theme (indigo-on-white).
+  - Crisp typography via the JetBrains Mono / Familjen Grotesk stack already
+    loaded by the dashboard. Pages that don't already load them fall back
     cleanly to the system stack — these charts never block on fonts.
   - Accessible: aria-labels, deterministic colors, no color-only encoding
     for status (red/yellow/green bands also carry text labels).
@@ -18,20 +18,20 @@ import html as _h
 from typing import Iterable, Sequence
 
 
-# Theme tokens — keep in sync with storefront_agent.STOREFRONT_CSS.
-GOLD        = "#c9a542"
-GOLD_BRIGHT = "#f0d27a"
-GOLD_DIM    = "#8a7521"
-INK         = "#f1efe9"
-MUTE        = "#9a9388"
-FAINT       = "#5d5852"
-SURFACE     = "#141414"
-SURFACE_2   = "#1c1c1c"
-EDGE        = "rgba(201,165,66,0.18)"
-RED         = "#d35a5a"
-AMBER       = "#e0a647"
-GREEN       = "#5fb874"
-GRID        = "rgba(255,255,255,0.05)"
+# Theme tokens — keep in sync with promote.py's :root CSS variables.
+GOLD        = "#4f46e5"
+GOLD_BRIGHT = "#6366f1"
+GOLD_DIM    = "#3730a3"
+INK         = "#0f172a"
+MUTE        = "#475569"
+FAINT       = "#94a3b8"
+SURFACE     = "#ffffff"
+SURFACE_2   = "#f1f3f6"
+EDGE        = "rgba(15,23,42,0.08)"
+RED         = "#dc2626"
+AMBER       = "#d97706"
+GREEN       = "#16a34a"
+GRID        = "rgba(15,23,42,0.06)"
 
 _BUCKET_COLORS = {
     "red":   RED,
@@ -49,7 +49,7 @@ _BUCKET_COLORS = {
 
 _FONT_STACK = "'JetBrains Mono', ui-monospace, Menlo, monospace"
 _LABEL_STACK = "'Familjen Grotesk', system-ui, sans-serif"
-_DISPLAY_STACK = "'Fraunces', Georgia, serif"
+_DISPLAY_STACK = "'Familjen Grotesk', system-ui, sans-serif"
 
 
 def _fmt_money(v: float) -> str:
@@ -84,14 +84,14 @@ def _fmt_int(v: float) -> str:
 
 
 def card_wrapper(title: str, subtitle: str, body_html: str, *, accent: str = GOLD_BRIGHT) -> str:
-    """Reusable framed container so every chart sits in the same kind of card."""
+    """Reusable framed container so every chart sits in the same kind of card.
+    No shadow, no gradient -- Tufte's data-ink ratio applies to the frame too."""
     return f'''
 <figure class="ch-card" style="
   background:{SURFACE};border:1px solid {EDGE};border-radius:4px;
-  padding:1.1rem 1.3rem 1.2rem;margin:0 0 1.2rem;
-  box-shadow:0 14px 40px -22px rgba(0,0,0,0.8);">
+  padding:1.1rem 1.3rem 1.2rem;margin:0 0 1.2rem;">
   <figcaption style="display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:0.85rem;border-bottom:1px solid {EDGE};padding-bottom:0.5rem;">
-    <span style="font-family:{_DISPLAY_STACK};font-style:italic;font-weight:500;font-size:18px;color:{INK};">{_h.escape(title)}</span>
+    <span style="font-family:{_DISPLAY_STACK};font-weight:700;font-size:16px;color:{INK};">{_h.escape(title)}</span>
     <span style="font-family:{_FONT_STACK};font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:{accent};">{_h.escape(subtitle)}</span>
   </figcaption>
   {body_html}

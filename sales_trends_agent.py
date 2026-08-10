@@ -2,19 +2,24 @@
 sales_trends_agent.py — analytics over all completed sales.
 
 Reads sold_history.json and computes headline KPIs, revenue-over-time,
-what's selling by set/brand, price-band mix, top sales, day-of-week pattern,
-and repeat buyers. Writes output/sales_trends.json for the personal dashboard
-to consume (docs/sales_trends.html was retired along with the old admin site).
+what's selling by set/brand (with a per-set weekly trend for sparklines),
+price-band mix, top sales, day-of-week pattern, and repeat buyers. Writes
+output/sales_trends.json for the personal dashboard to consume (docs/
+sales_trends.html was retired along with the old admin site).
+
+compute(data) is the pure function -- takes the raw sold_history.json-shaped
+list, returns the summary dict. main() just wires it to disk so callers who
+already have the sold list in memory (promote.py) can call compute()
+directly instead of round-tripping through the file.
 
 Usage: python3 sales_trends_agent.py
 """
 from __future__ import annotations
 
 import json
-import re
 import statistics
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO = Path(__file__).parent
@@ -52,6 +57,8 @@ BRANDS = [
 BANDS = [("$0–2", 0, 2), ("$2–5", 2, 5), ("$5–10", 5, 10),
          ("$10–25", 10, 25), ("$25–50", 25, 50), ("$50+", 50, 1e9)]
 
+_BRANDS_LOWER = [(token.lower(), label) for token, label in BRANDS]
+
 
 def parse_date(s: str):
     if not s:
@@ -63,8 +70,9 @@ def parse_date(s: str):
 
 
 def brand_of(title: str) -> str:
-    for token, label in BRANDS:
-        if token.lower() in title.lower():
+    t = (title or "").lower()
+    for token, label in _BRANDS_LOWER:
+        if token in t:
             return label
     return "Other"
 
@@ -76,8 +84,16 @@ def band_of(p: float) -> str:
     return "Other"
 
 
-def main() -> None:
-    data = json.loads(SOLD.read_text())
+def _money(x) -> str:
+    return f"${x:,.2f}"
+
+
+def compute(data: list[dict]) -> dict:
+    """Pure function: raw sold_history.json-shaped list -> summary dict.
+
+    Callers who already have the sold list in memory (promote.py, right
+    after fetch_sold_listings merges+saves it) should call this directly
+    instead of round-tripping through sold_history.json."""
     sales = []
     for s in data:
         try:
@@ -99,13 +115,16 @@ def main() -> None:
     first, last = (sales[0]["date"], sales[-1]["date"]) if n else (None, None)
     span_days = max(1, (last - first).days) if n else 1
 
-    # revenue + count by ISO week (Mon-anchored)
+    # revenue + count by ISO week (Mon-anchored), overall and per-set (for
+    # per-row sparklines in the "by set" table)
     by_week_rev: dict[str, float] = defaultdict(float)
     by_week_cnt: dict[str, int] = defaultdict(int)
+    by_week_set_rev: dict[tuple[str, str], float] = defaultdict(float)
     for s in sales:
-        wk = (s["date"] - __import__("datetime").timedelta(days=s["date"].weekday())).strftime("%Y-%m-%d")
+        wk = (s["date"] - timedelta(days=s["date"].weekday())).strftime("%Y-%m-%d")
         by_week_rev[wk] += s["price"]
         by_week_cnt[wk] += 1
+        by_week_set_rev[(wk, s["brand"])] += s["price"]
     weeks = sorted(by_week_rev)
     week_labels = [datetime.strptime(w, "%Y-%m-%d").strftime("%b %-d") for w in weeks]
 
@@ -144,6 +163,8 @@ def main() -> None:
                     key=lambda x: (-x[1], -x[2]))
 
     best_week_i = max(range(len(weeks)), key=lambda i: by_week_rev[weeks[i]]) if weeks else None
+    best_week_txt = (f'{week_labels[best_week_i]} · {_money(by_week_rev[weeks[best_week_i]])}'
+                     if best_week_i is not None else "—")
 
     payload = {
         "weekLabels": week_labels,
@@ -158,12 +179,7 @@ def main() -> None:
         "dowCnt": dow_cnt,
     }
 
-    def money(x): return f"${x:,.2f}"
-
-    best_week_txt = (f'{week_labels[best_week_i]} · {money(by_week_rev[weeks[best_week_i]])}'
-                     if best_week_i is not None else "—")
-
-    summary = {
+    return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "first_sale": first.isoformat() if first else None,
         "last_sale": last.isoformat() if last else None,
@@ -177,7 +193,9 @@ def main() -> None:
         **payload,
         "by_set": [
             {"set": b, "sold": brand_cnt[b], "revenue": round(brand_rev[b], 2),
-             "avg": round(brand_rev[b] / brand_cnt[b], 2), "pct_of_revenue": round(brand_rev[b] / total * 100, 1) if total else 0}
+             "avg": round(brand_rev[b] / brand_cnt[b], 2),
+             "pct_of_revenue": round(brand_rev[b] / total * 100, 1) if total else 0,
+             "trend": [round(by_week_set_rev.get((w, b), 0.0), 2) for w in weeks]}
             for b in brands_sorted
         ],
         "top_sales": [
@@ -189,9 +207,15 @@ def main() -> None:
             {"buyer": b, "orders": c, "spend": round(sp, 2)} for b, c, sp in repeat[:12]
         ],
     }
+
+
+def main() -> None:
+    data = json.loads(SOLD.read_text())
+    summary = compute(data)
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print(f"  Sales Trends: {n} sales · {money(total)} total · {len(brands_sorted)} sets")
+    print(f"  Sales Trends: {summary['cards_sold']} sales · {_money(summary['total_revenue'])} total"
+          f" · {len(summary['by_set'])} sets")
     print(f"  Wrote {OUT}")
 
 
