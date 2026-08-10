@@ -52,7 +52,11 @@ def main() -> int:
     args = ap.parse_args()
 
     backlog = load_backlog()
-    already_done = {r["item_id"] for r in json.loads(HISTORY_PATH.read_text())} if HISTORY_PATH.exists() else set()
+    # Only skip items that actually succeeded -- a failed attempt (e.g. the
+    # eBay-side payment-terms gate) must stay eligible for retry once that's
+    # resolved, otherwise every failure permanently self-excludes and a
+    # clean re-run reports "to process: 0" forever.
+    already_done = {r["item_id"] for r in json.loads(HISTORY_PATH.read_text()) if r.get("ok")} if HISTORY_PATH.exists() else set()
 
     skipped_giants = [i for i in backlog if is_giants(i["title"])]
     skipped_done = [i for i in backlog if i["item_id"] in already_done]
