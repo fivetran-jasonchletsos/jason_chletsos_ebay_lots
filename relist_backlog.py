@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import relist_agent as ra
@@ -105,7 +106,7 @@ def main() -> int:
             "ok": result.get("ok", False),
             "ack": result.get("ack", ""),
             "error": result.get("error", ""),
-            "ts": None,
+            "ts": datetime.now(timezone.utc).isoformat(),
         }
         history.append(rec)
         if rec["ok"]:
