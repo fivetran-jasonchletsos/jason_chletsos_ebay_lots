@@ -21,6 +21,7 @@ AGENT_ROLE = 'Relist'
 
 import argparse
 import json
+import re
 import statistics
 import sys
 import time
@@ -248,6 +249,21 @@ def relist_as_fixed_price(token: str, item_id: str, ebay_cfg: dict,
         if err is not None:
             err_msg = (f"[{err.findtext(f'{NS}ErrorCode')}] "
                        f"{err.findtext(f'{NS}LongMessage', '')[:200]}")
+            # Error 21919067 ("you already have this listing") names the
+            # item it collided with. A network-level failure on an EARLIER
+            # attempt (timeout/connection-reset) can still succeed
+            # server-side even though we never saw a clean response -- the
+            # retry then legitimately "fails" here because the relist
+            # already happened. Since that named item genuinely is this
+            # relist's outcome, report it as the real result instead of a
+            # false failure the caller would otherwise retry forever.
+            if err.findtext(f"{NS}ErrorCode") == "21919067":
+                dup_m = re.search(r"\((\d{9,})\)", err.findtext(f"{NS}LongMessage", "") or "")
+                if dup_m:
+                    return {"ok": True, "new_item_id": dup_m.group(1), "fee": fee,
+                            "ack": "Success", "error": "", "dry_run": False,
+                            "request_xml": xml,
+                            "note": "resolved via duplicate-listing self-heal"}
     return {"ok": ack in ("Success", "Warning") and bool(new_id),
             "new_item_id": new_id, "fee": fee, "ack": ack,
             "error": err_msg, "dry_run": False, "request_xml": xml}

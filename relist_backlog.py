@@ -93,10 +93,39 @@ def main() -> int:
     still_in_repo = list(backlog)
 
     ok_count = fail_count = 0
+    consecutive_quota_hits = 0
+    stopped_early = False
     for n, item in enumerate(todo, 1):
         iid = item["item_id"]
         new_price = markdown_price(item["price"], args.cut)
         result = ra.relist_as_fixed_price(token, iid, cfg, new_price=new_price, dry_run=False)
+        error = result.get("error", "")
+
+        # [932] "Auth token is hard expired" -- a long batch (1000+ items,
+        # 30-40+ min at this pacing) can outlast the token's ~2hr life.
+        # Refresh once and immediately retry this same item rather than
+        # letting every remaining item fail for the rest of the run.
+        if "[932]" in error:
+            token = promote.get_access_token(cfg)
+            result = ra.relist_as_fixed_price(token, iid, cfg, new_price=new_price, dry_run=False)
+            error = result.get("error", "")
+
+        # [518] "exceeded usage limit on this call" is a real per-day/hour
+        # Trading API quota, not a per-item problem -- once hit, every
+        # subsequent call fails identically until the window resets, so
+        # burning through the rest of `todo` just pollutes history with
+        # false failures. Stop after a few in a row and leave the rest
+        # untouched in the backlog for a later run.
+        if "[518]" in error:
+            consecutive_quota_hits += 1
+            if consecutive_quota_hits >= 3:
+                print(f"  Hit eBay's call-usage quota {consecutive_quota_hits}x in a row -- "
+                      f"stopping at {n}/{len(todo)}. Remaining items left untouched in the backlog.")
+                stopped_early = True
+                break
+        else:
+            consecutive_quota_hits = 0
+
         rec = {
             "item_id": iid,
             "title": item["title"],
@@ -105,7 +134,7 @@ def main() -> int:
             "new_item_id": result.get("new_item_id", ""),
             "ok": result.get("ok", False),
             "ack": result.get("ack", ""),
-            "error": result.get("error", ""),
+            "error": error,
             "ts": datetime.now(timezone.utc).isoformat(),
         }
         history.append(rec)
@@ -126,8 +155,11 @@ def main() -> int:
     DNR_PATH.write_text(json.dumps(sorted(dnr), indent=1))
     REPO_PATH.write_text(json.dumps(still_in_repo, indent=1))
 
-    print(f"\nDONE: {ok_count} relisted, {fail_count} failed, {len(still_in_repo)} remain in backlog")
-    fails = [r for r in history[-len(todo):] if not r["ok"]]
+    processed = ok_count + fail_count
+    status = "STOPPED EARLY (quota)" if stopped_early else "DONE"
+    print(f"\n{status}: {ok_count} relisted, {fail_count} failed, "
+          f"{len(still_in_repo)} remain in backlog")
+    fails = [r for r in history[-processed:] if not r["ok"]] if processed else []
     if fails:
         from collections import Counter
         err_counts = Counter(r["error"][:60] for r in fails)
