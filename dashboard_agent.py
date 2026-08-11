@@ -20,6 +20,17 @@ memory — see build()'s optional params):
                                      hits live eBay Browse API so it isn't
                                      re-run on every promote.py cycle)
     output/listings_snapshot.json  (current active inventory, for restock signal)
+    decisions_log.json             (editorial conclusions from a specific
+                                     analysis session, e.g. a multi-agent
+                                     panel's recommendation -- hand-edited,
+                                     not recomputed; see _load_decisions())
+
+The "Insights" section (2026-08-11) surfaces both: auto-computed
+observations that re-derive fresh from the data on every build
+(_compute_insights -- revenue trend, concentration risk, dead stock,
+restock signal, stale Buy Radar data, best sales day), and the decisions
+log's dated conclusions, so JC gets told things instead of having to
+read every chart and infer them himself.
 
 Writes:
     docs/dashboard.html
@@ -30,7 +41,7 @@ Usage:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import chart_helpers
@@ -42,7 +53,15 @@ REPO       = Path(__file__).parent
 OUTPUT_DIR = REPO / "output"
 TRENDS_PATH = OUTPUT_DIR / "sales_trends.json"
 FLIPS_PATH  = OUTPUT_DIR / "resale_flips_plan.json"
+DECISIONS_PATH = REPO / "decisions_log.json"
 OUT = REPO / "docs" / "dashboard.html"
+
+# Insight thresholds -- tuned to flag things worth JC's attention, not fire
+# on every minor wiggle in the data.
+REV_TREND_PCT = 15         # week-over-week revenue swing worth calling out
+CONCENTRATION_PCT = 25     # a set carrying this much of total revenue is a concentration risk
+DEAD_STOCK_MIN_ACTIVE = 20 # active listings in a set before "few sales" becomes a real signal
+DEAD_STOCK_MAX_SOLD = 1    # sales in-window at/below this count as "not moving"
 
 # Quick-buy rule thresholds (JC's rule of thumb, carried over from the old
 # seller.html Buy Radar).
@@ -84,13 +103,16 @@ def _rows_or(rows_html: str, colspan: int, empty_msg: str) -> str:
     return rows_html or f'<tr><td colspan="{colspan}" class="muted">{empty_msg}</td></tr>'
 
 
-def _restock_signals(trends: dict, listings: list[dict]) -> list[dict]:
-    """Sets that sell well but are running low in active inventory."""
-    active_by_set: dict[str, int] = {}
+def _active_by_set(listings: list[dict]) -> dict[str, int]:
+    counts: dict[str, int] = {}
     for l in listings:
         set_name = sales_trends_agent.brand_of(l.get("title", "") or "")
-        active_by_set[set_name] = active_by_set.get(set_name, 0) + 1
+        counts[set_name] = counts.get(set_name, 0) + 1
+    return counts
 
+
+def _restock_signals(trends: dict, active_by_set: dict[str, int]) -> list[dict]:
+    """Sets that sell well but are running low in active inventory."""
     signals = []
     for row in trends.get("by_set", []):
         set_name = row["set"]
@@ -125,6 +147,107 @@ def _kpi_html(t: dict) -> str:
         for val, lbl in stats
     )
     return f'<section class="kpi-row">{cells}</section>'
+
+
+def _load_decisions() -> list[dict]:
+    """Dated, editorial conclusions from a specific analysis session (e.g. a
+    multi-agent panel's recommendation) -- distinct from the auto-computed
+    insights below, which just re-read whatever the data says on every
+    build. A decision persists until JC (or a future analysis) revisits it;
+    it isn't silently recalculated. Newest first."""
+    raw = _load_json(DECISIONS_PATH, [])
+    return raw if isinstance(raw, list) else []
+
+
+def _compute_insights(trends: dict, active_by_set: dict[str, int],
+                       restock: list[dict], flips_age_days: int | None) -> list[dict]:
+    """Deterministic, data-driven observations computed fresh every build --
+    the dashboard should tell JC things, not just hand him charts to
+    interpret himself. Each rule only fires when its threshold is actually
+    crossed, so this stays a short list of things worth reading, not noise."""
+    insights: list[dict] = []
+    by_set = trends.get("by_set", [])
+
+    # Skip the current, still-in-progress week (its Monday anchor is within
+    # the last 7 days) -- comparing a partial week against a full one always
+    # looks like a crash regardless of actual trend.
+    week_rev = trends.get("weekRev", [])
+    week_starts = trends.get("weekStarts", [])
+    if week_starts and week_rev and len(week_starts) == len(week_rev):
+        try:
+            current_monday = datetime.now(timezone.utc) - timedelta(
+                days=datetime.now(timezone.utc).weekday())
+            if datetime.fromisoformat(week_starts[-1]).replace(tzinfo=timezone.utc) >= current_monday.replace(
+                    hour=0, minute=0, second=0, microsecond=0):
+                week_rev = week_rev[:-1]
+        except ValueError:
+            pass
+    if len(week_rev) >= 2 and week_rev[-2] > 0:
+        pct = (week_rev[-1] - week_rev[-2]) / week_rev[-2] * 100
+        if abs(pct) >= REV_TREND_PCT:
+            direction = "up" if pct > 0 else "down"
+            insights.append({"kind": "trend" if pct > 0 else "warning",
+                "text": f"Revenue is {direction} {abs(pct):.0f}% week-over-week (last two complete weeks) "
+                        f"({_money(week_rev[-2])} → {_money(week_rev[-1])})."})
+
+    if by_set and by_set[0]["pct_of_revenue"] >= CONCENTRATION_PCT:
+        top = by_set[0]
+        insights.append({"kind": "concentration",
+            "text": f"{_esc(top['set'])} is your single biggest set at {top['pct_of_revenue']:.0f}% "
+                    f"of revenue ({_money(top['revenue'])}) — a slowdown there would hit hard."})
+
+    sold_by_set = {r["set"]: r["sold"] for r in by_set}
+    dead = sorted(
+        ((sn, cnt, sold_by_set.get(sn, 0)) for sn, cnt in active_by_set.items()
+         if cnt >= DEAD_STOCK_MIN_ACTIVE and sold_by_set.get(sn, 0) <= DEAD_STOCK_MAX_SOLD),
+        key=lambda x: -x[1],
+    )
+    if dead:
+        sn, cnt, sold_cnt = dead[0]
+        insights.append({"kind": "dead-stock",
+            "text": f"{_esc(sn)} has {cnt} active listings but only {sold_cnt} sale(s) in this "
+                     "window — worth a markdown pass or bundling into a lot."})
+
+    if restock:
+        r = restock[0]
+        insights.append({"kind": "restock",
+            "text": f"{len(restock)} set(s) are selling well but low on stock — "
+                    f"{_esc(r['set'])} sold {r['sold_90d_or_alltime']}x with only "
+                    f"{r['active_now']} active listing(s) right now."})
+
+    if flips_age_days is not None and flips_age_days > STALE_FLIPS_DAYS:
+        insights.append({"kind": "stale-data",
+            "text": f"Buy Radar listing data is {flips_age_days} days old — refresh with "
+                     "<code>python3 resale_flips_agent.py</code> once the Browse API quota resets."})
+
+    dow_names, dow_cnt = trends.get("dowNames", []), trends.get("dowCnt", [])
+    if dow_names and dow_cnt and sum(dow_cnt) > 0:
+        i = max(range(len(dow_cnt)), key=lambda i: dow_cnt[i])
+        insights.append({"kind": "timing",
+            "text": f"{dow_names[i]} is your best day for sales historically ({dow_cnt[i]} orders) "
+                     "— worth timing new listings or relists around it."})
+
+    return insights
+
+
+def _insights_html(insights: list[dict], decisions: list[dict]) -> str:
+    decision_html = "".join(
+        f'<div class="insight insight-decision"><span class="insight-tag">DECISION · {_esc(d.get("date",""))}</span>'
+        f'{_esc(d.get("text",""))}</div>'
+        for d in decisions[:2]
+    )
+    auto_html = "".join(
+        f'<div class="insight">{i["text"]}</div>'  # text is built from _esc()'d/internal values above
+        for i in insights
+    )
+    body = decision_html + auto_html
+    if not body:
+        body = '<div class="insight muted">Nothing crossed a threshold this build — that\'s a quiet week, not missing data.</div>'
+    return f"""
+    <section class="panel insights-panel">
+      <h2>Insights</h2>
+      {body}
+    </section>"""
 
 
 def _selling_section_html(t: dict) -> str:
@@ -326,6 +449,13 @@ _CSS = """
 .kpi-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin-top: 3px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
 .panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+.insights-panel { border-color: var(--border-mid); }
+.insight { font-size: 13.5px; line-height: 1.5; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.insight:last-child { border-bottom: none; padding-bottom: 0; }
+.insight:first-child { padding-top: 0; }
+.insight code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+.insight-decision { background: rgba(79,70,229,.04); margin: 0 -20px; padding: 10px 20px; border-bottom: 1px solid var(--border); }
+.insight-tag { display: block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
 .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .dash-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 /* Grid items default to min-width:auto, so a nested table's min-width:600px
@@ -375,7 +505,9 @@ def build(trends: dict | None = None, listings: list[dict] | None = None) -> Pat
     flips_plan = _load_json(FLIPS_PATH, None)
     if listings is None:
         listings = snapshot_store.load()
-    restock = _restock_signals(trends, listings)
+    active_by_set = _active_by_set(listings)
+    restock = _restock_signals(trends, active_by_set)
+    _, flips_age_days = _flips_staleness(flips_plan or {})
 
     now = datetime.now(timezone.utc)
     hero = f"""
@@ -384,8 +516,12 @@ def build(trends: dict | None = None, listings: list[dict] | None = None) -> Pat
       <p class="muted">Updated {now.strftime('%b %-d, %Y &middot; %H:%M UTC')}</p>
     </header>"""
 
+    insights = _compute_insights(trends, active_by_set, restock, flips_age_days) if trends else []
+    decisions = _load_decisions()
+
     body = (
         '<main class="dash-wrap">' + hero
+        + _insights_html(insights, decisions)
         + (_kpi_html(trends) if trends else '<p class="muted">No sales_trends.json yet — run <code>python3 sales_trends_agent.py</code>.</p>')
         + (_selling_section_html(trends) if trends else "")
         + _buy_section_html(flips_plan, restock)

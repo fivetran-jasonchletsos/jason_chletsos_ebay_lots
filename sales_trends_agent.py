@@ -177,6 +177,12 @@ def compute(data: list[dict]) -> dict:
 
     payload = {
         "weekLabels": week_labels,
+        "weekStarts": weeks,  # raw "YYYY-MM-DD" Monday anchors -- lets consumers
+                               # tell a complete week from the still-in-progress
+                               # current one, which week_labels' formatted
+                               # "Aug 10" strings can't (2026-08-11: a
+                               # week-over-week revenue insight was comparing a
+                               # full week against 1-2 days of the current one).
         "weekRev": [round(by_week_rev[w], 2) for w in weeks],
         "weekCnt": [by_week_cnt[w] for w in weeks],
         "brandLabels": brands_sorted,
