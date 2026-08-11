@@ -29,6 +29,7 @@ OUT  = REPO / "output" / "sales_trends.json"
 
 # Ordered brand detection — check multi-word / specific tokens before generic.
 BRANDS = [
+    ("Poster", "Concert Memorabilia"),
     ("Pokemon", "Pokemon TCG"),
     ("TCG", "Pokemon TCG"),
     ("Signature Class", "Topps Signature Class"),
