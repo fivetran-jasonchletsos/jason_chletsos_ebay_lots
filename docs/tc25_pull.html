@@ -30,13 +30,13 @@
  #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
 </style></head><body><div class="wrap">
 <h1>2025 Topps Baseball (Scans 905-911) &mdash; Pull List</h1>
-<p class="sub">1 card clears the $5 bar from this batch opened 2026-08-11. See the <a href="tc25_pricing.html">full reference</a> for everything else. Tap a card to check it off, tap the image to zoom.</p>
+<p class="sub">No cards clear the $5 bar from this batch opened 2026-08-11 (top value $1.75). See the <a href="tc25_pricing.html">full reference</a> for everything.</p>
 <div id="list"></div>
 </div>
 <div id="lightbox"><img id="lbimg" src=""></div>
 <div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
 <script>
-const DATA = [{"k": "905_04", "p": "Jackson Merrill", "team": "Padres", "pr": 17.8, "style": "2025 Topps All-Star Stars Gold", "serial": null, "auto": false, "img": "tc25_imgs/905_04.jpg"}];
+const DATA = [];
 const KEY = "tc25_pull";
 let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
 const list = document.getElementById("list");
@@ -61,11 +61,11 @@ function render(){
 document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
 document.getElementById("rep").onclick = async (e) => {
   e.stopPropagation();
-  const txt = `TOPPS 2025 (SCANS 905-911) PULL: ${done.size}/${DATA.length} pulled.`;
+  const txt = `TOPPS 2025 (SCANS 905-911) PULL: nothing cleared the $5 bar this batch.`;
   try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
         setTimeout(()=>e.target.textContent="Copy report", 1500); }
   catch { prompt("Copy this:", txt); }
 };
-document.getElementById("reset").onclick = ()=>{if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
 render();
 </script></body></html>
