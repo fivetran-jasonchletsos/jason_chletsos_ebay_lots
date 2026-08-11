@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import statistics
+import unicodedata
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -69,8 +70,15 @@ def parse_date(s: str):
         return None
 
 
+def _strip_accents(s: str) -> str:
+    # "Pokémon" vs "Pokemon" — eBay titles mix accented/unaccented spelling;
+    # normalize so both match the same BRANDS token instead of the accented
+    # form silently falling through to "Other".
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
 def brand_of(title: str) -> str:
-    t = (title or "").lower()
+    t = _strip_accents((title or "").lower())
     for token, label in _BRANDS_LOWER:
         if token in t:
             return label

@@ -71,8 +71,13 @@ def _money(x) -> str:
 
 
 def _esc(s) -> str:
+    # Escapes quotes too (not just &/</>) because this is used inside
+    # double-quoted HTML attributes (href="{_esc(url)}") as well as text
+    # nodes — an unescaped `"` in an attribute value lets attacker-influenced
+    # data (eBay listing/query text) break out and inject markup.
     return (str(s or "")
-            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            .replace('"', "&quot;").replace("'", "&#39;"))
 
 
 def _rows_or(rows_html: str, colspan: int, empty_msg: str) -> str:
@@ -221,8 +226,14 @@ def _flips_staleness(flips_plan: dict) -> tuple[str, int | None]:
     if not ts:
         return "", None
     try:
-        age = (datetime.now(timezone.utc) - datetime.fromisoformat(ts)).days
-    except ValueError:
+        parsed = datetime.fromisoformat(ts)
+        if parsed.tzinfo is None:
+            # Defensive: a naive timestamp (e.g. a hand-edited or legacy
+            # cache file) would otherwise raise TypeError subtracting from
+            # an aware "now" and crash the whole dashboard build.
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        age = (datetime.now(timezone.utc) - parsed).days
+    except (ValueError, TypeError):
         return ts, None
     return ts, age
 
@@ -317,6 +328,13 @@ _CSS = """
 .panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
 .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .dash-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Grid items default to min-width:auto, so a nested table's min-width:600px
+   (promote.py's shared .table-wrap table rule) blows out the track instead of
+   being clamped + internally scrolled -- confirmed via headless render: the
+   "Top 15 sales"/"Repeat buyers" pair pushed the whole page 274px past a
+   375px viewport. min-width:0 lets the grid track win so table-wrap's own
+   overflow-x:auto can do its job. */
+.dash-two > * { min-width: 0; }
 .ch-card { margin-bottom: 16px !important; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -355,7 +373,7 @@ def build(trends: dict | None = None, listings: list[dict] | None = None) -> Pat
     if trends is None:
         trends = _load_json(TRENDS_PATH, {})
     flips_plan = _load_json(FLIPS_PATH, None)
-    if not listings:
+    if listings is None:
         listings = snapshot_store.load()
     restock = _restock_signals(trends, listings)
 
