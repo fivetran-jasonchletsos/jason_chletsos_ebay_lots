@@ -2968,6 +2968,61 @@ def lambda_handler(event, context):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
+    # POST /ebay/marvel-checklist-save — JC's personal "2026 Topps Chrome
+    # Marvel Comics" base-set want-list (docs/marvel_check.html). Not a
+    # photo scan like the other *-save routes above -- just overwrites
+    # docs/marvel_check_data/owned.json with the full owned-card-number
+    # array on every save (small enough that a full overwrite, not a
+    # merge, is simplest and safest against races). Reads happen directly
+    # off the committed file via GitHub Pages, no GET route needed.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/marvel-checklist-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("marvel-checklist-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {"success": False, "error": "GITHUB_TOKEN not configured"}, event)
+
+            body = json.loads(event.get("body") or "{}")
+            owned_raw = body.get("owned")
+            if not isinstance(owned_raw, list):
+                return _cors_response(400, {"success": False, "error": "owned must be an array"}, event)
+            try:
+                owned = sorted({int(n) for n in owned_raw if 1 <= int(n) <= 200})
+            except (TypeError, ValueError):
+                return _cors_response(400, {"success": False, "error": "owned must be an array of integers"}, event)
+
+            data_path = "docs/marvel_check_data/owned.json"
+            try:
+                _raw, sha = _github_get_json_file(data_path)
+            except urllib.error.HTTPError as exc:
+                if exc.code == 404:
+                    sha = None
+                else:
+                    logger.error(f"marvel-checklist-save GET HTTP {exc.code}: {exc.read().decode()[:300]}")
+                    return _cors_response(502, {"success": False, "error": f"Could not read existing state (HTTP {exc.code})"}, event)
+
+            payload = json.dumps({
+                "owned": owned,
+                "updated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds") + "Z",
+            }, indent=2).encode("utf-8")
+
+            try:
+                _github_put_file(data_path, payload, message=f"Marvel checklist: {len(owned)} owned", sha=sha)
+            except urllib.error.HTTPError as exc:
+                logger.error(f"marvel-checklist-save PUT HTTP {exc.code}: {exc.read().decode()[:300]}")
+                return _cors_response(502, {"success": False, "error": f"Could not save (HTTP {exc.code})"}, event)
+
+            logger.info(f"marvel-checklist-save: saved {len(owned)} owned card(s)")
+            return _cors_response(200, {"success": True, "owned_count": len(owned)}, event)
+
+        except Exception as exc:
+            logger.error(f"marvel-checklist-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/marvel-checklist-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
     # POST /ebay/lola-save — "Lola's Lot" auto-save (Disney/Marvel friend
     # collection). Same read-modify-write shape as sewer-save, against
     # docs/lolas_lot/cards.json + images/. Single board, no move endpoint.

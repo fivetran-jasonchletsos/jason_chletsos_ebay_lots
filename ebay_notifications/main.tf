@@ -425,6 +425,7 @@ locals {
     "rick-delete",
     "boiler-save",
     "boiler-delete",
+    "marvel-checklist-save",
   ]
 }
 
