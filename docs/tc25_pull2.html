@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>2025 Topps Baseball (Scans 915-921) - Pull List</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#123}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #123;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:15px;line-height:1.25}
+ .tm{color:#667;font-size:12px}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .nt{color:#96751a;font-size:11px;margin-top:3px;line-height:1.35}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:16px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#A5ACAF;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>2025 Topps Baseball (Scans 915-921) &mdash; Pull List</h1>
+<p class="sub">Nothing in this 56-card batch is a VERIFIED $5+ card &mdash; sold-comp data was unreachable (network-blocked pricing sites). These 5 are the ones worth pulling for a manual eBay sold-listing check before deciding how to list them; everything else is a $1-4 base/insert common. See the <a href="tc25_pricing2.html">full 56-card reference</a> for everything.</p>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "915_8", "p": "Nick Kurtz", "team": "Athletics", "pr": 4.0, "style": "#US201 base RC", "note": "REVISED DOWN: original estimate of $8-20 was based on his $450 AUTO sale + ROY narrative, but the repo's OWN prior batch (scan 905, priced 2026-08-11) already has a different Nick Kurtz insert (All-Star Stars) at just $1.75 -- real recent data point suggesting the market hasn't repriced his cards as high as the auto sale implies. This specific card is his actual rookie card (2025 Topps Update #US201), which does carry a real RC premium over random inserts, so pricing above the insert but well below the speculative $12 -- treat as $3-5, verify with an eBay sold search before listing.", "img": "tc25_imgs/915_08.jpg"}, {"k": "917_6", "p": "Chase Meidroth", "team": "White Sox", "pr": 3.0, "style": "base RC w/ inset photo -- POSSIBLE SSP image variation (Heritage HN #671 or Update #US337)", "note": "FLAG: if physical card matches an SSP/True Photo Variation code on the back, could be worth $5-15+. Check card back before pricing.", "img": "tc25_imgs/917_06.jpg"}, {"k": "917_9", "p": "Cedric Mullins", "team": "Orioles", "pr": 2.5, "style": "Black Border parallel -- no serial number visible on front", "note": "re-examined crop directly, confirmed no serial text; several Mullins Heritage parallels ARE serialized (/50, /76) so verify card back", "img": "tc25_imgs/917_09.jpg"}, {"k": "918_3", "p": "Paul Goldschmidt", "team": "Yankees", "pr": 4.0, "style": "#382 -- possible Black Border SP", "note": "est $3-6 IF true SP; verify card back for parallel name", "img": "tc25_imgs/918_03.jpg"}, {"k": "920_1", "p": "Luisangel Acuna", "team": "Mets", "pr": 3.0, "style": "1964 Topps Stand-Ups #64SU-8, RC, facsimile signature (confirmed printed, not real auto)", "note": "most notable card in batch by design/rarity; no hard sold comp found via search, estimate only -- worth an eBay sold-listing check before pricing", "img": "tc25_imgs/920_01.jpg"}];
+const KEY = "tc25_pull2";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const list = document.getElementById("list");
+function render(){
+  list.innerHTML = "";
+  for (const r of DATA){
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    el.innerHTML = `<div class="box"></div>` +
+      (r.img ? `<img class="th" loading="lazy" src="${r.img}">` : `<div class="th"></div>`) +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.team}</div><div class="st">${r.style}</div><div class="nt">${r.note}</div></div>` +
+      `<div class="pr">~$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    if (img) img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = r.img;
+      document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `TOPPS 2025 (SCANS 915-921) PULL: no verified $5+ cards; ` + DATA.length + ` flagged for manual check: ` + DATA.map(r => r.p).join(", ") + ".";
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
