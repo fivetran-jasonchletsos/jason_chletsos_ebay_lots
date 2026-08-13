@@ -178,6 +178,7 @@ BRAND_TOKENS: list[tuple[str, str]] = [
     ("sage",              "SAGE"),
     ("leaf",              "Leaf"),
     ("upper deck",        "Upper Deck"),
+    ("wild card",         "Wild Card"),
     ("bo jackson battle arena", "Koei Tecmo"),
     ("tecmo bowl",        "Koei Tecmo"),
 ]
