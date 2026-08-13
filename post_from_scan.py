@@ -173,6 +173,7 @@ BRAND_TOKENS: list[tuple[str, str]] = [
     ("gold standard",     "Panini"),
     ("unparalleled",      "Panini"),
     ("luminance",         "Panini"),
+    ("totally certified", "Panini"),
     ("panini",            "Panini"),
     ("sage",              "SAGE"),
     ("leaf",              "Leaf"),
