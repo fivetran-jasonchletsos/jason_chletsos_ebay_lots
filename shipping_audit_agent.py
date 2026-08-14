@@ -84,6 +84,15 @@ HOUSE_SINGLE_COST     = float(pfs.SHIPPING_SERVICE_COST)
 HOUSE_LOT_SERVICE     = pfs.LOT_SHIPPING_SERVICE
 HOUSE_LOT_COST        = float(pfs.LOT_SHIPPING_SERVICE_COST)
 
+# Non-card items with a DELIBERATE non-envelope shipping setup. These must
+# never be "fixed" back to the card-envelope default -- a rigid/heavy item on
+# US_eBayStandardEnvelope would be an undeliverable listing, the exact inverse
+# of the bug this agent exists to catch.
+SHIPPING_EXEMPT_ITEM_IDS = {
+    "307125889435",  # Gorham sterling souvenir spoon -- free USPSFirstClass
+                     # (Ground Advantage), postage built into price (2026-08-14)
+}
+
 DEFAULT_CONFIG: dict = {
     "cache_ttl_days":              7,      # re-check a compliant listing at most weekly
     "cost_tolerance_usd":          0.01,   # ignore sub-cent float noise
@@ -235,6 +244,10 @@ def audit_listing(listing: dict, ship: dict, cfg: dict) -> dict:
     found_service = ship.get("service") if ship else None
     found_cost    = ship.get("cost") if ship else None
     data_missing  = ship is None or (found_service is None and found_cost is None)
+
+    if item_id in SHIPPING_EXEMPT_ITEM_IDS:
+        # Deliberate non-card shipping setup -- report as compliant as-is.
+        exp_service, exp_cost = found_service, (found_cost if found_cost is not None else exp_cost)
 
     service_mismatch = (not data_missing) and found_service != exp_service
     cost_mismatch = (
