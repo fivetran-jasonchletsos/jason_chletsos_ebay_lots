@@ -36,8 +36,12 @@ import paths
 
 NS           = ebay_client.NS
 TRADING_URL  = ebay_client.TRADING_URL
-CATEGORY_ID  = "261328"    # Trading Card Singles
+CATEGORY_ID  = "261328"    # Sports Trading Card Singles
+NONSPORT_CATEGORY_ID = "183050"  # Non-Sport Trading Card Singles
 CONDITION_ID = "4000"      # Ungraded
+# Both singles categories require the "Card Condition" ConditionDescriptor;
+# only lot/bulk categories reject it.
+CARD_CONDITION_CATEGORIES = {CATEGORY_ID, NONSPORT_CATEGORY_ID}
 SPORT        = "Football"  # overridable via --sport (e.g. Basketball)
 
 # House shipping default for single cards -- eBay's discounted trading-card
@@ -229,7 +233,8 @@ def infer_specifics(title: str) -> dict[str, str] | None:
 
 def build_xml(title: str, price: float, picture_url: str, token: str,
               category: str = CATEGORY_ID, condition: str = CONDITION_ID,
-              listing_type: str = "FixedPriceItem", duration: str = "GTC") -> str:
+              listing_type: str = "FixedPriceItem", duration: str = "GTC",
+              specifics: dict[str, str] | None = None) -> str:
     description = build_description(title)
     # The "Ungraded" ConditionDescriptor sub-value only applies to the
     # Trading Card Singles schema -- other categories (e.g. Trading Card
@@ -240,13 +245,14 @@ def build_xml(title: str, price: float, picture_url: str, token: str,
         "<Name>40001</Name><Value>400010</Value>"
         "</ConditionDescriptor>"
         "</ConditionDescriptors>"
-    ) if category == CATEGORY_ID else ""
-    specifics = infer_specifics(title)
+    ) if category in CARD_CONDITION_CATEGORIES else ""
     if specifics is None:
-        raise ValueError(
-            f"Cannot determine card manufacturer from title: {title!r}. "
-            "Include the brand (Prizm/Select/Topps/etc.) in the title."
-        )
+        specifics = infer_specifics(title)
+        if specifics is None:
+            raise ValueError(
+                f"Cannot determine card manufacturer from title: {title!r}. "
+                "Include the brand (Prizm/Select/Topps/etc.) in the title."
+            )
     specifics_xml = "".join(
         f"<NameValueList><Name>{xml_escape(k)}</Name><Value>{xml_escape(v)}</Value></NameValueList>"
         for k, v in specifics.items()
@@ -312,7 +318,7 @@ def _find_live_duplicate(title: str) -> dict | None:
 def post_card(image_path: Path, title: str, price: float,
               cfg: dict, token: str, apply: bool, category: str = CATEGORY_ID,
               condition: str = CONDITION_ID, listing_type: str = "FixedPriceItem",
-              duration: str = "GTC") -> dict:
+              duration: str = "GTC", specifics: dict[str, str] | None = None) -> dict:
     print(f"\n  Card: {title[:60]}")
     label = "starting bid" if listing_type == "Chinese" else "Price"
     print(f"  Image: {image_path.name}  {label}: ${price:.2f}"
@@ -334,7 +340,7 @@ def post_card(image_path: Path, title: str, price: float,
     print(f"  Picture URL: {picture_url}")
 
     xml = build_xml(title, price, picture_url, token, category, condition,
-                     listing_type, duration)
+                     listing_type, duration, specifics)
 
     if not apply:
         print("  [dry-run] would post listing")
@@ -398,7 +404,8 @@ def main():
             continue
         r = post_card(img, c["title"], float(c["price"]), cfg, token, args.apply,
                       c.get("category", CATEGORY_ID), c.get("condition", CONDITION_ID),
-                      c.get("listing_type", "FixedPriceItem"), c.get("duration", "GTC"))
+                      c.get("listing_type", "FixedPriceItem"), c.get("duration", "GTC"),
+                      c.get("specifics"))
         results.append(r)
         time.sleep(0.5)
 
