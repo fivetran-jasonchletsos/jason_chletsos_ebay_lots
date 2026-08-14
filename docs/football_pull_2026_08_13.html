@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Football Scans (2026-08-13) - Pull List</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#123}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #bcd;
+       background:#fff;color:#345;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#123;color:#fff;border-color:#123}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.verify{border-color:#d4af37;background:#fffdf3}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #123;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:15px;line-height:1.25}
+ .tm{color:#667;font-size:12px}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .conf{color:#96751a;font-size:10.5px}
+ .badge{display:inline-block;font-size:9px;font-weight:800;background:#d4af37;color:#123;border-radius:6px;padding:1px 6px;margin-left:5px;vertical-align:1px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:16px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#A5ACAF;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Football Scans (2026-08-13) &mdash; Pull List</h1>
+<p class="sub">13 of 72 football cards scanned today clear the $4+ pull bar (2024 Topps Chrome legends/inserts + 2025 Mosaic/Select inserts). 8 are confident pulls; 5 (gold) need a quick physical check on parallel color/serial before pricing -- see the note on each. The other 59 cards are plain base commons/RCs under $4, not worth individual listings. Tap a card to mark it pulled. Tap image to zoom.</p>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [{"k": "chase", "p": "Ja'Marr Chase", "team": "Bengals", "note": "2025 Mosaic Epic Performers insert, pink prizm", "pr": 17.5, "conf": "estimated $10-25", "img": "football_pull_imgs/chase.jpg", "tier": "confident"}, {"k": "jefferson", "p": "Justin Jefferson", "team": "Vikings", "note": "2025 Mosaic Touchdown Masters insert", "pr": 17.5, "conf": "estimated $10-25", "img": "football_pull_imgs/jefferson.jpg", "tier": "confident"}, {"k": "montana", "p": "Joe Montana", "team": "49ers", "note": "2024 Topps Chrome Legends of the Gridiron insert", "pr": 17.5, "conf": "estimated $10-25", "img": "football_pull_imgs/montana.jpg", "tier": "confident"}, {"k": "caleb_williams", "p": "Caleb Williams", "team": "Bears", "note": "2024 Topps Chrome base RC, green parallel", "pr": 17.5, "conf": "estimated $10-25", "img": "football_pull_imgs/caleb_williams.jpg", "tier": "confident"}, {"k": "favre", "p": "Brett Favre", "team": "Packers", "note": "2024 Topps Chrome base, pink parallel", "pr": 14, "conf": "estimated $8-20", "img": "football_pull_imgs/favre.jpg", "tier": "confident"}, {"k": "marino", "p": "Dan Marino", "team": "Dolphins", "note": "2024 Topps Chrome Sunday Swag insert", "pr": 14, "conf": "estimated $8-20", "img": "football_pull_imgs/marino.jpg", "tier": "confident"}, {"k": "fouts", "p": "Dan Fouts", "team": "Chargers", "note": "2024 Topps Chrome base, wave-refractor parallel (unconfirmed parallel name -- verify)", "pr": 17.5, "conf": "estimated $10-25, parallel not independently verified", "img": "football_pull_imgs/fouts.jpg", "tier": "confident"}, {"k": "campbell", "p": "Earl Campbell", "team": "Oilers/Houston", "note": "2024 Topps Chrome base, purple/pink parallel (unconfirmed parallel name -- verify)", "pr": 14, "conf": "estimated $8-20, parallel not independently verified", "img": "football_pull_imgs/campbell.jpg", "tier": "confident"}, {"k": "mcbride", "p": "Trey McBride", "team": "Cardinals", "note": "2025 Mosaic Epic Performers insert, red prizm", "pr": 11.5, "conf": "estimated $8-15 IF red prizm confirmed -- verify color", "img": "football_pull_imgs/mcbride.jpg", "tier": "verify"}, {"k": "crosby", "p": "Maxx Crosby", "team": "Raiders", "note": "2025 Select Numbers insert", "pr": 5.5, "conf": "unknown -- Select Numbers cards are often numbered/premium, no price data found", "img": "football_pull_imgs/crosby.jpg", "tier": "verify"}, {"k": "gabriel", "p": "Dillon Gabriel", "team": "Browns", "note": "2025 Select Certified insert, RC (confirmed via crop: 'SELECT 2025' + 'SELECT CERTIFIED' text)", "pr": 4.5, "conf": "estimated, product ID confirmed by re-checking the crop", "img": "football_pull_imgs/gabriel.jpg", "tier": "verify"}, {"k": "nix", "p": "Bo Nix", "team": "Broncos", "note": "2025 Mosaic Touchdown Masters insert", "pr": 4.5, "conf": "estimated $3-6", "img": "football_pull_imgs/nix.jpg", "tier": "verify"}, {"k": "henderson", "p": "Treveyon Henderson", "team": "Patriots", "note": "2025 Select base RC, green prizm -- confirmed no serial number on crop", "pr": 3.5, "conf": "common tier, no serial visible", "img": "football_pull_imgs/henderson.jpg", "tier": "verify"}];
+const KEY = "football_pull_2026_08_13";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const FILTERS = [["All", () => true], ["Confident", r => r.tier === "confident"], ["Verify", r => r.tier === "verify"]];
+let activeFilter = "All";
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+function renderChips(){
+  chips.innerHTML = "";
+  for (const [label, pred] of FILTERS){
+    const n = DATA.filter(pred).length;
+    const b = document.createElement("button");
+    b.className = "chip" + (activeFilter === label ? " on" : "");
+    b.textContent = `${label} (${n})`;
+    b.onclick = () => { activeFilter = label; renderChips(); render(); };
+    chips.appendChild(b);
+  }
+}
+function render(){
+  const passesFilter = (FILTERS.find(([label]) => label === activeFilter) || FILTERS[0])[1];
+  list.innerHTML = "";
+  for (const r of DATA){
+    if (!passesFilter(r)) continue;
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.tier === "verify" ? " verify" : "");
+    const badge = r.tier === "verify" ? '<span class="badge">VERIFY</span>' : '';
+    el.innerHTML = `<div class="box"></div>` +
+      (r.img ? `<img class="th" loading="lazy" src="${r.img}">` : `<div class="th"></div>`) +
+      `<div class="info"><div class="nm">${r.p}${badge}</div><div class="tm">${r.team}</div><div class="st">${r.note}</div><div class="conf">${r.conf}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    if (img) img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `FOOTBALL PULL LIST (2026-08-13): ${DATA.length} cards.\n` + DATA.map(r => `- ${r.p} ($${r.pr.toFixed(2)}) -- ${r.note}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+renderChips(); render();
+</script></body></html>
