@@ -92,6 +92,7 @@ SHIPPING_EXEMPT_ITEM_IDS = {
     "307125889435",  # Gorham sterling souvenir spoon (Easton PA) -- free
                      # USPSFirstClass/Ground Advantage, postage in price (2026-08-14)
     "307127235915",  # Watson DC Capitol sterling souvenir spoon -- same setup
+    "307127251788",  # Weisgerber 1926 Sesquicentennial sterling spoon -- same setup
 }
 
 DEFAULT_CONFIG: dict = {
