@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Random Box Scans (2026-08-15) - Pull List</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#123}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #bcd;
+       background:#fff;color:#345;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#123;color:#fff;border-color:#123}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.verify{border-color:#d4af37;background:#fffdf3}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #123;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:15px;line-height:1.25}
+ .tm{color:#667;font-size:12px}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .badge{display:inline-block;font-size:9px;font-weight:800;background:#d4af37;color:#123;border-radius:6px;padding:1px 6px;margin-left:5px;vertical-align:1px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:16px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#A5ACAF;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Random Box Scans (2026-08-15) &mdash; Pull List</h1>
+<p class="sub">16 of ~130 cards scanned today clear the pull bar ($4+ default, $3+ for Select per the standing threshold), ~$66 total. Products: 2025 Select, 2025 Mosaic, 2026 Donruss/Optic football. Priced off this week's verified calibration for these exact value-tier products: base veterans are $1-3 bulk regardless of name (Lamar, Allen, Jefferson, Kelce, Emmitt, Brees etc. all stay in the box), the money is rookies with real 2025 seasons, silver prizms, and inserts. Tap a card to mark it pulled. Tap image to zoom.</p>
+<div class="warn"><b>Back-checks while pulling (house rule -- silver only from the back):</b> the Kamara reads as a Select Silver Prizm from the refractor rays but confirm the back before titling it Silver. The Al Toon sits on a white-sparkle Mosaic parallel -- read the parallel name off the back (base Mosaic backgrounds are dark chrome, this one is not base). Everything else is straightforward.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+ {"k":"jeanty_mosaic","p":"Ashton Jeanty","team":"Raiders","note":"2025 Mosaic base RC -- top RB of the 2025 class with a big rookie season","pr":8.0,"tier":"confident"},
+ {"k":"kamara_silver","p":"Alvin Kamara","team":"Saints","note":"2025 Select Silver Prizm (refractor rays visible; confirm Silver from the back before titling)","pr":5.0,"tier":"verify"},
+ {"k":"shedeur_rr","p":"Shedeur Sanders","team":"Browns","note":"2026 Donruss Rated Rookie -- stays liquid on Browns QB drama","pr":5.0,"tier":"confident"},
+ {"k":"loveland_mosaic","p":"Colston Loveland","team":"Bears","note":"2025 Mosaic base RC -- breakout TE, led Bears in receiving (matches our Resurgence pricing)","pr":4.5,"tier":"confident"},
+ {"k":"judkins_mosaic_1","p":"Quinshon Judkins","team":"Browns","note":"2025 Mosaic base RC (copy 1) -- 827 yds / 7 TD rookie season","pr":4.0,"tier":"confident"},
+ {"k":"judkins_mosaic_2","p":"Quinshon Judkins","team":"Browns","note":"2025 Mosaic base RC (copy 2, different pose)","pr":4.0,"tier":"confident"},
+ {"k":"judkins_donruss_rr","p":"Quinshon Judkins","team":"Browns","note":"2026 Donruss Rated Rookie","pr":4.0,"tier":"confident"},
+ {"k":"daniels_optic","p":"Jayden Daniels","team":"Commanders","note":"2026 Donruss Optic base -- star QB in the premium chrome brand","pr":4.0,"tier":"verify"},
+ {"k":"mcmillan_rr","p":"Tetairoa McMillan","team":"Panthers","note":"2026 Donruss Rated Rookie -- top-10 WR pick with a real rookie season","pr":4.0,"tier":"verify"},
+ {"k":"golden_mosaic","p":"Matthew Golden","team":"Packers","note":"2025 Mosaic base RC -- Packers 1st-round WR","pr":4.0,"tier":"verify"},
+ {"k":"daniels_select","p":"Jayden Daniels","team":"Commanders","note":"2025 Select base (Select $3+ bar)","pr":3.5,"tier":"verify"},
+ {"k":"milroe_select","p":"Jalen Milroe","team":"Seahawks","note":"2025 Select base RC (Select $3+ bar)","pr":3.5,"tier":"verify"},
+ {"k":"penix_numbers","p":"Michael Penix Jr.","team":"Falcons","note":"2025 Select Numbers insert #9 (unnumbered insert, same family as the Crosby we downgraded -- Penix is a starter though)","pr":3.5,"tier":"verify"},
+ {"k":"kittle_turbo","p":"George Kittle","team":"49ers","note":"2025 Select Turbocharged insert","pr":3.5,"tier":"verify"},
+ {"k":"altoon_silver","p":"Al Toon","team":"Jets","note":"2025 Mosaic white-sparkle parallel (NOT base -- read parallel name off the back), Jets legend niche","pr":3.5,"tier":"verify"},
+ {"k":"collins_silver","p":"Alfred Collins","team":"49ers","note":"2025 Select Silver Prizm RC (defensive rookie, Select $3+ bar)","pr":3.0,"tier":"verify"}
+];
+const KEY = "random_pull_2026_08_15";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const FILTERS = [["All", () => true], ["Confident", r => r.tier === "confident"], ["Verify", r => r.tier === "verify"]];
+let activeFilter = "All";
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+function renderChips(){
+  chips.innerHTML = "";
+  for (const [label, pred] of FILTERS){
+    const n = DATA.filter(pred).length;
+    const b = document.createElement("button");
+    b.className = "chip" + (activeFilter === label ? " on" : "");
+    b.textContent = `${label} (${n})`;
+    b.onclick = () => { activeFilter = label; renderChips(); render(); };
+    chips.appendChild(b);
+  }
+}
+function render(){
+  const passesFilter = (FILTERS.find(([label]) => label === activeFilter) || FILTERS[0])[1];
+  list.innerHTML = "";
+  for (const r of DATA){
+    if (!passesFilter(r)) continue;
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.tier === "verify" ? " verify" : "");
+    const badge = r.tier === "verify" ? '<span class="badge">VERIFY</span>' : '';
+    el.innerHTML = `<div class="box"></div>` +
+      `<img class="th" loading="lazy" src="random_pull_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}${badge}</div><div class="tm">${r.team}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `RANDOM BOX PULL LIST (2026-08-15): ${DATA.length} cards.\n` + DATA.map(r => `- ${r.p} ($${r.pr.toFixed(2)}) -- ${r.note}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+renderChips(); render();
+</script></body></html>
