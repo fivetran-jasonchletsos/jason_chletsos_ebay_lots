@@ -629,9 +629,29 @@ def find_existing_volume_promotion(token: str, marketplace_id: str) -> dict | No
         data = r.json()
     except json.JSONDecodeError:
         return None
-    for promo in (data.get("promotions") or []):
-        if promo.get("promotionType") == "VOLUME_DISCOUNT":
-            return promo
+    # Prefer a live promo over ended ones (the list can contain both, and the
+    # old ENDED volume discount lingers after the 2026-08-15 re-create).
+    candidates = [p for p in (data.get("promotions") or [])
+                  if p.get("promotionType") == "VOLUME_DISCOUNT"]
+    candidates.sort(key=lambda p: p.get("promotionStatus") not in ("RUNNING", "SCHEDULED"))
+    for promo in candidates:
+        # The LIST response is a summary WITHOUT discountRules — comparing
+        # tiers against it made every tier look "missing" (seen 2026-08-15).
+        # Fetch the full object by id before any drift comparison. The id must
+        # keep its "@EBAY_US" suffix — the bare numeric id 404s.
+        promo_id = promo.get("promotionId") or ""
+        if promo_id:
+            try:
+                from urllib.parse import quote
+                rd = requests.get(f"{MARKETING_BASE}/item_promotion/{quote(promo_id, safe='')}",
+                                  headers=headers, timeout=30)
+                if rd.status_code == 200:
+                    full = rd.json()
+                    full.setdefault("promotionStatus", promo.get("promotionStatus"))
+                    return full
+            except (requests.RequestException, json.JSONDecodeError):
+                pass
+        return promo
     return None
 
 
