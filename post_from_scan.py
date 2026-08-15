@@ -126,7 +126,7 @@ def build_description(title: str) -> str:
         "<li>Raw / ungraded — pack-fresh condition unless noted.</li>"
         "<li>Card pictured is the card you receive.</li>"
         "<li>Ships in penny sleeve + top loader via eBay Standard Envelope.</li>"
-        "<li>VOLUME DISCOUNT: Buy 2 save 5%, buy 5 save 12%, buy 10 save 20% — "
+        "<li>VOLUME DISCOUNT: Buy 2 save 3%, buy 3 save 6%, buy 4+ save 10% — "
         "combine with any cards in our store.</li>"
         "<li>Pack-fresh and grading-ready — pulled, sleeved, never played.</li>"
         "</ul>"

@@ -385,6 +385,15 @@ def plan_markdown(listing: dict, age_days: int, age_source: str,
             decision["reasons"].append(f"skip_category:{sc}")
             return decision
 
+    # Watcher guardrail (2026-08-15 panel): a watcher is a warm lead — send a
+    # watcher offer before publicly marking the price down for everyone.
+    watchers = int(listing.get("watchers") or listing.get("watch_count") or 0)
+    if watchers >= 1:
+        decision["decision"] = "blocked"
+        decision["reasons"].append(
+            f"{watchers} watcher(s) — watcher offer first, markdown later")
+        return decision
+
     tier = _tier_for_age(age_days, cfg)
     if not tier:
         decision["reasons"].append(f"age {age_days}d below first tier (61d)")

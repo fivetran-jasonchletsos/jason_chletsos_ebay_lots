@@ -254,7 +254,7 @@ def _avg_days_to_sell(sold_idx: dict[str, list[dict]]) -> float | None:
 # Tier decision                                                               #
 # --------------------------------------------------------------------------- #
 
-TIER_ORDER = ["no_ad", "low", "standard", "aggressive", "max"]
+TIER_ORDER = ["no_ad", "low", "standard", "aggressive", "max", "band_mid", "band_high"]
 
 
 def classify(listing: dict, *, age_days: int | None, watchers: int,
@@ -430,6 +430,13 @@ def build_decision(listing: dict, sold_idx: dict[str, list[dict]],
     )
     rate = cfg["tiers"][tier_key]["rate"]
 
+    # Stale dampener (2026-08-15 panel): past 120 days, ads are the wrong lever
+    # — the markdown ladder is the real fix — so halve whatever rate the tier
+    # or price band assigned rather than paying full freight on dead stock.
+    if rate > 0 and age is not None and age > 120:
+        rate = round(rate / 2, 4)
+        reasons.append(f"age {age}d > 120 — rate halved to {rate*100:g}% (markdown is the real fix)")
+
     # Margin guard — never promote a listing that's already too thin.
     min_margin = cfg.get("min_margin_pct_to_promote", 0.15)
     if rate > 0 and margin is not None and margin < min_margin:
@@ -491,11 +498,24 @@ def _segment_median_for_title(title: str, segments: dict) -> float | None:
 # Budget cap                                                                  #
 # --------------------------------------------------------------------------- #
 
-def apply_budget_cap(plan: list[dict], cap_usd: float) -> tuple[list[dict], list[str]]:
+FRESH_DEMOTION_EXEMPT_DAYS = 14  # 2026-08-15 panel: never strip ads off fresh listings
+
+
+def apply_budget_cap(plan: list[dict], cap_usd: float,
+                     cfg: dict | None = None) -> tuple[list[dict], list[str]]:
     """
-    If projected 30-day ad spend exceeds the cap, demote the highest-rate items
-    one tier at a time until we fit. Returns (plan, demoted_item_ids[]).
-    Demotion order: max → aggressive → standard → low → no_ad.
+    If projected 30-day ad spend exceeds the cap, demote listings one tier at a
+    time until we fit. Returns (plan, demoted_item_ids[]).
+
+    2026-08-15 panel rewrite: the old loop cut max(projected_30d_spend) first,
+    which — because spend = price x rate x flat p_sell — deterministically
+    stripped ads off the HIGHEST-priced fresh inventory (the exact items the
+    store needs to convert) while $4 commons kept theirs. Now:
+      - listings under FRESH_DEMOTION_EXEMPT_DAYS days old are never demoted;
+      - cuts start with the CHEAPEST, OLDEST candidates instead;
+      - demoted rates come from the live tier config, not stale hardcodes
+        (the old table set aggressive at 15%, a pre-June-cut relic that could
+        RAISE spend on demotion).
     """
     demoted: list[str] = []
     if cap_usd is None or cap_usd <= 0:
@@ -504,28 +524,44 @@ def apply_budget_cap(plan: list[dict], cap_usd: float) -> tuple[list[dict], list
     def total() -> float:
         return sum(d.get("projected_30d_spend", 0.0) for d in plan)
 
-    # Iteratively pick the most expensive non-NO_AD decision and step it down a tier.
     demote_to = {
-        "max":        ("aggressive", 0.15),
-        "aggressive": ("standard",   0.08),
-        "standard":   ("low",        0.03),
-        "low":        ("no_ad",      0.0),
+        "max":        "aggressive",
+        "aggressive": "standard",
+        "standard":   "low",
+        "low":        "no_ad",
+        "band_high":  "band_mid",
+        "band_mid":   "no_ad",
     }
+    fallback_rates = {"aggressive": 0.04, "standard": 0.04, "low": 0.02,
+                      "no_ad": 0.0, "band_mid": 0.03, "band_high": 0.08}
+
+    def rate_for(tier: str) -> float:
+        try:
+            return float(cfg["tiers"][tier]["rate"])
+        except (TypeError, KeyError, ValueError):
+            return fallback_rates.get(tier, 0.0)
+
     guard = 0
     while total() > cap_usd and guard < 10_000:
         guard += 1
-        candidates = [d for d in plan if d["tier"] in demote_to and not d["blocked"]]
+        candidates = [
+            d for d in plan
+            if d["tier"] in demote_to and not d["blocked"]
+            and (d.get("age_days") or 0) > FRESH_DEMOTION_EXEMPT_DAYS
+        ]
         if not candidates:
-            break
-        # Pick the single largest projected spend
-        worst = max(candidates, key=lambda d: d["projected_30d_spend"])
-        new_tier, new_rate = demote_to[worst["tier"]]
+            break  # only fresh/protected listings remain — cap is advisory past here
+        # Cut the cheapest listing first (tiebreak: oldest first) so the cap
+        # bleeds off long-tail commons instead of the premium fresh inventory.
+        worst = min(candidates,
+                    key=lambda d: (d.get("price") or 0.0, -(d.get("age_days") or 0)))
+        new_tier = demote_to[worst["tier"]]
+        new_rate = rate_for(new_tier)
         worst["reasons"].append(
             f"budget cap ${cap_usd:.0f} hit — demoted {worst['tier']} → {new_tier}"
         )
         worst["tier"] = new_tier
         worst["rate"] = new_rate
-        # Recompute spend.
         p_sell = 1.0 if worst["sold_30d"] >= 1 else 0.25
         worst["projected_30d_spend"] = round(worst["price"] * new_rate * p_sell, 4)
         if worst["item_id"] not in demoted:
@@ -811,6 +847,8 @@ TIER_DISPLAY = {
     "standard":   ("STANDARD",   "tier-standard"),
     "aggressive": ("AGGRESSIVE", "tier-aggressive"),
     "max":        ("MAX",        "tier-max"),
+    "band_mid":   ("BAND $2-10", "tier-standard"),
+    "band_high":  ("BAND $10+",  "tier-max"),
 }
 
 
@@ -818,7 +856,31 @@ TIER_DISPLAY = {
 # Orchestration                                                               #
 # --------------------------------------------------------------------------- #
 
+SNAPSHOT_MAX_AGE_HOURS = 6  # 2026-08-15 panel: never plan from a stale snapshot
+                            # (13 fresh listings were invisible to the 08-15 run)
+
+
+def _ensure_fresh_snapshot() -> None:
+    import subprocess
+    try:
+        age_h = (datetime.now(timezone.utc)
+                 - datetime.fromtimestamp(LISTINGS_SNAPSHOT.stat().st_mtime, timezone.utc)
+                 ).total_seconds() / 3600
+    except FileNotFoundError:
+        age_h = float("inf")
+    if age_h <= SNAPSHOT_MAX_AGE_HOURS:
+        return
+    print(f"  Snapshot is {age_h:.1f}h old (> {SNAPSHOT_MAX_AGE_HOURS}h) — refreshing first...")
+    try:
+        subprocess.run([sys.executable, str(REPO_ROOT / "refresh_snapshot.py")],
+                       check=True, timeout=900)
+    except Exception as exc:  # keep planning on the stale file, but say so loudly
+        print(f"  WARNING: snapshot refresh failed ({exc}) — planning from a "
+              f"{age_h:.1f}h-old snapshot; newly posted listings may be missing.")
+
+
 def plan_all(cfg: dict) -> tuple[list[dict], list[str]]:
+    _ensure_fresh_snapshot()
     listings = _load_listings()
     sold     = promote._load_sold_history()
     sold_idx = _sold_index_by_item_id(sold)
@@ -834,7 +896,7 @@ def plan_all(cfg: dict) -> tuple[list[dict], list[str]]:
         for l in listings
     ]
     cap = cfg.get("max_total_30d_ad_spend_usd")
-    plan, demoted = apply_budget_cap(plan, cap)
+    plan, demoted = apply_budget_cap(plan, cap, cfg)
     return plan, demoted
 
 
