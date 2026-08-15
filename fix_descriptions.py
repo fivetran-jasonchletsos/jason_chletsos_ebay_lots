@@ -51,6 +51,10 @@ def _save_log(log: dict) -> None:
     LOG_PATH.write_text(json.dumps(log, indent=1))
 
 
+class TradingCallLimit(Exception):
+    """Raised when eBay reports the daily Trading API call cap is exhausted."""
+
+
 def get_description(item_id: str, token: str, cfg: dict) -> str | None:
     xml = f'''<?xml version="1.0" encoding="utf-8"?>
 <GetItemRequest xmlns="{NS}">
@@ -61,8 +65,16 @@ def get_description(item_id: str, token: str, cfg: dict) -> str | None:
 </GetItemRequest>'''
     headers = ebay_client.trading_headers("GetItem", cfg, token)
     r = requests.post(TRADING_URL, headers=headers, data=xml.encode("utf-8"), timeout=30)
+    if "Call usage limit has been reached" in r.text:
+        raise TradingCallLimit(item_id)
     m = re.search(r"<Description>(.*?)</Description>", r.text, re.S)
     if not m:
+        # Distinguish a real empty description from any other API failure --
+        # failures must NOT be logged as done (2026-08-15: 1,260 rate-limit
+        # errors were logged "no_desc" and would have been silently skipped).
+        ack = re.search(r"<Ack>(.*?)</Ack>", r.text)
+        if not ack or ack.group(1) not in ("Success", "Warning"):
+            raise requests.RequestException(f"GetItem failed for {item_id}")
         return None
     desc = m.group(1)
     if desc.startswith("<![CDATA["):
@@ -117,6 +129,11 @@ def main() -> int:
         time.sleep(PACE_SECONDS)
         try:
             desc = get_description(item_id, token, cfg)
+        except TradingCallLimit:
+            print(f"  [{i}/{len(todo)}] daily Trading API call limit reached — "
+                  f"stopping; {len(todo) - i + 1} items remain for the next run "
+                  "(limit resets midnight PT)")
+            break
         except requests.RequestException as exc:
             print(f"  [{i}/{len(todo)}] {item_id} GetItem error: {exc} — will retry next run")
             continue
