@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Resurgence Football Boxes (2026-08-15) - Pull List</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#123}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #bcd;
+       background:#fff;color:#345;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#123;color:#fff;border-color:#123}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.verify{border-color:#d4af37;background:#fffdf3}
+ .card.corrected{border-color:#bbb;background:#f3f3f3;opacity:.7}
+ .box{flex:0 0 26px;height:26px;border:2.5px solid #123;border-radius:7px}
+ .card.done .box{background:#1a7f1a;border-color:#1a7f1a}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:15px;line-height:1.25}
+ .tm{color:#667;font-size:12px}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .badge{display:inline-block;font-size:9px;font-weight:800;background:#d4af37;color:#123;border-radius:6px;padding:1px 6px;margin-left:5px;vertical-align:1px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:16px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#123;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #789;color:#bcd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#A5ACAF;border:none;color:#123;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Resurgence Football Boxes (2026-08-15) &mdash; Pull List</h1>
+<p class="sub">10 of 32 cards from the first Resurgence box scans clear the $4+ bar, ~$51.50 total. Same product we posted Thursday, so pricing is calibrated: base veterans (Kelce, Hurts, Kittle, Bijan, Kamara, Evans, Lawrence, Garrett) run $1.50-3 bulk; the money is inserts, numbered parallels, and rookie QBs. Page will extend as more boxes get scanned. Tap a card to mark it pulled. Tap image to zoom.</p>
+<div class="warn"><b>Back-checks while pulling:</b> insert/parallel NAMES on this product are unverified from fronts (Thursday's lesson -- the original insert research hit the wrong product's checklist). Read the card backs for: the Cam Ward cracked-gauge insert name, the Chase rainbow-circuit insert name, both Tyler Shough insert names (radial-burst + molecule designs), and the parallel names on the Harmon holo, Mason Taylor pink lazer, and Ollie Gordon silver sparkle. The Shemar Turner blue wave serial is confirmed 09/99 from the scan.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+ {"k":"cam_ward_insert","p":"Cam Ward","team":"Titans","note":"Cracked-gauge insert RC -- #1 overall pick QB with a rookie season behind him (insert name TBD from back)","pr":10.0,"tier":"verify"},
+ {"k":"chase_circuit","p":"Ja'Marr Chase","team":"Bengals","note":"Rainbow circuit-board insert (same family as Thursday's Jeudy; name TBD from back)","pr":7.0,"tier":"verify"},
+ {"k":"shemar_turner_99","p":"Shemar Turner","team":"Bears","note":"RC, blue wave parallel, SERIAL 09/99 (confirmed from scan)","pr":6.0,"tier":"verify"},
+ {"k":"dart_rc","p":"Jaxson Dart","team":"Giants","note":"Base RC -- Giants QB with a rookie season","pr":4.5,"tier":"confident"},
+ {"k":"burrow","p":"Joe Burrow","team":"Bengals","note":"Base -- top-QB tier, borderline like Allen was","pr":4.0,"tier":"verify"},
+ {"k":"harmon_holo","p":"Derrick Harmon","team":"Steelers","note":"RC, holo/prizm parallel (name TBD from back)","pr":4.0,"tier":"verify"},
+ {"k":"mason_taylor_lazer","p":"Mason Taylor","team":"Jets","note":"RC, pink/teal lazer-sparkle parallel (name TBD from back)","pr":4.0,"tier":"verify"},
+ {"k":"ollie_gordon_sparkle","p":"Ollie Gordon II","team":"Dolphins","note":"RC, silver-sparkle parallel (name TBD from back)","pr":4.0,"tier":"verify"},
+ {"k":"shough_radial","p":"Tyler Shough","team":"Saints","note":"RC, radial-burst insert (same design as our Maye 198/275 -- unnumbered copy)","pr":4.0,"tier":"verify"},
+ {"k":"shough_molecule","p":"Tyler Shough","team":"Saints","note":"RC, molecule/web insert (same design as Thursday's Judkins insert)","pr":4.0,"tier":"verify"}
+];
+const KEY = "resurgence2_pull_2026_08_15";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const FILTERS = [["All", () => true], ["Confident", r => r.tier === "confident"], ["Verify", r => r.tier === "verify"], ["Corrected", r => r.tier === "corrected"]];
+let activeFilter = "All";
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+function renderChips(){
+  chips.innerHTML = "";
+  for (const [label, pred] of FILTERS){
+    const n = DATA.filter(pred).length;
+    const b = document.createElement("button");
+    b.className = "chip" + (activeFilter === label ? " on" : "");
+    b.textContent = `${label} (${n})`;
+    b.onclick = () => { activeFilter = label; renderChips(); render(); };
+    chips.appendChild(b);
+  }
+}
+function render(){
+  const passesFilter = (FILTERS.find(([label]) => label === activeFilter) || FILTERS[0])[1];
+  list.innerHTML = "";
+  for (const r of DATA){
+    if (!passesFilter(r)) continue;
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.tier === "verify" ? " verify" : "") + (r.tier === "corrected" ? " corrected" : "");
+    const badge = r.tier === "verify" ? '<span class="badge">VERIFY</span>' : (r.tier === "corrected" ? '<span class="badge" style="background:#999;color:#fff">BELOW BAR</span>' : '');
+    el.innerHTML = `<div class="box"></div>` +
+      `<img class="th" loading="lazy" src="resurgence2_pull_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}${badge}</div><div class="tm">${r.team}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `RESURGENCE FOOTBALL PULL LIST (2026-08-15): ${DATA.length} cards.\n` + DATA.map(r => `- ${r.p} ($${r.pr.toFixed(2)}) -- ${r.note}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+renderChips(); render();
+</script></body></html>
