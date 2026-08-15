@@ -164,8 +164,32 @@ def build_xml(picture_urls: list[str], token: str, include_condition: bool) -> s
 </AddItemRequest>"""
 
 
+def load_config_overrides() -> None:
+    """--config path.json overrides the module-level listing globals, so one
+    script posts any spoon/antique without editing source each time. Keys:
+    title, price, best_offer_auto_accept, best_offer_minimum, photo_dir,
+    photo_order, description_html, specifics."""
+    if "--config" not in sys.argv:
+        return
+    g = globals()
+    conf = json.loads(Path(sys.argv[sys.argv.index("--config") + 1]).read_text())
+    mapping = {
+        "title": "TITLE", "price": "PRICE",
+        "best_offer_auto_accept": "BEST_OFFER_AUTO_ACCEPT",
+        "best_offer_minimum": "BEST_OFFER_MINIMUM",
+        "photo_order": "PHOTO_ORDER", "description_html": "DESCRIPTION_HTML",
+        "specifics": "SPECIFICS",
+    }
+    for key, gname in mapping.items():
+        if key in conf:
+            g[gname] = conf[key]
+    if "photo_dir" in conf:
+        g["PHOTO_DIR"] = Path(conf["photo_dir"])
+
+
 def main() -> int:
     apply = "--apply" in sys.argv
+    load_config_overrides()
     cfg = json.loads(Path(paths.CONFIG).read_text())
     token = ebay_client.get_write_token(cfg)
 

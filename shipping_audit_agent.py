@@ -89,8 +89,9 @@ HOUSE_LOT_COST        = float(pfs.LOT_SHIPPING_SERVICE_COST)
 # US_eBayStandardEnvelope would be an undeliverable listing, the exact inverse
 # of the bug this agent exists to catch.
 SHIPPING_EXEMPT_ITEM_IDS = {
-    "307125889435",  # Gorham sterling souvenir spoon -- free USPSFirstClass
-                     # (Ground Advantage), postage built into price (2026-08-14)
+    "307125889435",  # Gorham sterling souvenir spoon (Easton PA) -- free
+                     # USPSFirstClass/Ground Advantage, postage in price (2026-08-14)
+    "307127235915",  # Watson DC Capitol sterling souvenir spoon -- same setup
 }
 
 DEFAULT_CONFIG: dict = {
