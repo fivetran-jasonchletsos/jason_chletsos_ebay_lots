@@ -119,6 +119,13 @@ def main() -> int:
 
     todo = [str(l["item_id"]) for l in listings
             if str(l.get("item_id")) and str(l.get("item_id")) not in log]
+    # Per-run safety cap (2026-08-16 panel): yesterday an uncapped sweep ate the
+    # ENTIRE daily Trading quota and blinded order reads + blocked postings for
+    # 12+ hours. Never again -- leave headroom for the store's real operations.
+    MAX_PER_RUN = 600
+    if len(todo) > MAX_PER_RUN and not limit:
+        print(f"  capping run at {MAX_PER_RUN} of {len(todo)} remaining (quota headroom)")
+        todo = todo[:MAX_PER_RUN]
     if limit:
         todo = todo[:limit]
     print(f"{len(listings)} active · {len(log)} already processed · {len(todo)} to scan"
