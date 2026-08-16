@@ -80,7 +80,8 @@ def get_unfeedback_transactions(token: str, cfg: dict) -> list[dict]:
 
 
 def leave_feedback(item_id: str, transaction_id: str, buyer: str,
-                   comment: str, token: str, cfg: dict) -> bool:
+                   comment: str, token: str, cfg: dict) -> str:
+    """Returns "ok", "permanent" (already left / invalid -- never retry), or "fail"."""
     xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <LeaveFeedbackRequest xmlns="{NS}">
   <RequesterCredentials><eBayAuthToken>{token}</eBayAuthToken></RequesterCredentials>
@@ -95,10 +96,18 @@ def leave_feedback(item_id: str, transaction_id: str, buyer: str,
     resp = requests.post(TRADING_URL, headers=headers, data=xml.encode(), timeout=30)
     ack = re.search(r"<Ack>(.*?)</Ack>", resp.text)
     errors = re.findall(r"<ShortMessage>(.*?)</ShortMessage>", resp.text)
-    ok = ack and ack.group(1) in ("Success", "Warning")
+    ok = bool(ack and ack.group(1) in ("Success", "Warning"))
     if not ok and errors:
         print(f"    Error: {errors[0]}")
-    return ok
+    if ok:
+        return "ok"
+    # "already left / invalid transaction" is a permanent state, not a retryable
+    # failure -- the caller logs these so the same stale buyers stop being
+    # re-attempted every day (seen 2026-08-15/16: 0/76 and 0/73 runs).
+    joined = " ".join(errors).lower()
+    if "already left" in joined or "invalid item" in joined or "invalid transaction" in joined:
+        return "permanent"
+    return "fail"
 
 
 def main() -> int:
@@ -114,6 +123,20 @@ def main() -> int:
     pending = get_unfeedback_transactions(token, cfg)
     print(f"  Found {len(pending)} transaction(s) without buyer feedback.")
 
+    # Skip transactions eBay has already permanently rejected ("feedback
+    # already left" etc.) -- its awaiting-feedback list lags reality and the
+    # agent was retrying the same stale buyers every day (0/76, 0/73 runs).
+    skip_path = REPO_ROOT / "output" / "feedback_left_log.json"
+    try:
+        skip_log = json.loads(skip_path.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        skip_log = {}
+    before = len(pending)
+    pending = [p for p in pending
+               if f"{p['item_id']}:{p['transaction_id']}" not in skip_log]
+    if before != len(pending):
+        print(f"  Skipping {before - len(pending)} already-handled transaction(s).")
+
     if args.limit:
         pending = pending[:args.limit]
 
@@ -123,15 +146,20 @@ def main() -> int:
         print(f"  {'[dry-run] would leave' if not args.apply else 'Leaving'} feedback for "
               f"{p['buyer']} on item {p['item_id']}: \"{comment[:50]}...\"")
         if args.apply:
-            ok = leave_feedback(p["item_id"], p["transaction_id"],
-                                p["buyer"], comment, token, cfg)
-            if ok:
+            status = leave_feedback(p["item_id"], p["transaction_id"],
+                                    p["buyer"], comment, token, cfg)
+            key = f"{p['item_id']}:{p['transaction_id']}"
+            if status == "ok":
                 ok_count += 1
+                skip_log[key] = "left"
+            elif status == "permanent":
+                skip_log[key] = "already_left_or_invalid"
             time.sleep(0.5)
         else:
             ok_count += 1
 
     if args.apply:
+        skip_path.write_text(json.dumps(skip_log, indent=1))
         print(f"\n  Result: {ok_count}/{len(pending)} feedback left successfully.")
     else:
         print(f"\n  Dry run: would leave feedback for {ok_count} buyer(s). Add --apply to post.")
