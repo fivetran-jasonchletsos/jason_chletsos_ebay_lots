@@ -167,11 +167,17 @@ def fetch_recent_orders(token: str, ebay_cfg: dict) -> list[dict]:
                              _xml_get_orders(token, start, now, page), ebay_cfg)
         ack = root.findtext(f"{NS}Ack", "") or ""
         if ack not in ("Success", "Warning"):
+            msgs = []
             for err in root.findall(f".//{NS}Errors"):
+                msg = err.findtext(f"{NS}ShortMessage", "")
+                msgs.append(msg)
                 print(f"  GetOrders error: "
-                      f"[{err.findtext(f'{NS}ErrorCode', '')}] "
-                      f"{err.findtext(f'{NS}ShortMessage', '')}")
-            break
+                      f"[{err.findtext(f'{NS}ErrorCode', '')}] {msg}")
+            # An API failure is NOT "zero orders". Raising here keeps main()
+            # from overwriting the plan with fake zeros -- the failure mode
+            # that produced phantom $0 dashboards on 2026-08-15 and -16
+            # (same bug class as fix_descriptions/feedback_agent, both fixed).
+            raise RuntimeError("GetOrders failed: " + "; ".join(msgs) or ack)
         rows.extend(_parse_orders_page(root))
         total_pages = int(root.findtext(f"{NS}PaginationResult/{NS}TotalNumberOfPages", "1") or "1")
         page += 1
@@ -488,7 +494,13 @@ def main() -> int:
         orders = fetch_recent_orders(token, ebay_cfg)
         print(f"  Got {len(orders)} order row(s) across the full window.")
     except Exception as exc:
-        print(f"  Could not fetch orders ({exc}); rendering empty state.")
+        # Never overwrite the plan with fake zeros on an API failure -- keep
+        # the last-known-good plan on disk and exit nonzero so callers see
+        # this run produced NO data (2026-08-16: quota exhaustion was being
+        # rendered as "today: 0 orders $0.00", triggering false alarms).
+        print(f"  Could not fetch orders ({exc}).")
+        print("  KEEPING last-known-good plan file; this run wrote nothing.")
+        return 1
 
     # Totals must be computed from the FULL window before truncating for
     # display, or "today"/"7-day" silently miss anything past MAX_ORDERS.
