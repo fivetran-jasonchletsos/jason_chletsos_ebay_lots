@@ -44,8 +44,24 @@ else:
     log("gave up after 12h"); sys.exit(1)
 
 py = sys.executable
-run([py, "post_from_scan.py", "--batch", "output/_post_mystery2_batch_2026_08_16.json", "--apply"], "mystery2 batch")
-run([py, "post_from_scan.py", "--image", "/tmp/myst_crop/bucky_chrome_2.jpg",
+
+def run_until_real(cmd, label):
+    """A lone probe success can be a fluke (2026-08-16 20:58: one upload
+    slipped through, the next call hit 518 again and the runner burned its
+    whole sequence on failures). Retry the step itself until it stops dying
+    on the usage limit."""
+    while True:
+        log(f"START {label}")
+        r = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO, timeout=3600)
+        out = r.stdout + r.stderr
+        log(f"DONE {label} (exit {r.returncode}):\n" + "\n".join(out.splitlines()[-8:]))
+        if "usage limit" not in out:
+            return r
+        log(f"{label}: quota still capped -- back to waiting 30 min")
+        time.sleep(1800)
+
+run_until_real([py, "post_from_scan.py", "--batch", "output/_post_mystery2_batch_2026_08_16.json", "--apply"], "mystery2 batch")
+run_until_real([py, "post_from_scan.py", "--image", "/tmp/myst_crop/bucky_chrome_2.jpg",
      "--title", "2024 Topps Chrome Bucky Irving RC Tampa Bay Buccaneers",
      "--price", "4.00", "--apply", "--force"], "Bucky copy 2 (force)")
 run([py, "orders_watch_agent.py"], "orders backfill")
