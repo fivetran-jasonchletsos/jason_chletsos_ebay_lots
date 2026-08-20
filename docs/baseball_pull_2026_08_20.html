@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Baseball Pull List — 2026-08-20</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#1a4a8a}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #cde;
+       background:#fff;color:#578;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#1a4a8a;color:#fff;border-color:#1a4a8a}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:15px;line-height:1.25}
+ .tm{color:#1a6a9a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:16px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#0d2c54;color:#fff;text-align:center;padding:11px;font-size:15px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #9ab;color:#dee;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#9cf;border:none;color:#036;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Baseball Pull List — Aug 20</h1>
+<p class="sub">From tonight's 32 scan pages (~290 cards, Scans 1091-1122). Only 2 cards clear the $4 bar — this batch is nearly all junk-wax-era commons. Tap a card once pulled. Tap image to zoom.</p>
+<div class="warn"><b>Where they are:</b> Locastro auto is Scan page 1096, top-left (red die-cut). Juan Gonzalez Rated Rookie is Scan page 1115, top-right. Everything else stays in the box (good lot fodder noted in the data JSON: the 1991 OPC Premier HOF run, the 2024 Bowman prospects, Guidry/Parker/Ortiz).</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {k:"locastro_auto", p:"Tim Locastro Status Red Die-Cut AUTO 55/75", set:"2017 Panini Elite Extra Edition", note:"On-card look blue-ink auto, serial 55/75 top-left. Dodgers-era prospect card, HBP-king cult following", pr:5.50, t:"auto"},
+  {k:"juangone_rr", p:"Juan Gonzalez Rated Rookie #33", set:"1990 Donruss", note:"2x AL MVP rookie card, iconic red Donruss. Clean copy", pr:4.00, t:"rookie"},
+];
+const KEY = "baseball_pull_2026_08_20";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","auto","rookie"];
+function render(){
+  chips.innerHTML = "";
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  for (const r of DATA){
+    if (filt!=="all" && r.t!==filt) continue;
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="baseball_pull_imgs_2026_08_20/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} total`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `BASEBALL PULLS 2026-08-20: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} (${r.set}) $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
