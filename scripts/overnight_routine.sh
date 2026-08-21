@@ -16,9 +16,10 @@
 cd /Users/jason.chletsos/Documents/GitHub/jason_chletsos_ebay_lots || exit 1
 
 if [ "$1" = "--wait" ]; then
-  # Wait for the ~3am ET quota reset. Guard against an evening launch (hour > 20)
-  # starting the run before midnight.
-  while [ "$(date +%H%M)" -lt "0305" ] || [ "$(date +%H)" -gt "20" ]; do sleep 60; done
+  # Wait for the ~3am ET quota reset. Guard against an evening launch (8pm or
+  # later) starting the run before midnight — the old `-gt 20` guard let a
+  # 20:24 launch fire immediately (2026-08-20, burned the day's leftover quota).
+  while [ "$(date +%H%M)" -lt "0305" ] || [ "$(date +%H)" -ge "20" ]; do sleep 60; done
 fi
 
 DAY=$(date +%A)
