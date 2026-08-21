@@ -16,10 +16,15 @@
 cd /Users/jason.chletsos/Documents/GitHub/jason_chletsos_ebay_lots || exit 1
 
 if [ "$1" = "--wait" ]; then
-  # Wait for the ~3am ET quota reset. Guard against an evening launch (8pm or
-  # later) starting the run before midnight — the old `-gt 20` guard let a
-  # 20:24 launch fire immediately (2026-08-20, burned the day's leftover quota).
-  while [ "$(date +%H%M)" -lt "0305" ] || [ "$(date +%H)" -ge "20" ]; do sleep 60; done
+  # Release ONLY inside the 3:05-5:00am window, no matter when armed.
+  # History of guard holes: `-gt 20` let a 20:24 launch run instantly
+  # (2026-08-20); the before/after-hours pair let a 19:39 launch run
+  # instantly (2026-08-21). A positive window can't have that class of bug.
+  while :; do
+    NOW=$(date +%H%M)
+    [ "$NOW" -ge "0305" ] && [ "$NOW" -lt "0500" ] && break
+    sleep 60
+  done
 fi
 
 DAY=$(date +%A)
