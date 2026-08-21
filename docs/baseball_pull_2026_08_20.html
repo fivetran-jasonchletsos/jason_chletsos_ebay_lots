@@ -9,10 +9,6 @@
  h1{font-size:22px;margin:6px 0 2px;color:#1a4a8a}
  .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
  .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
- #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
- .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #cde;
-       background:#fff;color:#578;cursor:pointer;white-space:nowrap}
- .chip.on{background:#1a4a8a;color:#fff;border-color:#1a4a8a}
  .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
        padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
  .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
@@ -33,7 +29,6 @@
 <h1>Baseball Pull List — Aug 20</h1>
 <p class="sub">From tonight's 32 scan pages (~290 cards, Scans 1091-1122). Only 2 cards clear the $4 bar — this batch is nearly all junk-wax-era commons. Tap a card once pulled. Tap image to zoom.</p>
 <div class="warn"><b>Where they are:</b> Locastro auto is Scan page 1096, top-left (red die-cut). Juan Gonzalez Rated Rookie is Scan page 1115, top-right. Everything else stays in the box (good lot fodder noted in the data JSON: the 1991 OPC Premier HOF run, the 2024 Bowman prospects, Guidry/Parker/Ortiz).</div>
-<div id="chips"></div>
 <div id="list"></div>
 </div>
 <div id="lightbox"><img id="lbimg" src=""></div>
@@ -45,21 +40,10 @@ const DATA = [
 ];
 const KEY = "baseball_pull_2026_08_20";
 let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
-let filt = "all";
-const list = document.getElementById("list"), chips = document.getElementById("chips");
-const TYPES = ["all","auto","rookie"];
+const list = document.getElementById("list");
 function render(){
-  chips.innerHTML = "";
-  for (const t of TYPES){
-    const c = document.createElement("div");
-    c.className = "chip" + (filt===t ? " on" : "");
-    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
-    c.onclick = () => { filt = t; render(); };
-    chips.appendChild(c);
-  }
   list.innerHTML = "";
   for (const r of DATA){
-    if (filt!=="all" && r.t!==filt) continue;
     const el = document.createElement("div");
     el.className = "card" + (done.has(r.k) ? " done" : "");
     el.innerHTML = `<img class="th" loading="lazy" src="baseball_pull_imgs_2026_08_20/${r.k}.jpg">` +
