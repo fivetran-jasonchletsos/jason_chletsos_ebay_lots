@@ -178,7 +178,7 @@ def load_config_overrides() -> None:
         "best_offer_auto_accept": "BEST_OFFER_AUTO_ACCEPT",
         "best_offer_minimum": "BEST_OFFER_MINIMUM",
         "photo_order": "PHOTO_ORDER", "description_html": "DESCRIPTION_HTML",
-        "specifics": "SPECIFICS",
+        "specifics": "SPECIFICS", "category": "CATEGORY_ID",
     }
     for key, gname in mapping.items():
         if key in conf:

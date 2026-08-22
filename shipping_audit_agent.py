@@ -93,6 +93,9 @@ SHIPPING_EXEMPT_ITEM_IDS = {
                      # USPSFirstClass/Ground Advantage, postage in price (2026-08-14)
     "307127235915",  # Watson DC Capitol sterling souvenir spoon -- same setup
     "307127251788",  # Weisgerber 1926 Sesquicentennial sterling spoon -- same setup
+    "307141227697",  # Ray Lewis Ravens jersey -- free Ground Advantage (2026-08-22)
+    "307141228251",  # Deion Sanders Cowboys jersey -- same setup
+    "307141228329",  # Marion Barber Cowboys jersey -- same setup
 }
 
 DEFAULT_CONFIG: dict = {
