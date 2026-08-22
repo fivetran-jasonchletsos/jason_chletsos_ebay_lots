@@ -403,7 +403,7 @@ def main():
             results.append({"error": "image not found", "title": c["title"]})
             continue
         r = post_card(img, c["title"], float(c["price"]), cfg, token, args.apply,
-                      c.get("category", CATEGORY_ID), c.get("condition", CONDITION_ID),
+                      str(c.get("category", CATEGORY_ID)), str(c.get("condition", CONDITION_ID)),
                       c.get("listing_type", "FixedPriceItem"), c.get("duration", "GTC"),
                       c.get("specifics"))
         results.append(r)
