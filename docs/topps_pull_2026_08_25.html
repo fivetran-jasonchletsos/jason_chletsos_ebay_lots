@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Topps Flagship Pull List — 2026-08-25</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Topps Flagship Pull List — Aug 25</h1>
+<p class="sub">2026 Topps NFL flagship, 3 boxes: 81 listings / 111 physical cards worth ~$457 at ask. Sorted A-Z by last name to match your stacks — rows marked "PULL n COPIES" need every copy. Tap a card once pulled. Tap image to zoom.</p>
+<div class="warn"><b>Box hit:</b> the Samaje Perine 35th Anniversary AUTO 19/25 (top of the P section) — sleeve it first.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "allar_rc", "p": "Drew Allar RC x2", "set": "2026 Topps flagship \u00b7 Scan 1210 r3c1 \u2014 PULL 2 COPIES (Scan 1262 r1c2)", "note": "", "pr": 4.0, "t": "rookie", "ln": "allar", "box": "Topps flagship"},
+  {"k": "allen_fl", "p": "Josh Allen", "set": "2026 Topps flagship \u00b7 Scan 1225 r2c2", "note": "", "pr": 3.5, "t": "star", "ln": "allen", "box": "Topps flagship"},
+  {"k": "saquon_sparkle", "p": "Saquon Barkley Silver Sparkle 35th", "set": "2026 Topps flagship \u00b7 Scan 1272 r2c3", "note": "", "pr": 5.5, "t": "color", "ln": "barkley", "box": "Topps flagship"},
+  {"k": "saquon_fl", "p": "Saquon Barkley x3", "set": "2026 Topps flagship \u00b7 Scan 1217 r1c3 \u2014 PULL 3 COPIES (Scan 1240 r2c1, Scan 1267 r2c3)", "note": "", "pr": 3.5, "t": "star", "ln": "barkley", "box": "Topps flagship"},
+  {"k": "baun_sparkle", "p": "Zack Baun Silver Sparkle (Eagles)", "set": "2026 Topps flagship \u00b7 Scan 1242 r3c3", "note": "", "pr": 4.0, "t": "color", "ln": "baun", "box": "Topps flagship"},
+  {"k": "beck_rc", "p": "Carson Beck RC x2", "set": "2026 Topps flagship \u00b7 Scan 1228 r1c2 \u2014 PULL 2 COPIES (Scan 1274 r1c2)", "note": "", "pr": 3.5, "t": "rookie", "ln": "beck", "box": "Topps flagship"},
+  {"k": "bond_sparkle", "p": "Lewis Bond RC Silver Sparkle", "set": "2026 Topps flagship \u00b7 Scan 1210 r1c2", "note": "", "pr": 3.0, "t": "color", "ln": "bond", "box": "Topps flagship"},
+  {"k": "bosa_fl", "p": "Nick Bosa x2", "set": "2026 Topps flagship \u00b7 Scan 1257 r3c1 \u2014 PULL 2 COPIES (Scan 1272 r1c2)", "note": "", "pr": 3.0, "t": "star", "ln": "bosa", "box": "Topps flagship"},
+  {"k": "bowers_sparkle", "p": "Brock Bowers Silver Sparkle", "set": "2026 Topps flagship \u00b7 Scan 1264 r2c2", "note": "", "pr": 5.0, "t": "color", "ln": "bowers", "box": "Topps flagship"},
+  {"k": "bowers_fl", "p": "Brock Bowers x3", "set": "2026 Topps flagship \u00b7 Scan 1238 r2c2 \u2014 PULL 3 COPIES (Scan 1253 r2c3, Scan 1273 r2c3)", "note": "", "pr": 3.5, "t": "star", "ln": "bowers", "box": "Topps flagship"},
+  {"k": "burrow_fl", "p": "Joe Burrow", "set": "2026 Topps flagship \u00b7 Scan 1239 r1c3", "note": "", "pr": 3.5, "t": "star", "ln": "burrow", "box": "Topps flagship"},
+  {"k": "abdul_fl", "p": "Abdul Carter RC All-Rookie x2", "set": "2026 Topps flagship \u00b7 Scan 1221 r2c3 \u2014 PULL 2 COPIES (Scan 1250 r1c3)", "note": "", "pr": 3.5, "t": "rookie", "ln": "carter", "box": "Topps flagship"},
+  {"k": "chase_fl", "p": "Ja'Marr Chase", "set": "2026 Topps flagship \u00b7 Scan 1218 r1c2", "note": "", "pr": 3.5, "t": "star", "ln": "chase", "box": "Topps flagship"},
+  {"k": "concepcion_35th", "p": "KC Concepcion 35th Retro RC", "set": "2026 Topps flagship \u00b7 Scan 1262 r1c1", "note": "", "pr": 3.5, "t": "insert", "ln": "concepcion", "box": "Topps flagship"},
+  {"k": "daniels_fl", "p": "Jayden Daniels x2", "set": "2026 Topps flagship \u00b7 Scan 1219 r2c1 \u2014 PULL 2 COPIES (Scan 1231 r1c3)", "note": "", "pr": 3.5, "t": "star", "ln": "daniels", "box": "Topps flagship"},
+  {"k": "dart_35th", "p": "Jaxson Dart 35th Retro RC", "set": "2026 Topps flagship \u00b7 Scan 1257 r3c3", "note": "", "pr": 5.5, "t": "insert", "ln": "dart", "box": "Topps flagship"},
+  {"k": "dart_fs", "p": "Jaxson Dart Future Stars All-Rookie RC", "set": "2026 Topps flagship \u00b7 Scan 1261 r2c1", "note": "", "pr": 5.5, "t": "insert", "ln": "dart", "box": "Topps flagship"},
+  {"k": "egbuka_fs", "p": "Emeka Egbuka Future Stars All-Rookie RC x2", "set": "2026 Topps flagship \u00b7 Scan 1251 r2c1 \u2014 PULL 2 COPIES (Scan 1225 r3c3)", "note": "", "pr": 4.5, "t": "insert", "ln": "egbuka", "box": "Topps flagship"},
+  {"k": "evans_fl", "p": "Mike Evans x2", "set": "2026 Topps flagship \u00b7 Scan 1255 r2c2 \u2014 PULL 2 COPIES (Scan 1272 r2c1)", "note": "", "pr": 3.0, "t": "star", "ln": "evans", "box": "Topps flagship"},
+  {"k": "gabriel_fl", "p": "Dillon Gabriel RC", "set": "2026 Topps flagship \u00b7 Scan 1229 r3c3", "note": "", "pr": 3.0, "t": "rookie", "ln": "gabriel", "box": "Topps flagship"},
+  {"k": "garrett_ice", "p": "Myles Garrett 35th Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1223 r3c1", "note": "", "pr": 6.0, "t": "color", "ln": "garrett", "box": "Topps flagship"},
+  {"k": "garrett_gold", "p": "Myles Garrett Gold Frame Insert", "set": "2026 Topps flagship \u00b7 Scan 1249 r3c2", "note": "", "pr": 4.0, "t": "insert", "ln": "garrett", "box": "Topps flagship"},
+  {"k": "gibbs_fl", "p": "Jahmyr Gibbs x2", "set": "2026 Topps flagship \u00b7 Scan 1266 r2c2 \u2014 PULL 2 COPIES (Scan 1275 r1c3)", "note": "", "pr": 3.5, "t": "star", "ln": "gibbs", "box": "Topps flagship"},
+  {"k": "goedert_rainbow", "p": "Dallas Goedert Rainbow Foil (Eagles)", "set": "2026 Topps flagship \u00b7 Scan 1254 r2c2", "note": "", "pr": 3.5, "t": "color", "ln": "goedert", "box": "Topps flagship"},
+  {"k": "henderson_fl", "p": "TreVeyon Henderson RC All-Rookie x2", "set": "2026 Topps flagship \u00b7 Scan 1230 r2c3 \u2014 PULL 2 COPIES (Scan 1269 r3c1)", "note": "", "pr": 3.5, "t": "rookie", "ln": "henderson", "box": "Topps flagship"},
+  {"k": "herbert_sparkle", "p": "Justin Herbert Silver Sparkle 35th", "set": "2026 Topps flagship \u00b7 Scan 1259 r1c2", "note": "", "pr": 5.0, "t": "color", "ln": "herbert", "box": "Topps flagship"},
+  {"k": "herbert_graffiti", "p": "Justin Herbert Splatter Insert", "set": "2026 Topps flagship \u00b7 Scan 1224 r3c3", "note": "", "pr": 4.0, "t": "insert", "ln": "herbert", "box": "Topps flagship"},
+  {"k": "hunter_35th", "p": "Travis Hunter 35th Retro RC", "set": "2026 Topps flagship \u00b7 Scan 1274 r3c2", "note": "", "pr": 5.0, "t": "insert", "ln": "hunter", "box": "Topps flagship"},
+  {"k": "hunter_fl", "p": "Travis Hunter RC (WR/CB)", "set": "2026 Topps flagship \u00b7 Scan 1229 r1c2", "note": "", "pr": 4.0, "t": "rookie", "ln": "hunter", "box": "Topps flagship"},
+  {"k": "hurts_35th", "p": "Jalen Hurts 35th Retro", "set": "2026 Topps flagship \u00b7 Scan 1230 r3c2", "note": "", "pr": 4.5, "t": "insert", "ln": "hurts", "box": "Topps flagship"},
+  {"k": "hurts_fl", "p": "Jalen Hurts x3", "set": "2026 Topps flagship \u00b7 Scan 1237 r1c1 \u2014 PULL 3 COPIES (Scan 1260 r3c3, Scan 1271 r3c3)", "note": "", "pr": 4.0, "t": "star", "ln": "hurts", "box": "Topps flagship"},
+  {"k": "bucky_bt", "p": "Bucky Irving Big Ticket", "set": "2026 Topps flagship \u00b7 Scan 1264 r3c2", "note": "", "pr": 3.5, "t": "insert", "ln": "irving", "box": "Topps flagship"},
+  {"k": "lamar_fl", "p": "Lamar Jackson x3", "set": "2026 Topps flagship \u00b7 Scan 1236 r3c3 \u2014 PULL 3 COPIES (Scan 1259 r3c3, Scan 1277 r1c1)", "note": "", "pr": 3.5, "t": "star", "ln": "jackson", "box": "Topps flagship"},
+  {"k": "jeanty_fs", "p": "Ashton Jeanty Future Stars All-Rookie RC", "set": "2026 Topps flagship \u00b7 Scan 1211 r3c1", "note": "", "pr": 5.0, "t": "insert", "ln": "jeanty", "box": "Topps flagship"},
+  {"k": "jefferson_35th", "p": "Justin Jefferson 35th Retro", "set": "2026 Topps flagship \u00b7 Scan 1271 r3c1", "note": "", "pr": 5.0, "t": "insert", "ln": "jefferson", "box": "Topps flagship"},
+  {"k": "judkins_fs", "p": "Quinshon Judkins Future Stars RC", "set": "2026 Topps flagship \u00b7 Scan 1227 r1c1", "note": "", "pr": 3.5, "t": "insert", "ln": "judkins", "box": "Topps flagship"},
+  {"k": "kelce_fl", "p": "Travis Kelce", "set": "2026 Topps flagship \u00b7 Scan 1229 r2c3", "note": "", "pr": 3.5, "t": "star", "ln": "kelce", "box": "Topps flagship"},
+  {"k": "klare_ice", "p": "Max Klare RC 35th Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1215 r2c3", "note": "", "pr": 5.0, "t": "color", "ln": "klare", "box": "Topps flagship"},
+  {"k": "klubnik_35th", "p": "Cade Klubnik 35th Retro RC", "set": "2026 Topps flagship \u00b7 Scan 1246 r2c2", "note": "", "pr": 4.5, "t": "insert", "ln": "klubnik", "box": "Topps flagship"},
+  {"k": "lawrence_ice", "p": "Trevor Lawrence 35th Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1211 r3c3", "note": "", "pr": 6.0, "t": "color", "ln": "lawrence", "box": "Topps flagship"},
+  {"k": "lemon_rc", "p": "Makai Lemon RC (Eagles) x2", "set": "2026 Topps flagship \u00b7 Scan 1228 r2c2 \u2014 PULL 2 COPIES (Scan 1274 r2c2)", "note": "", "pr": 3.0, "t": "rookie", "ln": "lemon", "box": "Topps flagship"},
+  {"k": "jlove_35th", "p": "Jeremiyah Love 35th Retro RC", "set": "2026 Topps flagship \u00b7 Scan 1269 r2c2", "note": "", "pr": 5.0, "t": "insert", "ln": "love", "box": "Topps flagship"},
+  {"k": "jlove_rc", "p": "Jeremiyah Love RC x2", "set": "2026 Topps flagship \u00b7 Scan 1210 r2c1 \u2014 PULL 2 COPIES (Scan 1257 r2c3)", "note": "", "pr": 4.5, "t": "rookie", "ln": "love", "box": "Topps flagship"},
+  {"k": "jlove_graffiti", "p": "Jordan Love Splatter Insert", "set": "2026 Topps flagship \u00b7 Scan 1237 r2c2", "note": "", "pr": 4.0, "t": "insert", "ln": "love", "box": "Topps flagship"},
+  {"k": "jordanlove_fl", "p": "Jordan Love x2", "set": "2026 Topps flagship \u00b7 Scan 1237 r3c3 \u2014 PULL 2 COPIES (Scan 1263 r2c1)", "note": "", "pr": 3.5, "t": "star", "ln": "love", "box": "Topps flagship"},
+  {"k": "mahomes_base", "p": "Patrick Mahomes x2", "set": "2026 Topps flagship \u00b7 Scan 1255 r3c2 \u2014 PULL 2 COPIES (Scan 1272 r3c1)", "note": "", "pr": 4.5, "t": "star", "ln": "mahomes", "box": "Topps flagship"},
+  {"k": "kcfinest", "p": "KC's Finest Mahomes Kelce Combo x2", "set": "2026 Topps flagship \u00b7 Scan 1236 r1c3 \u2014 PULL 2 COPIES (Scan 1261 r1c2)", "note": "", "pr": 3.5, "t": "insert", "ln": "mahomes", "box": "Topps flagship"},
+  {"k": "maye_fl", "p": "Drake Maye", "set": "2026 Topps flagship \u00b7 Scan 1245 r3c2", "note": "", "pr": 4.0, "t": "star", "ln": "maye", "box": "Topps flagship"},
+  {"k": "mcbride_att", "p": "Trey McBride All-Topps Team Gold", "set": "2026 Topps flagship \u00b7 Scan 1215 r3c3", "note": "", "pr": 3.5, "t": "insert", "ln": "mcbride", "box": "Topps flagship"},
+  {"k": "cmc_fl", "p": "Christian McCaffrey x2", "set": "2026 Topps flagship \u00b7 Scan 1267 r2c1 \u2014 PULL 2 COPIES (Scan 1273 r3c3)", "note": "", "pr": 3.5, "t": "star", "ln": "mccaffrey", "box": "Topps flagship"},
+  {"k": "jjm_fl", "p": "J.J. McCarthy", "set": "2026 Topps flagship \u00b7 Scan 1218 r3c1", "note": "", "pr": 3.5, "t": "star", "ln": "mccarthy", "box": "Topps flagship"},
+  {"k": "mcconkey_fl", "p": "Ladd McConkey x2", "set": "2026 Topps flagship \u00b7 Scan 1220 r1c3 \u2014 PULL 2 COPIES (Scan 1274 r1c3)", "note": "", "pr": 3.5, "t": "star", "ln": "mcconkey", "box": "Topps flagship"},
+  {"k": "tmac_pink_ice", "p": "Tetairoa McMillan PINK Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1251 r3c3", "note": "", "pr": 6.0, "t": "color", "ln": "mcmillan", "box": "Topps flagship"},
+  {"k": "tmac_fs", "p": "Tetairoa McMillan Future Stars All-Rookie RC", "set": "2026 Topps flagship \u00b7 Scan 1242 r3c1", "note": "", "pr": 3.5, "t": "insert", "ln": "mcmillan", "box": "Topps flagship"},
+  {"k": "mendoza_gold", "p": "Fernando Mendoza Gold Parallel RC", "set": "2026 Topps flagship \u00b7 Scan 1230 r2c2", "note": "", "pr": 4.5, "t": "color", "ln": "mendoza", "box": "Topps flagship"},
+  {"k": "nacua_35th", "p": "Puka Nacua 35th Retro", "set": "2026 Topps flagship \u00b7 Scan 1241 r2c1", "note": "", "pr": 4.0, "t": "insert", "ln": "nacua", "box": "Topps flagship"},
+  {"k": "puka_fl", "p": "Puka Nacua x2", "set": "2026 Topps flagship \u00b7 Scan 1229 r2c2 \u2014 PULL 2 COPIES (Scan 1258 r1c3)", "note": "", "pr": 3.0, "t": "star", "ln": "nacua", "box": "Topps flagship"},
+  {"k": "nix_35th", "p": "Bo Nix 35th Retro", "set": "2026 Topps flagship \u00b7 Scan 1239 r2c3", "note": "", "pr": 4.0, "t": "insert", "ln": "nix", "box": "Topps flagship"},
+  {"k": "parsons_att", "p": "Micah Parsons All-Topps Team Gold", "set": "2026 Topps flagship \u00b7 Scan 1259 r1c1", "note": "", "pr": 4.0, "t": "insert", "ln": "parsons", "box": "Topps flagship"},
+  {"k": "perine_auto", "p": "Samaje Perine 35th Anniversary AUTO 19/25", "set": "2026 Topps flagship \u00b7 Scan 1276 r2c1", "note": "", "pr": 19.99, "t": "hit", "ln": "perine", "box": "Topps flagship"},
+  {"k": "purdy_ice", "p": "Brock Purdy 35th Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1220 r3c1", "note": "", "pr": 6.0, "t": "color", "ln": "purdy", "box": "Topps flagship"},
+  {"k": "bijan_sparkle", "p": "Bijan Robinson Silver Sparkle 35th", "set": "2026 Topps flagship \u00b7 Scan 1256 r2c1", "note": "", "pr": 5.0, "t": "color", "ln": "robinson", "box": "Topps flagship"},
+  {"k": "bijan_fl", "p": "Bijan Robinson x2", "set": "2026 Topps flagship \u00b7 Scan 1236 r1c1 \u2014 PULL 2 COPIES (Scan 1269 r1c1)", "note": "", "pr": 3.5, "t": "star", "ln": "robinson", "box": "Topps flagship"},
+  {"k": "rodgers_fl", "p": "Aaron Rodgers (Steelers)", "set": "2026 Topps flagship \u00b7 Scan 1212 r2c3", "note": "", "pr": 3.0, "t": "star", "ln": "rodgers", "box": "Topps flagship"},
+  {"k": "shedeur_fl", "p": "Shedeur Sanders RC x2", "set": "2026 Topps flagship \u00b7 Scan 1220 r2c3 \u2014 PULL 2 COPIES (Scan 1274 r2c3)", "note": "", "pr": 4.5, "t": "rookie", "ln": "sanders", "box": "Topps flagship"},
+  {"k": "shough_ar", "p": "Tyler Shough All-Rookie", "set": "2026 Topps flagship \u00b7 Scan 1271 r1c2", "note": "", "pr": 3.5, "t": "rookie", "ln": "shough", "box": "Topps flagship"},
+  {"k": "simpson_rc", "p": "Ty Simpson RC x2", "set": "2026 Topps flagship \u00b7 Scan 1214 r1c3 \u2014 PULL 2 COPIES (Scan 1244 r3c1)", "note": "", "pr": 3.5, "t": "rookie", "ln": "simpson", "box": "Topps flagship"},
+  {"k": "staubach", "p": "Roger Staubach Purple Splash Insert", "set": "2026 Topps flagship \u00b7 Scan 1277 r2c3", "note": "", "pr": 4.0, "t": "insert", "ln": "staubach", "box": "Topps flagship"},
+  {"k": "amonra_att", "p": "Amon-Ra St. Brown All-Topps Team Gold", "set": "2026 Topps flagship \u00b7 Scan 1243 r1c1", "note": "", "pr": 3.5, "t": "insert", "ln": "stbrown", "box": "Topps flagship"},
+  {"k": "amonra_35th", "p": "Amon-Ra St. Brown 35th Retro", "set": "2026 Topps flagship \u00b7 Scan 1222 r1c1", "note": "", "pr": 3.5, "t": "insert", "ln": "stbrown", "box": "Topps flagship"},
+  {"k": "stowers_ice", "p": "Eli Stowers RC 35th Cracked Ice (Eagles)", "set": "2026 Topps flagship \u00b7 Scan 1233 r3c2", "note": "", "pr": 5.0, "t": "color", "ln": "stowers", "box": "Topps flagship"},
+  {"k": "stroud_pc", "p": "CJ Stroud Pressure Cookers", "set": "2026 Topps flagship \u00b7 Scan 1249 r2c2", "note": "", "pr": 4.5, "t": "insert", "ln": "stroud", "box": "Topps flagship"},
+  {"k": "btj_ice", "p": "Brian Thomas Jr 35th Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1247 r3c2", "note": "", "pr": 6.0, "t": "color", "ln": "thomas", "box": "Topps flagship"},
+  {"k": "thompson_ice", "p": "Brenen Thompson RC Pink Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1259 r2c1", "note": "", "pr": 4.0, "t": "color", "ln": "thompson", "box": "Topps flagship"},
+  {"k": "ward_fs", "p": "Cam Ward Future Stars All-Rookie RC", "set": "2026 Topps flagship \u00b7 Scan 1232 r3c2", "note": "", "pr": 4.0, "t": "insert", "ln": "ward", "box": "Topps flagship"},
+  {"k": "watt_fl", "p": "TJ Watt x2", "set": "2026 Topps flagship \u00b7 Scan 1235 r1c2 \u2014 PULL 2 COPIES (Scan 1263 r1c3)", "note": "", "pr": 3.5, "t": "star", "ln": "watt", "box": "Topps flagship"},
+  {"k": "caleb_pc", "p": "Caleb Williams Pressure Cookers", "set": "2026 Topps flagship \u00b7 Scan 1214 r2c3", "note": "", "pr": 4.5, "t": "insert", "ln": "williams", "box": "Topps flagship"},
+  {"k": "caleb_35th", "p": "Caleb Williams 35th Retro", "set": "2026 Topps flagship \u00b7 Scan 1252 r3c3", "note": "", "pr": 4.5, "t": "insert", "ln": "williams", "box": "Topps flagship"},
+  {"k": "caleb_bt", "p": "Caleb Williams Big Ticket", "set": "2026 Topps flagship \u00b7 Scan 1220 r1c2", "note": "", "pr": 4.0, "t": "insert", "ln": "williams", "box": "Topps flagship"},
+  {"k": "gwilson_ice", "p": "Garrett Wilson 35th Cracked Ice", "set": "2026 Topps flagship \u00b7 Scan 1244 r1c2", "note": "", "pr": 6.0, "t": "color", "ln": "wilson", "box": "Topps flagship"},
+  {"k": "worthy_fl", "p": "Xavier Worthy x2", "set": "2026 Topps flagship \u00b7 Scan 1220 r1c1 \u2014 PULL 2 COPIES (Scan 1273 r3c1)", "note": "", "pr": 3.5, "t": "star", "ln": "worthy", "box": "Topps flagship"}
+];
+const KEY = "topps_pull_2026_08_25";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="topps_pull_imgs_2026_08_25/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `TOPPS FLAGSHIP PULLS 2026-08-25: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
