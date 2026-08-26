@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Wave 2 Pull List — 2026-08-25</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Wave 2 Pull List — Aug 25 PM</h1>
+<p class="sub">Flagship box 4 + Topps Resurgence + 2025 Prizm + SAGE: 86 cards worth ~$355 ($323 sellable + 6 Giants holds). SAGE alone has 15 autos and 8 relics. A-Z by last name. Tap a card once pulled. Tap image to zoom.</p>
+<div class="warn"><b>Serials found:</b> Luther Burden Resurgence 113/425. <b>Giants holds (gold rows):</b> 4x Jaxson Dart (Resurgence x2, Prizm x2), Skattebo Resurgence, Abdul Carter flagship — keep box, do not post.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "achane_rainbow", "p": "De'Von Achane Resurgence Rainbow", "set": "Topps Resurgence \u00b7 Scan 1289 r1c2", "note": "", "pr": 4.0, "t": "color", "ln": "achane", "box": "Topps Resurgence"},
+  {"k": "aikman_lazer", "p": "Troy Aikman Prizm Lazer", "set": "Prizm \u00b7 Scan 1290 r1c3", "note": "", "pr": 5.0, "t": "color", "ln": "aikman", "box": "Prizm"},
+  {"k": "allar_35th", "p": "Drew Allar 35th Retro RC", "set": "Topps flagship box 4 \u00b7 Scan 1280 r1c3", "note": "", "pr": 4.0, "t": "insert", "ln": "allar", "box": "Topps flagship box 4"},
+  {"k": "vinny_peak", "p": "Vinny Anthony II Peak Performance Purple", "set": "SAGE \u00b7 Scan 1291 r3c1", "note": "", "pr": 3.0, "t": "insert", "ln": "anthony", "box": "SAGE"},
+  {"k": "saquon_b4", "p": "Saquon Barkley (4th copy)", "set": "Topps flagship box 4 \u00b7 Scan 1284 r1c3", "note": "", "pr": 3.5, "t": "star", "ln": "barkley", "box": "Topps flagship box 4"},
+  {"k": "barnes_auto", "p": "Khalil Barnes SAGE Auto", "set": "SAGE \u00b7 Scan 1291 r3c3", "note": "", "pr": 3.5, "t": "hit", "ln": "barnes", "box": "SAGE"},
+  {"k": "bosa_res", "p": "Nick Bosa Resurgence", "set": "Topps Resurgence \u00b7 Scan 1288 r1c2", "note": "", "pr": 4.0, "t": "star", "ln": "bosa", "box": "Topps Resurgence"},
+  {"k": "burden_425", "p": "Luther Burden III Resurgence 113/425 RC", "set": "Topps Resurgence \u00b7 Scan 1289 r1c1", "note": "", "pr": 5.5, "t": "hit", "ln": "burden", "box": "Topps Resurgence"},
+  {"k": "burden_res", "p": "Luther Burden III Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1288 r3c2", "note": "", "pr": 3.5, "t": "rookie", "ln": "burden", "box": "Topps Resurgence"},
+  {"k": "burrow_ice", "p": "Joe Burrow 35th Cracked Ice", "set": "Topps flagship box 4 \u00b7 Scan 1284 r2c2", "note": "", "pr": 6.0, "t": "color", "ln": "burrow", "box": "Topps flagship box 4"},
+  {"k": "abdul_b6_HOLD", "p": "HOLD (Giants) \u2014 Abdul Carter base", "set": "Topps flagship box 4 \u00b7 Scan 1284 r1c1", "note": "Do not post \u2014 Giants keep box", "pr": 3.5, "t": "flip", "ln": "carter", "box": "Topps flagship box 4"},
+  {"k": "clark_auto", "p": "Bud Clark SAGE Auto", "set": "SAGE \u00b7 Scan 1292 r1c3", "note": "", "pr": 3.5, "t": "hit", "ln": "clark", "box": "SAGE"},
+  {"k": "crosby_purple", "p": "Maxx Crosby Prizm Purple", "set": "Prizm \u00b7 Scan 1293 r1c3", "note": "", "pr": 4.0, "t": "color", "ln": "crosby", "box": "Prizm"},
+  {"k": "dart_res_HOLD", "p": "HOLD (Giants) \u2014 Jaxson Dart Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1289 r1c3", "note": "Do not post \u2014 Giants keep box", "pr": 5.0, "t": "flip", "ln": "dart", "box": "Topps Resurgence"},
+  {"k": "dart_swirl_HOLD", "p": "HOLD (Giants) \u2014 Jaxson Dart Resurgence Yellow Swirl RC", "set": "Topps Resurgence \u00b7 Scan 1290 r1c1", "note": "Do not post \u2014 Giants keep box", "pr": 5.5, "t": "flip", "ln": "dart", "box": "Topps Resurgence"},
+  {"k": "dart_prizm_HOLD", "p": "HOLD (Giants) \u2014 Jaxson Dart Prizm RC", "set": "Prizm \u00b7 Scan 1293 r3c3", "note": "Do not post \u2014 Giants keep box", "pr": 6.0, "t": "flip", "ln": "dart", "box": "Prizm"},
+  {"k": "dart_pink_HOLD", "p": "HOLD (Giants) \u2014 Jaxson Dart Prizm Pink RC", "set": "Prizm \u00b7 Scan 1294 r3c2", "note": "Do not post \u2014 Giants keep box", "pr": 7.0, "t": "flip", "ln": "dart", "box": "Prizm"},
+  {"k": "deluca_relic", "p": "Dominic Deluca Athlete Apparel Relic", "set": "SAGE \u00b7 Scan 1292 r3c2", "note": "", "pr": 3.0, "t": "hit", "ln": "deluca", "box": "SAGE"},
+  {"k": "egbuka_fs3", "p": "Emeka Egbuka Future Stars RC (3rd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1286 r2c3", "note": "", "pr": 4.5, "t": "insert", "ln": "egbuka", "box": "Topps flagship box 4"},
+  {"k": "etienne_res", "p": "Trevor Etienne Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1288 r1c3", "note": "", "pr": 3.0, "t": "rookie", "ln": "etienne", "box": "Topps Resurgence"},
+  {"k": "fannin_pink", "p": "Harold Fannin Jr Resurgence Pink RC", "set": "Topps Resurgence \u00b7 Scan 1289 r3c2", "note": "", "pr": 3.5, "t": "color", "ln": "fannin", "box": "Topps Resurgence"},
+  {"k": "fano_auto", "p": "Spencer Fano SAGE Auto", "set": "SAGE \u00b7 Scan 1292 r2c3", "note": "", "pr": 3.5, "t": "hit", "ln": "fano", "box": "SAGE"},
+  {"k": "faulk_ice", "p": "Keldric Faulk RC Pink Cracked Ice", "set": "Topps flagship box 4 \u00b7 Scan 1286 r1c1", "note": "", "pr": 4.0, "t": "color", "ln": "faulk", "box": "Topps flagship box 4"},
+  {"k": "finn_auto", "p": "Dequan Finn SAGE Auto", "set": "SAGE \u00b7 Scan 1290 r3c3", "note": "", "pr": 4.0, "t": "hit", "ln": "finn", "box": "SAGE"},
+  {"k": "flacco_roh", "p": "Joe Flacco Ring of Honor Gold", "set": "Topps flagship box 4 \u00b7 Scan 1279 r1c2", "note": "", "pr": 3.5, "t": "insert", "ln": "flacco", "box": "Topps flagship box 4"},
+  {"k": "gabriel_res", "p": "Dillon Gabriel Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1289 r2c3", "note": "", "pr": 3.5, "t": "rookie", "ln": "gabriel", "box": "Topps Resurgence"},
+  {"k": "gibbs_frame", "p": "Jahmyr Gibbs Resurgence Gold Frame", "set": "Topps Resurgence \u00b7 Scan 1289 r3c3", "note": "", "pr": 5.0, "t": "insert", "ln": "gibbs", "box": "Topps Resurgence"},
+  {"k": "greathouse_auto1", "p": "Jaden Greathouse Sneak Peek Auto Notre Dame (1)", "set": "SAGE \u00b7 Scan 1291 r2c3", "note": "", "pr": 5.0, "t": "hit", "ln": "greathouse", "box": "SAGE"},
+  {"k": "greathouse_auto2", "p": "Jaden Greathouse Sneak Peek Auto Notre Dame (2)", "set": "SAGE \u00b7 Scan 1292 r3c1", "note": "", "pr": 5.0, "t": "hit", "ln": "greathouse", "box": "SAGE"},
+  {"k": "harbor_auto1", "p": "Nyck Harbor Sneak Peek Auto (1)", "set": "SAGE \u00b7 Scan 1291 r1c1", "note": "", "pr": 6.0, "t": "hit", "ln": "harbor", "box": "SAGE"},
+  {"k": "harbor_auto2", "p": "Nyck Harbor Sneak Peek Auto (2)", "set": "SAGE \u00b7 Scan 1292 r2c2", "note": "", "pr": 6.0, "t": "hit", "ln": "harbor", "box": "SAGE"},
+  {"k": "treharris_res", "p": "Tre Harris III Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1288 r1c1", "note": "", "pr": 3.5, "t": "rookie", "ln": "harris", "box": "Topps Resurgence"},
+  {"k": "harvey_rainbow", "p": "RJ Harvey Resurgence Rainbow RC", "set": "Topps Resurgence \u00b7 Scan 1288 r2c2", "note": "", "pr": 4.0, "t": "color", "ln": "harvey", "box": "Topps Resurgence"},
+  {"k": "haynes_peak", "p": "Jamal Haynes Peak Performance Blue", "set": "SAGE \u00b7 Scan 1292 r2c1", "note": "", "pr": 3.0, "t": "insert", "ln": "haynes", "box": "SAGE"},
+  {"k": "helm_lazer", "p": "Gunnar Helm Prizm Lazer RC", "set": "Prizm \u00b7 Scan 1290 r2c3", "note": "", "pr": 3.5, "t": "color", "ln": "helm", "box": "Prizm"},
+  {"k": "henry_premier", "p": "Derrick Henry Prizm Premier Jersey Relic Pink", "set": "Prizm \u00b7 Scan 1295 r1c2", "note": "", "pr": 6.0, "t": "hit", "ln": "henry", "box": "Prizm"},
+  {"k": "herbert_swirl", "p": "Justin Herbert Resurgence Green Swirl", "set": "Topps Resurgence \u00b7 Scan 1289 r3c1", "note": "", "pr": 5.0, "t": "color", "ln": "herbert", "box": "Topps Resurgence"},
+  {"k": "howard_frame", "p": "Will Howard Resurgence Framed RC", "set": "Topps Resurgence \u00b7 Scan 1288 r2c1", "note": "", "pr": 4.0, "t": "rookie", "ln": "howard", "box": "Topps Resurgence"},
+  {"k": "hunter_res", "p": "Travis Hunter Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1288 r2c3", "note": "", "pr": 6.0, "t": "rookie", "ln": "hunter", "box": "Topps Resurgence"},
+  {"k": "jarquez_red", "p": "Jarquez Hunter Prizm Red RC", "set": "Prizm \u00b7 Scan 1290 r2c1", "note": "", "pr": 5.0, "t": "color", "ln": "hunter", "box": "Prizm"},
+  {"k": "hurts_lombardi", "p": "Jalen Hurts Prizm Silver (Lombardi Trophy photo)", "set": "Prizm \u00b7 Scan 1295 r2c2", "note": "", "pr": 7.0, "t": "color", "ln": "hurts", "box": "Prizm"},
+  {"k": "djackson_res", "p": "Donovan Jackson Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1289 r2c1", "note": "", "pr": 3.0, "t": "rookie", "ln": "jackson", "box": "Topps Resurgence"},
+  {"k": "bojackson_relic1", "p": "Bo Jackson (OSU RB) Athlete Apparel Relic (1)", "set": "SAGE \u00b7 Scan 1292 r1c1", "note": "", "pr": 4.0, "t": "hit", "ln": "jackson", "box": "SAGE"},
+  {"k": "bojackson_relic2", "p": "Bo Jackson (OSU RB) Athlete Apparel Relic (2)", "set": "SAGE \u00b7 Scan 1293 r1c2", "note": "", "pr": 4.0, "t": "hit", "ln": "jackson", "box": "SAGE"},
+  {"k": "jeanty_fs2", "p": "Ashton Jeanty Future Stars RC (2nd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1279 r3c3", "note": "", "pr": 5.0, "t": "insert", "ln": "jeanty", "box": "Topps flagship box 4"},
+  {"k": "wjohnson_pink", "p": "Will Johnson Prizm Pink RC", "set": "Prizm \u00b7 Scan 1294 r2c2", "note": "", "pr": 3.5, "t": "color", "ln": "johnson", "box": "Prizm"},
+  {"k": "judkins_pink", "p": "Quinshon Judkins Prizm Pink RC", "set": "Prizm \u00b7 Scan 1294 r2c3", "note": "", "pr": 5.0, "t": "color", "ln": "judkins", "box": "Prizm"},
+  {"k": "knox_pink", "p": "Dawson Knox Prizm Pink", "set": "Prizm \u00b7 Scan 1294 r1c2", "note": "", "pr": 3.0, "t": "color", "ln": "knox", "box": "Prizm"},
+  {"k": "kraft_pink", "p": "Tucker Kraft Prizm Pink", "set": "Prizm \u00b7 Scan 1294 r3c3", "note": "", "pr": 3.0, "t": "color", "ln": "kraft", "box": "Prizm"},
+  {"k": "latu_sparkle", "p": "Laiatu Latu Silver Sparkle", "set": "Topps flagship box 4 \u00b7 Scan 1279 r2c2", "note": "", "pr": 3.0, "t": "color", "ln": "latu", "box": "Topps flagship box 4"},
+  {"k": "lawrence_pink", "p": "Trevor Lawrence Prizm Pink", "set": "Prizm \u00b7 Scan 1295 r2c1", "note": "", "pr": 4.0, "t": "color", "ln": "lawrence", "box": "Prizm"},
+  {"k": "blewis_auto", "p": "Brendon Lewis SAGE Auto", "set": "SAGE \u00b7 Scan 1292 r3c3", "note": "", "pr": 3.5, "t": "hit", "ln": "lewis", "box": "SAGE"},
+  {"k": "jlove_rc3", "p": "Jeremiyah Love RC (3rd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1280 r2c3", "note": "", "pr": 4.5, "t": "rookie", "ln": "love", "box": "Topps flagship box 4"},
+  {"k": "jordanlove_b3", "p": "Jordan Love (3rd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1280 r2c2", "note": "", "pr": 3.5, "t": "star", "ln": "love", "box": "Topps flagship box 4"},
+  {"k": "loveland_fs2", "p": "Colston Loveland Future Stars RC", "set": "Topps flagship box 4 \u00b7 Scan 1279 r1c1", "note": "", "pr": 3.0, "t": "insert", "ln": "loveland", "box": "Topps flagship box 4"},
+  {"k": "matsuzawa_auto", "p": "Kansei Matsuzawa SAGE Auto (K)", "set": "SAGE \u00b7 Scan 1293 r3c1", "note": "", "pr": 3.0, "t": "hit", "ln": "matsuzawa", "box": "SAGE"},
+  {"k": "maye_res", "p": "Drake Maye Resurgence", "set": "Topps Resurgence \u00b7 Scan 1288 r3c1", "note": "", "pr": 5.0, "t": "star", "ln": "maye", "box": "Topps Resurgence"},
+  {"k": "jjm_lazer", "p": "J.J. McCarthy Prizm Purple Lazer", "set": "Prizm \u00b7 Scan 1290 r3c1", "note": "", "pr": 6.0, "t": "color", "ln": "mccarthy", "box": "Prizm"},
+  {"k": "mccloud_lazer", "p": "Ray-Ray McCloud Prizm Lazer", "set": "Prizm \u00b7 Scan 1290 r1c2", "note": "", "pr": 3.0, "t": "color", "ln": "mccloud", "box": "Prizm"},
+  {"k": "mcconkey_bt", "p": "Ladd McConkey Big Ticket", "set": "Topps flagship box 4 \u00b7 Scan 1286 r2c1", "note": "", "pr": 3.0, "t": "insert", "ln": "mcconkey", "box": "Topps flagship box 4"},
+  {"k": "milroe_lazer", "p": "Jalen Milroe Prizm Lazer RC", "set": "Prizm \u00b7 Scan 1290 r2c2", "note": "", "pr": 6.0, "t": "color", "ln": "milroe", "box": "Prizm"},
+  {"k": "moss_prizmatic", "p": "Randy Moss Prizmatic Insert", "set": "Prizm \u00b7 Scan 1295 r1c1", "note": "", "pr": 5.0, "t": "insert", "ln": "moss", "box": "Prizm"},
+  {"k": "oneil_auto", "p": "Danny O'Neil SAGE Auto", "set": "SAGE \u00b7 Scan 1293 r1c1", "note": "", "pr": 4.0, "t": "hit", "ln": "oneil", "box": "SAGE"},
+  {"k": "tjparker_relic", "p": "TJ Parker Athlete Apparel Relic", "set": "SAGE \u00b7 Scan 1292 r1c2", "note": "", "pr": 3.5, "t": "hit", "ln": "parker", "box": "SAGE"},
+  {"k": "payton_auto", "p": "Cole Payton SAGE Auto (Eagles QB)", "set": "SAGE \u00b7 Scan 1291 r2c1", "note": "", "pr": 4.0, "t": "hit", "ln": "payton", "box": "SAGE"},
+  {"k": "pesansky_auto", "p": "Joe Pesansky SAGE Auto", "set": "SAGE \u00b7 Scan 1293 r2c2", "note": "", "pr": 3.5, "t": "hit", "ln": "pesansky", "box": "SAGE"},
+  {"k": "dak_35th", "p": "Dak Prescott 35th Retro", "set": "Topps flagship box 4 \u00b7 Scan 1281 r3c3", "note": "", "pr": 4.0, "t": "insert", "ln": "prescott", "box": "Topps flagship box 4"},
+  {"k": "rankerson_relic1", "p": "Anthony Rankerson Athlete Apparel Relic (1)", "set": "SAGE \u00b7 Scan 1291 r1c3", "note": "", "pr": 3.5, "t": "hit", "ln": "rankerson", "box": "SAGE"},
+  {"k": "rankerson_relic2", "p": "Anthony Rankerson Athlete Apparel Relic (2)", "set": "SAGE \u00b7 Scan 1291 r3c2", "note": "", "pr": 3.5, "t": "hit", "ln": "rankerson", "box": "SAGE"},
+  {"k": "revel_purple", "p": "Shavon Revel Prizm Purple RC", "set": "Prizm \u00b7 Scan 1293 r2c3", "note": "", "pr": 3.5, "t": "color", "ln": "revel", "box": "Prizm"},
+  {"k": "rodgers_b2", "p": "Aaron Rodgers Steelers (2nd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1282 r2c3", "note": "", "pr": 3.0, "t": "star", "ln": "rodgers", "box": "Topps flagship box 4"},
+  {"k": "rudolph_peak", "p": "Trayvon Rudolph Peak Performance Red Checker", "set": "SAGE \u00b7 Scan 1291 r2c2", "note": "", "pr": 3.0, "t": "insert", "ln": "rudolph", "box": "SAGE"},
+  {"k": "shough_emergent", "p": "Tyler Shough Prizm Emergent Insert RC", "set": "Prizm \u00b7 Scan 1295 r1c3", "note": "", "pr": 4.0, "t": "insert", "ln": "shough", "box": "Prizm"},
+  {"k": "simmons_pink", "p": "Josh Simmons Prizm Pink RC", "set": "Prizm \u00b7 Scan 1294 r3c1", "note": "", "pr": 3.5, "t": "color", "ln": "simmons", "box": "Prizm"},
+  {"k": "skattebo_res_HOLD", "p": "HOLD (Giants) \u2014 Cam Skattebo Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1289 r2c2", "note": "Do not post \u2014 Giants keep box", "pr": 4.5, "t": "flip", "ln": "skattebo", "box": "Topps Resurgence"},
+  {"k": "jonno_pink", "p": "Jonnu Smith Prizm Pink", "set": "Prizm \u00b7 Scan 1294 r2c1", "note": "", "pr": 3.0, "t": "color", "ln": "smith", "box": "Prizm"},
+  {"k": "starks_res", "p": "Malaki Starks Resurgence RC", "set": "Topps Resurgence \u00b7 Scan 1288 r3c3", "note": "", "pr": 3.5, "t": "rookie", "ln": "starks", "box": "Topps Resurgence"},
+  {"k": "amonra_sparkle", "p": "Amon-Ra St. Brown Silver Sparkle", "set": "Topps flagship box 4 \u00b7 Scan 1287 r1c3", "note": "", "pr": 4.5, "t": "color", "ln": "stbrown", "box": "Topps flagship box 4"},
+  {"k": "btj_global", "p": "Brian Thomas Jr Prizm Global Reach London Insert", "set": "Prizm \u00b7 Scan 1290 r3c2", "note": "", "pr": 4.0, "t": "insert", "ln": "thomas", "box": "Prizm"},
+  {"k": "uiagalelei_relic", "p": "Matayo Uiagalelei Athlete Apparel Relic", "set": "SAGE \u00b7 Scan 1293 r2c1", "note": "", "pr": 3.5, "t": "hit", "ln": "uiagalelei", "box": "SAGE"},
+  {"k": "voisin_auto", "p": "Devin Voisin SAGE Auto", "set": "SAGE \u00b7 Scan 1291 r1c2", "note": "", "pr": 3.5, "t": "hit", "ln": "voisin", "box": "SAGE"},
+  {"k": "ward_fractal", "p": "Cam Ward Prizm Fractal Insert RC", "set": "Prizm \u00b7 Scan 1293 r3c2", "note": "", "pr": 5.0, "t": "insert", "ln": "ward", "box": "Prizm"},
+  {"k": "ward_prizm", "p": "Cam Ward Prizm RC", "set": "Prizm \u00b7 Scan 1294 r1c3", "note": "", "pr": 4.5, "t": "rookie", "ln": "ward", "box": "Prizm"},
+  {"k": "watkins_pink2", "p": "Jordan Watkins Prizm Pink RC", "set": "Prizm \u00b7 Scan 1294 r1c1", "note": "", "pr": 3.0, "t": "color", "ln": "watkins", "box": "Prizm"},
+  {"k": "watt_b3", "p": "TJ Watt (3rd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1284 r3c3", "note": "", "pr": 3.5, "t": "star", "ln": "watt", "box": "Topps flagship box 4"},
+  {"k": "caleb_b3", "p": "Caleb Williams (3rd copy)", "set": "Topps flagship box 4 \u00b7 Scan 1282 r3c1", "note": "", "pr": 3.5, "t": "star", "ln": "williams", "box": "Topps flagship box 4"}
+];
+const KEY = "wave2_pull_2026_08_25";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="wave2_pull_imgs_2026_08_25/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `WAVE 2 PULLS 2026-08-25: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
