@@ -96,6 +96,8 @@ SHIPPING_EXEMPT_ITEM_IDS = {
     "307141227697",  # Ray Lewis Ravens jersey -- free Ground Advantage (2026-08-22)
     "307141228251",  # Deion Sanders Cowboys jersey -- same setup
     "307141228329",  # Marion Barber Cowboys jersey -- same setup
+    "307150460802",  # Saquon Electro Lights -- free Ground Advantage (2026-08-28)
+    "307150460817",  # Myles Garrett Electro Lights -- same setup
 }
 
 DEFAULT_CONFIG: dict = {

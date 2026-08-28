@@ -234,7 +234,9 @@ def infer_specifics(title: str) -> dict[str, str] | None:
 def build_xml(title: str, price: float, picture_url: str, token: str,
               category: str = CATEGORY_ID, condition: str = CONDITION_ID,
               listing_type: str = "FixedPriceItem", duration: str = "GTC",
-              specifics: dict[str, str] | None = None, quantity: int = 1) -> str:
+              specifics: dict[str, str] | None = None, quantity: int = 1,
+              shipping_service: str = SHIPPING_SERVICE,
+              shipping_cost: str = SHIPPING_SERVICE_COST) -> str:
     description = build_description(title)
     # The "Ungraded" ConditionDescriptor sub-value only applies to the
     # Trading Card Singles schema -- other categories (e.g. Trading Card
@@ -282,8 +284,8 @@ def build_xml(title: str, price: float, picture_url: str, token: str,
       <ApplyShippingDiscount>true</ApplyShippingDiscount>
       <ShippingServiceOptions>
         <ShippingServicePriority>1</ShippingServicePriority>
-        <ShippingService>US_eBayStandardEnvelope</ShippingService>
-        <ShippingServiceCost currencyID="USD">1.32</ShippingServiceCost>
+        <ShippingService>{shipping_service}</ShippingService>
+        <ShippingServiceCost currencyID="USD">{shipping_cost}</ShippingServiceCost>
       </ShippingServiceOptions>
     </ShippingDetails>
     <ShipToLocations>US</ShipToLocations>
@@ -319,7 +321,8 @@ def post_card(image_path: Path, title: str, price: float,
               cfg: dict, token: str, apply: bool, category: str = CATEGORY_ID,
               condition: str = CONDITION_ID, listing_type: str = "FixedPriceItem",
               duration: str = "GTC", specifics: dict[str, str] | None = None,
-              quantity: int = 1) -> dict:
+              quantity: int = 1, shipping_service: str = SHIPPING_SERVICE,
+              shipping_cost: str = SHIPPING_SERVICE_COST) -> dict:
     print(f"\n  Card: {title[:60]}")
     label = "starting bid" if listing_type == "Chinese" else "Price"
     print(f"  Image: {image_path.name}  {label}: ${price:.2f}"
@@ -341,7 +344,8 @@ def post_card(image_path: Path, title: str, price: float,
     print(f"  Picture URL: {picture_url}")
 
     xml = build_xml(title, price, picture_url, token, category, condition,
-                     listing_type, duration, specifics, quantity)
+                     listing_type, duration, specifics, quantity,
+                    shipping_service, shipping_cost)
 
     if not apply:
         print("  [dry-run] would post listing")
@@ -406,7 +410,9 @@ def main():
         r = post_card(img, c["title"], float(c["price"]), cfg, token, args.apply,
                       str(c.get("category", CATEGORY_ID)), str(c.get("condition", CONDITION_ID)),
                       c.get("listing_type", "FixedPriceItem"), c.get("duration", "GTC"),
-                      c.get("specifics"), int(c.get("quantity", 1)))
+                      c.get("specifics"), int(c.get("quantity", 1)),
+                      c.get("shipping_service", SHIPPING_SERVICE),
+                      str(c.get("shipping_cost", SHIPPING_SERVICE_COST)))
         results.append(r)
         time.sleep(0.5)
 
