@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Prizm + Flagship Pull List — 2026-08-28</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Prizm + Flagship Pull List — Aug 28</h1>
+<p class="sub">Afternoon batch: 19 pulls worth ~$97 — 2025 Prizm (RWB, Green Flash, Emergent, Prizmatic) + flagship strays. A-Z by last name.</p>
+<div class="warn"><b>Top pulls:</b> Joe Montana Prizmatic green $6.99 · Travis Hunter red/white/blue RC $5.99 · Mahomes Prizmatic $5.99. No Giants holds triggered (the OBJ RWB stayed in fodder — say the word if you want it listed or held).</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "burrow_radial", "p": "Joe Burrow Radial Insert Bengals", "set": "2025 Panini Prizm \u00b7 Scan 1377 r1c2", "note": "", "pr": 5.49, "t": "insert", "ln": "burrow", "box": "2025 Panini Prizm"},
+  {"k": "burrow_rwb", "p": "Joe Burrow Red White Blue Prizm Bengals", "set": "2025 Panini Prizm \u00b7 Scan 1379 r2c2", "note": "", "pr": 5.49, "t": "color", "ln": "burrow", "box": "2025 Panini Prizm"},
+  {"k": "cook_greenflash", "p": "James Cook Green Flash Prizm Bills", "set": "2025 Panini Prizm \u00b7 Scan 1377 r3c3", "note": "", "pr": 4.99, "t": "color", "ln": "cook", "box": "2025 Panini Prizm"},
+  {"k": "egbuka_emergent", "p": "Emeka Egbuka Emergent Green Insert RC Buccaneers", "set": "2025 Panini Prizm \u00b7 Scan 1376 r2c2", "note": "", "pr": 5.49, "t": "insert", "ln": "egbuka", "box": "2025 Panini Prizm"},
+  {"k": "egbuka_fs_pig2", "p": "Emeka Egbuka Future Stars Pigskin RC Buccaneers", "set": "2026 Topps \u00b7 Scan 1375 r3c3", "note": "", "pr": 4.5, "t": "insert", "ln": "egbuka", "box": "2026 Topps"},
+  {"k": "gabriel_emergent1", "p": "Dillon Gabriel Emergent Green Insert RC Browns", "set": "2025 Panini Prizm \u00b7 Scan 1377 r2c2", "note": "", "pr": 4.99, "t": "insert", "ln": "gabriel", "box": "2025 Panini Prizm"},
+  {"k": "gabriel_emergent2", "p": "Dillon Gabriel Emergent Insert RC Browns", "set": "2025 Panini Prizm \u00b7 Scan 1379 r3c2", "note": "", "pr": 4.49, "t": "insert", "ln": "gabriel", "box": "2025 Panini Prizm"},
+  {"k": "hunter_rwb", "p": "Travis Hunter Red White Blue Prizm RC Jaguars", "set": "2025 Panini Prizm \u00b7 Scan 1376 r2c3", "note": "", "pr": 5.99, "t": "color", "ln": "hunter", "box": "2025 Panini Prizm"},
+  {"k": "kmet_greenflash", "p": "Cole Kmet Green Flash Prizm Bears", "set": "2025 Panini Prizm \u00b7 Scan 1376 r3c3", "note": "", "pr": 3.99, "t": "color", "ln": "kmet", "box": "2025 Panini Prizm"},
+  {"k": "loveland_rwb", "p": "Colston Loveland Red White Blue Prizm RC Bears", "set": "2025 Panini Prizm \u00b7 Scan 1378 r2c2", "note": "", "pr": 4.49, "t": "color", "ln": "loveland", "box": "2025 Panini Prizm"},
+  {"k": "mafah_greenflash", "p": "Phil Mafah Green Flash Prizm RC Cowboys", "set": "2025 Panini Prizm \u00b7 Scan 1378 r3c2", "note": "", "pr": 4.29, "t": "color", "ln": "mafah", "box": "2025 Panini Prizm"},
+  {"k": "mahomes_dark", "p": "Patrick Mahomes Prizmatic Insert Chiefs", "set": "2025 Panini Prizm \u00b7 Scan 1378 r1c3", "note": "", "pr": 5.99, "t": "insert", "ln": "mahomes", "box": "2025 Panini Prizm"},
+  {"k": "jjm_rwb", "p": "J.J. McCarthy Red White Blue Prizm Vikings", "set": "2025 Panini Prizm \u00b7 Scan 1378 r1c2", "note": "", "pr": 5.49, "t": "color", "ln": "mccarthy", "box": "2025 Panini Prizm"},
+  {"k": "montana_prizmatic", "p": "Joe Montana Prizmatic Green Insert 49ers", "set": "2025 Panini Prizm \u00b7 Scan 1378 r2c1", "note": "", "pr": 6.99, "t": "insert", "ln": "montana", "box": "2025 Panini Prizm"},
+  {"k": "moss_prizmatic2", "p": "Randy Moss Prizmatic Insert Vikings", "set": "2025 Panini Prizm \u00b7 Scan 1378 r1c1", "note": "", "pr": 4.99, "t": "insert", "ln": "moss", "box": "2025 Panini Prizm"},
+  {"k": "amonra_fireworks", "p": "Amon-Ra St. Brown Fireworks Green Insert Lions", "set": "2025 Panini Prizm \u00b7 Scan 1378 r2c3", "note": "", "pr": 4.99, "t": "insert", "ln": "stbrown", "box": "2025 Panini Prizm"},
+  {"k": "btj_greenflash", "p": "Brian Thomas Jr Green Flash Prizm Jaguars", "set": "2025 Panini Prizm \u00b7 Scan 1379 r1c1", "note": "", "pr": 4.99, "t": "color", "ln": "thomas", "box": "2025 Panini Prizm"},
+  {"k": "tyson_35th", "p": "Jordyn Tyson 35th Retro RC Cardinals", "set": "2026 Topps \u00b7 Scan 1376 r2c1", "note": "", "pr": 4.0, "t": "insert", "ln": "tyson", "box": "2026 Topps"},
+  {"k": "caleb_breaks", "p": "Caleb Williams Prizm Breaks Green Insert Bears", "set": "2025 Panini Prizm \u00b7 Scan 1379 r3c1", "note": "", "pr": 4.99, "t": "insert", "ln": "williams", "box": "2025 Panini Prizm"}
+];
+const KEY = "prizm_pull_2026_08_28";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="prizm_pull_imgs_2026_08_28/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `PRIZM PULLS 2026-08-28: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
