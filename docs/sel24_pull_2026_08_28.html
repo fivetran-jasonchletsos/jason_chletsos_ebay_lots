@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>2024 Select + Totally Certified Pull List — 2026-08-28 PM</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>2024 Select + TC Pull List — Aug 28 PM</h1>
+<p class="sub">Evening batch: 40 pulls worth ~$173 — 2024 Select (Flash die-cuts, Numbers, Premier, Certified, Future) + Totally Certified. A-Z by last name.</p>
+<div class="warn"><b>Serials:</b> Amon-Ra TC 161/299 · Davante Adams On Target 386/399 (both in titles). Top: Daniels Certified $5.50 · Mahomes Numbers $5.50 · Lamar Flash $5.50. No Giants holds.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "adams_ot399", "p": "TC: Davante Adams On Target 386/399 Jets", "set": "Scan 1380 r1c2", "note": "", "pr": 4.99, "t": "hit", "ln": "adams", "box": "2024 Totally Certified"},
+  {"k": "adams_flash", "p": "Davante Adams Flash Die-Cut Jets", "set": "Scan 1385 r1c1", "note": "", "pr": 4.0, "t": "color", "ln": "adams", "box": "2024 Select"},
+  {"k": "alt_flash", "p": "Joe Alt Flash Die-Cut RC Chargers", "set": "Scan 1382 r3c3", "note": "", "pr": 3.5, "t": "color", "ln": "alt", "box": "2024 Select"},
+  {"k": "bowers_cert", "p": "Brock Bowers Select Certified RC Raiders", "set": "Scan 1382 r2c1", "note": "", "pr": 4.5, "t": "insert", "ln": "bowers", "box": "2024 Select"},
+  {"k": "newgen_jersey", "p": "TC: New Generation Jersey Relic RC Panthers", "set": "Scan 1380 r3c3", "note": "", "pr": 4.5, "t": "hit", "ln": "brooks", "box": "2024 Totally Certified"},
+  {"k": "burrow_absolute", "p": "Absolute: Joe Burrow Bengals", "set": "Scan 1381 r2c1", "note": "", "pr": 4.0, "t": "star", "ln": "burrow", "box": "2024 Select"},
+  {"k": "keon_future1", "p": "Keon Coleman Future RC Bills", "set": "Scan 1382 r3c1", "note": "", "pr": 4.0, "t": "insert", "ln": "coleman", "box": "2024 Select"},
+  {"k": "keon_future2", "p": "Keon Coleman Future RC Bills", "set": "Scan 1384 r3c3", "note": "", "pr": 4.0, "t": "insert", "ln": "coleman", "box": "2024 Select"},
+  {"k": "crosby_intriguing", "p": "TC: Maxx Crosby Intriguing Players Raiders", "set": "Scan 1380 r2c3", "note": "", "pr": 3.5, "t": "insert", "ln": "crosby", "box": "2024 Totally Certified"},
+  {"k": "daniels_cert", "p": "Jayden Daniels Select Certified RC Commanders", "set": "Scan 1384 r3c2", "note": "", "pr": 5.5, "t": "insert", "ln": "daniels", "box": "2024 Select"},
+  {"k": "raydavis_cert", "p": "Ray Davis Select Certified RC Bills", "set": "Scan 1383 r3c2", "note": "", "pr": 3.5, "t": "insert", "ln": "davis", "box": "2024 Select"},
+  {"k": "fields_flash", "p": "Justin Fields Flash Die-Cut Steelers", "set": "Scan 1381 r2c3", "note": "", "pr": 4.5, "t": "color", "ln": "fields", "box": "2024 Select"},
+  {"k": "gibbs_flash", "p": "Jahmyr Gibbs Flash Die-Cut Lions", "set": "Scan 1381 r3c3", "note": "", "pr": 5.0, "t": "color", "ln": "gibbs", "box": "2024 Select"},
+  {"k": "lamar_turbo", "p": "Lamar Jackson Turbocharged Ravens", "set": "Scan 1383 r2c3", "note": "", "pr": 4.5, "t": "insert", "ln": "jackson", "box": "2024 Select"},
+  {"k": "lamar_rwb", "p": "Lamar Jackson Flash Die-Cut Ravens", "set": "Scan 1384 r1c1", "note": "", "pr": 5.5, "t": "color", "ln": "jackson", "box": "2024 Select"},
+  {"k": "kupp_turbo1", "p": "Cooper Kupp Turbocharged Rams", "set": "Scan 1382 r1c2", "note": "", "pr": 3.5, "t": "insert", "ln": "kupp", "box": "2024 Select"},
+  {"k": "kupp_turbo2", "p": "Cooper Kupp Turbocharged Rams", "set": "Scan 1384 r2c3", "note": "", "pr": 3.5, "t": "insert", "ln": "kupp", "box": "2024 Select"},
+  {"k": "mahomes_tc", "p": "TC: Patrick Mahomes Chiefs", "set": "Scan 1380 r3c1", "note": "", "pr": 4.5, "t": "star", "ln": "mahomes", "box": "2024 Totally Certified"},
+  {"k": "mahomes_premier", "p": "Patrick Mahomes Premier Chiefs", "set": "Scan 1383 r1c2", "note": "", "pr": 5.0, "t": "star", "ln": "mahomes", "box": "2024 Select"},
+  {"k": "mahomes_numbers15", "p": "Patrick Mahomes Numbers 15 Chiefs", "set": "Scan 1383 r1c3", "note": "", "pr": 5.5, "t": "insert", "ln": "mahomes", "box": "2024 Select"},
+  {"k": "mahomes_turbo", "p": "Patrick Mahomes Turbocharged Chiefs", "set": "Scan 1385 r3c1", "note": "", "pr": 5.0, "t": "insert", "ln": "mahomes", "box": "2024 Select"},
+  {"k": "nix_premier", "p": "Bo Nix Premier RC Broncos", "set": "Scan 1381 r3c2", "note": "", "pr": 4.0, "t": "rookie", "ln": "nix", "box": "2024 Select"},
+  {"k": "nix_future", "p": "Bo Nix Future RC Broncos", "set": "Scan 1385 r2c1", "note": "", "pr": 4.5, "t": "insert", "ln": "nix", "box": "2024 Select"},
+  {"k": "odunze_premier", "p": "Rome Odunze Premier RC Bears", "set": "Scan 1384 r1c2", "note": "", "pr": 4.0, "t": "rookie", "ln": "odunze", "box": "2024 Select"},
+  {"k": "odunze_cert", "p": "Rome Odunze Select Certified RC Bears", "set": "Scan 1385 r2c2", "note": "", "pr": 4.0, "t": "insert", "ln": "odunze", "box": "2024 Select"},
+  {"k": "penix_tc", "p": "TC: Michael Penix Jr RC Falcons", "set": "Scan 1380 r2c1", "note": "", "pr": 4.0, "t": "rookie", "ln": "penix", "box": "2024 Totally Certified"},
+  {"k": "penix_future", "p": "Michael Penix Jr Future RC Falcons", "set": "Scan 1383 r2c2", "note": "", "pr": 4.5, "t": "insert", "ln": "penix", "box": "2024 Select"},
+  {"k": "penix_select", "p": "Michael Penix Jr RC Falcons", "set": "Scan 1385 r1c3", "note": "", "pr": 4.0, "t": "rookie", "ln": "penix", "box": "2024 Select"},
+  {"k": "dak_numbers4", "p": "Dak Prescott Numbers 4 Cowboys", "set": "Scan 1384 r1c3", "note": "", "pr": 4.5, "t": "insert", "ln": "prescott", "box": "2024 Select"},
+  {"k": "purdy_numbers13", "p": "Brock Purdy Numbers 13 49ers", "set": "Scan 1385 r1c2", "note": "", "pr": 4.5, "t": "insert", "ln": "purdy", "box": "2024 Select"},
+  {"k": "purdy_premier", "p": "Brock Purdy Premier 49ers", "set": "Scan 1385 r2c3", "note": "", "pr": 4.5, "t": "star", "ln": "purdy", "box": "2024 Select"},
+  {"k": "amonra_tc299", "p": "TC: Amon-Ra St. Brown 161/299 Lions", "set": "Scan 1380 r2c2", "note": "", "pr": 4.99, "t": "hit", "ln": "stbrown", "box": "2024 Totally Certified"},
+  {"k": "stroud_premier1", "p": "CJ Stroud Premier Texans", "set": "Scan 1382 r3c2", "note": "", "pr": 4.0, "t": "star", "ln": "stroud", "box": "2024 Select"},
+  {"k": "stroud_premier2", "p": "CJ Stroud Premier Texans", "set": "Scan 1384 r2c2", "note": "", "pr": 4.0, "t": "star", "ln": "stroud", "box": "2024 Select"},
+  {"k": "tillman_flash", "p": "Cedric Tillman Flash Die-Cut Browns", "set": "Scan 1381 r1c3", "note": "", "pr": 3.5, "t": "color", "ln": "tillman", "box": "2024 Select"},
+  {"k": "caleb_numbers18", "p": "Caleb Williams Numbers 18 RC Bears", "set": "Scan 1382 r1c1", "note": "", "pr": 5.0, "t": "insert", "ln": "williams", "box": "2024 Select"},
+  {"k": "caleb_premier", "p": "Caleb Williams Premier RC Bears", "set": "Scan 1382 r2c2", "note": "", "pr": 4.0, "t": "rookie", "ln": "williams", "box": "2024 Select"},
+  {"k": "caleb_rwb", "p": "Caleb Williams Flash Die-Cut RC Bears", "set": "Scan 1382 r2c3", "note": "", "pr": 5.0, "t": "color", "ln": "williams", "box": "2024 Select"},
+  {"k": "jameis_rwb", "p": "Jameis Winston Flash Die-Cut Browns", "set": "Scan 1382 r1c3", "note": "", "pr": 4.0, "t": "color", "ln": "winston", "box": "2024 Select"},
+  {"k": "worthy_tc", "p": "TC: Xavier Worthy RC Chiefs", "set": "Scan 1380 r3c2", "note": "", "pr": 4.0, "t": "rookie", "ln": "worthy", "box": "2024 Totally Certified"}
+];
+const KEY = "sel24_pull_2026_08_28";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="sel24_pull_imgs_2026_08_28/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `SELECT24 PULLS 2026-08-28: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
