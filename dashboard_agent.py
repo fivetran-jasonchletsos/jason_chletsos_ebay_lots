@@ -351,9 +351,15 @@ def _flips_staleness(flips_plan: dict) -> tuple[str, int | None]:
     try:
         parsed = datetime.fromisoformat(ts)
         if parsed.tzinfo is None:
+<<<<<<< Updated upstream
             # Defensive: a naive timestamp (e.g. a hand-edited or legacy
             # cache file) would otherwise raise TypeError subtracting from
             # an aware "now" and crash the whole dashboard build.
+=======
+            # Defensive: a naive timestamp (e.g. a hand-edited or legacy cache
+            # file) would otherwise raise TypeError subtracting from an
+            # aware "now" and crash the whole dashboard build.
+>>>>>>> Stashed changes
             parsed = parsed.replace(tzinfo=timezone.utc)
         age = (datetime.now(timezone.utc) - parsed).days
     except (ValueError, TypeError):
