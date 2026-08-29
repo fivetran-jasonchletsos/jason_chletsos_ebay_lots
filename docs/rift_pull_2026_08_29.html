@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Prizm Parallels + RIFT Pull List — 2026-08-29 PM</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>Prizm + RIFT Pull List — Aug 29 PM</h1>
+<p class="sub">Big afternoon: 67 rows, ~$365 sellable — 2024 Prizm color round 2 (green ice, checkers, Lazers, Hype) + the brand-new 2026 Topps RIFT. Aggressive week-one pricing per the standing rule. A-Z.</p>
+<div class="warn"><b>Serials:</b> Garrett Wilson Rift 154/250 · Amon-Ra Rift 410/425 · the Chimere Dike pink burst has foil numbering top-left — read it to me when pulling. <b>Giants holds (gold):</b> Dart Rift + Abdul Carter Rift → keep box.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "allen_hype", "p": "Josh Allen Hype Blue Cracked Ice Bills", "set": "2024 Prizm \u00b7 Scan 1408 r3c1", "note": "", "pr": 6.99, "t": "insert", "ln": "allen", "box": "2024 Prizm", "sp": "football"},
+  {"k": "banks_rift", "p": "Kelvin Banks Jr Lava RC Saints", "set": "2026 Rift \u00b7 Scan 1413 r3c2", "note": "", "pr": 4.29, "t": "rookie", "ln": "banks", "box": "2026 Rift", "sp": "football"},
+  {"k": "benson_red", "p": "Trey Benson Red RC Cardinals", "set": "2024 Prizm \u00b7 Scan 1407 r3c2", "note": "", "pr": 4.49, "t": "color", "ln": "benson", "box": "2024 Prizm", "sp": "football"},
+  {"k": "blue_rift", "p": "Jaydon Blue Burst RC Cowboys", "set": "2026 Rift \u00b7 Scan 1411 r3c1", "note": "", "pr": 4.49, "t": "rookie", "ln": "blue", "box": "2026 Rift", "sp": "football"},
+  {"k": "burden_frame", "p": "Luther Burden III Gold Frame RC Bears", "set": "2026 Rift \u00b7 Scan 1410 r3c2", "note": "", "pr": 4.99, "t": "insert", "ln": "burden", "box": "2026 Rift", "sp": "football"},
+  {"k": "burrow_rift", "p": "Joe Burrow Cosmic Bengals", "set": "2026 Rift \u00b7 Scan 1414 r2c1", "note": "", "pr": 6.49, "t": "star", "ln": "burrow", "box": "2026 Rift", "sp": "football"},
+  {"k": "abdul_rift_HOLD", "p": "HOLD (Giants) \u2014 Abdul Carter Rift Cosmic RC", "set": "2026 Rift \u00b7 Scan 1412 r2c1", "note": "Keep box", "pr": 6.0, "t": "flip", "ln": "carter", "box": "2026 Rift", "sp": "football"},
+  {"k": "chase_rift", "p": "Ja'Marr Chase Lava Bengals", "set": "2026 Rift \u00b7 Scan 1413 r1c1", "note": "", "pr": 6.49, "t": "star", "ln": "chase", "box": "2026 Rift", "sp": "football"},
+  {"k": "corley_checker", "p": "Malachi Corley Black White Checker RC Jets", "set": "2024 Prizm \u00b7 Scan 1407 r1c2", "note": "", "pr": 3.99, "t": "color", "ln": "corley", "box": "2024 Prizm", "sp": "football"},
+  {"k": "daniels_lazer", "p": "Jayden Daniels Lazer RC Commanders", "set": "2024 Prizm \u00b7 Scan 1409 r3c3", "note": "", "pr": 6.99, "t": "color", "ln": "daniels", "box": "2024 Prizm", "sp": "football"},
+  {"k": "daniels_rift", "p": "Jayden Daniels Cosmic Commanders", "set": "2026 Rift \u00b7 Scan 1411 r1c1", "note": "", "pr": 6.49, "t": "star", "ln": "daniels", "box": "2026 Rift", "sp": "football"},
+  {"k": "daniels_rift2", "p": "Jayden Daniels Lightning Commanders", "set": "2026 Rift \u00b7 Scan 1414 r2c2", "note": "", "pr": 6.49, "t": "star", "ln": "daniels", "box": "2026 Rift", "sp": "football"},
+  {"k": "dart_rift_HOLD", "p": "HOLD (Giants) \u2014 Jaxson Dart Rift Cosmic RC", "set": "2026 Rift \u00b7 Scan 1410 r3c3", "note": "Keep box", "pr": 6.0, "t": "flip", "ln": "dart", "box": "2026 Rift", "sp": "football"},
+  {"k": "dike_rift", "p": "Chimere Dike Pink Burst RC Titans", "set": "2026 Rift \u00b7 Scan 1411 r1c2", "note": "", "pr": 4.99, "t": "rookie", "ln": "dike", "box": "2026 Rift", "sp": "football"},
+  {"k": "edwards_ice", "p": "Daijun Edwards Green Cracked Ice RC Steelers", "set": "2024 Prizm \u00b7 Scan 1407 r3c1", "note": "", "pr": 3.99, "t": "color", "ln": "edwards", "box": "2024 Prizm", "sp": "football"},
+  {"k": "ewers_rift", "p": "Quinn Ewers Splash RC Dolphins", "set": "2026 Rift \u00b7 Scan 1410 r2c1", "note": "", "pr": 4.99, "t": "rookie", "ln": "ewers", "box": "2026 Rift", "sp": "football"},
+  {"k": "zay_rift", "p": "Zay Flowers Splash Ravens", "set": "2026 Rift \u00b7 Scan 1413 r3c1", "note": "", "pr": 4.49, "t": "star", "ln": "flowers", "box": "2026 Rift", "sp": "football"},
+  {"k": "gonzalez_rift", "p": "Christian Gonzalez Patriots", "set": "2026 Rift \u00b7 Scan 1410 r2c2", "note": "", "pr": 4.49, "t": "star", "ln": "gonzalez", "box": "2026 Rift", "sp": "football"},
+  {"k": "henry_rift", "p": "Derrick Henry Lava Ravens", "set": "2026 Rift \u00b7 Scan 1412 r1c2", "note": "", "pr": 5.99, "t": "star", "ln": "henry", "box": "2026 Rift", "sp": "football"},
+  {"k": "higgins_rift", "p": "Jayden Higgins Splash RC Texans", "set": "2026 Rift \u00b7 Scan 1411 r2c3", "note": "", "pr": 4.99, "t": "rookie", "ln": "higgins", "box": "2026 Rift", "sp": "football"},
+  {"k": "holland_checker", "p": "Jevon Holland Black White Checker Dolphins", "set": "2024 Prizm \u00b7 Scan 1408 r3c3", "note": "", "pr": 3.99, "t": "color", "ln": "holland", "box": "2024 Prizm", "sp": "football"},
+  {"k": "hopkins_checker", "p": "DeAndre Hopkins Black White Checker Titans", "set": "2024 Prizm \u00b7 Scan 1407 r2c2", "note": "", "pr": 4.49, "t": "color", "ln": "hopkins", "box": "2024 Prizm", "sp": "football"},
+  {"k": "hunter_frame", "p": "Travis Hunter Gold Frame RC Jaguars", "set": "2026 Rift \u00b7 Scan 1411 r2c1", "note": "", "pr": 7.99, "t": "insert", "ln": "hunter", "box": "2026 Rift", "sp": "football"},
+  {"k": "hunter_frame2", "p": "Travis Hunter Gold Frame RC Jaguars", "set": "2026 Rift \u00b7 Scan 1414 r3c2", "note": "", "pr": 7.99, "t": "insert", "ln": "hunter", "box": "2026 Rift", "sp": "football"},
+  {"k": "lamar_rift", "p": "Lamar Jackson Cosmic Ravens", "set": "2026 Rift \u00b7 Scan 1413 r2c1", "note": "", "pr": 6.49, "t": "star", "ln": "jackson", "box": "2026 Rift", "sp": "football"},
+  {"k": "jeanty_lazer", "p": "Ashton Jeanty Lazer RC Raiders", "set": "2024 Prizm \u00b7 Scan 1409 r1c3", "note": "", "pr": 7.99, "t": "color", "ln": "jeanty", "box": "2024 Prizm", "sp": "football"},
+  {"k": "jeanty_rift", "p": "Ashton Jeanty Rainbow RC Raiders", "set": "2026 Rift \u00b7 Scan 1411 r3c3", "note": "", "pr": 7.99, "t": "rookie", "ln": "jeanty", "box": "2026 Rift", "sp": "football"},
+  {"k": "jeanty_pulsar", "p": "Ashton Jeanty Pulsar RC Raiders", "set": "2026 Rift \u00b7 Scan 1414 r3c1", "note": "", "pr": 7.49, "t": "rookie", "ln": "jeanty", "box": "2026 Rift", "sp": "football"},
+  {"k": "jj_rift", "p": "Justin Jefferson Cosmic Vikings", "set": "2026 Rift \u00b7 Scan 1414 r1c1", "note": "", "pr": 6.49, "t": "star", "ln": "jefferson", "box": "2026 Rift", "sp": "football"},
+  {"k": "kalebj_fireworks", "p": "Kaleb Johnson Fireworks RC Steelers", "set": "2024 Prizm \u00b7 Scan 1409 r3c2", "note": "", "pr": 4.49, "t": "insert", "ln": "johnson", "box": "2024 Prizm", "sp": "football"},
+  {"k": "judkins_rift", "p": "Quinshon Judkins Cosmic RC Browns", "set": "2026 Rift \u00b7 Scan 1411 r1c3", "note": "", "pr": 5.49, "t": "rookie", "ln": "judkins", "box": "2026 Rift", "sp": "football"},
+  {"k": "kittle_break", "p": "George Kittle Prizm Break Green Ice 49ers", "set": "2024 Prizm \u00b7 Scan 1408 r3c2", "note": "", "pr": 4.99, "t": "insert", "ln": "kittle", "box": "2024 Prizm", "sp": "football"},
+  {"k": "ceedee_rift", "p": "CeeDee Lamb Splatter Cowboys", "set": "2026 Rift \u00b7 Scan 1410 r3c1", "note": "", "pr": 5.49, "t": "star", "ln": "lamb", "box": "2026 Rift", "sp": "football"},
+  {"k": "laporta_checker", "p": "Sam LaPorta Black White Checker Lions", "set": "2024 Prizm \u00b7 Scan 1408 r1c3", "note": "", "pr": 4.49, "t": "color", "ln": "laporta", "box": "2024 Prizm", "sp": "football"},
+  {"k": "love_rift", "p": "Jordan Love Cosmic Packers", "set": "2026 Rift \u00b7 Scan 1414 r3c3", "note": "", "pr": 4.99, "t": "star", "ln": "love", "box": "2026 Rift", "sp": "football"},
+  {"k": "mack_hype", "p": "Khalil Mack Hype Green Cracked Ice Chargers", "set": "2024 Prizm \u00b7 Scan 1407 r2c1", "note": "", "pr": 4.99, "t": "insert", "ln": "mack", "box": "2024 Prizm", "sp": "football"},
+  {"k": "maye_prizmatic", "p": "Drake Maye Prizmatic Green Ice RC Patriots", "set": "2024 Prizm \u00b7 Scan 1407 r2c3", "note": "", "pr": 7.99, "t": "insert", "ln": "maye", "box": "2024 Prizm", "sp": "football"},
+  {"k": "lmcc_emergent", "p": "Luke McCaffrey Emergent Green Ice RC", "set": "2024 Prizm \u00b7 Scan 1407 r3c3", "note": "", "pr": 3.99, "t": "insert", "ln": "mccaffrey", "box": "2024 Prizm", "sp": "football"},
+  {"k": "cmc_rift", "p": "Christian McCaffrey Lava 49ers", "set": "2026 Rift \u00b7 Scan 1413 r1c3", "note": "", "pr": 5.99, "t": "star", "ln": "mccaffrey", "box": "2026 Rift", "sp": "football"},
+  {"k": "jjm_rift", "p": "J.J. McCarthy Splash Vikings", "set": "2026 Rift \u00b7 Scan 1413 r3c3", "note": "", "pr": 5.99, "t": "star", "ln": "mccarthy", "box": "2026 Rift", "sp": "football"},
+  {"k": "tmac_rift1", "p": "Tetairoa McMillan RC Panthers", "set": "2026 Rift \u00b7 Scan 1410 r1c3", "note": "", "pr": 5.49, "t": "rookie", "ln": "mcmillan", "box": "2026 Rift", "sp": "football"},
+  {"k": "tmac_rift2", "p": "Tetairoa McMillan RC Panthers", "set": "2026 Rift \u00b7 Scan 1411 r2c2", "note": "", "pr": 5.49, "t": "rookie", "ln": "mcmillan", "box": "2026 Rift", "sp": "football"},
+  {"k": "membou_lazer", "p": "Armand Membou Lazer RC Jets", "set": "2024 Prizm \u00b7 Scan 1409 r2c2", "note": "", "pr": 4.49, "t": "color", "ln": "membou", "box": "2024 Prizm", "sp": "football"},
+  {"k": "kyler_rift", "p": "Kyler Murray Lava Cardinals", "set": "2026 Rift \u00b7 Scan 1412 r3c2", "note": "", "pr": 4.99, "t": "star", "ln": "murray", "box": "2026 Rift", "sp": "football"},
+  {"k": "nix_rift", "p": "Bo Nix Cosmic Broncos", "set": "2026 Rift \u00b7 Scan 1412 r2c2", "note": "", "pr": 5.49, "t": "star", "ln": "nix", "box": "2026 Rift", "sp": "football"},
+  {"k": "nix_rift2", "p": "Bo Nix Lightning Broncos", "set": "2026 Rift \u00b7 Scan 1414 r2c3", "note": "", "pr": 5.49, "t": "star", "ln": "nix", "box": "2026 Rift", "sp": "football"},
+  {"k": "onl_rift", "p": "Omarr Norman-Lott Splash RC Chiefs", "set": "2026 Rift \u00b7 Scan 1412 r3c1", "note": "", "pr": 3.99, "t": "rookie", "ln": "normanlott", "box": "2026 Rift", "sp": "football"},
+  {"k": "pitts_ice", "p": "Kyle Pitts Green Cracked Ice Falcons", "set": "2024 Prizm \u00b7 Scan 1408 r1c1", "note": "", "pr": 4.49, "t": "color", "ln": "pitts", "box": "2024 Prizm", "sp": "football"},
+  {"k": "pollard_rift", "p": "Tony Pollard Blue Ice Titans", "set": "2026 Rift \u00b7 Scan 1411 r3c2", "note": "", "pr": 4.29, "t": "star", "ln": "pollard", "box": "2026 Rift", "sp": "football"},
+  {"k": "dak_rift", "p": "Dak Prescott Cosmic Cowboys", "set": "2026 Rift \u00b7 Scan 1410 r1c2", "note": "", "pr": 5.49, "t": "star", "ln": "prescott", "box": "2026 Rift", "sp": "football"},
+  {"k": "shough_frame", "p": "Tyler Shough Gold Frame RC Saints", "set": "2026 Rift \u00b7 Scan 1412 r1c3", "note": "", "pr": 4.99, "t": "insert", "ln": "shough", "box": "2026 Rift", "sp": "football"},
+  {"k": "amonra_425", "p": "Amon-Ra St. Brown 410/425 Lions", "set": "2026 Rift \u00b7 Scan 1415 r1c2", "note": "", "pr": 6.99, "t": "hit", "ln": "stbrown", "box": "2026 Rift", "sp": "football"},
+  {"k": "stroud_frame", "p": "CJ Stroud Gold Frame Texans", "set": "2026 Rift \u00b7 Scan 1410 r2c3", "note": "", "pr": 5.99, "t": "insert", "ln": "stroud", "box": "2026 Rift", "sp": "football"},
+  {"k": "jt_portals", "p": "Jonathan Taylor Portals Gold Ice Colts", "set": "2024 Prizm \u00b7 Scan 1407 r1c1", "note": "", "pr": 5.99, "t": "insert", "ln": "taylor", "box": "2024 Prizm", "sp": "football"},
+  {"k": "jt_checker", "p": "Jonathan Taylor Black White Checker Colts", "set": "2024 Prizm \u00b7 Scan 1407 r1c3", "note": "", "pr": 4.99, "t": "color", "ln": "taylor", "box": "2024 Prizm", "sp": "football"},
+  {"k": "princely_rift", "p": "Princely Umanmielen Splash RC Panthers", "set": "2026 Rift \u00b7 Scan 1412 r3c3", "note": "", "pr": 4.29, "t": "rookie", "ln": "umanmielen", "box": "2026 Rift", "sp": "football"},
+  {"k": "ward_pink", "p": "Cam Ward Pink Splash RC Titans", "set": "2026 Rift \u00b7 Scan 1413 r1c2", "note": "", "pr": 5.99, "t": "rookie", "ln": "ward", "box": "2026 Rift", "sp": "football"},
+  {"k": "ward_rift2", "p": "Cam Ward Cosmic RC Titans", "set": "2026 Rift \u00b7 Scan 1413 r2c3", "note": "", "pr": 5.99, "t": "rookie", "ln": "ward", "box": "2026 Rift", "sp": "football"},
+  {"k": "ward_rift3", "p": "Cam Ward Cosmic RC Titans", "set": "2026 Rift \u00b7 Scan 1414 r1c2", "note": "", "pr": 5.99, "t": "rookie", "ln": "ward", "box": "2026 Rift", "sp": "football"},
+  {"k": "warren_rift", "p": "Tyler Warren Cosmic RC Colts", "set": "2026 Rift \u00b7 Scan 1413 r2c2", "note": "", "pr": 5.49, "t": "rookie", "ln": "warren", "box": "2026 Rift", "sp": "football"},
+  {"k": "caleb_checker", "p": "Caleb Williams Black White Checker RC Bears", "set": "2024 Prizm \u00b7 Scan 1408 r1c2", "note": "", "pr": 5.49, "t": "color", "ln": "williams", "box": "2024 Prizm", "sp": "football"},
+  {"k": "caleb_fireworks", "p": "Caleb Williams Green Fireworks RC Bears", "set": "2024 Prizm \u00b7 Scan 1408 r2c2", "note": "", "pr": 7.99, "t": "insert", "ln": "williams", "box": "2024 Prizm", "sp": "football"},
+  {"k": "caleb_rift", "p": "Caleb Williams Cosmic Bears", "set": "2026 Rift \u00b7 Scan 1412 r1c1", "note": "", "pr": 6.49, "t": "star", "ln": "williams", "box": "2026 Rift", "sp": "football"},
+  {"k": "tylek_rift", "p": "Tyleik Williams Splash RC Lions", "set": "2026 Rift \u00b7 Scan 1412 r2c3", "note": "", "pr": 4.29, "t": "rookie", "ln": "williams", "box": "2026 Rift", "sp": "football"},
+  {"k": "gwilson_lazer", "p": "Garrett Wilson Lazer Jets", "set": "2024 Prizm \u00b7 Scan 1409 r1c2", "note": "", "pr": 4.99, "t": "color", "ln": "wilson", "box": "2024 Prizm", "sp": "football"},
+  {"k": "gwilson_250", "p": "Garrett Wilson 154/250 Jets", "set": "2026 Rift \u00b7 Scan 1415 r1c1", "note": "", "pr": 7.99, "t": "hit", "ln": "wilson", "box": "2026 Rift", "sp": "football"},
+  {"k": "worthy_frame", "p": "Xavier Worthy Gold Frame Chiefs", "set": "2026 Rift \u00b7 Scan 1414 r1c3", "note": "", "pr": 5.49, "t": "insert", "ln": "worthy", "box": "2026 Rift", "sp": "football"}
+];
+const KEY = "rift_pull_2026_08_29";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="rift_imgs_2026_08_29/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `RIFT PULLS 2026-08-29: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
