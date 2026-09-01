@@ -99,6 +99,7 @@ SHIPPING_EXEMPT_ITEM_IDS = {
     "307150460802",  # Saquon Electro Lights -- free Ground Advantage (2026-08-28)
     "307150460817",  # Myles Garrett Electro Lights -- same setup
     "307153009909",  # Caleb Williams 6-card lot -- free ship, combines w/ buyer's zebra order
+    "307157428604",  # Peter Woods SAGE auto (Chiefs R1) -- $24.99 over ESE limit, free Ground Advantage (2026-09-01)
 }
 
 DEFAULT_CONFIG: dict = {
