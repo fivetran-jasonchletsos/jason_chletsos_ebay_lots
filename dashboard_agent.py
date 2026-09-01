@@ -53,7 +53,10 @@ REPO       = Path(__file__).parent
 OUTPUT_DIR = REPO / "output"
 TRENDS_PATH = OUTPUT_DIR / "sales_trends.json"
 FLIPS_PATH  = OUTPUT_DIR / "resale_flips_plan.json"
+<<<<<<< Updated upstream
 DECISIONS_PATH = REPO / "decisions_log.json"
+=======
+>>>>>>> Stashed changes
 OUT = REPO / "docs" / "dashboard.html"
 
 # Insight thresholds -- tuned to flag things worth JC's attention, not fire
@@ -147,6 +150,7 @@ def _kpi_html(t: dict) -> str:
         for val, lbl in stats
     )
     return f'<section class="kpi-row">{cells}</section>'
+<<<<<<< Updated upstream
 
 
 def _load_decisions() -> list[dict]:
@@ -248,6 +252,8 @@ def _insights_html(insights: list[dict], decisions: list[dict]) -> str:
       <h2>Insights</h2>
       {body}
     </section>"""
+=======
+>>>>>>> Stashed changes
 
 
 def _selling_section_html(t: dict) -> str:
@@ -335,6 +341,7 @@ def _selling_section_html(t: dict) -> str:
       </section>
     </div>
     {dow_chart}"""
+<<<<<<< Updated upstream
 
 
 STALE_FLIPS_DAYS = 3  # Browse API listing data older than this: prices/availability may be wrong
@@ -365,16 +372,25 @@ def _flips_staleness(flips_plan: dict) -> tuple[str, int | None]:
     except (ValueError, TypeError):
         return ts, None
     return ts, age
+=======
+>>>>>>> Stashed changes
 
 
 def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
     flips_plan = flips_plan or {}
+<<<<<<< Updated upstream
     flips_generated, flips_age_days = _flips_staleness(flips_plan)
     is_stale = flips_age_days is not None and flips_age_days > STALE_FLIPS_DAYS
 
     def _flip_row(f: dict) -> str:
         meets_rule = (not is_stale
                       and f.get("net_profit", 0) >= MIN_NET_PROFIT
+=======
+    flips_generated = flips_plan.get("generated_at", "")
+
+    def _flip_row(f: dict) -> str:
+        meets_rule = (f.get("net_profit", 0) >= MIN_NET_PROFIT
+>>>>>>> Stashed changes
                       and f.get("velocity_30d", 0) >= MIN_VELOCITY_30D
                       and not f.get("warnings"))
         warn_html = "".join(f'<span class="tag tag-warn">{_esc(w)}</span>' for w in f.get("warnings", []))
@@ -395,6 +411,7 @@ def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
         7, 'No cached flip data — run <code>python3 resale_flips_agent.py</code> to refresh.',
     )
 
+<<<<<<< Updated upstream
     stale_banner = ""
     if is_stale:
         stale_banner = (
@@ -405,6 +422,8 @@ def _buy_section_html(flips_plan: dict | None, restock: list[dict]) -> str:
             f'<code>python3 resale_flips_agent.py</code> again successfully.</div>'
         )
 
+=======
+>>>>>>> Stashed changes
     restock_rows = _rows_or("\n".join(
         f'<tr><td>{_esc(r["set"])}</td><td class="num">{r["sold_90d_or_alltime"]}</td>'
         f'<td class="num">{_money(r["revenue"])}</td><td class="num">{_money(r["avg_sale"])}</td>'
@@ -455,6 +474,7 @@ _CSS = """
 .kpi-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); margin-top: 3px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
 .panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+<<<<<<< Updated upstream
 .insights-panel { border-color: var(--border-mid); }
 .insight { font-size: 13.5px; line-height: 1.5; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .insight:last-child { border-bottom: none; padding-bottom: 0; }
@@ -471,6 +491,10 @@ _CSS = """
    375px viewport. min-width:0 lets the grid track win so table-wrap's own
    overflow-x:auto can do its job. */
 .dash-two > * { min-width: 0; }
+=======
+.section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.dash-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+>>>>>>> Stashed changes
 .ch-card { margin-bottom: 16px !important; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -492,8 +516,11 @@ tr.buy-yes { background: rgba(79,70,229,.05); }
 .son-rules summary { cursor: pointer; font-size: 13px; color: var(--text-dim); }
 .son-rules-body { font-size: 13px; margin-top: 8px; color: var(--text-muted); }
 .son-rules-body .skip { color: var(--danger); }
+<<<<<<< Updated upstream
 .stale-warn { background: rgba(220,38,38,.06); border: 1px solid rgba(220,38,38,.25); border-radius: 4px; padding: 10px 14px; font-size: 13px; color: var(--text); margin-bottom: 14px; }
 .stale-warn code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+=======
+>>>>>>> Stashed changes
 @media (max-width: 820px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .dash-two { grid-template-columns: 1fr; } }
 </style>"""
 
@@ -509,11 +536,17 @@ def build(trends: dict | None = None, listings: list[dict] | None = None) -> Pat
     if trends is None:
         trends = _load_json(TRENDS_PATH, {})
     flips_plan = _load_json(FLIPS_PATH, None)
+<<<<<<< Updated upstream
     if listings is None:
         listings = snapshot_store.load()
     active_by_set = _active_by_set(listings)
     restock = _restock_signals(trends, active_by_set)
     _, flips_age_days = _flips_staleness(flips_plan or {})
+=======
+    if not listings:
+        listings = snapshot_store.load()
+    restock = _restock_signals(trends, listings)
+>>>>>>> Stashed changes
 
     now = datetime.now(timezone.utc)
     hero = f"""

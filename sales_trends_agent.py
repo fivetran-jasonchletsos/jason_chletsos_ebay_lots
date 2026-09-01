@@ -79,7 +79,11 @@ def _strip_accents(s: str) -> str:
 
 
 def brand_of(title: str) -> str:
+<<<<<<< Updated upstream
     t = _strip_accents((title or "").lower())
+=======
+    t = (title or "").lower()
+>>>>>>> Stashed changes
     for token, label in _BRANDS_LOWER:
         if token in t:
             return label
