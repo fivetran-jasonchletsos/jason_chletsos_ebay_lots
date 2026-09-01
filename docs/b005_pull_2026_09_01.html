@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B005 Shoebox — 2026-09-01</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B005 shoebox batch: 143 cards (2024 Select + Totally Certified, 2023-25 Optic, 2025 Topps baseball, junk-wax vintage). 56 listings / 62 cards / ~$266 at ask. Hits: Ashton Jeanty Optic Rated Rookie $12.99, 1979 Topps Jack Morris $7.99, Jayden Daniels Select $5.99. KEEP BOX (not posted): Thibodeaux, Tyrone Tracy, Dexter Lawrence (Giants), Luis Torrens (Mets). ~77 commons to fodder incl 1987 Topps vintage. A-Z by last name.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b005_40", "p": "Davante Adams On Target", "set": "2024 Panini Totally Certified On Target  \u00b7 B005", "note": "", "pr": 4.99, "t": "insert", "ln": "adams", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_50", "p": "Davante Adams TC", "set": "2024 Panini Totally Certified Davante Ad \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "adams", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_97", "p": "Will Anderson Select", "set": "2024 Panini Select Will Anderson Jr Texa \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "anderson", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_59", "p": "Brock Bowers Select", "set": "2024 Panini Select Brock Bowers Raiders \u00b7 B005", "note": "", "pr": 4.99, "t": "star", "ln": "bowers", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_33", "p": "Jonathon Brooks TC RC", "set": "2024 Panini Totally Certified Jonathon B \u00b7 B005", "note": "", "pr": 3.49, "t": "rookie", "ln": "brooks", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_48", "p": "James Cook TC", "set": "2024 Panini Totally Certified James Cook \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "cook", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_84", "p": "Jayden Daniels Select", "set": "2024 Panini Select Jayden Daniels Comman \u00b7 B005", "note": "", "pr": 5.99, "t": "star", "ln": "daniels", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_74", "p": "Stefon Diggs Select", "set": "2024 Panini Select Stefon Diggs Patriots \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "diggs", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_55", "p": "Ezeiruaku Optic Green Velocity", "set": "2025 Donruss Optic Donovan Ezeiruaku Gre \u00b7 B005", "note": "", "pr": 4.99, "t": "color", "ln": "ezeiruaku", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_44", "p": "Zay Flowers TC", "set": "2024 Panini Totally Certified Zay Flower \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "flowers", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_92", "p": "Taliese Fuaga Select Premier RC", "set": "2024 Panini Select Premier Taliese Fuaga \u00b7 B005", "note": "", "pr": 3.99, "t": "rookie", "ln": "fuaga", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_22", "p": "Jared Goff TC x2", "set": "2024 Panini Totally Certified Jared Goff \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "goff", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_18", "p": "Kyle Hamilton TC x2", "set": "2024 Panini Totally Certified Kyle Hamil \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "hamilton", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_99", "p": "Marvin Harrison Jr Optic", "set": "2024 Donruss Optic Marvin Harrison Jr Ca \u00b7 B005", "note": "", "pr": 4.99, "t": "rookie", "ln": "harrison", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_91", "p": "Trey Hendrickson Select", "set": "2024 Panini Select Trey Hendrickson Beng \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "hendrickson", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_60", "p": "Tee Higgins Select", "set": "2024 Panini Select Tee Higgins Bengals \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "higgins", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_51", "p": "Tyreek Hill TC", "set": "2024 Panini Totally Certified Tyreek Hil \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "hill", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_71", "p": "TJ Hockenson Select", "set": "2024 Panini Select TJ Hockenson Vikings \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "hockenson", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_94", "p": "Josh Jacobs Select", "set": "2024 Panini Select Josh Jacobs Packers \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "jacobs", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_56", "p": "Ashton Jeanty Optic RR", "set": "2025 Donruss Optic Ashton Jeanty Rated R \u00b7 B005", "note": "", "pr": 12.99, "t": "rookie", "ln": "jeanty", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_66", "p": "Chris Jones Select", "set": "2024 Panini Select Chris Jones Chiefs \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "jones", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_95", "p": "Cameron Jordan Select", "set": "2024 Panini Select Cameron Jordan Saints \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "jordan", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_64", "p": "Travis Kelce Select", "set": "2024 Panini Select Travis Kelce Chiefs \u00b7 B005", "note": "", "pr": 4.99, "t": "star", "ln": "kelce", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_111", "p": "Hyeseong Kim Holiday RC", "set": "2025 Topps Holiday Hyeseong Kim RC Los A \u00b7 B005", "note": "", "pr": 4.99, "t": "rookie", "ln": "kim", "box": "B005 Shoebox", "sp": "baseball"},
+  {"k": "b005_47", "p": "Dalton Kincaid TC", "set": "2024 Panini Totally Certified Dalton Kin \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "kincaid", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_96", "p": "George Kittle Select", "set": "2024 Panini Select George Kittle 49ers \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "kittle", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_21", "p": "George Kittle TC x2", "set": "2024 Panini Totally Certified George Kit \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "kittle", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_39", "p": "CeeDee Lamb TC x2", "set": "2024 Panini Totally Certified CeeDee Lam \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "lamb", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_24", "p": "Trevor Lawrence TC x2", "set": "2024 Panini Totally Certified Trevor Law \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "lawrence", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_63", "p": "Quinyon Mitchell Select", "set": "2024 Panini Select Quinyon Mitchell Eagl \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "mitchell", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_108", "p": "1979 Topps Jack Morris #251", "set": "1979 Topps Jack Morris #251 Detroit Tige \u00b7 B005", "note": "", "pr": 7.99, "t": "hit", "ln": "morris", "box": "B005 Shoebox", "sp": "baseball"},
+  {"k": "b005_29", "p": "Kyler Murray TC", "set": "2024 Panini Totally Certified Kyler Murr \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "murray", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_77", "p": "David Njoku Select", "set": "2024 Panini Select David Njoku Browns \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "njoku", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_46", "p": "William Perry TC (Fridge)", "set": "2024 Panini Totally Certified William Pe \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "perry", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_83", "p": "Michael Pittman Select", "set": "2024 Panini Select Michael Pittman Jr Co \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "pittman", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_52", "p": "Dak Prescott TC", "set": "2024 Panini Totally Certified Dak Presco \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "prescott", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_43", "p": "Ennis Rakestraw TC RC", "set": "2024 Panini Totally Certified Ennis Rake \u00b7 B005", "note": "", "pr": 3.49, "t": "rookie", "ln": "rakestraw", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_79", "p": "Spencer Rattler Select", "set": "2024 Panini Select Spencer Rattler Saint \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "rattler", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_85", "p": "Jayden Reed Select", "set": "2024 Panini Select Jayden Reed Packers \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "reed", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_78", "p": "Philip Rivers Select", "set": "2024 Panini Select Philip Rivers Charger \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "rivers", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_82", "p": "Aaron Rodgers Select", "set": "2024 Panini Select Aaron Rodgers Jets \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "rodgers", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_17", "p": "Aaron Rodgers TC x2", "set": "2024 Panini Totally Certified Aaron Rodg \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "rodgers", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_93", "p": "Penei Sewell Select", "set": "2024 Panini Select Penei Sewell Lions \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "sewell", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_57", "p": "Arian Smith Optic RR", "set": "2025 Donruss Optic Arian Smith Rated Roo \u00b7 B005", "note": "", "pr": 3.49, "t": "rookie", "ln": "smith", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_118", "p": "Cam Smith RC", "set": "2025 Topps Cam Smith RC Houston Astros \u00b7 B005", "note": "", "pr": 3.49, "t": "rookie", "ln": "smithc", "box": "B005 Shoebox", "sp": "baseball"},
+  {"k": "b005_45", "p": "Matthew Stafford TC", "set": "2024 Panini Totally Certified Matthew St \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "stafford", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_31", "p": "Amon-Ra TC", "set": "2024 Panini Totally Certified Amon-Ra St \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "stbrown", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_65", "p": "Tua Select", "set": "2024 Panini Select Tua Tagovailoa Dolphi \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "tagovailoa", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_62", "p": "Fred Taylor Select Premier", "set": "2024 Panini Select Premier Fred Taylor J \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "taylor", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_54", "p": "Jaylen Waddle Optic", "set": "2023 Donruss Optic Jaylen Waddle Dolphin \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "waddle", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_38", "p": "Jaylen Waddle TC", "set": "2024 Panini Totally Certified Jaylen Wad \u00b7 B005", "note": "", "pr": 3.99, "t": "star", "ln": "waddle", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_100", "p": "Kenneth Walker Optic", "set": "2023 Donruss Optic Kenneth Walker III Se \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "walker", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_30", "p": "Kenneth Walker TC", "set": "2024 Panini Totally Certified Kenneth Wa \u00b7 B005", "note": "", "pr": 3.49, "t": "star", "ln": "walker", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_37", "p": "Reggie Wayne On Target", "set": "2024 Panini Totally Certified On Target  \u00b7 B005", "note": "", "pr": 4.49, "t": "insert", "ln": "wayne", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_34", "p": "Garrett Wilson TC", "set": "2024 Panini Totally Certified Garrett Wi \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "wilson", "box": "B005 Shoebox", "sp": "football"},
+  {"k": "b005_81", "p": "Jameis Winston Select Premier", "set": "2024 Panini Select Premier Jameis Winsto \u00b7 B005", "note": "", "pr": 4.49, "t": "star", "ln": "winston", "box": "B005 Shoebox", "sp": "football"}
+];
+const KEY = "b005_pull_2026_09_01";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b005_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B005 PULLS 2026-09-01: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
