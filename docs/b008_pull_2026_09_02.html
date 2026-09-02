@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B008 Optic — 2026-09-02</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B008: 2025 Donruss Optic box + junk tail, 142 cards. Hard $4 floor applied: 42 listings / 47 cards / ~$239 at ask. Hits: Shedeur Sanders Light It Up RC $9.99, Wayne Chrebet Prizm Green Cracked Ice $6.99, 4 Green Velocity parallels, TreVeyon Henderson RR $5.99, Mahomes/Allen/Lamar/Elway. GIANTS KEEP BOX: Malik Nabers, Russell Wilson, Tyrone Tracy Optic. ~92 sub-$4 cards straight to fodder (not posted). A-Z by last name.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b008_121", "p": "Aaron Rodgers Steelers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "rodgers", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_52", "p": "Amon-Ra St. Brown Lions", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "st.", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_138", "p": "Benjamin Morrison Rated Rookie RC Buccaneers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "morrison", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_3", "p": "Bhayshul Tuten Rated Rookie Green Velocity Jaguars", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "color", "ln": "tuten", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_10", "p": "Bijan Robinson Falcons x2", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "star", "ln": "robinson", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_4", "p": "Bo Nix Broncos x2", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "nix", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_71", "p": "CJ Stroud Texans", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "stroud", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_106", "p": "CeeDee Lamb Cowboys", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "star", "ln": "lamb", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_125", "p": "Charles Woodson Packers x2", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "woodson", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_23", "p": "Dak Prescott Cowboys", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "prescott", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_41", "p": "Derrick Harmon Rated Rookie RC Steelers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "harmon", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_26", "p": "Drake Maye Patriots", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.99, "t": "star", "ln": "maye", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_40", "p": "Edgerrin James Colts", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "james", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_42", "p": "Elic Ayomanor Rated Rookie Green Velocity Titans RC", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "color", "ln": "ayomanor", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_65", "p": "Eric Dickerson Colts", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "dickerson", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_49", "p": "Garrett Wilson Jets", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "wilson", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_55", "p": "Hines Ward Steelers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "ward", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_27", "p": "Jackson Hawes Rated Rookie Green Velocity Bills RC", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "color", "ln": "hawes", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_115", "p": "Jalen Milroe Rated Rookie RC Seahawks", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "star", "ln": "milroe", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_76", "p": "Jaylin Lane Rated Rookie RC Commanders", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "lane", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_70", "p": "Jim Kelly Bills", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "kelly", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_16", "p": "John Elway Broncos", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.99, "t": "star", "ln": "elway", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_54", "p": "Josh Allen Bills", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.99, "t": "star", "ln": "allen", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_134", "p": "Justin Herbert Chargers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "star", "ln": "herbert", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_50", "p": "Lamar Jackson Ravens", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.99, "t": "star", "ln": "jackson", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_116", "p": "Mason Graham Rated Rookie Green Velocity Browns RC", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "color", "ln": "graham", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_74", "p": "Myles Garrett Browns", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "garrett", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_128", "p": "Nic Scourton Rated Rookie RC Panthers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "scourton", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_30", "p": "Patrick Mahomes Chiefs", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 6.99, "t": "star", "ln": "mahomes", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_124", "p": "Puka Nacua Rams", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.49, "t": "star", "ln": "nacua", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_47", "p": "RJ Harvey Rated Rookie RC Broncos x2", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "star", "ln": "harvey", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_57", "p": "Rashee Rice Chiefs", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "rice", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_28", "p": "Saquon Barkley Eagles x2", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.49, "t": "star", "ln": "barkley", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_43", "p": "Shedeur Sanders Light It Up RC Insert Browns", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 9.99, "t": "hit", "ln": "sanders", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_136", "p": "Stefon Diggs Patriots", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "diggs", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_53", "p": "TJ Watt Steelers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "watt", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_20", "p": "Terry Bradshaw Steelers", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.99, "t": "star", "ln": "bradshaw", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_96", "p": "Tony Dorsett Broncos Throwback", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.49, "t": "star", "ln": "dorsett", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_21", "p": "TreVeyon Henderson Rated Rookie RC Patriots", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 5.99, "t": "star", "ln": "henderson", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_22", "p": "Tua Tagovailoa Dolphins", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "tagovailoa", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_135", "p": "Tyreek Hill Dolphins", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 4.49, "t": "star", "ln": "hill", "box": "B008 Optic", "sp": "football"},
+  {"k": "b008_95", "p": "Wayne Chrebet Green Cracked Ice Jets", "set": "2025 Donruss Optic \u00b7 B008", "note": "", "pr": 6.99, "t": "hit", "ln": "chrebet", "box": "B008 Optic", "sp": "football"}
+];
+const KEY = "b008_pull_2026_09_02";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b008_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B008 PULLS 2026-09-02: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
