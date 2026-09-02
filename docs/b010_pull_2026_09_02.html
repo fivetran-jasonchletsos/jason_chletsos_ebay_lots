@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B010 Premium Brick — 2026-09-02</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B010: 776-card premium brick (Prizm/Select/flagship/Contenders/TC). $4 floor: 184 listings / 218 cards / ~$1,131 at ask. Heat: Lamar Select Flash $9.99, Mahomes Numbers $8.99 + Turbocharged x2 + Totally Certified, Winston + Gibbs Flash $8.99, Fields Flash $7.99, 5 pink Flash parallels, Jonathon Brooks New Generation JERSEY relic, Select Certified Daniels + Bowers, Elway/Terrell Davis/CMC Prizms, purple Chrebet. GIANTS KEEP BOX: 22 cards incl Thibodeaux Select Flash, Daniel Jones Prizm, Dexter x2, Theo x3, Likely x2, Colton Hood x3, NYG team. NOTE: one Lamar Jackson Select Flash has a damaged scan — RE-FEED that card in the next batch to list it. ~530 sub-$4 to fodder. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b010_705", "p": "Select A.J. Green Bengals", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "a.j.", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_660", "p": "Prizm Aeneas Williams Cardinals HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "aeneas", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_184", "p": "Drew Allar Steelers RC x2", "set": "2026 Topps Drew \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "allar", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_747", "p": "Rookies and Stars Jalen Hurts Eagles", "set": "2024 Panini Rookies \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "and", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_387", "p": "Elic Ayomanor Titans RC", "set": "2026 Topps Elic \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "ayomanor", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_525", "p": "Select Bhayshul Tuten RC Jaguars", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "bhayshul", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_594", "p": "Prizm Bo Nix Broncos x2", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "bo", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_626", "p": "Prizm Brandon Aiyuk 49ers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "brandon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_567", "p": "Prizm Brian Urlacher Bears HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "brian", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_586", "p": "Select Brock Purdy 49ers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "brock", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_566", "p": "Prizm Bryce Young Panthers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "bryce", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_556", "p": "Prizm Bucky Irving Buccaneers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "bucky", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_693", "p": "Select Bucky Irving Buccaneers x5", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "bucky", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_572", "p": "Prizm Budda Baker Cardinals", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "budda", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_576", "p": "Prizm Byron Murphy II RC Seahawks", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "byron", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_629", "p": "Prizm C.J. Mosley Jets", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "c.j.", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_580", "p": "Select Caleb Williams Bears", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "caleb", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_729", "p": "Select Cam Jurgens Eagles", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "cam", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_582", "p": "Select Cedric Tillman Flash Prizm Parallel Browns", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "hit", "ln": "cedric", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_721", "p": "Score Celebration Nico Collins Insert Texans", "set": "2025 Panini Score \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "celebration", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_742", "p": "Select Certified Brock Bowers RC Raiders", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_737", "p": "Select Certified Jayden Daniels RC Commanders", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_736", "p": "Select Certified Ray Davis RC Bills", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_592", "p": "Select Certified Rome Odunze RC Bears", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_519", "p": "Select Certified Tyler Shough RC Saints", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_585", "p": "Totally Certified Amon-Ra St. Brown Lions", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_769", "p": "Totally Certified Franchise Foundations Baker Mayfield", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_761", "p": "Totally Certified Franchise Foundations Rome Odunze RC", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_591", "p": "Totally Certified Michael Penix Jr RC Falcons", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_649", "p": "Totally Certified On Target Davante Adams Jets", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_763", "p": "Totally Certified Patrick Mahomes Chiefs", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_651", "p": "Totally Certified Portraits Xavier Worthy RC Chiefs", "set": "2024 Panini Totally \u00b7 B010", "note": "", "pr": 5.99, "t": "hit", "ln": "certified", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_666", "p": "Prizm Christian McCaffrey 49ers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "christian", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_553", "p": "Prizm Chuba Hubbard Panthers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "chuba", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_546", "p": "Prizm CJ Stroud Texans x3", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "cj", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_337", "p": "Nico Collins Texans", "set": "2026 Topps Nico \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "collins", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_710", "p": "Score Cooper DeJean Eagles", "set": "2025 Panini Score \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "cooper", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_349", "p": "Blake Corum Rams", "set": "2026 Topps Blake \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "corum", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_655", "p": "Prizm D'Andre Swift Bears", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "d'andre", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_745", "p": "Select Davante Adams Flash Prizm Parallel Jets", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "davante", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_640", "p": "Prizm Dave Krieg Seahawks", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "dave", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_569", "p": "Prizm David Montgomery Lions", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "david", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_717", "p": "Select David Carr Texans x3", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "david", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_512", "p": "Select De'Von Achane Dolphins x3", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "de'von", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_757", "p": "Select Derek Stingley Jr Texans", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "derek", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_731", "p": "Select Derwin James Chargers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "derwin", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_664", "p": "Prizm Deshaun Watson Browns", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "deshaun", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_641", "p": "Prizm DeVonta Smith Eagles", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "devonta", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_668", "p": "Prizm DJ Moore Bears", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "dj", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_675", "p": "Select DJ Giddens RC Colts", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "dj", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_562", "p": "Prizm Dwight Freeney Colts HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "dwight", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_667", "p": "Prizm Ed McCaffrey Broncos", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "ed", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_516", "p": "Select Elijah Arroyo RC Seahawks", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "elijah", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_551", "p": "Prizm Eric Moulds Texans", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "eric", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_692", "p": "Select Ernest Jones Pink Flash Prizm Seahawks", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.49, "t": "hit", "ln": "ernest", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_730", "p": "Select Ernest Jones Seahawks", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "ernest", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_707", "p": "Select Evan Engram Broncos", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "evan", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_662", "p": "Prizm Fireworks Will Levis Insert Titans", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "fireworks", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_528", "p": "Score Fran Tarkenton Vikings HOF", "set": "2025 Panini Score \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "fran", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_590", "p": "Select Future Michael Penix Jr Insert Falcons", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "future", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_333", "p": "Contenders Game Ticket Saquon Barkley Eagles", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "game", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_563", "p": "Prizm Garrett Wilson Jets x2", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "garrett", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_577", "p": "Prizm George Kittle 49ers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "george", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_678", "p": "Score Harold Fannin Jr RC Browns", "set": "2025 Panini Score \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "harold", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_677", "p": "Select Harold Fannin Jr RC Browns", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "harold", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_642", "p": "Prizm Harrison Smith Vikings", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "harrison", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_547", "p": "Prizm Hines Ward Steelers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "hines", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_319", "p": "Contenders Historic Draft Class Cowboys Packers Insert", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "historic", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_545", "p": "Prizm J.J. McCarthy Vikings", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "j.j.", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_194", "p": "Lamar Jackson Ravens", "set": "2026 Topps Lamar \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "jackson", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_507", "p": "Select Jahdae Barron RC Broncos x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "jahdae", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_734", "p": "Select Jahmyr Gibbs Flash Prizm Parallel Lions", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 8.99, "t": "hit", "ln": "jahmyr", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_656", "p": "Prizm Jaire Alexander Packers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jaire", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_767", "p": "Select Jaire Alexander Packers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jaire", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_768", "p": "Prizm Jake Ferguson Cowboys", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jake", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_750", "p": "Chrome Jalen Carter Eagles", "set": "2026 Topps Chrome \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "jalen", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_754", "p": "Prizm Jalen Hurts Super Bowl Champion Eagles", "set": "2025 Panini Prizm \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "jalen", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_749", "p": "Select Jalen Hurts Eagles", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "jalen", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_579", "p": "Select Jameis Winston Flash Prizm Parallel Browns", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 8.99, "t": "hit", "ln": "jameis", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_718", "p": "Select James Conner Cardinals", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "james", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_727", "p": "Select James Conner Pink Flash Prizm Cardinals", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "james", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_631", "p": "Prizm Jason Witten Cowboys", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "jason", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_320", "p": "Select Javonte Williams Cowboys", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "javonte", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_554", "p": "Prizm Jaxon Smith-Njigba Seahawks", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "jaxon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_596", "p": "Select Jaxon Smith-Njigba Seahawks", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "jaxon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_716", "p": "Select Jayden Daniels Commanders", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "jayden", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_699", "p": "Select Jayden Higgins RC Texans", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "jayden", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_328", "p": "Select Jaydon Blue Pink Flash Prizm RC Cowboys", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "jaydon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_511", "p": "Select Jaydon Blue RC Cowboys x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "jaydon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_520", "p": "Select Jeffery Simmons Titans", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jeffery", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_636", "p": "Prizm Jevon Holland Dolphins", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jevon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_676", "p": "Select Jimmy Graham Saints", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jimmy", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_765", "p": "Absolute Joe Burrow Bengals", "set": "2022 Panini Absolute \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "joe", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_532", "p": "Score Joe Thomas Browns HOF", "set": "2025 Panini Score \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "joe", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_744", "p": "Select Joe Alt Flash Prizm Parallel RC Chargers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "hit", "ln": "joe", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_766", "p": "Select Joey Bosa Chargers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "joey", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_646", "p": "Prizm John Elway Broncos HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "john", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_570", "p": "Prizm John Jefferson Chargers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "john", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_633", "p": "Prizm Jonathan Allen Commanders", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "jonathan", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_687", "p": "Select Josh Allen Bills x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "josh", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_536", "p": "Select Josh Simmons RC Chiefs x3", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "josh", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_735", "p": "Select Justin Fields Flash Prizm Parallel Steelers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 7.99, "t": "hit", "ln": "justin", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_638", "p": "Prizm Kam Chancellor Seahawks", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "kam", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_702", "p": "Select Kareem Hunt Chiefs x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "kareem", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_574", "p": "Prizm Kellen Winslow Chargers HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "kellen", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_739", "p": "Select Keon Coleman Bills x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "keon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_541", "p": "Prizm Khalil Mack Chargers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "khalil", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_645", "p": "Prizm Kool-Aid McKinstry RC Saints", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "kool-aid", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_552", "p": "Prizm Kyle Williams RC Patriots", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "kyle", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_764", "p": "Select Kyle Hamilton Flash Prizm Parallel Ravens", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.99, "t": "hit", "ln": "kyle", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_751", "p": "Select Kyle McCord RC Eagles", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "kyle", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_313", "p": "Select Kyren Williams Rams", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "kyren", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_691", "p": "Select Lamar Jackson Ravens", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "star", "ln": "lamar", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_659", "p": "Prizm LaVar Arrington Redskins", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "lavar", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_504", "p": "Prizm Leonard Fournette Jaguars", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "leonard", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_508", "p": "Select Luther Burden III RC Bears", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "rookie", "ln": "luther", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_665", "p": "Prizm Mark Andrews Ravens", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "mark", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_628", "p": "Prizm Marv Levy Bills HOF Coach", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "marv", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_550", "p": "Prizm Marvin Harrison Jr Cardinals", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "marvin", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_635", "p": "Prizm Matt Milano Bills", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "matt", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_762", "p": "SAGE Artistry Michael Mayer Comic Special Edition Raid", "set": "SAGE Artistry Michael \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "mayer", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_394", "p": "Fernando Mendoza Raiders RC", "set": "2026 Topps Fernando \u00b7 B010", "note": "", "pr": 5.99, "t": "rookie", "ln": "mendoza", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_634", "p": "Prizm Michael Pittman Jr Colts", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "michael", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_589", "p": "Select Michael Penix Jr Falcons", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "michael", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_704", "p": "Select Mike Gesicki Pink Flash Prizm Bengals", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "mike", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_650", "p": "Playoff Momentum Rookies Kenneth Walker III Seahawks", "set": "2022 Panini Playoff \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "momentum", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_578", "p": "Prizm Morten Andersen Saints HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "morten", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_403", "p": "Puka Nacua Rams", "set": "2026 Topps Puka \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "nacua", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_743", "p": "New Generation Jonathon Brooks Jersey Relic Panthers", "set": "2024 Totally Certified \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "new", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_537", "p": "Select Nic Scourton RC Panthers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "nic", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_559", "p": "Prizm Nick Emmanwori RC Seahawks", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "nick", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_539", "p": "Select Nick Sirianni Eagles Coach", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "nick", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_587", "p": "Select Numbers Brock Purdy Insert 49ers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "hit", "ln": "numbers", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_581", "p": "Select Numbers Caleb Williams Insert Bears", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.99, "t": "hit", "ln": "numbers", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_588", "p": "Select Numbers Dak Prescott Insert Cowboys", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.49, "t": "hit", "ln": "numbers", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_772", "p": "Select Numbers Patrick Mahomes Insert Chiefs", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 8.99, "t": "hit", "ln": "numbers", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_207", "p": "Micah Parsons Packers", "set": "2026 Topps Micah \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "parsons", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_543", "p": "Prizm Phil Mafah RC Cowboys", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "phil", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_748", "p": "Select Quinyon Mitchell Eagles", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "quinyon", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_557", "p": "Prizm Raghib Rocket Ismail Panthers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "raghib", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_564", "p": "Prizm Rashan Gary Packers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "rashan", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_506", "p": "Select Rashod Bateman Ravens", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "rashod", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_715", "p": "Select Ray Davis Bills", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "ray", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_627", "p": "Prizm Rhamondre Stevenson Patriots", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "rhamondre", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_593", "p": "Select Rome Odunze RC Bears x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "rome", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_538", "p": "Select Roquan Smith Ravens", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "roquan", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_317", "p": "Contenders Round Numbers Eagles Dolphins Insert", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.49, "t": "hit", "ln": "round", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_712", "p": "Contenders Round Numbers Eagles Saints Insert", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.49, "t": "hit", "ln": "round", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_711", "p": "Select Sam Darnold Seahawks x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "sam", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_690", "p": "Contenders Season Ticket Aaron Jones Vikings", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_332", "p": "Contenders Season Ticket Joe Burrow Bengals", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_533", "p": "Contenders Season Ticket Jonathan Taylor Colts", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 5.49, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_689", "p": "Contenders Season Ticket Josh Jacobs Packers", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_688", "p": "Contenders Season Ticket Justin Jefferson Vikings", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_706", "p": "Contenders Season Ticket Mike Evans Buccaneers", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_674", "p": "Contenders Season Ticket Myles Garrett Browns", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_713", "p": "Contenders Season Ticket Nico Collins Texans", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_535", "p": "Contenders Season Ticket Tua Tagovailoa Dolphins", "set": "2024 Panini Contenders \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_350", "p": "Jaxon Smith-Njigba Seahawks x4", "set": "2026 Topps Jaxon \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "smith-njigba", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_351", "p": "Courtland Sutton Broncos x2", "set": "2026 Topps Courtland \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "sutton", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_542", "p": "Prizm T.J. Hockenson Vikings", "set": "2025 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "t.j.", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_681", "p": "Select Tai Felton RC Vikings", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "tai", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_686", "p": "Select Tariq Woolen Seahawks", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "tariq", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_549", "p": "Prizm Tee Higgins Bengals", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "tee", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_630", "p": "Prizm Terrell Davis Broncos HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 5.99, "t": "star", "ln": "terrell", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_653", "p": "Prizm Terrion Arnold RC Lions", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "terrion", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_344", "p": "Dont'e Thornton Jr Raiders RC x2", "set": "2026 Topps Dont'e \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "thornton", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_573", "p": "Prizm Tony Boselli Jaguars HOF", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "tony", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_756", "p": "Select Tory Taylor Flash Prizm Parallel RC Chargers", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "hit", "ln": "tory", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_682", "p": "Select Trevor Etienne RC Panthers x5", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "trevor", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_515", "p": "Select Trey Amos RC Commanders", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "rookie", "ln": "trey", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_509", "p": "Select Trey Benson Cardinals", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "trey", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_518", "p": "Select Tua Tagovailoa Dolphins", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "tua", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_555", "p": "Prizm Tucker Kraft Packers", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "tucker", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_773", "p": "Select Turbocharged Cooper Kupp Insert Rams x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 5.99, "t": "hit", "ln": "turbocharged", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_733", "p": "Select Turbocharged Lamar Jackson Insert Ravens", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "turbocharged", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_770", "p": "Select Turbocharged Patrick Mahomes Insert Chiefs x2", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 6.99, "t": "hit", "ln": "turbocharged", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_395", "p": "Jordyn Tyson Saints RC", "set": "2026 Topps Jordyn \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "tyson", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_752", "p": "Prizm Wayne Chrebet Jets x2", "set": "2025 Panini Prizm \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "wayne", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_753", "p": "Prizm Wayne Chrebet Purple Parallel Jets", "set": "2025 Panini Prizm \u00b7 B010", "note": "", "pr": 5.99, "t": "hit", "ln": "wayne", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_725", "p": "Select Will Campbell RC Patriots", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "rookie", "ln": "will", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_558", "p": "Prizm Willis McGahee Bills", "set": "2024 Panini Prizm \u00b7 B010", "note": "", "pr": 4.49, "t": "star", "ln": "willis", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_345", "p": "Xavier Worthy Chiefs", "set": "2026 Topps Xavier \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "worthy", "box": "B010 Premium Brick", "sp": "football"},
+  {"k": "b010_679", "p": "Select Zay Flowers Ravens", "set": "2024 Panini Select \u00b7 B010", "note": "", "pr": 4.99, "t": "star", "ln": "zay", "box": "B010 Premium Brick", "sp": "football"}
+];
+const KEY = "b010_pull_2026_09_02";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b010_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B010 PULLS 2026-09-02: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
