@@ -139,6 +139,12 @@ def build_description(title: str) -> str:
 # class" must match before "topps", "prizm draft picks" before "prizm", etc.
 BRAND_TOKENS: list[tuple[str, str]] = [
     ("signature class",   "Topps"),
+    ("fleer",             "Fleer"),
+    ("upper deck",        "Upper Deck"),
+    ("goudey",            "Upper Deck"),
+    ("leaf trinity",      "Leaf"),
+    ("leaf",              "Leaf"),
+    ("sage",              "SAGE"),
     ("topps chrome",      "Topps"),
     ("bowman",            "Topps"),
     ("stadium club",      "Topps"),
