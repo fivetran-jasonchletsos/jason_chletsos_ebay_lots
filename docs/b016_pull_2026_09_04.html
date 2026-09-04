@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B016 Donruss + Basketball — 2026-09-04</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B016: 402 cards — 4th Donruss baseball box + basketball zone + Eagles Optics. 84 listings / 139 cards / ~$736 at ask. New heat: Josh Gibson $6.99, Griffey Jr x2 $6.99, Judge Donruss x3, Roman Anthony x2, A-Rod x2, Pujols x3, Deion baseball, Foxx x2, SGA + Luka Select $6.99, Jokic Prizm, D-Rob x2, Nolan Ryan +2 more. Legend dupes auto-bump live listings. KEEP BOX (Mets): Strawberry, David Wright Donruss, Piazza Donruss. ~250 commons/USA-team to fodder. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b016_329", "p": "Dick Allen Chicago White Sox HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "allen", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_110", "p": "Roberto Alomar Toronto Blue Jays HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "alomar", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_328", "p": "Roman Anthony Boston Red Sox x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "anthony", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_323", "p": "Aiva Arquette Rated Prospect Marlins", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "rookie", "ln": "arquette", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_243", "p": "Ayo Dosunmu Rated Rookie Bulls", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "rookie", "ln": "ayo", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_105", "p": "Johnny Bench Cincinnati Reds HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "bench", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_269", "p": "Yogi Berra New York Yankees HOF", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "berra", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_6", "p": "Mosaic Brazil Games Zack Baun Eagles", "set": "2025 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "brazil", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_78", "p": "George Brett Kansas City Royals HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "brett", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_10", "p": "Mosaic Brook Lopez Milwaukee Bucks", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "brook", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_209", "p": "Madison Bumgarner San Francisco Giants x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "bumgarner", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_40", "p": "Miguel Cabrera Detroit Tigers x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "cabrera", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_48", "p": "Frank Chance Chicago Cubs HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "chance", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_172", "p": "Jackson Chourio Milwaukee Brewers x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "chourio", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_153", "p": "Will Clark San Francisco Giants x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "clark", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_335", "p": "Roger Clemens Boston Red Sox x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "clemens", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_23", "p": "Dylan Crews Washington Nationals x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "crews", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_248", "p": "Prizm David Robinson San Antonio Spurs HOF x2", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "david", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_136", "p": "Leo De Vries Rated Prospect Athletics", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "rookie", "ln": "de", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_11", "p": "Mosaic Domantas Sabonis Sacramento Kings", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "domantas", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_386", "p": "Prizm Donte DiVincenzo Bucks", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "donte", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_102", "p": "Felix Hernandez Seattle Mariners x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "felix", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_55", "p": "Carlton Fisk Boston Red Sox HOF", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "fisk", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_363", "p": "Jimmie Foxx Philadelphia Phillies HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "foxx", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_2", "p": "Mosaic Giannis Antetokounmpo Bucks x2", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "giannis", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_388", "p": "Josh Gibson Homestead Grays HOF", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "gibson", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_188", "p": "Dwight Gooden New York Mets x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "gooden", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_361", "p": "Ken Griffey Jr Seattle Mariners HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "griffey", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_253", "p": "Ken Griffey Sr Cincinnati Reds", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "griffey", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_106", "p": "Vladimir Guerrero Anaheim Angels HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "guerrero", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_41", "p": "Josh Hamilton Texas Rangers x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "hamilton", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_26", "p": "Rickey Henderson Oakland Athletics HOF x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "henderson", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_118", "p": "Gil Hodges Brooklyn Dodgers HOF x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "hodges", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_99", "p": "Trevor Hoffman San Diego Padres HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "hoffman", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_245", "p": "NBA Hoops Carmelo Anthony New York Knicks", "set": "2013 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "hoops", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_230", "p": "NBA Hoops Chet Holmgren Thunder", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "hoops", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_234", "p": "NBA Hoops Kel'el Ware RC Miami Heat", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.99, "t": "rookie", "ln": "hoops", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_252", "p": "NBA Hoops Kemba Walker Knicks", "set": "2013 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "hoops", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_237", "p": "NBA Hoops Nikola Jokic Denver Nuggets", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "hoops", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_235", "p": "NBA Hoops Rudy Gobert Timberwolves", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "hoops", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_306", "p": "Bo Jackson Kansas City Royals x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "jackson", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_154", "p": "Reggie Jackson New York Yankees HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "jackson", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_231", "p": "Donruss Jalen Green Houston Rockets", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "jalen", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_4", "p": "Jalen Hurts Eagles", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "jalen", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_241", "p": "Jarrett Allen Cavaliers", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "jarrett", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_258", "p": "Aaron Judge New York Yankees x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "judge", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_13", "p": "Mosaic Karl-Anthony Towns Timberwolves", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "karl-anthony", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_27", "p": "Colt Keith Detroit Tigers x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "keith", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_143", "p": "Hye-Seong Kim Los Angeles Dodgers x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "kim", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_242", "p": "Kristaps Porzingis", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "kristaps", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_129", "p": "Nick Kurtz Athletics", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "kurtz", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_20", "p": "Tony Lazzeri New York Yankees HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "lazzeri", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_25", "p": "Luisangel Acuna Chicago White Sox x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "luisangel", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_119", "p": "Select Luka Doncic Dallas Mavericks", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "luka", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_65", "p": "Hideki Matsui New York Yankees x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "matsui", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_164", "p": "Don Mattingly New York Yankees x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "mattingly", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_15", "p": "Prizm Nikola Jokic Denver Nuggets", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "nikola", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_52", "p": "Kazuma Okamoto Rated Rookie Toronto Blue Jays x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "rookie", "ln": "okamoto", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_112", "p": "David Ortiz Boston Red Sox HOF", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "ortiz", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_343", "p": "Satchel Paige St. Louis HOF x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "paige", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_298", "p": "Andrew Painter Rated Prospect Phillies", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "rookie", "ln": "painter", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_280", "p": "Albert Pujols St. Louis Cardinals x3", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "pujols", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_263", "p": "Cal Ripken Jr Baltimore Orioles HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "ripken", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_151", "p": "Mariano Rivera New York Yankees HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "rivera", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_155", "p": "Alex Rodriguez Texas Rangers x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "rodriguez", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_163", "p": "Nolan Ryan Texas Rangers HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 7.99, "t": "star", "ln": "ryan", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_260", "p": "Ethan Salas Rated Prospect Padres", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "rookie", "ln": "salas", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_351", "p": "Deion Sanders Cincinnati Reds", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "sanders", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_3", "p": "Saquon Barkley Eagles", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "saquon", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_5", "p": "Score Saquon Barkley Kelly Green Eagles", "set": "2025 Panini \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "saquon", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_120", "p": "Select Shai Gilgeous-Alexander Thunder", "set": "2024 Panini \u00b7 B016", "note": "", "pr": 6.99, "t": "star", "ln": "shai", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_22", "p": "Cam Smith Houston Astros x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "smith", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_142", "p": "Ozzie Smith St. Louis Cardinals HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "smith", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_104", "p": "Sammy Sosa Chicago Cubs x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "sosa", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_98", "p": "Tomoyuki Sugano Baltimore Orioles x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "sugano", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_54", "p": "Jim Thome Cleveland HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "thome", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_216", "p": "Tracy McGrady Houston Rockets HOF", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 5.99, "t": "star", "ln": "tracy", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_212", "p": "Trae Young Atlanta Hawks", "set": "2023 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "trae", "box": "B016 Donruss+Hoops", "sp": "football"},
+  {"k": "b016_60", "p": "Jason Varitek Boston Red Sox", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "varitek", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_111", "p": "Dave Winfield San Diego Padres HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "winfield", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_255", "p": "Bobby Witt Jr Kansas City Royals x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 5.49, "t": "star", "ln": "witt", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_203", "p": "Kevin Youkilis Boston Red Sox", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.49, "t": "star", "ln": "youkilis", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_39", "p": "Robin Yount Milwaukee Brewers HOF x2", "set": "2026 Donruss \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "yount", "box": "B016 Donruss+Hoops", "sp": "baseball"},
+  {"k": "b016_1", "p": "Yuki Kawamura Memphis Grizzlies", "set": "2024 Topps \u00b7 B016", "note": "", "pr": 4.99, "t": "star", "ln": "yuki", "box": "B016 Donruss+Hoops", "sp": "football"}
+];
+const KEY = "b016_pull_2026_09_04";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b016_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B016 PULLS 2026-09-04: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
