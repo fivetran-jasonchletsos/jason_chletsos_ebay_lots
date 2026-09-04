@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B014 Basketball + 75th — 2026-09-04</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B014: 1,472-card brick — basketball core + 2025 Topps 75th baseball stars. 95 listings / 109 cards / ~$568 at ask. Heat: Otis Birdsong Signature Selections AUTO $9.99, Bronny James x3 (White Hot Rookies $9.99, Select RC, Topps Chrome), Jokic Deep Space $6.99, LeBron + Magic Chrome, Select flame parallels (Chet, Fox, LaVine), Tatum, Earl Campbell Select, Jayden Reed Flash. ~1,360 junk-wax/commons to fodder. Mets keep: Francisco Alvarez Topps. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b014_734", "p": "Allen & Ginter Zaccharie Risacher RC Hawks", "set": "2024 Topps Allen \u00b7 B014", "note": "", "pr": 4.99, "t": "rookie", "ln": "&", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_988", "p": "Yordan Alvarez Houston Astros", "set": "2025 Topps Yordan \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "alvarez", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_757", "p": "Anthony Davis Los Angeles Lakers", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "anthony", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1410", "p": "Anthony Edwards Timberwolves x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "anthony", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1161", "p": "Anthony Richardson Indianapolis Colts", "set": "2023 Donruss Optic \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "anthony", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_928", "p": "Nolan Arenado St. Louis Cardinals", "set": "2025 Topps Nolan \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "arenado", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1072", "p": "Luis Arraez San Francisco Giants", "set": "2025 Topps Luis \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "arraez", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_625", "p": "Bam Adebayo Miami Heat", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "bam", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_882", "p": "Bernard King New York Knicks HOF", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "bernard", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_43", "p": "Bradley Beal Red Parallel Suns", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "color", "ln": "bradley", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_25", "p": "Bronny James Jr RC Los Angeles Lakers", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 8.99, "t": "rookie", "ln": "bronny", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1463", "p": "Bronny James Jr RC Los Angeles Lakers", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 8.99, "t": "rookie", "ln": "bronny", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1425", "p": "Brook Lopez Green Parallel Bucks", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.99, "t": "color", "ln": "brook", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1235", "p": "Buster Posey San Francisco Giants", "set": "2024 Panini Donruss \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "buster", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_660", "p": "Cameron Thomas Flame Parallel Nets", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.99, "t": "color", "ln": "cameron", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1412", "p": "Carmelo Anthony Denver Nuggets", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "carmelo", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1046", "p": "Dylan Cease San Diego Padres", "set": "2025 Topps Dylan \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "cease", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_662", "p": "Certified Alexandre Sarr RC Wizards", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.99, "t": "rookie", "ln": "certified", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_29", "p": "Chet Holmgren Flame Parallel Thunder", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 5.99, "t": "color", "ln": "chet", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_628", "p": "Chet Holmgren Oklahoma City Thunder", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "chet", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1031", "p": "Jackson Chourio Milwaukee Brewers", "set": "2025 Topps Jackson \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "chourio", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1443", "p": "Chris Paul San Antonio Spurs", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "chris", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_5", "p": "CJ McCollum Blue Parallel Wizards", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "color", "ln": "cj", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_978", "p": "Gerrit Cole New York Yankees", "set": "2025 Topps Gerrit \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "cole", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1421", "p": "DaRon Holmes II RC Denver Nuggets", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "daron", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_16", "p": "De'Aaron Fox Flame Parallel Spurs", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 5.49, "t": "color", "ln": "de'aaron", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1432", "p": "Deep Space Nikola Jokic Insert Nuggets", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 6.99, "t": "hit", "ln": "deep", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_619", "p": "DeMar DeRozan Sacramento Kings", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "demar", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1456", "p": "Devin Booker Phoenix Suns", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "devin", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_610", "p": "Dirk Nowitzki Dallas Mavericks HOF", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "dirk", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_611", "p": "Domantas Sabonis Sacramento Kings", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "domantas", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_879", "p": "Donovan Mitchell Cleveland Cavaliers", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "donovan", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_618", "p": "Dwyane Wade Miami Heat HOF", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "dwyane", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1143", "p": "Earl Campbell Houston Oilers HOF", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "earl", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_554", "p": "Emergent KJ Johnson RC Bucks Insert", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "emergent", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1424", "p": "Emergent Tristan da Silva RC Magic Insert", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "emergent", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_969", "p": "Paul Goldschmidt New York Yankees", "set": "2025 Topps Paul \u00b7 B014", "note": "", "pr": 5.49, "t": "color", "ln": "goldschmidt", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1409", "p": "Ja Morant Memphis Grizzlies", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "ja", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_627", "p": "Jalen Brunson New York Knicks x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "jalen", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_889", "p": "Jalen Duren Detroit Pistons", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "jalen", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1455", "p": "James Harden Los Angeles Clippers", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "james", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1194", "p": "Jayden Reed Flash Prizm Parallel Packers", "set": "2025 Panini Select \u00b7 B014", "note": "", "pr": 5.99, "t": "color", "ln": "jayden", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_661", "p": "Jayson Tatum Boston Celtics", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 6.99, "t": "star", "ln": "jayson", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_754", "p": "Johnny Furphy RC Indiana Pacers", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "johnny", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_7", "p": "Jonathan Mogbo Flame Parallel RC Raptors", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "color", "ln": "jonathan", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_672", "p": "Julius Randle Timberwolves", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "julius", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_623", "p": "Kawhi Leonard Los Angeles Clippers", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "kawhi", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1448", "p": "Kawhi Leonard Los Angeles Clippers", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "kawhi", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_615", "p": "Kevin Garnett Minnesota Timberwolves HOF", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "kevin", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_12", "p": "Keyonte George Red Flame Parallel Jazz", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.99, "t": "color", "ln": "keyonte", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_883", "p": "Klay Thompson Dallas Mavericks x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "klay", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_881", "p": "Knicks Teammates Shine Brunson McBride Insert", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "knicks", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_885", "p": "LeBron James Los Angeles Lakers", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 6.99, "t": "star", "ln": "lebron", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_624", "p": "Magic Johnson Los Angeles Lakers HOF", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 6.99, "t": "star", "ln": "magic", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1438", "p": "Marcus Sasser Green Parallel Pistons", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "color", "ln": "marcus", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1", "p": "Michael Porter Jr Blue Parallel Nets", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "color", "ln": "michael", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_887", "p": "Mikal Bridges New York Knicks x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "mikal", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_39", "p": "Miles Bridges Green Parallel Hornets", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "color", "ln": "miles", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_669", "p": "Naz Reid Timberwolves", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "naz", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_884", "p": "Nikola Jokic Denver Nuggets x3", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.99, "t": "star", "ln": "nikola", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1429", "p": "Nikola Topic RC Oklahoma City Thunder x2", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "nikola", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_876", "p": "Aaron Nola Philadelphia Phillies", "set": "2025 Topps Aaron \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "nola", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1095", "p": "Stars of MLB Chandler Simpson Insert Rays x2", "set": "2025 Topps Stars \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "of", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1183", "p": "Stars of MLB Dalton Rushing Insert Dodgers", "set": "2025 Topps Stars \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "of", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1106", "p": "Stars of MLB Gold Cam Smith Insert Astros", "set": "2025 Topps Stars \u00b7 B014", "note": "", "pr": 4.99, "t": "color", "ln": "of", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1446", "p": "OG Anunoby New York Knicks", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "og", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1040", "p": "Shinnosuke Ogasawara RC Washington Nationals", "set": "2025 Topps Shinnosuke \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "ogasawara", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_972", "p": "Salvador Perez Kansas City Royals", "set": "2025 Topps Salvador \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "perez", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_626", "p": "Rick Barry Golden State Warriors HOF x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.99, "t": "color", "ln": "rick", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_756", "p": "Rob Dillingham RC Timberwolves", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.99, "t": "rookie", "ln": "rob", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_630", "p": "Ryan Kalkbrenner RC Charlotte Hornets", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "ryan", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_919", "p": "Kyle Schwarber Philadelphia Phillies", "set": "2025 Topps Kyle \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "schwarber", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_932", "p": "Corey Seager Texas Rangers", "set": "2025 Topps Corey \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "seager", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_54", "p": "Signature Selections Otis Birdsong Auto Nets SS-OTI", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 9.99, "t": "hit", "ln": "signature", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1076", "p": "George Springer Toronto Blue Jays x2", "set": "2025 Topps George \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "springer", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_937", "p": "Future Stars Kumar Rocker Texas Rangers", "set": "2025 Topps Future \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "stars", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_942", "p": "Future Stars Max Muncy Athletics", "set": "2025 Topps Future \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "stars", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_985", "p": "Sal Stewart RC Cincinnati Reds", "set": "2025 Topps Sal \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "stewart", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1074", "p": "Trevor Story Boston Red Sox", "set": "2025 Topps Trevor \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "story", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_874", "p": "Bryson Stott Philadelphia Phillies", "set": "2025 Topps Bryson \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "stott", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_920", "p": "Seiya Suzuki Chicago Cubs", "set": "2025 Topps Seiya \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "suzuki", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_755", "p": "Tari Eason Houston Rockets", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "tari", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_667", "p": "Terrence Shannon Jr RC Timberwolves", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "terrence", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1073", "p": "Gleyber Torres Detroit Tigers", "set": "2025 Topps Gleyber \u00b7 B014", "note": "", "pr": 4.49, "t": "star", "ln": "torres", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_613", "p": "Tracy McGrady Houston Rockets HOF x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "tracy", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_886", "p": "Trae Young Atlanta Hawks", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "trae", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_858", "p": "Trea Turner Philadelphia Phillies", "set": "2024 Bowman Trea \u00b7 B014", "note": "", "pr": 4.99, "t": "star", "ln": "turner", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_1420", "p": "Tyrese Haliburton Indiana Pacers", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "tyrese", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_616", "p": "Tyrese Haliburton Indiana Pacers x2", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "tyrese", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1077", "p": "Justin Verlander Detroit Tigers", "set": "2025 Topps Justin \u00b7 B014", "note": "", "pr": 5.49, "t": "star", "ln": "verlander", "box": "B014 Hoops+75th", "sp": "baseball"},
+  {"k": "b014_589", "p": "White Hot Rookies Bronny James RC Lakers", "set": "2024 Donruss Optic \u00b7 B014", "note": "", "pr": 9.99, "t": "hit", "ln": "white", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_655", "p": "Yves Missi RC New Orleans Pelicans", "set": "2024 Topps Chrome \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "yves", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_1442", "p": "Yves Missi RC New Orleans Pelicans", "set": "2024 Panini Prizm \u00b7 B014", "note": "", "pr": 4.49, "t": "rookie", "ln": "yves", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_668", "p": "Zaccharie Risacher RC Atlanta Hawks x3", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 4.99, "t": "rookie", "ln": "zaccharie", "box": "B014 Hoops+75th", "sp": "football"},
+  {"k": "b014_8", "p": "Zach LaVine Flame Parallel Kings", "set": "2024 Panini Select \u00b7 B014", "note": "", "pr": 5.49, "t": "color", "ln": "zach", "box": "B014 Hoops+75th", "sp": "football"}
+];
+const KEY = "b014_pull_2026_09_04";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b014_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B014 PULLS 2026-09-04: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
