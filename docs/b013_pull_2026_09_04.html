@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B013 Topps Chrome — 2026-09-04</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B013: 2026 Topps Chrome football, 25 cards. 23 listings / ~$116 at ask: Bijan Fortune 15 $7.99, Edelman Legends of the Gridiron $6.99, Ladd McConkey Future Stars $6.99, Jameson Williams Wave $5.99, Derrick Brown Pulsar. 2 commons to fodder. REMINDER: Lamar Select Flash + the black-scan TC card still need re-feeding. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b013_23", "p": "Bijan Robinson Fortune 15 Insert Falcons", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 7.99, "t": "hit", "ln": "bijan", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_19", "p": "Bobby Brown III Pigskin Parallel Panthers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "color", "ln": "bobby", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_20", "p": "Cade Otton Wave Refractor Buccaneers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "color", "ln": "cade", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_16", "p": "Chris Jones Chiefs", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "chris", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_17", "p": "Derrick Brown Pulsar Refractor Panthers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.99, "t": "color", "ln": "derrick", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_14", "p": "Jakobi Meyers Jaguars", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "jakobi", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_22", "p": "Jameson Williams Wave Refractor Lions", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 5.99, "t": "color", "ln": "jameson", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_11", "p": "Jaylen Warren Steelers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "jaylen", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_8", "p": "Jordan Mailata Eagles", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "jordan", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_9", "p": "JT Tuimoloau RC Colts", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "rookie", "ln": "jt", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_24", "p": "Julian Edelman Legends of the Gridiron Patriots Insert", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 6.99, "t": "hit", "ln": "julian", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_12", "p": "Kenneth Walker III Seahawks", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "kenneth", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_4", "p": "Khalil Shakir Bills", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "khalil", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_18", "p": "Ladd McConkey Future Stars Chargers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 6.99, "t": "insert", "ln": "ladd", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_7", "p": "Marvin Mims Jr Broncos", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "marvin", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_6", "p": "Najee Harris Chargers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "najee", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_0", "p": "Ricky Pearsall 49ers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.99, "t": "star", "ln": "ricky", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_21", "p": "Robert Spillane Wave Refractor Patriots", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "color", "ln": "robert", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_3", "p": "Sebastian Castro RC Steelers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "rookie", "ln": "sebastian", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_5", "p": "Tate Ratledge RC Lions", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "rookie", "ln": "tate", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_15", "p": "Tavion Sanders Panthers", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.49, "t": "star", "ln": "tavion", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_1", "p": "Tua Tagovailoa Dolphins", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 4.99, "t": "star", "ln": "tua", "box": "B013 Chrome", "sp": "football"},
+  {"k": "b013_10", "p": "Xavier Worthy Chiefs", "set": "2026 Topps Chrome \u00b7 B013", "note": "", "pr": 5.49, "t": "star", "ln": "xavier", "box": "B013 Chrome", "sp": "football"}
+];
+const KEY = "b013_pull_2026_09_04";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b013_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B013 PULLS 2026-09-04: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
