@@ -140,6 +140,9 @@ def build_description(title: str) -> str:
 BRAND_TOKENS: list[tuple[str, str]] = [
     ("signature class",   "Topps"),
     ("fleer",             "Fleer"),
+    ("kellogg",           "Kellogg's"),
+    ("pinnacle",          "Panini"),
+    ("rezonance",         "Panini"),
     ("upper deck",        "Upper Deck"),
     ("goudey",            "Upper Deck"),
     ("leaf trinity",      "Leaf"),
