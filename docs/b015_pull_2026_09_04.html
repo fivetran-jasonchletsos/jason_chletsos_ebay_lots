@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>B015 Season Tickets + Donruss — 2026-09-04</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">B015: 662 cards — Contenders Season Tickets, Select blacks/colors, flagship football round 3, 2026 Donruss baseball legends. 116 listings / ~$757 at ask. Heat: Ladd McConkey Big Ticket $8.99, Mahomes Season Ticket x2 $6.99, Satchel Paige x3 $6.99, Beavers Spray SP $6.99, Pollard Pink + Flash, Scourton Flash, T.O. x2. KEEP BOX: Arvell Reese RC x2 (GIANTS — back says NY Giants!), Mauigoa, Daniel Jones Game Ticket, Brian Burns (Giants); David Wright x2 + Mitch Voit x3 (Mets). ~430 commons to fodder. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "b015_505", "p": "De'Von Achane Dolphins", "set": "2026 Topps De'Von \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "achane", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_497", "p": "Davante Adams Rams x3", "set": "2026 Topps Davante \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "adams", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_501", "p": "Jordan Addison Vikings", "set": "2026 Topps Jordan \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "addison", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_504", "p": "Joe Alt Chargers", "set": "2026 Topps Joe \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "alt", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_490", "p": "Will Anderson Jr Texans x3", "set": "2026 Topps Will \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "anderson", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_404", "p": "Andrew Mukuba RC Eagles", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "andrew", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_492", "p": "Mark Andrews Ravens x3", "set": "2026 Topps Mark \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "andrews", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_427", "p": "Armand Membou RC Jets", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "armand", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_495", "p": "Elic Ayomanor Titans RC x2", "set": "2026 Topps Elic \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "ayomanor", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_0", "p": "Dylan Beavers Spray Paint Variation RC Orioles", "set": "2025 Topps Dylan \u00b7 B015", "note": "", "pr": 6.99, "t": "color", "ln": "beavers", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_364", "p": "Bijan Robinson Falcons", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "bijan", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_363", "p": "Brian Robinson Jr Commanders", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "brian", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_619", "p": "A.J. Brown Eagles x4", "set": "2026 Topps A.J. \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "brown", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_612", "p": "Chandler Simpson Tampa Bay Rays", "set": "2026 Donruss Optic \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "chandler", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_310", "p": "Chipper Jones Atlanta Braves HOF", "set": "2023 Donruss Optic \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "chipper", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_476", "p": "Colson Montgomery White Sox", "set": "2026 Donruss Optic \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "colson", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_540", "p": "Dalton Kincaid Bills", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "dalton", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_414", "p": "Deebo Samuel Commanders x2", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "deebo", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_408", "p": "DK Metcalf Steelers", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "dk", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_403", "p": "Donovan McNabb Eagles", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "donovan", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_312", "p": "Elston Howard Yankees", "set": "2026 Donruss Optic \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "elston", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_325", "p": "Amari Cooper Bills", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "game", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_417", "p": "Geno Smith Raiders", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "geno", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_366", "p": "Greg Rousseau Bills", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "greg", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_313", "p": "Josh Hammond Rated Prospect Royals", "set": "2026 Donruss Josh \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "hammond", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_15", "p": "Brady House Spray Paint Variation RC Nationals", "set": "2025 Topps Brady \u00b7 B015", "note": "", "pr": 5.99, "t": "color", "ln": "house", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_311", "p": "Ike Irish Rated Prospect Blue Orioles", "set": "2026 Donruss Optic \u00b7 B015", "note": "", "pr": 4.99, "t": "color", "ln": "ike", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_372", "p": "James Pearce Jr RC Falcons x2", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "james", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_365", "p": "Jayden Reed Packers", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "jayden", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_422", "p": "Jaylin Noel RC Texans", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "jaylin", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_512", "p": "Randy Johnson Seattle Mariners HOF", "set": "2026 Donruss Randy \u00b7 B015", "note": "", "pr": 5.49, "t": "star", "ln": "johnson", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_513", "p": "Jace Jung Detroit Tigers", "set": "2026 Donruss Jace \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "jung", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_509", "p": "Colt Keith Detroit Tigers x2", "set": "2026 Donruss Colt \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "keith", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_431", "p": "Kendre Miller Pink Prizm Parallel Saints", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.99, "t": "color", "ln": "kendre", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_507", "p": "Hye-Seong Kim Los Angeles Dodgers", "set": "2026 Donruss Hye-Seong \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "kim", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_527", "p": "Barry Larkin Cincinnati Reds HOF x2", "set": "2026 Donruss Barry \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "larkin", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_651", "p": "Tony Lazzeri New York Yankees HOF x2", "set": "2026 Donruss Tony \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "lazzeri", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_391", "p": "Khalil Mack Chargers", "set": "2026 Topps Khalil \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "mack", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_418", "p": "Malaki Starks Premier RC Ravens", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.99, "t": "rookie", "ln": "malaki", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_473", "p": "Hideki Matsui New York Yankees x2", "set": "2026 Donruss Hideki \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "matsui", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_477", "p": "Brice Matthews Houston Astros", "set": "2026 Donruss Brice \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "matthews", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_479", "p": "Don Mattingly New York Yankees", "set": "2026 Donruss Don \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "mattingly", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_460", "p": "Baker Mayfield Buccaneers", "set": "2026 Topps Baker \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "mayfield", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_390", "p": "Trey McBride Cardinals", "set": "2026 Topps Trey \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "mcbride", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_397", "p": "Luke McCaffrey Rookie Stallions Insert Commanders", "set": "2026 Topps Luke \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "mccaffrey", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_250", "p": "Ladd McConkey Big Ticket Insert Chargers", "set": "2026 Topps Ladd \u00b7 B015", "note": "", "pr": 8.99, "t": "hit", "ln": "mcconkey", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_389", "p": "Xavier McKinney Packers x2", "set": "2026 Topps Xavier \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "mckinney", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_478", "p": "Aidan Miller Rated Prospect Phillies", "set": "2026 Donruss Aidan \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "miller", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_472", "p": "Braden Montgomery Rated Prospect White Sox", "set": "2026 Donruss Braden \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "montgomery", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_461", "p": "DJ Moore Bears", "set": "2026 Topps DJ \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "moore", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_385", "p": "Kyler Murray Vikings x2", "set": "2026 Topps Kyler \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "murray", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_413", "p": "Nic Scourton Flash Prizm RC Panthers", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 5.99, "t": "color", "ln": "nic", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_579", "p": "Arjun Nimmala Rated Prospect Blue Jays", "set": "2026 Donruss Arjun \u00b7 B015", "note": "", "pr": 4.49, "t": "color", "ln": "nimmala", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_41", "p": "Stars of MLB Gold Jackson Merrill Insert Padres", "set": "2025 Topps Stars \u00b7 B015", "note": "", "pr": 5.49, "t": "color", "ln": "of", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_454", "p": "Isiah Pacheco Lions", "set": "2026 Topps Isiah \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "pacheco", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_572", "p": "Satchel Paige St. Louis HOF x3", "set": "2026 Donruss Satchel \u00b7 B015", "note": "", "pr": 6.99, "t": "star", "ln": "paige", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_577", "p": "JoJo Parker Rated Prospect Blue Jays", "set": "2026 Donruss JoJo \u00b7 B015", "note": "", "pr": 4.49, "t": "color", "ln": "parker", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_456", "p": "T.J. Parker Bills RC", "set": "2026 Topps T.J. \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "parker", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_283", "p": "Micah Parsons Packers x2", "set": "2026 Topps Micah \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "parsons", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_275", "p": "Michael Penix Jr Black Parallel Falcons", "set": "2026 Topps Michael \u00b7 B015", "note": "", "pr": 5.49, "t": "color", "ln": "penix", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_277", "p": "Michael Penix Jr Falcons", "set": "2026 Topps Michael \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "penix", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_602", "p": "Freddy Peralta Milwaukee Brewers", "set": "2025 Topps Freddy \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "peralta", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_453", "p": "Kyle Pitts Sr Falcons", "set": "2026 Topps Kyle \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "pitts", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_458", "p": "Dak Prescott Cowboys", "set": "2026 Topps Dak \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "prescott", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_578", "p": "Rated Prospect Retro David Ortiz Red Sox", "set": "2026 Donruss Rated \u00b7 B015", "note": "", "pr": 5.49, "t": "rookie", "ln": "prospect", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_233", "p": "Brock Purdy 49ers x3", "set": "2026 Topps Brock \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "purdy", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_452", "p": "Patrick Queen Steelers", "set": "2026 Topps Patrick \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "queen", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_407", "p": "Raheem Mostert Raiders", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "raheem", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_360", "p": "Raheim Sanders RC Chargers", "set": "2025 Panini Score \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "raheim", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_567", "p": "Bryce Rainer Rated Prospect Detroit Tigers x2", "set": "2026 Donruss Bryce \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "rainer", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_449", "p": "Jalen Ramsey Steelers", "set": "2026 Topps Jalen \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "ramsey", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_434", "p": "Jayden Reed Packers x2", "set": "2026 Topps Jayden \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "reed", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_436", "p": "Rashee Rice Chiefs x3", "set": "2026 Topps Rashee \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "rice", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_376", "p": "Ricky Pearsall 49ers x3", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "ricky", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_446", "p": "Calvin Ridley Titans x2", "set": "2026 Topps Calvin \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "ridley", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_571", "p": "Ivan Rodriguez Texas Rangers HOF", "set": "2026 Donruss Ivan \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "rodriguez", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_624", "p": "Mike Schmidt Philadelphia Phillies HOF", "set": "2026 Donruss Mike \u00b7 B015", "note": "", "pr": 5.49, "t": "star", "ln": "schmidt", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_627", "p": "Kruz Schoolcraft Rated Prospect Padres x2", "set": "2026 Donruss Kruz \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "schoolcraft", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_426", "p": "Sean McVay Rams Coach", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "sean", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_298", "p": "Aidan Hutchinson Lions", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_159", "p": "Amon-Ra St. Brown Lions x2", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_301", "p": "Baker Mayfield Buccaneers", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_303", "p": "Christian McCaffrey 49ers", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 5.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_160", "p": "Cooper Kupp Rams", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_300", "p": "DJ Moore Bears", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_546", "p": "Dalton Kincaid Bills", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_173", "p": "Derrick Henry Ravens", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 5.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_536", "p": "Drake London Falcons", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_547", "p": "George Kittle 49ers", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_324", "p": "James Conner Cardinals", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_296", "p": "James Cook Bills", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_302", "p": "Jaylen Waddle Dolphins", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_172", "p": "Kirk Cousins Falcons", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_410", "p": "Kyler Murray Cardinals", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_304", "p": "Kyren Williams Rams", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_327", "p": "Maxx Crosby Raiders", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_326", "p": "Nick Chubb Browns", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_161", "p": "Patrick Mahomes Chiefs x2", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 6.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_297", "p": "Puka Nacua Rams", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 5.49, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_535", "p": "Trevor Lawrence Jaguars", "set": "2025 Panini Contenders \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "season", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_625", "p": "Chase Shores Rated Prospect Angels", "set": "2026 Donruss Chase \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "shores", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_629", "p": "Ryan Sloan Rated Prospect Mariners", "set": "2026 Donruss Ryan \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "sloan", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_561", "p": "Cam Smith Houston Astros x2", "set": "2026 Donruss Cam \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "smith", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_622", "p": "Hagen Smith Rated Prospect White Sox", "set": "2026 Donruss Hagen \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "smith", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_562", "p": "Ozzie Smith St. Louis Cardinals HOF x2", "set": "2026 Donruss Ozzie \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "smith", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_623", "p": "Sung-Mun Song Rated Prospect Padres", "set": "2026 Donruss Sung-Mun \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "song", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_626", "p": "Tomoyuki Sugano Baltimore Orioles", "set": "2026 Donruss Tomoyuki \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "sugano", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_379", "p": "Terrell Owens Eagles HOF x2", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 5.49, "t": "star", "ln": "terrell", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_611", "p": "Jim Thome Cleveland HOF", "set": "2026 Donruss Jim \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "thome", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_610", "p": "James Tibbs III Rated Prospect Dodgers", "set": "2026 Donruss James \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "tibbs", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_369", "p": "Tony Pollard Flash Prizm Parallel Titans", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 5.99, "t": "color", "ln": "tony", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_367", "p": "Tony Pollard Pink Prizm Parallel Titans", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 5.99, "t": "color", "ln": "tony", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_368", "p": "Tony Pollard Titans x2", "set": "2025 Panini Select \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "tony", "box": "B015 Tickets+Donruss", "sp": "football"},
+  {"k": "b015_584", "p": "Ryan Waldschmidt Rated Prospect Diamondbacks", "set": "2026 Donruss Ryan \u00b7 B015", "note": "", "pr": 4.49, "t": "rookie", "ln": "waldschmidt", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_580", "p": "Dave Winfield San Diego Padres HOF x2", "set": "2026 Donruss Dave \u00b7 B015", "note": "", "pr": 4.49, "t": "star", "ln": "winfield", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_581", "p": "Bobby Witt Jr Kansas City Royals", "set": "2026 Donruss Bobby \u00b7 B015", "note": "", "pr": 5.49, "t": "star", "ln": "witt", "box": "B015 Tickets+Donruss", "sp": "baseball"},
+  {"k": "b015_585", "p": "James Wood Washington Nationals", "set": "2026 Donruss James \u00b7 B015", "note": "", "pr": 4.99, "t": "star", "ln": "wood", "box": "B015 Tickets+Donruss", "sp": "baseball"}
+];
+const KEY = "b015_pull_2026_09_04";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="b015_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `B015 PULLS 2026-09-04: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
