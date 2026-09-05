@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>C002 Prizm — 2026-09-05</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">C002: 336 cards — 2025 Prizm NFL + Prizm Draft Picks. 113 listings / 156 cards / ~$938 at ask (Prizm $5+ floor). Heat: ARCH MANNING Instant Impact $19.99, Mike Evans Red Cracked Ice $9.99, Jerry Rice Select MVSU $8.99, Joe Montana ND $8.99, Barry Sanders x2, Randy Moss, Peyton x3, Marino, Favre, Jim Kelly, Sean Taylor, Jeremiah Smith + Bryce Underwood + Ryan Williams Rated Prospects, 2 Lazers. ~170 dupes/commons to fodder. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "c002_301", "p": "Aaron Jones Minnesota Vikings", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "aaron", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_331", "p": "Aidan Hutchinson Detroit Lions", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "aidan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_60", "p": "Amon-Ra St. Brown Detroit Lions", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "amon-ra", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_334", "p": "Anthony Richardson Indianapolis Colts", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "anthony", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_21", "p": "Arch Manning Instant Impact Texas", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 19.99, "t": "hit", "ln": "arch", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_293", "p": "Austin Ekeler Washington Commanders", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "austin", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_306", "p": "Baker Mayfield Oklahoma", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "baker", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_327", "p": "Baker Mayfield Tampa Bay Buccaneers x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "baker", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_295", "p": "Barry Sanders Oklahoma State", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "star", "ln": "barry", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_200", "p": "Barry Sanders Oklahoma State HOF", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "star", "ln": "barry", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_276", "p": "Bijan Robinson Atlanta Falcons", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 6.49, "t": "star", "ln": "bijan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_181", "p": "Brashard Smith RC Kansas City Chiefs", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "brashard", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_79", "p": "Brenton Strange Lazer Parallel Jaguars", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "color", "ln": "brenton", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_298", "p": "Brett Favre Minnesota Vikings HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 6.99, "t": "star", "ln": "brett", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_67", "p": "Bryce Underwood Rated Prospect Michigan x3", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 6.99, "t": "rookie", "ln": "bryce", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_57", "p": "C.J. Stroud Houston Texans", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "c.j.", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_50", "p": "Caleb Downs Rated Prospect Ohio State x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "caleb", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_56", "p": "Cam Ward RC Tennessee Titans", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 6.99, "t": "rookie", "ln": "cam", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_335", "p": "Carl Pickens Cincinnati Bengals", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "carl", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_62", "p": "Carson Schwesinger RC Cleveland Browns x3", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "carson", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_269", "p": "CeeDee Lamb Dallas Cowboys", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "ceedee", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_275", "p": "Chris Olave New Orleans Saints", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "chris", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_322", "p": "Christian McCaffrey 49ers Stanford x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "christian", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_267", "p": "Clay Matthews Cleveland Browns", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "clay", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_264", "p": "Cris Dishman Houston Oilers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "cris", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_143", "p": "Dan Marino Pittsburgh HOF", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "star", "ln": "dan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_95", "p": "Dante Moore Rated Prospect Oregon x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "dante", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_296", "p": "Deebo Samuel Washington Commanders", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "deebo", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_315", "p": "Denzel Ward Cleveland Browns", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "denzel", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_84", "p": "Devin Neal Kansas RC x4", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "devin", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_127", "p": "DJ Giddens RC Indianapolis Colts", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "dj", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_292", "p": "DJ Moore Chicago Bears", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "dj", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_270", "p": "DK Metcalf Pittsburgh Steelers x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "dk", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_1", "p": "Donovan Edwards Michigan x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "donovan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_40", "p": "Donovan Ezeiruaku RC Boston College Eagles x4", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "donovan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_303", "p": "Dwight Freeney Indianapolis Colts HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "dwight", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_174", "p": "Dylan Raiola Rated Prospect Nebraska", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "dylan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_324", "p": "Ed Reed Houston Texans HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "ed", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_318", "p": "Elijah Arroyo RC Seattle Seahawks", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "elijah", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_98", "p": "Elijhah Badger Florida", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "elijhah", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_44", "p": "Eric Dickerson SMU HOF", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "eric", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_273", "p": "Eric Moulds Houston Texans", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "eric", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_329", "p": "Evan Engram Denver Broncos", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "evan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_287", "p": "Garrett Wilson New York Jets", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "garrett", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_180", "p": "Isaac TeSlaa RC Detroit Lions x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "isaac", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_99", "p": "Jack Bech TCU RC x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "jack", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_159", "p": "Jack Sawyer RC Pittsburgh Steelers x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "jack", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_223", "p": "Jalen Milroe Alabama RC", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "jalen", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_141", "p": "Jalen Royals RC Kansas City Chiefs x3", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "jalen", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_137", "p": "Jalon Walker RC Atlanta Falcons", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "jalon", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_86", "p": "James Cook Georgia x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "james", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_284", "p": "James Lofton Green Bay Packers HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "james", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_55", "p": "Jamien Sherwood Lazer Parallel Jets", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "color", "ln": "jamien", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_77", "p": "Jan Stenerud Kansas City Chiefs HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "jan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_88", "p": "Jared Goff California", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "jared", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_36", "p": "Jayden Daniels LSU", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 6.99, "t": "star", "ln": "jayden", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_104", "p": "Jaylin Noel Iowa State RC x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "jaylin", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_314", "p": "Jaylin Noel RC Houston Texans", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "jaylin", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_66", "p": "Jeremiah Smith Rated Prospect Ohio State", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "rookie", "ln": "jeremiah", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_23", "p": "Jerome Bettis Notre Dame HOF", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "jerome", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_164", "p": "Jerry Jeudy Cleveland Browns", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "jerry", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_16", "p": "Jerry Rice Mississippi Valley State HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 8.99, "t": "star", "ln": "jerry", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_311", "p": "Jim Kelly Buffalo Bills HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 6.99, "t": "star", "ln": "jim", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_243", "p": "Joe Montana Notre Dame HOF", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 8.99, "t": "star", "ln": "joe", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_178", "p": "Joe Theismann Washington Redskins", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "joe", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_49", "p": "Jonah Coleman Washington RC x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "jonah", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_309", "p": "Jordan Love Green Bay Packers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "jordan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_166", "p": "Jordyn Brooks Miami Dolphins", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "jordyn", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_59", "p": "JT Tuimoloau RC Indianapolis Colts x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "jt", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_289", "p": "Justin Herbert Los Angeles Chargers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 6.49, "t": "star", "ln": "justin", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_126", "p": "Kaleb Johnson RC Pittsburgh Steelers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "kaleb", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_140", "p": "Keelon Russell Rated Prospect Alabama", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "keelon", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_263", "p": "Kenneth Walker III Seattle Seahawks x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "kenneth", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_320", "p": "Khalil Shakir Buffalo Bills", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "khalil", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_89", "p": "Kyle McCord Syracuse RC", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "kyle", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_163", "p": "L'Jarius Sneed Tennessee Titans x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "l'jarius", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_112", "p": "LaNorris Sellers South Carolina x3", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "lanorris", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_260", "p": "Larry Fitzgerald Arizona Cardinals x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "larry", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_65", "p": "Malaki Starks Georgia RC", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "malaki", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_313", "p": "Mason Taylor RC New York Jets x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "mason", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_321", "p": "Micah Parsons Cowboys Penn State x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "micah", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_85", "p": "Micah Parsons Penn State x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "micah", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_17", "p": "Mike Evans Red Cracked Ice Texas A&M", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 9.99, "t": "color", "ln": "mike", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_281", "p": "Mike Evans Tampa Bay Buccaneers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "mike", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_42", "p": "Mike Evans Texas A&M", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "mike", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_290", "p": "Nick Bosa San Francisco 49ers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "nick", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_9", "p": "Nico Collins Michigan", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "nico", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_0", "p": "Oronde Gadsden II RC Los Angeles Chargers x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "oronde", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_106", "p": "Peyton Manning Tennessee", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "star", "ln": "peyton", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_43", "p": "Peyton Manning Tennessee HOF x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "star", "ln": "peyton", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_196", "p": "Quinshon Judkins RC Cleveland Browns x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "quinshon", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_87", "p": "Randy Moss Marshall HOF", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 7.99, "t": "star", "ln": "randy", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_237", "p": "Riley Leonard Notre Dame RC", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "riley", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_283", "p": "Rome Odunze Chicago Bears", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "rome", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_81", "p": "Ryan Williams Rated Prospect Alabama x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 6.49, "t": "rookie", "ln": "ryan", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_294", "p": "Sean Taylor Washington Redskins", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 6.99, "t": "star", "ln": "sean", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_173", "p": "Shavon Revel Jr RC Dallas Cowboys", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "shavon", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_64", "p": "Shemar Stewart RC Cincinnati Bengals", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "shemar", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_278", "p": "Stefon Diggs New England Patriots", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "star", "ln": "stefon", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_113", "p": "Tavien St Clair Rated Prospect Ohio State x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "rookie", "ln": "tavien", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_202", "p": "Tim Tebow Florida White", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "tim", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_37", "p": "Tim Tebow Florida x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "tim", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_286", "p": "Torry Holt Jacksonville Jaguars", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "torry", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_279", "p": "Trey Benson Arizona Cardinals x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "trey", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_109", "p": "Tyler Shough Louisville RC x2", "set": "Prizm DP \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "tyler", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_61", "p": "Tyler Shough RC New Orleans Saints", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "tyler", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_58", "p": "Tyler Warren RC Indianapolis Colts x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "tyler", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_268", "p": "Tyrann Mathieu New Orleans Saints", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "tyrann", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_310", "p": "Vernon Davis San Francisco 49ers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "vernon", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_333", "p": "Warren Sapp Oakland Raiders HOF", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "warren", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_191", "p": "Will Howard RC Pittsburgh Steelers x2", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.99, "t": "rookie", "ln": "will", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_288", "p": "Xavier McKinney Green Bay Packers", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "xavier", "box": "C002 Prizm", "sp": "football"},
+  {"k": "c002_304", "p": "Zay Flowers Baltimore Ravens", "set": "Prizm NFL \u00b7 C002", "note": "", "pr": 5.49, "t": "star", "ln": "zay", "box": "C002 Prizm", "sp": "football"}
+];
+const KEY = "c002_pull_2026_09_05";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="c002_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `C002 PULLS 2026-09-05: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
