@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>C004 SAGE Hits — 2026-09-05</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">C004: 637-card SAGE mega brick — the biggest hit haul of the scanner era. 56 listings / ~$311 at ask: 24 AUTOGRAPHS (Rashid Shaheed $11.99, Theo Jackson $7.99, Harvard QB Jaden Craig $6.99, Taron Vincent, Chris Hinton + 19 more), Aidan Bouman jersey-switch relic, Davon Booth red mosaic, Artistry inserts (Hutchinson, Stingley, Calcaterra, Milton), Michael Redd Campus Legends, Jeanty ART, Jonathan Ogden Prizm, Donruss legends (Dickerson, Carmichael, Suggs). ~570 base = SAGE restock depth + fodder. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "c004_542", "p": "Aidan Hutchinson Michigan Lions Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.99, "t": "insert", "ln": "aidan", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_311", "p": "Vinny Anthony II Autograph Wisconsin A-VAII", "set": "2025 SAGE Vinny \u00b7 C004", "note": "", "pr": 5.49, "t": "hit", "ln": "anthony", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_544", "p": "Arnold Ebiketie Penn State Falcons Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.49, "t": "insert", "ln": "arnold", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_42", "p": "Bailey Zappe Western Kentucky Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.49, "t": "insert", "ln": "bailey", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_309", "p": "Aidan Bouman Player-Worn Jersey Switch South Dakota", "set": "2025 SAGE Aidan \u00b7 C004", "note": "", "pr": 5.99, "t": "hit", "ln": "bouman", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_251", "p": "Brad Hawkins Michigan Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.49, "t": "insert", "ln": "brad", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_171", "p": "Kentrel Bullock Autograph South Alabama A-KB2", "set": "2025 SAGE Kentrel \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "bullock", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_34", "p": "Camren McDonald Autograph Florida State", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "camren", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_220", "p": "Chris Hinton Autograph Michigan", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.99, "t": "hit", "ln": "chris", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_636", "p": "Donruss Chris Godwin Tampa Bay Buccaneers", "set": "2023 Panini Donruss \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "chris", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_256", "p": "Christian Matthew Autograph Valdosta State", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "christian", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_169", "p": "Coulter Cleland Autograph Davidson A-CC", "set": "2025 SAGE Coulter \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "cleland", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_170", "p": "Jaden Craig Autograph Harvard A-JC3", "set": "2025 SAGE Jaden \u00b7 C004", "note": "", "pr": 6.99, "t": "hit", "ln": "craig", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_172", "p": "Ja'Quez Cross Autograph Arkansas State A-JQC", "set": "2025 SAGE Ja'Quez \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "cross", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_631", "p": "De'Von Achane Miami Dolphins", "set": "2023 Donruss Optic \u00b7 C004", "note": "", "pr": 4.99, "t": "star", "ln": "de'von", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_255", "p": "Dennis Houston Autograph Western Illinois", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "dennis", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_253", "p": "Derek Stingley Jr LSU Texans Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.49, "t": "insert", "ln": "derek", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_628", "p": "DeVonta Smith Philadelphia Eagles", "set": "2023 Donruss Optic \u00b7 C004", "note": "", "pr": 4.99, "t": "star", "ln": "devonta", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_250", "p": "Prestige Dominique Rodgers-Cromartie Cardinals", "set": "2008 Playoff Prestige \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "dominique", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_33", "p": "Drew Estrada Autograph Baylor x2", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "drew", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_316", "p": "Jahmal Edrine Autograph Virginia A-JE", "set": "2025 SAGE Jahmal \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "edrine", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_632", "p": "Donruss Eric Dickerson Indianapolis Colts HOF", "set": "2023 Panini Donruss \u00b7 C004", "note": "", "pr": 4.99, "t": "star", "ln": "eric", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_222", "p": "Gervarrius Owens Autograph Houston", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.49, "t": "hit", "ln": "gervarrius", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_315", "p": "Omar Graham Jr Autograph Florida State A-OGJ", "set": "2025 SAGE Omar \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "graham", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_247", "p": "Grant Calcaterra Oklahoma Eagles Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "insert", "ln": "grant", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_37", "p": "Greg Brooks Autograph LSU", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.99, "t": "hit", "ln": "greg", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_313", "p": "George Gumbs Jr Autograph Florida A-GGJ", "set": "2025 SAGE George \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "gumbs", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_634", "p": "Donruss Harold Carmichael Philadelphia Eagles HOF", "set": "2023 Panini Donruss \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "harold", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_546", "p": "Houston Griffith Autograph Notre Dame", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "houston", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_40", "p": "Isaiah King Autograph", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "isaiah", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_223", "p": "Jacob Copeland Autograph Florida", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "jacob", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_630", "p": "Donruss Jalen McMillan Buccaneers", "set": "2025 Panini Donruss \u00b7 C004", "note": "", "pr": 4.99, "t": "star", "ln": "jalen", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_519", "p": "Jerome Ford Cincinnati Browns Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.49, "t": "insert", "ln": "jerome", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_43", "p": "John Metchie Alabama Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.49, "t": "insert", "ln": "john", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_529", "p": "Prizm Jonathan Ogden Baltimore Ravens HOF", "set": "2024 Panini Prizm \u00b7 C004", "note": "", "pr": 5.49, "t": "star", "ln": "jonathan", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_4", "p": "Kalon Gervin Autograph Michigan State x2", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "kalon", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_98", "p": "Donruss Keenan Allen Chicago Bears", "set": "2024 Panini Donruss \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "keenan", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_545", "p": "Kyric McGowan Autograph Georgia Tech", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "kyric", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_38", "p": "Campus Legends Michael Redd Ohio State Insert", "set": "2025 Panini Campus \u00b7 C004", "note": "", "pr": 5.99, "t": "insert", "ln": "legends", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_627", "p": "Leonard Williams Seattle Seahawks", "set": "2023 Donruss Optic \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "leonard", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_525", "p": "Next Level Donovan Edwards Michigan", "set": "2026 SAGE Next \u00b7 C004", "note": "", "pr": 4.99, "t": "insert", "ln": "level", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_257", "p": "Luiji Vilain Autograph Wake Forest", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "luiji", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_635", "p": "Donruss Maxx Crosby Las Vegas Raiders", "set": "2025 Panini Donruss \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "maxx", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_252", "p": "McKenzie Milton UCF Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.99, "t": "insert", "ln": "mckenzie", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_310", "p": "Peak Performance Red Mosaic Davon Booth Mississippi St", "set": "2026 SAGE Peak \u00b7 C004", "note": "", "pr": 5.99, "t": "hit", "ln": "performance", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_387", "p": "Rashid Shaheed Autograph Saints", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 11.99, "t": "hit", "ln": "rashid", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_547", "p": "Red Calvin Turner Jr Autograph Hawaii", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.49, "t": "hit", "ln": "red", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_258", "p": "Red Lio'Undre Gallimore Autograph", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.99, "t": "hit", "ln": "red", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_246", "p": "All Rookie Team Ashton Jeanty Boise State Raiders", "set": "2026 SAGE All \u00b7 C004", "note": "", "pr": 5.99, "t": "insert", "ln": "rookie", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_543", "p": "Taron Vincent Autograph Ohio State", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 5.99, "t": "hit", "ln": "taron", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_626", "p": "Tee Higgins Cincinnati Bengals", "set": "2023 Donruss Optic \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "tee", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_629", "p": "Terrell Suggs Baltimore Ravens", "set": "2023 Donruss Optic \u00b7 C004", "note": "", "pr": 4.99, "t": "star", "ln": "terrell", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_562", "p": "Theo Jackson Autograph Titans", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 7.99, "t": "hit", "ln": "theo", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_633", "p": "Donruss Tutu Atwell Los Angeles Rams", "set": "2023 Panini Donruss \u00b7 C004", "note": "", "pr": 4.49, "t": "star", "ln": "tutu", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_312", "p": "Kaden Wetjen Autograph Iowa A-KW x2", "set": "2025 SAGE Kaden \u00b7 C004", "note": "", "pr": 4.99, "t": "hit", "ln": "wetjen", "box": "C004 SAGE Hits", "sp": "football"},
+  {"k": "c004_563", "p": "Zamir White Georgia Raiders Insert", "set": "2025 SAGE Artistry \u00b7 C004", "note": "", "pr": 4.49, "t": "insert", "ln": "zamir", "box": "C004 SAGE Hits", "sp": "football"}
+];
+const KEY = "c004_pull_2026_09_05";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="c004_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `C004 PULLS 2026-09-05: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
