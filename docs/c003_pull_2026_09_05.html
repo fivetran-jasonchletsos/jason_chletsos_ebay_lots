@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>C003 Contenders + NIL — 2026-09-05</title>
+<style>
+ body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f4f6f9;color:#111}
+ .wrap{max-width:760px;margin:0 auto;padding:16px 14px 90px}
+ h1{font-size:22px;margin:6px 0 2px;color:#7a1f1f}
+ .sub{color:#667;font-size:13.5px;margin:0 0 10px;line-height:1.4}
+ .warn{background:#fff3d6;border:1px solid #d4af37;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:10px}
+ #chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+ .chip{flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;border:1.5px solid #dcc;
+       background:#fff;color:#855;cursor:pointer;white-space:nowrap}
+ .chip.on{background:#7a1f1f;color:#fff;border-color:#7a1f1f}
+ .boxhdr{font-size:15px;font-weight:700;color:#7a1f1f;margin:14px 0 2px;border-bottom:2px solid #e0c8c8;padding-bottom:3px}
+ .card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dde;border-radius:12px;
+       padding:9px 11px;margin:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .card.done{opacity:.45;background:#e8f5e9;border-color:#9c9}
+ .card.done .nm{text-decoration:line-through}
+ .card.flip{border-color:#d4af37;background:#fffdf4}
+ img.th{width:52px;height:70px;object-fit:cover;border-radius:6px;background:#eee;flex:0 0 52px;cursor:zoom-in}
+ .info{flex:1;min-width:0}
+ .nm{font-weight:650;font-size:14.5px;line-height:1.25}
+ .tm{color:#96604a;font-size:12px;font-weight:600}
+ .st{color:#99a;font-size:11px;margin-top:2px}
+ .pr{flex:0 0 auto;font-weight:700;color:#1a5c1a;font-size:15px}
+ #bar{position:fixed;bottom:0;left:0;right:0;background:#4a1010;color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:600}
+ #reset{float:right;background:none;border:1px solid #b99;color:#fdd;border-radius:8px;padding:3px 9px;font-size:12px;margin-right:8px}
+ #rep{float:right;background:#f0c8a0;border:none;color:#502;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;margin-right:8px}
+ #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+ #lightbox.on{display:flex}
+ #lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
+</style></head><body><div class="wrap">
+<h1>B002 Pull List — Sep 1 PM (513 cards!)</h1>
+<p class="sub">C003: 377 cards — 2023 Contenders football + Contenders NIL (Ohio State/Texas) + 2023 SAGE. 108 listings / 154 cards / ~$780 at ask. Heat: ARCH MANNING College Ticket $14.99, Tom Brady Season Ticket $12.99, Jeremiah Smith rainbow (sparkle $8.99 + CT + Campus Legends x2 + School Colors), Julian Sayin x2, Gronk Legendary, Texas NIL stars (Booker, Atwood x2, Missimo). ~220 commons/women's-sports minors to fodder. A-Z.</p>
+<div class="warn"><b>No serials, no autos in this box</b> — clean base. Legends and coach cards are the value. Daniel Jones (Giants) left in fodder per the usual. All Prizm base — the repricer will comp-check after posting.</div>
+<div id="chips"></div>
+<div id="list"></div>
+</div>
+<div id="lightbox"><img id="lbimg" src=""></div>
+<div id="bar"><button id="reset">reset</button><button id="rep">Copy report</button><span id="cnt"></span></div>
+<script>
+const DATA = [
+  {"k": "c003_223", "p": "Round 1 Christian Gonzalez Emmanuel Forbes Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "1", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_118", "p": "Round 1 Zay Flowers Dalton Kincaid Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "insert", "ln": "1", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_58", "p": "Round 3 Hendon Hooker Tre Tucker Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "3", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_72", "p": "Round 3 Tank Bigsby Tank Dell Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "3", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_231", "p": "Round 5 Thompson-Robinson Jaren Hall Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "5", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_71", "p": "Jaire Alexander Packers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "alexander", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_222", "p": "Tyson Bagent RC Bears", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "rookie", "ln": "bagent", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_6", "p": "Odell Beckham Jr Ravens x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "beckham", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_239", "p": "Nick Bolton Chiefs", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "bolton", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_240", "p": "Joey Bosa Chargers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "bosa", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_207", "p": "Legendary Brian Orakpo Texas", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "brian", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_242", "p": "Harrison Butker Chiefs", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "butker", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_262", "p": "Nick Chubb Browns", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "chubb", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_241", "p": "Draft Class Bryan Bresee Saints Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "class", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_11", "p": "Draft Class Cedric Tillman Browns Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "class", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_243", "p": "Draft Class Jordan Addison Vikings Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "insert", "ln": "class", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_126", "p": "Draft Class Roschon Johnson Bears Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "class", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_46", "p": "Draft Class Tyree Wilson Raiders Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "class", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_247", "p": "School Colors Jeremiah Smith Ohio State Insert", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 6.99, "t": "insert", "ln": "colors", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_218", "p": "School Colors Tavien St Clair Ohio State Insert", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "insert", "ln": "colors", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_261", "p": "Kirk Cousins Vikings", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "cousins", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_320", "p": "Dalton Kincaid Utah Bills x4", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "dalton", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_331", "p": "Artistry Jordan Davis Georgia Eagles Insert", "set": "2023 SAGE Artistry \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "davis", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_18", "p": "Game Day Ticket Nick Chubb Browns", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "insert", "ln": "day", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_205", "p": "Legendary Derrick Johnson Texas", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "derrick", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_182", "p": "Clyde Edwards-Helaire Chiefs", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "edwards-helaire", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_3", "p": "Travis Etienne Jaguars", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "etienne", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_95", "p": "Jimmy Garoppolo Raiders", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "garoppolo", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_10", "p": "Chris Godwin Buccaneers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "godwin", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_115", "p": "DeAndre Hopkins Titans x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "hopkins", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_286", "p": "Jordan Addison USC Vikings RT-178 x2", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.99, "t": "insert", "ln": "jordan", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_2", "p": "Sam LaPorta Michael Mayer Rookie Ticket Duo", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "insert", "ln": "laporta", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_165", "p": "Campus Legends Jeremiah Smith Ohio State Insert x2", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 6.99, "t": "insert", "ln": "legends", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_214", "p": "Campus Legends Ted Ginn Jr Ohio State Insert", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "legends", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_212", "p": "Legendary Lexi Missimo Texas Soccer", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "insert", "ln": "lexi", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_208", "p": "Legendary Logan Eggleston Texas Volleyball", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "logan", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_61", "p": "Baker Mayfield Buccaneers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "mayfield", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_324", "p": "Michael Mayer Notre Dame Raiders RT-184", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "michael", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_107", "p": "Student Orientation Carnell Tate Prizm Ohio State", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.99, "t": "insert", "ln": "orientation", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_340", "p": "Phil Mafah Clemson Cowboys", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "phil", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_13", "p": "Kyle Pitts Falcons", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "pitts", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_303", "p": "Quentin Johnston TCU Chargers RT-185", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "quentin", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_201", "p": "Legendary Reese Atwood Texas Softball x2", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.99, "t": "insert", "ln": "reese", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_190", "p": "Legendary Rob Gronkowski Patriots Insert", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 6.99, "t": "insert", "ln": "rob", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_24", "p": "Harrison Smith Vikings", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "smith", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_4", "p": "Patrick Surtain II Broncos", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "surtain", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_12", "p": "Jonathan Taylor Colts", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "taylor", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_204", "p": "Legendary Teagan Kavan Texas Softball", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "insert", "ln": "teagan", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_8", "p": "Aaron Donald Rams x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_38", "p": "Aaron Jones Packers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_29", "p": "Adam Thielen Panthers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_67", "p": "Arch Manning Texas", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 14.99, "t": "hit", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_293", "p": "Austin Ekeler Chargers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_33", "p": "Bryce Young RC Panthers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "rookie", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_108", "p": "Caleb Downs Ohio State x2", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_177", "p": "Christian McCaffrey 49ers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_45", "p": "Christian Watson Packers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_199", "p": "Colin Simmons Texas", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_128", "p": "Cooper Kupp Rams", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_22", "p": "Courtland Sutton Broncos x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_176", "p": "D'Andre Swift Lions", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_226", "p": "DJ Moore Bears x3", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_5", "p": "DK Metcalf Seahawks x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_97", "p": "Dak Prescott Cowboys x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_15", "p": "Davante Adams Raiders x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_139", "p": "Derek Carr Saints x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_203", "p": "Dylan Volantis Texas Baseball", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_131", "p": "Ethan Mendoza Texas Baseball", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_142", "p": "Game Ticket Chris Godwin Buccaneers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "insert", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_233", "p": "Game Ticket Kyler Murray Cardinals", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "insert", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_172", "p": "Geno Smith Seahawks x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_35", "p": "George Pickens Steelers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_170", "p": "J.J. Watt Cardinals", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_52", "p": "Jaloni Cambridge Ohio State Basketball x2", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_121", "p": "Jameis Winston Saints", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_119", "p": "Jared Goff Lions x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_43", "p": "Jeremiah Smith Ohio State", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 7.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_166", "p": "Jeremiah Smith Sparkle Ohio State", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 8.99, "t": "hit", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_86", "p": "Jordan Love Packers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_84", "p": "Josh Jacobs Raiders x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_49", "p": "Julian Sayin Ohio State x2", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 6.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_80", "p": "Justin Fields Bears x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_23", "p": "Keenan Allen Chargers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_42", "p": "Kenny Pickett Steelers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_116", "p": "Kyle Hamilton Ravens", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_102", "p": "Kyler Murray Cardinals", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_125", "p": "Mac Jones Patriots x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_211", "p": "Madison Booker Texas Basketball", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_183", "p": "Michael Pittman Jr Colts x3", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_20", "p": "Michael Thomas Saints x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_110", "p": "Najee Harris Steelers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_44", "p": "Russell Wilson Broncos x3", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_105", "p": "Ryan Wingo Texas", "set": "2025 Panini Contenders \u00b7 C003", "note": "", "pr": 5.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_117", "p": "Sam Howell Commanders", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_16", "p": "Stefon Diggs Bills x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_81", "p": "T.J. Watt Steelers x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_181", "p": "Tee Higgins Bengals", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_179", "p": "Terry McLaurin Commanders", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_189", "p": "Tom Brady Buccaneers", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 12.99, "t": "hit", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_175", "p": "Travis Kelce Chiefs x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 5.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_26", "p": "Trevor Lawrence Jaguars", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_28", "p": "Tua Tagovailoa Dolphins x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_96", "p": "Von Miller Bills x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.99, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_237", "p": "Will Levis Titans x2", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "ticket", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_25", "p": "Justin Tucker Ravens", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "tucker", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_14", "p": "Deshaun Watson Browns", "set": "2023 Panini Contenders \u00b7 C003", "note": "", "pr": 4.49, "t": "star", "ln": "watson", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_325", "p": "Will Levis Kentucky Titans RT-183 x3", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "will", "box": "C003 Contenders+NIL", "sp": "football"},
+  {"k": "c003_341", "p": "Woody Marks USC Texans", "set": "2023 SAGE Next \u00b7 C003", "note": "", "pr": 4.49, "t": "insert", "ln": "woody", "box": "C003 Contenders+NIL", "sp": "football"}
+];
+const KEY = "c003_pull_2026_09_05";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+let filt = "all";
+let sortAZ = (localStorage.getItem(KEY+"_sort") !== "box");
+const list = document.getElementById("list"), chips = document.getElementById("chips");
+const TYPES = ["all","hit","color","insert","rookie","star","flip"];
+function render(){
+  chips.innerHTML = "";
+  const s = document.createElement("div");
+  s.className = "chip" + (sortAZ ? " on" : "");
+  s.textContent = sortAZ ? "A-Z \u2713" : "A-Z";
+  s.onclick = () => { sortAZ = !sortAZ; localStorage.setItem(KEY+"_sort", sortAZ?"az":"box"); render(); };
+  chips.appendChild(s);
+  for (const t of TYPES){
+    const c = document.createElement("div");
+    c.className = "chip" + (filt===t ? " on" : "");
+    c.textContent = t==="all" ? `All (${DATA.length})` : t + ` (${DATA.filter(r=>r.t===t).length})`;
+    c.onclick = () => { filt = t; render(); };
+    chips.appendChild(c);
+  }
+  list.innerHTML = "";
+  let lastBox = null, lastLetter = null;
+  const ROWS = sortAZ ? [...DATA].sort((a,b)=>a.ln.localeCompare(b.ln)||a.p.localeCompare(b.p)) : DATA;
+  for (const r of ROWS){
+    if (filt!=="all" && r.t!==filt) continue;
+    if (sortAZ){
+      const L = r.ln[0].toUpperCase();
+      if (L !== lastLetter){
+        const h = document.createElement("div");
+        h.className = "boxhdr"; h.textContent = L;
+        list.appendChild(h); lastLetter = L;
+      }
+    } else if (r.box !== lastBox){
+      const h = document.createElement("div");
+      h.className = "boxhdr"; h.textContent = r.box;
+      list.appendChild(h); lastBox = r.box;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (done.has(r.k) ? " done" : "") + (r.t==="flip" ? " flip" : "");
+    el.innerHTML = `<img class="th" loading="lazy" src="c003_imgs/${r.k}.jpg">` +
+      `<div class="info"><div class="nm">${r.p}</div><div class="tm">${r.set}</div><div class="st">${r.note}</div></div>` +
+      `<div class="pr">$${r.pr.toFixed(2)}</div>`;
+    const img = el.querySelector("img.th");
+    img.onclick = (e) => { e.stopPropagation(); document.getElementById("lbimg").src = img.src; document.getElementById("lightbox").classList.add("on"); };
+    el.onclick = () => { done.has(r.k) ? done.delete(r.k) : done.add(r.k);
+      localStorage.setItem(KEY, JSON.stringify([...done])); render(); };
+    list.appendChild(el);
+  }
+  const total = DATA.reduce((s,r)=>s+r.pr,0);
+  document.getElementById("cnt").textContent = `${done.size} / ${DATA.length} pulled — $${total.toFixed(2)} at ask`;
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.remove("on");
+document.getElementById("rep").onclick = async (e) => {
+  e.stopPropagation();
+  const txt = `C003 PULLS 2026-09-05: ${[...done].length}/${DATA.length} pulled.\n` +
+    DATA.map(r => `${done.has(r.k)?"[x]":"[ ]"} ${r.p} — ${r.set} $${r.pr.toFixed(2)}`).join("\n");
+  try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!";
+        setTimeout(()=>e.target.textContent="Copy report", 1500); }
+  catch { prompt("Copy this:", txt); }
+};
+document.getElementById("reset").onclick = (e)=>{e.stopPropagation(); if(confirm("Clear all checkmarks?")){done.clear();localStorage.removeItem(KEY);render();}};
+render();
+</script></body></html>
