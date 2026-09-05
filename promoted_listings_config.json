@@ -1,103 +1,103 @@
 {
- "enabled": true,
- "tiers": {
-  "no_ad": {
-   "rate": 0.0,
-   "label": "NO_AD",
-   "criteria": "sold_in_7d_count >= 1 OR (watchers >= 3 AND age_days < 30)"
+  "enabled": true,
+  "tiers": {
+    "no_ad": {
+      "rate": 0.0,
+      "label": "NO_AD",
+      "criteria": "sold_in_7d_count >= 1 OR (watchers >= 3 AND age_days < 30)"
+    },
+    "low": {
+      "rate": 0.02,
+      "label": "LOW",
+      "criteria": "age_days <= 30 AND watchers == 0"
+    },
+    "standard": {
+      "rate": 0.04,
+      "label": "STANDARD",
+      "criteria": "age_days <= 60"
+    },
+    "aggressive": {
+      "rate": 0.04,
+      "label": "AGGRESSIVE (capped \u2014 stale listings need price drops not more spend)",
+      "criteria": "age_days > 60 AND age_days <= 120 AND watchers == 0"
+    },
+    "max": {
+      "rate": 0.04,
+      "label": "MAX (capped \u2014 flag for relist)",
+      "criteria": "age_days > 120"
+    },
+    "sub3": {
+      "rate": 0.0,
+      "label": "BURST_SUB3",
+      "criteria": "price <= 2.99"
+    },
+    "b3to5": {
+      "rate": 0.02,
+      "label": "BURST_3-5",
+      "criteria": "3.00-4.99"
+    },
+    "b5to10": {
+      "rate": 0.03,
+      "label": "BURST_5-10",
+      "criteria": "5.00-9.99"
+    },
+    "b10plus": {
+      "rate": 0.05,
+      "label": "BURST_10+",
+      "criteria": "10.00+"
+    },
+    "band_mid": {
+      "rate": 0.03,
+      "label": "BAND $2-10",
+      "criteria": "price 2.00-9.99 (2026-08-15 panel price bands)"
+    },
+    "band_high": {
+      "rate": 0.08,
+      "label": "BAND $10+",
+      "criteria": "price 10.00+ (2026-08-15 panel price bands)"
+    }
   },
-  "low": {
-   "rate": 0.02,
-   "label": "LOW",
-   "criteria": "age_days <= 30 AND watchers == 0"
+  "price_band_tiers": [
+    {
+      "max_price": 1.99,
+      "tier": "no_ad"
+    },
+    {
+      "max_price": 9.99,
+      "tier": "band_mid"
+    },
+    {
+      "max_price": 999999,
+      "tier": "band_high"
+    }
+  ],
+  "min_margin_pct_to_promote": 0.05,
+  "skip_categories": [],
+  "max_total_30d_ad_spend_usd": 75,
+  "default_30d_sellthrough": 0.05,
+  "unknown_age_default_tier": "low",
+  "default_campaign": {
+    "name": "Harpua2001 Priority Manual-Bid 2026-05-17",
+    "funding_model": "COST_PER_SALE",
+    "daily_budget": 10.0,
+    "marketplace": "EBAY_US",
+    "duration_days": 30
   },
-  "standard": {
-   "rate": 0.04,
-   "label": "STANDARD",
-   "criteria": "age_days <= 60"
+  "_promo_burst": {
+    "active": false,
+    "started": "2026-06-19",
+    "reverted": "2026-07-07",
+    "review_by": "2026-07-10 (21-day gate)",
+    "prior_cap": 200,
+    "prior_daily": 10,
+    "note": "REVERTED 2026-07-07 (store analysis: ROAS -37% on burst, paying premium to promote self-selling $2-10 cards). Emptied price_band_tiers (back to age-based 8%-max ladder), cap 200/daily 10. Burst was 2026-06-19 committee, top band 15% JC override."
   },
-  "aggressive": {
-   "rate": 0.04,
-   "label": "AGGRESSIVE (capped \u2014 stale listings need price drops not more spend)",
-   "criteria": "age_days > 60 AND age_days <= 120 AND watchers == 0"
+  "_rate_cut_2026_08_06": {
+    "review_by": "2026-08-27 (21-day gate)",
+    "note": "Cut across the board: low 3->2%, standard/aggressive/max 8->4%, burst remnants sub3 7->0%, b3to5 10->2%, b5to10 11->3%, b10plus 15->5%, cap 200->40. Also fixed bulk_set_bids: eBay's create-ads endpoint can't update an existing ad's bid (errorId 35036), so 222 listings from the 6/19 burst stayed enrolled at the old 7-15% bids for weeks after the config 'revert'. bulk_set_bids now diffs against the live campaign and deletes+recreates ads whose bid changed."
   },
-  "max": {
-   "rate": 0.04,
-   "label": "MAX (capped \u2014 flag for relist)",
-   "criteria": "age_days > 120"
-  },
-  "sub3": {
-   "rate": 0.0,
-   "label": "BURST_SUB3",
-   "criteria": "price <= 2.99"
-  },
-  "b3to5": {
-   "rate": 0.02,
-   "label": "BURST_3-5",
-   "criteria": "3.00-4.99"
-  },
-  "b5to10": {
-   "rate": 0.03,
-   "label": "BURST_5-10",
-   "criteria": "5.00-9.99"
-  },
-  "b10plus": {
-   "rate": 0.05,
-   "label": "BURST_10+",
-   "criteria": "10.00+"
-  },
-  "band_mid": {
-   "rate": 0.03,
-   "label": "BAND $2-10",
-   "criteria": "price 2.00-9.99 (2026-08-15 panel price bands)"
-  },
-  "band_high": {
-   "rate": 0.08,
-   "label": "BAND $10+",
-   "criteria": "price 10.00+ (2026-08-15 panel price bands)"
+  "_panel_2026_08_15": {
+    "note": "6-agent promotions panel: reactivated June price-band policy (<$2 0% / $2-10 3% / $10+ 8%) which had sat as an empty price_band_tiers since the July burst revert. Cap 40->75 (cost-per-sale: worst-case realized spend at these rates is ~$60-75/mo even with 100% attribution). Demotion loop rewritten to exempt <14d listings and cut cheapest/oldest first (old loop cut highest price first). Rates on >120d items halved in code. Distinct from the July burst: that bled ROAS at 7-15% flat rates; top band here is 8% on $10+ only.",
+    "review_by": "2026-09-05 (21-day gate)"
   }
- },
- "price_band_tiers": [
-  {
-   "max_price": 1.99,
-   "tier": "no_ad"
-  },
-  {
-   "max_price": 9.99,
-   "tier": "band_mid"
-  },
-  {
-   "max_price": 999999,
-   "tier": "band_high"
-  }
- ],
- "min_margin_pct_to_promote": 0.05,
- "skip_categories": [],
- "max_total_30d_ad_spend_usd": 75,
- "default_30d_sellthrough": 0.25,
- "unknown_age_default_tier": "low",
- "default_campaign": {
-  "name": "Harpua2001 Priority Manual-Bid 2026-05-17",
-  "funding_model": "COST_PER_SALE",
-  "daily_budget": 10.0,
-  "marketplace": "EBAY_US",
-  "duration_days": 30
- },
- "_promo_burst": {
-  "active": false,
-  "started": "2026-06-19",
-  "reverted": "2026-07-07",
-  "review_by": "2026-07-10 (21-day gate)",
-  "prior_cap": 200,
-  "prior_daily": 10,
-  "note": "REVERTED 2026-07-07 (store analysis: ROAS -37% on burst, paying premium to promote self-selling $2-10 cards). Emptied price_band_tiers (back to age-based 8%-max ladder), cap 200/daily 10. Burst was 2026-06-19 committee, top band 15% JC override."
- },
- "_rate_cut_2026_08_06": {
-  "review_by": "2026-08-27 (21-day gate)",
-  "note": "Cut across the board: low 3->2%, standard/aggressive/max 8->4%, burst remnants sub3 7->0%, b3to5 10->2%, b5to10 11->3%, b10plus 15->5%, cap 200->40. Also fixed bulk_set_bids: eBay's create-ads endpoint can't update an existing ad's bid (errorId 35036), so 222 listings from the 6/19 burst stayed enrolled at the old 7-15% bids for weeks after the config 'revert'. bulk_set_bids now diffs against the live campaign and deletes+recreates ads whose bid changed."
- },
- "_panel_2026_08_15": {
-  "note": "6-agent promotions panel: reactivated June price-band policy (<$2 0% / $2-10 3% / $10+ 8%) which had sat as an empty price_band_tiers since the July burst revert. Cap 40->75 (cost-per-sale: worst-case realized spend at these rates is ~$60-75/mo even with 100% attribution). Demotion loop rewritten to exempt <14d listings and cut cheapest/oldest first (old loop cut highest price first). Rates on >120d items halved in code. Distinct from the July burst: that bled ROAS at 7-15% flat rates; top band here is 8% on $10+ only.",
-  "review_by": "2026-09-05 (21-day gate)"
- }
 }
