@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07060f">
+<title>Mindless Machine — Pokemon Collecting Guide</title>
+<meta name="description" content="What Pokemon cards are actually good — a beginner's guide to rarity, Japanese vs English cards, value, condition, grading and spotting fakes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060f; --bg-2:#0b0a18;
+    --panel:#120f22; --panel2:#19152f; --panel3:#221b42;
+    --cyan:#22d3ee; --violet:#a855f7; --magenta:#ff5ea8; --lime:#b6ff5e;
+    --holo:linear-gradient(120deg,#22d3ee 0%,#a855f7 48%,#ff5ea8 100%);
+    --border:rgba(168,85,247,.24); --hairline:rgba(168,85,247,.13);
+    --text:#f3f0ff; --sub:#aba3cc; --dim:#766e94;
+    --success:#49e3a6;
+    --font-display:'Zen Dots', sans-serif;
+    --font-body:'Space Grotesk', -apple-system, sans-serif;
+    --font-mono:'Space Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body);
+    font-size:17px; line-height:1.58; min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 8% -5%, rgba(168,85,247,.2), transparent 60%),
+      radial-gradient(ellipse 1000px 800px at 100% 5%, rgba(34,211,238,.14), transparent 60%),
+      radial-gradient(ellipse 1200px 900px at 40% 105%, rgba(255,94,168,.12), transparent 58%);
+    background-attachment:fixed;
+  }
+  .top-stripe{height:5px;background:var(--holo)}
+
+  header{
+    background:linear-gradient(180deg,var(--panel) 0%, var(--bg) 100%);
+    padding:18px 24px 14px; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border);
+  }
+  .header-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;max-width:1080px;margin:0 auto;flex-wrap:wrap}
+  .logo{font-family:var(--font-display);font-weight:400;font-size:clamp(1.25rem,3.6vw,1.9rem);letter-spacing:.5px;line-height:1.1;
+    background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px rgba(168,85,247,.3))}
+  .tagline{font-family:var(--font-body);font-weight:500;font-size:.86rem;color:var(--sub);margin-top:8px;font-style:italic}
+  .nav-links{display:flex;gap:10px;flex-wrap:wrap}
+  .nav-link{font-family:var(--font-mono);font-size:.7rem;color:var(--sub);text-decoration:none;border:1.5px solid var(--border);border-radius:5px;padding:8px 13px;letter-spacing:.4px;white-space:nowrap;transition:all .2s ease;background:var(--panel2)}
+  .nav-link:hover,.nav-link:focus-visible{border-color:var(--cyan);background:rgba(34,211,238,.12);color:#fff}
+  .nav-link.current{background:var(--violet);border-color:var(--violet);color:#fff}
+  .nav-link.ig{border-color:rgba(255,94,168,.45);color:var(--magenta)}
+
+  .wrap{max-width:780px;margin:0 auto;padding:28px 18px 64px}
+
+  .hero{text-align:center;padding:12px 0 22px}
+  .hero h1{font-family:var(--font-display);font-size:clamp(1.5rem,5.4vw,2.3rem);line-height:1.18;color:#fff;letter-spacing:.3px;
+    background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{font-size:1.05rem;color:var(--sub);margin-top:14px;max-width:36em;margin-inline:auto}
+  .hero .ja{font-family:var(--font-mono);color:var(--dim);font-size:.78rem;letter-spacing:.16em;margin-top:10px}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:22px auto 6px;max-width:640px}
+  .toc a{font-family:var(--font-mono);font-size:.7rem;color:var(--sub);text-decoration:none;border:1.5px solid var(--border);border-radius:999px;padding:6px 13px;transition:all .18s ease}
+  .toc a:hover,.toc a:focus-visible{border-color:var(--cyan);color:#fff;background:rgba(34,211,238,.1)}
+
+  .section{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px 22px 24px;margin-top:22px;box-shadow:0 2px 18px rgba(0,0,0,.4);scroll-margin-top:96px}
+  .sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .sec-num{font-family:var(--font-display);font-size:1.1rem;color:#0a0616;background:var(--holo);width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(168,85,247,.4)}
+  .sec-title{font-family:var(--font-body);font-weight:700;font-size:1.28rem;color:#fff;line-height:1.22}
+  .sec-sub{font-family:var(--font-mono);font-size:.64rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.4px;margin-top:3px}
+
+  .sec-body{margin-top:14px;font-size:1rem;color:var(--text)}
+  .sec-body p{margin-bottom:12px}
+  .sec-body ul,.sec-body ol{padding-left:22px;margin-bottom:12px}
+  .sec-body li{margin-bottom:8px}
+  .sec-body strong{color:#fff}
+  .sec-body h3{font-family:var(--font-body);font-weight:700;font-size:1.02rem;color:var(--cyan);margin:16px 0 8px}
+
+  .tier{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--hairline)}
+  .tier:last-child{border-bottom:none}
+  .tier-dot{width:12px;height:12px;border-radius:3px;margin-top:6px;flex-shrink:0}
+  .tier-name{font-weight:700;color:#fff}
+  .tier-desc{color:var(--sub);font-size:.94rem}
+  .d-common{background:#9aa0b8}.d-uncommon{background:#49e3a6}.d-rare{background:#22d3ee}
+  .d-ultra{background:#a855f7}.d-illus{background:#ff5ea8}.d-secret{background:linear-gradient(120deg,#ffd166,#ff5ea8)}
+
+  .callout{background:var(--panel2);border:1px solid var(--border);border-left:4px solid var(--cyan);border-radius:10px;padding:13px 15px;margin:14px 0;font-size:.95rem;color:var(--sub)}
+  .callout.jp{border-left-color:var(--magenta)}
+  .callout.warn{border-left-color:#ffcf5e}
+  .callout strong{color:#fff}
+
+  .do-dont{display:grid;grid-template-columns:1fr;gap:12px;margin-top:6px}
+  @media (min-width:560px){.do-dont{grid-template-columns:1fr 1fr}}
+  .dd{border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--panel2)}
+  .dd h4{font-family:var(--font-mono);font-size:.74rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+  .dd.do h4{color:var(--success)}.dd.dont h4{color:var(--magenta)}
+  .dd ul{padding-left:18px;margin:0}
+  .dd li{margin-bottom:7px;font-size:.92rem;color:var(--sub)}
+
+  .glossary dt{font-family:var(--font-mono);font-weight:700;color:#fff;margin-top:12px;font-size:.88rem}
+  .glossary dd{color:var(--sub);font-size:.92rem;margin-left:0;margin-top:2px}
+
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-body);font-weight:700;font-size:.95rem;text-decoration:none;padding:13px 20px;border-radius:11px;transition:transform .15s ease}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--holo);color:#0a0616;box-shadow:0 6px 22px rgba(168,85,247,.4)}
+  .btn-secondary{background:var(--panel2);border:1.5px solid var(--border);color:var(--cyan)}
+
+  footer{text-align:center;padding:32px 16px 40px;font-size:.78rem;color:var(--sub);font-family:var(--font-mono);border-top:1px solid var(--hairline);margin-top:28px}
+  footer .mark{color:var(--magenta)}
+  footer a{color:var(--cyan)}
+
+  @media (max-width:480px){.sec-title{font-size:1.12rem}.sec-num{width:40px;height:40px;font-size:1rem}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+
+<div class="top-stripe"></div>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="logo">Mindless Machine</div>
+      <div class="tagline">What Pokemon cards are actually good</div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">My Pokedex</a>
+      <a class="nav-link" href="scanner.html">Scan a Card</a>
+      <a class="nav-link current" href="guide.html">Guide</a>
+      <a class="nav-link ig" href="https://instagram.com/mindlessmachine" target="_blank" rel="noopener">@mindlessmachine</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>What Pokemon Cards Are Good</h1>
+    <p>A beginner's field guide for an artist starting to collect in Japan. How to read rarity, why Japanese cards are special, what actually holds value, and how to avoid getting burned.</p>
+    <div class="ja">ポケモンカード 入門ガイド &middot; guia para iniciantes</div>
+  </div>
+
+  <nav class="toc" aria-label="Table of contents">
+    <a href="#rarity">Rarity</a>
+    <a href="#japan">JP vs EN</a>
+    <a href="#value">What Holds Value</a>
+    <a href="#condition">Condition &amp; Grading</a>
+    <a href="#fakes">Spotting Fakes</a>
+    <a href="#dodont">Do &amp; Don't</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+
+  <!-- 1 RARITY -->
+  <section class="section" id="rarity">
+    <div class="sec-head">
+      <div class="sec-num">1</div>
+      <div>
+        <div class="sec-title">Reading Rarity: Symbols &amp; Tiers</div>
+        <div class="sec-sub">the bottom corner tells you a lot</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Most Pokemon cards print a small <strong>rarity symbol</strong> near the bottom corner. On modern English cards a <strong>circle</strong> is Common, a <strong>diamond</strong> is Uncommon, and a <strong>star</strong> is Rare. Beyond that, the look of the card matters more than the symbol. Here is the rough ladder from most common to most chased:</p>
+
+      <div class="tier"><span class="tier-dot d-common"></span><div><span class="tier-name">Common / Uncommon</span><div class="tier-desc">Non-foil, printed in huge numbers. Fun to collect, generally little resale value on their own.</div></div></div>
+      <div class="tier"><span class="tier-dot d-rare"></span><div><span class="tier-name">Rare, Holo &amp; Reverse Holo</span><div class="tier-desc">"Holo" = shiny picture window. "Reverse Holo" = shiny everywhere except the picture. Common pulls; a few popular Pokemon are exceptions.</div></div></div>
+      <div class="tier"><span class="tier-dot d-rare"></span><div><span class="tier-name">Double Rare (ex / V / VMAX)</span><div class="tier-desc">The big-HP "mechanic" cards with two black stars (modern "ex"). The entry point for cards people actively want.</div></div></div>
+      <div class="tier"><span class="tier-dot d-ultra"></span><div><span class="tier-name">Ultra Rare / Full Art</span><div class="tier-desc">Edge-to-edge artwork, often textured. Full-art trainers and full-art ex/V cards live here.</div></div></div>
+      <div class="tier"><span class="tier-dot d-illus"></span><div><span class="tier-name">Illustration Rare (IR) &amp; Special Illustration Rare (SIR)</span><div class="tier-desc">Story-art cards showing the Pokemon in a scene. SIRs (the Japanese "SAR") are among the most beautiful and most collected modern cards.</div></div></div>
+      <div class="tier"><span class="tier-dot d-secret"></span><div><span class="tier-name">Hyper / Rainbow &amp; Gold Secret Rare</span><div class="tier-desc">"Secret rares" numbered above the set total (e.g. 201/197). Rainbow holo or full gold. Flashy chase cards.</div></div></div>
+
+      <h3>Older Japanese rarity codes</h3>
+      <p>Japanese sets use letter codes you'll see printed on the card: <strong>C/U/R</strong> (Common/Uncommon/Rare), <strong>RR</strong> (double rare), <strong>SR</strong> (Super Rare, full-art), <strong>UR</strong> (Ultra Rare, usually gold), <strong>CHR</strong> (Character Rare), <strong>CSR</strong> (Character Super Rare), and <strong>SAR</strong> (Special Art Rare — the JP name for SIR). As a rule of thumb, more printing / more artwork / a higher letter code means more desirable.</p>
+      <div class="callout tip"><strong>Shortcut:</strong> if a card is covered in artwork from edge to edge, feels textured, or is numbered higher than the set total, it's a chase card worth looking up.</div>
+    </div>
+  </section>
+
+  <!-- 2 JAPAN -->
+  <section class="section" id="japan">
+    <div class="sec-head">
+      <div class="sec-num">2</div>
+      <div>
+        <div class="sec-title">Japanese vs English Cards</div>
+        <div class="sec-sub">a real edge when you live in Japan</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>You're collecting in the <strong>home country of the hobby</strong>, which is a genuine advantage.</p>
+      <ul>
+        <li><strong>Japanese sets release first</strong> — usually months before the English versions — and sealed Japanese product is generally cheaper per pack than English.</li>
+        <li><strong>Print quality &amp; condition culture.</strong> Japanese cards are known for sharp centering and careful handling. Graded gem-mint rates tend to be higher, and collectors prize that.</li>
+        <li><strong>Japan-exclusive promos.</strong> Many iconic cards never got an English print — tournament, campaign, and illustration-contest promos. These exclusives are a big reason JP cards are sought worldwide.</li>
+        <li><strong>Alt-art SARs are the crown jewels.</strong> The special illustration cards (SAR / "art rare") out of modern Japanese sets are some of the most wanted cards globally, and you can often find them at the source.</li>
+      </ul>
+      <div class="callout jp"><strong>Note on language &amp; value:</strong> for the <em>same</em> card, English copies often sell for more outside Japan simply because the audience is larger — but Japan-exclusive cards and top-condition JP copies can command strong premiums. Collect what you love first; value follows popularity.</div>
+      <p>Japanese set sizes are small and themed (e.g. a 60-70 card main set plus "SR/UR/SAR" extras), so completing a Japanese set is a very achievable, satisfying goal for a new collector.</p>
+    </div>
+  </section>
+
+  <!-- 3 VALUE -->
+  <section class="section" id="value">
+    <div class="sec-head">
+      <div class="sec-num">3</div>
+      <div>
+        <div class="sec-title">What Actually Holds Value</div>
+        <div class="sec-sub">popularity, art &amp; scarcity</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Value in this hobby is driven by <strong>which Pokemon it is</strong>, <strong>how good the art is</strong>, and <strong>how scarce it is</strong> — in roughly that order. No specific prices are promised here; treat everything as "generally" ranges that move with demand.</p>
+      <h3>Popular Pokemon that reliably hold interest</h3>
+      <ul>
+        <li><strong>Charizard</strong> — the single most valuable name in the hobby; almost any good Charizard is in demand.</li>
+        <li><strong>Pikachu</strong> — the mascot; promos and illustration cards stay desirable.</li>
+        <li><strong>Umbreon &amp; the Eeveelutions</strong> — Umbreon especially. The <em>Umbreon VMAX Alt Art ("Moonbreon")</em> from Evolving Skies is a famous modern chase card.</li>
+        <li><strong>Lugia, Mew, Mewtwo, Rayquaza, Gengar, Lucario</strong> — perennial fan favorites that art teams return to often.</li>
+      </ul>
+      <h3>Categories collectors chase</h3>
+      <ul>
+        <li><strong>Artist / alt-art cards</strong> (IR, SIR, SAR) — beautiful illustrations of popular Pokemon are the heart of the modern market.</li>
+        <li><strong>Vintage WOTC Base Set (1999)</strong> — the original holos, especially <strong>first-edition</strong> and <strong>shadowless</strong> printings.</li>
+        <li><strong>Promos</strong> — tournament, event and campaign cards, many Japan-exclusive.</li>
+        <li><strong>Sealed product</strong> — unopened booster boxes and ETBs tend to appreciate once a set stops printing.</li>
+      </ul>
+      <div class="callout"><strong>First-edition &amp; shadowless:</strong> early Base Set has a tiny "Edition 1" stamp (first edition) and some lack the drop-shadow behind the art box (shadowless). Both are scarcer and generally worth more than the standard "unlimited" print.</div>
+    </div>
+  </section>
+
+  <!-- 4 CONDITION -->
+  <section class="section" id="condition">
+    <div class="sec-head">
+      <div class="sec-num">4</div>
+      <div>
+        <div class="sec-title">Condition &amp; Grading</div>
+        <div class="sec-sub">the same card can be worth 5x more mint</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Two copies of the same card can be worth wildly different amounts based purely on condition. Graders judge four things:</p>
+      <ul>
+        <li><strong>Centering</strong> — how even the borders are on front and back (often the hardest one to get perfect).</li>
+        <li><strong>Corners</strong> — sharp vs soft or whitened.</li>
+        <li><strong>Edges</strong> — clean vs nicked or chipped (dark-bordered cards show wear easily).</li>
+        <li><strong>Surface</strong> — scratches, print lines, holo scratches, indentations.</li>
+      </ul>
+      <h3>Who grades, and why it matters</h3>
+      <p><strong>PSA</strong>, <strong>CGC</strong> and <strong>Beckett (BGS)</strong> are the main third-party graders. They seal the card in a tamper-evident "slab" with a number, typically on a 1-10 scale (PSA 10 = Gem Mint). Grading matters because it turns a subjective "looks mint" into a trusted, liquid grade — a graded <strong>PSA 10</strong> of a chase card often sells for several times the raw price, while a low grade can be worth less than an ungraded copy after fees.</p>
+      <div class="callout warn"><strong>Raw vs graded:</strong> only grade cards that are both <em>valuable</em> and <em>clearly high-grade</em> — grading has a per-card fee and turnaround time. For most common cards, grading costs more than it adds. PSA is widely used for Japanese cards and PSA Japan makes this easy from inside Japan.</div>
+      <p>Protect raw cards immediately: a <strong>penny sleeve</strong> inside a <strong>top-loader</strong> or a <strong>card saver</strong>, kept out of sunlight and humidity.</p>
+    </div>
+  </section>
+
+  <!-- 5 FAKES -->
+  <section class="section" id="fakes">
+    <div class="sec-head">
+      <div class="sec-num">5</div>
+      <div>
+        <div class="sec-title">Spotting Fakes</div>
+        <div class="sec-sub">a two-minute gut check</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Counterfeits are common online and at markets. A few quick checks catch most of them:</p>
+      <ul>
+        <li><strong>Texture &amp; gloss.</strong> Real cards have a consistent finish; fakes often feel too glossy, too flat, or slightly tacky.</li>
+        <li><strong>The rarity symbol &amp; set code.</strong> Fakes frequently get the little symbol, set logo, or card number wrong or blurry.</li>
+        <li><strong>The light test.</strong> Genuine cards have a thin black inner layer — hold a card to a bright light; a real one blocks most light, many fakes let light pass through easily. (Use this only on cards you're willing to flex slightly.)</li>
+        <li><strong>Font &amp; color.</strong> Compare the typeface, energy symbols, and color saturation against a card you know is real. Off fonts, muddy colors, or wrong HP placement are red flags.</li>
+        <li><strong>Back &amp; borders.</strong> The blue back swirl and the yellow border color are hard to fake precisely — mismatched hue or fuzzy printing is a giveaway.</li>
+      </ul>
+      <div class="callout warn"><strong>Rule of thumb:</strong> if a "chase" card is priced far below everything else, assume it's fake, a proxy, or damaged until proven otherwise. Buy sealed or from reputable sellers for anything expensive.</div>
+    </div>
+  </section>
+
+  <!-- 6 DO DONT -->
+  <section class="section" id="dodont">
+    <div class="sec-head">
+      <div class="sec-num">6</div>
+      <div>
+        <div class="sec-title">Beginner Do's &amp; Don'ts</div>
+        <div class="sec-sub">start smart, enjoy it more</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="do-dont">
+        <div class="dd do">
+          <h4>Do</h4>
+          <ul>
+            <li>Collect what you love — art and favorite Pokemon first.</li>
+            <li>Sleeve and top-load anything you care about, right away.</li>
+            <li>Learn the look of SIR/SAR and alt-arts — that's where modern value lives.</li>
+            <li>Use Japan's head start: buy JP singles and sealed before English drops.</li>
+            <li>Check sold listings (not asking prices) to learn real values.</li>
+            <li>Keep cards out of sun, heat, and humidity.</li>
+          </ul>
+        </div>
+        <div class="dd dont">
+          <h4>Don't</h4>
+          <ul>
+            <li>Don't grade cheap or clearly-flawed cards — fees eat the value.</li>
+            <li>Don't trust asking prices or hype; demand changes fast.</li>
+            <li>Don't buy expensive singles from unknown sellers without verifying.</li>
+            <li>Don't store cards loose, stacked, or with rubber bands.</li>
+            <li>Don't clean or "fix" a card — it almost always lowers the grade.</li>
+            <li>Don't chase every set; a focused collection is more rewarding.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="scanner.html">Scan a card &rarr;</a>
+        <a class="btn btn-secondary" href="index.html">View your Pokedex</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- GLOSSARY -->
+  <section class="section" id="glossary">
+    <div class="sec-head">
+      <div class="sec-num">7</div>
+      <div>
+        <div class="sec-title">Quick Glossary</div>
+        <div class="sec-sub">the words you'll keep hearing</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <dl class="glossary">
+        <dt>Holo / Reverse Holo</dt><dd>Holo = shiny artwork window. Reverse holo = shiny everywhere except the artwork.</dd>
+        <dt>ex / V / VMAX</dt><dd>High-power game mechanics across eras; the modern lowercase "ex" is today's Double Rare.</dd>
+        <dt>Full Art</dt><dd>Artwork covers the entire card, edge to edge, usually textured.</dd>
+        <dt>IR / SIR (JP: SAR)</dt><dd>Illustration Rare / Special Illustration Rare — story-scene art cards, the most collected modern chase cards.</dd>
+        <dt>Secret Rare</dt><dd>A card numbered above the set total (e.g. 201/197); includes gold and rainbow cards.</dd>
+        <dt>First Edition / Shadowless</dt><dd>Early-print markers on vintage WOTC cards; scarcer and generally more valuable than unlimited prints.</dd>
+        <dt>Moonbreon</dt><dd>Collector nickname for the Umbreon VMAX Alt Art from Evolving Skies, a famous modern chase card.</dd>
+        <dt>Raw vs Graded</dt><dd>Raw = ungraded/loose. Graded = sealed in a numbered slab by PSA, CGC or Beckett.</dd>
+        <dt>Gem Mint (PSA 10)</dt><dd>The top grade — near-perfect centering, corners, edges and surface.</dd>
+        <dt>Slab</dt><dd>The sealed plastic case a graded card lives in.</dd>
+        <dt>Comp</dt><dd>A "comparable" recent sold price used to estimate what a card is really worth.</dd>
+        <dt>ETB</dt><dd>Elite Trainer Box — a sealed product with packs and accessories; popular to collect sealed.</dd>
+      </dl>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  An AI artist's Pokedex — <span class="mark">pixels &times; paper, Brazil &times; Japan.</span><br>
+  Powered by <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener">Harpua2001</a> card intelligence
+</footer>
+
+</body>
+</html>
