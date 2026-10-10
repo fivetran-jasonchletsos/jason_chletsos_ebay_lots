@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindless Machine — Pokedex</title>
+<meta name="description" content="Thiago's Pokemon card collection — an AI artist's Pokedex, scanned and catalogued.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060f; --bg-2:#0b0a18;
+    --surface:#120f22; --surface-2:#19152f; --surface-3:#221b42;
+    --cyan:#22d3ee; --violet:#a855f7; --magenta:#ff5ea8; --lime:#b6ff5e;
+    --holo:linear-gradient(120deg,#22d3ee 0%,#a855f7 48%,#ff5ea8 100%);
+    --border:rgba(168,85,247,.22); --hairline:rgba(168,85,247,.12); --border-strong:rgba(34,211,238,.4);
+    --text:#f3f0ff; --sub:#aba3cc; --dim:#766e94;
+    --header-h:84px;
+    --font-display:'Zen Dots', sans-serif;
+    --font-body:'Space Grotesk', -apple-system, sans-serif;
+    --font-mono:'Space Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body); min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 1100px 800px at 8% -5%, rgba(168,85,247,.24), transparent 60%),
+      radial-gradient(ellipse 1000px 800px at 100% 4%, rgba(34,211,238,.16), transparent 60%),
+      radial-gradient(ellipse 1200px 900px at 40% 106%, rgba(255,94,168,.14), transparent 58%);
+    background-attachment:fixed;
+  }
+  .top-stripe{height:5px;background:var(--holo)}
+
+  header{
+    background:linear-gradient(180deg,var(--surface) 0%, var(--bg) 100%);
+    padding:18px 24px 14px; position:sticky; top:0; z-index:100;
+    border-bottom:1px solid var(--border); overflow:hidden;
+  }
+  .header-glow{position:absolute;border-radius:50%;filter:blur(72px);pointer-events:none;z-index:0}
+  .header-glow.g1{width:400px;height:400px;top:-230px;left:-100px;opacity:.5;
+    background:radial-gradient(circle, rgba(168,85,247,.55), transparent 70%);animation:driftA 22s ease-in-out infinite alternate}
+  .header-glow.g2{width:340px;height:340px;top:-190px;right:-110px;opacity:.5;
+    background:radial-gradient(circle, rgba(34,211,238,.55), transparent 70%);animation:driftB 26s ease-in-out infinite alternate}
+  @keyframes driftA{from{transform:translate(0,0)}to{transform:translate(30px,20px)}}
+  @keyframes driftB{from{transform:translate(0,0)}to{transform:translate(-26px,16px)}}
+
+  .header-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;max-width:1080px;margin:0 auto;position:relative;z-index:1;flex-wrap:wrap}
+  .logo{font-family:var(--font-display);font-weight:400;font-size:clamp(1.3rem,4vw,2rem);letter-spacing:.5px;line-height:1.1;
+    background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px rgba(168,85,247,.35))}
+  .tagline{font-family:var(--font-body);font-weight:500;font-size:.86rem;color:var(--sub);margin-top:9px;font-style:italic}
+  .est{font-family:var(--font-mono);font-size:.62rem;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px}
+  .nav-wrap{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+  .nav-link{font-family:var(--font-mono);font-size:.72rem;color:var(--sub);text-decoration:none;
+    border:1.5px solid var(--border);border-radius:5px;padding:8px 14px;letter-spacing:.4px;white-space:nowrap;transition:all .2s ease;background:var(--surface-2)}
+  .nav-link:hover,.nav-link:focus-visible{border-color:var(--cyan);background:rgba(34,211,238,.12);color:#fff}
+  .nav-link.ig{border-color:rgba(255,94,168,.45);color:var(--magenta)}
+  @keyframes heroIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  .stats-bar{display:flex;gap:0;justify-content:center;max-width:640px;margin:10px auto 0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);animation:heroIn .8s cubic-bezier(.16,1,.3,1) .1s both}
+  .stat{flex:1;text-align:center;padding:10px 12px;border-left:1px solid var(--hairline)}
+  .stat:first-child{border-left:none}
+  .stat-val{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat-lbl{font-size:.6rem;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;font-weight:600}
+
+  .filter-bar{padding:12px 16px 10px;border-bottom:1px solid var(--hairline);position:sticky;top:var(--header-h);z-index:99;backdrop-filter:blur(10px);background:rgba(7,6,15,.9)}
+  .search-row{display:flex;gap:10px;max-width:900px;margin:0 auto 12px;align-items:center}
+  .search-input{flex:1;background:var(--surface-2);border:1.5px solid var(--border);color:var(--text);border-radius:7px;padding:11px 16px;font-size:.92rem;outline:none;font-family:var(--font-body)}
+  .search-input::placeholder{color:var(--sub)}
+  .search-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.18)}
+  .size-btns{display:flex;gap:0;flex-shrink:0}
+  .size-btn{padding:10px 13px;font-size:.75rem;font-weight:700;background:var(--surface-2);border:1.5px solid var(--border);color:var(--sub);cursor:pointer;line-height:1;font-family:var(--font-mono)}
+  .size-btn:first-child{border-radius:7px 0 0 7px}
+  .size-btn:last-child{border-radius:0 7px 7px 0}
+  .size-btn.active{background:var(--violet);color:#fff;border-color:var(--violet)}
+
+  .controls{display:flex;gap:8px;max-width:900px;margin:0 auto}
+  select.filter-select{flex:1;background:var(--surface-2);border:1.5px solid var(--border);color:var(--text);border-radius:7px;padding:9px 10px;font-size:.85rem;outline:none;cursor:pointer;font-family:var(--font-body)}
+
+  .chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 0 2px;max-width:900px;margin:0 auto}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0;padding:7px 15px;border-radius:999px;font-size:.7rem;font-weight:700;background:var(--surface-2);color:var(--sub);border:1.5px solid var(--border);cursor:pointer;text-transform:uppercase;letter-spacing:.4px;font-family:var(--font-body);transition:all .15s ease}
+  .chip.active{background:var(--violet);color:#fff;border-color:var(--violet)}
+  .chip:focus-visible,.card-tile:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+  .grid-wrap{padding:16px;max-width:1400px;margin:0 auto}
+  .count-row{font-family:var(--font-mono);font-size:.72rem;color:var(--sub);margin-bottom:10px}
+  .card-grid{display:grid;gap:14px}
+
+  .card-grid.size-s{grid-template-columns:repeat(3,1fr);gap:8px}
+  .card-grid.size-s .card-info{display:none}
+  @media (min-width:480px){.card-grid.size-s{grid-template-columns:repeat(5,1fr)}}
+  @media (min-width:700px){.card-grid.size-s{grid-template-columns:repeat(7,1fr)}}
+  @media (min-width:1000px){.card-grid.size-s{grid-template-columns:repeat(9,1fr)}}
+
+  .card-grid.size-m{grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (min-width:480px){.card-grid.size-m{grid-template-columns:repeat(3,1fr)}}
+  @media (min-width:700px){.card-grid.size-m{grid-template-columns:repeat(4,1fr);gap:16px}}
+  @media (min-width:1000px){.card-grid.size-m{grid-template-columns:repeat(5,1fr)}}
+
+  .card-grid.size-l{grid-template-columns:repeat(1,1fr);gap:18px}
+  @media (min-width:480px){.card-grid.size-l{grid-template-columns:repeat(2,1fr)}}
+  @media (min-width:700px){.card-grid.size-l{grid-template-columns:repeat(3,1fr);gap:20px}}
+  @media (min-width:1000px){.card-grid.size-l{grid-template-columns:repeat(4,1fr)}}
+
+  .card-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;position:relative;transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s ease,border-color .22s ease;animation:cardIn .5s cubic-bezier(.16,1,.3,1) both;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  .card-tile:active{transform:scale(.97)}
+  @media (hover:hover){.card-tile:hover{transform:translateY(-5px);box-shadow:0 16px 36px rgba(168,85,247,.3),0 4px 14px rgba(0,0,0,.4);border-color:var(--cyan)}}
+  @keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  .thumb-wrap{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--surface-2)}
+  .thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.6rem;color:var(--dim);
+    background:radial-gradient(circle at 50% 35%, rgba(168,85,247,.2), transparent 70%)}
+  .badges{position:absolute;top:6px;left:6px;display:flex;flex-direction:column;gap:4px}
+  .badge{font-family:var(--font-mono);font-size:.56rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.3px;text-transform:uppercase}
+  .badge.auto{background:var(--violet);color:#fff}
+  .badge.relic{background:var(--cyan);color:#06121a}
+  .badge.num{background:var(--magenta);color:#1a0210}
+  .val-badge{position:absolute;bottom:6px;right:6px;background:rgba(7,6,15,.85);border:1px solid var(--cyan);color:#fff;font-family:var(--font-mono);font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:4px}
+  .card-grid.size-s .val-badge{display:none}
+
+  .card-info{padding:10px 11px 12px}
+  .card-name{font-family:var(--font-body);font-size:.98rem;font-weight:700;color:var(--text);line-height:1.2}
+  .card-set{font-family:var(--font-mono);font-size:.64rem;color:var(--sub);line-height:1.3;margin-top:3px}
+
+  .modal-overlay{display:flex;position:fixed;inset:0;background:rgba(2,2,8,.74);z-index:999;align-items:flex-end;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,visibility 0s linear .28s}
+  .modal-overlay.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .28s ease,visibility 0s linear 0s}
+  @media (min-width:600px){.modal-overlay{align-items:center;justify-content:center}}
+  .modal{position:relative;background:var(--surface);border-top:3px solid var(--violet);border-radius:16px 16px 0 0;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;transform:translateY(48px) scale(.98);opacity:0;transition:transform .36s cubic-bezier(.16,1,.3,1),opacity .3s ease}
+  .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--holo);border-radius:16px 16px 0 0}
+  .modal-overlay.open .modal{transform:translateY(0) scale(1);opacity:1}
+  @media (min-width:600px){.modal{border-radius:16px}}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 0}
+  .modal-header .label{font-family:var(--font-mono);font-size:.66rem;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px}
+  .modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .modal-img{padding:16px 20px}
+  .modal-img img{width:100%;border-radius:10px;max-height:360px;object-fit:contain;background:var(--surface-2)}
+  .modal-details{padding:0 20px 24px}
+  .modal-name{font-family:var(--font-body);font-size:1.5rem;font-weight:700;letter-spacing:-.3px;color:#fff}
+  .modal-sub{font-family:var(--font-mono);font-size:.76rem;color:var(--sub);margin:4px 0 16px}
+  .modal-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--hairline);font-size:.86rem;gap:12px}
+  .modal-row:last-child{border-bottom:none}
+  .modal-label{color:var(--sub);font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+  .modal-value{font-weight:600;color:var(--text);text-align:right}
+  .modal-value.highlight{color:var(--cyan);font-family:var(--font-mono)}
+  .price-note{font-size:.68rem;color:var(--sub);margin-top:14px;line-height:1.5;font-style:italic}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--sub);font-family:var(--font-body)}
+  .empty-state.hidden{display:none}
+  .empty-state .es-ic{font-family:var(--font-display);font-size:2rem;background:var(--holo);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:14px}
+  .empty-state .es-t{font-weight:700;font-size:1.15rem;color:var(--text);margin-bottom:8px}
+  .empty-state .es-b{font-size:.95rem;font-style:italic;margin-bottom:18px}
+  .empty-state a{display:inline-block;background:var(--holo);color:#0a0616;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:10px;font-size:.9rem}
+
+  footer{text-align:center;padding:32px 16px 40px;font-size:.74rem;color:var(--sub);font-family:var(--font-mono);border-top:1px solid var(--hairline);margin-top:20px}
+  footer .mark{color:var(--magenta);font-weight:500}
+  footer a{color:var(--cyan)}
+
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="top-stripe"></div>
+
+<header>
+  <div class="header-glow g1" aria-hidden="true"></div>
+  <div class="header-glow g2" aria-hidden="true"></div>
+  <div class="header-top">
+    <div>
+      <div class="logo">Mindless Machine</div>
+      <div class="tagline">An AI artist's Pokedex &mdash; Brazil &times; Japan</div>
+      <div class="est">ポケモンカード コレクション</div>
+    </div>
+    <div class="nav-wrap">
+      <a class="nav-link" href="guide.html">Collecting Guide</a>
+      <a class="nav-link" href="scanner.html">Scan a card &rarr;</a>
+      <a class="nav-link ig" href="https://instagram.com/mindlessmachine" target="_blank" rel="noopener">@mindlessmachine</a>
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Cards</div></div>
+  <div class="stat"><div class="stat-val" id="statValue">—</div><div class="stat-lbl">Est. Value</div></div>
+  <div class="stat"><div class="stat-val" id="statSets">—</div><div class="stat-lbl">Sets</div></div>
+  <div class="stat"><div class="stat-val" id="statSpecial">—</div><div class="stat-lbl">Autos &amp; Numbered</div></div>
+</div>
+
+<div class="filter-bar">
+  <div class="search-row">
+    <input class="search-input" id="searchInput" placeholder="Search name, set, number..." oninput="applyFilters()">
+    <div class="size-btns">
+      <button class="size-btn" data-size="s" onclick="setSize('s')">S</button>
+      <button class="size-btn" data-size="m" onclick="setSize('m')">M</button>
+      <button class="size-btn" data-size="l" onclick="setSize('l')">L</button>
+    </div>
+  </div>
+  <div class="controls">
+    <select class="filter-select" id="setSelect" onchange="applyFilters()"><option value="">Any Set</option></select>
+    <select class="filter-select" id="brandSelect" onchange="applyFilters()"><option value="">Any Brand</option></select>
+    <select class="filter-select" id="sortSelect" onchange="applyFilters()">
+      <option value="newest" selected>Newest First</option>
+      <option value="value-desc">Value ↓</option>
+      <option value="value-asc">Value ↑</option>
+      <option value="name-az">Name A–Z</option>
+    </select>
+  </div>
+  <div class="chips" id="chipRow">
+    <div class="chip active" data-filter="all" onclick="setChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setChip(this)}" tabindex="0" role="button">All</div>
+    <div class="chip" data-filter="auto" onclick="setChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setChip(this)}" tabindex="0" role="button">Autograph</div>
+    <div class="chip" data-filter="relic" onclick="setChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setChip(this)}" tabindex="0" role="button">Relic</div>
+    <div class="chip" data-filter="numbered" onclick="setChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setChip(this)}" tabindex="0" role="button">Numbered</div>
+    <div class="chip" data-filter="value" onclick="setChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setChip(this)}" tabindex="0" role="button">$10+</div>
+  </div>
+</div>
+
+<div class="grid-wrap">
+  <div class="count-row" id="countRow"></div>
+  <div class="card-grid" id="cardGrid"></div>
+  <div class="empty-state hidden" id="emptyState">
+    <div class="es-ic">[ &nbsp;empty&nbsp; ]</div>
+    <div class="es-t">Your Pokedex is empty</div>
+    <div class="es-b">No cards catalogued yet. Scan your first one and the machine will file it here.</div>
+    <a href="scanner.html">Open the Scanner &rarr;</a>
+  </div>
+  <div class="empty-state hidden" id="noResults">
+    <div class="es-ic">[ &nbsp;0&nbsp; ]</div>
+    <div class="es-t">No matches</div>
+    <div class="es-b">Nothing in the Pokedex fits those filters. Try clearing the search or a different tag.</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="label">Card Detail</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-img"><img id="modalImg" src="" alt=""></div>
+    <div class="modal-details">
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-sub" id="modalSub"></div>
+      <div id="modalRows"></div>
+      <div class="price-note">Est. value is a typical secondary-market range for this card &amp; parallel — not a live comp or a formal appraisal.</div>
+    </div>
+  </div>
+</div>
+
+<footer>An AI artist's Pokedex — <span class="mark">pixels &times; paper.</span><br>Powered by <a href="https://www.ebay.com/usr/harpua2001" target="_blank" rel="noopener">Harpua2001</a> card intelligence</footer>
+
+<script>
+let CARDS = [];
+
+function num(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+
+function badgeHTML(c){
+  let out = '';
+  if (c.isAuto || c.is_auto) out += `<div class="badge auto">Auto</div>`;
+  if (c.isRelic || c.is_relic) out += `<div class="badge relic">Relic</div>`;
+  if (c.serial) out += `<div class="badge num">#${c.serial}</div>`;
+  return out;
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function renderGrid(cards){
+  const grid = document.getElementById('cardGrid');
+  const empty = document.getElementById('emptyState');
+  const noRes = document.getElementById('noResults');
+  const countRow = document.getElementById('countRow');
+  grid.innerHTML = '';
+  if (cards.length === 0){
+    if (CARDS.length === 0){ empty.classList.remove('hidden'); noRes.classList.add('hidden'); }
+    else { noRes.classList.remove('hidden'); empty.classList.add('hidden'); }
+    countRow.textContent = '';
+    return;
+  }
+  empty.classList.add('hidden');
+  noRes.classList.add('hidden');
+  countRow.textContent = `${cards.length} card${cards.length !== 1 ? 's' : ''} shown`;
+  cards.forEach((c, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'card-tile';
+    tile.style.animationDelay = `${Math.min(i*22, 480)}ms`;
+    const subParts = [c.set, c.cardNumber ? '#'+c.cardNumber : ''].filter(Boolean);
+    const sub = subParts.length ? subParts.join(' · ') : '—';
+    const est = num(c.estValue);
+    const thumb = c.image
+      ? `<img src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy">`
+      : `<div class="thumb-ph">?</div>`;
+    const valBadge = est > 0 ? `<div class="val-badge">$${est}</div>` : '';
+    tile.innerHTML = `
+      <div class="thumb-wrap">
+        ${thumb}
+        <div class="badges">${badgeHTML(c)}</div>
+        ${valBadge}
+      </div>
+      <div class="card-info">
+        <div class="card-name">${esc(c.name) || 'Unidentified card'}</div>
+        <div class="card-set">${esc(sub)}</div>
+      </div>`;
+    tile.tabIndex = 0;
+    tile.setAttribute('role','button');
+    tile.setAttribute('aria-label', `${c.name||'card'} detail`);
+    tile.onclick = () => openModal(c);
+    tile.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openModal(c); } };
+    grid.appendChild(tile);
+  });
+}
+
+let activeFilter = 'all';
+
+function populateSelect(id, values){
+  const sel = document.getElementById(id);
+  const prev = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  const seen = [...new Set(values.filter(v => v !== null && v !== undefined && v !== ''))].sort();
+  seen.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+  if (seen.includes(prev)) sel.value = prev;
+}
+
+function applyFilters(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const set = document.getElementById('setSelect').value;
+  const brand = document.getElementById('brandSelect').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = CARDS.filter(c => {
+    if (activeFilter === 'auto' && !(c.isAuto || c.is_auto)) return false;
+    if (activeFilter === 'relic' && !(c.isRelic || c.is_relic)) return false;
+    if (activeFilter === 'numbered' && !c.serial) return false;
+    if (activeFilter === 'value' && num(c.estValue) < 10) return false;
+    if (set && c.set !== set) return false;
+    if (brand && c.brand !== brand) return false;
+    if (q){
+      const hay = `${c.name||''} ${c.set||''} ${c.brand||''} ${c.cardNumber||''} ${c.year||''} ${c.parallel||''} ${c.rarity||''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (sort === 'value-desc') filtered.sort((a,b) => num(b.estValue) - num(a.estValue));
+  else if (sort === 'value-asc') filtered.sort((a,b) => num(a.estValue) - num(b.estValue));
+  else if (sort === 'name-az') filtered.sort((a,b) => String(a.name||'').localeCompare(String(b.name||'')));
+  else filtered.sort((a,b) => (b.id||0) - (a.id||0)); // newest first
+
+  renderGrid(filtered);
+}
+
+function setChip(el){
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = el.dataset.filter;
+  applyFilters();
+}
+
+// Hide filter controls that would match nothing — works under either record shape
+function pruneUI(){
+  const preds = {
+    auto: c => c.isAuto || c.is_auto,
+    relic: c => c.isRelic || c.is_relic,
+    numbered: c => c.serial,
+    value: c => num(c.estValue) >= 10,
+  };
+  document.querySelectorAll('.chip').forEach(ch => {
+    const f = ch.dataset.filter;
+    if (f === 'all') return;
+    const pred = preds[f];
+    if (pred && !CARDS.some(pred)) ch.style.display = 'none';
+  });
+  ['setSelect','brandSelect'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel.options.length <= 1) sel.style.display = 'none';
+  });
+  const special = CARDS.filter(c => preds.auto(c) || preds.relic(c) || c.serial).length;
+  if (special === 0){
+    const el = document.getElementById('statSpecial');
+    const stat = el && el.closest('.stat');
+    if (stat) stat.style.display = 'none';
+  }
+}
+
+function updateStats(){
+  const total = CARDS.length;
+  const val = CARDS.reduce((s,c) => s + num(c.estValue), 0);
+  const sets = new Set(CARDS.map(c => c.set).filter(Boolean)).size;
+  const special = CARDS.filter(c => c.isAuto || c.is_auto || c.isRelic || c.is_relic || c.serial).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statValue').textContent = '$' + val.toLocaleString();
+  document.getElementById('statSets').textContent = sets;
+  document.getElementById('statSpecial').textContent = special;
+}
+
+function openModal(c){
+  const modalImg = document.getElementById('modalImg');
+  if (c.image){ modalImg.src = c.image; modalImg.style.display = 'block'; }
+  else { modalImg.removeAttribute('src'); modalImg.style.display = 'none'; }
+  modalImg.alt = c.name || '';
+  document.getElementById('modalName').textContent = c.name || 'Unidentified card';
+  const subParts = [c.brand, c.set].filter(Boolean);
+  document.getElementById('modalSub').textContent = subParts.join(' · ');
+
+  const est = num(c.estValue);
+  const rows = [
+    ['Set', c.set],
+    ['Brand', c.brand],
+    ['Card Number', c.cardNumber],
+    ['Parallel / Rarity', c.parallel || c.rarity],
+    ['Serial', c.serial],
+    ['Year', c.year],
+    ['Autograph', (c.isAuto || c.is_auto) ? 'Yes' : null],
+    ['Relic', (c.isRelic || c.is_relic) ? 'Yes' : null],
+    ['Est. Value', est > 0 ? '$' + est : null],
+    ['Scanned', c.scannedAt],
+  ].filter(([l,v]) => v !== null && v !== undefined && v !== '');
+
+  document.getElementById('modalRows').innerHTML = rows.map(([l,v]) =>
+    `<div class="modal-row"><span class="modal-label">${l}</span><span class="modal-value${l==='Est. Value'?' highlight':''}">${esc(v)}</span></div>`
+  ).join('');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e){
+  if (e && e.target !== document.getElementById('modalOverlay') && e.target.className !== 'modal-close') return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function setSize(s){
+  const grid = document.getElementById('cardGrid');
+  grid.classList.remove('size-s','size-m','size-l');
+  grid.classList.add('size-' + s);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === s));
+  try { localStorage.setItem('mindlessMachineGridSize', s); } catch(e) {}
+}
+
+async function init(){
+  try{
+    const r = await fetch('./cards.json?t=' + Date.now());
+    CARDS = await r.json();
+    if (!Array.isArray(CARDS)) CARDS = [];
+  }catch(e){ CARDS = []; }
+  populateSelect('setSelect', CARDS.map(c => c.set));
+  populateSelect('brandSelect', CARDS.map(c => c.brand));
+  updateStats();
+  pruneUI();
+  const initSize = (() => { try { return localStorage.getItem('mindlessMachineGridSize') || 'm'; } catch(e) { return 'm'; } })();
+  setSize(initSize);
+  applyFilters();
+}
+function syncHeaderHeight(){
+  const h = document.querySelector('header');
+  if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+}
+syncHeaderHeight();
+window.addEventListener('resize', syncHeaderHeight);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight);
+init();
+</script>
+</body>
+</html>
