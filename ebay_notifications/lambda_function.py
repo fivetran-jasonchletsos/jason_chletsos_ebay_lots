@@ -379,6 +379,81 @@ def _beyond_system_prompt() -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# R3 Toys and Games — retail PRODUCT scanner.
+# This is a *product* identifier (toys & games), NOT a trading-card identifier.
+# It reuses the exact same /upload-photos vision machinery (_run_vision +
+# _extract_json) but with its own system prompt, triggered only by
+# {"mode":"product"} in the request body so the default card path is unaffected.
+# (Free Will is a separate CARD scanner and uses the default /upload-photos path.)
+# ---------------------------------------------------------------------------
+
+# The storefront (docs/r3_toys/index.html) filters on these EXACT strings —
+# anything else silently never renders under a filter chip, so we snap whatever
+# the model returns onto this closed set server-side.
+_R3_CATEGORIES = ["Action Figures", "Board Games", "Video Games",
+                  "Collectibles", "Plush & Dolls", "Puzzles & Other"]
+
+
+def _r3_product_system_prompt() -> str:
+    """System prompt for identifying a single toy/game retail product from a
+    phone photo (R3 Toys and Games)."""
+    return (
+        "You are the product cataloguer behind \"R3 Toys and Games\", a toy and game store. "
+        "A staff member photographs one retail product; you identify it and draft a short, "
+        "sellable storefront listing.\n\n"
+        "Look at the photo and identify the single product shown. Pick the ONE category it "
+        "best fits from exactly this list (copy the string verbatim): "
+        "\"Action Figures\" (action figures, figurines, Funko Pops, statues), "
+        "\"Board Games\" (board games, card games, tabletop games), "
+        "\"Video Games\" (video game discs/cartridges, consoles, controllers, accessories), "
+        "\"Collectibles\" (LEGO/building sets, model kits, die-cast, other collectibles), "
+        "\"Plush & Dolls\" (stuffed animals, plush, dolls), "
+        "\"Puzzles & Other\" (jigsaw puzzles, brain teasers, anything else).\n\n"
+        "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
+        "trailing commas) with exactly these keys: is_product (boolean; false if the image "
+        "is not a retail product), name (a short sellable product name, title case, <= 60 "
+        "chars), category (exactly one of the six strings above), brand (the brand or maker "
+        "if visible on the item/box, else \"\"), desc (one factual sentence describing the "
+        "product, plain text), price (a realistic suggested US retail price as a plain "
+        "number in dollars, e.g. 19.99 or 45 — no \"$\", no range).\n\n"
+        "Rules: Never invent a brand you cannot see — use \"\" instead. Be realistic about "
+        "price (a small plush may be $8-15, a big LEGO set may be $60-250). If is_product is "
+        "false, still return the JSON with empty/zero fields. The output must be "
+        "machine-parseable JSON."
+    )
+
+
+def _r3_snap_category(value) -> str:
+    """Snap a model- or client-supplied category onto the closed storefront set
+    (case-insensitive exact match). Falls back to "Collectibles" so a product is
+    never stranded with an unfilterable value.
+    """
+    v = str(value or "").strip()
+    for cat in _R3_CATEGORIES:
+        if v.lower() == cat.lower():
+            return cat
+    return "Collectibles"
+
+
+def _r3_price(value):
+    """Coerce whatever price shape the model/client sends into a plain number.
+
+    Handles "$45", "45.00", "45-60" (takes the low end), "approx 45", 45, 45.0.
+    Returns an int when the value is whole, a float when it has cents, or 0 on
+    anything unparseable.
+    """
+    if isinstance(value, (int, float)):
+        num = float(value)
+    else:
+        import re as _re
+        m = _re.search(r"\d+(?:\.\d+)?", str(value or "").replace(",", ""))
+        if not m:
+            return 0
+        num = float(m.group(0))
+    return int(num) if num == int(num) else round(num, 2)
+
+
 def _img_bytes(data_url):
     """Turn a data URL (or bare base64) into (format, raw_bytes).
 
@@ -999,6 +1074,54 @@ def lambda_handler(event, context):
                     "error":   "Image too large — please use a smaller photo.",
                 }, event)
 
+            # --- PRODUCT mode (R3 Toys and Games product scanner) ---
+            # When the client sends {"mode":"product"} we identify a retail
+            # product instead of a trading card. We early-return here so the
+            # card path below is completely unchanged. Shared above: the model
+            # guard, _img_bytes, and the 3.5MB cap. Shared below (inside this
+            # block): _run_vision error handling + _extract_json fallback.
+            if str(body.get("mode") or "").strip().lower() == "product":
+                try:
+                    raw, model_label = _run_vision(
+                        _r3_product_system_prompt(), [(ffmt, fraw)],
+                        "Identify this retail product and produce the listing JSON. "
+                        "Return ONLY the JSON object.", 500)
+                except urllib.error.HTTPError as exc:
+                    logger.error(f"upload-photos(product) vision HTTP {exc.code}: {exc.read().decode()[:300]}")
+                    return _cors_response(502, {
+                        "success": False,
+                        "error":   f"AI vision error (HTTP {exc.code}). Please try again.",
+                    }, event)
+                except Exception as exc:
+                    logger.error(f"upload-photos(product) vision error: {exc}")
+                    return _cors_response(502, {
+                        "success": False,
+                        "error":   "AI vision error. Please try again.",
+                    }, event)
+
+                prod = _extract_json(raw)
+                logger.info(f"upload-photos(product): model={model_label} parsed={isinstance(prod, dict)}")
+                if not isinstance(prod, dict):
+                    return _cors_response(200, {
+                        "success":    True,
+                        "identified": False,
+                        "message":    "Couldn't read the product clearly — try a straight, well-lit photo.",
+                    }, event)
+
+                return _cors_response(200, {
+                    "success":    True,
+                    "identified": bool(prod.get("is_product", True)),
+                    "product": {
+                        "name":     str(prod.get("name") or "").strip(),
+                        "category": _r3_snap_category(prod.get("category")),
+                        "price":    _r3_price(prod.get("price")),
+                        "brand":    str(prod.get("brand") or "").strip(),
+                        "desc":     str(prod.get("desc") or "").strip(),
+                    },
+                    "model": model_label,
+                }, event)
+            # --- end PRODUCT mode; card path below is untouched ---------------
+
             images = [(ffmt, fraw)]
             if back:
                 bfmt, braw = _img_bytes(back)
@@ -1245,6 +1368,85 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/pokedex-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/mindless-save — "Mindless Machine Art" Pokedex auto-save
+    # (Thiago's Pokemon collection, Japan). Identical shape/schema to
+    # pokedex-save, just against docs/mindless_machine/cards.json + images/.
+    # Body: {"image": <data-url>, "card": {...from /upload-photos}, "scannedAt"}.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/mindless-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("mindless-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            card       = body.get("card") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            est = card.get("estimated_value_usd") or {}
+            try:
+                est_value = round(float((est or {}).get("typical") or 0))
+            except (TypeError, ValueError):
+                est_value = 0
+
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "name":        card.get("player"),
+                    "dexNo":       None,
+                    "hp":          None,
+                    "type":        None,
+                    "language":    None,
+                    "set":         card.get("set_name") or card.get("brand"),
+                    "cardNumber":  card.get("card_number"),
+                    "rarity":      None,
+                    "stage":       None,
+                    "attacks":     [],
+                    "illustrator": None,
+                    "year":        card.get("year") or None,
+                    "estValue":    est_value,
+                    "scannedAt":   scanned_at,
+                }
+
+            try:
+                next_id, record = _save_card_with_retry(
+                    "docs/mindless_machine", raw, build_record, "Mindless Machine"
+                )
+            except RuntimeError as exc:
+                logger.error(f"mindless-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
+
+            logger.info(f"mindless-save: added card id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":      True,
+                "id":           next_id,
+                "mindless_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/mindless_machine/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"mindless-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/mindless-save"):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
@@ -2395,6 +2597,157 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/rick-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/freewill-save — "Free Will" card auto-save (Will's football &
+    # baseball card store). A direct clone of rick-save: same GET -> next_id ->
+    # image PUT -> cards.json PUT flow via _save_card_with_retry, against
+    # docs/freewill_scanner/cards.json + images/. Body: {"image": <data-url>,
+    # "card": {...fields from /upload-photos' "card" object}, "scannedAt":
+    # "YYYY-MM-DD" (computed client-side)}.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/freewill-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("freewill-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            card       = body.get("card") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            est = card.get("estimated_value_usd") or {}
+            try:
+                est_value = round(float((est or {}).get("typical") or 0))
+            except (TypeError, ValueError):
+                est_value = 0
+
+            def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at):
+                return {
+                    "sport":      card.get("sport"),
+                    "name":       card.get("player"),
+                    "team":       card.get("team"),
+                    "brand":      card.get("brand"),
+                    "set":        card.get("set_name"),
+                    "cardNumber": card.get("card_number"),
+                    "parallel":   card.get("parallel"),
+                    "serial":     card.get("serial"),
+                    "isRookie":   bool(card.get("is_rookie")),
+                    "isAuto":     bool(card.get("is_auto")),
+                    "isRelic":    bool(card.get("is_relic")),
+                    "estValue":   est_value,
+                    "scannedAt":  scanned_at,
+                }
+
+            try:
+                next_id, record = _save_card_with_retry(
+                    "docs/freewill_scanner", raw, build_record, "Free Will"
+                )
+            except RuntimeError as exc:
+                logger.error(f"freewill-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
+
+            logger.info(f"freewill-save: added card id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":      True,
+                "id":           next_id,
+                "freewill_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/freewill_scanner/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"freewill-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/freewill-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/r3-save — "R3 Toys and Games" product auto-save. Mirrors the
+    # card *-save flow (GET -> next_id -> image PUT -> JSON PUT via
+    # _save_card_with_retry) but writes a toy/game PRODUCT record to
+    # docs/r3_toys/products.json + images/. Body: {"image": <data-url>,
+    # "product": {name,category,price,brand,desc}, "scannedAt": "YYYY-MM-DD"}.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/r3-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("r3-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            product    = body.get("product") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(product, dict):
+                return _cors_response(400, {"success": False, "error": "product object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            # Build the storefront record. The product object may have been
+            # edited in the scanner UI, so re-snap the category and re-coerce
+            # the price here too — this is the point where the value hits disk.
+            def build_record(next_id, product=product, scanned_at=scanned_at):
+                return {
+                    "name":      str(product.get("name") or "").strip() or "Untitled",
+                    "brand":     str(product.get("brand") or "").strip(),
+                    "category":  _r3_snap_category(product.get("category")),
+                    "price":     _r3_price(product.get("price")),
+                    "desc":      str(product.get("desc") or "").strip(),
+                    "scannedAt": scanned_at,
+                    "inStock":   True,
+                }
+
+            try:
+                next_id, record = _save_card_with_retry(
+                    "docs/r3_toys", raw, build_record, "R3 Toys and Games",
+                    data_filename="products.json", image_prefix="product",
+                )
+            except RuntimeError as exc:
+                logger.error(f"r3-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
+
+            logger.info(f"r3-save: added product id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":  True,
+                "id":       next_id,
+                "r3_url":   "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/r3_toys/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"r3-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/r3-save"):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
@@ -3912,7 +4265,8 @@ def _recompute_copies(cards: list) -> list:
 _CONFLICT_HTTP_CODES = (409, 412, 422)
 
 
-def _save_card_with_retry(board_dir: str, raw_image: bytes, build_record, commit_label: str, max_attempts: int = 6):
+def _save_card_with_retry(board_dir: str, raw_image: bytes, build_record, commit_label: str, max_attempts: int = 6,
+                          data_filename: str = "cards.json", image_prefix: str = "card"):
     """Read-modify-write a board's cards.json to append one new scanned card,
     retrying on GitHub's optimistic-concurrency conflicts (HTTP 409/412/422)
     at EITHER step that can race: the image PUT (two invocations computing
@@ -3944,7 +4298,10 @@ def _save_card_with_retry(board_dir: str, raw_image: bytes, build_record, commit
     added here. Returns (next_id, record) on success. Raises RuntimeError
     with a caller-friendly message on exhausted retries or a hard failure.
     """
-    cards_path = f"{board_dir}/cards.json"
+    # data_filename / image_prefix default to the card-board convention
+    # ("cards.json" + "card<id>.jpg"); the Free Will product scanner overrides
+    # them to "products.json" + "product<id>.jpg". Everything else is identical.
+    cards_path = f"{board_dir}/{data_filename}"
     orphaned_image_path = None
     last_err = None
 
@@ -3972,7 +4329,7 @@ def _save_card_with_retry(board_dir: str, raw_image: bytes, build_record, commit
         existing_ids = [c.get("id") for c in cards if isinstance(c, dict) and isinstance(c.get("id"), (int, float))]
         next_id = int(max(existing_ids)) + 1 if existing_ids else 1
 
-        image_rel = f"images/card{next_id}.jpg"
+        image_rel = f"images/{image_prefix}{next_id}.jpg"
         image_path = f"{board_dir}/{image_rel}"
         try:
             _github_put_file(image_path, raw_image, message=f"{commit_label}: add card {next_id} image (auto-save)")
