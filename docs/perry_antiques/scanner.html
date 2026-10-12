@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14110c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Perry's Place Ardmore — Item Scanner</title>
+<meta name="description" content="Staff tool: photograph a piece to identify, appraise, and add it to the collection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14110c; --surface:#1d1912; --surface-2:#251f17; --surface-3:#2f281d;
+    --gold:#c8a24e; --gold-2:#dfc081; --gold-dim:rgba(200,162,78,.15);
+    --text:#f3ecdd; --muted:#bcb09a; --dim:#867a64;
+    --border:rgba(200,162,78,.24); --border-strong:rgba(200,162,78,.42); --border-soft:rgba(243,236,221,.08);
+    --success:#7cbd8c; --warn:#d1a13a; --danger:#e8708a;
+    --r-sm:6px; --r-md:10px; --r-lg:16px;
+    --container:min(94vw,560px);
+    --font-head:'Playfair Display',Georgia,serif;
+    --font-body:'Inter',system-ui,-apple-system,sans-serif;
+    --t:220ms cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(120% 70% at 50% -10%, rgba(200,162,78,.13), transparent 55%),
+      radial-gradient(90% 60% at 100% 100%, rgba(200,162,78,.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:var(--font-body); font-size:16px; line-height:1.55; min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .top-rule{height:3px;background:linear-gradient(90deg,transparent,var(--gold) 50%,transparent)}
+  .wrap{max-width:var(--container); margin-inline:auto; padding:0 18px 56px}
+
+  .top-nav{display:flex; justify-content:center; gap:10px; padding-top:16px}
+  .top-nav a{font-family:var(--font-body); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.12em;
+    color:var(--muted); text-decoration:none; border:1.5px solid var(--border-soft); border-radius:999px;
+    padding:8px 15px; background:var(--surface-2); transition:all var(--t)}
+  .top-nav a:hover,.top-nav a:focus-visible{border-color:var(--gold); color:var(--text)}
+
+  header{text-align:center; padding:28px 0 6px}
+  .wordmark{font-family:var(--font-head); font-weight:700;
+    font-size:clamp(30px,8vw,46px); letter-spacing:.02em; line-height:1.02}
+  .wordmark .amp{color:var(--gold-2)}
+  .house{font-family:var(--font-head); font-style:italic; font-weight:500; color:var(--gold);
+    font-size:clamp(14px,3.6vw,18px); letter-spacing:.04em; margin-top:4px}
+  .sub{font-family:var(--font-body); font-weight:600; text-transform:uppercase; color:var(--gold);
+    font-size:11px; letter-spacing:.3em; margin-top:12px}
+  .lede{color:var(--muted); font-size:14px; margin:12px auto 0; max-width:32em}
+
+  .panel{background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--r-lg);
+    padding:20px; margin-top:22px; box-shadow:0 2px 14px rgba(0,0,0,.45)}
+  .panel h2{font-family:var(--font-body); font-weight:600; text-transform:uppercase; letter-spacing:.1em;
+    font-size:13px; margin:0 0 14px; color:var(--gold)}
+
+  .shots{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .shot{position:relative; border:1.5px dashed var(--border-strong); border-radius:var(--r-md);
+    background:var(--surface-2); aspect-ratio:4/5; overflow:hidden; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    color:var(--muted); transition:border-color var(--t),background var(--t); text-align:center; padding:12px}
+  .shot:active{border-color:var(--gold); background:var(--surface-3)}
+  .shot.filled{border-style:solid; border-color:var(--gold)}
+  .shot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+  .shot .badge{position:absolute; top:8px; left:8px; background:rgba(200,162,78,.92); color:#14110c;
+    font-family:var(--font-body); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    padding:3px 9px; border-radius:999px; z-index:1}
+  .shot .swap{position:absolute; bottom:8px; right:8px; background:rgba(20,17,12,.82); color:var(--gold);
+    font-size:11px; padding:4px 10px; border-radius:999px; font-family:var(--font-body); font-weight:600; letter-spacing:.04em}
+  .shot .ph-ic{width:30px; height:30px; opacity:.78; color:var(--gold)}
+  .shot .ph-t{font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--text); text-transform:uppercase; letter-spacing:.06em}
+  .shot .ph-s{font-size:11px; color:var(--dim)}
+  .shot input{display:none}
+  .req{color:var(--gold-2)}
+
+  .btn{display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+    border:none; border-radius:var(--r-md); padding:16px; margin-top:16px; cursor:pointer;
+    font-family:var(--font-body); font-size:14px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    transition:transform var(--t),opacity var(--t),box-shadow var(--t)}
+  .btn-gold{background:linear-gradient(150deg,var(--gold-2),var(--gold)); color:#14110c; box-shadow:0 8px 28px rgba(200,162,78,.28)}
+  .btn-gold:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.4; cursor:not-allowed; box-shadow:none}
+  .btn-ghost{background:var(--surface); color:var(--muted); border:1.5px solid var(--border-soft); font-weight:600; font-size:13px; padding:13px; letter-spacing:.08em}
+  .btn-ghost:hover{border-color:var(--gold); color:var(--text)}
+
+  .toast{position:fixed; top:14px; right:14px; z-index:30; max-width:260px;
+    background:var(--surface-3); border:1px solid var(--gold); color:var(--text);
+    font-size:13px; line-height:1.45; padding:12px 16px; border-radius:10px;
+    box-shadow:0 10px 28px rgba(0,0,0,.55); opacity:0; transform:translateY(-6px);
+    pointer-events:none; transition:opacity 220ms ease,transform 220ms ease}
+  .toast.on{opacity:1; transform:none}
+
+  .loading{display:none; text-align:center; padding:34px 10px}
+  .loading.on{display:block}
+  .spin{width:42px; height:42px; margin:0 auto 16px; border-radius:50%;
+    border:3px solid var(--border-soft); border-top-color:var(--gold); animation:sp 800ms linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .loading p{color:var(--muted); font-size:14px; margin:0}
+
+  #results{display:none}
+  #results.on{display:block; animation:rise 320ms cubic-bezier(.2,.7,.2,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .chips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px}
+  .chip{font-family:var(--font-body); font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    padding:5px 11px; border-radius:999px; background:var(--gold-dim); color:var(--gold); border:1px solid var(--border)}
+
+  .ident{font-family:var(--font-head); font-size:26px; font-weight:600; line-height:1.2; margin:0 0 4px; color:var(--text)}
+  .subident{color:var(--muted); font-size:14px; margin:0 0 6px}
+  .ptext{color:var(--muted); font-size:14px; line-height:1.55; margin:8px 0 0}
+
+  .value{text-align:center; padding:22px 14px; background:var(--surface-2); border-radius:var(--r-md); margin:18px 0}
+  .value .lab{font-family:var(--font-body); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); font-weight:600}
+  .value .amt{font-family:var(--font-head); font-weight:700; font-size:clamp(30px,9vw,44px); line-height:1; margin:10px 0 6px; color:var(--gold-2)}
+  .value .est{color:var(--dim); font-size:12.5px; margin-top:8px; font-style:italic}
+
+  .note{color:var(--dim); font-size:12px; text-align:center; margin-top:16px; line-height:1.55}
+  .site-link{display:none; text-align:center; margin-top:16px}
+  .site-link a{font-family:var(--font-body); color:var(--gold); font-size:13px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.1em; text-decoration:none}
+
+  .err{display:none; background:rgba(232,112,138,.1); border:1px solid rgba(232,112,138,.35);
+    color:var(--danger); border-radius:var(--r-md); padding:14px 16px; margin-top:16px; font-size:14px}
+  .err.on{display:block}
+
+  footer{margin-top:40px; text-align:center; color:var(--dim); font-size:12.5px; line-height:1.8}
+  footer .fm{font-family:var(--font-head); font-weight:600; color:var(--gold); letter-spacing:.04em; font-size:16px}
+  footer .pw{font-family:var(--font-body); text-transform:uppercase; letter-spacing:.18em; font-size:11px; margin-top:8px}
+  .hr{height:1px; background:var(--border-soft); margin:26px 0 18px}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="top-rule"></div>
+
+<div class="wrap">
+
+  <div class="toast" id="toast"></div>
+
+  <nav class="top-nav">
+    <a href="index.html">The Collection</a>
+    <a href="scanner.html">Scan &rarr;</a>
+  </nav>
+
+  <header>
+    <div class="wordmark">Perry's Place</div>
+    <div class="house">Ardmore</div>
+    <div class="sub">Item Intake</div>
+    <p class="lede">Photograph an item &mdash; gold, silver, jewelry, a coin, or an antique &mdash; to identify, appraise, and add it to the collection.</p>
+  </header>
+
+  <section class="panel">
+    <h2>1 &middot; Photograph the piece</h2>
+    <div class="shots">
+      <label class="shot" id="shot-front">
+        <span class="badge">Front <span class="req">*</span></span>
+        <svg class="ph-ic" viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 012-2h1.5l1-1.6a1 1 0 01.86-.4h5.28a1 1 0 01.86.4L21.5 6H22a2 2 0 012 2" stroke="currentColor" stroke-width="1.6"/><rect x="2" y="6" width="20" height="14" rx="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.6" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="ph-t">Take / choose</span>
+        <span class="ph-s">main shot</span>
+        <input type="file" accept="image/*" capture="environment" id="in-front">
+      </label>
+      <label class="shot" id="shot-angle">
+        <span class="badge">Hallmark <span style="opacity:.75">(optional)</span></span>
+        <svg class="ph-ic" viewBox="0 0 24 24" fill="none"><path d="M4 16l4.5-5.5 3 3.5 3-4L20 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="4" width="18" height="16" rx="2.2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="9" r="1.4" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span class="ph-t">Add detail</span>
+        <span class="ph-s">hallmark or maker's mark</span>
+        <input type="file" accept="image/*" capture="environment" id="in-angle">
+      </label>
+    </div>
+    <button class="btn btn-gold" id="go" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="#14110c" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" fill="#14110c"/></svg>
+      <span>Identify &amp; appraise</span>
+    </button>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="spin"></div>
+    <p id="loadmsg">Examining the piece&hellip;</p>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <section id="results">
+    <div class="panel">
+      <h2 style="margin-bottom:10px">Identified</h2>
+      <div class="chips" id="chips"></div>
+      <p class="ident" id="ident"></p>
+      <p class="subident" id="subident"></p>
+      <p class="ptext" id="ptext"></p>
+
+      <div class="value">
+        <div class="lab">Estimated value</div>
+        <div class="amt" id="amt">&mdash;</div>
+        <div class="est">Estimate only &mdash; set the final price in store.</div>
+      </div>
+
+      <p class="note">Value is an AI estimate based on the photo and may not reflect condition, maker, hallmark, or current market. Review before listing.</p>
+      <div class="site-link" id="siteLink"><a href="index.html">View the collection &rarr;</a></div>
+    </div>
+    <button class="btn btn-ghost" id="again">Scan another piece</button>
+  </section>
+
+  <footer>
+    <div class="hr"></div>
+    <div class="fm">Perry's Place Ardmore</div>
+    <div class="pw">Powered by Harpua2001 appraisal intelligence</div>
+  </footer>
+
+</div>
+
+<script>
+const LAMBDA = 'https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay';
+const state = { front:null, angle:null };
+let lastProduct = null;
+
+const $ = id => document.getElementById(id);
+const LOAD_MSGS = ['Examining the piece…','Checking hallmarks & makers…','Estimating a value…','Adding to the collection…'];
+let loadMsgIdx = 0;
+
+let toastTimer = null;
+function showToast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('on'), 3400);
+}
+
+function downscale(file, maxDim=1280, quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let {width:w, height:h} = img;
+      if (Math.max(w,h) > maxDim){
+        const s = maxDim/Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s);
+      }
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+    img.src = url;
+  });
+}
+
+function wireShot(inputId, shotId, key){
+  const input = $(inputId), shot = $(shotId);
+  input.addEventListener('change', async ()=>{
+    const f = input.files && input.files[0];
+    if (!f) return;
+    try{
+      const data = await downscale(f);
+      state[key] = data;
+      shot.classList.add('filled');
+      shot.querySelectorAll('.ph-ic,.ph-t,.ph-s').forEach(e=>e.style.display='none');
+      let prev = shot.querySelector('img'); if(!prev){ prev=document.createElement('img'); shot.appendChild(prev); }
+      prev.src = data;
+      let swap = shot.querySelector('.swap'); if(!swap){ swap=document.createElement('span'); swap.className='swap'; swap.textContent='Retake'; shot.appendChild(swap); }
+      $('go').disabled = !state.front;
+    }catch(e){ showErr(e.message || 'Could not read that image.'); }
+  });
+}
+wireShot('in-front','shot-front','front');
+wireShot('in-angle','shot-angle','angle');
+
+function showErr(msg){ const e=$('err'); e.textContent=msg; e.classList.add('on'); }
+function clearErr(){ $('err').classList.remove('on'); }
+
+$('go').addEventListener('click', identify);
+$('again').addEventListener('click', ()=>{
+  $('results').classList.remove('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+function money(n){
+  if(typeof n==='number' && isFinite(n)) return '$'+n.toLocaleString(undefined,{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+  if(typeof n==='string' && n.trim()) return n.trim().charAt(0)==='$'?n.trim():'$'+n.trim();
+  return null;
+}
+
+async function identify(){
+  if (!state.front) return;
+  clearErr();
+  $('results').classList.remove('on');
+  $('siteLink').style.display = 'none';
+  $('go').disabled = true;
+  const load = $('loading'); load.classList.add('on');
+  loadMsgIdx=0; $('loadmsg').textContent=LOAD_MSGS[0];
+  const cycle = setInterval(()=>{ loadMsgIdx=(loadMsgIdx+1)%LOAD_MSGS.length; $('loadmsg').textContent=LOAD_MSGS[loadMsgIdx]; }, 2200);
+
+  try{
+    const res = await fetch(LAMBDA + '/upload-photos', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: state.front, angle: state.angle || undefined, mode:'product', catalog:'antiques' })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Something went wrong.');
+    if (!data.identified || !data.product){
+      throw new Error(data.message || "Couldn't identify the piece — try a straight, well-lit photo.");
+    }
+    lastProduct = data.product;
+    render(data.product);
+    saveToCollection(data.product);
+  }catch(e){
+    showErr(e.message || 'Network error — please try again.');
+  }finally{
+    clearInterval(cycle);
+    load.classList.remove('on');
+    $('go').disabled = false;
+  }
+}
+
+async function saveToCollection(product){
+  try{
+    const res = await fetch(LAMBDA + '/perry-save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        image: state.front,
+        product: product,
+        scannedAt: new Date().toISOString().slice(0,10)
+      })
+    });
+    const out = await res.json();
+    if (out && out.success){
+      showToast('Added to the collection');
+      $('siteLink').style.display = 'block';
+    } else {
+      console.warn('Perry save did not succeed:', out && out.error);
+    }
+  }catch(e){
+    console.warn('Perry save failed:', e);
+  }
+}
+
+function render(p){
+  const chips = $('chips'); chips.innerHTML='';
+  const add=(txt)=>{ if(!txt) return; const s=document.createElement('span'); s.className='chip'; s.textContent=txt; chips.appendChild(s); };
+  add(p.category);
+  add(p.brand);
+
+  $('ident').textContent = p.name || 'Piece identified';
+  $('subident').textContent = [p.brand, p.category].filter(Boolean).join(' · ');
+  $('ptext').textContent = p.desc || '';
+
+  $('amt').textContent = money(p.price) || 'Set in store';
+
+  $('results').classList.add('on');
+  setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}), 60);
+}
+</script>
+</body>
+</html>
