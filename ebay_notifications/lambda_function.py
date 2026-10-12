@@ -454,6 +454,60 @@ def _r3_price(value):
     return int(num) if num == int(num) else round(num, 2)
 
 
+# ---------------------------------------------------------------------------
+# Perry's Antiques & Silver — estate / antiques / silver PRODUCT scanner.
+# A second product "catalog" on the shared /upload-photos product mode: the
+# scanner sends {"mode":"product","catalog":"antiques"} to get this prompt +
+# category set instead of the default R3 toys one. Save path: /perry-save ->
+# docs/perry_antiques/products.json.
+# ---------------------------------------------------------------------------
+_PERRY_CATEGORIES = ["Sterling Silver", "Antiques", "Jewelry",
+                     "Coins & Currency", "Fine Art", "Collectibles"]
+
+
+def _perry_product_system_prompt() -> str:
+    """System prompt for identifying a single silver / antique / estate item
+    from a phone photo (Perry's Antiques & Silver)."""
+    return (
+        "You are the cataloguer and appraiser behind \"Perry's Antiques & Silver\", a "
+        "dealer in sterling silver, antiques, and estate collectibles. A staff member "
+        "photographs one item; you identify it and draft a short catalog listing with a "
+        "realistic resale estimate.\n\n"
+        "Look at the photo and identify the single item shown. Pick the ONE category it "
+        "best fits from exactly this list (copy the string verbatim): "
+        "\"Sterling Silver\" (sterling/silverplate flatware, holloware, tea sets, trays), "
+        "\"Antiques\" (antique decor, glassware, porcelain, clocks, lamps, small furniture), "
+        "\"Jewelry\" (rings, brooches, watches, estate jewelry), "
+        "\"Coins & Currency\" (coins, bullion, paper currency, tokens), "
+        "\"Fine Art\" (paintings, prints, sculpture, signed works), "
+        "\"Collectibles\" (anything else collectible — figurines, memorabilia, curios).\n\n"
+        "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
+        "trailing commas) with exactly these keys: is_product (boolean; false if the image "
+        "is not an item), name (a short descriptive name, title case, <= 70 chars — include "
+        "maker/pattern/era if visible, e.g. \"Gorham Sterling Chantilly Serving Spoon\"), "
+        "category (exactly one of the six strings above), brand (the maker, hallmark, or "
+        "artist if visible, else \"\"), desc (one factual sentence — note material, maker's "
+        "marks/hallmarks, era, and condition cues you can actually see), price (a realistic "
+        "suggested US resale price as a plain number in dollars, e.g. 45 or 1200 — no \"$\", "
+        "no range).\n\n"
+        "Rules: Never invent a hallmark, maker, or date you cannot see — use \"\" or leave it "
+        "out of the description. Antiques vary enormously in value; be conservative and "
+        "realistic (a silverplate tray may be $20-60, a sterling tea set hundreds). If "
+        "is_product is false, still return the JSON with empty/zero fields. The output must "
+        "be machine-parseable JSON."
+    )
+
+
+def _perry_snap_category(value) -> str:
+    """Snap a model- or client-supplied category onto Perry's closed set
+    (case-insensitive exact match). Falls back to "Antiques"."""
+    v = str(value or "").strip()
+    for cat in _PERRY_CATEGORIES:
+        if v.lower() == cat.lower():
+            return cat
+    return "Antiques"
+
+
 def _img_bytes(data_url):
     """Turn a data URL (or bare base64) into (format, raw_bytes).
 
@@ -1081,9 +1135,19 @@ def lambda_handler(event, context):
             # guard, _img_bytes, and the 3.5MB cap. Shared below (inside this
             # block): _run_vision error handling + _extract_json fallback.
             if str(body.get("mode") or "").strip().lower() == "product":
+                # Which product catalog? default "toys" (R3 Toys and Games);
+                # "antiques" => Perry's Antiques & Silver. Each has its own
+                # vision prompt + closed category set.
+                _catalog = str(body.get("catalog") or "toys").strip().lower()
+                if _catalog == "antiques":
+                    _prod_prompt = _perry_product_system_prompt()
+                    _prod_snap = _perry_snap_category
+                else:
+                    _prod_prompt = _r3_product_system_prompt()
+                    _prod_snap = _r3_snap_category
                 try:
                     raw, model_label = _run_vision(
-                        _r3_product_system_prompt(), [(ffmt, fraw)],
+                        _prod_prompt, [(ffmt, fraw)],
                         "Identify this retail product and produce the listing JSON. "
                         "Return ONLY the JSON object.", 500)
                 except urllib.error.HTTPError as exc:
@@ -1113,7 +1177,7 @@ def lambda_handler(event, context):
                     "identified": bool(prod.get("is_product", True)),
                     "product": {
                         "name":     str(prod.get("name") or "").strip(),
-                        "category": _r3_snap_category(prod.get("category")),
+                        "category": _prod_snap(prod.get("category")),
                         "price":    _r3_price(prod.get("price")),
                         "brand":    str(prod.get("brand") or "").strip(),
                         "desc":     str(prod.get("desc") or "").strip(),
@@ -2748,6 +2812,74 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/r3-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/perry-save — "Perry's Antiques & Silver" product auto-save.
+    # Same flow as r3-save (GET -> next_id -> image PUT -> JSON PUT via
+    # _save_card_with_retry) against docs/perry_antiques/products.json + images/.
+    # Body: {"image": <data-url>, "product": {name,category,price,brand,desc},
+    # "scannedAt": "YYYY-MM-DD"}.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/perry-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("perry-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            product    = body.get("product") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if not isinstance(product, dict):
+                return _cors_response(400, {"success": False, "error": "product object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            def build_record(next_id, product=product, scanned_at=scanned_at):
+                return {
+                    "name":      str(product.get("name") or "").strip() or "Untitled",
+                    "brand":     str(product.get("brand") or "").strip(),
+                    "category":  _perry_snap_category(product.get("category")),
+                    "price":     _r3_price(product.get("price")),
+                    "desc":      str(product.get("desc") or "").strip(),
+                    "scannedAt": scanned_at,
+                    "inStock":   True,
+                }
+
+            try:
+                next_id, record = _save_card_with_retry(
+                    "docs/perry_antiques", raw, build_record, "Perry's Antiques & Silver",
+                    data_filename="products.json", image_prefix="product",
+                )
+            except RuntimeError as exc:
+                logger.error(f"perry-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
+
+            logger.info(f"perry-save: added item id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":  True,
+                "id":       next_id,
+                "perry_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/perry_antiques/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"perry-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/perry-save"):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
