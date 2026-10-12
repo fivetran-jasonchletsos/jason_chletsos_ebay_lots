@@ -461,51 +461,54 @@ def _r3_price(value):
 # category set instead of the default R3 toys one. Save path: /perry-save ->
 # docs/perry_antiques/products.json.
 # ---------------------------------------------------------------------------
-_PERRY_CATEGORIES = ["Sterling Silver", "Antiques", "Jewelry",
-                     "Coins & Currency", "Fine Art", "Collectibles"]
+_PERRY_CATEGORIES = ["Gold & Precious Metals", "Jewelry & Watches",
+                     "Coins & Currency", "Sterling Silver", "Antiques", "Collectibles"]
 
 
 def _perry_product_system_prompt() -> str:
-    """System prompt for identifying a single silver / antique / estate item
-    from a phone photo (Perry's Antiques & Silver)."""
+    """System prompt for identifying a single gold / silver / jewelry / coin /
+    antique / estate item from a phone photo (Perry's Place Ardmore — a buyer of
+    gold, silver, platinum, diamonds, fine jewelry, watches, coins & antiques)."""
     return (
-        "You are the cataloguer and appraiser behind \"Perry's Antiques & Silver\", a "
-        "dealer in sterling silver, antiques, and estate collectibles. A staff member "
-        "photographs one item; you identify it and draft a short catalog listing with a "
-        "realistic resale estimate.\n\n"
+        "You are the cataloguer and appraiser behind \"Perry's Place Ardmore\", a dealer "
+        "that buys and sells gold, silver, platinum, diamonds, fine jewelry, watches, "
+        "coins, and antiques. A staff member photographs one item; you identify it and "
+        "draft a short listing with a realistic resale estimate.\n\n"
         "Look at the photo and identify the single item shown. Pick the ONE category it "
         "best fits from exactly this list (copy the string verbatim): "
+        "\"Gold & Precious Metals\" (gold/platinum items, bullion, bars, scrap/broken gold, "
+        "loose diamonds and gemstones), "
+        "\"Jewelry & Watches\" (rings, necklaces, bracelets, brooches, estate jewelry, "
+        "wristwatches and pocket watches), "
+        "\"Coins & Currency\" (coins, bullion coins, paper currency, tokens), "
         "\"Sterling Silver\" (sterling/silverplate flatware, holloware, tea sets, trays), "
         "\"Antiques\" (antique decor, glassware, porcelain, clocks, lamps, small furniture), "
-        "\"Jewelry\" (rings, brooches, watches, estate jewelry), "
-        "\"Coins & Currency\" (coins, bullion, paper currency, tokens), "
-        "\"Fine Art\" (paintings, prints, sculpture, signed works), "
-        "\"Collectibles\" (anything else collectible — figurines, memorabilia, curios).\n\n"
+        "\"Collectibles\" (anything else collectible — memorabilia, figurines, curios, art).\n\n"
         "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
         "trailing commas) with exactly these keys: is_product (boolean; false if the image "
         "is not an item), name (a short descriptive name, title case, <= 70 chars — include "
-        "maker/pattern/era if visible, e.g. \"Gorham Sterling Chantilly Serving Spoon\"), "
-        "category (exactly one of the six strings above), brand (the maker, hallmark, or "
-        "artist if visible, else \"\"), desc (one factual sentence — note material, maker's "
-        "marks/hallmarks, era, and condition cues you can actually see), price (a realistic "
-        "suggested US resale price as a plain number in dollars, e.g. 45 or 1200 — no \"$\", "
-        "no range).\n\n"
-        "Rules: Never invent a hallmark, maker, or date you cannot see — use \"\" or leave it "
-        "out of the description. Antiques vary enormously in value; be conservative and "
-        "realistic (a silverplate tray may be $20-60, a sterling tea set hundreds). If "
-        "is_product is false, still return the JSON with empty/zero fields. The output must "
-        "be machine-parseable JSON."
+        "metal/karat, maker/pattern, or era if visible, e.g. \"14K Gold Diamond Solitaire "
+        "Ring\" or \"Gorham Sterling Chantilly Serving Spoon\"), category (exactly one of the "
+        "six strings above), brand (the maker, hallmark, or artist if visible, else \"\"), "
+        "desc (one factual sentence — note metal/karat stamps, hallmarks, gemstones, maker's "
+        "marks, era, and condition cues you can actually see), price (a realistic suggested "
+        "US resale price as a plain number in dollars, e.g. 45 or 1200 — no \"$\", no range).\n\n"
+        "Rules: Never invent a karat stamp, hallmark, maker, carat weight, or date you cannot "
+        "see — use \"\" or leave it out of the description. Values vary enormously; be "
+        "conservative and realistic (a silverplate tray may be $20-60; gold/diamond pieces "
+        "price largely on metal weight/karat and stone size). If is_product is false, still "
+        "return the JSON with empty/zero fields. The output must be machine-parseable JSON."
     )
 
 
 def _perry_snap_category(value) -> str:
     """Snap a model- or client-supplied category onto Perry's closed set
-    (case-insensitive exact match). Falls back to "Antiques"."""
+    (case-insensitive exact match). Falls back to "Collectibles"."""
     v = str(value or "").strip()
     for cat in _PERRY_CATEGORIES:
         if v.lower() == cat.lower():
             return cat
-    return "Antiques"
+    return "Collectibles"
 
 
 def _img_bytes(data_url):
