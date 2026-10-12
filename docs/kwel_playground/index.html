@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060509">
+<title>kwel_playground — Dark Surreal AI Art</title>
+<meta name="description" content="The dark, surreal AI artwork of kwel_playground — a Hong Kong artist. Creepy-cute dolls, neon nightmares, gothic dreamscapes. Now exhibiting at Saatchi Gallery, London.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,500&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060509; --bg-2:#0c0a12; --panel:#121019; --panel-2:#181522;
+    --ink:#f3eefb; --mut:#a79fc0; --dim:#6f678a;
+    --pink:#ff2d9b; --pink-2:#ff67c3; --cyan:#27e8ff; --lime:#b6ff3a; --violet:#8a5bff;
+    --line:rgba(170,150,230,.14);
+    --holo:linear-gradient(100deg,#27e8ff,#8a5bff 38%,#ff2d9b 70%,#b6ff3a);
+    --disp:'Bodoni Moda',Georgia,serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --hk:'Noto Sans HK','Space Grotesk',system-ui,sans-serif;
+    --t:.4s cubic-bezier(.2,.7,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--body);
+    font-size:16px; line-height:1.6; min-height:100vh; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  html[data-lang="zh"] body{font-family:var(--hk)}
+  /* film grain + glow field */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background:
+      radial-gradient(60% 40% at 15% 0%, rgba(138,91,255,.22), transparent 60%),
+      radial-gradient(50% 40% at 100% 20%, rgba(255,45,155,.18), transparent 60%),
+      radial-gradient(60% 50% at 50% 110%, rgba(39,232,255,.12), transparent 60%);
+  }
+  body::after{
+    content:""; position:fixed; inset:-50%; z-index:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative; z-index:1; max-width:1180px; margin-inline:auto; padding:0 20px}
+
+  /* top bar */
+  .bar{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; backdrop-filter:blur(12px);
+    background:linear-gradient(180deg,rgba(6,5,9,.86),rgba(6,5,9,.3));
+    border-bottom:1px solid var(--line);
+  }
+  .mark{font-family:var(--disp); font-weight:600; font-style:italic; font-size:19px; letter-spacing:.02em}
+  .mark b{font-style:normal; background:var(--holo); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .bar-right{display:flex; align-items:center; gap:10px}
+  .lang{display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--panel)}
+  .lang button{
+    font-family:var(--body); font-size:12px; font-weight:600; letter-spacing:.04em;
+    padding:7px 13px; background:transparent; color:var(--mut); border:none; cursor:pointer; transition:var(--t); white-space:nowrap;
+  }
+  .lang button.on{background:var(--pink); color:#0a0510}
+  .lang button:focus-visible{outline:2px solid var(--cyan); outline-offset:-2px}
+  .ig-btn{
+    display:inline-flex; align-items:center; gap:7px; font-weight:600; font-size:13px; text-decoration:none;
+    color:#0a0510; background:var(--holo); background-size:200% 100%; padding:9px 15px; border-radius:999px;
+    transition:var(--t); animation:holo 8s linear infinite;
+  }
+  @keyframes holo{to{background-position:200% 0}}
+  .ig-btn:hover{transform:translateY(-1px); box-shadow:0 8px 30px rgba(255,45,155,.35)}
+  .ig-btn svg{width:16px;height:16px}
+
+  /* hero */
+  .hero{padding:72px 0 40px; text-align:center; position:relative}
+  .kwel{
+    font-family:var(--disp); font-weight:600; font-size:clamp(54px,16vw,150px); line-height:.9; letter-spacing:-.02em;
+    position:relative; display:inline-block;
+  }
+  .kwel span{background:var(--holo); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 28px rgba(255,45,155,.4))}
+  .kwel .bang{color:var(--pink); -webkit-text-fill-color:var(--pink); filter:drop-shadow(0 0 22px rgba(255,45,155,.7))}
+  .handle{font-size:13px; letter-spacing:.42em; text-transform:uppercase; color:var(--mut); margin-top:18px}
+  .tagline{font-family:var(--disp); font-style:italic; font-size:clamp(18px,3.4vw,27px); color:var(--ink); margin:22px auto 0; max-width:22ch; opacity:.92}
+  html[data-lang="zh"] .tagline{font-family:var(--hk); font-style:normal; font-weight:500}
+  .hero-cta{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:30px}
+  .btn{
+    font-weight:600; font-size:14px; text-decoration:none; padding:12px 22px; border-radius:999px; transition:var(--t); cursor:pointer;
+  }
+  .btn-solid{background:var(--pink); color:#0a0510; border:1px solid var(--pink)}
+  .btn-solid:hover{background:var(--pink-2); transform:translateY(-2px); box-shadow:0 10px 34px rgba(255,45,155,.4)}
+  .btn-ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--cyan); color:var(--cyan)}
+
+  /* exhibition ribbon */
+  .exhibit{
+    display:grid; grid-template-columns:140px 1fr; gap:0; align-items:stretch;
+    margin:30px 0 56px; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    background:linear-gradient(120deg,var(--panel),var(--panel-2));
+  }
+  @media(max-width:620px){.exhibit{grid-template-columns:1fr}}
+  .exhibit .ph{background-size:cover; background-position:center top; min-height:150px}
+  .exhibit .meta{padding:22px 26px; display:flex; flex-direction:column; justify-content:center; gap:6px}
+  .exhibit .kick{font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--lime)}
+  .exhibit .ttl{font-family:var(--disp); font-size:clamp(20px,3.6vw,30px); font-weight:600; line-height:1.15}
+  .exhibit .sub{color:var(--mut); font-size:14.5px}
+
+  /* section heads */
+  .sec-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:0 0 22px; flex-wrap:wrap}
+  .sec-head h2{font-family:var(--disp); font-weight:600; font-size:clamp(26px,5vw,40px); letter-spacing:-.01em}
+  html[data-lang="zh"] .sec-head h2{font-family:var(--hk)}
+  .sec-head .idx{font-size:12px; letter-spacing:.3em; text-transform:uppercase; color:var(--dim)}
+
+  /* about */
+  .about{max-width:62ch; color:var(--mut); font-size:clamp(15px,2.2vw,18px); line-height:1.8; margin-bottom:64px}
+  .about b{color:var(--ink); font-weight:600}
+
+  /* gallery */
+  .gal{columns:3 260px; column-gap:16px; margin-bottom:20px}
+  .tile{
+    position:relative; break-inside:avoid; margin:0 0 16px; border-radius:14px; overflow:hidden;
+    border:1px solid var(--line); background:var(--panel); display:block; text-decoration:none; color:inherit;
+    transition:transform var(--t), box-shadow var(--t), border-color var(--t);
+    opacity:0; transform:translateY(22px);
+  }
+  .tile.in{opacity:1; transform:none}
+  .tile img{width:100%; display:block; transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  .tile:hover{border-color:var(--pink); box-shadow:0 20px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(255,45,155,.3)}
+  .tile:hover img{transform:scale(1.05)}
+  .tile .ov{
+    position:absolute; inset:0; display:flex; align-items:flex-end; padding:14px;
+    background:linear-gradient(180deg,transparent 55%,rgba(6,4,10,.86)); opacity:0; transition:var(--t);
+  }
+  .tile:hover .ov{opacity:1}
+  .tile .ov span{font-size:12px; font-weight:600; letter-spacing:.06em; display:inline-flex; align-items:center; gap:6px; color:var(--cyan)}
+
+  /* lightbox */
+  .lb{position:fixed; inset:0; z-index:100; background:rgba(4,3,7,.94); backdrop-filter:blur(8px);
+    display:none; align-items:center; justify-content:center; padding:24px}
+  .lb.on{display:flex}
+  .lb img{max-width:min(92vw,900px); max-height:88vh; border-radius:10px; box-shadow:0 30px 90px rgba(0,0,0,.7)}
+  .lb .x{position:absolute; top:18px; right:22px; font-size:30px; color:var(--mut); cursor:pointer; line-height:1; background:none; border:none}
+  .lb .x:hover{color:var(--pink)}
+
+  footer{border-top:1px solid var(--line); margin-top:54px; padding:40px 0 60px; text-align:center}
+  footer .fmark{font-family:var(--disp); font-style:italic; font-size:22px; margin-bottom:10px}
+  footer .fmark b{font-style:normal; background:var(--holo); -webkit-background-clip:text; background-clip:text; color:transparent}
+  footer p{color:var(--dim); font-size:13px; margin-top:6px}
+  footer a{color:var(--mut); text-decoration:none; border-bottom:1px solid var(--line)}
+  footer a:hover{color:var(--pink)}
+
+  [data-zh]{display:none}
+  html[data-lang="zh"] [data-en]{display:none}
+  html[data-lang="zh"] [data-zh]{display:revert}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.tile{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="mark">kwel<b>_playground</b></div>
+  <div class="bar-right">
+    <div class="lang" role="group" aria-label="Language">
+      <button id="en" class="on" onclick="setLang('en')">English</button>
+      <button id="zh" onclick="setLang('zh')">繁體中文</button>
+    </div>
+    <a class="ig-btn" href="https://instagram.com/kwel_playground" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg>
+      <span data-en>Follow</span><span data-zh>追蹤</span>
+    </a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <h1 class="kwel"><span>kwel</span><span class="bang">!</span></h1>
+    <div class="handle">@kwel_playground</div>
+    <p class="tagline"><span data-en>Dark, surreal AI art from Hong Kong.</span><span data-zh>來自香港的暗黑超現實 AI 藝術。</span></p>
+    <div class="hero-cta">
+      <a class="btn btn-solid" href="#gallery"><span data-en>Enter the gallery</span><span data-zh>進入畫廊</span></a>
+      <a class="btn btn-ghost" href="https://instagram.com/kwel_playground" target="_blank" rel="noopener"><span data-en>See more on Instagram</span><span data-zh>在 Instagram 看更多</span></a>
+    </div>
+  </section>
+
+  <section class="exhibit">
+    <div class="ph" style="background-image:url('./images/art8.jpg')"></div>
+    <div class="meta">
+      <div class="kick"><span data-en>Now exhibiting</span><span data-zh>展覽中</span></div>
+      <div class="ttl"><span data-en>British Art Fair &middot; Saatchi Gallery, London</span><span data-zh>英國藝術博覽會 &middot; 倫敦薩奇美術館</span></div>
+      <div class="sub"><span data-en>24&ndash;27 September 2026</span><span data-zh>2026年9月24&ndash;27日</span></div>
+    </div>
+  </section>
+
+  <section class="about-sec">
+    <div class="sec-head">
+      <h2><span data-en>The Artist</span><span data-zh>藝術家</span></h2>
+      <div class="idx">01 — kwel</div>
+    </div>
+    <p class="about">
+      <span data-en><b>kwel_playground</b> is a Hong Kong artist building dark, surreal worlds with AI — creepy-cute dolls, neon-soaked nightmares, and gothic dreamscapes where the adorable and the uncanny collide. Every piece is a small, haunted playground.</span>
+      <span data-zh><b>kwel_playground</b> 是一位香港藝術家，用 AI 建構暗黑而超現實的世界——詭異可愛的娃娃、霓虹浸染的夢魘、哥德式的夢境，讓可愛與詭異在此碰撞。每一件作品，都是一個小小的、鬧鬼的遊樂場。</span>
+    </p>
+  </section>
+
+  <section id="gallery">
+    <div class="sec-head">
+      <h2><span data-en>Gallery</span><span data-zh>作品集</span></h2>
+      <div class="idx">02 — <span data-en>selected works</span><span data-zh>精選作品</span></div>
+    </div>
+    <div class="gal" id="gal"></div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="fmark">kwel<b>!</b></div>
+  <p><span data-en>Artwork by</span><span data-zh>作品由</span> <a href="https://instagram.com/kwel_playground" target="_blank" rel="noopener">@kwel_playground</a></p>
+  <p><span data-en>A showcase made with love for a friend in Hong Kong.</span><span data-zh>為香港的朋友，用心製作的作品展示。</span></p>
+</footer>
+
+<div class="lb" id="lb" onclick="closeLb(event)">
+  <button class="x" aria-label="Close" onclick="closeLb(event,true)">&times;</button>
+  <img id="lbImg" src="" alt="kwel_playground artwork">
+</div>
+
+<script>
+  // --- Language toggle (English <-> Traditional Chinese / Hong Kong) ---
+  function setLang(l){
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l==='zh'?'zh-Hant':'en');
+    document.getElementById('en').classList.toggle('on', l==='en');
+    document.getElementById('zh').classList.toggle('on', l==='zh');
+    try{ localStorage.setItem('kwel_lang', l); }catch(e){}
+  }
+  (function(){ try{ var s=localStorage.getItem('kwel_lang'); if(s) setLang(s); }catch(e){} })();
+
+  // --- Gallery (her cropped works) ---
+  var ART = ['art3','art8','art4','art1','art2','art6','art7','art5','art9'];
+  var gal = document.getElementById('gal');
+  ART.forEach(function(name){
+    var a = document.createElement('a');
+    a.className = 'tile';
+    a.href = 'https://instagram.com/kwel_playground';
+    a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML =
+      '<img src="./images/'+name+'.jpg" alt="Artwork by kwel_playground" loading="lazy">'+
+      '<div class="ov"><span>View on Instagram &#8599;</span></div>';
+    // click opens lightbox instead of leaving, unless modifier/middle click
+    a.addEventListener('click', function(e){
+      if(e.metaKey||e.ctrlKey||e.button===1) return;
+      e.preventDefault(); openLb('./images/'+name+'.jpg');
+    });
+    gal.appendChild(a);
+  });
+
+  // reveal on scroll
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.tile').forEach(function(t,i){ t.style.transitionDelay=Math.min(i*45,360)+'ms'; io.observe(t); });
+
+  // --- Lightbox ---
+  function openLb(src){ document.getElementById('lbImg').src = src; document.getElementById('lb').classList.add('on'); }
+  function closeLb(e, force){ if(force || e.target.id==='lb'){ document.getElementById('lb').classList.remove('on'); } }
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.getElementById('lb').classList.remove('on'); });
+</script>
+</body>
+</html>
