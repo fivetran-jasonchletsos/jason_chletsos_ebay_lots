@@ -511,6 +511,56 @@ def _perry_snap_category(value) -> str:
     return "Collectibles"
 
 
+# ---------------------------------------------------------------------------
+# Kristen's — a UNIVERSAL scanner (jewelry, Pokemon cards, anything). Cards go
+# through the default /upload-photos card path; everything else uses this
+# "general" product catalog ({"mode":"product","catalog":"general"}). Both are
+# filed into one unified collection via /kristen-save (docs/kristen/items.json).
+# ---------------------------------------------------------------------------
+_KRISTEN_CATEGORIES = ["Jewelry", "Clothing & Accessories", "Home & Decor",
+                       "Electronics", "Toys & Collectibles", "Beauty", "Other"]
+
+
+def _kristen_product_system_prompt() -> str:
+    """System prompt for identifying a single general resale item (jewelry,
+    accessories, home goods, etc.) from a phone photo (Kristen's shop)."""
+    return (
+        "You are the product cataloguer behind \"Kristen's\", a seller of jewelry and all "
+        "kinds of resale items. A staff member photographs one item (anything EXCEPT a "
+        "trading card — those are handled separately); you identify it and draft a short, "
+        "sellable listing.\n\n"
+        "Look at the photo and identify the single item shown. Pick the ONE category it "
+        "best fits from exactly this list (copy the string verbatim): "
+        "\"Jewelry\" (rings, necklaces, bracelets, earrings, watches), "
+        "\"Clothing & Accessories\" (apparel, bags, shoes, hats, accessories), "
+        "\"Home & Decor\" (home goods, kitchen, decor, candles), "
+        "\"Electronics\" (gadgets, devices, accessories), "
+        "\"Toys & Collectibles\" (toys, figures, funko, memorabilia), "
+        "\"Beauty\" (makeup, skincare, fragrance), "
+        "\"Other\" (anything that doesn't fit above).\n\n"
+        "Return ONLY a single valid JSON object (no markdown, no prose, no comments, no "
+        "trailing commas) with exactly these keys: is_product (boolean; false if the image "
+        "is not an item), name (a short sellable product name, title case, <= 60 chars), "
+        "category (exactly one of the seven strings above), brand (the brand or maker if "
+        "visible, else \"\"), desc (one factual sentence describing the item, plain text), "
+        "price (a realistic suggested US resale price as a plain number in dollars, e.g. "
+        "24.99 or 45 — no \"$\", no range).\n\n"
+        "Rules: Never invent a brand you cannot see — use \"\" instead. Be realistic about "
+        "price. If is_product is false, still return the JSON with empty/zero fields. The "
+        "output must be machine-parseable JSON."
+    )
+
+
+def _kristen_snap_category(value) -> str:
+    """Snap a category onto Kristen's general set (case-insensitive exact
+    match). Falls back to "Other"."""
+    v = str(value or "").strip()
+    for cat in _KRISTEN_CATEGORIES:
+        if v.lower() == cat.lower():
+            return cat
+    return "Other"
+
+
 def _img_bytes(data_url):
     """Turn a data URL (or bare base64) into (format, raw_bytes).
 
@@ -1145,6 +1195,9 @@ def lambda_handler(event, context):
                 if _catalog == "antiques":
                     _prod_prompt = _perry_product_system_prompt()
                     _prod_snap = _perry_snap_category
+                elif _catalog == "general":
+                    _prod_prompt = _kristen_product_system_prompt()
+                    _prod_snap = _kristen_snap_category
                 else:
                     _prod_prompt = _r3_product_system_prompt()
                     _prod_snap = _r3_snap_category
@@ -2883,6 +2936,113 @@ def lambda_handler(event, context):
             return _cors_response(500, {"success": False, "error": str(exc)}, event)
 
     if method == "OPTIONS" and path.endswith("/ebay/perry-save"):
+        return _cors_preflight(event)
+
+    # ------------------------------------------------------------------
+    # POST /ebay/kristen-save — "Kristen's" UNIVERSAL auto-save. Accepts EITHER
+    # a trading card (kind="card", card={...from /upload-photos}) OR a general
+    # item (kind="item", product={name,category,price,brand,desc}) and files a
+    # unified record into docs/kristen/items.json + images/. Body also carries
+    # image + scannedAt. For JC's little sister Kristen.
+    # ------------------------------------------------------------------
+    if method == "POST" and path.endswith("/ebay/kristen-save"):
+        try:
+            if not GITHUB_TOKEN:
+                logger.error("kristen-save: GITHUB_TOKEN not configured")
+                return _cors_response(503, {
+                    "success": False,
+                    "error":   "GITHUB_TOKEN not configured",
+                }, event)
+
+            body       = json.loads(event.get("body") or "{}")
+            image_data = str(body.get("image") or "").strip()
+            kind       = str(body.get("kind") or "").strip().lower()
+            card       = body.get("card") or {}
+            product    = body.get("product") or {}
+            scanned_at = str(body.get("scannedAt") or "").strip()
+            if not image_data:
+                return _cors_response(400, {"success": False, "error": "image required"}, event)
+            if kind not in ("card", "item"):
+                # Infer from payload if the client omitted kind.
+                kind = "card" if isinstance(card, dict) and card else "item"
+            if kind == "card" and not isinstance(card, dict):
+                return _cors_response(400, {"success": False, "error": "card object required"}, event)
+            if kind == "item" and not isinstance(product, dict):
+                return _cors_response(400, {"success": False, "error": "product object required"}, event)
+
+            fmt, raw = _img_bytes(image_data)
+            if not raw:
+                return _cors_response(400, {"success": False, "error": "invalid image"}, event)
+            if len(raw) > 8_000_000:
+                return _cors_response(413, {
+                    "success": False,
+                    "error":   "Image too large — please use a smaller photo.",
+                }, event)
+
+            if kind == "card":
+                est = card.get("estimated_value_usd") or {}
+                try:
+                    est_value = round(float((est or {}).get("typical") or 0))
+                except (TypeError, ValueError):
+                    est_value = 0
+                _cat_raw = str(card.get("category") or "").strip().lower()
+                if _cat_raw == "pokemon":
+                    _cat = "Pokémon"
+                elif card.get("sport"):
+                    _cat = str(card.get("sport")).strip().title()
+                else:
+                    _cat = "Trading Card"
+
+                def build_record(next_id, card=card, est_value=est_value, scanned_at=scanned_at, _cat=_cat):
+                    return {
+                        "kind":       "card",
+                        "name":       card.get("player") or "Trading Card",
+                        "category":   _cat,
+                        "price":      est_value,
+                        "brand":      card.get("brand"),
+                        "set":        card.get("set_name"),
+                        "cardNumber": card.get("card_number"),
+                        "parallel":   card.get("parallel"),
+                        "serial":     card.get("serial"),
+                        "isRookie":   bool(card.get("is_rookie")),
+                        "isAuto":     bool(card.get("is_auto")),
+                        "scannedAt":  scanned_at,
+                        "inStock":    True,
+                    }
+            else:
+                def build_record(next_id, product=product, scanned_at=scanned_at):
+                    return {
+                        "kind":      "item",
+                        "name":      str(product.get("name") or "").strip() or "Item",
+                        "category":  _kristen_snap_category(product.get("category")),
+                        "price":     _r3_price(product.get("price")),
+                        "brand":     str(product.get("brand") or "").strip(),
+                        "desc":      str(product.get("desc") or "").strip(),
+                        "scannedAt": scanned_at,
+                        "inStock":   True,
+                    }
+
+            try:
+                next_id, record = _save_card_with_retry(
+                    "docs/kristen", raw, build_record, "Kristen's",
+                    data_filename="items.json", image_prefix="item",
+                )
+            except RuntimeError as exc:
+                logger.error(f"kristen-save: {exc}")
+                return _cors_response(502, {"success": False, "error": str(exc)}, event)
+
+            logger.info(f"kristen-save: added {kind} id={next_id} name={record.get('name')}")
+            return _cors_response(200, {
+                "success":     True,
+                "id":          next_id,
+                "kristen_url": "https://fivetran-jasonchletsos.github.io/jason_chletsos_ebay_lots/kristen/index.html",
+            }, event)
+
+        except Exception as exc:
+            logger.error(f"kristen-save error: {exc}")
+            return _cors_response(500, {"success": False, "error": str(exc)}, event)
+
+    if method == "OPTIONS" and path.endswith("/ebay/kristen-save"):
         return _cors_preflight(event)
 
     # ------------------------------------------------------------------
