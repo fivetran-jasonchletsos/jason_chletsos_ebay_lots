@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perry's Place Ardmore — Sell Gold, Silver, Diamonds &amp; Estate Jewelry</title>
+<meta name="description" content="Perry's Place Ardmore buys gold, silver, platinum, diamonds, fine jewelry, watches, coins, and antiques. Top dollar, honest service, fast transactions. Call (484) 735-1980.">
+<meta name="theme-color" content="#14281d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6efe1;
+    --paper-2:#efe6d3;
+    --ink:#25201a;
+    --ink-soft:#4a4035;
+    --green:#14281d;
+    --green-2:#1d3a2a;
+    --oxblood:#5e1f1f;
+    --gold:#b08833;
+    --gold-bright:#caa14a;
+    --gold-soft:#e8d7a8;
+    --rule:#c9b78d;
+    --rule-soft:#d8c9a6;
+    --shadow:rgba(20,40,29,.14);
+    --maxw:1140px;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  }
+  body{
+    margin:0;
+    font-family:"EB Garamond",Georgia,"Times New Roman",serif;
+    font-size:clamp(17px,1.15vw + 13px,19px);
+    line-height:1.65;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(circle at 18% 12%, rgba(176,136,51,.06), transparent 42%),
+      radial-gradient(circle at 82% 88%, rgba(94,31,31,.05), transparent 46%);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  h1,h2,h3{font-family:"Cormorant Garamond","EB Garamond",Georgia,serif;font-weight:600;line-height:1.1;margin:0;color:var(--green)}
+  a{color:var(--oxblood);text-decoration-thickness:1px;text-underline-offset:3px}
+  p{margin:0 0 1rem}
+  img,svg{max-width:100%;display:block}
+
+  /* Focus states */
+  a:focus-visible,button:focus-visible,.btn:focus-visible{
+    outline:2.5px solid var(--oxblood);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  .wrap{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:clamp(20px,5vw,48px)}
+
+  .skip-link{position:absolute;left:-999px;top:0;background:var(--green);color:var(--paper);padding:.6rem 1rem;z-index:200}
+  .skip-link:focus{left:12px;top:12px}
+
+  /* Small-caps label */
+  .eyebrow{
+    font-family:"EB Garamond",serif;
+    font-size:.78rem;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--gold);
+    display:inline-flex;
+    align-items:center;
+    gap:.7em;
+  }
+  .eyebrow::before,.eyebrow::after{content:"";height:1px;width:28px;background:var(--rule)}
+  .eyebrow.one::before{display:none}
+
+  /* Ornamental divider */
+  .flourish{display:flex;align-items:center;justify-content:center;gap:1rem;color:var(--gold);margin:0 auto}
+  .flourish .line{height:1px;width:min(120px,22vw);background:linear-gradient(90deg,transparent,var(--rule))}
+  .flourish .line.rev{background:linear-gradient(90deg,var(--rule),transparent)}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:.6em;
+    font-family:"EB Garamond",serif;
+    font-size:1.02rem;
+    letter-spacing:.04em;
+    padding:.95em 1.7em;
+    border-radius:2px;
+    text-decoration:none;
+    font-weight:600;
+    transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+    border:1px solid transparent;
+    cursor:pointer;
+  }
+  .btn-gold{
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    color:#2a1e07;
+    box-shadow:0 2px 0 #8c6a24, 0 6px 16px rgba(176,136,51,.28);
+    border-color:#8c6a24;
+  }
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 4px 0 #8c6a24,0 10px 22px rgba(176,136,51,.34)}
+  .btn-outline{
+    background:transparent;
+    color:var(--green);
+    border:1px solid var(--green);
+  }
+  .btn-outline:hover{background:var(--green);color:var(--paper);transform:translateY(-2px)}
+  .btn-ghost{background:transparent;color:var(--gold-soft);border:1px solid rgba(232,215,168,.5)}
+  .btn-ghost:hover{background:rgba(232,215,168,.12);color:#fff}
+
+  /* ===== Top bar ===== */
+  .topbar{
+    background:var(--green);
+    color:var(--gold-soft);
+    font-size:.86rem;
+    letter-spacing:.06em;
+  }
+  .topbar .wrap{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;align-items:center;justify-content:center;padding-top:.6rem;padding-bottom:.6rem;text-align:center}
+  .topbar a{color:var(--gold-soft);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:.4em}
+  .topbar a:hover{color:#fff;text-decoration:underline}
+  .topbar .dot{width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:.6}
+
+  @media (max-width:560px){.topbar .dot{display:none}}
+
+  /* ===== Hero ===== */
+  .hero{
+    position:relative;
+    color:var(--paper);
+    background:
+      radial-gradient(130% 120% at 50% 0%, var(--green-2), var(--green) 62%, #0e1d15 100%);
+    overflow:hidden;
+    border-bottom:3px solid var(--gold);
+  }
+  .hero::before{
+    /* subtle engraved frame */
+    content:"";
+    position:absolute;inset:16px;
+    border:1px solid rgba(202,161,74,.28);
+    pointer-events:none;
+  }
+  .hero .wrap{position:relative;padding-top:clamp(3rem,8vw,5.5rem);padding-bottom:clamp(3rem,8vw,5.5rem);text-align:center}
+  .hero .eyebrow{color:var(--gold-bright)}
+  .hero .eyebrow::before,.hero .eyebrow::after{background:rgba(202,161,74,.5)}
+  .hero .crest{margin:0 auto 1.4rem;color:var(--gold-bright)}
+  .hero h1{
+    color:#fdf8ec;
+    font-size:clamp(2.6rem,7vw,5.2rem);
+    font-weight:600;
+    letter-spacing:.005em;
+    margin:.4rem auto .2rem;
+    max-width:14ch;
+  }
+  .hero h1 .lead-word{display:block;font-style:italic;font-weight:500;color:var(--gold-bright);font-size:.92em}
+  .hero .tagline{
+    font-size:clamp(1.15rem,2.4vw,1.5rem);
+    color:var(--gold-soft);
+    font-style:italic;
+    max-width:30ch;
+    margin:1rem auto 0;
+  }
+  .hero .cta-row{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:2rem}
+  .hero .flourish{margin-top:2rem}
+  .hero .flourish .line{background:linear-gradient(90deg,transparent,rgba(202,161,74,.6))}
+  .hero .flourish .line.rev{background:linear-gradient(90deg,rgba(202,161,74,.6),transparent)}
+
+  /* ===== Section scaffolding ===== */
+  section{padding-block:clamp(3rem,7vw,5rem)}
+  .section-head{text-align:center;max-width:46ch;margin:0 auto clamp(2rem,4vw,3rem)}
+  .section-head h2{font-size:clamp(2rem,4.4vw,3rem);margin:.6rem 0 .3rem}
+  .section-head p{color:var(--ink-soft)}
+
+  .alt{background:var(--paper-2);border-block:1px solid var(--rule-soft)}
+
+  /* ===== About ===== */
+  .about-grid{display:grid;grid-template-columns:1fr;gap:clamp(2rem,5vw,3.5rem);align-items:center}
+  @media (min-width:860px){.about-grid{grid-template-columns:1.1fr .9fr}}
+  .about-copy p{font-size:1.1rem}
+  .about-copy .lede{font-family:"Cormorant Garamond",serif;font-size:clamp(1.4rem,2.4vw,1.8rem);color:var(--green);font-weight:500;line-height:1.3;margin-bottom:1.2rem}
+  .emblem{
+    position:relative;
+    aspect-ratio:1/1;
+    max-width:360px;
+    margin:0 auto;
+    display:grid;place-items:center;
+    color:var(--green);
+  }
+  .emblem svg{width:100%;height:auto}
+
+  /* ===== Benefits (feature list) ===== */
+  .features{list-style:none;margin:0 auto;padding:0;max-width:760px;display:grid;gap:0}
+  .features li{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:1.2rem;
+    align-items:start;
+    padding:1.5rem 0;
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .features li:first-child{border-top:1px solid var(--rule-soft)}
+  .features .mark{color:var(--gold);flex:none;margin-top:.15rem}
+  .features h3{font-size:clamp(1.4rem,2.6vw,1.75rem);color:var(--green);margin-bottom:.15rem}
+  .features p{margin:0;color:var(--ink-soft)}
+
+  /* ===== What we buy ===== */
+  .buy{text-align:center}
+  .buy-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1px;
+    background:var(--rule-soft);
+    border:1px solid var(--rule-soft);
+    max-width:860px;
+    margin:0 auto;
+  }
+  @media (min-width:640px){.buy-grid{grid-template-columns:repeat(4,1fr)}}
+  .buy-cell{
+    background:var(--paper);
+    padding:1.8rem 1rem;
+    display:flex;flex-direction:column;align-items:center;gap:.9rem;
+    transition:background-color .25s ease,transform .25s ease;
+  }
+  .buy-cell:hover{background:#fffaf0;transform:translateY(-2px)}
+  .buy-cell .ic{color:var(--gold);width:46px;height:46px}
+  .buy-cell .ic svg{width:100%;height:100%}
+  .buy-cell span{
+    font-family:"Cormorant Garamond",serif;
+    font-size:1.35rem;
+    font-weight:600;
+    letter-spacing:.03em;
+    color:var(--green);
+  }
+
+  /* ===== CTA band ===== */
+  .cta-band{
+    background:
+      linear-gradient(180deg, var(--oxblood), #4a1717);
+    color:var(--paper);
+    text-align:center;
+    border-block:3px solid var(--gold);
+    position:relative;
+  }
+  .cta-band::before{content:"";position:absolute;inset:12px;border:1px solid rgba(202,161,74,.3);pointer-events:none}
+  .cta-band .wrap{position:relative}
+  .cta-band h2{color:#fdf4ec;font-size:clamp(2rem,4.6vw,3.2rem)}
+  .cta-band p{color:var(--gold-soft);font-style:italic;font-size:1.2rem;max-width:36ch;margin-inline:auto}
+  .cta-band .phone-big{
+    display:inline-block;
+    margin-top:1.4rem;
+    font-family:"Cormorant Garamond",serif;
+    font-size:clamp(2rem,6vw,3.4rem);
+    font-weight:700;
+    letter-spacing:.02em;
+    color:#fdf8ec;
+    text-decoration:none;
+  }
+  .cta-band .phone-big:hover{color:var(--gold-bright);text-decoration:underline;text-underline-offset:6px}
+  .cta-band .btn-row{margin-top:1.8rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+  /* ===== Visit / contact ===== */
+  .visit-grid{display:grid;grid-template-columns:1fr;gap:2rem;max-width:760px;margin:0 auto}
+  @media (min-width:720px){.visit-grid{grid-template-columns:1fr 1fr}}
+  .info-card{
+    background:var(--paper);
+    border:1px solid var(--rule-soft);
+    padding:2rem;
+    text-align:center;
+  }
+  .info-card .ic{color:var(--gold);width:40px;height:40px;margin:0 auto 1rem}
+  .info-card h3{font-size:1.5rem;color:var(--green);margin-bottom:.6rem}
+  .info-card address{font-style:normal;color:var(--ink-soft);line-height:1.5}
+  .info-card .rear{font-style:italic;color:var(--oxblood);font-weight:600}
+  .info-card a.phone-link{
+    font-family:"Cormorant Garamond",serif;
+    font-size:1.9rem;font-weight:700;color:var(--green);text-decoration:none;
+  }
+  .info-card a.phone-link:hover{color:var(--oxblood);text-decoration:underline}
+  .info-card .btn{margin-top:1.2rem}
+
+  /* ===== Footer ===== */
+  footer{
+    background:var(--green);
+    color:var(--gold-soft);
+    text-align:center;
+    padding-block:clamp(2.5rem,5vw,3.5rem);
+    border-top:3px solid var(--gold);
+  }
+  footer .crest{color:var(--gold-bright);margin:0 auto 1rem}
+  footer .brand{font-family:"Cormorant Garamond",serif;font-size:clamp(1.8rem,4vw,2.4rem);color:#fdf8ec;font-weight:600;letter-spacing:.03em}
+  footer address{font-style:normal;margin-top:.8rem;line-height:1.7}
+  footer a{color:var(--gold-soft);text-decoration:none;font-weight:600}
+  footer a:hover{color:#fff;text-decoration:underline}
+  footer .tagline{font-style:italic;color:var(--gold);margin-top:1.2rem;font-size:1.1rem}
+  footer .flourish{margin:1.4rem auto 0}
+  footer .flourish .line{background:linear-gradient(90deg,transparent,rgba(202,161,74,.5))}
+  footer .flourish .line.rev{background:linear-gradient(90deg,rgba(202,161,74,.5),transparent)}
+  footer .fine{margin-top:1.4rem;font-size:.82rem;letter-spacing:.08em;color:rgba(232,215,168,.6);text-transform:uppercase}
+
+  /* Reveal on scroll */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="wrap">
+    <a href="tel:+14847351980" aria-label="Call Perry's Place Ardmore at (484) 735-1980">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      (484) 735-1980
+    </a>
+    <span class="dot" aria-hidden="true"></span>
+    <span>28 W Lancaster Ave (Rear), Ardmore, PA 19003</span>
+    <span class="dot" aria-hidden="true"></span>
+    <span>Gold &middot; Silver &middot; Diamonds &middot; Estate Jewelry</span>
+  </div>
+</div>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="wrap">
+    <!-- Crest ornament -->
+    <svg class="crest" width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M32 3l6.2 12.6L52 17.6l-9.9 9.7L44.4 41 32 34.4 19.6 41l2.3-13.7L12 17.6l13.8-2z" fill="currentColor" opacity=".9"/>
+      <circle cx="32" cy="24" r="4.6" fill="#14281d"/>
+      <path d="M22 50h20M26 56h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <p class="eyebrow">Perry&rsquo;s Place &middot; Ardmore</p>
+    <h1><span class="lead-word">Sell Gold</span>&amp; Estate Treasures with Confidence</h1>
+    <p class="tagline">Turn your valuables into cash &mdash; fast and fair.</p>
+    <div class="cta-row">
+      <a class="btn btn-gold" href="tel:+14847351980">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Call Today: (484) 735-1980
+      </a>
+      <a class="btn btn-ghost" href="https://www.google.com/maps/dir/?api=1&amp;destination=28%20W%20Lancaster%20Ave%20Rear%2C%20Ardmore%2C%20PA%2019003" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Get Directions
+      </a>
+    </div>
+    <div class="flourish" aria-hidden="true">
+      <span class="line"></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2 6 6-2-4 5 4 5-6-2-2 6-2-6-6 2 4-5-4-5 6 2z"/></svg>
+      <span class="line rev"></span>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- About -->
+  <section id="about">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="about-copy reveal">
+          <p class="eyebrow one">Our Trade</p>
+          <h2 style="font-size:clamp(2rem,4.4vw,3rem);margin:.4rem 0 1.2rem">A Trusted Buyer of Fine Things</h2>
+          <p class="lede">At Perry&rsquo;s Place, we specialize in buying gold, silver, platinum, diamonds, fine jewelry, watches, coins, and antiques.</p>
+          <p>Whether you&rsquo;re looking to sell heirloom pieces, broken gold, estate jewelry, or even high-end collectibles, we offer top dollar and a hassle-free experience.</p>
+          <a class="btn btn-outline" href="tel:+14847351980" style="margin-top:.6rem">Speak With Us: (484) 735-1980</a>
+        </div>
+        <div class="emblem reveal" role="img" aria-label="Decorative estate emblem featuring scales of fair value and a laurel wreath">
+          <svg viewBox="0 0 320 320" fill="none" aria-hidden="true">
+            <circle cx="160" cy="160" r="150" stroke="var(--rule)" stroke-width="2"/>
+            <circle cx="160" cy="160" r="138" stroke="var(--gold)" stroke-width="1" stroke-dasharray="2 7"/>
+            <!-- laurel left -->
+            <g stroke="var(--green)" stroke-width="2.4" fill="none" stroke-linecap="round">
+              <path d="M78 250c-18-30-24-70-10-110"/>
+              <path d="M70 175c-10 2-19 9-22 19M74 160c-11 0-21 6-26 16M80 146c-11-2-22 2-29 11M88 133c-11-3-22 0-30 8"/>
+              <path d="M242 250c18-30 24-70 10-110"/>
+              <path d="M250 175c10 2 19 9 22 19M246 160c11 0 21 6 26 16M240 146c11-2 22 2 29 11M232 133c11-3 22 0 30 8"/>
+            </g>
+            <!-- balance scale -->
+            <g stroke="var(--green)" stroke-width="3" stroke-linecap="round" fill="none">
+              <path d="M160 92v120"/>
+              <path d="M118 118h84"/>
+              <path d="M160 212h0"/>
+              <path d="M130 212h60"/>
+              <!-- hangers -->
+              <path d="M118 118l-22 34M118 118l22 34M202 118l-22 34M202 118l22 34"/>
+            </g>
+            <!-- pans -->
+            <path d="M94 150a22 10 0 0 0 44 0z" fill="var(--gold-soft)" stroke="var(--green)" stroke-width="2.2"/>
+            <path d="M182 150a22 10 0 0 0 44 0z" fill="var(--gold-soft)" stroke="var(--green)" stroke-width="2.2"/>
+            <circle cx="160" cy="88" r="7" fill="var(--gold)" stroke="var(--green)" stroke-width="2.2"/>
+            <!-- gem at base -->
+            <path d="M150 220h20l6 10-16 16-16-16z" fill="var(--gold)" stroke="var(--green)" stroke-width="2"/>
+            <path d="M144 230h32M160 230v16" stroke="var(--green)" stroke-width="1.4"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="alt" id="why">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Why Choose Us</p>
+        <h2>The Perry&rsquo;s Place Promise</h2>
+        <p>Established dealing, fair value, and a genuinely easy transaction &mdash; every time.</p>
+      </div>
+      <ul class="features reveal">
+        <li>
+          <span class="mark" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </span>
+          <div>
+            <h3>Highest Prices Paid</h3>
+            <p>Competitive offers based on real market value.</p>
+          </div>
+        </li>
+        <li>
+          <span class="mark" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </span>
+          <div>
+            <h3>Honest &amp; Professional Service</h3>
+            <p>No pressure, no gimmicks.</p>
+          </div>
+        </li>
+        <li>
+          <span class="mark" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </span>
+          <div>
+            <h3>Fast &amp; Easy Transactions</h3>
+            <p>Call ahead for an appointment.</p>
+          </div>
+        </li>
+        <li>
+          <span class="mark" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </span>
+          <div>
+            <h3>All Types of Jewelry Accepted</h3>
+            <p>Fine jewelry, vintage, and costume.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- What we buy -->
+  <section class="buy" id="buy">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">What We Buy</p>
+        <h2>From Heirlooms to High-End Collectibles</h2>
+        <p>Bring in a single piece or an entire estate &mdash; we appraise it all.</p>
+      </div>
+      <div class="buy-grid reveal">
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M8 3l-2 6 6 12M16 3l2 6-6 12"/></svg></span>
+          <span>Gold</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+          <span>Silver</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></span>
+          <span>Platinum</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3L6 9l6 12M15 3l3 6-6 12"/></svg></span>
+          <span>Diamonds</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><path d="M12 15l2.5-8M9 7l3-4 3 4M9 7h6"/></svg></span>
+          <span>Fine Jewelry</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><path d="M12 8.5V12l2.5 1.5M9 3h6M12 3V5"/></svg></span>
+          <span>Watches</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 7v10M9.5 9.5h3.2a1.3 1.3 0 0 1 0 2.6H9.5h3.5a1.3 1.3 0 0 1 0 2.6H9.5"/></svg></span>
+          <span>Coins</span>
+        </div>
+        <div class="buy-cell">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10V8a7 7 0 0 1 14 0v2"/><path d="M4 10h16l-1 11H5z"/><path d="M9 10v11M15 10v11M8 3.5l1.5 2M16 3.5L14.5 5.5"/></svg></span>
+          <span>Antiques</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <section class="cta-band" id="call">
+    <div class="wrap">
+      <p class="eyebrow" style="color:var(--gold-bright)">Ready When You Are</p>
+      <h2>Discover What Your Valuables Are Worth</h2>
+      <p>Call ahead for an appointment and get a fair, no-pressure offer today.</p>
+      <a class="phone-big" href="tel:+14847351980">(484) 735-1980</a>
+      <div class="btn-row">
+        <a class="btn btn-gold" href="tel:+14847351980">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Call Today: (484) 735-1980
+        </a>
+        <a class="btn btn-ghost" href="https://www.google.com/maps/dir/?api=1&amp;destination=28%20W%20Lancaster%20Ave%20Rear%2C%20Ardmore%2C%20PA%2019003" target="_blank" rel="noopener">Get Directions</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visit -->
+  <section id="visit" class="alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Visit The Shop</p>
+        <h2>Find Us in Ardmore</h2>
+      </div>
+      <div class="visit-grid">
+        <div class="info-card reveal">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          <h3>Our Location</h3>
+          <address>
+            28 W Lancaster Ave <span class="rear">(Rear)</span><br>
+            Ardmore, PA 19003
+          </address>
+          <a class="btn btn-outline" href="https://www.google.com/maps/dir/?api=1&amp;destination=28%20W%20Lancaster%20Ave%20Rear%2C%20Ardmore%2C%20PA%2019003" target="_blank" rel="noopener">Get Directions</a>
+        </div>
+        <div class="info-card reveal">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <h3>Call or Visit</h3>
+          <p style="margin-bottom:.4rem;color:var(--ink-soft)">Call ahead for an appointment.</p>
+          <a class="phone-link" href="tel:+14847351980">(484) 735-1980</a>
+          <br>
+          <a class="btn btn-gold" href="tel:+14847351980" style="margin-top:1.2rem">Call Today</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="wrap">
+    <svg class="crest" width="48" height="48" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M32 3l6.2 12.6L52 17.6l-9.9 9.7L44.4 41 32 34.4 19.6 41l2.3-13.7L12 17.6l13.8-2z" fill="currentColor" opacity=".9"/>
+      <circle cx="32" cy="24" r="4.6" fill="#14281d"/>
+    </svg>
+    <div class="brand">Perry&rsquo;s Place Ardmore</div>
+    <address>
+      28 W Lancaster Ave (Rear), Ardmore, PA 19003<br>
+      <a href="tel:+14847351980">(484) 735-1980</a>
+    </address>
+    <p class="tagline">Turn your valuables into cash &mdash; fast and fair.</p>
+    <div class="flourish" aria-hidden="true">
+      <span class="line"></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2 6 6-2-4 5 4 5-6-2-2 6-2-6-6 2 4-5-4-5 6 2z"/></svg>
+      <span class="line rev"></span>
+    </div>
+    <p class="fine">Gold &middot; Silver &middot; Platinum &middot; Diamonds &middot; Fine Jewelry &middot; Watches &middot; Coins &middot; Antiques</p>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var items = document.querySelectorAll('.reveal');
+    if (reduce || !('IntersectionObserver' in window)) {
+      items.forEach(function(el){ el.classList.add('in'); });
+      return;
+    }
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    items.forEach(function(el){ obs.observe(el); });
+  })();
+</script>
+</body>
+</html>
