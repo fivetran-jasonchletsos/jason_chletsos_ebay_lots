@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0c">
+<title>Perry's Place — Choose a Design</title>
+<meta name="description" content="Preview and cycle through website design options for Perry's Place Ardmore.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0c; --chrome:#121318; --chrome2:#1b1d25; --line:rgba(212,175,110,.22);
+    --ink:#f6f3ec; --mut:#a6a090; --dim:#6f6a5c;
+    --gold:#d4af6e; --gold-2:#eccb8e;
+    --t:.35s cubic-bezier(.3,.7,.2,1);
+    --serif:'Cormorant Garamond',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+
+  .app{display:flex;flex-direction:column;height:100dvh}
+
+  header{
+    background:linear-gradient(180deg,var(--chrome),rgba(18,19,24,.86));
+    border-bottom:1px solid var(--line); backdrop-filter:blur(8px);
+    padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; flex:none;
+  }
+  .brand{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+  .brand b{color:var(--gold-2)}
+  .brand small{font-family:var(--sans);display:block;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim);margin-top:-2px}
+
+  .tabs{display:flex;gap:7px;flex-wrap:wrap;flex:1;min-width:0}
+  .tab{
+    font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.01em;
+    color:var(--mut);background:var(--chrome2);border:1px solid transparent;border-radius:999px;
+    padding:8px 14px;cursor:pointer;transition:var(--t);white-space:nowrap;display:flex;align-items:center;gap:7px;
+  }
+  .tab .n{font-size:10px;color:var(--dim);font-weight:700}
+  .tab:hover{color:var(--ink);border-color:var(--line)}
+  .tab.on{background:linear-gradient(120deg,var(--gold),#b98f4e);color:#161007;border-color:transparent}
+  .tab.on .n{color:#161007;opacity:.7}
+  .tab:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
+
+  .ctrls{display:flex;align-items:center;gap:8px;flex:none}
+  .ib{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    width:38px;height:38px;border-radius:10px;background:var(--chrome2);border:1px solid var(--line);
+    color:var(--ink);cursor:pointer;transition:var(--t);font-family:var(--sans);font-size:13px;font-weight:600;
+  }
+  .ib.wide{width:auto;padding:0 13px}
+  .ib:hover{border-color:var(--gold);color:var(--gold-2)}
+  .ib.on{background:linear-gradient(120deg,var(--gold),#b98f4e);color:#161007;border-color:transparent}
+  .ib svg{width:17px;height:17px}
+  .seg{display:flex;background:var(--chrome2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:none;border:none;color:var(--mut);font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 12px;cursor:pointer;transition:var(--t)}
+  .seg button.on{background:var(--gold);color:#161007}
+  .open{text-decoration:none}
+
+  .stage{flex:1;position:relative;overflow:auto;display:flex;align-items:flex-start;justify-content:center;background:
+    radial-gradient(70% 50% at 50% 0%, rgba(212,175,110,.07), transparent 70%), var(--bg);padding:0}
+  .stage.mobile{padding:22px 0 40px;align-items:flex-start}
+  .frameWrap{position:relative;width:100%;height:100%;transition:var(--t)}
+  .stage.mobile .frameWrap{
+    width:390px;max-width:94vw;height:calc(100% - 44px);min-height:680px;margin-top:0;
+    border:10px solid #000;border-radius:38px;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px var(--line);
+    overflow:hidden;background:#000;
+  }
+  iframe{width:100%;height:100%;border:0;display:block;background:#0a0a0c}
+  .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);
+    font-family:var(--serif);font-size:20px;letter-spacing:.04em;pointer-events:none;opacity:0;transition:opacity .3s}
+  .loading.on{opacity:1}
+
+  .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:5;
+    background:rgba(18,19,24,.9);border:1px solid var(--line);border-radius:999px;
+    padding:7px 15px;font-size:11.5px;color:var(--mut);letter-spacing:.02em;backdrop-filter:blur(6px);
+    display:flex;gap:12px;align-items:center;white-space:nowrap;transition:var(--t)}
+  .hint kbd{background:var(--chrome2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:var(--sans);font-size:10.5px;color:var(--ink)}
+  .hint.hide{opacity:0;pointer-events:none;transform:translate(-50%,10px)}
+
+  .desc{color:var(--dim);font-size:12px;letter-spacing:.02em;margin-left:2px;white-space:nowrap;display:none}
+  @media(min-width:1180px){.desc{display:inline}}
+  @media(max-width:720px){
+    header{gap:10px;padding:9px 12px}
+    .brand{font-size:18px}
+    .tabs{order:3;width:100%}
+    .hint{display:none}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">Perry's <b>Place</b><small>Website Options</small></div>
+
+    <div class="tabs" id="tabs" role="tablist" aria-label="Design versions"></div>
+    <span class="desc" id="desc"></span>
+
+    <div class="ctrls">
+      <button class="ib" id="prev" title="Previous (←)" aria-label="Previous design">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="ib wide" id="play" title="Auto-cycle" aria-label="Auto-cycle designs">
+        <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <span id="playLbl">Cycle</span>
+      </button>
+      <button class="ib" id="next" title="Next (→)" aria-label="Next design">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="seg" role="group" aria-label="Preview size">
+        <button id="segDesk" class="on" title="Desktop preview">Desktop</button>
+        <button id="segMob" title="Mobile preview">Mobile</button>
+      </div>
+      <a class="ib wide open" id="open" href="#" target="_blank" rel="noopener" title="Open full screen">Open &#8599;</a>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="frameWrap">
+      <iframe id="frame" title="Website preview" loading="eager"></iframe>
+      <div class="loading" id="loading">loading&hellip;</div>
+    </div>
+  </div>
+</div>
+
+<div class="hint" id="hint">
+  <span>Flip through the designs</span>
+  <span><kbd>&larr;</kbd> <kbd>&rarr;</kbd> arrows</span>
+  <span><kbd>1</kbd>&ndash;<kbd>5</kbd> jump</span>
+  <span><kbd>Space</kbd> cycle</span>
+</div>
+
+<script>
+  var VERSIONS = [
+    {slug:'luxe',   name:'Luxury Gold',   desc:'Black & gold fine-jeweler elegance'},
+    {slug:'trust',  name:'Trust & Local', desc:'Bright, clean, trustworthy neighborhood shop'},
+    {slug:'bold',   name:'Bold Modern',   desc:'Huge type, high-contrast, conversion-first'},
+    {slug:'estate', name:'Classic Estate',desc:'Warm cream & heritage auction-house refinement'},
+    {slug:'cash',   name:'Fast Cash',     desc:'Mobile-first urgency with a sticky Call bar'}
+  ];
+  var i = 0, playing = false, timer = null;
+  var frame = document.getElementById('frame'),
+      tabsEl = document.getElementById('tabs'),
+      descEl = document.getElementById('desc'),
+      openEl = document.getElementById('open'),
+      loadEl = document.getElementById('loading'),
+      stage  = document.getElementById('stage'),
+      hint   = document.getElementById('hint');
+
+  // build tabs
+  VERSIONS.forEach(function(v,idx){
+    var b = document.createElement('button');
+    b.className='tab'; b.setAttribute('role','tab');
+    b.innerHTML = '<span class="n">'+(idx+1)+'</span>'+v.name;
+    b.onclick = function(){ go(idx); };
+    tabsEl.appendChild(b);
+  });
+
+  function src(idx){ return './'+VERSIONS[idx].slug+'/index.html'; }
+
+  function go(idx, keepPlaying){
+    i = (idx+VERSIONS.length)%VERSIONS.length;
+    loadEl.classList.add('on');
+    frame.src = src(i);
+    openEl.href = src(i);
+    descEl.textContent = VERSIONS[i].desc;
+    [].forEach.call(tabsEl.children, function(c,n){
+      c.classList.toggle('on', n===i); if(n===i) c.setAttribute('aria-selected','true'); else c.removeAttribute('aria-selected');
+    });
+    try{ history.replaceState(null,'','#'+VERSIONS[i].slug); }catch(e){}
+    if(!keepPlaying) stopHintSoon();
+  }
+  frame.addEventListener('load', function(){ loadEl.classList.remove('on'); });
+
+  function next(){ go(i+1, playing); }
+  function prev(){ go(i-1, playing); }
+
+  // auto-cycle
+  var playBtn=document.getElementById('play'), playLbl=document.getElementById('playLbl'), playIcon=document.getElementById('playIcon');
+  function setPlay(on){
+    playing=on; playBtn.classList.toggle('on',on); playLbl.textContent = on?'Stop':'Cycle';
+    playIcon.innerHTML = on ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>' : '<path d="M8 5v14l11-7z"/>';
+    clearInterval(timer);
+    if(on) timer=setInterval(next, 6000);
+  }
+  playBtn.onclick=function(){ setPlay(!playing); };
+  document.getElementById('next').onclick=function(){ next(); };
+  document.getElementById('prev').onclick=function(){ prev(); };
+
+  // size toggle
+  var segDesk=document.getElementById('segDesk'), segMob=document.getElementById('segMob');
+  function size(mobile){ stage.classList.toggle('mobile',mobile); segMob.classList.toggle('on',mobile); segDesk.classList.toggle('on',!mobile); }
+  segDesk.onclick=function(){ size(false); };
+  segMob.onclick=function(){ size(true); };
+
+  // keys
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'){ next(); }
+    else if(e.key==='ArrowLeft'){ prev(); }
+    else if(e.key===' '){ e.preventDefault(); setPlay(!playing); }
+    else if(e.key>='1' && e.key<='5'){ go(parseInt(e.key,10)-1); }
+  });
+
+  var hintT; function stopHintSoon(){ clearTimeout(hintT); hintT=setTimeout(function(){ hint.classList.add('hide'); }, 6000); }
+
+  // deep link
+  var h=(location.hash||'').replace('#',''); var start=VERSIONS.findIndex(function(v){return v.slug===h;});
+  go(start>=0?start:0); stopHintSoon();
+</script>
+</body>
+</html>
