@@ -83,10 +83,26 @@
   .desc{color:var(--dim);font-size:12px;letter-spacing:.02em;margin-left:2px;white-space:nowrap;display:none}
   @media(min-width:1180px){.desc{display:inline}}
   @media(max-width:720px){
-    header{gap:10px;padding:9px 12px}
-    .brand{font-size:18px}
-    .tabs{order:3;width:100%}
+    header{gap:8px;padding:8px 10px}
+    .brand{font-size:17px}
+    .brand small{display:none}
+    /* tabs become one swipeable row instead of wrapping to many lines */
+    .tabs{order:3;width:100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:1px}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:none}
+    .seg{display:none}           /* on a phone the preview is already phone-width */
+    .ctrls{margin-left:auto}
+    .desc{display:none}
     .hint{display:none}
+    .stage.mobile{padding:0}     /* no desktop device-frame on an actual phone */
+    .stage.mobile .frameWrap{width:100%;max-width:none;height:100%;min-height:0;border:0;border-radius:0;box-shadow:none}
+  }
+  @media(max-width:380px){
+    .brand{font-size:15px}
+    .ib,.ib.wide{height:34px}
+    .ib{width:34px}
+    #play span{display:none}      /* icon-only cycle button on tiny screens */
+    .ib.wide#play{width:34px;padding:0}
   }
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
