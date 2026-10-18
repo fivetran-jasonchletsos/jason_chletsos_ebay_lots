@@ -42,9 +42,61 @@ import time
 import urllib.request
 from pathlib import Path
 
+import statistics
+
+import requests
 from PIL import Image
 
 import card_price_agent as cpa
+import promote
+
+BROWSE_URL = "https://api.ebay.com/buy/browse/v1/item_summary/search"
+OWN_SELLER = "harpua2001"
+_LOT_RE = re.compile(r"\b(lot|lots|bundle|bulk|you pick|complete set|\d+\s*cards?)\b", re.I)
+
+
+def ebay_price(token: str, title: str) -> dict:
+    """Price a card from eBay ACTIVE listings (Browse API) — asking-price comps.
+    Returns {price (median), n, low, high} using the matched active listings,
+    excluding our own store and obvious lot/bundle listings. Asking prices skew
+    a bit high vs sold, but they're a free, already-authorized ballpark good
+    enough to sort >$10 vs under while PriceCharting is down."""
+    q = " ".join((title or "").split())[:350]
+    if not q:
+        return {"price": None, "n": 0}
+    params = {
+        "q": q,
+        "limit": "60",
+        "filter": "buyingOptions:{FIXED_PRICE},itemLocationCountry:US,price:[1..],priceCurrency:USD",
+    }
+    headers = {"Authorization": f"Bearer {token}", "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"}
+    try:
+        r = requests.get(BROWSE_URL, params=params, headers=headers, timeout=20)
+        r.raise_for_status()
+    except requests.RequestException:
+        return {"price": None, "n": 0}
+    prices = []
+    for it in (r.json().get("itemSummaries") or []):
+        seller = ((it.get("seller") or {}).get("username") or "").lower()
+        if seller == OWN_SELLER:
+            continue
+        if _LOT_RE.search(it.get("title") or ""):
+            continue
+        try:
+            p = float((it.get("price") or {}).get("value") or 0)
+        except (TypeError, ValueError):
+            continue
+        if p > 0:
+            prices.append(p)
+    if not prices:
+        return {"price": None, "n": 0}
+    prices.sort()
+    return {
+        "price": round(statistics.median(prices), 2),
+        "n": len(prices),
+        "low": prices[0],
+        "high": prices[-1],
+    }
 
 REPO = Path(__file__).parent
 LAMBDA_URL = "https://jw0hur2091.execute-api.us-east-1.amazonaws.com/ebay/upload-photos"
@@ -129,6 +181,8 @@ def main() -> int:
     ap.add_argument("--min-price", type=float, default=10.0, help="default filter on the page")
     ap.add_argument("--limit", type=int, default=0, help="process at most N new fronts (0 = all)")
     ap.add_argument("--rebuild-html", action="store_true", help="only regenerate the HTML from saved results")
+    ap.add_argument("--source", choices=["ebay", "scp"], default="ebay",
+                    help="price source: ebay=active-listing comps (free, default); scp=SportsCardsPro (needs valid token)")
     args = ap.parse_args()
 
     results = json.loads(RESULTS.read_text()) if RESULTS.exists() else {}
@@ -138,7 +192,11 @@ def main() -> int:
         if not folder.exists():
             print(f"ERROR: {folder} not found")
             return 1
-        token = cpa.load_token()
+        if args.source == "scp":
+            token = cpa.load_token()
+        else:
+            cfg = json.loads((REPO / "configuration.json").read_text())
+            token = promote.get_app_token(cfg)
         fronts = seq_fronts(folder, args.prefix)
         todo = [(n, fp, bp) for (n, fp, bp) in fronts if fp.name not in results]
         if args.limit:
@@ -156,16 +214,26 @@ def main() -> int:
                 rec["set"] = card.get("set_name")
                 rec["year"] = card.get("year")
                 rec["identified"] = bool(resp.get("identified"))
-                # REAL SCP price
-                price_info = cpa.price_listing({"title": title}, token) if title else None
-                if price_info:
-                    rec["price"] = price_info.get("actual_price")
-                    rec["grades"] = price_info.get("grades")
-                    rec["scp_url"] = price_info.get("scp_url")
-                    rec["scp_confidence"] = price_info.get("confidence")
-                    rec["matched"] = price_info.get("matched_product")
-                else:
+                # Price the card
+                rec["price_source"] = args.source
+                if not title:
                     rec["price"] = None
+                elif args.source == "scp":
+                    pi = cpa.price_listing({"title": title}, token)
+                    if pi:
+                        rec["price"] = pi.get("actual_price")
+                        rec["grades"] = pi.get("grades")
+                        rec["scp_url"] = pi.get("scp_url")
+                        rec["scp_confidence"] = pi.get("confidence")
+                        rec["matched"] = pi.get("matched_product")
+                    else:
+                        rec["price"] = None
+                else:  # ebay active-comp median
+                    ep = ebay_price(token, title)
+                    rec["price"] = ep.get("price")
+                    rec["comps"] = ep.get("n")
+                    rec["comp_low"] = ep.get("low")
+                    rec["comp_high"] = ep.get("high")
                 rec["hold"] = is_held(title)
                 img_rel = f"perry_picklist_imgs/{fp.stem}.jpg"
                 save_thumb(fp, REPO / "output" / img_rel)
