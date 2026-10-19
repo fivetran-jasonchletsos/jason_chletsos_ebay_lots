@@ -183,6 +183,9 @@ def main() -> int:
     ap.add_argument("--rebuild-html", action="store_true", help="only regenerate the HTML from saved results")
     ap.add_argument("--source", choices=["ebay", "scp"], default="ebay",
                     help="price source: ebay=active-listing comps (free, default); scp=SportsCardsPro (needs valid token)")
+    ap.add_argument("--reprice", action="store_true",
+                    help="re-price already-identified cards that have no price yet (no re-ID / no vision cost). "
+                         "Run this after a price source comes back up.")
     args = ap.parse_args()
 
     results = json.loads(RESULTS.read_text()) if RESULTS.exists() else {}
@@ -197,7 +200,44 @@ def main() -> int:
         else:
             cfg = json.loads((REPO / "configuration.json").read_text())
             token = promote.get_app_token(cfg)
-        fronts = seq_fronts(folder, args.prefix)
+        # Reprice pass: fill in prices for already-identified cards that have
+        # none yet (price source was down when they were scanned). No vision.
+        if args.reprice:
+            need = [r for r in results.values()
+                    if r.get("title") and not isinstance(r.get("price"), (int, float))]
+            print(f"reprice: {len(need)} identified cards missing a price")
+            for j, r in enumerate(need, 1):
+                title = r["title"]
+                if args.source == "scp":
+                    pi = cpa.price_listing({"title": title}, token)
+                    r["price"] = (pi or {}).get("actual_price")
+                    if pi:
+                        r["grades"] = pi.get("grades"); r["scp_url"] = pi.get("scp_url")
+                        r["scp_confidence"] = pi.get("confidence")
+                else:
+                    ep = ebay_price(token, title)
+                    r["price"] = ep.get("price"); r["comps"] = ep.get("n")
+                    r["comp_low"] = ep.get("low"); r["comp_high"] = ep.get("high")
+                r["price_source"] = args.source
+                if j % 25 == 0 or j == len(need):
+                    RESULTS.write_text(json.dumps(results, indent=2))
+                    print(f"  repriced {j}/{len(need)}")
+                time.sleep(0.2)
+            RESULTS.write_text(json.dumps(results, indent=2))
+            render_html(results, args.min_price)
+            priced = [r for r in results.values() if isinstance(r.get("price"), (int, float))]
+            print(f"reprice done. {len(priced)} now priced. Pick list: {HTML_OUT}")
+            return 0
+
+        if args.prefix.upper() == "ALL":
+            prefixes = sorted({m.group(0) for f in folder.iterdir()
+                               if (m := re.match(r"PP_\d+", f.name))})
+            fronts = []
+            for pre in prefixes:
+                fronts.extend(seq_fronts(folder, pre))
+            print(f"batches found: {', '.join(prefixes)}")
+        else:
+            fronts = seq_fronts(folder, args.prefix)
         todo = [(n, fp, bp) for (n, fp, bp) in fronts if fp.name not in results]
         if args.limit:
             todo = todo[: args.limit]
