@@ -183,6 +183,8 @@ def main() -> int:
     ap.add_argument("--rebuild-html", action="store_true", help="only regenerate the HTML from saved results")
     ap.add_argument("--source", choices=["ebay", "scp"], default="ebay",
                     help="price source: ebay=active-listing comps (free, default); scp=SportsCardsPro (needs valid token)")
+    ap.add_argument("--no-price", action="store_true",
+                    help="identify only, skip the price lookup (fast; fill prices later with --reprice)")
     ap.add_argument("--reprice", action="store_true",
                     help="re-price already-identified cards that have no price yet (no re-ID / no vision cost). "
                          "Run this after a price source comes back up.")
@@ -256,7 +258,7 @@ def main() -> int:
                 rec["identified"] = bool(resp.get("identified"))
                 # Price the card
                 rec["price_source"] = args.source
-                if not title:
+                if args.no_price or not title:
                     rec["price"] = None
                 elif args.source == "scp":
                     pi = cpa.price_listing({"title": title}, token)
