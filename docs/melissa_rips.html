@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Melissa's Rips Tonight — priced cards</title>
+<style>
+  :root{--bg:#0c0e13;--surf:#151924;--line:rgba(255,255,255,.09);--ink:#eef2f8;--mut:#9aa6b8;--dim:#6b7688;--gold:#e3b23c;--green:#3fd27e}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,sans-serif;padding:0 0 60px}
+  header{position:sticky;top:0;z-index:5;background:rgba(12,14,19,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 18px}
+  h1{font-size:18px;font-weight:700}
+  .sub{color:var(--mut);font-size:13px;margin-top:2px}
+  .controls{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .controls label{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:8px}
+  .controls input[type=number]{width:90px;background:var(--surf);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 10px;font-size:14px;font-weight:600}
+  .controls .count{color:var(--green);font-weight:700;font-size:14px}
+  .controls .tot{color:var(--gold);font-weight:700}
+  .controls button{background:var(--surf);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .controls button.on{background:var(--gold);color:#1a1205;border-color:var(--gold)}
+  table{width:100%;max-width:1000px;margin:14px auto;border-collapse:collapse;padding:0 12px}
+  td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:middle}
+  .thumbcell{width:70px} .thumbcell img{width:60px;height:80px;object-fit:cover;border-radius:5px;display:block;background:var(--surf)}
+  .pricecell{font-weight:800;font-size:17px;color:var(--green);white-space:nowrap;width:92px}
+  .titlecell{font-size:14px;line-height:1.35}
+  .hold{display:inline-block;margin-left:8px;font-size:10.5px;font-weight:700;color:#ffb3b3;background:rgba(255,80,80,.14);border:1px solid rgba(255,80,80,.35);border-radius:999px;padding:1px 8px;text-transform:uppercase;letter-spacing:.04em}
+  .scp{margin-left:8px;font-size:11px;color:var(--mut)}
+  .confcell{color:var(--dim);font-size:12px;width:48px;text-align:right}
+  tr.hidden{display:none}
+</style></head><body>
+<header>
+  <h1>Melissa's Rips Tonight</h1>
+  <div class="sub">40 cards, priced from live eBay comps. Sorted high to low.</div>
+  <div class="summary" id="summary" style="margin-top:10px;font-size:15.5px;color:var(--ink)"></div>
+  <div class="controls">
+    <label>Min price $ <input type="number" id="min" value="10" min="0" step="1"></label>
+    <button id="holdBtn">Hide Giants/Mets</button>
+    <span class="count" id="count"></span>
+    <span>·</span><span>Showing: <span class="tot" id="total"></span></span>
+  </div>
+</header>
+<table><tbody id="rows">
+      <tr class="card" data-price="2.99" data-hold="0">
+        <td class="pricecell">$2.99</td>
+        <td class="titlecell">2025 Panini Mosaic Ashton Jeanty RC #345 Raiders Football
+            <span class="meta">With_Melissa_001 · 68 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.99" data-hold="0">
+        <td class="pricecell">$2.99</td>
+        <td class="titlecell">2026 Panini Prizm Roman Anthony #186 Boston Baseball Card
+            <span class="meta">With_Melissa_001 · 44 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.79" data-hold="0">
+        <td class="pricecell">$2.79</td>
+        <td class="titlecell">2025 Panini Mosaic Quinn Ewers RC #14 Rookie Dolphins Football
+            <span class="meta">With_Melissa_001 · 5 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.79" data-hold="0">
+        <td class="pricecell">$2.79</td>
+        <td class="titlecell">2025 Panini Mosaic Quinn Ewers RC #14 Rookie Card Dolphins Football
+            <span class="meta">With_Melissa_001 · 5 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.5" data-hold="0">
+        <td class="pricecell">$2.50</td>
+        <td class="titlecell">2024 Panini Mosaic Chop Robinson #20 Rookie Card Miami Dolphins
+            <span class="meta">With_Melissa_001 · 15 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.0" data-hold="0">
+        <td class="pricecell">$2.00</td>
+        <td class="titlecell">2025 Panini Mosaic Football Drake Maye Notoriety #3 Rookie Patriots
+            <span class="meta">With_Melissa_001 · 47 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.0" data-hold="0">
+        <td class="pricecell">$2.00</td>
+        <td class="titlecell">2025 Panini Mosaic Football Travis Hunter RC #301 Rookie Card Jaguars
+            <span class="meta">With_Melissa_001 · 58 comps</span></td>
+      </tr>
+      <tr class="card" data-price="2.0" data-hold="0">
+        <td class="pricecell">$2.00</td>
+        <td class="titlecell">2025 Panini Mosaic Football Terrell Owens Hall of Fame #297 RC Cowboys
+            <span class="meta">With_Melissa_001 · 3 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.99" data-hold="0">
+        <td class="pricecell">$1.99</td>
+        <td class="titlecell">2025 Panini Super Bowl LX Kid Reporter Access Code Card
+            <span class="meta">With_Melissa_001 · 10 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.99" data-hold="0">
+        <td class="pricecell">$1.99</td>
+        <td class="titlecell">2025 Panini Mosaic Trevor Lawrence #183 Prism Jacksonville Jaguars
+            <span class="meta">With_Melissa_001 · 71 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.99" data-hold="0">
+        <td class="pricecell">$1.99</td>
+        <td class="titlecell">2025 Panini Mosaic Travis Hunter Rookie Card #12 Jacksonville Jaguars
+            <span class="meta">With_Melissa_001 · 64 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.98" data-hold="0">
+        <td class="pricecell">$1.98</td>
+        <td class="titlecell">2025 Panini Mosaic Kyren Williams #136 LA Rams Football Card
+            <span class="meta">With_Melissa_001 · 58 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.95" data-hold="0">
+        <td class="pricecell">$1.95</td>
+        <td class="titlecell">2025 Panini Mosaic Football Kyle Williams RC #353 Rookie Patriots
+            <span class="meta">With_Melissa_001 · 73 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.89" data-hold="0">
+        <td class="pricecell">$1.89</td>
+        <td class="titlecell">2025 Panini Mosaic Football Sean McVay Rams Mosaic #238
+            <span class="meta">With_Melissa_001 · 61 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.84" data-hold="0">
+        <td class="pricecell">$1.84</td>
+        <td class="titlecell">2025 Panini Mosaic Football D&#x27;Andre Swift #213 Bears NFL
+            <span class="meta">With_Melissa_001 · 64 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.84" data-hold="0">
+        <td class="pricecell">$1.84</td>
+        <td class="titlecell">2024 Panini Mosaic Zack Baun Intl. Games #268 Eagles Football Card
+            <span class="meta">With_Melissa_001 · 7 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.77" data-hold="0">
+        <td class="pricecell">$1.77</td>
+        <td class="titlecell">2025 Panini Mosaic Football Andre Reed #162 Bills NFL Card
+            <span class="meta">With_Melissa_001 · 65 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.77" data-hold="0">
+        <td class="pricecell">$1.77</td>
+        <td class="titlecell">2026 Panini Prizm Baseball Ethan Frey #74 Card
+            <span class="meta">With_Melissa_001 · 32 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.76" data-hold="0">
+        <td class="pricecell">$1.76</td>
+        <td class="titlecell">2025 Panini Mosaic Fred Taylor #157 Jacksonville Jaguars Football Card
+            <span class="meta">With_Melissa_001 · 67 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.75" data-hold="0">
+        <td class="pricecell">$1.75</td>
+        <td class="titlecell">2025 Panini Mosaic Football Dominic Lovett RC #363 Rookie Lions NFL
+            <span class="meta">With_Melissa_001 · 63 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.75" data-hold="0">
+        <td class="pricecell">$1.75</td>
+        <td class="titlecell">2025 Panini Mosaic Football Fred Warner #165 49ers NFL Card
+            <span class="meta">With_Melissa_001 · 63 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.69" data-hold="0">
+        <td class="pricecell">$1.69</td>
+        <td class="titlecell">2025 Panini Mosaic Zack Baun #141 Philadelphia Eagles Football
+            <span class="meta">With_Melissa_001 · 66 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.69" data-hold="0">
+        <td class="pricecell">$1.69</td>
+        <td class="titlecell">2025 Panini Mosaic Troy Franklin #16 Denver Broncos Football Card
+            <span class="meta">With_Melissa_001 · 62 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.69" data-hold="0">
+        <td class="pricecell">$1.69</td>
+        <td class="titlecell">2025 Panini Mosaic Football Warren Sapp #68 Raiders NFL
+            <span class="meta">With_Melissa_001 · 62 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.67" data-hold="0">
+        <td class="pricecell">$1.67</td>
+        <td class="titlecell">2025 Panini Mosaic Football Al Toon #77 New York Jets
+            <span class="meta">With_Melissa_001 · 66 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.67" data-hold="0">
+        <td class="pricecell">$1.67</td>
+        <td class="titlecell">2025 Panini Mosaic Jaydon Blue Rookie Card #320 Dallas Cowboys Football
+            <span class="meta">With_Melissa_001 · 68 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.5" data-hold="0">
+        <td class="pricecell">$1.50</td>
+        <td class="titlecell">2025 Panini Mosaic Football Marquise Brown Chiefs #73 Card
+            <span class="meta">With_Melissa_001 · 61 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.5" data-hold="0">
+        <td class="pricecell">$1.50</td>
+        <td class="titlecell">2025 Panini Mosaic Julius Peppers #19 Epic Performers Panthers NFL
+            <span class="meta">With_Melissa_001 · 78 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.49" data-hold="0">
+        <td class="pricecell">$1.49</td>
+        <td class="titlecell">2025 Panini Mosaic Micah Parsons #6 Dallas Cowboys Football Card
+            <span class="meta">With_Melissa_001 · 76 comps</span></td>
+      </tr>
+      <tr class="card" data-price="1.49" data-hold="0">
+        <td class="pricecell">$1.49</td>
+        <td class="titlecell">2025 Panini Mosaic Football Ollie Gordon II Rookie Card #310 Miami Dolphins
+            <span class="meta">With_Melissa_001 · 68 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2023 Panini Mosaic Chigoziem Okonkwo #85 Titans Football Card
+            <span class="meta">With_Melissa_001</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Mosaic Football Cole Kmet #85 Chicago Bears
+            <span class="meta">With_Melissa_001 · 1 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2024 Panini Mosaic Isaiah Davis #59 New York Jets Football Card
+            <span class="meta">With_Melissa_001 · 1 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Mosaic Football Nick Emmannwori RC #321 Rookie Seahawks
+            <span class="meta">With_Melissa_001</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Mosaic Football Randy Gradisha #53 Denver Broncos
+            <span class="meta">With_Melissa_001 · 2 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Mosaic Mason Taylor Rookie Card #85 Jets Football
+            <span class="meta">With_Melissa_001 · 1 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Mosaic Football Richard Seymour #171 Patriots RC
+            <span class="meta">With_Melissa_001 · 2 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2024 Panini Mosaic Patrick Queen #12 Pittsburgh Steelers Football
+            <span class="meta">With_Melissa_001 · 1 comps</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Super Bowl LX Kid Reporter Card M978EE3359424 NFL
+            <span class="meta">With_Melissa_001</span></td>
+      </tr>
+      <tr class="card" data-price="-1" data-hold="0">
+        <td class="pricecell">—</td>
+        <td class="titlecell">2025 Panini Prizm Carson Benge Rookie Card #262 New York Baseball
+            <span class="meta">With_Melissa_001 · 2 comps</span></td>
+      </tr></tbody></table>
+<script>
+  var rows = Array.prototype.slice.call(document.querySelectorAll('tr.card'));
+  var minEl=document.getElementById('min'), holdBtn=document.getElementById('holdBtn'),
+      countEl=document.getElementById('count'), totalEl=document.getElementById('total'),
+      sumEl=document.getElementById('summary');
+  var hideHolds=false;
+  var fmt=function(v){ return '$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  // Fixed summary over ALL priced cards (Giants/Mets included), independent of the filter.
+  (function(){
+    var all=0, allTot=0, o10=0, o10Tot=0;
+    rows.forEach(function(r){ var p=parseFloat(r.dataset.price); if(p>0){ all++; allTot+=p; if(p>=10){ o10++; o10Tot+=p; } } });
+    sumEl.innerHTML = '<b>'+all+'</b> cards scanned &amp; priced · total value <b>'+fmt(allTot)+'</b>'+
+      ' &nbsp;&middot;&nbsp; <span style="color:#3fd27e;font-weight:700">'+o10+' cards over $10 = '+fmt(o10Tot)+'</span>';
+  })();
+  function apply(){
+    var min=parseFloat(minEl.value)||0, shown=0, total=0;
+    rows.forEach(function(r){
+      var p=parseFloat(r.dataset.price), hold=r.dataset.hold==='1';
+      var ok = p>=min && !(hideHolds&&hold);
+      r.classList.toggle('hidden', !ok);
+      if(ok){ shown++; if(p>0) total+=p; }
+    });
+    countEl.textContent = shown+' shown';
+    totalEl.textContent = fmt(total);
+  }
+  minEl.addEventListener('input', apply);
+  holdBtn.addEventListener('click', function(){ hideHolds=!hideHolds; holdBtn.classList.toggle('on',hideHolds); holdBtn.textContent=hideHolds?'Show Giants/Mets':'Hide Giants/Mets'; apply(); });
+  apply();
+</script>
+</body></html>
