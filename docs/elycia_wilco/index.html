@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Wilco Guide — for Elycia</title>
+<meta name="description" content="A gentle way into Wilco, made for the ride home.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#15111d; --dusk:#201829; --panel:#241b30;
+    --cream:#f4ece0; --muted:#b2a7bb; --dim:#857a92;
+    --amber:#e8a35d; --rose:#d98a8a; --gold:#eec37a;
+    --line:rgba(244,236,224,.12); --line2:rgba(244,236,224,.07);
+    --disp:"Fraunces",Georgia,serif; --body:"Spectral",Georgia,serif; --mono:"DM Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--night); color:var(--cream); font-family:var(--body);
+    font-weight:400; line-height:1.6; -webkit-font-smoothing:antialiased;
+    padding-bottom:180px; min-height:100vh;
+    background-image:
+      radial-gradient(120% 70% at 50% -10%, rgba(232,163,93,.22), rgba(217,138,138,.10) 32%, transparent 60%),
+      radial-gradient(90% 50% at 85% 8%, rgba(238,195,122,.10), transparent 55%),
+      linear-gradient(180deg, #1b1424 0%, var(--night) 40%);
+    background-attachment:fixed;
+  }
+  /* grain */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative; z-index:1; max-width:760px; margin:0 auto; padding:0 20px}
+
+  /* ---------- hero ---------- */
+  header{padding:64px 0 10px; text-align:center}
+  .kicker{font-family:var(--mono); font-size:11.5px; letter-spacing:.34em; text-transform:uppercase; color:var(--amber); margin-bottom:22px}
+  h1{font-family:var(--disp); font-weight:500; font-size:clamp(44px,12vw,86px); line-height:.95; letter-spacing:-.02em;
+     font-optical-sizing:auto; text-wrap:balance}
+  h1 em{font-style:italic; color:var(--gold); font-weight:400}
+  .tagline{font-family:var(--disp); font-style:italic; font-size:clamp(17px,4.5vw,21px); color:var(--muted); margin-top:18px; font-weight:400}
+
+  .note{
+    margin:38px auto 0; max-width:560px; text-align:left;
+    background:linear-gradient(180deg, rgba(36,27,48,.75), rgba(27,20,37,.6));
+    border:1px solid var(--line); border-radius:16px; padding:22px 24px;
+    font-size:16.5px; color:#e8ddcf; position:relative; backdrop-filter:blur(6px);
+  }
+  .note::before{content:"\201C"; position:absolute; top:-18px; left:16px; font-family:var(--disp); font-size:64px; color:var(--amber); opacity:.5}
+  .note .sig{display:block; margin-top:14px; font-family:var(--disp); font-style:italic; color:var(--gold)}
+
+  /* ---------- faves ---------- */
+  .section-label{font-family:var(--mono); font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--dim); margin:52px 0 16px; display:flex; align-items:center; gap:12px}
+  .section-label::after{content:""; flex:1; height:1px; background:var(--line2)}
+  .faves{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  .fave{
+    border:1px solid rgba(217,138,138,.3); border-radius:14px; padding:14px 12px; cursor:pointer; text-align:center;
+    background:radial-gradient(120% 120% at 50% 0%, rgba(217,138,138,.14), transparent 70%);
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .fave:hover,.fave:focus-visible{transform:translateY(-3px); border-color:var(--rose); outline:none}
+  .fave .heart{color:var(--rose); font-size:13px}
+  .fave .ft{font-family:var(--disp); font-weight:500; font-size:16px; margin-top:4px; line-height:1.15}
+
+  /* ---------- filters ---------- */
+  .filters{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 4px; position:sticky; top:0; z-index:4;
+    background:linear-gradient(180deg, var(--night) 70%, transparent); padding:14px 0}
+  .chip{
+    font-family:var(--mono); font-size:12px; letter-spacing:.02em; color:var(--muted);
+    background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:7px 14px; cursor:pointer;
+    transition:all .18s ease; white-space:nowrap;
+  }
+  .chip:hover{border-color:var(--muted); color:var(--cream)}
+  .chip.on{background:var(--amber); color:#2a1a08; border-color:var(--amber); font-weight:500}
+  .chip .c{opacity:.6; margin-left:5px}
+
+  /* ---------- song list ---------- */
+  .list{margin-top:10px; display:flex; flex-direction:column; gap:0}
+  .song{
+    display:grid; grid-template-columns:34px 1fr auto; gap:14px; align-items:start;
+    padding:18px 8px; border-bottom:1px solid var(--line2); cursor:pointer; position:relative;
+    transition:background .2s ease;
+  }
+  .song:hover{background:rgba(244,236,224,.03)}
+  .song.playing{background:linear-gradient(90deg, rgba(232,163,93,.12), transparent 80%)}
+  .song.playing::before{content:""; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--amber)}
+  .song.hidden{display:none}
+  .idx{font-family:var(--mono); font-size:13px; color:var(--dim); padding-top:5px; text-align:right}
+  .song.playing .idx{color:var(--amber)}
+  .main .st{font-family:var(--disp); font-weight:500; font-size:20px; line-height:1.15; letter-spacing:-.01em}
+  .main .st .lovehint{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--rose); border:1px solid rgba(217,138,138,.4); border-radius:999px; padding:1px 7px; margin-left:8px; vertical-align:middle; white-space:nowrap}
+  .meta{font-family:var(--mono); font-size:11.5px; color:var(--dim); margin-top:5px; letter-spacing:.02em}
+  .fact{font-size:15px; color:#d9cfc3; margin-top:10px; max-width:52ch}
+  .line{margin-top:10px; font-family:var(--disp); font-style:italic; font-size:16px; color:var(--gold); line-height:1.4}
+  .line.listen{font-style:normal; font-family:var(--mono); font-size:12px; letter-spacing:.02em; color:var(--muted)}
+  .line.listen::before{content:"\25B8  Listen for  "; color:var(--amber)}
+  .tags{margin-top:12px; display:flex; flex-wrap:wrap; gap:6px}
+  .tag{font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:rgba(244,236,224,.05); border:1px solid var(--line2); border-radius:6px; padding:2px 7px}
+  .play{align-self:center; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--cream); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; transition:all .18s ease}
+  .song:hover .play{border-color:var(--amber); color:var(--amber)}
+  .song.playing .play{background:var(--amber); color:#2a1a08; border-color:var(--amber)}
+
+  .empty{text-align:center; color:var(--dim); font-style:italic; padding:40px 0; display:none}
+
+  footer{text-align:center; color:var(--dim); font-family:var(--mono); font-size:11px; letter-spacing:.06em; padding:46px 0 10px}
+  footer a{color:var(--muted)}
+
+  /* ---------- now playing bar ---------- */
+  .player{position:fixed; left:0; right:0; bottom:0; z-index:20;
+    background:rgba(21,17,29,.92); backdrop-filter:blur(16px); border-top:1px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));}
+  .player .inner{max-width:760px; margin:0 auto}
+  .player .nowlabel{font-family:var(--mono); font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); margin:0 0 8px 2px}
+  .player iframe{width:100%; border:0; border-radius:12px; display:block; height:80px; background:var(--panel)}
+  @media (max-width:480px){
+    .faves{grid-template-columns:1fr; gap:8px}
+    .fave{display:flex; align-items:center; gap:10px; text-align:left; padding:12px 16px}
+    .fave .ft{margin-top:0; font-size:17px}
+    .song{grid-template-columns:26px 1fr; }
+    .play{display:none}
+    .fact{font-size:14.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">A field guide to Wilco</div>
+    <h1>For <em>Elycia</em></h1>
+    <div class="tagline">A way to take a minute during your hectic day</div>
+
+    <div class="note">
+      Work's been heavy lately, so here's the band I reach for when I need to breathe out.
+      Start with the three you already love, then let your mood pick the rest. There's no wrong
+      order and nothing to figure out — just press play and let the drive get a little longer.
+      <span class="sig">— for the long way home</span>
+    </div>
+  </header>
+
+  <div class="section-label">The three you already love</div>
+  <div class="faves" id="faves"></div>
+
+  <div class="section-label">Find your mood</div>
+  <div class="filters" id="filters"></div>
+
+  <div class="list" id="list"></div>
+  <div class="empty" id="empty">Nothing in that mood yet — try another.</div>
+
+  <footer>
+    Made with care · plays full songs when you're signed into Spotify ·
+    <a href="https://open.spotify.com/artist/5mvfg9cZwH87gwIWwWCXCZ" target="_blank" rel="noopener">all of Wilco →</a>
+  </footer>
+</div>
+
+<div class="player">
+  <div class="inner">
+    <div class="nowlabel" id="nowlabel">Now playing — tap any song above</div>
+    <iframe id="sp" title="Spotify player" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script>
+// Spotify track IDs (studio versions). Filled from a verified lookup.
+const IDS = {
+  jesus_etc:"4wd09wCccmxUB7XVJp0RNn",
+  radio_cure:"5y4MDqm1PYa2T1vT6vboJI",
+  poor_places:"4cGVaSWrKvMYuVTz5NRYYJ",
+  trying_to_break_your_heart:"3HWxpLKnTlz6jE3Vi5dTF2",
+  reservations:"1TRsfoxOCzeSJXHtY8KiQC",
+  ashes_of_american_flags:"1BI3TOb107VToPovrraoU2",
+  heavy_metal_drummer:"4xmeLj3uVcoAwgDtwM4MbG",
+  war_on_war:"0ZQ0AYmoSQqmPYtI9JP9F9",
+  via_chicago:"6GxE238euI2u9RxuwPFREI",
+  how_to_fight_loneliness:"7MVxiYFcqzVw0vH5w41Vr8",
+  shes_a_jar:"4glxRj7X50hk3FA5qsKnbl",
+  impossible_germany:"6L0BBPYeWnaQJeDa0ox0IA",
+  sky_blue_sky:"41c6R2RLOiO0tglrV7Uxr2",
+  either_way:"5ovcVaOus1Wv4vTtyGXlhB",
+  please_be_patient:"6KjhpY9ylfLNEJx6RB7xJC",
+  on_and_on_and_on:"15IXY8FJTdtMABsIlaHm6u",
+  hummingbird:"5PIerNGziihTrPFsPxUR0a",
+  at_least_thats_what_you_said:"263uAmDYMkK8pU07QAnBKe",
+  california_stars:"5B2mJIk8yso3ugyvfHR62A",
+  you_and_i:"2fdMAIsNH4wY7RRda8aCfL",
+  one_sunday_morning:"3fFXxIW8nfUMVhKPz6bdpi",
+  dawned_on_me:"7t771nfNcAxFw1sHbfTY4J"
+};
+
+const MOODS = {
+  start:"Start Here", unwind:"Wind Down", tender:"Tender",
+  sunny:"Sunny", epic:"Guitar Epic", essential:"Essential", roots:"Roots"
+};
+
+const SONGS = [
+  {k:"jesus_etc", t:"Jesus, Etc.", al:"Yankee Hotel Foxtrot", yr:2002, fave:true, tags:["start","tender","essential"],
+   fact:"Written before 9/11, its line about tall buildings shaking felt eerily prophetic afterward. Those warm strings are the heart of the whole record — for a lot of people it's the first Wilco song they fall for.",
+   line:"Jesus, don't cry — you can rely on me, honey.", lt:"lyric"},
+  {k:"radio_cure", t:"Radio Cure", al:"Yankee Hotel Foxtrot", yr:2002, fave:true, tags:["start","unwind"],
+   fact:"A slow, hazy ache that treats music itself as the medicine. Don't listen closely — just let it blur past the windshield.",
+   line:"Distance has no way of making love understandable.", lt:"lyric"},
+  {k:"poor_places", t:"Poor Places", al:"Yankee Hotel Foxtrot", yr:2002, fave:true, tags:["start","essential"],
+   fact:"It builds from quiet piano into a beautiful storm of static — and that faint radio voice murmuring “Yankee… Hotel… Foxtrot” is literally where the album got its name.",
+   line:"It's hot in the poor places tonight.", lt:"lyric"},
+  {k:"trying_to_break_your_heart", t:"I Am Trying to Break Your Heart", al:"Yankee Hotel Foxtrot", yr:2002, tags:["start","essential"],
+   fact:"The woozy, surreal opener. The documentary named after it caught the band nearly falling apart making this album — and somehow it came out gorgeous.",
+   line:"I am an American aquarium drinker.", lt:"lyric"},
+  {k:"reservations", t:"Reservations", al:"Yankee Hotel Foxtrot", yr:2002, tags:["unwind","tender"],
+   fact:"The hushed last song of the night. If you keep one line from the whole album, make it this one.",
+   line:"I've got reservations about so many things — but not about you.", lt:"lyric"},
+  {k:"ashes_of_american_flags", t:"Ashes of American Flags", al:"Yankee Hotel Foxtrot", yr:2002, tags:["unwind","essential"],
+   fact:"Slow and searching, drifting between melody and static. A song for staring out a window.",
+   line:"I would like to salute the ashes of American flags.", lt:"lyric"},
+  {k:"heavy_metal_drummer", t:"Heavy Metal Drummer", al:"Yankee Hotel Foxtrot", yr:2002, tags:["sunny","essential"],
+   fact:"The sunniest thing on the record — pure nostalgia for summer nights and KISS cover bands. Impossible not to smile.",
+   line:"I sincerely miss those heavy metal bands.", lt:"lyric"},
+  {k:"war_on_war", t:"War on War", al:"Yankee Hotel Foxtrot", yr:2002, tags:["sunny"],
+   fact:"Bright and bouncy despite the title — a little pep talk disguised as a pop song.",
+   line:"You have to learn how to die, if you want to want to be alive.", lt:"lyric"},
+  {k:"via_chicago", t:"Via Chicago", al:"Summerteeth", yr:1999, tags:["tender","roots"],
+   fact:"A gorgeous melody that the band keeps crashing into and out of while Jeff Tweedy stays perfectly calm. Classic early-Wilco tension — pretty on top, restless underneath.",
+   line:"the quiet voice at the center while the band falls apart around it.", lt:"listen"},
+  {k:"how_to_fight_loneliness", t:"How to Fight Loneliness", al:"Summerteeth", yr:1999, tags:["unwind","tender","roots"],
+   fact:"A gentle, slightly ironic survival guide for a hard day. Exactly the advice it sounds like.",
+   line:"Smile all the time.", lt:"lyric"},
+  {k:"shes_a_jar", t:"She's a Jar", al:"Summerteeth", yr:1999, tags:["tender","roots"],
+   fact:"Dreamy and harmonica-laced, sweet right up until a last line that quietly turns the whole song over. Beautiful either way.",
+   line:"the warm harmonica and that soft, sleepy melody.", lt:"listen"},
+  {k:"impossible_germany", t:"Impossible Germany", al:"Sky Blue Sky", yr:2007, tags:["epic","unwind"],
+   fact:"Mellow and unhurried until guitarist Nels Cline takes off — one of the great modern guitar moments, and it never stops feeling warm.",
+   line:"the three guitars weaving together before the solo lifts off.", lt:"listen"},
+  {k:"sky_blue_sky", t:"Sky Blue Sky", al:"Sky Blue Sky", yr:2007, tags:["unwind","sunny"],
+   fact:"The title track: unguarded, comforting, like sun through a kitchen window. Wilco at their most at-ease.",
+   line:"a plainspoken, sunlit calm.", lt:"listen"},
+  {k:"either_way", t:"Either Way", al:"Sky Blue Sky", yr:2007, tags:["unwind","sunny"],
+   fact:"Opens the album with the most reassuring shrug in music. Perfect for exhaling after a long day.",
+   line:"Maybe the sun will shine today, the clouds will roll away.", lt:"lyric"},
+  {k:"please_be_patient", t:"Please Be Patient With Me", al:"Sky Blue Sky", yr:2007, tags:["tender"],
+   fact:"A bare, honest little apology of a song. Just voice, guitar, and good intentions.",
+   line:"Please be patient with me.", lt:"lyric"},
+  {k:"on_and_on_and_on", t:"On and On and On", al:"Sky Blue Sky", yr:2007, tags:["tender"],
+   fact:"Tweedy wrote it for his father — a quiet, steadying song about loss and carrying on. More comforting than sad.",
+   line:"the soft, circling piano that never quite resolves.", lt:"listen"},
+  {k:"hummingbird", t:"Hummingbird", al:"A Ghost Is Born", yr:2004, tags:["sunny"],
+   fact:"Whimsical and McCartney-esque, it practically skips. A tiny burst of lightness.",
+   line:"His goal in life was to be an echo.", lt:"lyric"},
+  {k:"at_least_thats_what_you_said", t:"At Least That's What You Said", al:"A Ghost Is Born", yr:2004, tags:["epic"],
+   fact:"Starts almost whispered, then erupts into a raw, unguarded guitar solo. Quiet-to-storm, done perfectly.",
+   line:"the whispered opening before the guitar breaks loose.", lt:"listen"},
+  {k:"california_stars", t:"California Stars", al:"Mermaid Avenue", yr:1998, tags:["sunny","unwind","roots"],
+   fact:"Wilco put music to unused Woody Guthrie lyrics. The result is warm, drowsy and perfect — maybe the best ride-home song they ever touched.",
+   line:"I'd like to rest my heavy head tonight on a bed of California stars.", lt:"lyric"},
+  {k:"you_and_i", t:"You and I", al:"Wilco (The Album)", yr:2009, tags:["tender"],
+   fact:"A sweet, unshowy duet with Feist. Two voices, a lot of space, nothing to prove.",
+   line:"You and I — we might be strangers, however close we get sometimes.", lt:"lyric"},
+  {k:"one_sunday_morning", t:"One Sunday Morning", al:"The Whole Love", yr:2011, tags:["unwind"],
+   fact:"Twelve minutes that feel like six — a gentle, rolling meditation you can completely disappear into. Great for the whole drive.",
+   line:"the endless, circular guitar figure that just keeps gently turning.", lt:"listen"},
+  {k:"dawned_on_me", t:"Dawned on Me", al:"The Whole Love", yr:2011, tags:["sunny"],
+   fact:"Bright, hooky power-pop with a grin on its face. Proof Wilco can just make you feel good.",
+   line:"the bouncy riff and that can't-help-it chorus.", lt:"listen"},
+];
+
+const listEl = document.getElementById("list");
+const favesEl = document.getElementById("faves");
+const filtersEl = document.getElementById("filters");
+const emptyEl = document.getElementById("empty");
+const sp = document.getElementById("sp");
+const nowlabel = document.getElementById("nowlabel");
+
+let current = null;
+
+function play(song){
+  current = song.k;
+  const id = IDS[song.k];
+  if(id){
+    sp.src = "https://open.spotify.com/embed/track/" + id + "?utm_source=generator&theme=0";
+  } else {
+    // fallback: open a Spotify search for the exact song (no broken embed)
+    window.open("https://open.spotify.com/search/" + encodeURIComponent("Wilco " + song.t), "_blank", "noopener");
+  }
+  nowlabel.textContent = "Now playing — " + song.t + "  ·  " + song.al;
+  document.querySelectorAll(".song").forEach(el=>el.classList.toggle("playing", el.dataset.k===song.k));
+}
+
+// faves
+SONGS.filter(s=>s.fave).forEach(s=>{
+  const d=document.createElement("div");
+  d.className="fave"; d.tabIndex=0; d.setAttribute("role","button");
+  d.innerHTML='<div class="heart">♥ you love this</div><div class="ft">'+s.t+'</div>';
+  d.addEventListener("click",()=>play(s));
+  d.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();play(s);}});
+  favesEl.appendChild(d);
+});
+
+// filters
+let activeFilter="all";
+const counts={all:SONGS.length};
+Object.keys(MOODS).forEach(m=>counts[m]=SONGS.filter(s=>s.tags.includes(m)).length);
+function makeChip(key,label){
+  const c=document.createElement("button");
+  c.className="chip"+(key==="all"?" on":""); c.dataset.f=key;
+  c.innerHTML=label+'<span class="c">'+counts[key]+'</span>';
+  c.addEventListener("click",()=>{activeFilter=key; document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.f===key)); applyFilter();});
+  filtersEl.appendChild(c);
+}
+makeChip("all","All");
+Object.entries(MOODS).forEach(([k,v])=>makeChip(k,v));
+
+// list
+SONGS.forEach((s,i)=>{
+  const el=document.createElement("div");
+  el.className="song"; el.dataset.k=s.k; el.dataset.tags=s.tags.join(" ");
+  const tagHtml=s.tags.map(t=>'<span class="tag">'+MOODS[t]+'</span>').join("");
+  const love = s.fave ? '<span class="lovehint">♥ you love this</span>' : '';
+  el.innerHTML=
+    '<div class="idx">'+String(i+1).padStart(2,"0")+'</div>'+
+    '<div class="main">'+
+      '<div class="st">'+s.t+love+'</div>'+
+      '<div class="meta">'+s.al+'  ·  '+s.yr+'</div>'+
+      '<div class="fact">'+s.fact+'</div>'+
+      '<div class="line '+(s.lt==="listen"?"listen":"")+'">'+(s.lt==="lyric"?('“'+s.line+'”'):s.line)+'</div>'+
+      '<div class="tags">'+tagHtml+'</div>'+
+    '</div>'+
+    '<div class="play">▶</div>';
+  el.addEventListener("click",()=>play(s));
+  listEl.appendChild(el);
+});
+
+function applyFilter(){
+  let shown=0;
+  document.querySelectorAll(".song").forEach(el=>{
+    const ok = activeFilter==="all" || el.dataset.tags.split(" ").includes(activeFilter);
+    el.classList.toggle("hidden",!ok);
+    if(ok) shown++;
+  });
+  emptyEl.style.display = shown? "none":"block";
+}
+
+// preload her favorite into the player (she presses play)
+play(SONGS.find(s=>s.k==="jesus_etc"));
+</script>
+</body>
+</html>
