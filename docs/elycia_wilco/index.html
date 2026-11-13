@@ -265,7 +265,21 @@ const nowlabel = document.getElementById("nowlabel");
 
 let current = null;
 
-function play(song){
+// Private play-tracking: each time she picks a song, ping a private ntfy topic.
+// Subscribe to this exact topic in the ntfy app (or open the URL in a browser)
+// to get a notification with the song name. Silent + invisible on her end.
+const TRACK_TOPIC = "elycia-wilco-journal-8f2a4c9d1b";
+function track(song){
+  try{
+    fetch("https://ntfy.sh/" + TRACK_TOPIC, {
+      method:"POST",
+      // plain-text body = a "simple" request, no CORS preflight
+      body: "♪ Elycia played: " + song.t + " — " + song.al
+    }).catch(function(){});
+  }catch(e){}
+}
+
+function play(song, userPicked){
   current = song.k;
   const id = IDS[song.k];
   if(id){
@@ -276,6 +290,7 @@ function play(song){
   }
   nowlabel.textContent = "Now playing — " + song.t + "  ·  " + song.al;
   document.querySelectorAll(".song").forEach(el=>el.classList.toggle("playing", el.dataset.k===song.k));
+  if(userPicked) track(song);
 }
 
 // faves
@@ -283,8 +298,8 @@ SONGS.filter(s=>s.fave).forEach(s=>{
   const d=document.createElement("div");
   d.className="fave"; d.tabIndex=0; d.setAttribute("role","button");
   d.innerHTML='<div class="heart">♥ you love this</div><div class="ft">'+s.t+'</div>';
-  d.addEventListener("click",()=>play(s));
-  d.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();play(s);}});
+  d.addEventListener("click",()=>play(s,true));
+  d.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();play(s,true);}});
   favesEl.appendChild(d);
 });
 
@@ -318,7 +333,7 @@ SONGS.forEach((s,i)=>{
       '<div class="tags">'+tagHtml+'</div>'+
     '</div>'+
     '<div class="play">▶</div>';
-  el.addEventListener("click",()=>play(s));
+  el.addEventListener("click",()=>play(s,true));
   listEl.appendChild(el);
 });
 
@@ -332,8 +347,8 @@ function applyFilter(){
   emptyEl.style.display = shown? "none":"block";
 }
 
-// preload her favorite into the player (she presses play)
-play(SONGS.find(s=>s.k==="jesus_etc"));
+// preload her favorite into the player (she presses play); not counted as a pick
+play(SONGS.find(s=>s.k==="jesus_etc"), false);
 </script>
 </body>
 </html>
